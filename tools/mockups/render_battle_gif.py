@@ -652,7 +652,7 @@ class BattleAnimation:
                 tx, ty = pose[:2]
             ax, ay = attacker.render_px(T)
             direction = math.atan2(ty - ay, tx - ax)
-            cx = max(16, min(W - 17, round(tx) + BCELL // 2))
+            cx = max(18, min(W - 19, round(tx) + BCELL // 2))
             cy = round(ty) + BCELL - 30
             color = TYPE_COLORS[attacker.u.piece.types[0]]
             if phase < 2:
@@ -661,20 +661,20 @@ class BattleAnimation:
                 line = (round(sx) + BCELL // 2, round(sy) + BCELL - 30, cx, cy)
                 draw.line(line, fill=color, width=3)
                 draw.line(line, fill=PAPER, width=1)
-            # 三帧双色爆花，白核随外圈扩张；最小外半径为 16px。
-            radius = 16 + phase * 4
+            # 三帧双色爆花，白核随外圈扩张；最小外半径为 18px。
+            radius = 18 + phase * 4
             for size, fill in ((radius, color), (radius * 0.58, PAPER)):
                 points = []
                 for i in range(16):
                     angle = direction + i * math.tau / 16
-                    r = size if i % 2 == 0 else size * 0.55
+                    r = size if i % 2 == 0 else size * 0.65
                     points.append((round(cx + r * math.cos(angle)),
                                    round(cy + r * math.sin(angle))))
                 draw.polygon(points, fill=fill)
-            # 八粒沿整圈飞散，实际采样半径 16 -> 22 -> 28（行程 12px）。
+            # 八粒沿整圈飞散，实际采样半径 18 -> 24 -> 30（行程 12px）。
             for i in budget.take(8, required=True):
                 angle = direction + i * math.tau / 8
-                radius = 16 + phase * 6
+                radius = 18 + phase * 6
                 x = round(cx + radius * math.cos(angle))
                 y = round(cy + radius * math.sin(angle))
                 dx, dy = round(4 * math.cos(angle)), round(4 * math.sin(angle))
