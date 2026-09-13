@@ -5,8 +5,9 @@ v3 修正（v2 遗留的真 bug）：
 1. 游标式回放：事件按帧时间递进应用，帧渲染只见到「已发生」的事件——
    v2 把整场事件先应用完再渲染，导致未来阵亡的单位在早期帧被画成
    白色剪影（负 age 落进死亡闪白分支）、血条/位置显示终局值；
-2. 棋盘按 sim 真实规格渲染：7 列 × 6 行 × 34px（238px 宽居中），
-   v2 按 6 列画导致第 6 列单位整只被裁出画布；
+2. 棋盘按 sim 真实规格渲染（v3 曾为 7×6@34px）；2026-09-14 起 C-sym
+   （docs/10 §1.5）：6 列 × 6 视觉行 = 敌备战 1 + 战场 2+2 + 我备战 1，
+   sim 的战斗行 0-3 映射视觉行 1-4，备战行画观战格、不落战斗单位；
 3. 死亡/击退/攻击动画全部加 `0 <=` 时间下界。
 
 视觉层与静态稿共用三色地砖、米色窗框、底座与红 HP 条。原尺寸精灵
@@ -56,8 +57,14 @@ PARTICLE_LIMIT = 192
 OPENING_LIFE = 4 * FPS_DT
 FULL_GOLD = (255, 208, 64)
 
-# GIF 棋盘 = sim 真实规格：7 列 × 6 行 × 34px（静态设计稿的 6×40 是布局方案C，两者独立）
-BCOLS, BROWS, BCELL = 7, 6, 34
+# GIF 棋盘 = C-sym 布局（docs/10 §1.1/§1.5）：6 列 × 6 视觉行 × 34px（204px 宽居中）。
+# 视觉行分区：0 敌备战行（虚线观战格）/ 1-2 敌方战场（沙色）/ 3-4 己方战场
+# （草绿）/ 5 我备战行（虚线观战格）。sim 战斗网格只有 4 行（combat.ROWS=4），
+# 战斗行 r 经 VIS_ROW_OFF 映射到视觉行 r+1；备战行不落战斗单位（不参战）。
+BCOLS, BROWS, BCELL = 6, 6, 34
+VIS_ROW_OFF = 1                    # 战斗行 0-3 → 视觉行 1-4
+ENEMY_ROWS, ALLY_ROWS = (1, 2), (3, 4)   # 视觉行的战场分区
+BENCH_ROWS = (0, 5)                # 视觉行的双备战行
 BX, BY = (W - BCOLS * BCELL) // 2, 28
 
 GRASS = (GRASS_A, GRASS_B)
@@ -193,7 +200,7 @@ class AnimUnit:
 
     def reset(self) -> None:
         self.from_px = self.init_px or (BX + self.u.pos[0] * BCELL,
-                                        BY + self.u.pos[1] * BCELL)
+                                        BY + (self.u.pos[1] + VIS_ROW_OFF) * BCELL)
         self.to_px = self.from_px
         self.move_t0 = -9.0
         self.hp = self.u.max_hp
@@ -224,7 +231,7 @@ class AnimUnit:
         return prev - (prev - cur) * step
 
     def cell_px(self, pos: tuple) -> tuple:
-        return (BX + pos[0] * BCELL, BY + pos[1] * BCELL)
+        return (BX + pos[0] * BCELL, BY + (pos[1] + VIS_ROW_OFF) * BCELL)
 
     def deploy(self, pos) -> None:
         self.init_px = self.cell_px(pos)
@@ -366,10 +373,13 @@ class BattleAnimation:
         return img
 
     def _draw_board(self, img: Image, T: float) -> None:
+        # C-sym 分区（自上而下）：敌备战 1 行 / 敌战场 2 行 / 我战场 2 行 /
+        # 我备战 1 行；备战行用观战格底色（bench=True），不落战斗单位。
         for cy in range(BROWS):
             for cx in range(BCOLS):
                 draw_floor_tile(img, BX + cx * BCELL, BY + cy * BCELL,
-                                BCELL, cx, cy, enemy=cy < 3)
+                                BCELL, cx, cy,
+                                enemy=cy in ENEMY_ROWS, bench=cy in BENCH_ROWS)
         draw_divider(img, BX, BY + 3 * BCELL, BCOLS * BCELL)
         draw = ImageDraw.Draw(img)
         draw.rectangle((BX - 1, BY - 1, BX + BCOLS * BCELL, BY + BROWS * BCELL),

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""240×320 GSC 风格视觉稿：准备 / 战斗 / 特写，保留方案 C 与原输出接口。"""
+"""240×320 GSC 风格视觉稿：准备 / 战斗 / 特写，保留原输出接口。
+
+方案 C 已按 C-sym 重排棋盘分区（docs/10 §1.1，2026-09-14 sim 联动）：
+敌备战 1 行 + 战场 2+2（对称）+ 我备战 1 行；敌/我备战行画观战格。
+"""
 
 import sys
 from pathlib import Path
@@ -383,11 +387,16 @@ def draw_message_window(img, font, box, lines, cursor=True):
 
 
 def screen_prep(front: Front, pal: Palettes, font: Font16) -> Image.Image:
-    """方案 C：敌 3 行、我方 2 行、备战 1 行，底部商店 48px。"""
+    """C-sym 准备页：敌备战 1 + 战场 2+2 + 我备战 1，底部商店 48px。
+
+    棋盘分区已按 C-sym 重排（2026-09-14 sim 联动）；敌备战行的「上轮
+    快照」内容与 4 格动作条（商店 4 + 刷新/经验/开战）随 SHOP_SLOTS 联动
+    与第四期美术上稿（M4 验收清单 #13），本稿暂维持 5 格动作条与棋子摆样。
+    """
     img = Image.new("RGBA", (W, H), INK + (255,))
     for cy in range(6):
         for cx in range(6):
-            cell_bg(img, cx, cy, enemy=cy < 3, bench=cy == 5)
+            cell_bg(img, cx, cy, enemy=cy in (1, 2), bench=cy in (0, 5))
     board_frame(img)
     for cx, pid, types, tier in (
             (1, 19, ("NORMAL",), 1), (2, 10, ("BUG",), 1),
@@ -413,10 +422,12 @@ def screen_prep(front: Front, pal: Palettes, font: Font16) -> Image.Image:
 
 
 def screen_battle(front: Front, pal: Palettes, font: Font16) -> Image.Image:
+    """C-sym 战斗页：备战行画观战格（敌行战斗期揭示真实备战、我行显示
+    替补——静态稿留空），战场 2+2 与 sim 战斗网格同构。"""
     img = Image.new("RGBA", (W, H), INK + (255,))
     for cy in range(6):
         for cx in range(6):
-            cell_bg(img, cx, cy, enemy=cy < 3, bench=False)
+            cell_bg(img, cx, cy, enemy=cy in (1, 2), bench=cy in (0, 5))
     board_frame(img)
     for cx, pid, types, tier, hp, en in (
             (1, 20, ("NORMAL",), 1, 0.35, 0.6),

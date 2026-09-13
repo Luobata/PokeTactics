@@ -415,31 +415,32 @@ class Bot:
     def counter_vs(self, opp_board: list) -> None:
         """L3 专用：配对后按对手阵容做列对位（弱化版）。
 
-        对手同样 back 布阵，其主 C（战力最高）大概率落在其列表前段（列 0-6）；
-        我方主 C 落到镜像列（6 - 对手列）拉开距离，主坦对齐对手主 C 列。
-        只做一次置换，非 L3 直接返回。"""
+        对手同样 back 布阵，其主 C（战力最高）大概率落在其列表前段
+        （列 0~COLS-1）；我方主 C 落到镜像列（COLS-1 - 对手列）拉开
+        距离，主坦对齐对手主 C 列。列宽随 combat.COLS（C-sym 为 6），
+        置换只发生在首行（列表索引 < COLS 即锚定行），非 L3 直接返回。"""
         if self.ability < 3 or not self.board:
             return
         comp = self.board
-        opp_carry_col = 3
+        opp_carry_col = COLS // 2
         if opp_board:
             carry = max(opp_board, key=power)
             try:
-                opp_carry_col = min(opp_board.index(carry), 6)
+                opp_carry_col = min(opp_board.index(carry), COLS - 1)
             except ValueError:
                 pass
 
         def swap_to(piece: OwnedPiece, want_col: int) -> None:
-            if want_col >= min(7, len(comp)):
+            if want_col >= min(COLS, len(comp)):
                 return
             cur = comp.index(piece)
-            if cur < 7 and cur != want_col:
+            if cur < COLS and cur != want_col:
                 comp[cur], comp[want_col] = comp[want_col], comp[cur]
 
         ranged = [o for o in comp if o.piece.distance > 1]
         melee = [o for o in comp if o.piece.distance == 1]
         if ranged:
-            swap_to(max(ranged, key=power), 6 - opp_carry_col)
+            swap_to(max(ranged, key=power), COLS - 1 - opp_carry_col)
         if melee:
             swap_to(max(melee, key=lambda o: pokedex().bst(o.piece.species_id)),
                     opp_carry_col)

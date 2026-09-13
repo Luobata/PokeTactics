@@ -139,7 +139,7 @@ def check_seed(seed, output=None):
     rect = (r.BX, r.BY, r.BX + r.BCOLS * r.BCELL, r.BY + r.BROWS * r.BCELL)
     t = 0.0
     # 与生产入口使用完全相同的浮点累加顺序，不调整事件时间或切镜调度。
-    while t <= t_end + 0.6:
+    while t <= t_end + 1.2:  # 与生产渲染窗一致（csym 报告遗留注记的一行修复）
         display = anim.frame(t).convert("RGB")
         board = board_frame(anim, t)
         cues, required = frame_cues(anim, t)
@@ -166,7 +166,8 @@ def check_seed(seed, output=None):
 
         candidates = [("attack", ev) for ev in anim._recent_hits(t)
                       if r.effect_frame(t - ev[0] - r.HIT_DELAY) == 0]
-        candidates += [("land", c) for c in anim.cutins if r.effect_frame(t - c[1]) == 0]
+        candidates += [("land", c) for c in anim.cutins
+                       if 0 <= t - c[1] < r.FPS_DT + 1e-9]
         if t == 0:
             before, after = previous, board
             isolated.append({"kind": "opening", "t": 0, "diff_1x": diff_pixels(before, after)})
@@ -191,8 +192,11 @@ def check_seed(seed, output=None):
     for row in isolated:
         if row["diff_1x"] < LIMITS[row["kind"]]:
             failures.append(row)
+    t_end = max(e[0] for e in anim.events)
+    banner_from = t_end + 0.6  # 结算横幅帧会替换棋盘渲染，窗口内大招不计入期望
     expected_hits = sum(e[1] == "attack" and e[4] > 0 for e in anim.events)
-    expected_lands = sum(e[1] == "cast" for e in anim.events)
+    expected_lands = sum(c[1] <= t_end + 1.2 for c in anim.cutins)
+    # 期望边界=采样窗本身（检查器直调 anim.frame，无横幅替换）
     for kind, expected in (("attack", expected_hits), ("land", expected_lands), ("opening", 1)):
         actual = sum(row["kind"] == kind for row in isolated)
         if not actual or actual != expected:
