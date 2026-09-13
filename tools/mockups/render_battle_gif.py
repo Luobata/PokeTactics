@@ -10,8 +10,8 @@ v3 修正（v2 遗留的真 bug）：
    sim 的战斗行 0-3 映射视觉行 1-4，备战行画观战格、不落战斗单位；
 3. 死亡/击退/攻击动画全部加 `0 <=` 时间下界。
 
-视觉层与静态稿共用三色地砖、米色窗框、底座与红 HP 条。原尺寸精灵
-保持原图像素与调色板，保留前后遮挡、位移、呼吸和攻击相位；原精灵
+视觉层与静态稿共用三色地砖、米色窗框、底座与红 HP 条。棋盘精灵
+用 NEAREST 等比缩入 28/30px，特写保留原尺寸，保留前后遮挡与调色板；精灵
 命中以整只闪白、双色爆点和轨迹强调。事件游标、回放状态、时长与
 固定调色板量化均不变。
 
@@ -19,10 +19,12 @@ v3 修正（v2 遗留的真 bug）：
 """
 
 import argparse
+import copy
 import math
 import random
 import sys
 from collections import Counter
+from functools import lru_cache
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter
@@ -36,7 +38,7 @@ from render_mockups import (  # noqa: E402
     H, W, INK, PAPER, FRAME, NIGHT, ENERGY, HP_RED, HP_LOW,
     TYPE_COLORS, TIER_COLORS, GRASS_A, GRASS_B, SAND_A, SAND_B,
     arena_dot, draw_hud, draw_small_number, draw_text, draw_pixel_text,
-    draw_floor_tile, draw_divider, draw_base, draw_meters, draw_spark,
+    draw_floor_tile, draw_divider, draw_base, draw_meter, draw_spark,
     pixel_window, draw_message_window, draw_cutin_stage, draw_cutin_sprites,
     draw_nameplate, draw_effect_badge, text_width, wrap_text,
 )
@@ -56,6 +58,8 @@ HIT_LIFE = 3 * FPS_DT
 PARTICLE_LIMIT = 192
 OPENING_LIFE = 4 * FPS_DT
 FULL_GOLD = (255, 208, 64)
+BOARD_FOOT = 26  # 30px 精灵顶端最多越过所在格 4px；底座前沿仍在格内。
+SCAR_FRAMES = 8
 
 # GIF 棋盘 = C-sym 布局（docs/10 §1.1/§1.5）：6 列 × 6 视觉行 × 34px（204px 宽居中）。
 # 视觉行分区：0 敌备战行（虚线观战格）/ 1-2 敌方战场（沙色）/ 3-4 己方战场
@@ -84,6 +88,105 @@ FX_STYLE = {
 SRC_PT = (164, 180)
 TGT_PT = (56, 114)
 
+# 每系两个确定性图形，第二变体在切镜及棋盘共用同一轮廓语言。
+FX_VARIANTS = {
+    "ELECTRIC": ("锯齿闪电", "双叉闪电"), "FIRE": ("锥形火星", "爆燃环"),
+    "WATER": ("抛物水珠", "环形水花"), "GRASS": ("旋转叶片", "四叶绽放"),
+    "BUG": ("环绕虫群", "蝶翼交错"), "PSYCHIC": ("同心波纹", "菱形念场"),
+    "GHOST": ("升腾幽火", "双螺幽魂"), "POISON": ("毒雾", "毒泡破裂"),
+    "DARK": ("暗雾", "交错月牙"), "ICE": ("放射冰晶", "六角雪晶"),
+    "FIGHTING": ("碎片冲击", "拳压方环"), "ROCK": ("飞散碎石", "棱角岩簇"),
+    "GROUND": ("扬尘", "分叉地裂"), "STEEL": ("金属碎片", "旋转刀片"),
+    "NORMAL": ("冲击碎片", "交叉斩线"), "DRAGON": ("能量飞弹", "龙焰彗尾"),
+    "FLYING": ("疾风飞弹", "双卷风刃"),
+}
+
+
+def fx_variant(t, unit_idx):
+    return (effect_frame(t) + unit_idx) % 2
+
+
+def impact_tier(damage, max_hp):
+    """轻 <6%，中 6–15%，重 ≥15%；整数比较避免临界浮点漂移。"""
+    return 2 if damage * 100 >= max_hp * 15 else int(damage * 100 >= max_hp * 6)
+
+
+def draw_cross(draw, cx, cy, radius, color):
+    for line in ((cx - radius, cy, cx + radius, cy), (cx, cy - radius, cx, cy + radius)):
+        draw.line(line, fill=color, width=7)
+        draw.line(line, fill=PAPER, width=3)
+
+
+def draw_type_variant(draw, mtype, cx, cy, p, direction):
+    """第二轮廓；无新增粒子，沿用原有预算中的主体图形。"""
+    color = TYPE_COLORS.get(mtype, FRAME)
+    radius = 18 + round(18 * p)
+
+    def point(x, y):
+        return (round(cx + x * math.cos(direction) - y * math.sin(direction)),
+                round(cy + x * math.sin(direction) + y * math.cos(direction)))
+
+    def stroke(points, width=4):
+        draw.line(points, fill=color, width=width)
+        draw.line(points, fill=PAPER, width=1)
+
+    if mtype == "ELECTRIC":
+        for side in (-1, 1):
+            stroke([point(-radius, 0), point(-3, side * 8), point(2, side * 3),
+                    point(radius, side * 13)])
+    elif mtype in ("FIRE", "WATER", "PSYCHIC", "FIGHTING"):
+        count = 16 if mtype == "FIRE" else 4
+        if mtype == "WATER":
+            for offset in (0, 5):
+                draw.ellipse((cx - radius, cy - radius // 2 - offset,
+                              cx + radius, cy + radius // 2 - offset), outline=color, width=3)
+        else:
+            points = []
+            for i in range(count + 1):
+                angle = i * math.tau / count + (math.pi / 4 if mtype == "FIGHTING" else 0)
+                length = radius * (0.7 if mtype == "FIRE" and i % 2 else 1)
+                points.append(point(length * math.cos(angle), length * math.sin(angle)))
+            stroke(points)
+    elif mtype in ("GRASS", "BUG", "ROCK", "STEEL"):
+        for i in range(4):
+            angle = i * math.pi / 2 + p
+            x, y = radius * math.cos(angle), radius * math.sin(angle)
+            points = [point(x * 0.25, y * 0.25), point(x - y * 0.3, y + x * 0.3),
+                      point(x * 1.3, y * 1.3), point(x + y * 0.3, y - x * 0.3)]
+            if mtype == "BUG":
+                points[0] = point(0, 0)
+            if mtype == "STEEL":
+                points[2] = point(x * 1.5 - y * 0.4, y * 1.5 + x * 0.4)
+            draw.polygon(points, fill=color, outline=PAPER)
+    elif mtype in ("GHOST", "DARK", "DRAGON", "FLYING"):
+        for side in (-1, 1):
+            points = []
+            for i in range(13):
+                k = i / 12
+                if mtype == "GHOST":
+                    x, y = math.sin(k * math.tau + p * 3) * 8 * side, (k - 0.5) * radius * 2
+                elif mtype == "DRAGON":
+                    x, y = (k - 1) * radius * 2, side * (3 + 8 * k) + math.sin(k * 5) * 3
+                else:
+                    angle = side * (k * math.pi * 1.5 + p)
+                    x, y = radius * math.cos(angle), radius * math.sin(angle) * 0.65 + side * 4
+                points.append(point(x, y))
+            stroke(points)
+    elif mtype == "POISON":
+        for i in range(4):
+            x, y = point((i - 1.5) * 9, -math.sin(i + p * 3) * radius)
+            draw.ellipse((x - 5, y - 5, x + 5, y + 5), outline=color, width=3)
+            draw.point((x - 2, y - 2), fill=PAPER)
+    elif mtype in ("ICE", "GROUND"):
+        for i in range(6 if mtype == "ICE" else 3):
+            angle = i * math.tau / (6 if mtype == "ICE" else 3)
+            x, y = radius * math.cos(angle), radius * math.sin(angle)
+            stroke([point(0, 0), point(x * 0.5 - 3, y * 0.5), point(x, y)], 3)
+            stroke([point(x * 0.5 - 3, y * 0.5), point(x * 0.7 - y * 0.3, y * 0.7 + x * 0.3)], 3)
+    else:  # NORMAL
+        for side in (-1, 1):
+            stroke([point(-radius, side * radius), point(radius, -side * radius)], 5)
+
 
 class ParticleBudget:
     """仅削减装饰粒子；命中、落点、消散和吸能始终保留整组。"""
@@ -111,7 +214,6 @@ def effect_frame(age):
 def draw_fx(draw, mtype: str, T: float, cutin_key: tuple) -> None:
     """按属性画一帧技能特效（特效相位 0.3~0.9）。"""
     style, colors = FX_STYLE.get(mtype, FX_STYLE["NORMAL"])
-    rng = random.Random(f"{cutin_key}{int(T * 10)}")
     phase = (T - cutin_key[0]) / CUTIN_LEN
     p = min(1.0, max(0.0, (phase - 0.3) / 0.6))
     if p <= 0:
@@ -119,17 +221,21 @@ def draw_fx(draw, mtype: str, T: float, cutin_key: tuple) -> None:
     c1, c2 = colors
     sx, sy = SRC_PT
     tx, ty = TGT_PT
+    if fx_variant(T, cutin_key[1]):
+        draw_type_variant(draw, mtype, tx, ty, p, math.atan2(ty - sy, tx - sx))
+        return
     if style == "bolt":
         pts = [(sx, sy)]
         for i in range(1, 6):
             k = i / 6
-            pts.append((sx + (tx - sx) * k + rng.randint(-9, 9),
-                        sy + (ty - sy) * k + rng.randint(-7, 7)))
+            pts.append((sx + (tx - sx) * k + ((i * 7 + effect_frame(T) * 3) % 19 - 9),
+                        sy + (ty - sy) * k + ((i * 11 + effect_frame(T) * 7) % 15 - 7)))
         pts.append((tx, ty))
         draw.line(pts, fill=c2, width=3)
         draw.line(pts, fill=c1, width=1)
-        for _ in range(3):
-            draw.point((tx + rng.randint(-10, 10), ty + rng.randint(-10, 10)),
+        for i in range(3):
+            draw.point((tx + (i * 13 + effect_frame(T) * 3) % 21 - 10,
+                        ty + (i * 7 + effect_frame(T) * 5) % 21 - 10),
                        fill=c1)
     elif style == "travel":
         for i in range(9):
@@ -384,6 +490,7 @@ class BattleAnimation:
         draw = ImageDraw.Draw(img)
         draw.rectangle((BX - 1, BY - 1, BX + BCOLS * BCELL, BY + BROWS * BCELL),
                        outline=INK)
+        self._draw_ground_scars(img, T)
         shown = sorted((au for au in self.units.values() if au.visible(T)),
                        key=lambda a: a.render_px(T)[1])
         poses = {au.u.idx: self._unit_pose(au, T) for au in shown}
@@ -454,14 +561,16 @@ class BattleAnimation:
         for c in reversed(self.cutins):
             phase = effect_frame(T - c[1])
             if c[6] > 0 and 0 <= phase < 3:
-                return (3, -3, 3)[phase]
+                strength = 4 if impact_tier(c[6], self.units[c[3]].u.max_hp) == 2 else 3
+                return (strength, -strength, strength)[phase]
         for ev in reversed(self.events[:self._cursor]):
             if ev[0] < T - HIT_DELAY - 2 * FPS_DT - 1e-9:
                 break
             if ev[1] == "attack" and ev[4] > 0:
                 phase = effect_frame(T - ev[0] - HIT_DELAY)
                 if 0 <= phase < 2:
-                    return (2, -2)[phase]
+                    strength = 3 if impact_tier(ev[4], self.units[ev[3]].u.max_hp) == 2 else 2
+                    return (strength, -strength)[phase]
         return 0
 
     def _draw_board_flash(self, img, T):
@@ -511,38 +620,30 @@ class BattleAnimation:
         age = (T - au.die_t) if dying else 0
         casting = self._casting_phase(au, T)
 
-        recent = [a for a in au.attacks if 0 <= T - a[0] < ATTACK_ANIM]
-
-        ox = oy = 0.0
-        if recent:
-            _, adx, ady = recent[-1]
-            dt2 = T - recent[-1][0]
-            if dt2 < HIT_DELAY:
-                k = dt2 / HIT_DELAY
-                ox, oy = -adx * 2 * k, -ady * 2 * k
-            elif dt2 < 0.18:
-                ox, oy = adx * 3, ady * 3
-                oy -= 1  # 突进小跳步
-            else:
-                k = 1 - (dt2 - 0.18) / (ATTACK_ANIM - 0.18)
-                ox, oy = adx * 3 * k, ady * 3 * k
+        idle, _, sensitive, tempo, amplitude, walk_hz = self._motion_profile(u.piece.species_id)
+        ox, oy, _ = self._attack_motion(au, T)
         for kt, kdx, kdy in au.knockbacks[-1:]:
             dt2 = T - kt
-            if 0 <= dt2 < 0.2:
-                k = 1 - dt2 / 0.2
-                ox += kdx * 2 * k
-                oy += kdy * 2 * k
-        if au.jitter_t is not None and 0 <= T - au.jitter_t < 0.2:
-            # GSC 受击抖动：左右交替颤 2px（与击退叠加）
-            ox += 2 if int((T - au.jitter_t) / FPS_DT) % 2 == 0 else -2
+            recovery = (0.16 if sensitive else 0.26) * tempo
+            if 0 <= dt2 < recovery:
+                k = 1 - dt2 / recovery
+                ox += kdx * 2 * k * amplitude
+                oy += kdy * 2 * k * amplitude
+        if sensitive and au.jitter_t is not None and 0 <= T - au.jitter_t < 0.16 * tempo:
+            ox += (3 if effect_frame(T - au.jitter_t) % 2 == 0 else -3) * amplitude
         if casting:
             oy += 1 if casting[0] < 0.45 else -2
         if au.recoil_t and 0 <= T - au.recoil_t < 0.2:
             oy += 1
         if not dying and not casting:
-            # 待机呼吸：纵向为主 + 轻微横向摇曳（更活）
-            oy += math.sin((T + u.idx * 0.7) * 2.1) * 1.0
-            ox += math.sin((T + u.idx * 0.7) * 1.05) * 0.5
+            clock = T / tempo + u.piece.species_id * 0.17
+            if idle == 0:  # 稳重：慢、大呼吸；纵向压缩也参与呼吸。
+                oy += math.sin(clock * 1.8) * 1.5 * amplitude
+            elif idle == 1:  # 灵活：小而快，周期歪头 1px。
+                oy += math.sin(clock * 5.8) * 0.55 * amplitude
+                ox += int(effect_frame(clock) % 24 in (0, 1))
+            else:  # 慵懒：极慢的左右摇摆。
+                ox += math.sin(clock * 0.85) * 1.2 * amplitude
         if not dying and not casting and T < 0.35:
             # 开场入场：从上方落下，缓动到位 + 末尾一像素顿挫
             k = T / 0.35
@@ -551,7 +652,7 @@ class BattleAnimation:
                 oy += 1
         walk = au.moving(T)
         if walk > 0:
-            oy += math.sin(walk * math.pi * 2) * 1.8
+            oy += math.sin((T - au.move_t0) * math.tau * walk_hz / tempo) * 1.8 * amplitude
         dying_frame = effect_frame(age) if dying else -1
         if dying:
             # GSC 濒死：脚下星闪 -> 逐帧下沉 -> 眨眼消失
@@ -559,7 +660,62 @@ class BattleAnimation:
             if dying_frame >= 3:
                 return  # 最后一帧隐去（眨眼）
 
-        return (int(x + ox), int(y + oy), casting)
+        # 只约束绘制偏移，不改模拟坐标/插值；横向极值仍可区分攻击风格。
+        sprite = self._board_sprite(u.piece.species_id, u.piece.tier, self._sprite_squash(au, T))
+        bounds = sprite.getbbox()
+        rise_limit = BOARD_FOOT - (bounds[3] - bounds[1]) + 4
+        return (round(x + max(-3, min(3, ox))),
+                round(y + max(-rise_limit, oy if dying else min(3, oy))), casting)
+
+    @lru_cache(maxsize=151)
+    def _motion_profile(self, species_id):
+        size = self.front.size_of[species_id]
+        speed = pokedex().species[species_id]["base"]["speed"]
+        weight = (size - 40) / 16
+        return (species_id % 3, (species_id // 3) % 3, species_id % 2,
+                1 + 0.2 * weight, 1 - 0.2 * weight,
+                4.5 if speed >= 90 else 3.5 if speed >= 60 else 2.5)
+
+    def _attack_motion(self, au, T):
+        _, style, _, tempo, amplitude, _ = self._motion_profile(au.u.piece.species_id)
+        attack = next((a for a in reversed(au.attacks)
+                       if 0 <= T - a[0] < ATTACK_ANIM * tempo), None)
+        if attack is None or au.dying(T):
+            return 0.0, 0.0, 0
+        age = (T - attack[0]) / tempo
+        windup = (0.08, 0.055, 0.14)[style]
+        if age < windup:
+            k = age / windup
+            thrust, jump, squash = -1.5 * k, 0, round((2, 5, 4)[style] * k)
+        else:
+            k = (age - windup) / (ATTACK_ANIM - windup)
+            thrust = (3.5, 4, 5)[style] * (1 - k) ** (1 if style == 0 else 2)
+            jump = 3 * math.sin(k * math.pi) if style == 0 else 0
+            squash = round((2, 6, 1)[style] * (1 - k))
+        return (attack[1] * thrust * amplitude,
+                (attack[2] * thrust - jump) * amplitude, squash)
+
+    def _sprite_squash(self, au, T):
+        squash = self._attack_motion(au, T)[2]
+        idle, _, _, tempo, _, _ = self._motion_profile(au.u.piece.species_id)
+        if idle == 0 and not au.dying(T):
+            squash += round(1 + math.sin((T / tempo + au.u.piece.species_id * 0.17) * 1.8))
+        return min(6, squash)
+
+    @lru_cache(maxsize=1024)
+    def _board_sprite(self, species_id, tier, squash=0):
+        box = 30 if tier == 3 else 28
+        source = self.front.image(species_id, self.pal)
+        # 等比缩完整源画布；仅动作相位允许纵向压缩，不做平滑/像素倍增后裁切。
+        return source.resize((box, box - squash), Image.Resampling.NEAREST)
+
+    def _sprite_placement(self, au, T, pose):
+        sprite = self._board_sprite(au.u.piece.species_id, au.u.piece.tier,
+                                    self._sprite_squash(au, T))
+        x = max(BX, min(BX + BCOLS * BCELL - sprite.width,
+                       round(pose[0] + (BCELL - sprite.width) / 2)))
+        y = pose[1] + BOARD_FOOT - sprite.getbbox()[3]
+        return sprite, x, y
 
     def _draw_unit(self, img, au, T, pose, budget):
         draw = ImageDraw.Draw(img)
@@ -567,7 +723,7 @@ class BattleAnimation:
         px_, py_, casting = pose
         dying = au.dying(T)
         age = T - au.die_t if dying else 0
-        foot = py_ + BCELL - 16
+        foot = py_ + BOARD_FOOT
         if not dying:
             draw_base(img, px_ + 1, foot, BCELL - 2, u.piece.types,
                       u.piece.tier, casting)
@@ -578,11 +734,8 @@ class BattleAnimation:
                     draw.ellipse((px_ + BCELL // 2 - r, foot - r // 2,
                                   px_ + BCELL // 2 + r, foot + r // 2), outline=PAPER)
 
-        sprite = self.front.image(u.piece.species_id, self.pal)
-        bounds = sprite.getbbox()
-        anchor_x = max(0, min(W - sprite.width, int(px_ + (BCELL - sprite.width) / 2)))
-        anchor_y = foot - bounds[3]
-        # 残影只复制 alpha 蒙版；当前帧原精灵保持原图原像素。
+        sprite, anchor_x, anchor_y = self._sprite_placement(au, T, pose)
+        # 残影只复制已缩小的 alpha 蒙版，保持 NEAREST 三色像素边缘。
         if not dying:
             trail = next((a for a in reversed(au.attacks)
                           if HIT_DELAY <= T - a[0] < ATTACK_ANIM), None)
@@ -647,8 +800,42 @@ class BattleAnimation:
         c = HP_RED if frac > 0.25 or int(T * 10) % 4 < 2 else HP_LOW
         full = au.energy >= 80
         ec = (ENERGY if int(T * 10) % 4 < 2 else PAPER) if full else ENERGY
-        draw_meters(img, px_ + 3, py_ + BCELL - 9, BCELL - 6,
-                    frac, au.energy / 80, c, ec)
+        # 3px 槽分别留在脚下；第 30 行露出底座费用铆钉。
+        draw_meter(img, px_ + 3, py_ + 27, BCELL - 6, frac, c, height=3)
+        draw_meter(img, px_ + 3, py_ + 31, BCELL - 6, au.energy / 80, ec, height=3)
+
+    def _ground_scars(self, T):
+        """印记固定在落点格；从已发生的事件推导，不添加回放状态。"""
+        impacts = [(ev[0] + HIT_DELAY, ev[3], self.units[ev[2]].u.piece.types[0])
+                   for ev in self.events[:self._cursor] if ev[1] == "attack"
+                   and impact_tier(ev[4], self.units[ev[3]].u.max_hp) == 2]
+        impacts += [(c[1], c[3], c[7]) for c in self.cutins]
+        end = next((ev[0] for ev in reversed(self.events[:self._cursor]) if ev[1] == "end"), None)
+        fade = max(0, 1 - (T - end) / 0.6) if end is not None else 1
+        for at, target, mtype in impacts:
+            phase = effect_frame(T - at)
+            if not 0 <= phase < SCAR_FRAMES or fade <= 0:
+                continue
+            pos = next((ev[3] for ev in reversed(self.events[:self._cursor])
+                        if ev[0] <= at and ev[1] in ("deploy", "move") and ev[2] == target), None)
+            if pos is not None:
+                x, y = self.units[target].cell_px(pos)
+                yield (x + BCELL // 2, y + BOARD_FOOT, mtype,
+                       round(112 * (SCAR_FRAMES - phase) / SCAR_FRAMES * fade))
+
+    def _draw_ground_scars(self, img, T):
+        layer = Image.new("RGBA", img.size)
+        draw = ImageDraw.Draw(layer)
+        for cx, cy, mtype, alpha in self._ground_scars(T):
+            color = TYPE_COLORS[mtype] + (alpha,)
+            for i in range(14):
+                angle = i * math.tau / 14
+                radius = 16 + (i % 3) * 3  # 露出底座两侧，离开后仍可见。
+                x = round(cx + math.cos(angle) * radius)
+                y = round(cy + math.sin(angle) * radius * 0.4)
+                draw.rectangle((x, y, x + 1, y + 1), fill=color)
+            draw.line((cx - 5, cy, cx - 1, cy + 2, cx + 5, cy - 1), fill=INK + (alpha,))
+        img.alpha_composite(layer)
 
     def _draw_board_fx(self, img, T, budget, poses):
         """统一棋盘粒子预算：普攻落点优先，其次大招、消散、吸能。"""
@@ -665,28 +852,41 @@ class BattleAnimation:
             cx = max(18, min(W - 19, round(tx) + BCELL // 2))
             cy = round(ty) + BCELL - 30
             color = TYPE_COLORS[attacker.u.piece.types[0]]
+            strength = impact_tier(ev[4], target.u.max_hp)
+            variant = fx_variant(T, ev[2])
             if phase < 2:
                 source = poses.get(ev[2])
                 sx, sy = source[:2] if source is not None else (ax, ay)
                 line = (round(sx) + BCELL // 2, round(sy) + BCELL - 30, cx, cy)
+                if variant:
+                    sx0, sy0, _, _ = line
+                    line = [(round(sx0 + (cx - sx0) * k / 8),
+                             round(sy0 + (cy - sy0) * k / 8 - 9 * 4 * k / 8 * (1 - k / 8)))
+                            for k in range(9)]
                 draw.line(line, fill=color, width=3)
                 draw.line(line, fill=PAPER, width=1)
-            # 三帧双色爆花，白核随外圈扩张；最小外半径为 18px。
-            radius = 18 + phase * 4
+            # 轻击的小白芯外留空心冲击环，三档均守住原可见度红线。
+            radius = (11, 18, 22)[strength] + phase * 4 + (4 if variant else 0)
+            if strength == 0:
+                ring = 22 + phase * 4
+                draw.ellipse((cx - ring, cy - ring, cx + ring, cy + ring), outline=color, width=3)
             for size, fill in ((radius, color), (radius * 0.58, PAPER)):
                 points = []
                 for i in range(16):
                     angle = direction + i * math.tau / 16
-                    r = size if i % 2 == 0 else size * 0.65
+                    r = size if i % 2 == 0 else size * (0.38 if variant else 0.65)
                     points.append((round(cx + r * math.cos(angle)),
                                    round(cy + r * math.sin(angle))))
                 draw.polygon(points, fill=fill)
-            # 八粒沿整圈飞散，实际采样半径 18 -> 24 -> 30（行程 12px）。
+            if strength == 2:
+                draw_cross(draw, cx, cy, 28 + phase * 3, color)
+            # 保留八粒与 12px 行程，整体沿攻击向前漂移，背向粒子更短。
             for i in budget.take(8, required=True):
                 angle = direction + i * math.tau / 8
                 radius = 18 + phase * 6
-                x = round(cx + radius * math.cos(angle))
-                y = round(cy + radius * math.sin(angle))
+                drift = 6 + phase * 4
+                x = round(cx + radius * math.cos(angle) + drift * math.cos(direction))
+                y = round(cy + radius * math.sin(angle) + drift * math.sin(direction))
                 dx, dy = round(4 * math.cos(angle)), round(4 * math.sin(angle))
                 draw.line((x - dx, y - dy, x, y), fill=color, width=3)
                 draw.rectangle((x - 1, y - 1, x + 1, y + 1), fill=PAPER)
@@ -703,19 +903,29 @@ class BattleAnimation:
             mtype, eff = c[7], c[5]
             style, colors = FX_STYLE.get(mtype, FX_STYLE["NORMAL"])
             c2 = colors[1]
+            strength = impact_tier(c[6], self.units[ti].u.max_hp)
+            sxp, syp = self.units[c[2]].render_px(T)
+            direction = math.atan2(ty - syp, tx - sxp)
+            variant = fx_variant(T, c[2])
             # 格子闪光保持 alpha 160 整整三帧，状态条在所有特效之后重绘。
             if phase < 3:
                 draw.rectangle((int(tx) + 1, int(ty) + 1,
                                 int(tx) + BCELL - 2, int(ty) + BCELL - 2),
                                fill=c2 + (160,))
             r = 20 + round(20 * p)
-            draw.ellipse((cx - r, cy - r, cx + r, cy + r), outline=c2, width=3)
+            draw.ellipse((cx - r, cy - r, cx + r, cy + r), outline=c2, width=4)
             draw.ellipse((cx - r + 3, cy - r + 3, cx + r - 3, cy + r - 3),
                          outline=PAPER, width=2)
             if eff >= 2 and phase < 3:
                 rr = 25 + phase * 5
                 draw.ellipse((cx - rr, cy - rr, cx + rr, cy + rr),
                              outline=HP_RED, width=3)
+                for i in range(8):
+                    angle = i * math.tau / 8
+                    draw.line((round(cx + (rr + 3) * math.cos(angle)),
+                               round(cy + (rr + 3) * math.sin(angle)),
+                               round(cx + (rr + 9) * math.cos(angle)),
+                               round(cy + (rr + 9) * math.sin(angle))), fill=HP_RED, width=2)
             if phase < 2:
                 caster = self.units[c[2]]
                 sxp, syp = caster.render_px(T)
@@ -723,21 +933,37 @@ class BattleAnimation:
                 draw.line((scx, scy, cx, cy), fill=c2, width=4)
                 draw.line((scx, scy, cx, cy), fill=PAPER, width=1)
             if phase == 0:
-                draw.ellipse((cx - 9, cy - 9, cx + 9, cy + 9), fill=PAPER)
-            if style == "bolt":
-                draw.line((cx - 18, cy - 15, cx + 18, cy + 15), fill=c2, width=4)
-                draw.line((cx + 18, cy - 15, cx - 18, cy + 15), fill=PAPER, width=2)
+                core = (6, 9, 13)[strength]
+                draw.ellipse((cx - core, cy - core, cx + core, cy + core), fill=PAPER)
+            if strength == 2 and phase < 3:
+                draw_cross(draw, cx, cy, 30 + phase * 3, c2)
+            if variant:
+                draw_type_variant(draw, mtype, cx, cy, p, direction)
+            elif style == "bolt":
+                points = [(cx - 20, cy - 16), (cx - 5, cy - 4), (cx - 10, cy + 4),
+                          (cx + 8, cy + 6), (cx + 20, cy + 16)]
+                draw.line(points, fill=c2, width=4)
+                draw.line(points, fill=PAPER, width=1)
             # 每种属性都有 12 粒，属性只改变运动形态，不降低粒子数。
             for i in budget.take(12, required=True):
-                angle = i * math.tau / 12 + 0.3
+                angle = direction + i * math.tau / 12 + 0.3
                 if style == "orbit":
                     angle += p * 2
+                elif style == "travel" and not variant:
+                    angle = direction + (i - 5.5) * 0.2
                 distance = 18 + 24 * p
-                xx = round(cx + distance * math.cos(angle))
-                yy = round(cy + distance * math.sin(angle) - (16 * p if style == "wisps" else 0))
-                if style == "shards":
+                drift = 4 + 10 * p
+                xx = round(cx + distance * math.cos(angle) + drift * math.cos(direction))
+                yy = round(cy + distance * math.sin(angle) + drift * math.sin(direction)
+                           - (16 * p if style == "wisps" else 0))
+                if style == "arc" and not variant:
+                    xx = round(cx + (i - 5.5) * (2 + 3 * p))
+                    yy = round(cy - 24 * 4 * p * (1 - p) + (i % 3) * 3)
+                if style == "shards" or (variant and mtype == "STEEL"):
                     draw.line((xx - round(6 * math.cos(angle)),
                                yy - round(6 * math.sin(angle)), xx, yy), fill=c2, width=3)
+                elif variant and mtype in ("WATER", "POISON"):
+                    draw.ellipse((xx - 3, yy - 2, xx + 3, yy + 2), outline=c2, width=2)
                 else:
                     draw.rectangle((xx - 2, yy - 2, xx + 2, yy + 2), fill=c2)
                 draw.rectangle((xx - 1, yy - 1, xx, yy), fill=PAPER)
@@ -946,7 +1172,9 @@ def main() -> None:
 
     banner = None
     if result is not None:  # 结算横幅预渲染一次，避免循环内回卷游标
-        banner = anim.frame(t_end - FPS_DT).copy()
+        backdrop = copy.deepcopy(anim)
+        backdrop._draw_ground_scars = lambda *_: None
+        banner = backdrop.frame(t_end - FPS_DT).copy()
         d = ImageDraw.Draw(banner)
         y0 = H // 2 - 30
         pixel_window(banner, (20, y0, W - 20, y0 + 60))
@@ -972,12 +1200,12 @@ def main() -> None:
                 ("步行留影", T >= OPENING_LIFE and any(
                     effect_frame(T - au.move_t0) == 1 and not au.dying(T)
                     for au in anim.units.values())),
-                ("突进与命中", T >= OPENING_LIFE + FPS_DT and anim._board_shake(T) == 2),
+                ("突进与命中", T >= OPENING_LIFE + FPS_DT and bool(anim._recent_hits(T))),
                 ("蓄力金环", any(anim._casting_phase(au, T)
                                  for au in anim.units.values())),
                 ("消失星光", any(au.die_t is not None and effect_frame(T - au.die_t) == 2
                                for au in anim.units.values())),
-                ("大招落点", abs(anim._board_shake(T)) == 3),
+                ("大招落点", any(0 <= effect_frame(T - c[1]) < 3 for c in anim.cutins)),
             )
             for label, active in cues:
                 if active and label not in board_keys:
