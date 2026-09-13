@@ -11,8 +11,11 @@
 每 5 轮 PVE 野怪轮（大葱鸭群→暴走肯泰罗→化石翼龙，胜 2-3 金；
 装备掉落留 S5）。HP 100 归零淘汰，按淘汰顺序排名。
 
-确定性：整局只用一个显式 rng（宪法 2.2），同 seed 重放逐轮一致
-（淘汰顺序与排名完全一致，验收见 experiment_match）。
+确定性（宪法 2.2，S7 种子协议）：RNG 分层派生（sim/rng.py）——master_seed
+按「轮 × 用途 × counter」现派生子流（pers/shop/bots/pair/battle/pve），
+不再有贯穿全局的单流。轮边界零 RNG 游标（docs/09 §2.2 存档前置依赖）：
+第 r 轮的全部随机只依赖 (master_seed, r, 用途, counter)。同 seed 重放
+逐轮一致（淘汰顺序与排名完全一致，验收见 experiment_match）。
 
 用法：
     python3 sim/match.py --bots 8 --seed 7 --rounds 31 [-v]
@@ -28,6 +31,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import economy  # noqa: E402
 import shop as shop_mod  # noqa: E402
+import rng as rng_mod  # noqa: E402  # S7 分层派生（docs/09 §2.2）
 from bots import Bot, LINEUP, assign_personalities, main_types  # noqa: E402
 from combat import Battle  # noqa: E402
 from shop import SharedPool, build_templates, make_piece  # noqa: E402
@@ -51,11 +55,11 @@ class Match:
     def __init__(self, seed: int, n_bots: int = 8, max_rounds: int = 31) -> None:
         assert n_bots in LINEUP, f"bots 只支持 {sorted(LINEUP)}"
         self.seed = seed
-        self.rng = random.Random(seed)
         self.max_rounds = max_rounds
         self.templates = build_templates()
         self.pool = SharedPool(self.templates)
-        pers = assign_personalities(n_bots, random.Random(seed ^ 0x5EED))
+        # 人格/能力发牌：开局一次的 pers 子流（docs/09 §1.2「只在开局用」）
+        pers = assign_personalities(n_bots, self._derive(0, "pers"))
         self.bots = [Bot(i, LINEUP[n_bots][i], pers[i],
                          self.pool, self.templates) for i in range(n_bots)]
         self.round = 0
@@ -68,6 +72,27 @@ class Match:
     # ---- 工具 ----
     def alive(self) -> list:
         return [b for b in self.bots if b.alive]
+
+    def _derive(self, round_no: int, purpose: str, counter: int = 0) -> random.Random:
+        """按（轮 × 用途 × counter）现派生子流（sim/rng.py，S7 种子协议）。"""
+        return rng_mod.derive(self.seed, round_no, purpose, counter)
+
+    def _shop_rng(self, round_no: int, seat: int,
+                  refresh_count: int = 0) -> random.Random:
+        """商店子流：counter = 席位×256 + 刷新序。
+
+        j=0 免费滚；j≥1 = 第 j 次手动刷新——与存档 1B refresh_count 游标
+        对齐（docs/09 §1.1/§2.2），M5 人类玩家席直读档现派生。
+        """
+        return self._derive(round_no, "shop",
+                            rng_mod.shop_counter(seat, refresh_count))
+
+    def _battle_rng(self, round_no: int, index: int) -> random.Random:
+        """战斗子流：counter = 该轮第 index 场（0 起，含幽灵战与 PVE 野怪战）。
+
+        单场可独立回放（docs/09 §2.2 battle_seed 第 i 场语义）。
+        """
+        return self._derive(round_no, "battle", index)
 
     def _eliminate(self, bot: Bot, round_no: int) -> None:
         """淘汰：定名次，棋子/商店全部归还共享池（卡池恢复，可被别人买走）。"""
@@ -82,9 +107,9 @@ class Match:
 
     # ---- 主循环 ----
     def run(self) -> dict:
-        # 首轮免费铺一次商店
+        # 首轮免费铺一次商店（round 0 的 shop 子流：开局铺货，进 R1 前完成）
         for b in self.bots:
-            b.shop.roll(self.rng, b.level)
+            b.shop.roll(self._shop_rng(0, b.seat), b.level)
         while self.round < self.max_rounds and len(self.alive()) > 1:
             self.round += 1
             self._play_round(self.round)
@@ -101,17 +126,20 @@ class Match:
         return self.result()
 
     def _play_round(self, round_no: int) -> None:
-        rng = self.rng
         pve = round_no % 5 == 0
-        # 1) 收入结算 + 白送 XP + 免费重滚（席位顺序，确定性）
+        # 1) 收入结算 + 白送 XP + 免费重滚（席位顺序，确定性）。
+        #    免费滚走 shop 子流（j=0），各席独立互不位移
         for b in self.alive():
             b.gold += economy.round_income(b.gold, b.streak)
             b.level, b.xp = economy.gain_round_xp(b.level, b.xp)
-            b.shop.roll(rng, b.level)
-        # 2) bot 决策（耗时统计：perf_counter 含 OS 调度抖动，实验读 p99）
+            b.shop.roll(self._shop_rng(round_no, b.seat), b.level)
+        # 2) bot 决策（耗时统计：perf_counter 含 OS 调度抖动，实验读 p99）。
+        #    决策随机（L0 买入/卖出/摆位 + bot 刷新的商店抽取）走按席位的
+        #    bots 子流——decide 阶段消费、不跨写点（docs/09 §2.2）
         for b in self.alive():
+            decide_rng = self._derive(round_no, "bots", b.seat)
             t0 = time.perf_counter()
-            b.decide(round_no, self.bots, rng)
+            b.decide(round_no, self.bots, decide_rng)
             self.decide_times.append((time.perf_counter() - t0) * 1000)
         # 3) 配对 / PVE
         events = []
@@ -134,9 +162,12 @@ class Match:
 
     # ---- PVP 轮 ----
     def _pvp_round(self, round_no: int) -> list:
-        rng = self.rng
         alive = self.alive()
-        pairs, odd = self._pair_up(alive)
+        # 配对/幽灵走 pair 子流（每轮一条，≤20 次尝试 + 幽灵源顺序消费；
+        # 发生在写点 A「开战提交」之后，无游标需求——docs/09 §2.2）
+        pair_rng = self._derive(round_no, "pair")
+        pairs, odd = self._pair_up(alive, pair_rng)
+        battle_i = 0   # 该轮第 i 场：battle 子流 counter（按对序，幽灵战殿后）
         events = []   # [(bot, damage, 描述)]
         for a, b in pairs:
             dmg_a = dmg_b = 0
@@ -145,7 +176,9 @@ class Match:
                 a.counter_vs(b.board)   # L3 对位（非 L3 无操作）
                 b.counter_vs(a.board)
                 res = Battle(a.battle_comp(), b.battle_comp(),
-                             rng, layout="back").run()
+                             self._battle_rng(round_no, battle_i),
+                             layout="back").run()
+                battle_i += 1
                 self.battles += 1
                 factor = economy.stage_factor(round_no)
                 surv = res["survivors"]
@@ -175,9 +208,10 @@ class Match:
             events.append((a, dmg_a, f"vs {b.name}: {note}"))
             events.append((b, dmg_b, ""))
         if odd is not None:   # 奇数人：打幽灵（随机对手的镜像，败方照常掉血）
-            ghost_src = rng.choice([b for b in alive if b is not odd])
+            ghost_src = pair_rng.choice([b for b in alive if b is not odd])
             res = Battle(odd.battle_comp(), ghost_src.battle_comp(),
-                         rng, layout="back").run()
+                         self._battle_rng(round_no, battle_i),
+                         layout="back").run()
             self.battles += 1
             dmg = 0
             if res["winner"] == 1:
@@ -188,9 +222,11 @@ class Match:
             events.append((odd, dmg, f"幽灵战({ghost_src.name}镜像)"))
         return events
 
-    def _pair_up(self, alive: list):
-        """随机配对，尽量避开上一轮同对手（无重复对手优先，头脑风暴 §7）。"""
-        rng = self.rng
+    def _pair_up(self, alive: list, rng: random.Random):
+        """随机配对，尽量避开上一轮同对手（无重复对手优先，头脑风暴 §7）。
+
+        rng = 该轮的 pair 子流（调用方传入）：≤20 次洗牌尝试顺序消费。
+        """
         best = None
         for _ in range(20):
             order = sorted(alive, key=lambda _: rng.random())
@@ -217,16 +253,19 @@ class Match:
 
     # ---- PVE 野怪轮 ----
     def _pve_round(self, round_no: int) -> list:
-        rng = self.rng
         wave_ids = PVE_WAVES[min(round_no // 5 - 1, len(PVE_WAVES) - 1)]
         wave = [make_piece(sid, self.templates) for sid in wave_ids]
         events = []
-        for b in self.alive():
-            res = Battle(b.battle_comp(), list(wave), rng,
+        battle_i = 0   # PVE 轮的野怪战同样走 battle 子流（单场可回放）
+        for i, b in enumerate(self.alive()):
+            res = Battle(b.battle_comp(), list(wave),
+                         self._battle_rng(round_no, battle_i),
                          layout="back").run()
+            battle_i += 1
             self.battles += 1
             if res["winner"] == 0:   # 野怪轮不改连胜连败（docs/03 §5 惯例）
-                b.gold += rng.randint(*PVE_GOLD)
+                # 掉金走 pve 子流：counter = 存活者序（docs/09 §2.2 野怪轮掉金）
+                b.gold += self._derive(round_no, "pve", i).randint(*PVE_GOLD)
                 events.append((b, 0, "野怪胜"))
             else:
                 dmg = economy.loss_damage(round_no, res["survivors"][1])
