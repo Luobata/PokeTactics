@@ -1,0 +1,8904 @@
+{
+ "extracted_from": "PokeWalk (../ESP32-PokemonGo)",
+ "upstream": "https://github.com/pret/pokegold @656583c939d3",
+ "species_types": "hand-curated Gen2 table, see tools/species_types_gen2.py",
+ "entries": [
+  {
+   "id": 1,
+   "name": "bulbasaur",
+   "name_zh": "妙蛙种子",
+   "types": [
+    "GRASS",
+    "POISON"
+   ],
+   "base": {
+    "name": "bulbasaur",
+    "hp": 45,
+    "attack": 49,
+    "defense": 49,
+    "speed": 45,
+    "special_attack": 65,
+    "special_defense": 65
+   },
+   "lineage": [
+    1
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     4,
+     45
+    ],
+    [
+     7,
+     73
+    ],
+    [
+     10,
+     22
+    ],
+    [
+     15,
+     77
+    ],
+    [
+     15,
+     79
+    ],
+    [
+     20,
+     75
+    ],
+    [
+     25,
+     230
+    ],
+    [
+     32,
+     74
+    ],
+    [
+     39,
+     235
+    ],
+    [
+     46,
+     76
+    ]
+   ]
+  },
+  {
+   "id": 2,
+   "name": "ivysaur",
+   "name_zh": "妙蛙草",
+   "types": [
+    "GRASS",
+    "POISON"
+   ],
+   "base": {
+    "name": "ivysaur",
+    "hp": 60,
+    "attack": 62,
+    "defense": 63,
+    "speed": 60,
+    "special_attack": 80,
+    "special_defense": 80
+   },
+   "lineage": [
+    2,
+    1
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     73
+    ],
+    [
+     10,
+     22
+    ],
+    [
+     15,
+     77
+    ],
+    [
+     15,
+     79
+    ],
+    [
+     20,
+     75
+    ],
+    [
+     25,
+     230
+    ],
+    [
+     32,
+     74
+    ],
+    [
+     39,
+     235
+    ],
+    [
+     46,
+     76
+    ]
+   ]
+  },
+  {
+   "id": 3,
+   "name": "venusaur",
+   "name_zh": "妙蛙花",
+   "types": [
+    "GRASS",
+    "POISON"
+   ],
+   "base": {
+    "name": "venusaur",
+    "hp": 80,
+    "attack": 82,
+    "defense": 83,
+    "speed": 80,
+    "special_attack": 100,
+    "special_defense": 100
+   },
+   "lineage": [
+    3,
+    2,
+    1
+   ],
+   "level_up": [
+    [
+     1,
+     22
+    ],
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     73
+    ],
+    [
+     15,
+     77
+    ],
+    [
+     15,
+     79
+    ],
+    [
+     20,
+     75
+    ],
+    [
+     25,
+     230
+    ],
+    [
+     32,
+     74
+    ],
+    [
+     39,
+     235
+    ],
+    [
+     46,
+     76
+    ]
+   ]
+  },
+  {
+   "id": 4,
+   "name": "charmander",
+   "name_zh": "小火龙",
+   "types": [
+    "FIRE"
+   ],
+   "base": {
+    "name": "charmander",
+    "hp": 39,
+    "attack": 52,
+    "defense": 43,
+    "speed": 65,
+    "special_attack": 60,
+    "special_defense": 50
+   },
+   "lineage": [
+    4
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     7,
+     52
+    ],
+    [
+     13,
+     108
+    ],
+    [
+     19,
+     99
+    ],
+    [
+     25,
+     184
+    ],
+    [
+     31,
+     53
+    ],
+    [
+     37,
+     163
+    ],
+    [
+     43,
+     82
+    ],
+    [
+     49,
+     83
+    ]
+   ]
+  },
+  {
+   "id": 5,
+   "name": "charmeleon",
+   "name_zh": "火恐龙",
+   "types": [
+    "FIRE"
+   ],
+   "base": {
+    "name": "charmeleon",
+    "hp": 58,
+    "attack": 64,
+    "defense": 58,
+    "speed": 80,
+    "special_attack": 80,
+    "special_defense": 65
+   },
+   "lineage": [
+    5,
+    4
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     52
+    ],
+    [
+     13,
+     108
+    ],
+    [
+     19,
+     99
+    ],
+    [
+     25,
+     184
+    ],
+    [
+     31,
+     53
+    ],
+    [
+     37,
+     163
+    ],
+    [
+     43,
+     82
+    ],
+    [
+     49,
+     83
+    ]
+   ]
+  },
+  {
+   "id": 6,
+   "name": "charizard",
+   "name_zh": "喷火龙",
+   "types": [
+    "FIRE",
+    "FLYING"
+   ],
+   "base": {
+    "name": "charizard",
+    "hp": 78,
+    "attack": 84,
+    "defense": 78,
+    "speed": 100,
+    "special_attack": 109,
+    "special_defense": 85
+   },
+   "lineage": [
+    6,
+    5,
+    4
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     52
+    ],
+    [
+     1,
+     108
+    ],
+    [
+     19,
+     99
+    ],
+    [
+     25,
+     184
+    ],
+    [
+     31,
+     53
+    ],
+    [
+     36,
+     17
+    ],
+    [
+     37,
+     163
+    ],
+    [
+     43,
+     82
+    ],
+    [
+     49,
+     83
+    ]
+   ]
+  },
+  {
+   "id": 7,
+   "name": "squirtle",
+   "name_zh": "杰尼龟",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "squirtle",
+    "hp": 44,
+    "attack": 48,
+    "defense": 65,
+    "speed": 43,
+    "special_attack": 50,
+    "special_defense": 64
+   },
+   "lineage": [
+    7
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     4,
+     39
+    ],
+    [
+     7,
+     145
+    ],
+    [
+     10,
+     110
+    ],
+    [
+     13,
+     55
+    ],
+    [
+     18,
+     44
+    ],
+    [
+     23,
+     229
+    ],
+    [
+     28,
+     182
+    ],
+    [
+     33,
+     240
+    ],
+    [
+     40,
+     130
+    ],
+    [
+     47,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 8,
+   "name": "wartortle",
+   "name_zh": "卡咪龟",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "wartortle",
+    "hp": 59,
+    "attack": 63,
+    "defense": 80,
+    "speed": 58,
+    "special_attack": 65,
+    "special_defense": 80
+   },
+   "lineage": [
+    8,
+    7
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     39
+    ],
+    [
+     1,
+     145
+    ],
+    [
+     10,
+     110
+    ],
+    [
+     13,
+     55
+    ],
+    [
+     18,
+     44
+    ],
+    [
+     23,
+     229
+    ],
+    [
+     28,
+     182
+    ],
+    [
+     33,
+     240
+    ],
+    [
+     40,
+     130
+    ],
+    [
+     47,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 9,
+   "name": "blastoise",
+   "name_zh": "水箭龟",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "blastoise",
+    "hp": 79,
+    "attack": 83,
+    "defense": 100,
+    "speed": 78,
+    "special_attack": 85,
+    "special_defense": 105
+   },
+   "lineage": [
+    9,
+    8,
+    7
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     39
+    ],
+    [
+     1,
+     110
+    ],
+    [
+     1,
+     145
+    ],
+    [
+     13,
+     55
+    ],
+    [
+     18,
+     44
+    ],
+    [
+     23,
+     229
+    ],
+    [
+     28,
+     182
+    ],
+    [
+     33,
+     240
+    ],
+    [
+     40,
+     130
+    ],
+    [
+     47,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 10,
+   "name": "caterpie",
+   "name_zh": "绿毛虫",
+   "types": [
+    "BUG"
+   ],
+   "base": {
+    "name": "caterpie",
+    "hp": 45,
+    "attack": 30,
+    "defense": 35,
+    "speed": 45,
+    "special_attack": 20,
+    "special_defense": 20
+   },
+   "lineage": [
+    10
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     81
+    ]
+   ]
+  },
+  {
+   "id": 11,
+   "name": "metapod",
+   "name_zh": "铁甲蛹",
+   "types": [
+    "BUG"
+   ],
+   "base": {
+    "name": "metapod",
+    "hp": 50,
+    "attack": 20,
+    "defense": 55,
+    "speed": 30,
+    "special_attack": 25,
+    "special_defense": 25
+   },
+   "lineage": [
+    11,
+    10
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     81
+    ],
+    [
+     1,
+     106
+    ]
+   ]
+  },
+  {
+   "id": 12,
+   "name": "butterfree",
+   "name_zh": "巴大蝶",
+   "types": [
+    "BUG",
+    "FLYING"
+   ],
+   "base": {
+    "name": "butterfree",
+    "hp": 60,
+    "attack": 45,
+    "defense": 50,
+    "speed": 70,
+    "special_attack": 80,
+    "special_defense": 80
+   },
+   "lineage": [
+    12,
+    11,
+    10
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     81
+    ],
+    [
+     1,
+     93
+    ],
+    [
+     1,
+     106
+    ],
+    [
+     13,
+     77
+    ],
+    [
+     14,
+     78
+    ],
+    [
+     15,
+     79
+    ],
+    [
+     18,
+     48
+    ],
+    [
+     23,
+     18
+    ],
+    [
+     28,
+     16
+    ],
+    [
+     34,
+     60
+    ],
+    [
+     40,
+     219
+    ]
+   ]
+  },
+  {
+   "id": 13,
+   "name": "weedle",
+   "name_zh": "独角虫",
+   "types": [
+    "BUG",
+    "POISON"
+   ],
+   "base": {
+    "name": "weedle",
+    "hp": 40,
+    "attack": 35,
+    "defense": 30,
+    "speed": 50,
+    "special_attack": 20,
+    "special_defense": 20
+   },
+   "lineage": [
+    13
+   ],
+   "level_up": [
+    [
+     1,
+     40
+    ],
+    [
+     1,
+     81
+    ]
+   ]
+  },
+  {
+   "id": 14,
+   "name": "kakuna",
+   "name_zh": "铁壳蛹",
+   "types": [
+    "BUG",
+    "POISON"
+   ],
+   "base": {
+    "name": "kakuna",
+    "hp": 45,
+    "attack": 25,
+    "defense": 50,
+    "speed": 35,
+    "special_attack": 25,
+    "special_defense": 25
+   },
+   "lineage": [
+    14,
+    13
+   ],
+   "level_up": [
+    [
+     1,
+     40
+    ],
+    [
+     1,
+     81
+    ],
+    [
+     1,
+     106
+    ]
+   ]
+  },
+  {
+   "id": 15,
+   "name": "beedrill",
+   "name_zh": "大针蜂",
+   "types": [
+    "BUG",
+    "POISON"
+   ],
+   "base": {
+    "name": "beedrill",
+    "hp": 65,
+    "attack": 80,
+    "defense": 40,
+    "speed": 75,
+    "special_attack": 45,
+    "special_defense": 80
+   },
+   "lineage": [
+    15,
+    14,
+    13
+   ],
+   "level_up": [
+    [
+     1,
+     31
+    ],
+    [
+     1,
+     40
+    ],
+    [
+     1,
+     81
+    ],
+    [
+     1,
+     106
+    ],
+    [
+     15,
+     116
+    ],
+    [
+     20,
+     41
+    ],
+    [
+     25,
+     99
+    ],
+    [
+     30,
+     228
+    ],
+    [
+     35,
+     42
+    ],
+    [
+     40,
+     97
+    ]
+   ]
+  },
+  {
+   "id": 16,
+   "name": "pidgey",
+   "name_zh": "波波",
+   "types": [
+    "NORMAL",
+    "FLYING"
+   ],
+   "base": {
+    "name": "pidgey",
+    "hp": 40,
+    "attack": 45,
+    "defense": 40,
+    "speed": 56,
+    "special_attack": 35,
+    "special_defense": 35
+   },
+   "lineage": [
+    16
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     5,
+     28
+    ],
+    [
+     9,
+     16
+    ],
+    [
+     15,
+     98
+    ],
+    [
+     21,
+     18
+    ],
+    [
+     29,
+     17
+    ],
+    [
+     37,
+     97
+    ],
+    [
+     47,
+     119
+    ]
+   ]
+  },
+  {
+   "id": 17,
+   "name": "pidgeotto",
+   "name_zh": "比比鸟",
+   "types": [
+    "NORMAL",
+    "FLYING"
+   ],
+   "base": {
+    "name": "pidgeotto",
+    "hp": 63,
+    "attack": 60,
+    "defense": 55,
+    "speed": 71,
+    "special_attack": 50,
+    "special_defense": 50
+   },
+   "lineage": [
+    17,
+    16
+   ],
+   "level_up": [
+    [
+     1,
+     16
+    ],
+    [
+     1,
+     28
+    ],
+    [
+     1,
+     33
+    ],
+    [
+     15,
+     98
+    ],
+    [
+     21,
+     18
+    ],
+    [
+     29,
+     17
+    ],
+    [
+     37,
+     97
+    ],
+    [
+     47,
+     119
+    ]
+   ]
+  },
+  {
+   "id": 18,
+   "name": "pidgeot",
+   "name_zh": "大比鸟",
+   "types": [
+    "NORMAL",
+    "FLYING"
+   ],
+   "base": {
+    "name": "pidgeot",
+    "hp": 83,
+    "attack": 80,
+    "defense": 75,
+    "speed": 91,
+    "special_attack": 70,
+    "special_defense": 70
+   },
+   "lineage": [
+    18,
+    17,
+    16
+   ],
+   "level_up": [
+    [
+     1,
+     16
+    ],
+    [
+     1,
+     28
+    ],
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     98
+    ],
+    [
+     21,
+     18
+    ],
+    [
+     29,
+     17
+    ],
+    [
+     37,
+     97
+    ],
+    [
+     47,
+     119
+    ]
+   ]
+  },
+  {
+   "id": 19,
+   "name": "rattata",
+   "name_zh": "小拉达",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "rattata",
+    "hp": 30,
+    "attack": 56,
+    "defense": 35,
+    "speed": 72,
+    "special_attack": 25,
+    "special_defense": 35
+   },
+   "lineage": [
+    19
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     39
+    ],
+    [
+     7,
+     98
+    ],
+    [
+     13,
+     158
+    ],
+    [
+     20,
+     116
+    ],
+    [
+     27,
+     228
+    ],
+    [
+     34,
+     162
+    ]
+   ]
+  },
+  {
+   "id": 20,
+   "name": "raticate",
+   "name_zh": "拉达",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "raticate",
+    "hp": 55,
+    "attack": 81,
+    "defense": 60,
+    "speed": 97,
+    "special_attack": 50,
+    "special_defense": 70
+   },
+   "lineage": [
+    20,
+    19
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     39
+    ],
+    [
+     1,
+     98
+    ],
+    [
+     13,
+     158
+    ],
+    [
+     20,
+     116
+    ],
+    [
+     20,
+     184
+    ],
+    [
+     27,
+     228
+    ],
+    [
+     34,
+     162
+    ]
+   ]
+  },
+  {
+   "id": 21,
+   "name": "spearow",
+   "name_zh": "烈雀",
+   "types": [
+    "NORMAL",
+    "FLYING"
+   ],
+   "base": {
+    "name": "spearow",
+    "hp": 40,
+    "attack": 60,
+    "defense": 30,
+    "speed": 70,
+    "special_attack": 31,
+    "special_defense": 31
+   },
+   "lineage": [
+    21
+   ],
+   "level_up": [
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     64
+    ],
+    [
+     7,
+     43
+    ],
+    [
+     13,
+     31
+    ],
+    [
+     25,
+     228
+    ],
+    [
+     31,
+     119
+    ],
+    [
+     37,
+     65
+    ],
+    [
+     43,
+     97
+    ]
+   ]
+  },
+  {
+   "id": 22,
+   "name": "fearow",
+   "name_zh": "大嘴雀",
+   "types": [
+    "NORMAL",
+    "FLYING"
+   ],
+   "base": {
+    "name": "fearow",
+    "hp": 65,
+    "attack": 90,
+    "defense": 65,
+    "speed": 100,
+    "special_attack": 61,
+    "special_defense": 61
+   },
+   "lineage": [
+    22,
+    21
+   ],
+   "level_up": [
+    [
+     1,
+     31
+    ],
+    [
+     1,
+     43
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     64
+    ],
+    [
+     25,
+     228
+    ],
+    [
+     31,
+     119
+    ],
+    [
+     37,
+     65
+    ],
+    [
+     43,
+     97
+    ]
+   ]
+  },
+  {
+   "id": 23,
+   "name": "ekans",
+   "name_zh": "阿柏蛇",
+   "types": [
+    "POISON"
+   ],
+   "base": {
+    "name": "ekans",
+    "hp": 35,
+    "attack": 60,
+    "defense": 44,
+    "speed": 55,
+    "special_attack": 40,
+    "special_defense": 54
+   },
+   "lineage": [
+    23
+   ],
+   "level_up": [
+    [
+     1,
+     35
+    ],
+    [
+     1,
+     43
+    ],
+    [
+     9,
+     40
+    ],
+    [
+     15,
+     44
+    ],
+    [
+     23,
+     137
+    ],
+    [
+     29,
+     103
+    ],
+    [
+     37,
+     51
+    ],
+    [
+     43,
+     114
+    ]
+   ]
+  },
+  {
+   "id": 24,
+   "name": "arbok",
+   "name_zh": "阿柏怪",
+   "types": [
+    "POISON"
+   ],
+   "base": {
+    "name": "arbok",
+    "hp": 60,
+    "attack": 85,
+    "defense": 69,
+    "speed": 80,
+    "special_attack": 65,
+    "special_defense": 79
+   },
+   "lineage": [
+    24,
+    23
+   ],
+   "level_up": [
+    [
+     1,
+     35
+    ],
+    [
+     1,
+     40
+    ],
+    [
+     1,
+     43
+    ],
+    [
+     1,
+     44
+    ],
+    [
+     23,
+     137
+    ],
+    [
+     29,
+     103
+    ],
+    [
+     37,
+     51
+    ],
+    [
+     43,
+     114
+    ]
+   ]
+  },
+  {
+   "id": 25,
+   "name": "pikachu",
+   "name_zh": "皮卡丘",
+   "types": [
+    "ELECTRIC"
+   ],
+   "base": {
+    "name": "pikachu",
+    "hp": 35,
+    "attack": 55,
+    "defense": 30,
+    "speed": 90,
+    "special_attack": 50,
+    "special_defense": 40
+   },
+   "lineage": [
+    25,
+    172
+   ],
+   "level_up": [
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     84
+    ],
+    [
+     1,
+     204
+    ],
+    [
+     6,
+     39
+    ],
+    [
+     8,
+     86
+    ],
+    [
+     11,
+     98
+    ],
+    [
+     11,
+     186
+    ],
+    [
+     15,
+     104
+    ],
+    [
+     20,
+     21
+    ],
+    [
+     26,
+     85
+    ],
+    [
+     33,
+     97
+    ],
+    [
+     41,
+     87
+    ],
+    [
+     50,
+     113
+    ]
+   ]
+  },
+  {
+   "id": 26,
+   "name": "raichu",
+   "name_zh": "雷丘",
+   "types": [
+    "ELECTRIC"
+   ],
+   "base": {
+    "name": "raichu",
+    "hp": 60,
+    "attack": 90,
+    "defense": 55,
+    "speed": 100,
+    "special_attack": 90,
+    "special_defense": 80
+   },
+   "lineage": [
+    26,
+    25,
+    172
+   ],
+   "level_up": [
+    [
+     1,
+     39
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     84
+    ],
+    [
+     1,
+     85
+    ],
+    [
+     1,
+     98
+    ],
+    [
+     1,
+     204
+    ],
+    [
+     8,
+     86
+    ],
+    [
+     11,
+     186
+    ],
+    [
+     15,
+     104
+    ],
+    [
+     20,
+     21
+    ],
+    [
+     33,
+     97
+    ],
+    [
+     41,
+     87
+    ],
+    [
+     50,
+     113
+    ]
+   ]
+  },
+  {
+   "id": 27,
+   "name": "sandshrew",
+   "name_zh": "穿山鼠",
+   "types": [
+    "GROUND"
+   ],
+   "base": {
+    "name": "sandshrew",
+    "hp": 50,
+    "attack": 75,
+    "defense": 85,
+    "speed": 40,
+    "special_attack": 20,
+    "special_defense": 30
+   },
+   "lineage": [
+    27
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     6,
+     111
+    ],
+    [
+     11,
+     28
+    ],
+    [
+     17,
+     40
+    ],
+    [
+     23,
+     163
+    ],
+    [
+     30,
+     129
+    ],
+    [
+     37,
+     154
+    ],
+    [
+     45,
+     201
+    ]
+   ]
+  },
+  {
+   "id": 28,
+   "name": "sandslash",
+   "name_zh": "穿山王",
+   "types": [
+    "GROUND"
+   ],
+   "base": {
+    "name": "sandslash",
+    "hp": 75,
+    "attack": 100,
+    "defense": 110,
+    "speed": 65,
+    "special_attack": 45,
+    "special_defense": 55
+   },
+   "lineage": [
+    28,
+    27
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     1,
+     28
+    ],
+    [
+     1,
+     111
+    ],
+    [
+     17,
+     40
+    ],
+    [
+     23,
+     163
+    ],
+    [
+     30,
+     129
+    ],
+    [
+     37,
+     154
+    ],
+    [
+     45,
+     201
+    ]
+   ]
+  },
+  {
+   "id": 29,
+   "name": "nidoran_f",
+   "name_zh": "尼多兰",
+   "types": [
+    "POISON"
+   ],
+   "base": {
+    "name": "nidoran_f",
+    "hp": 55,
+    "attack": 47,
+    "defense": 52,
+    "speed": 41,
+    "special_attack": 40,
+    "special_defense": 40
+   },
+   "lineage": [
+    29
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     8,
+     10
+    ],
+    [
+     12,
+     24
+    ],
+    [
+     17,
+     40
+    ],
+    [
+     23,
+     39
+    ],
+    [
+     30,
+     44
+    ],
+    [
+     38,
+     154
+    ]
+   ]
+  },
+  {
+   "id": 30,
+   "name": "nidorina",
+   "name_zh": "尼多娜",
+   "types": [
+    "POISON"
+   ],
+   "base": {
+    "name": "nidorina",
+    "hp": 70,
+    "attack": 62,
+    "defense": 67,
+    "speed": 56,
+    "special_attack": 55,
+    "special_defense": 55
+   },
+   "lineage": [
+    30,
+    29
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     8,
+     10
+    ],
+    [
+     12,
+     24
+    ],
+    [
+     17,
+     40
+    ],
+    [
+     23,
+     39
+    ],
+    [
+     30,
+     44
+    ],
+    [
+     38,
+     154
+    ]
+   ]
+  },
+  {
+   "id": 31,
+   "name": "nidoqueen",
+   "name_zh": "尼多后",
+   "types": [
+    "POISON",
+    "GROUND"
+   ],
+   "base": {
+    "name": "nidoqueen",
+    "hp": 90,
+    "attack": 82,
+    "defense": 87,
+    "speed": 76,
+    "special_attack": 75,
+    "special_defense": 85
+   },
+   "lineage": [
+    31,
+    30,
+    29
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     1,
+     24
+    ],
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     39
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     17,
+     40
+    ],
+    [
+     23,
+     34
+    ],
+    [
+     30,
+     44
+    ],
+    [
+     38,
+     154
+    ]
+   ]
+  },
+  {
+   "id": 32,
+   "name": "nidoran_m",
+   "name_zh": "尼多朗",
+   "types": [
+    "POISON"
+   ],
+   "base": {
+    "name": "nidoran_m",
+    "hp": 46,
+    "attack": 57,
+    "defense": 40,
+    "speed": 50,
+    "special_attack": 40,
+    "special_defense": 40
+   },
+   "lineage": [
+    32
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     43
+    ],
+    [
+     8,
+     30
+    ],
+    [
+     12,
+     24
+    ],
+    [
+     17,
+     40
+    ],
+    [
+     23,
+     116
+    ],
+    [
+     30,
+     31
+    ],
+    [
+     38,
+     32
+    ]
+   ]
+  },
+  {
+   "id": 33,
+   "name": "nidorino",
+   "name_zh": "尼多力诺",
+   "types": [
+    "POISON"
+   ],
+   "base": {
+    "name": "nidorino",
+    "hp": 61,
+    "attack": 72,
+    "defense": 57,
+    "speed": 65,
+    "special_attack": 55,
+    "special_defense": 55
+   },
+   "lineage": [
+    33,
+    32
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     43
+    ],
+    [
+     8,
+     30
+    ],
+    [
+     12,
+     24
+    ],
+    [
+     17,
+     40
+    ],
+    [
+     23,
+     116
+    ],
+    [
+     30,
+     31
+    ],
+    [
+     38,
+     32
+    ]
+   ]
+  },
+  {
+   "id": 34,
+   "name": "nidoking",
+   "name_zh": "尼多王",
+   "types": [
+    "POISON",
+    "GROUND"
+   ],
+   "base": {
+    "name": "nidoking",
+    "hp": 81,
+    "attack": 92,
+    "defense": 77,
+    "speed": 85,
+    "special_attack": 85,
+    "special_defense": 75
+   },
+   "lineage": [
+    34,
+    33,
+    32
+   ],
+   "level_up": [
+    [
+     1,
+     24
+    ],
+    [
+     1,
+     30
+    ],
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     40
+    ],
+    [
+     1,
+     43
+    ],
+    [
+     23,
+     37
+    ],
+    [
+     23,
+     116
+    ],
+    [
+     30,
+     31
+    ],
+    [
+     38,
+     32
+    ]
+   ]
+  },
+  {
+   "id": 35,
+   "name": "clefairy",
+   "name_zh": "皮皮",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "clefairy",
+    "hp": 70,
+    "attack": 45,
+    "defense": 48,
+    "speed": 35,
+    "special_attack": 60,
+    "special_defense": 65
+   },
+   "lineage": [
+    35,
+    173
+   ],
+   "level_up": [
+    [
+     1,
+     1
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     204
+    ],
+    [
+     4,
+     227
+    ],
+    [
+     8,
+     47
+    ],
+    [
+     13,
+     3
+    ],
+    [
+     13,
+     186
+    ],
+    [
+     19,
+     107
+    ],
+    [
+     26,
+     111
+    ],
+    [
+     34,
+     118
+    ],
+    [
+     43,
+     236
+    ],
+    [
+     53,
+     113
+    ]
+   ]
+  },
+  {
+   "id": 36,
+   "name": "clefable",
+   "name_zh": "皮可西",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "clefable",
+    "hp": 95,
+    "attack": 70,
+    "defense": 73,
+    "speed": 60,
+    "special_attack": 85,
+    "special_defense": 90
+   },
+   "lineage": [
+    36,
+    35,
+    173
+   ],
+   "level_up": [
+    [
+     1,
+     1
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     47
+    ],
+    [
+     1,
+     118
+    ],
+    [
+     1,
+     204
+    ],
+    [
+     1,
+     236
+    ],
+    [
+     4,
+     227
+    ],
+    [
+     13,
+     186
+    ],
+    [
+     19,
+     107
+    ],
+    [
+     26,
+     111
+    ],
+    [
+     53,
+     113
+    ]
+   ]
+  },
+  {
+   "id": 37,
+   "name": "vulpix",
+   "name_zh": "六尾",
+   "types": [
+    "FIRE"
+   ],
+   "base": {
+    "name": "vulpix",
+    "hp": 38,
+    "attack": 41,
+    "defense": 40,
+    "speed": 65,
+    "special_attack": 50,
+    "special_defense": 65
+   },
+   "lineage": [
+    37
+   ],
+   "level_up": [
+    [
+     1,
+     39
+    ],
+    [
+     1,
+     52
+    ],
+    [
+     7,
+     98
+    ],
+    [
+     13,
+     46
+    ],
+    [
+     19,
+     109
+    ],
+    [
+     25,
+     219
+    ],
+    [
+     31,
+     53
+    ],
+    [
+     37,
+     83
+    ]
+   ]
+  },
+  {
+   "id": 38,
+   "name": "ninetales",
+   "name_zh": "九尾",
+   "types": [
+    "FIRE"
+   ],
+   "base": {
+    "name": "ninetales",
+    "hp": 73,
+    "attack": 76,
+    "defense": 75,
+    "speed": 100,
+    "special_attack": 81,
+    "special_defense": 100
+   },
+   "lineage": [
+    38,
+    37
+   ],
+   "level_up": [
+    [
+     1,
+     39
+    ],
+    [
+     1,
+     52
+    ],
+    [
+     1,
+     98
+    ],
+    [
+     1,
+     109
+    ],
+    [
+     1,
+     219
+    ],
+    [
+     13,
+     46
+    ],
+    [
+     31,
+     53
+    ],
+    [
+     37,
+     83
+    ]
+   ]
+  },
+  {
+   "id": 39,
+   "name": "jigglypuff",
+   "name_zh": "胖丁",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "jigglypuff",
+    "hp": 115,
+    "attack": 45,
+    "defense": 20,
+    "speed": 20,
+    "special_attack": 45,
+    "special_defense": 25
+   },
+   "lineage": [
+    39,
+    174
+   ],
+   "level_up": [
+    [
+     1,
+     47
+    ],
+    [
+     1,
+     204
+    ],
+    [
+     4,
+     111
+    ],
+    [
+     9,
+     1
+    ],
+    [
+     14,
+     50
+    ],
+    [
+     14,
+     186
+    ],
+    [
+     19,
+     205
+    ],
+    [
+     24,
+     3
+    ],
+    [
+     29,
+     156
+    ],
+    [
+     34,
+     34
+    ],
+    [
+     39,
+     38
+    ]
+   ]
+  },
+  {
+   "id": 40,
+   "name": "wigglytuff",
+   "name_zh": "胖可丁",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "wigglytuff",
+    "hp": 140,
+    "attack": 70,
+    "defense": 45,
+    "speed": 45,
+    "special_attack": 75,
+    "special_defense": 50
+   },
+   "lineage": [
+    40,
+    39,
+    174
+   ],
+   "level_up": [
+    [
+     1,
+     3
+    ],
+    [
+     1,
+     47
+    ],
+    [
+     1,
+     50
+    ],
+    [
+     1,
+     111
+    ],
+    [
+     1,
+     204
+    ],
+    [
+     9,
+     1
+    ],
+    [
+     14,
+     186
+    ],
+    [
+     19,
+     205
+    ],
+    [
+     29,
+     156
+    ],
+    [
+     34,
+     34
+    ],
+    [
+     39,
+     38
+    ]
+   ]
+  },
+  {
+   "id": 41,
+   "name": "zubat",
+   "name_zh": "超音蝠",
+   "types": [
+    "POISON",
+    "FLYING"
+   ],
+   "base": {
+    "name": "zubat",
+    "hp": 40,
+    "attack": 45,
+    "defense": 35,
+    "speed": 55,
+    "special_attack": 30,
+    "special_defense": 40
+   },
+   "lineage": [
+    41
+   ],
+   "level_up": [
+    [
+     1,
+     141
+    ],
+    [
+     6,
+     48
+    ],
+    [
+     12,
+     44
+    ],
+    [
+     19,
+     109
+    ],
+    [
+     27,
+     17
+    ],
+    [
+     36,
+     212
+    ],
+    [
+     46,
+     114
+    ]
+   ]
+  },
+  {
+   "id": 42,
+   "name": "golbat",
+   "name_zh": "大嘴蝠",
+   "types": [
+    "POISON",
+    "FLYING"
+   ],
+   "base": {
+    "name": "golbat",
+    "hp": 75,
+    "attack": 80,
+    "defense": 70,
+    "speed": 90,
+    "special_attack": 65,
+    "special_defense": 75
+   },
+   "lineage": [
+    42,
+    41
+   ],
+   "level_up": [
+    [
+     1,
+     48
+    ],
+    [
+     1,
+     103
+    ],
+    [
+     1,
+     141
+    ],
+    [
+     12,
+     44
+    ],
+    [
+     19,
+     109
+    ],
+    [
+     27,
+     17
+    ],
+    [
+     36,
+     212
+    ],
+    [
+     46,
+     114
+    ]
+   ]
+  },
+  {
+   "id": 43,
+   "name": "oddish",
+   "name_zh": "走路草",
+   "types": [
+    "GRASS",
+    "POISON"
+   ],
+   "base": {
+    "name": "oddish",
+    "hp": 45,
+    "attack": 50,
+    "defense": 55,
+    "speed": 30,
+    "special_attack": 75,
+    "special_defense": 65
+   },
+   "lineage": [
+    43
+   ],
+   "level_up": [
+    [
+     1,
+     71
+    ],
+    [
+     7,
+     230
+    ],
+    [
+     14,
+     77
+    ],
+    [
+     16,
+     78
+    ],
+    [
+     18,
+     79
+    ],
+    [
+     23,
+     51
+    ],
+    [
+     32,
+     236
+    ],
+    [
+     39,
+     80
+    ]
+   ]
+  },
+  {
+   "id": 44,
+   "name": "gloom",
+   "name_zh": "臭臭花",
+   "types": [
+    "GRASS",
+    "POISON"
+   ],
+   "base": {
+    "name": "gloom",
+    "hp": 60,
+    "attack": 65,
+    "defense": 70,
+    "speed": 40,
+    "special_attack": 85,
+    "special_defense": 75
+   },
+   "lineage": [
+    44,
+    43
+   ],
+   "level_up": [
+    [
+     1,
+     71
+    ],
+    [
+     1,
+     77
+    ],
+    [
+     1,
+     230
+    ],
+    [
+     16,
+     78
+    ],
+    [
+     18,
+     79
+    ],
+    [
+     23,
+     51
+    ],
+    [
+     32,
+     236
+    ],
+    [
+     39,
+     80
+    ]
+   ]
+  },
+  {
+   "id": 45,
+   "name": "vileplume",
+   "name_zh": "霸王花",
+   "types": [
+    "GRASS",
+    "POISON"
+   ],
+   "base": {
+    "name": "vileplume",
+    "hp": 75,
+    "attack": 80,
+    "defense": 85,
+    "speed": 50,
+    "special_attack": 100,
+    "special_defense": 90
+   },
+   "lineage": [
+    45,
+    44,
+    43
+   ],
+   "level_up": [
+    [
+     1,
+     71
+    ],
+    [
+     1,
+     77
+    ],
+    [
+     1,
+     78
+    ],
+    [
+     1,
+     80
+    ],
+    [
+     1,
+     230
+    ],
+    [
+     18,
+     79
+    ],
+    [
+     23,
+     51
+    ],
+    [
+     32,
+     236
+    ]
+   ]
+  },
+  {
+   "id": 46,
+   "name": "paras",
+   "name_zh": "派拉斯",
+   "types": [
+    "BUG",
+    "GRASS"
+   ],
+   "base": {
+    "name": "paras",
+    "hp": 35,
+    "attack": 70,
+    "defense": 55,
+    "speed": 25,
+    "special_attack": 45,
+    "special_defense": 55
+   },
+   "lineage": [
+    46
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     7,
+     78
+    ],
+    [
+     13,
+     77
+    ],
+    [
+     19,
+     141
+    ],
+    [
+     25,
+     147
+    ],
+    [
+     31,
+     163
+    ],
+    [
+     37,
+     74
+    ],
+    [
+     43,
+     202
+    ]
+   ]
+  },
+  {
+   "id": 47,
+   "name": "parasect",
+   "name_zh": "派拉斯特",
+   "types": [
+    "BUG",
+    "GRASS"
+   ],
+   "base": {
+    "name": "parasect",
+    "hp": 60,
+    "attack": 95,
+    "defense": 80,
+    "speed": 30,
+    "special_attack": 60,
+    "special_defense": 80
+   },
+   "lineage": [
+    47,
+    46
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     1,
+     77
+    ],
+    [
+     1,
+     78
+    ],
+    [
+     19,
+     141
+    ],
+    [
+     25,
+     147
+    ],
+    [
+     31,
+     163
+    ],
+    [
+     37,
+     74
+    ],
+    [
+     43,
+     202
+    ]
+   ]
+  },
+  {
+   "id": 48,
+   "name": "venonat",
+   "name_zh": "毛球",
+   "types": [
+    "BUG",
+    "POISON"
+   ],
+   "base": {
+    "name": "venonat",
+    "hp": 60,
+    "attack": 55,
+    "defense": 50,
+    "speed": 45,
+    "special_attack": 40,
+    "special_defense": 55
+   },
+   "lineage": [
+    48
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     50
+    ],
+    [
+     1,
+     193
+    ],
+    [
+     9,
+     48
+    ],
+    [
+     17,
+     93
+    ],
+    [
+     20,
+     77
+    ],
+    [
+     25,
+     141
+    ],
+    [
+     28,
+     78
+    ],
+    [
+     33,
+     60
+    ],
+    [
+     36,
+     79
+    ],
+    [
+     41,
+     94
+    ]
+   ]
+  },
+  {
+   "id": 49,
+   "name": "venomoth",
+   "name_zh": "摩鲁蛾",
+   "types": [
+    "BUG",
+    "POISON"
+   ],
+   "base": {
+    "name": "venomoth",
+    "hp": 70,
+    "attack": 65,
+    "defense": 60,
+    "speed": 90,
+    "special_attack": 90,
+    "special_defense": 75
+   },
+   "lineage": [
+    49,
+    48
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     48
+    ],
+    [
+     1,
+     50
+    ],
+    [
+     1,
+     193
+    ],
+    [
+     17,
+     93
+    ],
+    [
+     20,
+     77
+    ],
+    [
+     25,
+     141
+    ],
+    [
+     28,
+     78
+    ],
+    [
+     31,
+     16
+    ],
+    [
+     33,
+     60
+    ],
+    [
+     36,
+     79
+    ],
+    [
+     41,
+     94
+    ]
+   ]
+  },
+  {
+   "id": 50,
+   "name": "diglett",
+   "name_zh": "地鼠",
+   "types": [
+    "GROUND"
+   ],
+   "base": {
+    "name": "diglett",
+    "hp": 10,
+    "attack": 55,
+    "defense": 25,
+    "speed": 95,
+    "special_attack": 35,
+    "special_defense": 45
+   },
+   "lineage": [
+    50
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     5,
+     45
+    ],
+    [
+     9,
+     222
+    ],
+    [
+     17,
+     91
+    ],
+    [
+     25,
+     28
+    ],
+    [
+     33,
+     163
+    ],
+    [
+     41,
+     89
+    ],
+    [
+     49,
+     90
+    ]
+   ]
+  },
+  {
+   "id": 51,
+   "name": "dugtrio",
+   "name_zh": "三地鼠",
+   "types": [
+    "GROUND"
+   ],
+   "base": {
+    "name": "dugtrio",
+    "hp": 35,
+    "attack": 80,
+    "defense": 50,
+    "speed": 120,
+    "special_attack": 50,
+    "special_defense": 70
+   },
+   "lineage": [
+    51,
+    50
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     222
+    ],
+    [
+     17,
+     91
+    ],
+    [
+     25,
+     28
+    ],
+    [
+     33,
+     163
+    ],
+    [
+     41,
+     89
+    ],
+    [
+     49,
+     90
+    ]
+   ]
+  },
+  {
+   "id": 52,
+   "name": "meowth",
+   "name_zh": "喵喵",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "meowth",
+    "hp": 40,
+    "attack": 45,
+    "defense": 35,
+    "speed": 90,
+    "special_attack": 40,
+    "special_defense": 40
+   },
+   "lineage": [
+    52
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     11,
+     44
+    ],
+    [
+     20,
+     6
+    ],
+    [
+     28,
+     185
+    ],
+    [
+     35,
+     103
+    ],
+    [
+     41,
+     154
+    ],
+    [
+     46,
+     163
+    ]
+   ]
+  },
+  {
+   "id": 53,
+   "name": "persian",
+   "name_zh": "猫老大",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "persian",
+    "hp": 65,
+    "attack": 70,
+    "defense": 60,
+    "speed": 115,
+    "special_attack": 65,
+    "special_defense": 65
+   },
+   "lineage": [
+    53,
+    52
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     1,
+     44
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     20,
+     6
+    ],
+    [
+     28,
+     185
+    ],
+    [
+     35,
+     103
+    ],
+    [
+     41,
+     154
+    ],
+    [
+     46,
+     163
+    ]
+   ]
+  },
+  {
+   "id": 54,
+   "name": "psyduck",
+   "name_zh": "可达鸭",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "psyduck",
+    "hp": 50,
+    "attack": 52,
+    "defense": 48,
+    "speed": 55,
+    "special_attack": 65,
+    "special_defense": 50
+   },
+   "lineage": [
+    54
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     5,
+     39
+    ],
+    [
+     10,
+     50
+    ],
+    [
+     16,
+     93
+    ],
+    [
+     23,
+     103
+    ],
+    [
+     31,
+     244
+    ],
+    [
+     40,
+     154
+    ],
+    [
+     50,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 55,
+   "name": "golduck",
+   "name_zh": "哥达鸭",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "golduck",
+    "hp": 80,
+    "attack": 82,
+    "defense": 78,
+    "speed": 85,
+    "special_attack": 95,
+    "special_defense": 80
+   },
+   "lineage": [
+    55,
+    54
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     1,
+     39
+    ],
+    [
+     1,
+     50
+    ],
+    [
+     1,
+     93
+    ],
+    [
+     23,
+     103
+    ],
+    [
+     31,
+     244
+    ],
+    [
+     40,
+     154
+    ],
+    [
+     50,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 56,
+   "name": "mankey",
+   "name_zh": "猴怪",
+   "types": [
+    "FIGHTING"
+   ],
+   "base": {
+    "name": "mankey",
+    "hp": 40,
+    "attack": 80,
+    "defense": 35,
+    "speed": 70,
+    "special_attack": 35,
+    "special_defense": 45
+   },
+   "lineage": [
+    56
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     1,
+     43
+    ],
+    [
+     9,
+     67
+    ],
+    [
+     15,
+     2
+    ],
+    [
+     21,
+     154
+    ],
+    [
+     27,
+     116
+    ],
+    [
+     33,
+     69
+    ],
+    [
+     39,
+     238
+    ],
+    [
+     45,
+     103
+    ],
+    [
+     51,
+     37
+    ]
+   ]
+  },
+  {
+   "id": 57,
+   "name": "primeape",
+   "name_zh": "火暴猴",
+   "types": [
+    "FIGHTING"
+   ],
+   "base": {
+    "name": "primeape",
+    "hp": 65,
+    "attack": 105,
+    "defense": 60,
+    "speed": 95,
+    "special_attack": 60,
+    "special_defense": 70
+   },
+   "lineage": [
+    57,
+    56
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     1,
+     43
+    ],
+    [
+     1,
+     67
+    ],
+    [
+     1,
+     99
+    ],
+    [
+     15,
+     2
+    ],
+    [
+     21,
+     154
+    ],
+    [
+     27,
+     116
+    ],
+    [
+     33,
+     69
+    ],
+    [
+     39,
+     238
+    ],
+    [
+     45,
+     103
+    ],
+    [
+     51,
+     37
+    ]
+   ]
+  },
+  {
+   "id": 58,
+   "name": "growlithe",
+   "name_zh": "卡蒂狗",
+   "types": [
+    "FIRE"
+   ],
+   "base": {
+    "name": "growlithe",
+    "hp": 55,
+    "attack": 70,
+    "defense": 45,
+    "speed": 60,
+    "special_attack": 70,
+    "special_defense": 50
+   },
+   "lineage": [
+    58
+   ],
+   "level_up": [
+    [
+     1,
+     44
+    ],
+    [
+     1,
+     46
+    ],
+    [
+     9,
+     52
+    ],
+    [
+     18,
+     43
+    ],
+    [
+     26,
+     36
+    ],
+    [
+     34,
+     172
+    ],
+    [
+     42,
+     97
+    ],
+    [
+     50,
+     53
+    ]
+   ]
+  },
+  {
+   "id": 59,
+   "name": "arcanine",
+   "name_zh": "风速狗",
+   "types": [
+    "FIRE"
+   ],
+   "base": {
+    "name": "arcanine",
+    "hp": 90,
+    "attack": 110,
+    "defense": 80,
+    "speed": 95,
+    "special_attack": 100,
+    "special_defense": 80
+   },
+   "lineage": [
+    59,
+    58
+   ],
+   "level_up": [
+    [
+     1,
+     36
+    ],
+    [
+     1,
+     43
+    ],
+    [
+     1,
+     44
+    ],
+    [
+     1,
+     46
+    ],
+    [
+     1,
+     172
+    ],
+    [
+     9,
+     52
+    ],
+    [
+     42,
+     97
+    ],
+    [
+     50,
+     53
+    ],
+    [
+     50,
+     245
+    ]
+   ]
+  },
+  {
+   "id": 60,
+   "name": "poliwag",
+   "name_zh": "蚊香蝌蚪",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "poliwag",
+    "hp": 40,
+    "attack": 50,
+    "defense": 40,
+    "speed": 90,
+    "special_attack": 40,
+    "special_defense": 40
+   },
+   "lineage": [
+    60
+   ],
+   "level_up": [
+    [
+     1,
+     145
+    ],
+    [
+     7,
+     95
+    ],
+    [
+     13,
+     55
+    ],
+    [
+     19,
+     3
+    ],
+    [
+     25,
+     240
+    ],
+    [
+     31,
+     34
+    ],
+    [
+     37,
+     187
+    ],
+    [
+     43,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 61,
+   "name": "poliwhirl",
+   "name_zh": "蚊香君",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "poliwhirl",
+    "hp": 65,
+    "attack": 65,
+    "defense": 65,
+    "speed": 90,
+    "special_attack": 50,
+    "special_defense": 50
+   },
+   "lineage": [
+    61,
+    60
+   ],
+   "level_up": [
+    [
+     1,
+     55
+    ],
+    [
+     1,
+     95
+    ],
+    [
+     1,
+     145
+    ],
+    [
+     19,
+     3
+    ],
+    [
+     25,
+     240
+    ],
+    [
+     31,
+     34
+    ],
+    [
+     37,
+     187
+    ],
+    [
+     43,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 62,
+   "name": "poliwrath",
+   "name_zh": "蚊香泳士",
+   "types": [
+    "WATER",
+    "FIGHTING"
+   ],
+   "base": {
+    "name": "poliwrath",
+    "hp": 90,
+    "attack": 85,
+    "defense": 95,
+    "speed": 70,
+    "special_attack": 70,
+    "special_defense": 90
+   },
+   "lineage": [
+    62,
+    61,
+    60
+   ],
+   "level_up": [
+    [
+     1,
+     3
+    ],
+    [
+     1,
+     55
+    ],
+    [
+     1,
+     66
+    ],
+    [
+     1,
+     95
+    ],
+    [
+     1,
+     145
+    ],
+    [
+     25,
+     240
+    ],
+    [
+     31,
+     34
+    ],
+    [
+     37,
+     187
+    ],
+    [
+     43,
+     56
+    ],
+    [
+     51,
+     170
+    ]
+   ]
+  },
+  {
+   "id": 63,
+   "name": "abra",
+   "name_zh": "凯西",
+   "types": [
+    "PSYCHIC"
+   ],
+   "base": {
+    "name": "abra",
+    "hp": 25,
+    "attack": 20,
+    "defense": 15,
+    "speed": 90,
+    "special_attack": 105,
+    "special_defense": 55
+   },
+   "lineage": [
+    63
+   ],
+   "level_up": [
+    [
+     1,
+     100
+    ]
+   ]
+  },
+  {
+   "id": 64,
+   "name": "kadabra",
+   "name_zh": "勇基拉",
+   "types": [
+    "PSYCHIC"
+   ],
+   "base": {
+    "name": "kadabra",
+    "hp": 40,
+    "attack": 35,
+    "defense": 30,
+    "speed": 105,
+    "special_attack": 120,
+    "special_defense": 70
+   },
+   "lineage": [
+    64,
+    63
+   ],
+   "level_up": [
+    [
+     1,
+     93
+    ],
+    [
+     1,
+     100
+    ],
+    [
+     1,
+     134
+    ],
+    [
+     18,
+     50
+    ],
+    [
+     21,
+     60
+    ],
+    [
+     26,
+     105
+    ],
+    [
+     31,
+     248
+    ],
+    [
+     38,
+     94
+    ],
+    [
+     45,
+     115
+    ]
+   ]
+  },
+  {
+   "id": 65,
+   "name": "alakazam",
+   "name_zh": "胡地",
+   "types": [
+    "PSYCHIC"
+   ],
+   "base": {
+    "name": "alakazam",
+    "hp": 55,
+    "attack": 50,
+    "defense": 45,
+    "speed": 120,
+    "special_attack": 135,
+    "special_defense": 85
+   },
+   "lineage": [
+    65,
+    64,
+    63
+   ],
+   "level_up": [
+    [
+     1,
+     93
+    ],
+    [
+     1,
+     100
+    ],
+    [
+     1,
+     134
+    ],
+    [
+     18,
+     50
+    ],
+    [
+     21,
+     60
+    ],
+    [
+     26,
+     105
+    ],
+    [
+     31,
+     248
+    ],
+    [
+     38,
+     94
+    ],
+    [
+     45,
+     115
+    ]
+   ]
+  },
+  {
+   "id": 66,
+   "name": "machop",
+   "name_zh": "腕力",
+   "types": [
+    "FIGHTING"
+   ],
+   "base": {
+    "name": "machop",
+    "hp": 70,
+    "attack": 80,
+    "defense": 50,
+    "speed": 35,
+    "special_attack": 35,
+    "special_defense": 35
+   },
+   "lineage": [
+    66
+   ],
+   "level_up": [
+    [
+     1,
+     43
+    ],
+    [
+     1,
+     67
+    ],
+    [
+     7,
+     116
+    ],
+    [
+     13,
+     2
+    ],
+    [
+     19,
+     69
+    ],
+    [
+     25,
+     193
+    ],
+    [
+     31,
+     233
+    ],
+    [
+     37,
+     238
+    ],
+    [
+     43,
+     184
+    ],
+    [
+     49,
+     66
+    ]
+   ]
+  },
+  {
+   "id": 67,
+   "name": "machoke",
+   "name_zh": "豪力",
+   "types": [
+    "FIGHTING"
+   ],
+   "base": {
+    "name": "machoke",
+    "hp": 80,
+    "attack": 100,
+    "defense": 70,
+    "speed": 45,
+    "special_attack": 50,
+    "special_defense": 60
+   },
+   "lineage": [
+    67,
+    66
+   ],
+   "level_up": [
+    [
+     1,
+     43
+    ],
+    [
+     1,
+     67
+    ],
+    [
+     1,
+     116
+    ],
+    [
+     13,
+     2
+    ],
+    [
+     19,
+     69
+    ],
+    [
+     25,
+     193
+    ],
+    [
+     31,
+     233
+    ],
+    [
+     37,
+     238
+    ],
+    [
+     43,
+     184
+    ],
+    [
+     49,
+     66
+    ]
+   ]
+  },
+  {
+   "id": 68,
+   "name": "machamp",
+   "name_zh": "怪力",
+   "types": [
+    "FIGHTING"
+   ],
+   "base": {
+    "name": "machamp",
+    "hp": 90,
+    "attack": 130,
+    "defense": 80,
+    "speed": 55,
+    "special_attack": 65,
+    "special_defense": 85
+   },
+   "lineage": [
+    68,
+    67,
+    66
+   ],
+   "level_up": [
+    [
+     1,
+     43
+    ],
+    [
+     1,
+     67
+    ],
+    [
+     1,
+     116
+    ],
+    [
+     13,
+     2
+    ],
+    [
+     19,
+     69
+    ],
+    [
+     25,
+     193
+    ],
+    [
+     31,
+     233
+    ],
+    [
+     37,
+     238
+    ],
+    [
+     43,
+     184
+    ],
+    [
+     49,
+     66
+    ]
+   ]
+  },
+  {
+   "id": 69,
+   "name": "bellsprout",
+   "name_zh": "喇叭芽",
+   "types": [
+    "GRASS",
+    "POISON"
+   ],
+   "base": {
+    "name": "bellsprout",
+    "hp": 50,
+    "attack": 75,
+    "defense": 35,
+    "speed": 40,
+    "special_attack": 70,
+    "special_defense": 30
+   },
+   "lineage": [
+    69
+   ],
+   "level_up": [
+    [
+     1,
+     22
+    ],
+    [
+     6,
+     74
+    ],
+    [
+     11,
+     35
+    ],
+    [
+     15,
+     79
+    ],
+    [
+     17,
+     77
+    ],
+    [
+     19,
+     78
+    ],
+    [
+     23,
+     51
+    ],
+    [
+     30,
+     230
+    ],
+    [
+     37,
+     75
+    ],
+    [
+     45,
+     21
+    ]
+   ]
+  },
+  {
+   "id": 70,
+   "name": "weepinbell",
+   "name_zh": "口呆花",
+   "types": [
+    "GRASS",
+    "POISON"
+   ],
+   "base": {
+    "name": "weepinbell",
+    "hp": 65,
+    "attack": 90,
+    "defense": 50,
+    "speed": 55,
+    "special_attack": 85,
+    "special_defense": 45
+   },
+   "lineage": [
+    70,
+    69
+   ],
+   "level_up": [
+    [
+     1,
+     22
+    ],
+    [
+     1,
+     35
+    ],
+    [
+     1,
+     74
+    ],
+    [
+     15,
+     79
+    ],
+    [
+     17,
+     77
+    ],
+    [
+     19,
+     78
+    ],
+    [
+     23,
+     51
+    ],
+    [
+     30,
+     230
+    ],
+    [
+     37,
+     75
+    ],
+    [
+     45,
+     21
+    ]
+   ]
+  },
+  {
+   "id": 71,
+   "name": "victreebel",
+   "name_zh": "大食花",
+   "types": [
+    "GRASS",
+    "POISON"
+   ],
+   "base": {
+    "name": "victreebel",
+    "hp": 80,
+    "attack": 105,
+    "defense": 65,
+    "speed": 70,
+    "special_attack": 100,
+    "special_defense": 60
+   },
+   "lineage": [
+    71,
+    70,
+    69
+   ],
+   "level_up": [
+    [
+     1,
+     22
+    ],
+    [
+     1,
+     35
+    ],
+    [
+     1,
+     74
+    ],
+    [
+     1,
+     75
+    ],
+    [
+     1,
+     79
+    ],
+    [
+     1,
+     230
+    ],
+    [
+     17,
+     77
+    ],
+    [
+     19,
+     78
+    ],
+    [
+     23,
+     51
+    ],
+    [
+     45,
+     21
+    ]
+   ]
+  },
+  {
+   "id": 72,
+   "name": "tentacool",
+   "name_zh": "玛瑙水母",
+   "types": [
+    "WATER",
+    "POISON"
+   ],
+   "base": {
+    "name": "tentacool",
+    "hp": 40,
+    "attack": 40,
+    "defense": 35,
+    "speed": 70,
+    "special_attack": 50,
+    "special_defense": 100
+   },
+   "lineage": [
+    72
+   ],
+   "level_up": [
+    [
+     1,
+     40
+    ],
+    [
+     6,
+     48
+    ],
+    [
+     12,
+     132
+    ],
+    [
+     19,
+     51
+    ],
+    [
+     25,
+     61
+    ],
+    [
+     30,
+     35
+    ],
+    [
+     36,
+     112
+    ],
+    [
+     43,
+     103
+    ],
+    [
+     49,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 73,
+   "name": "tentacruel",
+   "name_zh": "毒刺水母",
+   "types": [
+    "WATER",
+    "POISON"
+   ],
+   "base": {
+    "name": "tentacruel",
+    "hp": 80,
+    "attack": 70,
+    "defense": 65,
+    "speed": 100,
+    "special_attack": 80,
+    "special_defense": 120
+   },
+   "lineage": [
+    73,
+    72
+   ],
+   "level_up": [
+    [
+     1,
+     40
+    ],
+    [
+     1,
+     48
+    ],
+    [
+     1,
+     132
+    ],
+    [
+     19,
+     51
+    ],
+    [
+     25,
+     61
+    ],
+    [
+     30,
+     35
+    ],
+    [
+     36,
+     112
+    ],
+    [
+     43,
+     103
+    ],
+    [
+     49,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 74,
+   "name": "geodude",
+   "name_zh": "小拳石",
+   "types": [
+    "ROCK",
+    "GROUND"
+   ],
+   "base": {
+    "name": "geodude",
+    "hp": 40,
+    "attack": 80,
+    "defense": 100,
+    "speed": 20,
+    "special_attack": 30,
+    "special_defense": 30
+   },
+   "lineage": [
+    74
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     6,
+     111
+    ],
+    [
+     11,
+     88
+    ],
+    [
+     16,
+     222
+    ],
+    [
+     21,
+     120
+    ],
+    [
+     26,
+     106
+    ],
+    [
+     31,
+     205
+    ],
+    [
+     36,
+     89
+    ],
+    [
+     41,
+     153
+    ]
+   ]
+  },
+  {
+   "id": 75,
+   "name": "graveler",
+   "name_zh": "隆隆石",
+   "types": [
+    "ROCK",
+    "GROUND"
+   ],
+   "base": {
+    "name": "graveler",
+    "hp": 55,
+    "attack": 95,
+    "defense": 115,
+    "speed": 35,
+    "special_attack": 45,
+    "special_defense": 45
+   },
+   "lineage": [
+    75,
+    74
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     88
+    ],
+    [
+     1,
+     111
+    ],
+    [
+     16,
+     222
+    ],
+    [
+     21,
+     120
+    ],
+    [
+     26,
+     106
+    ],
+    [
+     31,
+     205
+    ],
+    [
+     36,
+     89
+    ],
+    [
+     41,
+     153
+    ]
+   ]
+  },
+  {
+   "id": 76,
+   "name": "golem",
+   "name_zh": "隆隆岩",
+   "types": [
+    "ROCK",
+    "GROUND"
+   ],
+   "base": {
+    "name": "golem",
+    "hp": 80,
+    "attack": 110,
+    "defense": 130,
+    "speed": 45,
+    "special_attack": 55,
+    "special_defense": 65
+   },
+   "lineage": [
+    76,
+    75,
+    74
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     88
+    ],
+    [
+     1,
+     111
+    ],
+    [
+     1,
+     222
+    ],
+    [
+     21,
+     120
+    ],
+    [
+     26,
+     106
+    ],
+    [
+     31,
+     205
+    ],
+    [
+     36,
+     89
+    ],
+    [
+     41,
+     153
+    ]
+   ]
+  },
+  {
+   "id": 77,
+   "name": "ponyta",
+   "name_zh": "小火马",
+   "types": [
+    "FIRE"
+   ],
+   "base": {
+    "name": "ponyta",
+    "hp": 50,
+    "attack": 85,
+    "defense": 55,
+    "speed": 90,
+    "special_attack": 65,
+    "special_defense": 65
+   },
+   "lineage": [
+    77
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     4,
+     45
+    ],
+    [
+     8,
+     39
+    ],
+    [
+     13,
+     52
+    ],
+    [
+     19,
+     23
+    ],
+    [
+     26,
+     83
+    ],
+    [
+     34,
+     36
+    ],
+    [
+     43,
+     97
+    ],
+    [
+     53,
+     126
+    ]
+   ]
+  },
+  {
+   "id": 78,
+   "name": "rapidash",
+   "name_zh": "烈焰马",
+   "types": [
+    "FIRE"
+   ],
+   "base": {
+    "name": "rapidash",
+    "hp": 65,
+    "attack": 100,
+    "defense": 70,
+    "speed": 105,
+    "special_attack": 80,
+    "special_defense": 80
+   },
+   "lineage": [
+    78,
+    77
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     39
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     52
+    ],
+    [
+     19,
+     23
+    ],
+    [
+     26,
+     83
+    ],
+    [
+     34,
+     36
+    ],
+    [
+     40,
+     31
+    ],
+    [
+     43,
+     97
+    ],
+    [
+     53,
+     126
+    ]
+   ]
+  },
+  {
+   "id": 79,
+   "name": "slowpoke",
+   "name_zh": "呆呆兽",
+   "types": [
+    "WATER",
+    "PSYCHIC"
+   ],
+   "base": {
+    "name": "slowpoke",
+    "hp": 90,
+    "attack": 65,
+    "defense": 65,
+    "speed": 15,
+    "special_attack": 40,
+    "special_defense": 40
+   },
+   "lineage": [
+    79
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     174
+    ],
+    [
+     6,
+     45
+    ],
+    [
+     15,
+     55
+    ],
+    [
+     20,
+     93
+    ],
+    [
+     29,
+     50
+    ],
+    [
+     34,
+     29
+    ],
+    [
+     43,
+     133
+    ],
+    [
+     48,
+     94
+    ]
+   ]
+  },
+  {
+   "id": 80,
+   "name": "slowbro",
+   "name_zh": "呆壳兽",
+   "types": [
+    "WATER",
+    "PSYCHIC"
+   ],
+   "base": {
+    "name": "slowbro",
+    "hp": 95,
+    "attack": 75,
+    "defense": 110,
+    "speed": 30,
+    "special_attack": 100,
+    "special_defense": 80
+   },
+   "lineage": [
+    80,
+    79
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     55
+    ],
+    [
+     1,
+     174
+    ],
+    [
+     20,
+     93
+    ],
+    [
+     29,
+     50
+    ],
+    [
+     34,
+     29
+    ],
+    [
+     37,
+     110
+    ],
+    [
+     43,
+     133
+    ],
+    [
+     48,
+     94
+    ]
+   ]
+  },
+  {
+   "id": 81,
+   "name": "magnemite",
+   "name_zh": "小磁怪",
+   "types": [
+    "ELECTRIC",
+    "STEEL"
+   ],
+   "base": {
+    "name": "magnemite",
+    "hp": 25,
+    "attack": 35,
+    "defense": 70,
+    "speed": 45,
+    "special_attack": 95,
+    "special_defense": 55
+   },
+   "lineage": [
+    81
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     6,
+     84
+    ],
+    [
+     11,
+     48
+    ],
+    [
+     16,
+     49
+    ],
+    [
+     21,
+     86
+    ],
+    [
+     27,
+     199
+    ],
+    [
+     33,
+     129
+    ],
+    [
+     39,
+     103
+    ],
+    [
+     45,
+     192
+    ]
+   ]
+  },
+  {
+   "id": 82,
+   "name": "magneton",
+   "name_zh": "三合一磁怪",
+   "types": [
+    "ELECTRIC",
+    "STEEL"
+   ],
+   "base": {
+    "name": "magneton",
+    "hp": 50,
+    "attack": 60,
+    "defense": 95,
+    "speed": 70,
+    "special_attack": 120,
+    "special_defense": 70
+   },
+   "lineage": [
+    82,
+    81
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     48
+    ],
+    [
+     1,
+     49
+    ],
+    [
+     1,
+     84
+    ],
+    [
+     21,
+     86
+    ],
+    [
+     27,
+     199
+    ],
+    [
+     33,
+     129
+    ],
+    [
+     39,
+     103
+    ],
+    [
+     45,
+     192
+    ]
+   ]
+  },
+  {
+   "id": 83,
+   "name": "farfetch_d",
+   "name_zh": "大葱鸭",
+   "types": [
+    "NORMAL",
+    "FLYING"
+   ],
+   "base": {
+    "name": "farfetch_d",
+    "hp": 52,
+    "attack": 65,
+    "defense": 55,
+    "speed": 60,
+    "special_attack": 58,
+    "special_defense": 62
+   },
+   "lineage": [
+    83
+   ],
+   "level_up": [
+    [
+     1,
+     64
+    ],
+    [
+     7,
+     28
+    ],
+    [
+     13,
+     43
+    ],
+    [
+     19,
+     31
+    ],
+    [
+     25,
+     14
+    ],
+    [
+     31,
+     97
+    ],
+    [
+     37,
+     163
+    ],
+    [
+     44,
+     206
+    ]
+   ]
+  },
+  {
+   "id": 84,
+   "name": "doduo",
+   "name_zh": "嘟嘟",
+   "types": [
+    "NORMAL",
+    "FLYING"
+   ],
+   "base": {
+    "name": "doduo",
+    "hp": 35,
+    "attack": 85,
+    "defense": 45,
+    "speed": 75,
+    "special_attack": 35,
+    "special_defense": 35
+   },
+   "lineage": [
+    84
+   ],
+   "level_up": [
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     64
+    ],
+    [
+     9,
+     228
+    ],
+    [
+     13,
+     31
+    ],
+    [
+     21,
+     161
+    ],
+    [
+     25,
+     99
+    ],
+    [
+     33,
+     65
+    ],
+    [
+     37,
+     97
+    ]
+   ]
+  },
+  {
+   "id": 85,
+   "name": "dodrio",
+   "name_zh": "嘟嘟利",
+   "types": [
+    "NORMAL",
+    "FLYING"
+   ],
+   "base": {
+    "name": "dodrio",
+    "hp": 60,
+    "attack": 110,
+    "defense": 70,
+    "speed": 100,
+    "special_attack": 60,
+    "special_defense": 60
+   },
+   "lineage": [
+    85,
+    84
+   ],
+   "level_up": [
+    [
+     1,
+     31
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     64
+    ],
+    [
+     1,
+     228
+    ],
+    [
+     21,
+     161
+    ],
+    [
+     25,
+     99
+    ],
+    [
+     33,
+     65
+    ],
+    [
+     37,
+     97
+    ]
+   ]
+  },
+  {
+   "id": 86,
+   "name": "seel",
+   "name_zh": "小海狮",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "seel",
+    "hp": 65,
+    "attack": 45,
+    "defense": 55,
+    "speed": 45,
+    "special_attack": 45,
+    "special_defense": 70
+   },
+   "lineage": [
+    86
+   ],
+   "level_up": [
+    [
+     1,
+     29
+    ],
+    [
+     5,
+     45
+    ],
+    [
+     16,
+     62
+    ],
+    [
+     21,
+     156
+    ],
+    [
+     32,
+     36
+    ],
+    [
+     37,
+     58
+    ],
+    [
+     48,
+     219
+    ]
+   ]
+  },
+  {
+   "id": 87,
+   "name": "dewgong",
+   "name_zh": "白海狮",
+   "types": [
+    "WATER",
+    "ICE"
+   ],
+   "base": {
+    "name": "dewgong",
+    "hp": 90,
+    "attack": 70,
+    "defense": 80,
+    "speed": 70,
+    "special_attack": 70,
+    "special_defense": 95
+   },
+   "lineage": [
+    87,
+    86
+   ],
+   "level_up": [
+    [
+     1,
+     29
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     62
+    ],
+    [
+     21,
+     156
+    ],
+    [
+     32,
+     36
+    ],
+    [
+     37,
+     58
+    ],
+    [
+     48,
+     219
+    ]
+   ]
+  },
+  {
+   "id": 88,
+   "name": "grimer",
+   "name_zh": "臭泥",
+   "types": [
+    "POISON"
+   ],
+   "base": {
+    "name": "grimer",
+    "hp": 80,
+    "attack": 80,
+    "defense": 50,
+    "speed": 25,
+    "special_attack": 40,
+    "special_defense": 50
+   },
+   "lineage": [
+    88
+   ],
+   "level_up": [
+    [
+     1,
+     1
+    ],
+    [
+     1,
+     139
+    ],
+    [
+     5,
+     106
+    ],
+    [
+     10,
+     50
+    ],
+    [
+     16,
+     124
+    ],
+    [
+     23,
+     107
+    ],
+    [
+     31,
+     103
+    ],
+    [
+     40,
+     151
+    ],
+    [
+     50,
+     188
+    ]
+   ]
+  },
+  {
+   "id": 89,
+   "name": "muk",
+   "name_zh": "臭臭泥",
+   "types": [
+    "POISON"
+   ],
+   "base": {
+    "name": "muk",
+    "hp": 105,
+    "attack": 105,
+    "defense": 75,
+    "speed": 50,
+    "special_attack": 65,
+    "special_defense": 100
+   },
+   "lineage": [
+    89,
+    88
+   ],
+   "level_up": [
+    [
+     1,
+     1
+    ],
+    [
+     1,
+     106
+    ],
+    [
+     1,
+     139
+    ],
+    [
+     10,
+     50
+    ],
+    [
+     16,
+     124
+    ],
+    [
+     23,
+     107
+    ],
+    [
+     31,
+     103
+    ],
+    [
+     40,
+     151
+    ],
+    [
+     50,
+     188
+    ]
+   ]
+  },
+  {
+   "id": 90,
+   "name": "shellder",
+   "name_zh": "大舌贝",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "shellder",
+    "hp": 30,
+    "attack": 65,
+    "defense": 100,
+    "speed": 40,
+    "special_attack": 45,
+    "special_defense": 25
+   },
+   "lineage": [
+    90
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     110
+    ],
+    [
+     9,
+     48
+    ],
+    [
+     17,
+     62
+    ],
+    [
+     25,
+     182
+    ],
+    [
+     33,
+     43
+    ],
+    [
+     41,
+     128
+    ],
+    [
+     49,
+     58
+    ]
+   ]
+  },
+  {
+   "id": 91,
+   "name": "cloyster",
+   "name_zh": "刺甲贝",
+   "types": [
+    "WATER",
+    "ICE"
+   ],
+   "base": {
+    "name": "cloyster",
+    "hp": 50,
+    "attack": 95,
+    "defense": 180,
+    "speed": 70,
+    "special_attack": 85,
+    "special_defense": 45
+   },
+   "lineage": [
+    91,
+    90
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     48
+    ],
+    [
+     1,
+     62
+    ],
+    [
+     1,
+     110
+    ],
+    [
+     1,
+     182
+    ],
+    [
+     33,
+     43
+    ],
+    [
+     41,
+     128
+    ],
+    [
+     41,
+     131
+    ],
+    [
+     49,
+     58
+    ]
+   ]
+  },
+  {
+   "id": 92,
+   "name": "gastly",
+   "name_zh": "鬼斯",
+   "types": [
+    "GHOST",
+    "POISON"
+   ],
+   "base": {
+    "name": "gastly",
+    "hp": 30,
+    "attack": 35,
+    "defense": 30,
+    "speed": 80,
+    "special_attack": 100,
+    "special_defense": 35
+   },
+   "lineage": [
+    92
+   ],
+   "level_up": [
+    [
+     1,
+     95
+    ],
+    [
+     1,
+     122
+    ],
+    [
+     8,
+     180
+    ],
+    [
+     13,
+     212
+    ],
+    [
+     16,
+     174
+    ],
+    [
+     21,
+     101
+    ],
+    [
+     28,
+     109
+    ],
+    [
+     33,
+     138
+    ],
+    [
+     36,
+     194
+    ]
+   ]
+  },
+  {
+   "id": 93,
+   "name": "haunter",
+   "name_zh": "鬼斯通",
+   "types": [
+    "GHOST",
+    "POISON"
+   ],
+   "base": {
+    "name": "haunter",
+    "hp": 45,
+    "attack": 50,
+    "defense": 45,
+    "speed": 95,
+    "special_attack": 115,
+    "special_defense": 55
+   },
+   "lineage": [
+    93,
+    92
+   ],
+   "level_up": [
+    [
+     1,
+     95
+    ],
+    [
+     1,
+     122
+    ],
+    [
+     1,
+     180
+    ],
+    [
+     13,
+     212
+    ],
+    [
+     16,
+     174
+    ],
+    [
+     21,
+     101
+    ],
+    [
+     28,
+     109
+    ],
+    [
+     33,
+     138
+    ],
+    [
+     36,
+     194
+    ]
+   ]
+  },
+  {
+   "id": 94,
+   "name": "gengar",
+   "name_zh": "耿鬼",
+   "types": [
+    "GHOST",
+    "POISON"
+   ],
+   "base": {
+    "name": "gengar",
+    "hp": 60,
+    "attack": 65,
+    "defense": 60,
+    "speed": 110,
+    "special_attack": 130,
+    "special_defense": 75
+   },
+   "lineage": [
+    94,
+    93,
+    92
+   ],
+   "level_up": [
+    [
+     1,
+     95
+    ],
+    [
+     1,
+     122
+    ],
+    [
+     1,
+     180
+    ],
+    [
+     13,
+     212
+    ],
+    [
+     16,
+     174
+    ],
+    [
+     21,
+     101
+    ],
+    [
+     28,
+     109
+    ],
+    [
+     33,
+     138
+    ],
+    [
+     36,
+     194
+    ]
+   ]
+  },
+  {
+   "id": 95,
+   "name": "onix",
+   "name_zh": "大岩蛇",
+   "types": [
+    "ROCK",
+    "GROUND"
+   ],
+   "base": {
+    "name": "onix",
+    "hp": 35,
+    "attack": 45,
+    "defense": 160,
+    "speed": 70,
+    "special_attack": 30,
+    "special_defense": 45
+   },
+   "lineage": [
+    95
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     103
+    ],
+    [
+     10,
+     20
+    ],
+    [
+     14,
+     88
+    ],
+    [
+     23,
+     106
+    ],
+    [
+     27,
+     99
+    ],
+    [
+     36,
+     201
+    ],
+    [
+     40,
+     21
+    ]
+   ]
+  },
+  {
+   "id": 96,
+   "name": "drowzee",
+   "name_zh": "催眠貘",
+   "types": [
+    "PSYCHIC"
+   ],
+   "base": {
+    "name": "drowzee",
+    "hp": 60,
+    "attack": 48,
+    "defense": 45,
+    "speed": 42,
+    "special_attack": 43,
+    "special_defense": 90
+   },
+   "lineage": [
+    96
+   ],
+   "level_up": [
+    [
+     1,
+     1
+    ],
+    [
+     1,
+     95
+    ],
+    [
+     10,
+     50
+    ],
+    [
+     18,
+     93
+    ],
+    [
+     25,
+     29
+    ],
+    [
+     31,
+     139
+    ],
+    [
+     36,
+     96
+    ],
+    [
+     40,
+     94
+    ],
+    [
+     43,
+     244
+    ],
+    [
+     45,
+     248
+    ]
+   ]
+  },
+  {
+   "id": 97,
+   "name": "hypno",
+   "name_zh": "引梦貘人",
+   "types": [
+    "PSYCHIC"
+   ],
+   "base": {
+    "name": "hypno",
+    "hp": 85,
+    "attack": 73,
+    "defense": 70,
+    "speed": 67,
+    "special_attack": 73,
+    "special_defense": 115
+   },
+   "lineage": [
+    97,
+    96
+   ],
+   "level_up": [
+    [
+     1,
+     1
+    ],
+    [
+     1,
+     50
+    ],
+    [
+     1,
+     93
+    ],
+    [
+     1,
+     95
+    ],
+    [
+     25,
+     29
+    ],
+    [
+     31,
+     139
+    ],
+    [
+     36,
+     96
+    ],
+    [
+     40,
+     94
+    ],
+    [
+     43,
+     244
+    ],
+    [
+     45,
+     248
+    ]
+   ]
+  },
+  {
+   "id": 98,
+   "name": "krabby",
+   "name_zh": "大钳蟹",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "krabby",
+    "hp": 30,
+    "attack": 105,
+    "defense": 90,
+    "speed": 50,
+    "special_attack": 25,
+    "special_defense": 25
+   },
+   "lineage": [
+    98
+   ],
+   "level_up": [
+    [
+     1,
+     145
+    ],
+    [
+     5,
+     43
+    ],
+    [
+     12,
+     11
+    ],
+    [
+     16,
+     106
+    ],
+    [
+     23,
+     23
+    ],
+    [
+     27,
+     12
+    ],
+    [
+     34,
+     182
+    ],
+    [
+     41,
+     152
+    ]
+   ]
+  },
+  {
+   "id": 99,
+   "name": "kingler",
+   "name_zh": "巨钳蟹",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "kingler",
+    "hp": 55,
+    "attack": 130,
+    "defense": 115,
+    "speed": 75,
+    "special_attack": 50,
+    "special_defense": 50
+   },
+   "lineage": [
+    99,
+    98
+   ],
+   "level_up": [
+    [
+     1,
+     11
+    ],
+    [
+     1,
+     43
+    ],
+    [
+     1,
+     145
+    ],
+    [
+     16,
+     106
+    ],
+    [
+     23,
+     23
+    ],
+    [
+     27,
+     12
+    ],
+    [
+     34,
+     182
+    ],
+    [
+     41,
+     152
+    ]
+   ]
+  },
+  {
+   "id": 100,
+   "name": "voltorb",
+   "name_zh": "霹雳电球",
+   "types": [
+    "ELECTRIC"
+   ],
+   "base": {
+    "name": "voltorb",
+    "hp": 40,
+    "attack": 30,
+    "defense": 50,
+    "speed": 100,
+    "special_attack": 55,
+    "special_defense": 55
+   },
+   "lineage": [
+    100
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     9,
+     103
+    ],
+    [
+     17,
+     49
+    ],
+    [
+     23,
+     120
+    ],
+    [
+     29,
+     205
+    ],
+    [
+     33,
+     113
+    ],
+    [
+     37,
+     129
+    ],
+    [
+     39,
+     153
+    ],
+    [
+     41,
+     243
+    ]
+   ]
+  },
+  {
+   "id": 101,
+   "name": "electrode",
+   "name_zh": "顽皮雷弹",
+   "types": [
+    "ELECTRIC"
+   ],
+   "base": {
+    "name": "electrode",
+    "hp": 60,
+    "attack": 50,
+    "defense": 70,
+    "speed": 140,
+    "special_attack": 80,
+    "special_defense": 80
+   },
+   "lineage": [
+    101,
+    100
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     49
+    ],
+    [
+     1,
+     103
+    ],
+    [
+     1,
+     120
+    ],
+    [
+     29,
+     205
+    ],
+    [
+     33,
+     113
+    ],
+    [
+     37,
+     129
+    ],
+    [
+     39,
+     153
+    ],
+    [
+     41,
+     243
+    ]
+   ]
+  },
+  {
+   "id": 102,
+   "name": "exeggcute",
+   "name_zh": "蛋蛋",
+   "types": [
+    "GRASS",
+    "PSYCHIC"
+   ],
+   "base": {
+    "name": "exeggcute",
+    "hp": 60,
+    "attack": 40,
+    "defense": 80,
+    "speed": 40,
+    "special_attack": 60,
+    "special_defense": 45
+   },
+   "lineage": [
+    102
+   ],
+   "level_up": [
+    [
+     1,
+     95
+    ],
+    [
+     1,
+     140
+    ],
+    [
+     7,
+     115
+    ],
+    [
+     13,
+     73
+    ],
+    [
+     19,
+     93
+    ],
+    [
+     25,
+     78
+    ],
+    [
+     31,
+     77
+    ],
+    [
+     37,
+     79
+    ],
+    [
+     43,
+     76
+    ]
+   ]
+  },
+  {
+   "id": 103,
+   "name": "exeggutor",
+   "name_zh": "椰蛋树",
+   "types": [
+    "GRASS",
+    "PSYCHIC"
+   ],
+   "base": {
+    "name": "exeggutor",
+    "hp": 95,
+    "attack": 95,
+    "defense": 85,
+    "speed": 55,
+    "special_attack": 125,
+    "special_defense": 65
+   },
+   "lineage": [
+    103,
+    102
+   ],
+   "level_up": [
+    [
+     1,
+     93
+    ],
+    [
+     1,
+     95
+    ],
+    [
+     1,
+     140
+    ],
+    [
+     7,
+     115
+    ],
+    [
+     13,
+     73
+    ],
+    [
+     19,
+     23
+    ],
+    [
+     25,
+     78
+    ],
+    [
+     31,
+     77
+    ],
+    [
+     31,
+     121
+    ],
+    [
+     37,
+     79
+    ],
+    [
+     43,
+     76
+    ]
+   ]
+  },
+  {
+   "id": 104,
+   "name": "cubone",
+   "name_zh": "卡拉卡拉",
+   "types": [
+    "GROUND"
+   ],
+   "base": {
+    "name": "cubone",
+    "hp": 50,
+    "attack": 50,
+    "defense": 95,
+    "speed": 35,
+    "special_attack": 40,
+    "special_defense": 50
+   },
+   "lineage": [
+    104
+   ],
+   "level_up": [
+    [
+     1,
+     45
+    ],
+    [
+     5,
+     39
+    ],
+    [
+     9,
+     125
+    ],
+    [
+     13,
+     29
+    ],
+    [
+     17,
+     43
+    ],
+    [
+     21,
+     116
+    ],
+    [
+     25,
+     155
+    ],
+    [
+     29,
+     99
+    ],
+    [
+     33,
+     206
+    ],
+    [
+     37,
+     37
+    ],
+    [
+     41,
+     198
+    ]
+   ]
+  },
+  {
+   "id": 105,
+   "name": "marowak",
+   "name_zh": "嘎啦嘎啦",
+   "types": [
+    "GROUND"
+   ],
+   "base": {
+    "name": "marowak",
+    "hp": 60,
+    "attack": 80,
+    "defense": 110,
+    "speed": 45,
+    "special_attack": 50,
+    "special_defense": 80
+   },
+   "lineage": [
+    105,
+    104
+   ],
+   "level_up": [
+    [
+     1,
+     29
+    ],
+    [
+     1,
+     39
+    ],
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     125
+    ],
+    [
+     17,
+     43
+    ],
+    [
+     21,
+     116
+    ],
+    [
+     25,
+     155
+    ],
+    [
+     29,
+     99
+    ],
+    [
+     33,
+     206
+    ],
+    [
+     37,
+     37
+    ],
+    [
+     41,
+     198
+    ]
+   ]
+  },
+  {
+   "id": 106,
+   "name": "hitmonlee",
+   "name_zh": "飞腿郎",
+   "types": [
+    "FIGHTING"
+   ],
+   "base": {
+    "name": "hitmonlee",
+    "hp": 50,
+    "attack": 120,
+    "defense": 53,
+    "speed": 87,
+    "special_attack": 35,
+    "special_defense": 110
+   },
+   "lineage": [
+    106,
+    236
+   ],
+   "level_up": [
+    [
+     1,
+     24
+    ],
+    [
+     1,
+     33
+    ],
+    [
+     6,
+     96
+    ],
+    [
+     11,
+     27
+    ],
+    [
+     16,
+     26
+    ],
+    [
+     21,
+     116
+    ],
+    [
+     26,
+     136
+    ],
+    [
+     31,
+     170
+    ],
+    [
+     36,
+     193
+    ],
+    [
+     41,
+     203
+    ],
+    [
+     46,
+     25
+    ],
+    [
+     51,
+     179
+    ]
+   ]
+  },
+  {
+   "id": 107,
+   "name": "hitmonchan",
+   "name_zh": "快拳郎",
+   "types": [
+    "FIGHTING"
+   ],
+   "base": {
+    "name": "hitmonchan",
+    "hp": 50,
+    "attack": 105,
+    "defense": 79,
+    "speed": 76,
+    "special_attack": 35,
+    "special_defense": 110
+   },
+   "lineage": [
+    107,
+    236
+   ],
+   "level_up": [
+    [
+     1,
+     4
+    ],
+    [
+     1,
+     33
+    ],
+    [
+     7,
+     97
+    ],
+    [
+     13,
+     228
+    ],
+    [
+     26,
+     7
+    ],
+    [
+     26,
+     8
+    ],
+    [
+     26,
+     9
+    ],
+    [
+     32,
+     183
+    ],
+    [
+     38,
+     5
+    ],
+    [
+     44,
+     197
+    ],
+    [
+     50,
+     68
+    ]
+   ]
+  },
+  {
+   "id": 108,
+   "name": "lickitung",
+   "name_zh": "大舌头",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "lickitung",
+    "hp": 90,
+    "attack": 55,
+    "defense": 75,
+    "speed": 30,
+    "special_attack": 60,
+    "special_defense": 75
+   },
+   "lineage": [
+    108
+   ],
+   "level_up": [
+    [
+     1,
+     122
+    ],
+    [
+     7,
+     48
+    ],
+    [
+     13,
+     111
+    ],
+    [
+     19,
+     23
+    ],
+    [
+     25,
+     35
+    ],
+    [
+     31,
+     50
+    ],
+    [
+     37,
+     21
+    ],
+    [
+     43,
+     103
+    ]
+   ]
+  },
+  {
+   "id": 109,
+   "name": "koffing",
+   "name_zh": "瓦斯弹",
+   "types": [
+    "POISON"
+   ],
+   "base": {
+    "name": "koffing",
+    "hp": 40,
+    "attack": 65,
+    "defense": 95,
+    "speed": 35,
+    "special_attack": 60,
+    "special_defense": 45
+   },
+   "lineage": [
+    109
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     139
+    ],
+    [
+     9,
+     123
+    ],
+    [
+     17,
+     120
+    ],
+    [
+     21,
+     124
+    ],
+    [
+     25,
+     108
+    ],
+    [
+     33,
+     114
+    ],
+    [
+     41,
+     153
+    ],
+    [
+     45,
+     194
+    ]
+   ]
+  },
+  {
+   "id": 110,
+   "name": "weezing",
+   "name_zh": "双弹瓦斯",
+   "types": [
+    "POISON"
+   ],
+   "base": {
+    "name": "weezing",
+    "hp": 65,
+    "attack": 90,
+    "defense": 120,
+    "speed": 60,
+    "special_attack": 85,
+    "special_defense": 70
+   },
+   "lineage": [
+    110,
+    109
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     120
+    ],
+    [
+     1,
+     123
+    ],
+    [
+     1,
+     139
+    ],
+    [
+     21,
+     124
+    ],
+    [
+     25,
+     108
+    ],
+    [
+     33,
+     114
+    ],
+    [
+     41,
+     153
+    ],
+    [
+     45,
+     194
+    ]
+   ]
+  },
+  {
+   "id": 111,
+   "name": "rhyhorn",
+   "name_zh": "独角犀牛",
+   "types": [
+    "GROUND",
+    "ROCK"
+   ],
+   "base": {
+    "name": "rhyhorn",
+    "hp": 80,
+    "attack": 85,
+    "defense": 95,
+    "speed": 25,
+    "special_attack": 30,
+    "special_defense": 30
+   },
+   "lineage": [
+    111
+   ],
+   "level_up": [
+    [
+     1,
+     30
+    ],
+    [
+     1,
+     39
+    ],
+    [
+     13,
+     23
+    ],
+    [
+     19,
+     31
+    ],
+    [
+     31,
+     184
+    ],
+    [
+     37,
+     32
+    ],
+    [
+     49,
+     36
+    ],
+    [
+     55,
+     89
+    ]
+   ]
+  },
+  {
+   "id": 112,
+   "name": "rhydon",
+   "name_zh": "钻角犀兽",
+   "types": [
+    "GROUND",
+    "ROCK"
+   ],
+   "base": {
+    "name": "rhydon",
+    "hp": 105,
+    "attack": 130,
+    "defense": 120,
+    "speed": 40,
+    "special_attack": 45,
+    "special_defense": 45
+   },
+   "lineage": [
+    112,
+    111
+   ],
+   "level_up": [
+    [
+     1,
+     23
+    ],
+    [
+     1,
+     30
+    ],
+    [
+     1,
+     31
+    ],
+    [
+     1,
+     39
+    ],
+    [
+     31,
+     184
+    ],
+    [
+     37,
+     32
+    ],
+    [
+     49,
+     36
+    ],
+    [
+     55,
+     89
+    ]
+   ]
+  },
+  {
+   "id": 113,
+   "name": "chansey",
+   "name_zh": "吉利蛋",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "chansey",
+    "hp": 250,
+    "attack": 5,
+    "defense": 5,
+    "speed": 50,
+    "special_attack": 35,
+    "special_defense": 105
+   },
+   "lineage": [
+    113
+   ],
+   "level_up": [
+    [
+     1,
+     1
+    ],
+    [
+     5,
+     45
+    ],
+    [
+     9,
+     39
+    ],
+    [
+     13,
+     135
+    ],
+    [
+     17,
+     3
+    ],
+    [
+     23,
+     107
+    ],
+    [
+     29,
+     47
+    ],
+    [
+     35,
+     121
+    ],
+    [
+     41,
+     111
+    ],
+    [
+     49,
+     113
+    ],
+    [
+     57,
+     38
+    ]
+   ]
+  },
+  {
+   "id": 114,
+   "name": "tangela",
+   "name_zh": "蔓藤怪",
+   "types": [
+    "GRASS"
+   ],
+   "base": {
+    "name": "tangela",
+    "hp": 65,
+    "attack": 55,
+    "defense": 115,
+    "speed": 60,
+    "special_attack": 100,
+    "special_defense": 40
+   },
+   "lineage": [
+    114
+   ],
+   "level_up": [
+    [
+     1,
+     132
+    ],
+    [
+     4,
+     79
+    ],
+    [
+     10,
+     71
+    ],
+    [
+     13,
+     77
+    ],
+    [
+     19,
+     22
+    ],
+    [
+     25,
+     20
+    ],
+    [
+     31,
+     72
+    ],
+    [
+     34,
+     78
+    ],
+    [
+     40,
+     21
+    ],
+    [
+     46,
+     74
+    ]
+   ]
+  },
+  {
+   "id": 115,
+   "name": "kangaskhan",
+   "name_zh": "袋兽",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "kangaskhan",
+    "hp": 105,
+    "attack": 95,
+    "defense": 80,
+    "speed": 90,
+    "special_attack": 40,
+    "special_defense": 80
+   },
+   "lineage": [
+    115
+   ],
+   "level_up": [
+    [
+     1,
+     4
+    ],
+    [
+     7,
+     43
+    ],
+    [
+     13,
+     44
+    ],
+    [
+     19,
+     39
+    ],
+    [
+     25,
+     5
+    ],
+    [
+     31,
+     99
+    ],
+    [
+     37,
+     203
+    ],
+    [
+     43,
+     146
+    ],
+    [
+     49,
+     179
+    ]
+   ]
+  },
+  {
+   "id": 116,
+   "name": "horsea",
+   "name_zh": "墨海马",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "horsea",
+    "hp": 30,
+    "attack": 40,
+    "defense": 70,
+    "speed": 60,
+    "special_attack": 70,
+    "special_defense": 25
+   },
+   "lineage": [
+    116
+   ],
+   "level_up": [
+    [
+     1,
+     145
+    ],
+    [
+     8,
+     108
+    ],
+    [
+     15,
+     43
+    ],
+    [
+     22,
+     55
+    ],
+    [
+     29,
+     239
+    ],
+    [
+     36,
+     97
+    ],
+    [
+     43,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 117,
+   "name": "seadra",
+   "name_zh": "海刺龙",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "seadra",
+    "hp": 55,
+    "attack": 65,
+    "defense": 95,
+    "speed": 85,
+    "special_attack": 95,
+    "special_defense": 45
+   },
+   "lineage": [
+    117,
+    116
+   ],
+   "level_up": [
+    [
+     1,
+     43
+    ],
+    [
+     1,
+     55
+    ],
+    [
+     1,
+     108
+    ],
+    [
+     1,
+     145
+    ],
+    [
+     29,
+     239
+    ],
+    [
+     36,
+     97
+    ],
+    [
+     43,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 118,
+   "name": "goldeen",
+   "name_zh": "角金鱼",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "goldeen",
+    "hp": 45,
+    "attack": 67,
+    "defense": 60,
+    "speed": 63,
+    "special_attack": 35,
+    "special_defense": 50
+   },
+   "lineage": [
+    118
+   ],
+   "level_up": [
+    [
+     1,
+     39
+    ],
+    [
+     1,
+     64
+    ],
+    [
+     10,
+     48
+    ],
+    [
+     15,
+     30
+    ],
+    [
+     24,
+     175
+    ],
+    [
+     29,
+     31
+    ],
+    [
+     38,
+     127
+    ],
+    [
+     43,
+     32
+    ],
+    [
+     52,
+     97
+    ]
+   ]
+  },
+  {
+   "id": 119,
+   "name": "seaking",
+   "name_zh": "金鱼王",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "seaking",
+    "hp": 80,
+    "attack": 92,
+    "defense": 65,
+    "speed": 68,
+    "special_attack": 65,
+    "special_defense": 80
+   },
+   "lineage": [
+    119,
+    118
+   ],
+   "level_up": [
+    [
+     1,
+     39
+    ],
+    [
+     1,
+     64
+    ],
+    [
+     10,
+     48
+    ],
+    [
+     15,
+     30
+    ],
+    [
+     24,
+     175
+    ],
+    [
+     29,
+     31
+    ],
+    [
+     38,
+     127
+    ],
+    [
+     43,
+     32
+    ],
+    [
+     52,
+     97
+    ]
+   ]
+  },
+  {
+   "id": 120,
+   "name": "staryu",
+   "name_zh": "海星星",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "staryu",
+    "hp": 30,
+    "attack": 45,
+    "defense": 55,
+    "speed": 85,
+    "special_attack": 70,
+    "special_defense": 55
+   },
+   "lineage": [
+    120
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     106
+    ],
+    [
+     7,
+     55
+    ],
+    [
+     13,
+     229
+    ],
+    [
+     19,
+     105
+    ],
+    [
+     25,
+     129
+    ],
+    [
+     31,
+     61
+    ],
+    [
+     37,
+     107
+    ],
+    [
+     43,
+     113
+    ],
+    [
+     50,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 121,
+   "name": "starmie",
+   "name_zh": "宝石海星",
+   "types": [
+    "WATER",
+    "PSYCHIC"
+   ],
+   "base": {
+    "name": "starmie",
+    "hp": 60,
+    "attack": 75,
+    "defense": 85,
+    "speed": 115,
+    "special_attack": 100,
+    "special_defense": 85
+   },
+   "lineage": [
+    121,
+    120
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     61
+    ],
+    [
+     1,
+     105
+    ],
+    [
+     1,
+     106
+    ],
+    [
+     1,
+     229
+    ],
+    [
+     7,
+     55
+    ],
+    [
+     25,
+     129
+    ],
+    [
+     37,
+     107
+    ],
+    [
+     37,
+     109
+    ],
+    [
+     43,
+     113
+    ],
+    [
+     50,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 122,
+   "name": "mr__mime",
+   "name_zh": "魔墙人偶",
+   "types": [
+    "PSYCHIC"
+   ],
+   "base": {
+    "name": "mr__mime",
+    "hp": 40,
+    "attack": 45,
+    "defense": 65,
+    "speed": 90,
+    "special_attack": 100,
+    "special_defense": 120
+   },
+   "lineage": [
+    122
+   ],
+   "level_up": [
+    [
+     1,
+     112
+    ],
+    [
+     6,
+     93
+    ],
+    [
+     11,
+     164
+    ],
+    [
+     16,
+     96
+    ],
+    [
+     21,
+     3
+    ],
+    [
+     26,
+     113
+    ],
+    [
+     26,
+     115
+    ],
+    [
+     31,
+     227
+    ],
+    [
+     36,
+     60
+    ],
+    [
+     41,
+     226
+    ],
+    [
+     46,
+     219
+    ]
+   ]
+  },
+  {
+   "id": 123,
+   "name": "scyther",
+   "name_zh": "飞天螳螂",
+   "types": [
+    "BUG",
+    "FLYING"
+   ],
+   "base": {
+    "name": "scyther",
+    "hp": 70,
+    "attack": 110,
+    "defense": 80,
+    "speed": 105,
+    "special_attack": 55,
+    "special_defense": 80
+   },
+   "lineage": [
+    123
+   ],
+   "level_up": [
+    [
+     1,
+     43
+    ],
+    [
+     1,
+     98
+    ],
+    [
+     6,
+     116
+    ],
+    [
+     12,
+     228
+    ],
+    [
+     18,
+     206
+    ],
+    [
+     24,
+     97
+    ],
+    [
+     30,
+     17
+    ],
+    [
+     36,
+     163
+    ],
+    [
+     42,
+     14
+    ],
+    [
+     48,
+     104
+    ]
+   ]
+  },
+  {
+   "id": 124,
+   "name": "jynx",
+   "name_zh": "迷唇姐",
+   "types": [
+    "ICE",
+    "PSYCHIC"
+   ],
+   "base": {
+    "name": "jynx",
+    "hp": 65,
+    "attack": 50,
+    "defense": 35,
+    "speed": 95,
+    "special_attack": 115,
+    "special_defense": 95
+   },
+   "lineage": [
+    124,
+    238
+   ],
+   "level_up": [
+    [
+     1,
+     1
+    ],
+    [
+     1,
+     122
+    ],
+    [
+     1,
+     142
+    ],
+    [
+     1,
+     181
+    ],
+    [
+     9,
+     186
+    ],
+    [
+     21,
+     3
+    ],
+    [
+     21,
+     93
+    ],
+    [
+     25,
+     8
+    ],
+    [
+     25,
+     47
+    ],
+    [
+     33,
+     212
+    ],
+    [
+     37,
+     94
+    ],
+    [
+     41,
+     34
+    ],
+    [
+     45,
+     195
+    ],
+    [
+     49,
+     59
+    ]
+   ]
+  },
+  {
+   "id": 125,
+   "name": "electabuzz",
+   "name_zh": "电击兽",
+   "types": [
+    "ELECTRIC"
+   ],
+   "base": {
+    "name": "electabuzz",
+    "hp": 65,
+    "attack": 83,
+    "defense": 57,
+    "speed": 105,
+    "special_attack": 95,
+    "special_defense": 85
+   },
+   "lineage": [
+    125,
+    239
+   ],
+   "level_up": [
+    [
+     1,
+     9
+    ],
+    [
+     1,
+     43
+    ],
+    [
+     1,
+     98
+    ],
+    [
+     17,
+     113
+    ],
+    [
+     25,
+     129
+    ],
+    [
+     33,
+     103
+    ],
+    [
+     41,
+     85
+    ],
+    [
+     49,
+     87
+    ]
+   ]
+  },
+  {
+   "id": 126,
+   "name": "magmar",
+   "name_zh": "鸭嘴火兽",
+   "types": [
+    "FIRE"
+   ],
+   "base": {
+    "name": "magmar",
+    "hp": 65,
+    "attack": 95,
+    "defense": 57,
+    "speed": 93,
+    "special_attack": 100,
+    "special_defense": 85
+   },
+   "lineage": [
+    126,
+    240
+   ],
+   "level_up": [
+    [
+     1,
+     7
+    ],
+    [
+     1,
+     43
+    ],
+    [
+     1,
+     52
+    ],
+    [
+     1,
+     123
+    ],
+    [
+     25,
+     108
+    ],
+    [
+     31,
+     241
+    ],
+    [
+     37,
+     53
+    ],
+    [
+     43,
+     109
+    ],
+    [
+     49,
+     126
+    ]
+   ]
+  },
+  {
+   "id": 127,
+   "name": "pinsir",
+   "name_zh": "凯罗斯",
+   "types": [
+    "BUG"
+   ],
+   "base": {
+    "name": "pinsir",
+    "hp": 65,
+    "attack": 125,
+    "defense": 100,
+    "speed": 85,
+    "special_attack": 55,
+    "special_defense": 70
+   },
+   "lineage": [
+    127
+   ],
+   "level_up": [
+    [
+     1,
+     11
+    ],
+    [
+     7,
+     116
+    ],
+    [
+     13,
+     20
+    ],
+    [
+     19,
+     69
+    ],
+    [
+     25,
+     106
+    ],
+    [
+     31,
+     12
+    ],
+    [
+     37,
+     66
+    ],
+    [
+     43,
+     14
+    ]
+   ]
+  },
+  {
+   "id": 128,
+   "name": "tauros",
+   "name_zh": "肯泰罗",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "tauros",
+    "hp": 75,
+    "attack": 100,
+    "defense": 95,
+    "speed": 110,
+    "special_attack": 40,
+    "special_defense": 70
+   },
+   "lineage": [
+    128
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     4,
+     39
+    ],
+    [
+     8,
+     99
+    ],
+    [
+     13,
+     30
+    ],
+    [
+     19,
+     184
+    ],
+    [
+     26,
+     228
+    ],
+    [
+     34,
+     156
+    ],
+    [
+     43,
+     37
+    ],
+    [
+     53,
+     36
+    ]
+   ]
+  },
+  {
+   "id": 129,
+   "name": "magikarp",
+   "name_zh": "鲤鱼王",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "magikarp",
+    "hp": 20,
+    "attack": 10,
+    "defense": 55,
+    "speed": 80,
+    "special_attack": 15,
+    "special_defense": 20
+   },
+   "lineage": [
+    129
+   ],
+   "level_up": [
+    [
+     1,
+     150
+    ],
+    [
+     15,
+     33
+    ],
+    [
+     30,
+     175
+    ]
+   ]
+  },
+  {
+   "id": 130,
+   "name": "gyarados",
+   "name_zh": "暴鲤龙",
+   "types": [
+    "WATER",
+    "FLYING"
+   ],
+   "base": {
+    "name": "gyarados",
+    "hp": 95,
+    "attack": 125,
+    "defense": 79,
+    "speed": 81,
+    "special_attack": 60,
+    "special_defense": 100
+   },
+   "lineage": [
+    130,
+    129
+   ],
+   "level_up": [
+    [
+     1,
+     37
+    ],
+    [
+     1,
+     150
+    ],
+    [
+     15,
+     33
+    ],
+    [
+     20,
+     44
+    ],
+    [
+     25,
+     82
+    ],
+    [
+     30,
+     43
+    ],
+    [
+     30,
+     175
+    ],
+    [
+     35,
+     239
+    ],
+    [
+     40,
+     56
+    ],
+    [
+     45,
+     240
+    ],
+    [
+     50,
+     63
+    ]
+   ]
+  },
+  {
+   "id": 131,
+   "name": "lapras",
+   "name_zh": "拉普拉斯",
+   "types": [
+    "WATER",
+    "ICE"
+   ],
+   "base": {
+    "name": "lapras",
+    "hp": 130,
+    "attack": 85,
+    "defense": 80,
+    "speed": 60,
+    "special_attack": 85,
+    "special_defense": 95
+   },
+   "lineage": [
+    131
+   ],
+   "level_up": [
+    [
+     1,
+     45
+    ],
+    [
+     1,
+     47
+    ],
+    [
+     1,
+     55
+    ],
+    [
+     8,
+     54
+    ],
+    [
+     15,
+     34
+    ],
+    [
+     22,
+     109
+    ],
+    [
+     29,
+     195
+    ],
+    [
+     36,
+     58
+    ],
+    [
+     43,
+     240
+    ],
+    [
+     50,
+     219
+    ],
+    [
+     57,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 132,
+   "name": "ditto",
+   "name_zh": "百变怪",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "ditto",
+    "hp": 48,
+    "attack": 48,
+    "defense": 48,
+    "speed": 48,
+    "special_attack": 48,
+    "special_defense": 48
+   },
+   "lineage": [
+    132
+   ],
+   "level_up": [
+    [
+     1,
+     144
+    ]
+   ]
+  },
+  {
+   "id": 133,
+   "name": "eevee",
+   "name_zh": "伊布",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "eevee",
+    "hp": 55,
+    "attack": 55,
+    "defense": 50,
+    "speed": 55,
+    "special_attack": 45,
+    "special_defense": 65
+   },
+   "lineage": [
+    133
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     39
+    ],
+    [
+     8,
+     28
+    ],
+    [
+     16,
+     45
+    ],
+    [
+     23,
+     98
+    ],
+    [
+     30,
+     44
+    ],
+    [
+     36,
+     116
+    ],
+    [
+     42,
+     36
+    ]
+   ]
+  },
+  {
+   "id": 134,
+   "name": "vaporeon",
+   "name_zh": "水伊布",
+   "types": [
+    "WATER"
+   ],
+   "base": {
+    "name": "vaporeon",
+    "hp": 130,
+    "attack": 65,
+    "defense": 60,
+    "speed": 65,
+    "special_attack": 110,
+    "special_defense": 95
+   },
+   "lineage": [
+    134,
+    133
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     39
+    ],
+    [
+     8,
+     28
+    ],
+    [
+     16,
+     45
+    ],
+    [
+     16,
+     55
+    ],
+    [
+     23,
+     98
+    ],
+    [
+     30,
+     44
+    ],
+    [
+     36,
+     62
+    ],
+    [
+     36,
+     116
+    ],
+    [
+     42,
+     36
+    ],
+    [
+     42,
+     114
+    ],
+    [
+     47,
+     151
+    ],
+    [
+     52,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 135,
+   "name": "jolteon",
+   "name_zh": "雷伊布",
+   "types": [
+    "ELECTRIC"
+   ],
+   "base": {
+    "name": "jolteon",
+    "hp": 65,
+    "attack": 65,
+    "defense": 60,
+    "speed": 130,
+    "special_attack": 110,
+    "special_defense": 95
+   },
+   "lineage": [
+    135,
+    133
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     39
+    ],
+    [
+     8,
+     28
+    ],
+    [
+     16,
+     45
+    ],
+    [
+     16,
+     84
+    ],
+    [
+     23,
+     98
+    ],
+    [
+     30,
+     24
+    ],
+    [
+     30,
+     44
+    ],
+    [
+     36,
+     42
+    ],
+    [
+     36,
+     116
+    ],
+    [
+     42,
+     36
+    ],
+    [
+     42,
+     86
+    ],
+    [
+     47,
+     97
+    ],
+    [
+     52,
+     87
+    ]
+   ]
+  },
+  {
+   "id": 136,
+   "name": "flareon",
+   "name_zh": "火伊布",
+   "types": [
+    "FIRE"
+   ],
+   "base": {
+    "name": "flareon",
+    "hp": 65,
+    "attack": 130,
+    "defense": 60,
+    "speed": 65,
+    "special_attack": 95,
+    "special_defense": 110
+   },
+   "lineage": [
+    136,
+    133
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     39
+    ],
+    [
+     8,
+     28
+    ],
+    [
+     16,
+     45
+    ],
+    [
+     16,
+     52
+    ],
+    [
+     23,
+     98
+    ],
+    [
+     30,
+     44
+    ],
+    [
+     36,
+     83
+    ],
+    [
+     36,
+     116
+    ],
+    [
+     42,
+     36
+    ],
+    [
+     42,
+     123
+    ],
+    [
+     47,
+     43
+    ],
+    [
+     52,
+     53
+    ]
+   ]
+  },
+  {
+   "id": 137,
+   "name": "porygon",
+   "name_zh": "多边兽",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "porygon",
+    "hp": 65,
+    "attack": 60,
+    "defense": 70,
+    "speed": 40,
+    "special_attack": 85,
+    "special_defense": 75
+   },
+   "lineage": [
+    137
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     1,
+     160
+    ],
+    [
+     1,
+     176
+    ],
+    [
+     9,
+     97
+    ],
+    [
+     12,
+     60
+    ],
+    [
+     20,
+     105
+    ],
+    [
+     24,
+     159
+    ],
+    [
+     32,
+     199
+    ],
+    [
+     36,
+     161
+    ],
+    [
+     44,
+     192
+    ]
+   ]
+  },
+  {
+   "id": 138,
+   "name": "omanyte",
+   "name_zh": "菊石兽",
+   "types": [
+    "ROCK",
+    "WATER"
+   ],
+   "base": {
+    "name": "omanyte",
+    "hp": 35,
+    "attack": 40,
+    "defense": 100,
+    "speed": 35,
+    "special_attack": 90,
+    "special_defense": 55
+   },
+   "lineage": [
+    138
+   ],
+   "level_up": [
+    [
+     1,
+     110
+    ],
+    [
+     1,
+     132
+    ],
+    [
+     13,
+     44
+    ],
+    [
+     19,
+     55
+    ],
+    [
+     31,
+     43
+    ],
+    [
+     37,
+     182
+    ],
+    [
+     49,
+     246
+    ],
+    [
+     55,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 139,
+   "name": "omastar",
+   "name_zh": "多刺菊石兽",
+   "types": [
+    "ROCK",
+    "WATER"
+   ],
+   "base": {
+    "name": "omastar",
+    "hp": 70,
+    "attack": 60,
+    "defense": 125,
+    "speed": 55,
+    "special_attack": 115,
+    "special_defense": 70
+   },
+   "lineage": [
+    139,
+    138
+   ],
+   "level_up": [
+    [
+     1,
+     44
+    ],
+    [
+     1,
+     110
+    ],
+    [
+     1,
+     132
+    ],
+    [
+     19,
+     55
+    ],
+    [
+     31,
+     43
+    ],
+    [
+     37,
+     182
+    ],
+    [
+     40,
+     131
+    ],
+    [
+     49,
+     246
+    ],
+    [
+     55,
+     56
+    ]
+   ]
+  },
+  {
+   "id": 140,
+   "name": "kabuto",
+   "name_zh": "化石盔",
+   "types": [
+    "ROCK",
+    "WATER"
+   ],
+   "base": {
+    "name": "kabuto",
+    "hp": 30,
+    "attack": 80,
+    "defense": 90,
+    "speed": 55,
+    "special_attack": 55,
+    "special_defense": 45
+   },
+   "lineage": [
+    140
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     1,
+     106
+    ],
+    [
+     10,
+     71
+    ],
+    [
+     19,
+     43
+    ],
+    [
+     28,
+     28
+    ],
+    [
+     37,
+     203
+    ],
+    [
+     46,
+     72
+    ],
+    [
+     55,
+     246
+    ]
+   ]
+  },
+  {
+   "id": 141,
+   "name": "kabutops",
+   "name_zh": "镰刀盔",
+   "types": [
+    "ROCK",
+    "WATER"
+   ],
+   "base": {
+    "name": "kabutops",
+    "hp": 60,
+    "attack": 115,
+    "defense": 105,
+    "speed": 80,
+    "special_attack": 65,
+    "special_defense": 70
+   },
+   "lineage": [
+    141,
+    140
+   ],
+   "level_up": [
+    [
+     1,
+     10
+    ],
+    [
+     1,
+     71
+    ],
+    [
+     1,
+     106
+    ],
+    [
+     19,
+     43
+    ],
+    [
+     28,
+     28
+    ],
+    [
+     37,
+     203
+    ],
+    [
+     40,
+     163
+    ],
+    [
+     46,
+     72
+    ],
+    [
+     55,
+     246
+    ]
+   ]
+  },
+  {
+   "id": 142,
+   "name": "aerodactyl",
+   "name_zh": "化石翼龙",
+   "types": [
+    "ROCK",
+    "FLYING"
+   ],
+   "base": {
+    "name": "aerodactyl",
+    "hp": 80,
+    "attack": 105,
+    "defense": 65,
+    "speed": 130,
+    "special_attack": 60,
+    "special_defense": 75
+   },
+   "lineage": [
+    142
+   ],
+   "level_up": [
+    [
+     1,
+     17
+    ],
+    [
+     8,
+     97
+    ],
+    [
+     15,
+     44
+    ],
+    [
+     22,
+     48
+    ],
+    [
+     29,
+     246
+    ],
+    [
+     36,
+     184
+    ],
+    [
+     43,
+     36
+    ],
+    [
+     50,
+     63
+    ]
+   ]
+  },
+  {
+   "id": 143,
+   "name": "snorlax",
+   "name_zh": "卡比兽",
+   "types": [
+    "NORMAL"
+   ],
+   "base": {
+    "name": "snorlax",
+    "hp": 160,
+    "attack": 110,
+    "defense": 65,
+    "speed": 30,
+    "special_attack": 65,
+    "special_defense": 110
+   },
+   "lineage": [
+    143
+   ],
+   "level_up": [
+    [
+     1,
+     33
+    ],
+    [
+     8,
+     133
+    ],
+    [
+     15,
+     111
+    ],
+    [
+     22,
+     187
+    ],
+    [
+     29,
+     29
+    ],
+    [
+     36,
+     156
+    ],
+    [
+     36,
+     173
+    ],
+    [
+     43,
+     34
+    ],
+    [
+     50,
+     205
+    ],
+    [
+     57,
+     63
+    ]
+   ]
+  },
+  {
+   "id": 144,
+   "name": "articuno",
+   "name_zh": "急冻鸟",
+   "types": [
+    "ICE",
+    "FLYING"
+   ],
+   "base": {
+    "name": "articuno",
+    "hp": 90,
+    "attack": 85,
+    "defense": 100,
+    "speed": 85,
+    "special_attack": 95,
+    "special_defense": 125
+   },
+   "lineage": [
+    144
+   ],
+   "level_up": [
+    [
+     1,
+     16
+    ],
+    [
+     1,
+     181
+    ],
+    [
+     13,
+     54
+    ],
+    [
+     25,
+     97
+    ],
+    [
+     37,
+     170
+    ],
+    [
+     49,
+     58
+    ],
+    [
+     61,
+     115
+    ],
+    [
+     73,
+     59
+    ]
+   ]
+  },
+  {
+   "id": 145,
+   "name": "zapdos",
+   "name_zh": "闪电鸟",
+   "types": [
+    "ELECTRIC",
+    "FLYING"
+   ],
+   "base": {
+    "name": "zapdos",
+    "hp": 90,
+    "attack": 90,
+    "defense": 85,
+    "speed": 100,
+    "special_attack": 125,
+    "special_defense": 90
+   },
+   "lineage": [
+    145
+   ],
+   "level_up": [
+    [
+     1,
+     64
+    ],
+    [
+     1,
+     84
+    ],
+    [
+     13,
+     86
+    ],
+    [
+     25,
+     97
+    ],
+    [
+     37,
+     197
+    ],
+    [
+     49,
+     65
+    ],
+    [
+     61,
+     113
+    ],
+    [
+     73,
+     87
+    ]
+   ]
+  },
+  {
+   "id": 146,
+   "name": "moltres",
+   "name_zh": "火焰鸟",
+   "types": [
+    "FIRE",
+    "FLYING"
+   ],
+   "base": {
+    "name": "moltres",
+    "hp": 90,
+    "attack": 100,
+    "defense": 90,
+    "speed": 90,
+    "special_attack": 125,
+    "special_defense": 85
+   },
+   "lineage": [
+    146
+   ],
+   "level_up": [
+    [
+     1,
+     17
+    ],
+    [
+     1,
+     52
+    ],
+    [
+     13,
+     83
+    ],
+    [
+     25,
+     97
+    ],
+    [
+     37,
+     203
+    ],
+    [
+     49,
+     53
+    ],
+    [
+     61,
+     219
+    ],
+    [
+     73,
+     143
+    ]
+   ]
+  },
+  {
+   "id": 147,
+   "name": "dratini",
+   "name_zh": "迷你龙",
+   "types": [
+    "DRAGON"
+   ],
+   "base": {
+    "name": "dratini",
+    "hp": 41,
+    "attack": 64,
+    "defense": 45,
+    "speed": 50,
+    "special_attack": 50,
+    "special_defense": 50
+   },
+   "lineage": [
+    147
+   ],
+   "level_up": [
+    [
+     1,
+     35
+    ],
+    [
+     1,
+     43
+    ],
+    [
+     8,
+     86
+    ],
+    [
+     15,
+     239
+    ],
+    [
+     22,
+     82
+    ],
+    [
+     29,
+     21
+    ],
+    [
+     36,
+     97
+    ],
+    [
+     43,
+     219
+    ],
+    [
+     50,
+     200
+    ],
+    [
+     57,
+     63
+    ]
+   ]
+  },
+  {
+   "id": 148,
+   "name": "dragonair",
+   "name_zh": "哈克龙",
+   "types": [
+    "DRAGON"
+   ],
+   "base": {
+    "name": "dragonair",
+    "hp": 61,
+    "attack": 84,
+    "defense": 65,
+    "speed": 70,
+    "special_attack": 70,
+    "special_defense": 70
+   },
+   "lineage": [
+    148,
+    147
+   ],
+   "level_up": [
+    [
+     1,
+     35
+    ],
+    [
+     1,
+     43
+    ],
+    [
+     1,
+     86
+    ],
+    [
+     1,
+     239
+    ],
+    [
+     22,
+     82
+    ],
+    [
+     29,
+     21
+    ],
+    [
+     36,
+     97
+    ],
+    [
+     43,
+     219
+    ],
+    [
+     50,
+     200
+    ],
+    [
+     57,
+     63
+    ]
+   ]
+  },
+  {
+   "id": 149,
+   "name": "dragonite",
+   "name_zh": "快龙",
+   "types": [
+    "DRAGON",
+    "FLYING"
+   ],
+   "base": {
+    "name": "dragonite",
+    "hp": 91,
+    "attack": 134,
+    "defense": 95,
+    "speed": 80,
+    "special_attack": 100,
+    "special_defense": 100
+   },
+   "lineage": [
+    149,
+    148,
+    147
+   ],
+   "level_up": [
+    [
+     1,
+     35
+    ],
+    [
+     1,
+     43
+    ],
+    [
+     1,
+     86
+    ],
+    [
+     1,
+     239
+    ],
+    [
+     22,
+     82
+    ],
+    [
+     29,
+     21
+    ],
+    [
+     36,
+     97
+    ],
+    [
+     43,
+     219
+    ],
+    [
+     50,
+     200
+    ],
+    [
+     55,
+     17
+    ],
+    [
+     57,
+     63
+    ]
+   ]
+  },
+  {
+   "id": 150,
+   "name": "mewtwo",
+   "name_zh": "超梦",
+   "types": [
+    "PSYCHIC"
+   ],
+   "base": {
+    "name": "mewtwo",
+    "hp": 106,
+    "attack": 110,
+    "defense": 90,
+    "speed": 130,
+    "special_attack": 154,
+    "special_defense": 90
+   },
+   "lineage": [
+    150
+   ],
+   "level_up": [
+    [
+     1,
+     50
+    ],
+    [
+     1,
+     93
+    ],
+    [
+     11,
+     112
+    ],
+    [
+     22,
+     129
+    ],
+    [
+     33,
+     244
+    ],
+    [
+     44,
+     248
+    ],
+    [
+     55,
+     54
+    ],
+    [
+     66,
+     94
+    ],
+    [
+     77,
+     133
+    ],
+    [
+     88,
+     105
+    ],
+    [
+     99,
+     219
+    ]
+   ]
+  },
+  {
+   "id": 151,
+   "name": "mew",
+   "name_zh": "梦幻",
+   "types": [
+    "PSYCHIC"
+   ],
+   "base": {
+    "name": "mew",
+    "hp": 100,
+    "attack": 100,
+    "defense": 100,
+    "speed": 100,
+    "special_attack": 100,
+    "special_defense": 100
+   },
+   "lineage": [
+    151
+   ],
+   "level_up": [
+    [
+     1,
+     1
+    ],
+    [
+     10,
+     144
+    ],
+    [
+     20,
+     5
+    ],
+    [
+     30,
+     118
+    ],
+    [
+     40,
+     94
+    ],
+    [
+     50,
+     246
+    ]
+   ]
+  }
+ ]
+}

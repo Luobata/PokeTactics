@@ -1,0 +1,146 @@
+{
+  "agent_session_id": "01a09b85-d4b3-7090-83e6-17dffe506e06",
+  "agent_turn_id": "",
+  "cache": {
+    "hit": false,
+    "key": "ebd0c4ae7b7fa796049d701b",
+    "stored": false,
+    "ttl_sec": 0
+  },
+  "changed_paths": [
+    "tools/mockups/render_battle_gif.py"
+  ],
+  "checked_files": 1,
+  "correlation_id": "",
+  "decision": {
+    "actionable_block_findings": 0,
+    "advisory_incomplete_engines": [],
+    "block_merge": false,
+    "blocking_execution_complete": true,
+    "blocking_incomplete_engines": [],
+    "deferred_block_findings": 0,
+    "engine_results_are_raw_signals": true,
+    "execution_complete": true,
+    "gate": "pass",
+    "incomplete_engines": [],
+    "mutation_status": "not_applicable",
+    "quality_confidence": "full",
+    "raw_gate": "pass",
+    "runtime_incidents": [],
+    "scope": "final_quality_gate_decision",
+    "source": "qualitygate.gate.orchestrator",
+    "validation_lanes": {
+      "go_rules": {
+        "checked_files": 0,
+        "finding_count": 0,
+        "status": "completed"
+      },
+      "production_compile": {
+        "affected_scope_count": 0,
+        "finding_count": 0,
+        "status": "not_applicable"
+      },
+      "ut_compile": {
+        "affected_scope_count": 0,
+        "blocked_scope_count": 0,
+        "finding_count": 0,
+        "status": "not_applicable"
+      },
+      "ut_rules": {
+        "finding_count": 0,
+        "reason": "no changed *_test.go files",
+        "status": "not_applicable"
+      }
+    }
+  },
+  "findings_count": 0,
+  "git": {
+    "base_ref": "",
+    "base_sha": "",
+    "branch": "main",
+    "detached": false,
+    "diff_fingerprint": "3a0c8b44897a3d7000fa569837439be8a8e12754dac9fb688dad4b82cf08d908",
+    "dirty": true,
+    "head_sha": "",
+    "remote_url": "https://github.com/Luobata/PokeTactics"
+  },
+  "kind": "qualitygate.run_telemetry",
+  "lifecycle": {
+    "agent_session_id": "01a09b85-d4b3-7090-83e6-17dffe506e06",
+    "attempt_id": "ebd0c4ae7b7fa796049d701b:23324:1789316335591920000",
+    "changed_paths": [
+      "tools/mockups/render_battle_gif.py"
+    ],
+    "completed_at_unix_ms": 1789316336359,
+    "deadline_at_unix_ms": 1789316395465,
+    "elapsed_ms": 894.0,
+    "failure_kind": "",
+    "git": {
+      "base_ref": "",
+      "base_sha": "",
+      "branch": "main",
+      "detached": false,
+      "diff_fingerprint": "4a36a5ef1f7ac4825c29a588974b611f531589ad44c39442e0a08a190f5d6bab",
+      "dirty": true,
+      "head_sha": "",
+      "remote_url": "https://github.com/Luobata/PokeTactics"
+    },
+    "heartbeat_at_unix_ms": 1789316336359,
+    "kind": "qualitygate.gate_attempt",
+    "mode": "local",
+    "reason": "",
+    "repo": "",
+    "run_id": "ebd0c4ae7b7fa796049d701b",
+    "schema_version": 1,
+    "stage": "starting",
+    "started_at_unix_ms": 1789316335465,
+    "status": "completed",
+    "timeout_sec": 60,
+    "timeout_source": "argument"
+  },
+  "mode": "local",
+  "parent_run_id": "",
+  "repair_context_kind": "",
+  "repair_intent_id": "",
+  "repair_session_id": "",
+  "repo": "",
+  "run_id": "ebd0c4ae7b7fa796049d701b",
+  "schema_version": 1,
+  "source_head_sha": "",
+  "source_mr_number": 0,
+  "spans": [
+    {
+      "bucket": "static",
+      "elapsed_ms": null,
+      "findings": 0,
+      "name": "script_rules",
+      "raw_findings": 0,
+      "status": "skipped",
+      "timeout_sec": null
+    },
+    {
+      "bucket": "mutation_gate",
+      "elapsed_ms": null,
+      "findings": 0,
+      "name": "ut_mutation_gate",
+      "status": "skipped"
+    },
+    {
+      "bucket": "orchestrator",
+      "elapsed_ms": 538.3,
+      "findings": 0,
+      "name": "quality_gate.total",
+      "status": "ok"
+    }
+  ],
+  "summary_counts": {
+    "deferred_block": 0,
+    "fixed_by_agent": 0,
+    "not_actioned": 0,
+    "open_block": 0,
+    "open_warn": 0
+  },
+  "tool_call_id": "",
+  "ts_unix_ms": 1789316336359,
+  "workspace": "/Users/bytedance/luobata/PokeTactics"
+}

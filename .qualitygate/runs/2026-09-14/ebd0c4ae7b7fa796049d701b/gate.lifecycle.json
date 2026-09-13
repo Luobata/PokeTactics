@@ -1,0 +1,33 @@
+{
+  "agent_session_id": "01a09b85-d4b3-7090-83e6-17dffe506e06",
+  "attempt_id": "ebd0c4ae7b7fa796049d701b:23324:1789316335591920000",
+  "changed_paths": [
+    "tools/mockups/render_battle_gif.py"
+  ],
+  "completed_at_unix_ms": 1789316336359,
+  "deadline_at_unix_ms": 1789316395465,
+  "elapsed_ms": 894.0,
+  "failure_kind": "",
+  "git": {
+    "base_ref": "",
+    "base_sha": "",
+    "branch": "main",
+    "detached": false,
+    "diff_fingerprint": "4a36a5ef1f7ac4825c29a588974b611f531589ad44c39442e0a08a190f5d6bab",
+    "dirty": true,
+    "head_sha": "",
+    "remote_url": "https://github.com/Luobata/PokeTactics"
+  },
+  "heartbeat_at_unix_ms": 1789316336359,
+  "kind": "qualitygate.gate_attempt",
+  "mode": "local",
+  "reason": "",
+  "repo": "",
+  "run_id": "ebd0c4ae7b7fa796049d701b",
+  "schema_version": 1,
+  "stage": "starting",
+  "started_at_unix_ms": 1789316335465,
+  "status": "completed",
+  "timeout_sec": 60,
+  "timeout_source": "argument"
+}

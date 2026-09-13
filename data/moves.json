@@ -1,0 +1,2266 @@
+{
+ "extracted_from": "PokeWalk (../ESP32-PokemonGo)",
+ "upstream": "https://github.com/pret/pokegold @656583c939d3",
+ "species_types": "hand-curated Gen2 table, see tools/species_types_gen2.py",
+ "entries": [
+  {
+   "id": 1,
+   "name": "pound",
+   "name_zh": "拍击",
+   "type": "NORMAL",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 2,
+   "name": "karate_chop",
+   "name_zh": "空手劈",
+   "type": "FIGHTING",
+   "power": 50,
+   "accuracy": 100,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 3,
+   "name": "doubleslap",
+   "name_zh": "连环巴掌",
+   "type": "NORMAL",
+   "power": 15,
+   "accuracy": 85,
+   "effect": "EFFECT_MULTI_HIT"
+  },
+  {
+   "id": 4,
+   "name": "comet_punch",
+   "name_zh": "连续拳",
+   "type": "NORMAL",
+   "power": 18,
+   "accuracy": 85,
+   "effect": "EFFECT_MULTI_HIT"
+  },
+  {
+   "id": 5,
+   "name": "mega_punch",
+   "name_zh": "百万吨重拳",
+   "type": "NORMAL",
+   "power": 80,
+   "accuracy": 85,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 6,
+   "name": "pay_day",
+   "name_zh": "聚宝功",
+   "type": "NORMAL",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_PAY_DAY"
+  },
+  {
+   "id": 7,
+   "name": "fire_punch",
+   "name_zh": "火焰拳",
+   "type": "FIRE",
+   "power": 75,
+   "accuracy": 100,
+   "effect": "EFFECT_BURN_HIT"
+  },
+  {
+   "id": 8,
+   "name": "ice_punch",
+   "name_zh": "冰冻拳",
+   "type": "ICE",
+   "power": 75,
+   "accuracy": 100,
+   "effect": "EFFECT_FREEZE_HIT"
+  },
+  {
+   "id": 9,
+   "name": "thunderpunch",
+   "name_zh": "雷电拳",
+   "type": "ELECTRIC",
+   "power": 75,
+   "accuracy": 100,
+   "effect": "EFFECT_PARALYZE_HIT"
+  },
+  {
+   "id": 10,
+   "name": "scratch",
+   "name_zh": "抓",
+   "type": "NORMAL",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 11,
+   "name": "vicegrip",
+   "name_zh": "夹住",
+   "type": "NORMAL",
+   "power": 55,
+   "accuracy": 100,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 12,
+   "name": "guillotine",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 30,
+   "effect": "EFFECT_OHKO"
+  },
+  {
+   "id": 13,
+   "name": "razor_wind",
+   "name_zh": "旋风刀",
+   "type": "NORMAL",
+   "power": 80,
+   "accuracy": 75,
+   "effect": "EFFECT_RAZOR_WIND"
+  },
+  {
+   "id": 14,
+   "name": "swords_dance",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_ATTACK_UP_2"
+  },
+  {
+   "id": 15,
+   "name": "cut",
+   "name_zh": "居合斩",
+   "type": "NORMAL",
+   "power": 50,
+   "accuracy": 95,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 16,
+   "name": "gust",
+   "name_zh": "起风",
+   "type": "FLYING",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_GUST"
+  },
+  {
+   "id": 17,
+   "name": "wing_attack",
+   "name_zh": "翅膀攻击",
+   "type": "FLYING",
+   "power": 60,
+   "accuracy": 100,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 18,
+   "name": "whirlwind",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_FORCE_SWITCH"
+  },
+  {
+   "id": 19,
+   "name": "fly",
+   "name_zh": "飞翔",
+   "type": "FLYING",
+   "power": 70,
+   "accuracy": 95,
+   "effect": "EFFECT_FLY"
+  },
+  {
+   "id": 20,
+   "name": "bind",
+   "name_zh": "绑紧",
+   "type": "NORMAL",
+   "power": 15,
+   "accuracy": 75,
+   "effect": "EFFECT_TRAP_TARGET"
+  },
+  {
+   "id": 21,
+   "name": "slam",
+   "name_zh": "摔打",
+   "type": "NORMAL",
+   "power": 80,
+   "accuracy": 75,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 22,
+   "name": "vine_whip",
+   "name_zh": "藤鞭",
+   "type": "GRASS",
+   "power": 35,
+   "accuracy": 100,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 23,
+   "name": "stomp",
+   "name_zh": "踩踏",
+   "type": "NORMAL",
+   "power": 65,
+   "accuracy": 100,
+   "effect": "EFFECT_STOMP"
+  },
+  {
+   "id": 24,
+   "name": "double_kick",
+   "name_zh": "二连踢",
+   "type": "FIGHTING",
+   "power": 30,
+   "accuracy": 100,
+   "effect": "EFFECT_DOUBLE_HIT"
+  },
+  {
+   "id": 25,
+   "name": "mega_kick",
+   "name_zh": "百万吨重踢",
+   "type": "NORMAL",
+   "power": 120,
+   "accuracy": 75,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 26,
+   "name": "jump_kick",
+   "name_zh": "飞踢",
+   "type": "FIGHTING",
+   "power": 70,
+   "accuracy": 95,
+   "effect": "EFFECT_JUMP_KICK"
+  },
+  {
+   "id": 27,
+   "name": "rolling_kick",
+   "name_zh": "回旋踢",
+   "type": "FIGHTING",
+   "power": 60,
+   "accuracy": 85,
+   "effect": "EFFECT_FLINCH_HIT"
+  },
+  {
+   "id": 28,
+   "name": "sand_attack",
+   "name_zh": "",
+   "type": "GROUND",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_ACCURACY_DOWN"
+  },
+  {
+   "id": 29,
+   "name": "headbutt",
+   "name_zh": "头锤",
+   "type": "NORMAL",
+   "power": 70,
+   "accuracy": 100,
+   "effect": "EFFECT_FLINCH_HIT"
+  },
+  {
+   "id": 30,
+   "name": "horn_attack",
+   "name_zh": "角撞",
+   "type": "NORMAL",
+   "power": 65,
+   "accuracy": 100,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 31,
+   "name": "fury_attack",
+   "name_zh": "乱击",
+   "type": "NORMAL",
+   "power": 15,
+   "accuracy": 85,
+   "effect": "EFFECT_MULTI_HIT"
+  },
+  {
+   "id": 32,
+   "name": "horn_drill",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 1,
+   "accuracy": 30,
+   "effect": "EFFECT_OHKO"
+  },
+  {
+   "id": 33,
+   "name": "tackle",
+   "name_zh": "撞击",
+   "type": "NORMAL",
+   "power": 35,
+   "accuracy": 95,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 34,
+   "name": "body_slam",
+   "name_zh": "泰山压顶",
+   "type": "NORMAL",
+   "power": 85,
+   "accuracy": 100,
+   "effect": "EFFECT_PARALYZE_HIT"
+  },
+  {
+   "id": 35,
+   "name": "wrap",
+   "name_zh": "紧束",
+   "type": "NORMAL",
+   "power": 15,
+   "accuracy": 85,
+   "effect": "EFFECT_TRAP_TARGET"
+  },
+  {
+   "id": 36,
+   "name": "take_down",
+   "name_zh": "猛撞",
+   "type": "NORMAL",
+   "power": 90,
+   "accuracy": 85,
+   "effect": "EFFECT_RECOIL_HIT"
+  },
+  {
+   "id": 37,
+   "name": "thrash",
+   "name_zh": "大闹一番",
+   "type": "NORMAL",
+   "power": 90,
+   "accuracy": 100,
+   "effect": "EFFECT_RAMPAGE"
+  },
+  {
+   "id": 38,
+   "name": "double_edge",
+   "name_zh": "舍身冲撞",
+   "type": "NORMAL",
+   "power": 120,
+   "accuracy": 100,
+   "effect": "EFFECT_RECOIL_HIT"
+  },
+  {
+   "id": 39,
+   "name": "tail_whip",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_DEFENSE_DOWN"
+  },
+  {
+   "id": 40,
+   "name": "poison_sting",
+   "name_zh": "毒针",
+   "type": "POISON",
+   "power": 15,
+   "accuracy": 100,
+   "effect": "EFFECT_POISON_HIT"
+  },
+  {
+   "id": 41,
+   "name": "twineedle",
+   "name_zh": "双针",
+   "type": "BUG",
+   "power": 25,
+   "accuracy": 100,
+   "effect": "EFFECT_POISON_MULTI_HIT"
+  },
+  {
+   "id": 42,
+   "name": "pin_missile",
+   "name_zh": "飞弹针",
+   "type": "BUG",
+   "power": 14,
+   "accuracy": 85,
+   "effect": "EFFECT_MULTI_HIT"
+  },
+  {
+   "id": 43,
+   "name": "leer",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_DEFENSE_DOWN"
+  },
+  {
+   "id": 44,
+   "name": "bite",
+   "name_zh": "咬住",
+   "type": "DARK",
+   "power": 60,
+   "accuracy": 100,
+   "effect": "EFFECT_FLINCH_HIT"
+  },
+  {
+   "id": 45,
+   "name": "growl",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_ATTACK_DOWN"
+  },
+  {
+   "id": 46,
+   "name": "roar",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_FORCE_SWITCH"
+  },
+  {
+   "id": 47,
+   "name": "sing",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 55,
+   "effect": "EFFECT_SLEEP"
+  },
+  {
+   "id": 48,
+   "name": "supersonic",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 55,
+   "effect": "EFFECT_CONFUSE"
+  },
+  {
+   "id": 49,
+   "name": "sonicboom",
+   "name_zh": "音爆",
+   "type": "NORMAL",
+   "power": 20,
+   "accuracy": 90,
+   "effect": "EFFECT_STATIC_DAMAGE"
+  },
+  {
+   "id": 50,
+   "name": "disable",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 55,
+   "effect": "EFFECT_DISABLE"
+  },
+  {
+   "id": 51,
+   "name": "acid",
+   "name_zh": "溶解液",
+   "type": "POISON",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_DEFENSE_DOWN_HIT"
+  },
+  {
+   "id": 52,
+   "name": "ember",
+   "name_zh": "火花",
+   "type": "FIRE",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_BURN_HIT"
+  },
+  {
+   "id": 53,
+   "name": "flamethrower",
+   "name_zh": "喷射火焰",
+   "type": "FIRE",
+   "power": 95,
+   "accuracy": 100,
+   "effect": "EFFECT_BURN_HIT"
+  },
+  {
+   "id": 54,
+   "name": "mist",
+   "name_zh": "",
+   "type": "ICE",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_MIST"
+  },
+  {
+   "id": 55,
+   "name": "water_gun",
+   "name_zh": "水枪",
+   "type": "WATER",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 56,
+   "name": "hydro_pump",
+   "name_zh": "水炮",
+   "type": "WATER",
+   "power": 120,
+   "accuracy": 80,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 57,
+   "name": "surf",
+   "name_zh": "冲浪",
+   "type": "WATER",
+   "power": 95,
+   "accuracy": 100,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 58,
+   "name": "ice_beam",
+   "name_zh": "冰冻光束",
+   "type": "ICE",
+   "power": 95,
+   "accuracy": 100,
+   "effect": "EFFECT_FREEZE_HIT"
+  },
+  {
+   "id": 59,
+   "name": "blizzard",
+   "name_zh": "暴风雪",
+   "type": "ICE",
+   "power": 120,
+   "accuracy": 70,
+   "effect": "EFFECT_FREEZE_HIT"
+  },
+  {
+   "id": 60,
+   "name": "psybeam",
+   "name_zh": "幻象光线",
+   "type": "PSYCHIC",
+   "power": 65,
+   "accuracy": 100,
+   "effect": "EFFECT_CONFUSE_HIT"
+  },
+  {
+   "id": 61,
+   "name": "bubblebeam",
+   "name_zh": "泡沫光线",
+   "type": "WATER",
+   "power": 65,
+   "accuracy": 100,
+   "effect": "EFFECT_SPEED_DOWN_HIT"
+  },
+  {
+   "id": 62,
+   "name": "aurora_beam",
+   "name_zh": "极光束",
+   "type": "ICE",
+   "power": 65,
+   "accuracy": 100,
+   "effect": "EFFECT_ATTACK_DOWN_HIT"
+  },
+  {
+   "id": 63,
+   "name": "hyper_beam",
+   "name_zh": "破坏光线",
+   "type": "NORMAL",
+   "power": 150,
+   "accuracy": 90,
+   "effect": "EFFECT_HYPER_BEAM"
+  },
+  {
+   "id": 64,
+   "name": "peck",
+   "name_zh": "啄",
+   "type": "FLYING",
+   "power": 35,
+   "accuracy": 100,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 65,
+   "name": "drill_peck",
+   "name_zh": "啄钻",
+   "type": "FLYING",
+   "power": 80,
+   "accuracy": 100,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 66,
+   "name": "submission",
+   "name_zh": "地狱翻滚",
+   "type": "FIGHTING",
+   "power": 80,
+   "accuracy": 80,
+   "effect": "EFFECT_RECOIL_HIT"
+  },
+  {
+   "id": 67,
+   "name": "low_kick",
+   "name_zh": "踢倒",
+   "type": "FIGHTING",
+   "power": 50,
+   "accuracy": 90,
+   "effect": "EFFECT_FLINCH_HIT"
+  },
+  {
+   "id": 68,
+   "name": "counter",
+   "name_zh": "",
+   "type": "FIGHTING",
+   "power": 1,
+   "accuracy": 100,
+   "effect": "EFFECT_COUNTER"
+  },
+  {
+   "id": 69,
+   "name": "seismic_toss",
+   "name_zh": "地球上投",
+   "type": "FIGHTING",
+   "power": 1,
+   "accuracy": 100,
+   "effect": "EFFECT_LEVEL_DAMAGE"
+  },
+  {
+   "id": 70,
+   "name": "strength",
+   "name_zh": "怪力",
+   "type": "NORMAL",
+   "power": 80,
+   "accuracy": 100,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 71,
+   "name": "absorb",
+   "name_zh": "吸取",
+   "type": "GRASS",
+   "power": 20,
+   "accuracy": 100,
+   "effect": "EFFECT_LEECH_HIT"
+  },
+  {
+   "id": 72,
+   "name": "mega_drain",
+   "name_zh": "超级吸取",
+   "type": "GRASS",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_LEECH_HIT"
+  },
+  {
+   "id": 73,
+   "name": "leech_seed",
+   "name_zh": "",
+   "type": "GRASS",
+   "power": 0,
+   "accuracy": 90,
+   "effect": "EFFECT_LEECH_SEED"
+  },
+  {
+   "id": 74,
+   "name": "growth",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_SP_ATK_UP"
+  },
+  {
+   "id": 75,
+   "name": "razor_leaf",
+   "name_zh": "飞叶快刀",
+   "type": "GRASS",
+   "power": 55,
+   "accuracy": 95,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 76,
+   "name": "solarbeam",
+   "name_zh": "日光束",
+   "type": "GRASS",
+   "power": 120,
+   "accuracy": 100,
+   "effect": "EFFECT_SOLARBEAM"
+  },
+  {
+   "id": 77,
+   "name": "poisonpowder",
+   "name_zh": "",
+   "type": "POISON",
+   "power": 0,
+   "accuracy": 75,
+   "effect": "EFFECT_POISON"
+  },
+  {
+   "id": 78,
+   "name": "stun_spore",
+   "name_zh": "",
+   "type": "GRASS",
+   "power": 0,
+   "accuracy": 75,
+   "effect": "EFFECT_PARALYZE"
+  },
+  {
+   "id": 79,
+   "name": "sleep_powder",
+   "name_zh": "",
+   "type": "GRASS",
+   "power": 0,
+   "accuracy": 75,
+   "effect": "EFFECT_SLEEP"
+  },
+  {
+   "id": 80,
+   "name": "petal_dance",
+   "name_zh": "花瓣舞",
+   "type": "GRASS",
+   "power": 70,
+   "accuracy": 100,
+   "effect": "EFFECT_RAMPAGE"
+  },
+  {
+   "id": 81,
+   "name": "string_shot",
+   "name_zh": "",
+   "type": "BUG",
+   "power": 0,
+   "accuracy": 95,
+   "effect": "EFFECT_SPEED_DOWN"
+  },
+  {
+   "id": 82,
+   "name": "dragon_rage",
+   "name_zh": "龙之怒",
+   "type": "DRAGON",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_STATIC_DAMAGE"
+  },
+  {
+   "id": 83,
+   "name": "fire_spin",
+   "name_zh": "火焰旋涡",
+   "type": "FIRE",
+   "power": 15,
+   "accuracy": 70,
+   "effect": "EFFECT_TRAP_TARGET"
+  },
+  {
+   "id": 84,
+   "name": "thundershock",
+   "name_zh": "电击",
+   "type": "ELECTRIC",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_PARALYZE_HIT"
+  },
+  {
+   "id": 85,
+   "name": "thunderbolt",
+   "name_zh": "十万伏特",
+   "type": "ELECTRIC",
+   "power": 95,
+   "accuracy": 100,
+   "effect": "EFFECT_PARALYZE_HIT"
+  },
+  {
+   "id": 86,
+   "name": "thunder_wave",
+   "name_zh": "",
+   "type": "ELECTRIC",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_PARALYZE"
+  },
+  {
+   "id": 87,
+   "name": "thunder",
+   "name_zh": "打雷",
+   "type": "ELECTRIC",
+   "power": 120,
+   "accuracy": 70,
+   "effect": "EFFECT_THUNDER"
+  },
+  {
+   "id": 88,
+   "name": "rock_throw",
+   "name_zh": "落石",
+   "type": "ROCK",
+   "power": 50,
+   "accuracy": 90,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 89,
+   "name": "earthquake",
+   "name_zh": "地震",
+   "type": "GROUND",
+   "power": 100,
+   "accuracy": 100,
+   "effect": "EFFECT_EARTHQUAKE"
+  },
+  {
+   "id": 90,
+   "name": "fissure",
+   "name_zh": "",
+   "type": "GROUND",
+   "power": 1,
+   "accuracy": 30,
+   "effect": "EFFECT_OHKO"
+  },
+  {
+   "id": 91,
+   "name": "dig",
+   "name_zh": "挖洞",
+   "type": "GROUND",
+   "power": 60,
+   "accuracy": 100,
+   "effect": "EFFECT_FLY"
+  },
+  {
+   "id": 92,
+   "name": "toxic",
+   "name_zh": "",
+   "type": "POISON",
+   "power": 0,
+   "accuracy": 85,
+   "effect": "EFFECT_TOXIC"
+  },
+  {
+   "id": 93,
+   "name": "confusion",
+   "name_zh": "念力",
+   "type": "PSYCHIC",
+   "power": 50,
+   "accuracy": 100,
+   "effect": "EFFECT_CONFUSE_HIT"
+  },
+  {
+   "id": 94,
+   "name": "psychic_m",
+   "name_zh": "精神强念",
+   "type": "PSYCHIC",
+   "power": 90,
+   "accuracy": 100,
+   "effect": "EFFECT_SP_DEF_DOWN_HIT"
+  },
+  {
+   "id": 95,
+   "name": "hypnosis",
+   "name_zh": "",
+   "type": "PSYCHIC",
+   "power": 0,
+   "accuracy": 60,
+   "effect": "EFFECT_SLEEP"
+  },
+  {
+   "id": 96,
+   "name": "meditate",
+   "name_zh": "",
+   "type": "PSYCHIC",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_ATTACK_UP"
+  },
+  {
+   "id": 97,
+   "name": "agility",
+   "name_zh": "",
+   "type": "PSYCHIC",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_SPEED_UP_2"
+  },
+  {
+   "id": 98,
+   "name": "quick_attack",
+   "name_zh": "电光一闪",
+   "type": "NORMAL",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_PRIORITY_HIT"
+  },
+  {
+   "id": 99,
+   "name": "rage",
+   "name_zh": "愤怒",
+   "type": "NORMAL",
+   "power": 20,
+   "accuracy": 100,
+   "effect": "EFFECT_RAGE"
+  },
+  {
+   "id": 100,
+   "name": "teleport",
+   "name_zh": "",
+   "type": "PSYCHIC",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_TELEPORT"
+  },
+  {
+   "id": 101,
+   "name": "night_shade",
+   "name_zh": "黑夜魔影",
+   "type": "GHOST",
+   "power": 1,
+   "accuracy": 100,
+   "effect": "EFFECT_LEVEL_DAMAGE"
+  },
+  {
+   "id": 102,
+   "name": "mimic",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_MIMIC"
+  },
+  {
+   "id": 103,
+   "name": "screech",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 85,
+   "effect": "EFFECT_DEFENSE_DOWN_2"
+  },
+  {
+   "id": 104,
+   "name": "double_team",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_EVASION_UP"
+  },
+  {
+   "id": 105,
+   "name": "recover",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_HEAL"
+  },
+  {
+   "id": 106,
+   "name": "harden",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_DEFENSE_UP"
+  },
+  {
+   "id": 107,
+   "name": "minimize",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_EVASION_UP"
+  },
+  {
+   "id": 108,
+   "name": "smokescreen",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_ACCURACY_DOWN"
+  },
+  {
+   "id": 109,
+   "name": "confuse_ray",
+   "name_zh": "",
+   "type": "GHOST",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_CONFUSE"
+  },
+  {
+   "id": 110,
+   "name": "withdraw",
+   "name_zh": "",
+   "type": "WATER",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_DEFENSE_UP"
+  },
+  {
+   "id": 111,
+   "name": "defense_curl",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_DEFENSE_CURL"
+  },
+  {
+   "id": 112,
+   "name": "barrier",
+   "name_zh": "",
+   "type": "PSYCHIC",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_DEFENSE_UP_2"
+  },
+  {
+   "id": 113,
+   "name": "light_screen",
+   "name_zh": "",
+   "type": "PSYCHIC",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_LIGHT_SCREEN"
+  },
+  {
+   "id": 114,
+   "name": "haze",
+   "name_zh": "",
+   "type": "ICE",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_RESET_STATS"
+  },
+  {
+   "id": 115,
+   "name": "reflect",
+   "name_zh": "",
+   "type": "PSYCHIC",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_REFLECT"
+  },
+  {
+   "id": 116,
+   "name": "focus_energy",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_FOCUS_ENERGY"
+  },
+  {
+   "id": 117,
+   "name": "bide",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_BIDE"
+  },
+  {
+   "id": 118,
+   "name": "metronome",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_METRONOME"
+  },
+  {
+   "id": 119,
+   "name": "mirror_move",
+   "name_zh": "",
+   "type": "FLYING",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_MIRROR_MOVE"
+  },
+  {
+   "id": 120,
+   "name": "selfdestruct",
+   "name_zh": "自爆",
+   "type": "NORMAL",
+   "power": 200,
+   "accuracy": 100,
+   "effect": "EFFECT_SELFDESTRUCT"
+  },
+  {
+   "id": 121,
+   "name": "egg_bomb",
+   "name_zh": "炸蛋",
+   "type": "NORMAL",
+   "power": 100,
+   "accuracy": 75,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 122,
+   "name": "lick",
+   "name_zh": "舌舔",
+   "type": "GHOST",
+   "power": 20,
+   "accuracy": 100,
+   "effect": "EFFECT_PARALYZE_HIT"
+  },
+  {
+   "id": 123,
+   "name": "smog",
+   "name_zh": "浊雾",
+   "type": "POISON",
+   "power": 20,
+   "accuracy": 70,
+   "effect": "EFFECT_POISON_HIT"
+  },
+  {
+   "id": 124,
+   "name": "sludge",
+   "name_zh": "污泥攻击",
+   "type": "POISON",
+   "power": 65,
+   "accuracy": 100,
+   "effect": "EFFECT_POISON_HIT"
+  },
+  {
+   "id": 125,
+   "name": "bone_club",
+   "name_zh": "骨棒",
+   "type": "GROUND",
+   "power": 65,
+   "accuracy": 85,
+   "effect": "EFFECT_FLINCH_HIT"
+  },
+  {
+   "id": 126,
+   "name": "fire_blast",
+   "name_zh": "大字爆炎",
+   "type": "FIRE",
+   "power": 120,
+   "accuracy": 85,
+   "effect": "EFFECT_BURN_HIT"
+  },
+  {
+   "id": 127,
+   "name": "waterfall",
+   "name_zh": "攀瀑",
+   "type": "WATER",
+   "power": 80,
+   "accuracy": 100,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 128,
+   "name": "clamp",
+   "name_zh": "贝壳夹击",
+   "type": "WATER",
+   "power": 35,
+   "accuracy": 75,
+   "effect": "EFFECT_TRAP_TARGET"
+  },
+  {
+   "id": 129,
+   "name": "swift",
+   "name_zh": "高速星星",
+   "type": "NORMAL",
+   "power": 60,
+   "accuracy": 100,
+   "effect": "EFFECT_ALWAYS_HIT"
+  },
+  {
+   "id": 130,
+   "name": "skull_bash",
+   "name_zh": "火箭头锤",
+   "type": "NORMAL",
+   "power": 100,
+   "accuracy": 100,
+   "effect": "EFFECT_SKULL_BASH"
+  },
+  {
+   "id": 131,
+   "name": "spike_cannon",
+   "name_zh": "尖刺加农炮",
+   "type": "NORMAL",
+   "power": 20,
+   "accuracy": 100,
+   "effect": "EFFECT_MULTI_HIT"
+  },
+  {
+   "id": 132,
+   "name": "constrict",
+   "name_zh": "缠绕",
+   "type": "NORMAL",
+   "power": 10,
+   "accuracy": 100,
+   "effect": "EFFECT_SPEED_DOWN_HIT"
+  },
+  {
+   "id": 133,
+   "name": "amnesia",
+   "name_zh": "",
+   "type": "PSYCHIC",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_SP_DEF_UP_2"
+  },
+  {
+   "id": 134,
+   "name": "kinesis",
+   "name_zh": "",
+   "type": "PSYCHIC",
+   "power": 0,
+   "accuracy": 80,
+   "effect": "EFFECT_ACCURACY_DOWN"
+  },
+  {
+   "id": 135,
+   "name": "softboiled",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_HEAL"
+  },
+  {
+   "id": 136,
+   "name": "hi_jump_kick",
+   "name_zh": "飞膝踢",
+   "type": "FIGHTING",
+   "power": 85,
+   "accuracy": 90,
+   "effect": "EFFECT_JUMP_KICK"
+  },
+  {
+   "id": 137,
+   "name": "glare",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 75,
+   "effect": "EFFECT_PARALYZE"
+  },
+  {
+   "id": 138,
+   "name": "dream_eater",
+   "name_zh": "食梦",
+   "type": "PSYCHIC",
+   "power": 100,
+   "accuracy": 100,
+   "effect": "EFFECT_DREAM_EATER"
+  },
+  {
+   "id": 139,
+   "name": "poison_gas",
+   "name_zh": "",
+   "type": "POISON",
+   "power": 0,
+   "accuracy": 55,
+   "effect": "EFFECT_POISON"
+  },
+  {
+   "id": 140,
+   "name": "barrage",
+   "name_zh": "投球",
+   "type": "NORMAL",
+   "power": 15,
+   "accuracy": 85,
+   "effect": "EFFECT_MULTI_HIT"
+  },
+  {
+   "id": 141,
+   "name": "leech_life",
+   "name_zh": "吸血",
+   "type": "BUG",
+   "power": 20,
+   "accuracy": 100,
+   "effect": "EFFECT_LEECH_HIT"
+  },
+  {
+   "id": 142,
+   "name": "lovely_kiss",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 75,
+   "effect": "EFFECT_SLEEP"
+  },
+  {
+   "id": 143,
+   "name": "sky_attack",
+   "name_zh": "神鸟猛击",
+   "type": "FLYING",
+   "power": 140,
+   "accuracy": 90,
+   "effect": "EFFECT_SKY_ATTACK"
+  },
+  {
+   "id": 144,
+   "name": "transform",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_TRANSFORM"
+  },
+  {
+   "id": 145,
+   "name": "bubble",
+   "name_zh": "泡沫",
+   "type": "WATER",
+   "power": 20,
+   "accuracy": 100,
+   "effect": "EFFECT_SPEED_DOWN_HIT"
+  },
+  {
+   "id": 146,
+   "name": "dizzy_punch",
+   "name_zh": "迷昏拳",
+   "type": "NORMAL",
+   "power": 70,
+   "accuracy": 100,
+   "effect": "EFFECT_CONFUSE_HIT"
+  },
+  {
+   "id": 147,
+   "name": "spore",
+   "name_zh": "",
+   "type": "GRASS",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_SLEEP"
+  },
+  {
+   "id": 148,
+   "name": "flash",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 70,
+   "effect": "EFFECT_ACCURACY_DOWN"
+  },
+  {
+   "id": 149,
+   "name": "psywave",
+   "name_zh": "",
+   "type": "PSYCHIC",
+   "power": 1,
+   "accuracy": 80,
+   "effect": "EFFECT_PSYWAVE"
+  },
+  {
+   "id": 150,
+   "name": "splash",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_SPLASH"
+  },
+  {
+   "id": 151,
+   "name": "acid_armor",
+   "name_zh": "",
+   "type": "POISON",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_DEFENSE_UP_2"
+  },
+  {
+   "id": 152,
+   "name": "crabhammer",
+   "name_zh": "蟹钳锤",
+   "type": "WATER",
+   "power": 90,
+   "accuracy": 85,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 153,
+   "name": "explosion",
+   "name_zh": "大爆炸",
+   "type": "NORMAL",
+   "power": 250,
+   "accuracy": 100,
+   "effect": "EFFECT_SELFDESTRUCT"
+  },
+  {
+   "id": 154,
+   "name": "fury_swipes",
+   "name_zh": "乱抓",
+   "type": "NORMAL",
+   "power": 18,
+   "accuracy": 80,
+   "effect": "EFFECT_MULTI_HIT"
+  },
+  {
+   "id": 155,
+   "name": "bonemerang",
+   "name_zh": "骨头回力镖",
+   "type": "GROUND",
+   "power": 50,
+   "accuracy": 90,
+   "effect": "EFFECT_DOUBLE_HIT"
+  },
+  {
+   "id": 156,
+   "name": "rest",
+   "name_zh": "",
+   "type": "PSYCHIC",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_HEAL"
+  },
+  {
+   "id": 157,
+   "name": "rock_slide",
+   "name_zh": "岩崩",
+   "type": "ROCK",
+   "power": 75,
+   "accuracy": 90,
+   "effect": "EFFECT_FLINCH_HIT"
+  },
+  {
+   "id": 158,
+   "name": "hyper_fang",
+   "name_zh": "必杀门牙",
+   "type": "NORMAL",
+   "power": 80,
+   "accuracy": 90,
+   "effect": "EFFECT_FLINCH_HIT"
+  },
+  {
+   "id": 159,
+   "name": "sharpen",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_ATTACK_UP"
+  },
+  {
+   "id": 160,
+   "name": "conversion",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_CONVERSION"
+  },
+  {
+   "id": 161,
+   "name": "tri_attack",
+   "name_zh": "三重攻击",
+   "type": "NORMAL",
+   "power": 80,
+   "accuracy": 100,
+   "effect": "EFFECT_TRI_ATTACK"
+  },
+  {
+   "id": 162,
+   "name": "super_fang",
+   "name_zh": "愤怒门牙",
+   "type": "NORMAL",
+   "power": 1,
+   "accuracy": 90,
+   "effect": "EFFECT_SUPER_FANG"
+  },
+  {
+   "id": 163,
+   "name": "slash",
+   "name_zh": "劈开",
+   "type": "NORMAL",
+   "power": 70,
+   "accuracy": 100,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 164,
+   "name": "substitute",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_SUBSTITUTE"
+  },
+  {
+   "id": 165,
+   "name": "struggle",
+   "name_zh": "挣扎",
+   "type": "NORMAL",
+   "power": 50,
+   "accuracy": 100,
+   "effect": "EFFECT_RECOIL_HIT"
+  },
+  {
+   "id": 166,
+   "name": "sketch",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_SKETCH"
+  },
+  {
+   "id": 167,
+   "name": "triple_kick",
+   "name_zh": "",
+   "type": "FIGHTING",
+   "power": 10,
+   "accuracy": 90,
+   "effect": "EFFECT_TRIPLE_KICK"
+  },
+  {
+   "id": 168,
+   "name": "thief",
+   "name_zh": "",
+   "type": "DARK",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_THIEF"
+  },
+  {
+   "id": 169,
+   "name": "spider_web",
+   "name_zh": "",
+   "type": "BUG",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_MEAN_LOOK"
+  },
+  {
+   "id": 170,
+   "name": "mind_reader",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_LOCK_ON"
+  },
+  {
+   "id": 171,
+   "name": "nightmare",
+   "name_zh": "",
+   "type": "GHOST",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_NIGHTMARE"
+  },
+  {
+   "id": 172,
+   "name": "flame_wheel",
+   "name_zh": "",
+   "type": "FIRE",
+   "power": 60,
+   "accuracy": 100,
+   "effect": "EFFECT_FLAME_WHEEL"
+  },
+  {
+   "id": 173,
+   "name": "snore",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_SNORE"
+  },
+  {
+   "id": 174,
+   "name": "curse",
+   "name_zh": "",
+   "type": "NONE",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_CURSE"
+  },
+  {
+   "id": 175,
+   "name": "flail",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 1,
+   "accuracy": 100,
+   "effect": "EFFECT_REVERSAL"
+  },
+  {
+   "id": 176,
+   "name": "conversion2",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_CONVERSION2"
+  },
+  {
+   "id": 177,
+   "name": "aeroblast",
+   "name_zh": "",
+   "type": "FLYING",
+   "power": 100,
+   "accuracy": 95,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 178,
+   "name": "cotton_spore",
+   "name_zh": "",
+   "type": "GRASS",
+   "power": 0,
+   "accuracy": 85,
+   "effect": "EFFECT_SPEED_DOWN_2"
+  },
+  {
+   "id": 179,
+   "name": "reversal",
+   "name_zh": "",
+   "type": "FIGHTING",
+   "power": 1,
+   "accuracy": 100,
+   "effect": "EFFECT_REVERSAL"
+  },
+  {
+   "id": 180,
+   "name": "spite",
+   "name_zh": "",
+   "type": "GHOST",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_SPITE"
+  },
+  {
+   "id": 181,
+   "name": "powder_snow",
+   "name_zh": "",
+   "type": "ICE",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_FREEZE_HIT"
+  },
+  {
+   "id": 182,
+   "name": "protect",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_PROTECT"
+  },
+  {
+   "id": 183,
+   "name": "mach_punch",
+   "name_zh": "",
+   "type": "FIGHTING",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_PRIORITY_HIT"
+  },
+  {
+   "id": 184,
+   "name": "scary_face",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 90,
+   "effect": "EFFECT_SPEED_DOWN_2"
+  },
+  {
+   "id": 185,
+   "name": "faint_attack",
+   "name_zh": "",
+   "type": "DARK",
+   "power": 60,
+   "accuracy": 100,
+   "effect": "EFFECT_ALWAYS_HIT"
+  },
+  {
+   "id": 186,
+   "name": "sweet_kiss",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 75,
+   "effect": "EFFECT_CONFUSE"
+  },
+  {
+   "id": 187,
+   "name": "belly_drum",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_BELLY_DRUM"
+  },
+  {
+   "id": 188,
+   "name": "sludge_bomb",
+   "name_zh": "",
+   "type": "POISON",
+   "power": 90,
+   "accuracy": 100,
+   "effect": "EFFECT_POISON_HIT"
+  },
+  {
+   "id": 189,
+   "name": "mud_slap",
+   "name_zh": "",
+   "type": "GROUND",
+   "power": 20,
+   "accuracy": 100,
+   "effect": "EFFECT_ACCURACY_DOWN_HIT"
+  },
+  {
+   "id": 190,
+   "name": "octazooka",
+   "name_zh": "",
+   "type": "WATER",
+   "power": 65,
+   "accuracy": 85,
+   "effect": "EFFECT_ACCURACY_DOWN_HIT"
+  },
+  {
+   "id": 191,
+   "name": "spikes",
+   "name_zh": "",
+   "type": "GROUND",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_SPIKES"
+  },
+  {
+   "id": 192,
+   "name": "zap_cannon",
+   "name_zh": "",
+   "type": "ELECTRIC",
+   "power": 100,
+   "accuracy": 50,
+   "effect": "EFFECT_PARALYZE_HIT"
+  },
+  {
+   "id": 193,
+   "name": "foresight",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_FORESIGHT"
+  },
+  {
+   "id": 194,
+   "name": "destiny_bond",
+   "name_zh": "",
+   "type": "GHOST",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_DESTINY_BOND"
+  },
+  {
+   "id": 195,
+   "name": "perish_song",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_PERISH_SONG"
+  },
+  {
+   "id": 196,
+   "name": "icy_wind",
+   "name_zh": "",
+   "type": "ICE",
+   "power": 55,
+   "accuracy": 95,
+   "effect": "EFFECT_SPEED_DOWN_HIT"
+  },
+  {
+   "id": 197,
+   "name": "detect",
+   "name_zh": "",
+   "type": "FIGHTING",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_PROTECT"
+  },
+  {
+   "id": 198,
+   "name": "bone_rush",
+   "name_zh": "",
+   "type": "GROUND",
+   "power": 25,
+   "accuracy": 80,
+   "effect": "EFFECT_MULTI_HIT"
+  },
+  {
+   "id": 199,
+   "name": "lock_on",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_LOCK_ON"
+  },
+  {
+   "id": 200,
+   "name": "outrage",
+   "name_zh": "",
+   "type": "DRAGON",
+   "power": 90,
+   "accuracy": 100,
+   "effect": "EFFECT_RAMPAGE"
+  },
+  {
+   "id": 201,
+   "name": "sandstorm",
+   "name_zh": "",
+   "type": "ROCK",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_SANDSTORM"
+  },
+  {
+   "id": 202,
+   "name": "giga_drain",
+   "name_zh": "",
+   "type": "GRASS",
+   "power": 60,
+   "accuracy": 100,
+   "effect": "EFFECT_LEECH_HIT"
+  },
+  {
+   "id": 203,
+   "name": "endure",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_ENDURE"
+  },
+  {
+   "id": 204,
+   "name": "charm",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_ATTACK_DOWN_2"
+  },
+  {
+   "id": 205,
+   "name": "rollout",
+   "name_zh": "",
+   "type": "ROCK",
+   "power": 30,
+   "accuracy": 90,
+   "effect": "EFFECT_ROLLOUT"
+  },
+  {
+   "id": 206,
+   "name": "false_swipe",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_FALSE_SWIPE"
+  },
+  {
+   "id": 207,
+   "name": "swagger",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 90,
+   "effect": "EFFECT_SWAGGER"
+  },
+  {
+   "id": 208,
+   "name": "milk_drink",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_HEAL"
+  },
+  {
+   "id": 209,
+   "name": "spark",
+   "name_zh": "",
+   "type": "ELECTRIC",
+   "power": 65,
+   "accuracy": 100,
+   "effect": "EFFECT_PARALYZE_HIT"
+  },
+  {
+   "id": 210,
+   "name": "fury_cutter",
+   "name_zh": "",
+   "type": "BUG",
+   "power": 10,
+   "accuracy": 95,
+   "effect": "EFFECT_FURY_CUTTER"
+  },
+  {
+   "id": 211,
+   "name": "steel_wing",
+   "name_zh": "",
+   "type": "STEEL",
+   "power": 70,
+   "accuracy": 90,
+   "effect": "EFFECT_DEFENSE_UP_HIT"
+  },
+  {
+   "id": 212,
+   "name": "mean_look",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_MEAN_LOOK"
+  },
+  {
+   "id": 213,
+   "name": "attract",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_ATTRACT"
+  },
+  {
+   "id": 214,
+   "name": "sleep_talk",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_SLEEP_TALK"
+  },
+  {
+   "id": 215,
+   "name": "heal_bell",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_HEAL_BELL"
+  },
+  {
+   "id": 216,
+   "name": "return",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 1,
+   "accuracy": 100,
+   "effect": "EFFECT_RETURN"
+  },
+  {
+   "id": 217,
+   "name": "present",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 1,
+   "accuracy": 90,
+   "effect": "EFFECT_PRESENT"
+  },
+  {
+   "id": 218,
+   "name": "frustration",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 1,
+   "accuracy": 100,
+   "effect": "EFFECT_FRUSTRATION"
+  },
+  {
+   "id": 219,
+   "name": "safeguard",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_SAFEGUARD"
+  },
+  {
+   "id": 220,
+   "name": "pain_split",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_PAIN_SPLIT"
+  },
+  {
+   "id": 221,
+   "name": "sacred_fire",
+   "name_zh": "",
+   "type": "FIRE",
+   "power": 100,
+   "accuracy": 95,
+   "effect": "EFFECT_SACRED_FIRE"
+  },
+  {
+   "id": 222,
+   "name": "magnitude",
+   "name_zh": "",
+   "type": "GROUND",
+   "power": 1,
+   "accuracy": 100,
+   "effect": "EFFECT_MAGNITUDE"
+  },
+  {
+   "id": 223,
+   "name": "dynamicpunch",
+   "name_zh": "",
+   "type": "FIGHTING",
+   "power": 100,
+   "accuracy": 50,
+   "effect": "EFFECT_CONFUSE_HIT"
+  },
+  {
+   "id": 224,
+   "name": "megahorn",
+   "name_zh": "",
+   "type": "BUG",
+   "power": 120,
+   "accuracy": 85,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 225,
+   "name": "dragonbreath",
+   "name_zh": "",
+   "type": "DRAGON",
+   "power": 60,
+   "accuracy": 100,
+   "effect": "EFFECT_PARALYZE_HIT"
+  },
+  {
+   "id": 226,
+   "name": "baton_pass",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_BATON_PASS"
+  },
+  {
+   "id": 227,
+   "name": "encore",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_ENCORE"
+  },
+  {
+   "id": 228,
+   "name": "pursuit",
+   "name_zh": "",
+   "type": "DARK",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_PURSUIT"
+  },
+  {
+   "id": 229,
+   "name": "rapid_spin",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 20,
+   "accuracy": 100,
+   "effect": "EFFECT_RAPID_SPIN"
+  },
+  {
+   "id": 230,
+   "name": "sweet_scent",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_EVASION_DOWN"
+  },
+  {
+   "id": 231,
+   "name": "iron_tail",
+   "name_zh": "",
+   "type": "STEEL",
+   "power": 100,
+   "accuracy": 75,
+   "effect": "EFFECT_DEFENSE_DOWN_HIT"
+  },
+  {
+   "id": 232,
+   "name": "metal_claw",
+   "name_zh": "",
+   "type": "STEEL",
+   "power": 50,
+   "accuracy": 95,
+   "effect": "EFFECT_ATTACK_UP_HIT"
+  },
+  {
+   "id": 233,
+   "name": "vital_throw",
+   "name_zh": "",
+   "type": "FIGHTING",
+   "power": 70,
+   "accuracy": 100,
+   "effect": "EFFECT_ALWAYS_HIT"
+  },
+  {
+   "id": 234,
+   "name": "morning_sun",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_MORNING_SUN"
+  },
+  {
+   "id": 235,
+   "name": "synthesis",
+   "name_zh": "",
+   "type": "GRASS",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_SYNTHESIS"
+  },
+  {
+   "id": 236,
+   "name": "moonlight",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_MOONLIGHT"
+  },
+  {
+   "id": 237,
+   "name": "hidden_power",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 1,
+   "accuracy": 100,
+   "effect": "EFFECT_HIDDEN_POWER"
+  },
+  {
+   "id": 238,
+   "name": "cross_chop",
+   "name_zh": "",
+   "type": "FIGHTING",
+   "power": 100,
+   "accuracy": 80,
+   "effect": "EFFECT_NORMAL_HIT"
+  },
+  {
+   "id": 239,
+   "name": "twister",
+   "name_zh": "",
+   "type": "DRAGON",
+   "power": 40,
+   "accuracy": 100,
+   "effect": "EFFECT_TWISTER"
+  },
+  {
+   "id": 240,
+   "name": "rain_dance",
+   "name_zh": "",
+   "type": "WATER",
+   "power": 0,
+   "accuracy": 90,
+   "effect": "EFFECT_RAIN_DANCE"
+  },
+  {
+   "id": 241,
+   "name": "sunny_day",
+   "name_zh": "",
+   "type": "FIRE",
+   "power": 0,
+   "accuracy": 90,
+   "effect": "EFFECT_SUNNY_DAY"
+  },
+  {
+   "id": 242,
+   "name": "crunch",
+   "name_zh": "",
+   "type": "DARK",
+   "power": 80,
+   "accuracy": 100,
+   "effect": "EFFECT_SP_DEF_DOWN_HIT"
+  },
+  {
+   "id": 243,
+   "name": "mirror_coat",
+   "name_zh": "",
+   "type": "PSYCHIC",
+   "power": 1,
+   "accuracy": 100,
+   "effect": "EFFECT_MIRROR_COAT"
+  },
+  {
+   "id": 244,
+   "name": "psych_up",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 0,
+   "accuracy": 100,
+   "effect": "EFFECT_PSYCH_UP"
+  },
+  {
+   "id": 245,
+   "name": "extremespeed",
+   "name_zh": "",
+   "type": "NORMAL",
+   "power": 80,
+   "accuracy": 100,
+   "effect": "EFFECT_PRIORITY_HIT"
+  },
+  {
+   "id": 246,
+   "name": "ancientpower",
+   "name_zh": "",
+   "type": "ROCK",
+   "power": 60,
+   "accuracy": 100,
+   "effect": "EFFECT_ALL_UP_HIT"
+  },
+  {
+   "id": 247,
+   "name": "shadow_ball",
+   "name_zh": "",
+   "type": "GHOST",
+   "power": 80,
+   "accuracy": 100,
+   "effect": "EFFECT_SP_DEF_DOWN_HIT"
+  },
+  {
+   "id": 248,
+   "name": "future_sight",
+   "name_zh": "",
+   "type": "PSYCHIC",
+   "power": 80,
+   "accuracy": 90,
+   "effect": "EFFECT_FUTURE_SIGHT"
+  },
+  {
+   "id": 249,
+   "name": "rock_smash",
+   "name_zh": "",
+   "type": "FIGHTING",
+   "power": 20,
+   "accuracy": 100,
+   "effect": "EFFECT_DEFENSE_DOWN_HIT"
+  },
+  {
+   "id": 250,
+   "name": "whirlpool",
+   "name_zh": "",
+   "type": "WATER",
+   "power": 15,
+   "accuracy": 70,
+   "effect": "EFFECT_TRAP_TARGET"
+  },
+  {
+   "id": 251,
+   "name": "beat_up",
+   "name_zh": "",
+   "type": "DARK",
+   "power": 10,
+   "accuracy": 100,
+   "effect": "EFFECT_BEAT_UP"
+  }
+ ]
+}
