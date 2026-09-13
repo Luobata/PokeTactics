@@ -93,6 +93,11 @@ PLAYER_HTML = """<!doctype html><html lang="zh-CN">
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f2efe5;color:#29302b;font:14px/1.6 ui-monospace,"PingFang SC",monospace}
 main{max-width:1180px;margin:auto;padding:24px}header{border-bottom:2px solid #29302b;padding-bottom:12px;margin-bottom:20px}
+.tabs{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.tabs a{text-decoration:none;color:inherit;border:1px solid #899081;border-radius:4px 4px 0 0;
+padding:4px 12px;font-size:13px;background:#e9e4d3}
+.tabs a.on{background:#355c3d;color:#fff;border-color:#355c3d;font-weight:600}
+.tabs a:hover:not(.on){background:#dfe5d4}
 h1{font-size:20px;margin:0 0 4px}p{margin:6px 0;color:#555e54}a{color:#355c3d}
 .layout{display:grid;grid-template-columns:230px auto minmax(250px,340px);gap:28px;align-items:start}
 label{display:block;font-size:12px;margin:14px 0 4px}
@@ -115,7 +120,7 @@ details{margin-top:16px}.kbd{background:#e6e0cf;border:1px solid #b9b3a0;border-
 #evpanel div.ev b{color:#29302b}
 @media(max-width:980px){.layout{grid-template-columns:1fr}.stage{order:1}#evpanel{order:2;max-height:300px}.settings{order:3}}
 </style></head><body><main>
-<header><h1>战斗动画验收台 · seed=__SEED__</h1><a href="/">← 返回验收清单</a> · <a href="__SYNLINK__"><button style="display:inline-block;width:auto;min-height:0;padding:4px 10px;font-size:12px">__SYNBTN__</button></a></header>
+<header><h1>战斗动画验收台 · seed=__SEED__</h1><a href="/">← 返回验收清单</a> · <a href="__SYNLINK__"><button style="display:inline-block;width:auto;min-height:0;padding:4px 10px;font-size:12px">__SYNBTN__</button></a><div class="tabs" id="tabs"></div></header>
 <div class="layout">
 <aside class="settings">
 <label for="seed">战斗种子</label><input id="seedin" type="number" value="__SEED__" min="1" max="99999">
@@ -144,6 +149,10 @@ details{margin-top:16px}.kbd{background:#e6e0cf;border:1px solid #b9b3a0;border-
 </main>
 <script>
 const seed=__SEED__, DT=__DT__, syn=__SYN__;
+const TAB_SEEDS=[3,7,11,42,100,777];
+(function(){const el=document.getElementById('tabs');
+el.innerHTML=TAB_SEEDS.map(n=>'<a href="/anim?seed='+n+'&synergy='+syn+'" class="'+(n===seed?'on':'')+'">seed '+n+'</a>').join('')
++(TAB_SEEDS.includes(seed)?'':'<a class="on">seed '+seed+'</a>');})();
 let frames=[], n=0, cur=0, playing=false, timer=null, events=[];
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
 const scrub=document.getElementById('scrub');

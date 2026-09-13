@@ -20,6 +20,7 @@ import random
 from data import pokedex
 import economy
 import shop as shop_mod
+from combat import COLS  # C-sym 棋盘列数（docs/10 §1.5）：列对位随棋盘常量走
 from shop import OwnedPiece, SharedPool, try_combine
 
 BENCH_SIZE = 9       # 备战席 9 格（TFT 同款）
@@ -394,8 +395,9 @@ class Bot:
     def _arrange(self) -> None:
         """摆位（L1 起）：远程后排（列表头）/ 坦克前排（列表尾）。
 
-        layout="back" 下 Battle 按列表顺序从己方后排(行5)向前填 →
-        次序即阵型。L3 的列对位由 counter_vs 在配对后追加。
+        layout="back" 下 Battle 按列表顺序从己方后排（C-sym 战场行 3，
+        贴己方边缘）向前排（行 2，贴中线）填 → 次序即阵型。
+        L3 的列对位由 counter_vs 在配对后追加。
         """
         dex = pokedex()
 

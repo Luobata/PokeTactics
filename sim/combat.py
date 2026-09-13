@@ -26,7 +26,15 @@ import status as status_mod   # S12 状态/Buff：默认 STATUS_ON=False（docs/
 import weather as weather_mod  # S11 天气：默认无天气（docs/05）
 
 TICK = 0.1  # 解算步长（秒）
-COLS, ROWS = 7, 6  # 棋盘 7×6：行 0-2 敌方区，行 3-5 己方区
+# ---- C-sym 棋盘（docs/10 §1.3/§1.5，2026-09-14 sim 联动落地）----
+# 6 列 × 4 行对称战场：行 0-1 敌方战场、行 2-3 己方战场（旧版 7×6 的
+# 3+3 纵深收成 2+2）。双方各 1 条备战行是准备页/渲染层概念，不进战斗
+# 网格：备战棋子本就不传入 Battle（bots.battle_comp 只含上场名单），
+# 无需部署过滤；若把备战行画进网格，要么整行不可通行切断两军通路、
+# 要么可通行变成行军走廊，都与「不参战」矛盾。
+COLS, ROWS = 6, 4
+ROWS_ENEMY = (0, 1)   # 敌方战场行；"back" 布阵自 rows[-1]（贴中线的前排）起填
+ROWS_ALLY = (2, 3)    # 己方战场行；"back" 布阵自 rows[-1]（贴己方边缘的后排）起填
 
 
 class Unit:
@@ -101,8 +109,8 @@ class Battle:
         self.dex = pokedex()
         self.units: list = []
         self.events: list = []
-        self._deploy(comp_a, team=0, rows=(3, 4, 5), layout=layout)
-        self._deploy(comp_b, team=1, rows=(0, 1, 2), layout=layout)
+        self._deploy(comp_a, team=0, rows=ROWS_ALLY, layout=layout)
+        self._deploy(comp_b, team=1, rows=ROWS_ENEMY, layout=layout)
         if synergy.synergies_on():  # S3：按场上当前形态一次性结算（无随机）
             synergy.apply([u for u in self.units if u.team == 0], comp_a)
             synergy.apply([u for u in self.units if u.team == 1], comp_b)
@@ -113,7 +121,8 @@ class Battle:
         cells = [(c, r) for r in rows for c in range(COLS)]
         if layout == "random":
             spots = self.rng.sample(cells, len(comp))
-        else:  # "back": 优先后排（靠己方边缘）密排
+        else:  # "back": 自 rows[-1] 行起密排（我方=后排起填、敌方=前排起填，
+               # 与旧 3+3 布阵的填充方向逐行对应，列表头=远程）
             order = sorted(cells, key=lambda p: abs(p[1] - rows[-1]))
             spots = order[:len(comp)]
         for piece, pos in zip(comp, spots):
