@@ -19,6 +19,7 @@
 import random
 from data import pokedex
 import economy
+import items as items_mod   # S5 装备：仓库 + 合成/装备策略（L1+）
 import shop as shop_mod
 from combat import COLS  # C-sym 棋盘列数（docs/10 §1.5）：列对位随棋盘常量走
 from shop import OwnedPiece, SharedPool, try_combine
@@ -115,6 +116,13 @@ class Bot:
         self.synergy_formed_type = None
         self.combines = 0
         self.refreshes = 0
+        # ---- S5 装备（items_on 时启用；L0 教学沙包不参与合成/装备）----
+        self.inventory = items_mod.Inventory()  # 组件池 + 待装备成品
+        self.stone_used = False                 # 进化石：每 bot 每局一次（8s 冷却的 sim 语义）
+        self.item_drops = 0                     # 收到的组件数
+        self.item_crafts = 0                    # 合成次数
+        self.item_equips = 0                    # 装备次数
+        self.stone_triggers = 0                 # 进化石触发的通信进化数
 
     # ---- 通用视图 ----
     def all_pieces(self) -> list:
@@ -151,8 +159,87 @@ class Bot:
             self._update_target(round_no, others)
         self._sell_pass(round_no, rng)
         self._shopping(round_no, rng)
+        self._items_pass(round_no, others)
         self._select_board(round_no, rng)
         self._record(round_no)
+
+    # ---- S5 装备整理（L1+；items_on 时启用）----
+    def _items_pass(self, round_no: int, others: list) -> None:
+        """合成（优先级表，人格差异）→ 进化石通信进化 → 通信 3合1 解锁 → 装备。
+
+        全程确定性（无 rng）：合成/装备次序由固定序与棋子列表序决定。
+        顺序在 _select_board 之前——进化/合成改变棋子池，上场选择要看
+        新形态；装备本身不影响上场评分（power 是纯 BST）。
+        """
+        if not items_mod.items_on() or self.ability == 0:
+            return
+        dex = pokedex()
+        # 1) 合成：组件 ≥2 即按优先级出成品（幸运蛋达全场上限则让位）
+        wants_stone = not self.stone_used and any(
+            o.piece.species_id in items_mod.STONE_TARGETS
+            for o in self.all_pieces())
+        priority = items_mod.craft_priority(self.pers_key, wants_stone)
+        while True:
+            lucky_ok = items_mod.lucky_egg_count(others) < \
+                items_mod.LUCKY_EGG_GLOBAL_CAP
+            if items_mod.craft_best(self.inventory, priority, lucky_ok) is None:
+                break
+            self.item_crafts += 1
+        # 2) 进化石：装备到通信族中段形态上即触发通信进化（不消耗、每局一次）
+        if "evo_stone" in self.inventory.finished and not self.stone_used:
+            for o in sorted(self.all_pieces(),
+                            key=lambda x: -dex.bst(x.piece.species_id)):
+                nxt = items_mod.STONE_TARGETS.get(o.piece.species_id)
+                if o.item is None and nxt and self.pool.remaining.get(nxt, 0) > 0:
+                    self.inventory.finished.remove("evo_stone")
+                    o.item = "evo_stone"
+                    self.item_equips += 1
+                    self.pool.take(nxt)
+                    o.piece = shop_mod.make_piece(nxt, self.templates)
+                    o.sources.append(nxt)      # 池记账：进化形态占 1 张
+                    self.stone_used = True
+                    self.stone_triggers += 1
+                    break
+        # 3) 通信 3合1 解锁：3 只通信族 + 任意非进化石成品 → 装上即合成
+        for sid in sorted(shop_mod.TRADE_EVOLUTIONS):
+            if self.count_species(sid) < 3:
+                continue
+            spare = [k for k in self.inventory.finished if k != "evo_stone"]
+            if not spare:
+                continue
+            target = next((o for o in self.all_pieces()
+                           if o.piece.species_id == sid and o.item is None), None)
+            if target is None:
+                continue
+            self.inventory.finished.remove(spare[0])
+            target.item = spare[0]
+            self.item_equips += 1
+            self.combines += len(try_combine(
+                self.board, self.bench, self.pool, self.templates,
+                self.inventory))
+        # 4) 装备：战斗件按优先级给主 C（BST 最高、空手者），幸运蛋给最弱棋
+        by_bst = sorted(self.all_pieces(),
+                        key=lambda o: -dex.bst(o.piece.species_id))
+        for key in [k for k in self.inventory.finished if k != "lucky_egg"]:
+            for o in by_bst:
+                if o.item is None:
+                    self.inventory.finished.remove(key)
+                    o.item = key
+                    self.item_equips += 1
+                    break
+        if "lucky_egg" in self.inventory.finished:
+            for o in reversed(by_bst):        # 最弱棋背蛋（不占主 C 的 1 格）
+                if o.item is None:
+                    self.inventory.finished.remove("lucky_egg")
+                    o.item = "lucky_egg"
+                    self.item_equips += 1
+                    break
+
+    def _unequip(self, owned: OwnedPiece) -> None:
+        """卸下装备回仓库（卖棋自动卸下，无惩罚——docs/07 §3）。"""
+        if owned.item is not None:
+            self.inventory.finished.append(owned.item)
+            owned.item = None
 
     # ---- 升级人口 ----
     def _maybe_buy_xp(self, round_no: int, others: list) -> None:
@@ -233,6 +320,7 @@ class Bot:
     # ---- 卖棋整理（备战席容量管理 + L2 卖偏离羁绊）----
     def _sell_pass(self, round_no: int, rng: random.Random) -> None:
         def do_sell(owned: OwnedPiece) -> None:
+            self._unequip(owned)   # S5：卖棋自动卸下回仓库（无惩罚）
             self.gold += shop_mod.sell_owned(owned, self.pool)
             if owned in self.bench:
                 self.bench.remove(owned)
@@ -273,8 +361,12 @@ class Bot:
         if copies == 1:
             score += 600 if valuable else 250    # 第 2 只：3 合 1 进度
         elif copies >= 2:
-            score += (900 if valuable else 300) \
-                if sid not in shop_mod.TRADE_EVOLUTIONS else -800
+            # 通信族第 3 只：装备关 = 合不成（S2 §1.5 暂缓），不追；
+            # 装备开 = 可用任意成品解锁合成，按正常复制件估值
+            if sid in shop_mod.TRADE_EVOLUTIONS and not items_mod.items_on():
+                score += -800
+            else:
+                score += 900 if valuable else 300
         score += {1: 0, 2: 100, 3: 220}[piece.tier]   # 高档位通用升级价值
         if in_target:
             score += 400            # 供主羁绊
@@ -351,6 +443,7 @@ class Bot:
                 new_val = self._slot_score(sid) if self.ability >= 2 \
                     else pokedex().bst(sid)
                 if self.ability == 0 or power(victim, self.target_types) < new_val:
+                    self._unequip(victim)   # S5：卖棋自动卸下回仓库
                     self.gold += shop_mod.sell_owned(victim, self.pool)
                     self.bench.remove(victim)
                 else:
@@ -359,7 +452,8 @@ class Bot:
             self.gold -= price
             self.bench.append(owned)
             self.combines += len(try_combine(
-                self.board, self.bench, self.pool, self.templates))
+                self.board, self.bench, self.pool, self.templates,
+                self.inventory))
             bought = True
         return bought
 
@@ -447,7 +541,9 @@ class Bot:
 
     # ---- 供 battle 用的 comp ----
     def battle_comp(self) -> list:
-        return [o.piece for o in self.board]
+        """上场名单：带装备者传 (Piece, item_key) 二元组（S5 协议），空手传裸 Piece。"""
+        return [o.piece if o.item is None else (o.piece, o.item)
+                for o in self.board]
 
     # ---- 统计 ----
     def _record(self, round_no: int) -> None:

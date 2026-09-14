@@ -31,6 +31,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import economy  # noqa: E402
 import shop as shop_mod  # noqa: E402
+import items as items_mod  # noqa: E402  # S5 装备（docs/07）
 import rng as rng_mod  # noqa: E402  # S7 分层派生（docs/09 §2.2）
 from bots import Bot, LINEUP, assign_personalities, main_types  # noqa: E402
 from combat import Battle  # noqa: E402
@@ -131,6 +132,8 @@ class Match:
         #    免费滚走 shop 子流（j=0），各席独立互不位移
         for b in self.alive():
             b.gold += economy.round_income(b.gold, b.streak)
+            if items_mod.items_on():   # S5 幸运蛋：持有者每轮 +1 金（全场限 2 件在合成侧）
+                b.gold += items_mod.lucky_egg_income(b)
             b.level, b.xp = economy.gain_round_xp(b.level, b.xp)
             b.shop.roll(self._shop_rng(round_no, b.seat), b.level)
         # 2) bot 决策（耗时统计：perf_counter 含 OS 调度抖动，实验读 p99）。
@@ -257,7 +260,8 @@ class Match:
         wave = [make_piece(sid, self.templates) for sid in wave_ids]
         events = []
         battle_i = 0   # PVE 轮的野怪战同样走 battle 子流（单场可回放）
-        for i, b in enumerate(self.alive()):
+        alive = self.alive()
+        for i, b in enumerate(alive):
             res = Battle(b.battle_comp(), list(wave),
                          self._battle_rng(round_no, battle_i),
                          layout="back").run()
@@ -270,7 +274,33 @@ class Match:
             else:
                 dmg = economy.loss_damage(round_no, res["survivors"][1])
                 events.append((b, dmg, f"野怪败 -{dmg}"))
+        if items_mod.items_on():
+            self._item_drops(round_no, alive)
         return events
+
+    def _item_drops(self, round_no: int, alive: list) -> None:
+        """S5 组件掉落（docs/07 §1 的 v1 读法）：人头保底 + 加发追赶。
+
+        保底：每位存活玩家每野怪轮 +1 组件（种类随机）；加发：另
+        PVE_BONUS_DROPS 件按血量加权分发（hp ≤ 存活均值 = 落后方，权重×2，
+        docs/03 §5 追赶渠道）。全部走 pve 子流的掉落 counter 段
+        （PVE_DROP_COUNTER 起）——与掉金 counter=i 互不位移（S7 分层）。
+        """
+        comps = sorted(items_mod.COMPONENT_ORDER)
+        # 保底：counter = 段起点 + 存活者序
+        for i, b in enumerate(alive):
+            rng_d = self._derive(round_no, "pve",
+                                 items_mod.PVE_DROP_COUNTER + i)
+            b.inventory.add_component(rng_d.choice(comps))
+            b.item_drops += 1
+        # 加发：counter = 段起点 + 256 + j（与保底段隔离）
+        weights = items_mod.drop_weights(alive)
+        for j in range(items_mod.PVE_BONUS_DROPS):
+            rng_d = self._derive(round_no, "pve",
+                                 items_mod.PVE_DROP_COUNTER + 256 + j)
+            rec = rng_d.choices(alive, weights=weights)[0]
+            rec.inventory.add_component(rng_d.choice(comps))
+            rec.item_drops += 1
 
     # ---- 结果摘要 ----
     def result(self) -> dict:
@@ -284,6 +314,25 @@ class Match:
             "rounds_with_damage": self.rounds_with_damage,
             "decide_times": list(self.decide_times),
             "battles": self.battles,
+            # S5 装备统计（items 关时全 0）
+            "items_on": items_mod.items_on(),
+            "item_stats": {
+                "drops": sum(b.item_drops for b in self.bots),
+                "crafts": sum(b.item_crafts for b in self.bots),
+                "equips": sum(b.item_equips for b in self.bots),
+                "stone_triggers": sum(b.stone_triggers for b in self.bots),
+                "lucky_eggs": items_mod.lucky_egg_count(self.bots),
+                # 通信进化终点现存（胡地 65/怪力 68/耿鬼 94）按来源分账：
+                # len(sources)==2 = 进化石单人进化；>=4 = 3合1（持装备门）
+                "stone_forms": sum(1 for b in self.bots
+                                   for o in b.all_pieces()
+                                   if o.piece.species_id in {65, 68, 94}
+                                   and len(o.sources) == 2),
+                "trade_merges": sum(1 for b in self.bots
+                                    for o in b.all_pieces()
+                                    if o.piece.species_id in {65, 68, 94}
+                                    and len(o.sources) >= 4),
+            },
         }
 
 

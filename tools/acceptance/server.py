@@ -79,6 +79,7 @@ ul{margin:6px 0;padding-left:20px}li{margin:3px 0}
 <a href="/match"><button>单局模拟（8 bot 锦标赛）</button></a>
 <a href="/experiments"><button>实验台（8 个对照实验）</button></a>
 <a href="/synergy"><button>羁绊表（17 系）</button></a>
+<a href="/scenarios"><button>场景动画库（分场景带动画）</button></a>
 </div>
 
 <h2>静态设计稿<span class="badge ok">已上稿</span></h2>
@@ -129,7 +130,7 @@ details{margin-top:16px}.kbd{background:#e6e0cf;border:1px solid #b9b3a0;border-
 #evpanel div.ev b{color:#29302b}
 @media(max-width:980px){.layout{grid-template-columns:1fr}.stage{order:1}#evpanel{order:2;max-height:300px}.settings{order:3}}
 </style></head><body><main>
-<header><h1>战斗动画验收台 · seed=__SEED__</h1><a href="/">← 返回验收清单</a> · <a href="__SYNLINK__"><button style="display:inline-block;width:auto;min-height:0;padding:4px 10px;font-size:12px">__SYNBTN__</button></a><div class="tabs" id="tabs"></div></header>
+<header><h1>战斗动画验收台 · seed=__SEED__ <span class="muted" id="scenlabel" data-l="__SCENLABEL__" data-s="__SCEN__"></span></h1><a href="/">← 返回验收清单</a> · <a href="__SYNLINK__"><button style="display:inline-block;width:auto;min-height:0;padding:4px 10px;font-size:12px">__SYNBTN__</button></a><div class="tabs" id="tabs"></div></header>
 <div class="layout">
 <aside class="settings">
 <label for="seed">战斗种子</label><input id="seedin" type="number" value="__SEED__" min="1" max="99999">
@@ -160,13 +161,15 @@ details{margin-top:16px}.kbd{background:#e6e0cf;border:1px solid #b9b3a0;border-
 const seed=__SEED__, DT=__DT__, syn=__SYN__;
 const TAB_SEEDS=[3,7,11,42,100,777];
 (function(){const el=document.getElementById('tabs');
-el.innerHTML=TAB_SEEDS.map(n=>'<a href="/anim?seed='+n+'&synergy='+syn+'" class="'+(n===seed?'on':'')+'">seed '+n+'</a>').join('')
+el.innerHTML=TAB_SEEDS.map(n=>'<a href="/anim?seed='+n+'&synergy='+syn+(scenS?'&scenario='+scenS:'')+'" class="'+(n===seed?'on':'')+'">seed '+n+'</a>').join('')
 +(TAB_SEEDS.includes(seed)?'':'<a class="on">seed '+seed+'</a>');})();
 let frames=[], n=0, cur=0, playing=false, timer=null, events=[];
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
 const scrub=document.getElementById('scrub');
 function clock(text){document.getElementById('clock-state').textContent=text;}
-fetch('/api/prepare?seed='+seed+'&synergy='+syn).then(r=>r.json()).then(m=>{
+const scen=document.getElementById('scenlabel');
+const scenS=scen.dataset.s;
+if(scenS){fetch('/api/prepare?seed='+seed+'&synergy='+syn+'&scenario='+scenS).then}else{fetch('/api/prepare?seed='+seed+'&synergy='+syn).then}(r=>r.json()).then(m=>{
   n=m.n; events=m.events;
   document.getElementById('meta').textContent=
     m.na+' vs '+m.nb+' · '+m.n+' 帧 @10fps · '+(m.n*DT).toFixed(1)+'s · 胜者='+(m.result===null?'平':('AB'[m.result]??m.result))+' · '+m.casts+' 次大招 · 构建 '+m.key;
@@ -211,9 +214,10 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();}); 
 </script></body></html>"""
 
 
-def render_battle(seed: int, synergy: bool = False) -> dict:
-    """跑一场战斗并渲染全部帧（带源码哈希缓存；synergy=开 S3 羁绊）。"""
+def render_battle(seed: int, synergy: bool = False, scenario: str = None) -> dict:
+    """跑一场战斗并渲染全部帧（缓存；synergy=羁绊；scenario=场景库预设）."""
     import data
+    import status as status_mod
     import synergy as syn
     from decoders import Front, Font16, Palettes
     from render_battle_gif import BattleAnimation
@@ -228,13 +232,15 @@ def render_battle(seed: int, synergy: bool = False) -> dict:
         h.update(rel.encode())
         h.update((ROOT / rel).read_bytes())
     src_hash = h.hexdigest()[:10]
-    key = f"s{seed}{'sy' if synergy else ''}_{META_REV}_{src_hash}"
+    key = (f"s{seed}{'sy' if synergy else ''}"
+           f"{'sc_' + scenario if scenario else ''}_{META_REV}_{src_hash}")
     out_dir = ROOT / ".build" / "acceptance" / key
     meta_path = out_dir / "meta.json"
     if not meta_path.exists():
         with _LOCK:
             if not meta_path.exists():
-                prev = syn.SYNERGIES_ON
+                prev_syn = syn.SYNERGIES_ON
+                prev_status = status_mod.STATUS_ON
                 syn.SYNERGIES_ON = synergy  # 仅在锁内翻转，渲染完还原
                 front, pal, font = Front(), Palettes(), Font16()
                 roster = build_roster()
@@ -242,9 +248,18 @@ def render_battle(seed: int, synergy: bool = False) -> dict:
                 def find(name):
                     return next(p for ps in roster.values() for p in ps if p.name == name)
 
-                comp_a = [find(n) for n in ("雷丘", "妙蛙花", "隆隆岩", "怪力", "水伊布")]
-                comp_b = [find(n) for n in ("暴鲤龙", "喷火龙", "胡地", "大比鸟", "霸王花")]
-                anim = BattleAnimation(comp_a, comp_b, seed, front, pal, font)
+                sc = SCENARIOS.get(scenario) if scenario else None
+                if sc:
+                    comp_a = [find(n) for n in sc["a"]]
+                    comp_b = [find(n) for n in sc["b"]]
+                    weather = sc.get("weather")
+                    status_mod.STATUS_ON = bool(sc.get("status"))
+                else:
+                    comp_a = [find(n) for n in ("雷丘", "妙蛙花", "隆隆岩", "怪力", "水伊布")]
+                    comp_b = [find(n) for n in ("暴鲤龙", "喷火龙", "胡地", "大比鸟", "霸王花")]
+                    weather = None
+                anim = BattleAnimation(comp_a, comp_b, seed, front, pal, font,
+                                       weather_name=weather)
                 t_end = max(e[0] for e in anim.events)
                 result = next((e[2] for e in reversed(anim.events)
                                if e[1] == "end"), None)
@@ -262,7 +277,8 @@ def render_battle(seed: int, synergy: bool = False) -> dict:
                 for e in anim.events:
                     events.append({"t": round(e[0], 2),
                                    "text": _fmt_event(anim, e)})
-                syn.SYNERGIES_ON = prev
+                syn.SYNERGIES_ON = prev_syn
+                status_mod.STATUS_ON = prev_status
                 fx_moments = [("0.2", "开战演出")]
                 first_atk = next((e[0] for e in anim.events
                                   if e[1] == "attack"), None)
@@ -278,6 +294,9 @@ def render_battle(seed: int, synergy: bool = False) -> dict:
                 meta = {"key": key, "n": i, "times": frames_meta,
                         "events": events, "result": result, "casts": n_casts,
                         "synergy": synergy, "fx": fx_moments,
+                        "scenario": scenario,
+                        "scenario_label": (SCENARIOS.get(scenario) or {}).get("label", ""),
+                        "weather": weather,
                         "na": " ".join(p.name for p in comp_a),
                         "nb": " ".join(p.name for p in comp_b)}
                 meta_path.write_text(json.dumps(meta, ensure_ascii=False))
@@ -347,7 +366,15 @@ pre{background:#fffdf5;border:1px solid #899081;border-radius:4px;padding:10px;f
 
 NAV = ('<div class="tabs"><a href="/">总览</a><a href="/anim?seed=11">动画验收台</a>'
        '<a href="/roster">棋子库</a><a href="/match">单局模拟</a>'
-       '<a href="/experiments">实验台</a><a href="/synergy">羁绊表</a></div>')
+       '<a href="/experiments">实验台</a><a href="/synergy">羁绊表</a>'
+       '<a href="/scenarios">场景动画库</a></div>')
+
+SCEN_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
+             "<title>场景动画库 · PokeTactics</title><style>" + CONSOLE_CSS + "</style>"
+             "<main><header><h1>场景动画库</h1>" + NAV + "</header>"
+             "<p>每个分场景模拟的动画回放——与实验台文字读数一一对应。</p>"
+             "<div class=cardrow>__CARDS__</div></main></body></html>")
+
 
 ROSTER_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
                "<title>棋子库 · PokeTactics</title><style>" + CONSOLE_CSS + "</style>"
@@ -389,10 +416,14 @@ EXP_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
             "<script>const EXPS={effectiveness:'克制×倍率×等级 六臂',melee:'近远程补偿六臂',"
             "tiering:'BST 档位同质化',synergy:'羁绊开/关',weather:'四天气',status:'状态/Buff',"
             "balance:'ICE/BUG 平衡',match:'M2 四条验收(50局)'};"
-            "fetch('/api/experiments').then(r=>r.json()).then(names=>{"
+            "fetch('/api/experiments').then(r=>r.json()).then(names=>"
+            "fetch('/api/scenarios').then(r=>r.json()).then(scs=>{"
+            "const byExp={};scs.forEach(x=>{(byExp[x.exp]=byExp[x.exp]||[]).push(x)});"
             "document.getElementById('cards').innerHTML=names.map(n=>"
             "'<div class=card><b>'+n+'</b><br><span class=muted>'+(EXPS[n]||'')+'</span>"
-            "<button onclick=run(this) data-n='+n+'>运行</button></div>').join('');});"
+            "<button onclick=run(this) data-n='+n+'>运行</button>"
+            "+((byExp[n]||[]).map(x=>'<br><a href=\'/anim?seed=7&scenario='+x.key+'\'>▶ '+x.label+'</a>').join(''))"
+            "+'</div>').join('');});});"
             "function run(b){document.getElementById('out').textContent='运行中…（最长 60s）';"
             "fetch('/api/experiment?name='+b.dataset.n).then(r=>r.text())"
             ".then(t=>document.getElementById('out').textContent=t);}</script></body></html>")
@@ -408,6 +439,46 @@ SYN_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
             "</body></html>")
 
 
+
+
+# ---- 场景库：分场景模拟的动画预设（comp_a/comp_b 用棋子中文名）----
+SCENARIOS = {
+    "eff_clean_2x": {"exp": "effectiveness", "label": "克制 · 干净2x对位",
+                     "a": ["水箭龟"] * 6, "b": ["喷火龙"] * 6, "weather": None},
+    "eff_4x_rock": {"exp": "effectiveness", "label": "克制 · 4x+近战（岩地欠账）",
+                    "a": ["水箭龟"] * 6, "b": ["隆隆岩"] * 6, "weather": None},
+    "melee_counterpart": {"exp": "melee", "label": "近战 · 物特对照组",
+                          "a": ["怪力"] * 6, "b": ["胡地"] * 6, "weather": None},
+    "melee_lunge_pair": {"exp": "melee", "label": "近战 · 两段线终形态",
+                         "a": ["风速狗"] * 6, "b": ["喷火龙"] * 6, "weather": None},
+    "weather_rain": {"exp": "weather", "label": "天气 · 雨（水增益火减）",
+                     "a": ["水箭龟", "水伊布", "宝石海星", "蚊香泳士", "哥达鸭", "水箭龟"],
+                     "b": ["喷火龙", "风速狗", "胡地", "大比鸟", "霸王花", "喷火龙"],
+                     "weather": "rain"},
+    "weather_sun": {"exp": "weather", "label": "天气 · 晴（火增益水减）",
+                    "a": ["水箭龟", "水伊布", "宝石海星", "蚊香泳士", "哥达鸭", "水箭龟"],
+                    "b": ["喷火龙", "风速狗", "胡地", "大比鸟", "霸王花", "喷火龙"],
+                    "weather": "sun"},
+    "weather_sand": {"exp": "weather", "label": "天气 · 沙暴（岩地主场）",
+                     "a": ["隆隆岩", "隆隆石", "尼多王", "尼多后", "大岩蛇", "钻角犀兽"],
+                     "b": ["喷火龙", "妙蛙花", "水箭龟", "胡地", "大比鸟", "霸王花"],
+                     "weather": "sand"},
+    "syn_ice_bias": {"exp": "synergy", "label": "羁绊 · 冰偏置水队 vs 散件",
+                     "a": ["拉普拉斯", "水箭龟", "水伊布", "宝石海星", "蚊香泳士", "哥达鸭"],
+                     "b": ["喷火龙", "胡地", "怪力", "大比鸟", "霸王花", "妙蛙花"],
+                     "weather": None},
+    "syn_poison_deep": {"exp": "synergy", "label": "羁绊 · 毒深池 vs 飞行",
+                        "a": ["尼多后", "尼多王", "大食花", "大针蜂", "臭臭花", "霸王花"],
+                        "b": ["大比鸟", "喷火龙", "暴鲤龙", "大嘴蝠", "超音蝠", "烈雀"],
+                        "weather": None},
+    "status_shock": {"exp": "status", "label": "状态 · 电麻展示（自动开状态）",
+                     "a": ["雷丘", "三合一磁怪", "雷伊布", "皮卡丘", "雷丘", "三合一磁怪"],
+                     "b": ["水箭龟", "水伊布", "宝石海星", "蚊香泳士", "哥达鸭", "拉普拉斯"],
+                     "weather": None, "status": True},
+    "balance_pair": {"exp": "balance", "label": "平衡 · 水vs岩（上限检验）",
+                     "a": ["水箭龟"] * 6, "b": ["隆隆岩"] * 6, "weather": None},
+}
+SCENARIO_SEED_DEFAULT = 7
 
 def _sim_state_hash() -> str:
     h = hashlib.sha256()
@@ -490,13 +561,34 @@ class Handler(SimpleHTTPRequestHandler):
         elif parsed.path == "/anim":
             seed = int(qs.get("seed", ["7"])[0])
             syn_on = qs.get("synergy", ["1"])[0] == "1"  # 2026-09-14 起 S3 默认开
+            scenario = qs.get("scenario", [""])[0] or None
             body = (PLAYER_HTML.replace("__SEED__", str(seed))
                     .replace("__SYN__", "1" if syn_on else "0")
                     .replace("__SYNLINK__",
-                             f"/anim?seed={seed}&synergy={0 if syn_on else 1}")
+                             f"/anim?seed={seed}&synergy={0 if syn_on else 1}"
+                             + (f"&scenario={scenario}" if scenario else ""))
                     .replace("__SYNBTN__",
                              "羁绊：开（点击关闭）" if syn_on else "羁绊：关（点击开启）")
+                    .replace("__SCEN__", scenario or "")
+                    .replace("__SCENLABEL__",
+                             (SCENARIOS.get(scenario) or {}).get("label", ""))
                     .replace("__DT__", str(FPS_DT))).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        elif parsed.path == "/scenarios":
+            cards = []
+            for k, sc in SCENARIOS.items():
+                cards.append(
+                    f'<div class="card"><b>{sc["label"]}</b>'
+                    f'<br><span class="muted">{sc["exp"]} 实验 · '
+                    f'{"天气:" + (sc.get("weather") or "无")}'
+                    f'{" · 状态开" if sc.get("status") else ""}</span>'
+                    f'<a href="/anim?seed={SCENARIO_SEED_DEFAULT}&scenario={k}">'
+                    f'<button class="primary">播放动画</button></a></div>')
+            body = (SCEN_HTML.replace("__CARDS__", "\n".join(cards))).encode()
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
@@ -514,8 +606,9 @@ class Handler(SimpleHTTPRequestHandler):
         elif parsed.path == "/api/prepare":
             seed = int(qs.get("seed", ["7"])[0])
             syn_on = qs.get("synergy", ["1"])[0] == "1"
+            scenario = qs.get("scenario", [""])[0] or None
             t0 = time.time()
-            meta = render_battle(seed, syn_on)
+            meta = render_battle(seed, syn_on, scenario)
             print(f"[acceptance] seed={seed} 帧渲染+缓存 "
                   f"{time.time() - t0:.1f}s（key={meta['key']}）")
             self._json(meta)
@@ -544,6 +637,9 @@ class Handler(SimpleHTTPRequestHandler):
             with _LOCK:  # match 子进程读共享文件，串行化避免缓存竞态
                 out = run_experiment(f"__match_{seed}")
             self._txt(out)
+        elif parsed.path == "/api/scenarios":
+            self._json([{"key": k, "label": v["label"], "exp": v["exp"]}
+                       for k, v in SCENARIOS.items()])
         elif parsed.path == "/api/experiments":
             self._json(sorted(set(WHITELIST) - {k for k in WHITELIST if k.startswith("__")}))
         elif parsed.path == "/api/experiment":

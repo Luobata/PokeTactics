@@ -24,6 +24,7 @@ from roster import Piece
 import synergy  # S3 羁绊：默认 SYNERGIES_ON=False，零随机、零事件流变更
 import status as status_mod   # S12 状态/Buff：默认 STATUS_ON=False（docs/06）
 import weather as weather_mod  # S11 天气：默认无天气（docs/05）
+import items as items_mod     # S5 装备：comp 元素可带 (Piece, item) 二元组（docs/07）
 
 TICK = 0.1  # 解算步长（秒）
 # ---- C-sym 棋盘（docs/10 §1.3/§1.5，2026-09-14 sim 联动落地）----
@@ -72,6 +73,15 @@ class Unit:
         self.synergy_heal = 0.0      # 每秒回复（最大 HP 比例）
         self.synergy_energy = 0.0    # 回能加成（比例）
         self.synergy_ult_cap = None  # 单次大招承伤上限（最大 HP 比例）
+        # ---- S5 装备结算维度（items.apply_to_unit 写入，默认中性值）----
+        self.item_ult_dmg = 0.0     # 大招伤害加成（比例，聚光镜）
+        self.item_dr = 0.0          # 受伤减免（比例，天气石 v1 折算）
+        self.item_heal = 0.0        # 每秒回复（最大 HP 比例，剩饭）
+        self.item_energy = 0.0      # 回能加成（比例）
+        self.item_dodge = 0.0       # 被击闪避（比例，亮粉）
+        self.item_type_dmg = None   # 系别伤害加成 {属性: 比例}（三色围巾）
+        self.item_sash = False      # 气势披带：致命伤保留 1 HP
+        self.item_sash_used = False # 披带一次/场
 
     @property
     def alive(self) -> bool:
@@ -112,8 +122,11 @@ class Battle:
         self._deploy(comp_a, team=0, rows=ROWS_ALLY, layout=layout)
         self._deploy(comp_b, team=1, rows=ROWS_ENEMY, layout=layout)
         if synergy.synergies_on():  # S3：按场上当前形态一次性结算（无随机）
-            synergy.apply([u for u in self.units if u.team == 0], comp_a)
-            synergy.apply([u for u in self.units if u.team == 1], comp_b)
+            # S5 协议：comp 元素可能带 (Piece, item) 二元组——羁绊只看裸 Piece
+            plain_a = [e[0] if isinstance(e, tuple) else e for e in comp_a]
+            plain_b = [e[0] if isinstance(e, tuple) else e for e in comp_b]
+            synergy.apply([u for u in self.units if u.team == 0], plain_a)
+            synergy.apply([u for u in self.units if u.team == 1], plain_b)
         status_mod.init_battle(self)  # S12：状态容器（默认无操作）
         self.duration = 0.0
 
@@ -125,8 +138,13 @@ class Battle:
                # 与旧 3+3 布阵的填充方向逐行对应，列表头=远程）
             order = sorted(cells, key=lambda p: abs(p[1] - rows[-1]))
             spots = order[:len(comp)]
-        for piece, pos in zip(comp, spots):
+        for entry, pos in zip(comp, spots):
+            # S5 装备协议：comp 元素可为 (Piece, item_key) 二元组（带装备）或
+            # 裸 Piece（无装备——prototype/野怪波次走此路径，行为不变）
+            piece, item_key = entry if isinstance(entry, tuple) else (entry, None)
             unit = Unit(piece, team, pos)
+            if item_key is not None:   # S5 施加点（S3 synergy.apply 同模式）
+                items_mod.apply_to_unit(unit, item_key)
             unit.next_act = self.rng.uniform(0, 0.3)  # 起手抖动，消除先手偏差
             unit.idx = len(self.units)
             self.units.append(unit)
@@ -135,8 +153,9 @@ class Battle:
     # ---- 主循环 ----
     def run(self) -> dict:
         t = 0.0
-        # S3 持续羁绊（水之治疗等）：每 1s 一跳；v1 不入事件流（渲染端暂不表现）
-        regen_units = [u for u in self.units if u.synergy_heal > 0]
+        # S3 持续羁绊（水之治疗等）+ S5 剩饭：每 1s 一跳；v1 不入事件流
+        regen_units = [u for u in self.units
+                       if u.synergy_heal > 0 or u.item_heal > 0]
         next_regen = 1.0
         while t <= MAX_BATTLE_SECONDS:
             self.duration = t
@@ -150,7 +169,7 @@ class Battle:
                 for u in regen_units:
                     if u.alive and u.hp < u.max_hp:
                         healed = min(u.max_hp, u.hp + max(
-                            1, int(u.max_hp * u.synergy_heal))) - u.hp
+                            1, int(u.max_hp * (u.synergy_heal + u.item_heal)))) - u.hp
                         u.hp += healed
                         if healed:
                             self.events.append((t, "regen", u.idx, healed))
@@ -219,6 +238,12 @@ class Battle:
                 queue.append((nxt, first or nxt))
 
     def _strike(self, u: Unit, target: Unit, t: float) -> None:
+        # S5 亮粉闪避（施加点）：出手即判定，命中失败 = 整次挥空——伤害/回能/
+        # 耗能都不发生，事件流只补一条 miss（渲染契约：attack/cast 数字与
+        # 掉血一致）。骰走本场 battle 子流，确定性不受影响
+        if target.item_dodge > 0 and self.rng.random() < target.item_dodge:
+            self.events.append((t, "miss", u.idx, target.idx))
+            return
         move = None
         if u.energy >= ENERGY_MAX and u.piece.move_id:
             move = self.dex.moves[u.piece.move_id]
@@ -233,7 +258,8 @@ class Battle:
                               u.attack_stat(special), target.defense_stat(special),
                               stab, eff)
                 target.energy = min(ENERGY_MAX, target.energy + int(
-                    ENERGY_PER_HIT_TAKEN * (1.0 + target.synergy_energy)))
+                    ENERGY_PER_HIT_TAKEN * (1.0 + target.synergy_energy
+                                            + target.item_energy)))
             u.energy = 0
             u.casts += 1
             dmg = self._final_damage(u, target, move, dmg)
@@ -250,12 +276,17 @@ class Battle:
                           u.attack_stat(special), target.defense_stat(special),
                           stab, eff)
             u.energy = min(ENERGY_MAX, u.energy + int(
-                ENERGY_PER_ATTACK * (1.0 + u.synergy_energy)))
+                ENERGY_PER_ATTACK * (1.0 + u.synergy_energy + u.item_energy)))
             dmg = self._final_damage(u, target, None, dmg)
             self.events.append((t, "attack", u.idx, target.idx, dmg))
         target.hp -= dmg
         u.damage_dealt += dmg
         status_mod.on_hit(self, u, target, move, t)  # S12：几率施加（默认无操作）
+        # S5 气势披带（施加点）：致命伤保留 1 HP，一次/场
+        if target.hp <= 0 and target.item_sash and not target.item_sash_used:
+            target.item_sash_used = True
+            target.hp = 1
+            self.events.append((t, "sash", target.idx))
         if target.hp <= 0:
             target.hp = 0
             self.events.append((t, "die", target.idx))
@@ -273,9 +304,13 @@ class Battle:
         dmg = int(dmg * (1.0 + u.synergy_dmg))
         if move is not None:
             dmg = int(dmg * (1.0 + u.synergy_ult_dmg))
+            # ---- S5 装备结算钩子（聚光镜大招乘区 / 三色围巾系别乘区）----
+            dmg = int(dmg * (1.0 + u.item_ult_dmg))
+            if u.item_type_dmg and move["type"] in u.item_type_dmg:
+                dmg = int(dmg * (1.0 + u.item_type_dmg[move["type"]]))
             if target.synergy_ult_cap is not None:
                 dmg = min(dmg, int(target.max_hp * target.synergy_ult_cap))
-        return int(dmg * (1.0 - target.synergy_dr))
+        return int(dmg * (1.0 - target.synergy_dr) * (1.0 - target.item_dr))
 
     def _result(self) -> dict:
         alive = [u for u in self.units if u.alive]

@@ -19,6 +19,7 @@ import random
 from typing import Dict, List, Optional
 
 from data import pokedex
+import items as items_mod   # S5 装备：通信进化持装备门（items_on 时生效）
 from roster import (LEVEL_BY_TIER, RANGED, MELEE, Piece, build_roster,
                     tier_for_bst)
 
@@ -96,6 +97,7 @@ class OwnedPiece:
         self.piece = piece
         self.invested = invested
         self.sources = [piece.species_id]
+        self.item = None   # S5 装备栏：每单位 1 格（None = 空手，docs/07 §3）
 
     def __repr__(self) -> str:
         return f"{self.piece.name}(T{self.piece.tier},投{self.invested})"
@@ -171,11 +173,15 @@ def sell_owned(owned: OwnedPiece, pool: SharedPool) -> int:
 
 
 def try_combine(board: List[OwnedPiece], bench: List[OwnedPiece],
-                pool: SharedPool, templates: Dict[int, Piece]) -> List[str]:
+                pool: SharedPool, templates: Dict[int, Piece],
+                inventory=None) -> List[str]:
     """3 合 1 自动进化（S2 §1）：凑齐 3 只同图鉴号立即合成下一形态。
 
     在 board+bench 上反复扫描直到无可合成；合成品优先落 bench（备战），
-    池中无进化形态存量或通信进化门未开时保持原状等待（S2 §1.5/§1.4）。
+    池中无进化形态存量时保持原状等待（S2 §1.4）。S5 装备条款（S2 §1.5）：
+    通信进化族（勇基拉/豪力/鬼斯通）的 3 合 1 要求选中三只中至少一只
+    **持有任意装备**——装备随棋子进入新形态（不消耗）；选中三只里多余
+    的持装备者卸回 inventory（每单位 1 格）。items 关闭时维持旧门（暂缓）。
     返回日志（无进化则空表）。
     """
     dex = pokedex()
@@ -194,16 +200,29 @@ def try_combine(board: List[OwnedPiece], bench: List[OwnedPiece],
             nxt = dex.next_evolution(sid)
             if nxt is None:
                 continue                       # 终形态不再合成（S2 §1.7）
+            three = group[:3]                  # board 在前、bench 在后，确定性
             if sid in TRADE_EVOLUTIONS:
-                continue                       # 通信进化需装备（S5 前暂缓）
+                holders = [o for o in group if o.item is not None]
+                if not (items_mod.items_on() and holders):
+                    continue                   # 通信进化需持装备（S5 前暂缓）
+                # 优先让持装备者入选（否则被前两只无装备者占坑卡死合成）
+                three = [holders[0]] + [o for o in group
+                                       if o is not holders[0]][:2]
             if pool.remaining.get(nxt, 0) <= 0:
                 continue                       # 池中无该形态，等待
-            three = group[:3]                  # board 在前、bench 在后，确定性
             pool.take(nxt)
             new_piece = make_piece(nxt, templates)
             merged_owned = OwnedPiece(new_piece,
                                       invested=sum(o.invested for o in three))
             merged_owned.sources = sum((o.sources for o in three), []) + [nxt]
+            # 装备继承（S2 §1.2）：首个持装备者的装备随棋子进入新形态；
+            # 其余持装备者卸回仓库（每单位 1 格，不吞装备）
+            for o in three:
+                if o.item is not None and merged_owned.item is None:
+                    merged_owned.item = o.item
+                elif o.item is not None and inventory is not None:
+                    inventory.finished.append(o.item)
+                o.item = None
             for o in three:  # 三只的池占用已并入 merged_owned.sources 记账
                 (board if o in board else bench).remove(o)
             bench.append(merged_owned)

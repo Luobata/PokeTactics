@@ -375,13 +375,16 @@ class BattleAnimation:
     """游标式回放：_ensure(T) 把事件推进到 T，frame(T) 只读「过去」状态。"""
 
     def __init__(self, comp_a, comp_b, seed: int,
-                 front: Front, pal: Palettes, font: Font16) -> None:
+                 front: Front, pal: Palettes, font: Font16,
+                 weather_name=None) -> None:
         self.front, self.pal, self.font = front, pal, font
+        self.weather_name = weather_name  # 场景动画：透传给 Battle（S11）
         self.move_type = {m["name"]: m["type"] for m in pokedex().moves.values()}
         # 显示层汉化：事件流契约不变（cast 事件仍存英文名），渲染/面板翻译
         self.move_zh = {m["name"]: (m.get("name_zh") or m["name"])
                         for m in pokedex().moves.values()}
-        b = Battle(comp_a, comp_b, random.Random(seed + 1))
+        b = Battle(comp_a, comp_b, random.Random(seed + 1),
+                  weather_name=weather_name)
         b.run()
         self.units = {u.idx: AnimUnit(u) for u in b.units}
         self.by_idx = {u.idx: u for u in b.units}
