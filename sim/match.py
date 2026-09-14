@@ -50,6 +50,25 @@ PVE_WAVES = [
 PVE_GOLD = (2, 3)   # 野怪轮胜利掉落 2-3 金（装备组件留 S5）
 
 
+
+def weather_for_round(round_no: int):
+    """S11 天气时刻表（docs/05 §1）：固定序列 1-25，26+ 按种子派生轮换。
+
+    天气只影响带属性招式（大招）的乘区（weather.damage_mult）。
+    """
+    if round_no <= 5:
+        return None
+    if round_no <= 10:
+        return "sun"
+    if round_no <= 15:
+        return "rain"
+    if round_no <= 20:
+        return "sand"
+    if round_no <= 25:
+        return "hail"
+    return ("sun", "rain", "sand", "hail", None)[round_no % 5]
+
+
 class Match:
     """一局完整模拟。run() 返回结果摘要 dict（experiment 复用）。"""
 
@@ -194,7 +213,8 @@ class Match:
                 b.counter_vs(a.board)
                 res = Battle(a.battle_comp(), b.battle_comp(),
                              self._battle_rng(round_no, battle_i),
-                             layout="back").run()
+                             layout="back",
+                             weather_name=weather_for_round(round_no)).run()
                 battle_i += 1
                 self.battles += 1
                 if items_mod.items_on():

@@ -92,6 +92,10 @@ import synergy as _syn
 _syn.SYNERGIES_ON = False  # 本报告基线建立于羁绊关（2026-09-14 起默认开）
 
 
+import combo as _cb, items as _it, status as _st
+_cb.COMBOS_ON = False; _it.ITEMS_ON = False; _st.STATUS_ON = False  # 2026-09-14 成套翻开后钉关保基线
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--games", type=int, default=1000)

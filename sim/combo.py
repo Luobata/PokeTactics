@@ -52,7 +52,7 @@ import synergy
 
 # ---- 模块级开关（模式照抄 synergy.SYNERGIES_ON / status.STATUS_ON）----
 # 由 sim/experiment_combo.py 切换；combat.Battle.run() 开头读取。
-COMBOS_ON = False
+COMBOS_ON = True  # 2026-09-14 成套翻开（用户批准；见 reports/flip-all-baseline-2026-09-14.md）
 
 
 def combos_on() -> bool:

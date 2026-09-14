@@ -180,6 +180,10 @@ def determinism_check(size: int, seed: int) -> None:
         raise SystemExit(1)
 
 
+import combo as _cb, items as _it, status as _st
+_cb.COMBOS_ON = False; _it.ITEMS_ON = False; _st.STATUS_ON = False  # 2026-09-14 成套翻开后钉关保基线
+
+
 def main() -> None:
     global V2_TABLE, V2_HEAL_MULT
     ap = argparse.ArgumentParser()

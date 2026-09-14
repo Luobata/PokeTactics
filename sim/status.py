@@ -32,7 +32,7 @@ reports/status-experiment-2026-09-13.md）：
 from collections import Counter
 
 # ---- 模块级开关（模式照抄 synergy.SYNERGIES_ON / data.EFF_*，默认关，主线裁定后翻默认）----
-STATUS_ON = False
+STATUS_ON = True  # 2026-09-14 成套翻开（用户批准；见 reports/flip-all-baseline-2026-09-14.md）
 
 
 # ---- 减益表（docs/06 §1 骨架数值；数值臂微调见行内注）----

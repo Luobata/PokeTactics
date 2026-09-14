@@ -50,7 +50,7 @@ from typing import Dict, List, Optional, Tuple
 # 由 sim/experiment_items.py 切换臂；match 层（掉落/幸运蛋/通信进化门）与
 # bots 层（合成/装备策略）读它。战斗层不读开关：comp 里出现 (Piece, item)
 # 二元组就施加——prototype 传裸 Piece，天然无装备。
-ITEMS_ON = False
+ITEMS_ON = True  # 2026-09-14 成套翻开（用户批准；见 reports/flip-all-baseline-2026-09-14.md）
 
 
 def items_on() -> bool:
