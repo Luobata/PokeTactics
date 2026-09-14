@@ -188,21 +188,34 @@ def craft_priority(pers_key: str, wants_stone: bool) -> Tuple[str, ...]:
     return ("evo_stone",) + base if wants_stone else base
 
 
-def craft_best(inv: Inventory, priority: Tuple[str, ...],
-               lucky_ok: bool = True) -> Optional[str]:
+def craft_best(inv: Inventory, priority: Tuple[str, ...], lucky_ok: bool = True,
+               stone_ok: bool = True) -> Optional[str]:
     """按优先级合成一件成品；组件够但无想要的特定配方时兜底进化石。
 
-    返回合成的成品 key，无料可合返回 None。确定性（无随机）。
+    lucky_ok：幸运蛋达全场上限时让位；stone_ok：没有通信进化目标或
+    每局一次已用时不造进化石（组件留给后续特定配方，不烧成废石）。
+    仓库里已有进化石时不重复造。返回合成的成品 key，无料可合返回 None。
+    确定性（无随机）。
     """
+    has_stone = "evo_stone" in inv.finished
     for key in priority:
         if key == "lucky_egg" and not lucky_ok:
+            continue
+        if key == "evo_stone":
+            if not stone_ok or has_stone:
+                continue
+            pair = inv._stone_pair()
+            if pair is not None:
+                inv.craft("evo_stone", pair)
+                return "evo_stone"
             continue
         pair = inv.craftable(key)
         if pair is not None:
             inv.craft(key, pair)
             return key
-    if "evo_stone" not in priority and inv.total_components() >= 2:
-        pair = inv._stone_pair()   # 优先序里没排进化石（不追通信进化）→ 兜底
+    if (stone_ok and not has_stone and "evo_stone" not in priority
+            and inv.total_components() >= 2):
+        pair = inv._stone_pair()   # 优先序里没排进化石 → 兜底（有目标才烧）
         if pair is not None:
             inv.craft("evo_stone", pair)
             return "evo_stone"
@@ -263,14 +276,15 @@ if __name__ == "__main__":   # 自检：配方覆盖 / 兜底 / 合成确定性
     assert craft_result("band", "bell") == "lucky_egg"      # 撞车裁定后的幸运蛋
     assert craft_result("shoes", "shoes") == "swift_feather"
     assert craft_result("band", "charcoal") == "evo_stone"  # 无特定对 → 兜底
-    # 全组件各 1：合成应产出 4 件（8 组件 → 4 消耗对）
+    # 全组件各 1：合成 3 件（专爱头巾 + 剩饭 + 进化石兜底），余 2 个单组件等配对
     made = []
     while True:
         key = craft_best(inv, craft_priority("balanced", False))
         if key is None:
             break
         made.append(key)
-    assert len(made) == 4 and inv.total_components() == 0, made
+    assert made == ["choice_band", "leftovers", "evo_stone"], made
+    assert inv.total_components() == 2 and "evo_stone" in inv.finished
     # 梭哈型优先攻击件：band+magnet 在场先出专爱头巾
     inv2 = Inventory()
     for c in ("band", "magnet", "hardstone", "bell"):

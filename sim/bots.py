@@ -174,15 +174,17 @@ class Bot:
         if not items_mod.items_on() or self.ability == 0:
             return
         dex = pokedex()
-        # 1) 合成：组件 ≥2 即按优先级出成品（幸运蛋达全场上限则让位）
-        wants_stone = not self.stone_used and any(
+        # 1) 合成：组件 ≥2 即按优先级出成品（幸运蛋达全场上限则让位；
+        #    无通信进化目标/石头已用则不烧进化石，组件留作后续特定配方）
+        stone_ok = not self.stone_used and any(
             o.piece.species_id in items_mod.STONE_TARGETS
             for o in self.all_pieces())
-        priority = items_mod.craft_priority(self.pers_key, wants_stone)
+        priority = items_mod.craft_priority(self.pers_key, stone_ok)
         while True:
             lucky_ok = items_mod.lucky_egg_count(others) < \
                 items_mod.LUCKY_EGG_GLOBAL_CAP
-            if items_mod.craft_best(self.inventory, priority, lucky_ok) is None:
+            if items_mod.craft_best(self.inventory, priority, lucky_ok,
+                                    stone_ok) is None:
                 break
             self.item_crafts += 1
         # 2) 进化石：装备到通信族中段形态上即触发通信进化（不消耗、每局一次）
@@ -217,10 +219,12 @@ class Bot:
             self.combines += len(try_combine(
                 self.board, self.bench, self.pool, self.templates,
                 self.inventory))
-        # 4) 装备：战斗件按优先级给主 C（BST 最高、空手者），幸运蛋给最弱棋
+        # 4) 装备：战斗件按优先级给主 C（BST 最高、空手者），幸运蛋给最弱棋；
+        #    进化石只走上面的通信进化通道（不占无目标的棋子格）
         by_bst = sorted(self.all_pieces(),
                         key=lambda o: -dex.bst(o.piece.species_id))
-        for key in [k for k in self.inventory.finished if k != "lucky_egg"]:
+        for key in [k for k in self.inventory.finished
+                    if k not in ("lucky_egg", "evo_stone")]:
             for o in by_bst:
                 if o.item is None:
                     self.inventory.finished.remove(key)

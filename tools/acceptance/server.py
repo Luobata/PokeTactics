@@ -367,13 +367,29 @@ pre{background:#fffdf5;border:1px solid #899081;border-radius:4px;padding:10px;f
 NAV = ('<div class="tabs"><a href="/">总览</a><a href="/anim?seed=11">动画验收台</a>'
        '<a href="/roster">棋子库</a><a href="/match">单局模拟</a>'
        '<a href="/experiments">实验台</a><a href="/synergy">羁绊表</a>'
-       '<a href="/scenarios">场景动画库</a></div>')
+       '<a href="/scenarios">场景动画库</a><a href="/items">装备</a></div>')
 
 SCEN_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
              "<title>场景动画库 · PokeTactics</title><style>" + CONSOLE_CSS + "</style>"
              "<main><header><h1>场景动画库</h1>" + NAV + "</header>"
              "<p>每个分场景模拟的动画回放——与实验台文字读数一一对应。</p>"
              "<div class=cardrow>__CARDS__</div></main></body></html>")
+
+
+
+ITEMS_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
+              "<title>装备与道具 · PokeTactics</title><style>" + CONSOLE_CSS + "</style>"
+              "<main><header><h1>装备与道具（S5 v1）</h1>" + NAV + "</header>"
+              "<h2>组件（野怪轮掉落 · 血量加权）</h2><div id=comps>加载中…</div>"
+              "<h2>成品（两组件合成 · 每单位 1 格）</h2><div id=fin>加载中…</div>"
+              "<p class=muted>装备默认关（experiment_items 开/关对照）；"
+              "进化石=通信进化 catalyst（不消耗 · 每局一次）。</p></main>"
+              "<script>Promise.all([fetch('/api/items').then(r=>r.json())]).then(([d])=>{"
+              "document.getElementById('comps').innerHTML='<table><tr><th>组件</th><th>倾向</th></tr>'+"
+              "d.components.map(c=>'<tr><td><b>'+c[1]+'</b></td><td>'+c[0]+'</td></tr>').join('')+'</table>';"
+              "document.getElementById('fin').innerHTML='<table><tr><th>成品</th><th>配方</th><th>效果</th></tr>'+"
+              "d.finished.map(f=>'<tr><td><b>'+f.name+'</b></td><td>'+f.recipe+'</td><td>'+f.effect+'</td></tr>').join('')+'</table>';});</script>"
+              "</body></html>")
 
 
 ROSTER_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
@@ -594,6 +610,39 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+        elif parsed.path == "/items":
+            body = ITEMS_HTML.encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        elif parsed.path == "/api/items":
+            import items as it
+            comp_tendency = {"band": "物攻", "hardstone": "物防", "magnet": "特攻",
+                             "shoes": "攻速", "bell": "回能", "charcoal": "火伤",
+                             "mysticwater": "水伤", "spark": "电伤"}
+            comps = [[comp_tendency.get(k, k), v] for k, v in it.COMPONENT_NAMES.items()]
+            fin = []
+            for key, spec in it.FINISHED.items():
+                pairs = spec.get("pairs") or ((None,),)
+                recipe = " + ".join(it.COMPONENT_NAMES.get(c, c)
+                                    for c in pairs[0] if c) or "（进化石：任意两组件）"
+                eff = []
+                KEY_ZH2 = {"heal": "回血", "sash": "保命", "atk": "攻击", "spatk": "特攻",
+                           "speed": "攻速", "dodge": "闪避", "ult": "大招", "fire": "火伤",
+                           "water": "水伤", "electric": "电伤", "dr": "减伤", "gold": "金币",
+                           "evo": "通信进化"}
+                for k, v in spec.items():
+                    if k in ("name", "pairs"):
+                        continue
+                    if isinstance(v, bool):
+                        eff.append(KEY_ZH2.get(k, k))
+                    elif isinstance(v, (int, float)):
+                        eff.append(f"{KEY_ZH2.get(k, k)}+{round(v * 100, 1)}%")
+                fin.append({"name": spec["name"], "recipe": recipe,
+                            "effect": " ".join(eff) or "—"})
+            self._json({"components": comps, "finished": fin})
         elif parsed.path in ("/roster", "/match", "/experiments", "/synergy"):
             page = {"/roster": ROSTER_HTML, "/match": MATCH_HTML,
                     "/experiments": EXP_HTML, "/synergy": SYN_HTML}[parsed.path]

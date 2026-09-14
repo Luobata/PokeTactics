@@ -37,6 +37,7 @@ from decoders import Front, Font16, Palettes  # noqa: E402
 from render_mockups import (  # noqa: E402
     H, W, CELL, BOARD_X, BOARD_Y, BOARD_FOOT, INK, PAPER, FRAME, NIGHT, ENERGY, HP_RED, HP_LOW,
     TYPE_COLORS, TIER_COLORS, GRASS_A, GRASS_B, SAND_A, SAND_B,
+    GRASS_LINE, SAND_LINE, SPOT,
     arena_dot, draw_hud, draw_small_number, draw_text, draw_pixel_text,
     draw_floor_tile, draw_divider, draw_base, draw_meter, draw_spark,
     pixel_window, draw_message_window, draw_cutin_stage, draw_cutin_sprites,
@@ -73,6 +74,89 @@ BX, BY = BOARD_X, BOARD_Y
 
 GRASS = (GRASS_A, GRASS_B)
 SAND = (SAND_A, SAND_B)
+
+# 每个天气只替换有限色板：草地 / 沙地各三色，观战格单独一色。
+# 雨色板以原亮度约 0.85 蓝化，晴色板以约 1.1 暖黄化后手工定色。
+FLOOR_COLORS = (GRASS_A, GRASS_B, GRASS_LINE, SAND_A, SAND_B, SAND_LINE, SPOT)
+WEATHER_PALETTES = {
+    "rain": ((130, 150, 165), (120, 140, 155), (96, 118, 136),
+             (159, 165, 177), (149, 155, 167), (128, 135, 150), (49, 61, 77)),
+    "sun": ((191, 197, 145), (181, 187, 133), (155, 161, 110),
+            (224, 210, 153), (214, 198, 141), (193, 176, 121), (78, 73, 54)),
+    "sand": ((181, 170, 120), (169, 158, 108), (146, 133, 89),
+             (206, 177, 120), (194, 165, 108), (172, 143, 89), (79, 66, 46)),
+    "hail": ((195, 210, 209), (182, 198, 198), (157, 179, 181),
+             (216, 221, 222), (204, 210, 212), (179, 189, 195), (75, 89, 100)),
+}
+WEATHER_MESSAGES = {"rain": "下雨了！", "sun": "阳光强烈！",
+                    "sand": "沙暴肆虐了！", "hail": "开始下冰雹了！"}
+WEATHER_ICONS = {
+    "rain": (("0110", "1111", "0000", "1010"), (104, 139, 163)),
+    "sun": (("1001", "0110", "0110", "1001"), (193, 139, 43)),
+    "sand": (("0111", "1100", "0011", "1110"), (163, 139, 99)),
+    "hail": (("0110", "1111", "0110", "1001"), (146, 174, 171)),
+}
+STATUS_ORANGE, STATUS_PURPLE = (240, 144, 56), (184, 112, 200)
+STATUS_BLUE, STATUS_GREEN = (112, 176, 232), (120, 208, 136)
+# 6px 图标槽内绘制离散点阵；睡眠字形为严格的 2×3px。
+STATUS_ICONS = {
+    "burn": (("0010", "0110", "1111", "0110"), STATUS_ORANGE),
+    "poison": (("1111", "1001", "1111", "0110"), STATUS_PURPLE),
+    "paralysis": (("0011", "0110", "1100", "0110"), FULL_GOLD),
+    "freeze": (("1010", "0111", "1110", "0101"), (255, 255, 255)),
+    "sleep": (("11", "01", "11"), STATUS_BLUE),
+    "lightscreen": (("1111", "1001", "1001", "1111"), STATUS_BLUE),
+    "reflect": (("1111", "1011", "1101", "1111"), (146, 174, 171)),
+    "sworddance": (("0010", "0111", "1110", "1000"), FULL_GOLD),
+    "flinch": (("0100", "1110", "0101", "0010"), PAPER),
+}
+BUFF_KINDS = ("lightscreen", "reflect", "sworddance")
+DOT_COLORS = {"burn": STATUS_GREEN, "poison": STATUS_PURPLE}
+
+
+def draw_pixel_icon(img, xy, rows, color):
+    draw = ImageDraw.Draw(img)
+    for y, row in enumerate(rows):
+        for x, bit in enumerate(row):
+            if bit == "1":
+                draw.point((xy[0] + x, xy[1] + y), fill=color)
+
+
+@lru_cache(maxsize=5)
+def board_floor(weather_name):
+    """只缓存地砖；按色板查表替换，不乘整幅图，也不染精灵/UI。"""
+    floor = Image.new("RGBA", (BCOLS * BCELL, BROWS * BCELL))
+    for cy in range(BROWS):
+        for cx in range(BCOLS):
+            draw_floor_tile(floor, cx * BCELL, cy * BCELL, BCELL, cx, cy,
+                            enemy=cy in ENEMY_ROWS, bench=cy in BENCH_ROWS)
+    if weather_name in WEATHER_PALETTES:
+        replacements = {src + (255,): dst + (255,) for src, dst in
+                        zip(FLOOR_COLORS, WEATHER_PALETTES[weather_name])}
+        floor.putdata([replacements.get(pixel, pixel) for pixel in floor.getdata()])
+    return floor
+
+
+def weather_particles(weather_name, T):
+    """八粒上限；位置仅由帧号和序号决定，回卷、随机种子均不影响相位。"""
+    frame = effect_frame(T)
+    width, height = BCOLS * BCELL, BROWS * BCELL
+    particles = []
+    for i in range(8 if weather_name in WEATHER_PALETTES else 0):
+        if weather_name == "rain":
+            x, y = 27 + (i % 3) * 80, (i * 31 + frame * 9) % (height - 3)
+            w, h, color = 1, 4, (184, 216, 232)
+        elif weather_name == "sun":
+            x, y = (i * 31 + frame // 3) % (width - 1), (i * 47 + frame // 5) % (height - 1)
+            w, h, color = 2, 2, (248, 232, 168)
+        elif weather_name == "sand":
+            x, y = (i * 31 + frame * 7) % (width - 1), (i * 43 + frame // 4) % height
+            w, h, color = 2, 1, (232, 192, 120)
+        else:
+            x, y = (i * 31 + frame // 2) % (width - 1), (i * 43 + frame * 17) % (height - 1)
+            w, h, color = 2, 2, (248, 248, 255)
+        particles.append((BX + x, BY + y, w, h, color))
+    return particles
 
 # 每种招式共享纸色高光 + 属性色，不产生逐帧渐变色或额外抖动色。
 FX_STYLE = {
@@ -317,6 +401,9 @@ class AnimUnit:
         self.knockbacks = []
         self.jitter_t = None  # 受击抖动（GSC 左右颤）
         self.recoil_t = None
+        self.statuses = {}  # kind -> apply 时间；不读取 sim 的终局 _st。
+        self.frozen_pose = None
+        self.frozen_squash = 0
 
     def set_hp(self, t: float, hp: int) -> None:
         self.hp = max(0, hp)
@@ -350,6 +437,8 @@ class AnimUnit:
         self.move_t0 = t
 
     def render_px(self, t: float) -> tuple:
+        if "freeze" in self.statuses:
+            t = min(t, self.statuses["freeze"])
         k = min(1.0, max(0.0, (t - self.move_t0) / MOVE_SMOOTH))
         k = 1 - (1 - k) * (1 - k)  # easeOutQuad：起步快、到位缓，去机器感
         fx = self.from_px[0] + (self.to_px[0] - self.from_px[0]) * k
@@ -397,6 +486,11 @@ class BattleAnimation:
         self.msg = (0.0, "")
         self.cutins = []
         self.result = None
+
+    def _active_statuses(self, au, T):
+        # sim 的 flinch 只发 apply；这个短促反馈按其 0.3s 视觉寿命自行隐去。
+        return [kind for kind in STATUS_ICONS if kind in au.statuses
+                and (kind != "flinch" or 0 <= T - au.statuses[kind] < 0.3)]
 
     def _reset(self) -> None:
         for au in self.units.values():
@@ -456,7 +550,31 @@ class BattleAnimation:
             self.msg = (start + CUTIN_LEN,
                         f"{self.by_idx[ci].piece.name}的{self.move_zh.get(move, move)}！ {extra}")
         elif kind == "die":
-            self.units[ev[2]].die_t = t
+            au = self.units[ev[2]]
+            au.die_t = t
+            au.statuses.clear()
+            au.frozen_pose = None
+        elif kind == "status":
+            au = self.units[ev[2]]
+            status, action = ("paralysis" if ev[3] == "para" else ev[3]), ev[4]
+            if action == "apply" and status in STATUS_ICONS:
+                if status == "freeze" and status not in au.statuses:
+                    pose = self._unit_pose(au, t)
+                    au.frozen_pose = (pose[0], pose[1], None) if pose else None
+                    au.frozen_squash = self._sprite_squash(au, t)
+                # 冰冻刷新延续同一姿态与位置；其余状态刷新显示起点。
+                if status != "freeze" or status not in au.statuses:
+                    au.statuses[status] = t
+            elif action == "expire":
+                if status == "freeze" and status in au.statuses:
+                    au.from_px = au.render_px(t)
+                    au.move_t0 = t
+                    au.frozen_pose = None
+                au.statuses.pop(status, None)
+            elif action == "tick" and len(ev) > 5 and ev[5] > 0:
+                au.set_hp(t, au.hp - ev[5])
+                self.floats.append((t, *au.render_px(t), f"-{ev[5]}",
+                                    DOT_COLORS.get(status, STATUS_PURPLE)))
         elif kind == "end":
             self.result = ev[2]
 
@@ -484,11 +602,7 @@ class BattleAnimation:
     def _draw_board(self, img: Image, T: float) -> None:
         # C-sym 分区（自上而下）：敌备战 1 行 / 敌战场 2 行 / 我战场 2 行 /
         # 我备战 1 行；备战行用观战格底色（bench=True），不落战斗单位。
-        for cy in range(BROWS):
-            for cx in range(BCOLS):
-                draw_floor_tile(img, BX + cx * BCELL, BY + cy * BCELL,
-                                BCELL, cx, cy,
-                                enemy=cy in ENEMY_ROWS, bench=cy in BENCH_ROWS)
+        img.paste(board_floor(self.weather_name), (BX, BY))
         draw_divider(img, BX, BY + 3 * BCELL, BCOLS * BCELL)
         draw = ImageDraw.Draw(img)
         draw.line((BX, BY - 1, BX + BCOLS * BCELL - 1, BY - 1), fill=INK)
@@ -500,6 +614,9 @@ class BattleAnimation:
         # 切镜滑入/滑出时两层同时可见，为切镜的至多 9 粒子 + 4 星闪留额。
         in_cutin = any(c[0] <= T < c[1] for c in self.cutins)
         budget = ParticleBudget(PARTICLE_LIMIT - 13 if in_cutin else PARTICLE_LIMIT)
+        # 天气预算独立固定为八粒，也从整盘预算扣除。
+        weather = weather_particles(self.weather_name, T)
+        budget.take(len(weather), minimum=len(weather))
         fx = Image.new("RGBA", (W, H))
         # 先分配命中/消散/蓄力，再把剩余预算给尘土与旧星闪。
         self._draw_board_fx(fx, T, budget, poses)
@@ -515,9 +632,15 @@ class BattleAnimation:
             if poses[au.u.idx] is not None:
                 self._draw_unit(img, au, T, poses[au.u.idx], budget)
         img.alpha_composite(fx)
+        for x, y, width, height, color in weather:
+            draw.rectangle((x, y, x + width - 1, y + height - 1), fill=color)
         self._draw_floats(img, T)
         self._draw_board_flash(img, T)
         self._draw_opening(img, T)
+        # 图标属于持久状态，最后重绘，免于被落点、跳字、白闪淹没。
+        for au in shown:
+            if poses[au.u.idx] is not None:
+                self._draw_status_band(img, au, T)
         # 全部状态条最后画：粒子、邻格残影、白闪、数字牌均不能盖住读数。
         for au in shown:
             pose = poses[au.u.idx]
@@ -533,6 +656,9 @@ class BattleAnimation:
         self._draw_message(img, T)
         # HUD 最后绘制，原尺寸大精灵入场时不会遮住顶部读数。
         draw_hud(img, self.font, hp=34, gold=13, level=5, rnd=13, right="▶")
+        if self.weather_name in WEATHER_ICONS:
+            rows, color = WEATHER_ICONS[self.weather_name]
+            draw_pixel_icon(img, (228, 11), rows, color)
 
     def _casting_phase(self, au, T):
         """只从已回放信息推导抬手；即时 cast 之前以满能量阈值为起点。"""
@@ -617,6 +743,8 @@ class BattleAnimation:
 
     def _unit_pose(self, au, T):
         """绘制坐标供精灵、特效和最后一层状态条共用，不写回单位。"""
+        if "freeze" in au.statuses and au.frozen_pose is not None and not au.dying(T):
+            return au.frozen_pose
         u = au.u
         x, y = au.render_px(T)
         dying = au.dying(T)
@@ -699,6 +827,8 @@ class BattleAnimation:
                 (attack[2] * thrust - jump) * amplitude, squash)
 
     def _sprite_squash(self, au, T):
+        if "freeze" in au.statuses and not au.dying(T):
+            return au.frozen_squash
         squash = self._attack_motion(au, T)[2]
         idle, _, _, tempo, _, _ = self._motion_profile(au.u.piece.species_id)
         if idle == 0 and not au.dying(T):
@@ -720,6 +850,55 @@ class BattleAnimation:
         y = pose[1] + BOARD_FOOT - sprite.getbbox()[3]
         return sprite, x, y
 
+    @lru_cache(maxsize=1024)
+    def _status_sprite(self, species_id, tier, squash, status):
+        sprite = self._board_sprite(species_id, tier, squash).copy()
+        tint, amount = ((255, 255, 255), 60) if status == "freeze" else (STATUS_PURPLE, 15)
+        colors = self.pal.for_species(species_id)
+        replacements = {tuple(c): tuple((v * (100 - amount) + target * amount + 50) // 100
+                                        for v, target in zip(c, tint)) for c in colors}
+        sprite.putdata([replacements.get(pixel[:3], pixel[:3]) + (pixel[3],)
+                        for pixel in sprite.getdata()])
+        return sprite
+
+    def _draw_status_band(self, img, au, T):
+        if au.dying(T):
+            return
+        kinds = self._active_statuses(au, T)[:3]
+        px, py = au.render_px(T)
+        x = round(px + (BCELL - len(kinds) * 7 + 1) / 2)
+        y = round(py + BOARD_FOOT - 7)
+        draw = ImageDraw.Draw(img)
+        for i, kind in enumerate(kinds):
+            left = x + i * 7
+            rows, color = STATUS_ICONS[kind]
+            draw.rectangle((left, y, left + 5, y + 5), fill=INK)
+            draw_pixel_icon(img, (left + (6 - len(rows[0])) // 2, y + 1), rows, color)
+
+    def _draw_status_body(self, img, au, T, pose, budget):
+        if au.dying(T):
+            return
+        px, py, _ = pose
+        foot = py + BOARD_FOOT
+        draw = ImageDraw.Draw(img)
+        kinds = self._active_statuses(au, T)
+        for kind in kinds:
+            if kind in BUFF_KINDS:
+                color = STATUS_ICONS[kind][1]
+                draw.ellipse((px + 1, foot - 4, px + BCELL - 2, foot + 4), outline=color)
+        if "freeze" in kinds:
+            return
+        if "burn" in kinds:
+            for i in budget.take(2, minimum=2, required=True):
+                rise = (effect_frame(T) + i * 3) % 6
+                x, y = px + (7 if i == 0 else BCELL - 8), foot - 2 - rise
+                draw.rectangle((x, y, x + 1, y + 1), fill=STATUS_ORANGE if rise < 3 else HP_LOW)
+        if "paralysis" in kinds and effect_frame(T) % 6 == 0 and budget.take(1):
+            draw_pixel_icon(img, (px + BCELL - 6, foot - 14), ("01", "10", "01"), FULL_GOLD)
+        if "sleep" in kinds and budget.take(1):
+            draw_pixel_icon(img, (px + BCELL - 6, foot - 15 - effect_frame(T) % 8),
+                            STATUS_ICONS["sleep"][0], STATUS_BLUE)
+
     def _draw_unit(self, img, au, T, pose, budget):
         draw = ImageDraw.Draw(img)
         u = au.u
@@ -738,8 +917,14 @@ class BattleAnimation:
                                   px_ + BCELL // 2 + r, foot + r // 2), outline=PAPER)
 
         sprite, anchor_x, anchor_y = self._sprite_placement(au, T, pose)
+        frozen = "freeze" in au.statuses and not dying
+        status_tint = "freeze" if frozen else (
+            "poison" if "poison" in au.statuses and effect_frame(T) % 2 == 0 and not dying else None)
+        if status_tint:
+            sprite = self._status_sprite(u.piece.species_id, u.piece.tier,
+                                         self._sprite_squash(au, T), status_tint)
         # 残影只复制量化后精灵的二值 alpha 蒙版，保留干净的像素边缘。
-        if not dying:
+        if not dying and not frozen:
             trail = next((a for a in reversed(au.attacks)
                           if HIT_DELAY <= T - a[0] < ATTACK_ANIM), None)
             if trail:
@@ -755,12 +940,13 @@ class BattleAnimation:
                                 anchor_y + round((old_y - now_y) * 0.45), FRAME, 48)
         hit_flash = any(ev[3] == u.idx and effect_frame(T - ev[0] - HIT_DELAY) == 0
                         for ev in self._recent_hits(T))
-        if hit_flash:
+        if hit_flash and not frozen:
             white = Image.new("RGBA", sprite.size, (255, 255, 255, 255))
             white.putalpha(sprite.getchannel("A"))
             img.alpha_composite(white, (anchor_x, anchor_y))
         else:
             img.alpha_composite(sprite, (anchor_x, anchor_y))
+        self._draw_status_body(img, au, T, pose, budget)
         if not dying and au.energy >= 80:
             # 底座外沿完整闭合的 2px 金描边；画在精灵之后，背侧也清晰可见。
             halo = Image.new("RGBA", (BCELL + 6, 18))
@@ -774,7 +960,7 @@ class BattleAnimation:
             draw_spark(img, px_ + BCELL // 2, anchor_y - 3)
         if casting and budget.take(1):
             draw_spark(img, px_ + BCELL // 2, anchor_y - 5, ENERGY)
-        strike = [a for a in au.attacks if HIT_DELAY <= T - a[0] < ATTACK_ANIM]
+        strike = [a for a in au.attacks if not frozen and HIT_DELAY <= T - a[0] < ATTACK_ANIM]
         if strike:
             _, adx, ady = strike[-1]
             cx0 = anchor_x + sprite.width // 2
@@ -796,15 +982,16 @@ class BattleAnimation:
         img.alpha_composite(echo, (int(x), int(y)))
 
     def _draw_unit_meters(self, img, au, T, pose):
-        px_, py_, _ = pose
+        # 固定在逻辑脚点，不随身体颤动，防止前排头顶 HP 撞后排能量条。
+        px_, py_ = (round(v) for v in au.render_px(T))
         u = au.u
         # 滴落读数和原低血/满能相位不变，仅收束到红 / 金两种语义。
         frac = au.hp_display(T) / u.max_hp
         c = HP_RED if frac > 0.25 or int(T * 10) % 4 < 2 else HP_LOW
         full = au.energy >= 80
         ec = (ENERGY if int(T * 10) % 4 < 2 else PAPER) if full else ENERGY
-        # 34×4px 双槽；第 34 行露出底座费用铆钉，能量条止于第 38 行。
-        draw_meter(img, px_ + 3, py_ + BOARD_FOOT, BCELL - 6, frac, c, height=4)
+        # HP 在头顶（精灵 alpha 最多上溢 4px）；6px 图标带在脚点前 7px。
+        draw_meter(img, px_ + 3, py_ - 10, BCELL - 6, frac, c, height=4)
         draw_meter(img, px_ + 3, py_ + BOARD_FOOT + 5, BCELL - 6, au.energy / 80, ec, height=4)
 
     def _ground_scars(self, T):
@@ -1036,7 +1223,7 @@ class BattleAnimation:
             if not (0 <= age < FLOAT_LIFE):
                 continue
             # 普攻 4 倍、大招 5 倍点阵；保留上升/消失相位与克制颤动。
-            scale = 4 if color == (255, 255, 255) else 5
+            scale = 1 if color in DOT_COLORS.values() else (4 if color == (255, 255, 255) else 5)
             fx = max(6, min(W - len(text) * 6 * scale - 6, x + 6))
             rise = int(14 * (1 - (1 - age / FLOAT_LIFE) ** 2))  # easeOut 上升
             fy = max(32, y - 6 - rise)
@@ -1083,6 +1270,8 @@ class BattleAnimation:
 
     def _draw_message(self, img: Image, T: float) -> None:
         t0, text = self.msg
+        if self.weather_name in WEATHER_MESSAGES and 0 <= T <= 1.8:
+            t0, text = 0.0, WEATHER_MESSAGES[self.weather_name]
         y0 = BY + BROWS * BCELL + 4
         # 固定日志外框填满原有底部留白；消息出现/消退条件完全不变。
         pixel_window(img, (1, y0, 238, H - 2))
