@@ -40,6 +40,8 @@
 # 验收后台（推荐入口：设计稿/动画验收台/事件流对照）
 python3 tools/acceptance/server.py --port 8799
 # 浏览器打开 http://127.0.0.1:8799/
+# Web 可玩 Demo（1 玩家 + 7 bot 整局：买棋/摆位/装备/羁绊/天气/战斗动画）
+#   http://127.0.0.1:8799/demo ｜ 整局自测 python3 tools/acceptance/demo_selftest.py
 
 # 从 ../ESP32-PokemonGo 提取数据（data/ 已随仓库提供，可跳过）
 python3 tools/extract_from_pokewalk.py

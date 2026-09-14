@@ -28,6 +28,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT / "tools" / "mockups"))
 sys.path.insert(0, str(ROOT / "sim"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))   # Web 可玩 Demo（demo.py）
+
+import demo as demo_mod  # noqa: E402  /demo 页 + /api/demo/* 动作（只加挂接）
 
 FPS_DT = 0.1
 META_REV = "r3"  # r3: 事件格式器汉化（combo 属性）  # meta 生成逻辑版本：变更高级此号使缓存整体失效
@@ -757,6 +760,36 @@ class Handler(SimpleHTTPRequestHandler):
             super().do_GET()
         elif parsed.path.startswith("/reports/"):
             self.path = "/reports" + parsed.path[len("/reports"):]
+            super().do_GET()
+        elif parsed.path == "/demo":
+            # Web 可玩 Demo（tools/acceptance/demo.py 提供页面与会话引擎）
+            body = demo_mod.DEMO_HTML.encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        elif parsed.path == "/api/demo/action":
+            params = {k: v[0] for k, v in qs.items()}
+            self._json(demo_mod.api_action(params))
+        elif parsed.path.startswith("/demo/sprite/"):
+            m = re.match(r"^/demo/sprite/(\d+)\.png$", parsed.path)
+            data = demo_mod.sprite_png(int(m.group(1))) if m else None
+            if data is None:
+                return self.send_error(404)
+            self.send_response(200)
+            self.send_header("Content-Type", "image/png")
+            self.send_header("Cache-Control", "public, max-age=86400")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+        elif parsed.path.startswith("/demo/frame/"):
+            # /demo/frame/<sid>/r<round>/<i>.png -> .build/demo/<sid>/r<round>/
+            m = re.match(r"^/demo/frame/([\w-]+)/r(\d+)/(\d+)\.png$", parsed.path)
+            if not m:
+                return self.send_error(404)
+            self.path = (f"/.build/demo/{m.group(1)}/"
+                         f"r{m.group(2)}/{m.group(3)}.png")
             super().do_GET()
         else:
             super().do_GET()
