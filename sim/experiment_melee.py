@@ -29,15 +29,21 @@ ARMS = [
     ("M0 无补偿对照", dict(ranged=1.0, move=1.0, resist=0.0)),
     ("M1 远程出手×1.25", dict(ranged=1.25, move=1.0, resist=0.0)),
     ("M2 近战突进×0.6", dict(ranged=1.0, move=0.6, resist=0.0)),
+    # M2c：C-sym 棋盘（6 列）修订值 = 当前 data.MELEE_MOVE_MULT 默认
+    # （2026-09-14 平衡 pass：旧板 0.6 在 C-sym 下怪力vs胡地 61% 出带，
+    #   0.62 拉回 42.6%；旧臂保留保 2026-09-13 报告可复现）
+    ("M2c 突进×0.62(C-sym修订)", dict(ranged=1.0, move=0.62, resist=0.0)),
     ("M3 近战坚韧15%", dict(ranged=1.0, move=1.0, resist=0.15)),
     ("M4 出手+突进", dict(ranged=1.25, move=0.6, resist=0.0)),
     ("M5 全组合", dict(ranged=1.25, move=0.6, resist=0.10)),
 ]
 MIN_SAMPLE = 40
-# 对位健康线：4x 克制方（水vs岩）65~85%；物特对照组（怪力vs胡地）40~60%；
-# 2x 回归（水vs火）不劣化出 55~85%。
+# 对位健康线：物特对照组（怪力vs胡地）40~60%；2x 回归（水vs火）不劣化出
+# 55~85%。水vs岩为附读（band=None）：melee 报告 §3 裁定「同种纯克制压力
+# 对位允许 ~100%」（物理墙特防纸的结构行为，修法归 S3 摆位解），
+# 2026-09-14 平衡 pass 将代码带与已发布裁定同步。
 PAIRS = [
-    ("水箭龟", "隆隆岩", (0.65, 0.85), "4x+远程打近战"),
+    ("水箭龟", "隆隆岩", None, "4x+远程打近战（附读：结构项，允许~100%）"),
     ("怪力", "胡地", (0.40, 0.60), "近战vs远程对照（无克制）"),
     ("水箭龟", "喷火龙", (0.55, 0.85), "2x 回归检查"),
 ]
@@ -99,10 +105,15 @@ def main() -> None:
         apply_arm(arm)
         bw, med, rates = random_bandwidth(args.games, args.size, args.seed)
         top = max(rates.items(), key=lambda kv: kv[1])
-        pairs = [(a, b, pair_winrate(a, b, args.pairs), rng_) for a, b, rng_, _ in PAIRS]
+        pairs = [(a, b, pair_winrate(a, b, args.pairs), band)
+                 for a, b, band, _ in PAIRS]
         print(f"\n[{name}]  带宽 {bw:.1%}（最高 {top[0]} {top[1]:.0%}）  "
               f"时长中位 {med:.1f}s")
-        for (a, b, wr, label), (_, _, (lo, hi), _) in zip(pairs, PAIRS):
+        for (a, b, wr, band), (_, _, _, label) in zip(pairs, PAIRS):
+            if band is None:   # 附读锚点：只报读数不判带（结构项裁定）
+                print(f"  · {a} vs {b} [{label}]: {wr:.0%}")
+                continue
+            lo, hi = band
             ok = "✓" if lo <= wr <= hi else "✗"
             print(f"  {ok} {a} vs {b} [{label}]: {wr:.0%}（目标 {lo:.0%}~{hi:.0%}）")
 

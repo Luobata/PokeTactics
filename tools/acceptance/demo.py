@@ -15,8 +15,9 @@
   羁绊/状态/天气/齐射全开）→ bot 对 bot 秒算只留结果行 → 掉血/淘汰/
   下一轮（天气按 weather_for_round）→ 终局排名页。
 - 与 sim/match.py 的差异（适配层裁定，均为简化/单机可用性让路）：
-  · 玩家商店 4 格（docs/10 裁定；第 5 格抽取后归还池，bot 仍 5 格）；
-  · 玩家备战 6 格（docs/10；bot 仍 9 格）；
+  · 商店 4 格 / 备战 6 格：2026-09-14 平衡 pass 起 sim 常量已对齐
+    （docs/10 设备裁定），bot 与玩家同规则（此前 bot 5 格/9 格的不对等
+    已消除，见 reports/matchbalance-2026-09-14.md）；
   · 玩家战斗的解算与渲染同源（DemoBattleAnimation 内部那次 Battle 就是
     权威结果），帧 = 战报；bot 战斗与 match 完全同轨；
   · 幽灵战/野怪战也吃当轮天气（match 只给 PVP 主对战上天气）；
@@ -384,11 +385,9 @@ class Session:
                 self.opp_view = self._opponent_view()
 
     def _roll_player_shop(self, rng) -> None:
+        # 2026-09-14 平衡 pass：sim SHOP_SLOTS 已对齐 4 格（docs/10 裁定），
+        # bot 与玩家同规则，适配层不再裁第 5 格
         self.player.shop.roll(rng, self.player.level)
-        # docs/10 裁定商店 4 格：sim Shop 常量 5 格（只读），适配层裁掉第 5 格
-        if self.player.shop.slots[SHOP_SLOTS_UI] is not None:
-            self.player.shop.pool.put(self.player.shop.slots[SHOP_SLOTS_UI])
-            self.player.shop.slots[SHOP_SLOTS_UI] = None
 
     def _enemy_rows(self, board: list):
         """bot 上场列表 -> 战场 2 行（combat 行 1=贴中线行在前、行 0 在后）。"""

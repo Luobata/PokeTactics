@@ -24,7 +24,8 @@ import shop as shop_mod
 from combat import COLS  # C-sym 棋盘列数（docs/10 §1.5）：列对位随棋盘常量走
 from shop import OwnedPiece, SharedPool, try_combine
 
-BENCH_SIZE = 9       # 备战席 9 格（TFT 同款）
+BENCH_SIZE = 6       # 备战席 6 格（docs/10 §1.1 C-sym 设备裁定；2026-09-14
+                     # 平衡 pass：从 TFT 口径 9 格对齐——bot 与 Demo 玩家同规则）
 BUY_THRESHOLD = 500  # L2 买入分界：复制件/目标羁绊/高 BST 任一过线才买
 LATE_GAME_ROUND = 18  # 后期：全体追加刷新预算
 
@@ -37,8 +38,11 @@ LATE_GAME_ROUND = 18  # 后期：全体追加刷新预算
 PERSONALITIES = {
     "saver":    {"label": "攒钱型·火箭队干部", "reserve_start": 10,
                  "reserve_gain": 5, "reserve_cap": 50, "pivot_round": 12,
-                 "late_cap": 20, "refresh_max": 1,
+                 "late_cap": 30, "refresh_max": 1,
                  "level_mode": "slow", "pivot_tol": 0},
+                 # late_cap 20→30（2026-09-14 平衡 pass）：变现期更晚兑现——
+                 # 读数里 20 的 saver 决赛圈 40% 冠军碾压全场，30 压回 33% 且
+                 # 人格极差 1.29→0.80（experiment_matchbalance v4 臂）
     "roller":   {"label": "梭哈型·格斗道馆主", "reserve_start": 4,
                  "reserve_gain": 2, "reserve_cap": 10, "pivot_round": 99,
                  "late_cap": 10, "refresh_max": 6,
@@ -337,8 +341,11 @@ class Bot:
     def _level_target(self, round_no: int, mode: str, strongest_lv: int) -> int:
         if mode == "fast":      # 梭哈：R6 起全力冲满级
             return economy.MAX_LEVEL if round_no >= 6 else min(4, 2 + round_no // 3)
-        if mode == "follow":    # 跟牌：等级咬住最强对手
-            return max(strongest_lv, min(4, 2 + round_no // 5))
+        if mode == "follow":    # 跟牌：等级咬住最强对手（滞后 1 级——模仿总比
+            # 原创慢半拍；2026-09-14 平衡 pass：无滞后时 copycat 白嫖领跑者
+            # 节奏（平均名次 3.2 领先 1.2 名，消融实证与抄牌分支无关），滞后 1
+            # 级回到 4.2 与其余人格挤进一格）
+            return max(strongest_lv - 1, min(4, 2 + round_no // 5))
         if mode == "slow":      # 攒钱：吃满利息慢升；变现期（pivot 后）追赶
             if round_no >= self.pers["pivot_round"]:
                 return min(economy.MAX_LEVEL, 2 + round_no // 3)
@@ -408,8 +415,8 @@ class Bot:
             single = 1 if self.count_species(owned.piece.species_id) == 1 else 0
             return (off_target, single, -power(owned, self.target_types))
 
-        limit = 6 if self.ability >= 2 else 8
-        while len(self.bench) > limit:
+        limit = BENCH_SIZE   # L1/L2 都守 6 格硬上限（设备裁定）；差别在卖谁：
+        while len(self.bench) > limit:   # L2 按偏离羁绊优先卖，L1 只看战力
             do_sell(max(self.bench, key=sell_rank))
         while len(self.bench) > BENCH_SIZE:  # 硬上限兜底
             do_sell(max(self.bench, key=lambda o: -power(o, self.target_types)))

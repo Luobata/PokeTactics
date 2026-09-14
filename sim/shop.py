@@ -1,7 +1,9 @@
 """M2 商店层：共享卡池 + 按等级概率滚动 + 买/卖/刷新 + 3 合 1 自动进化。
 
 设计依据（docs/00-brainstorm §5、docs/systems/S2）：
-- 商店 5 格；每格独立按「等级 → 档位概率表」定档，再从共享池该档
+- 商店 4 格（docs/10 §1.2 设备裁定；2026-09-14 平衡 pass：sim 从 TFT 口径
+  5 格对齐到 4 格，bot 与 Demo 玩家同规则）；每格独立按「等级 → 档位概率表」
+  定档，再从共享池该档
   仍有存量的物种中均匀抽一只；
 - 共享卡池按档位限量：1费 22 / 2费 18 / 3费 12（84 只池 → 全局 1540 只），
   8 人共享，定向买棋会真实卡别人牌（docs/03 §5 滚雪球抑制）；
@@ -23,7 +25,7 @@ from data import pokedex
 from roster import (LEVEL_BY_TIER, RANGED, MELEE, Piece, build_roster,
                     tier_for_bst)
 
-SHOP_SLOTS = 5
+SHOP_SLOTS = 4
 
 # 共享卡池：每只（按物种）在池中的张数（任务书骨架值，1费22/2费18/3费12）
 POOL_COPIES: Dict[int, int] = {1: 22, 2: 18, 3: 12}
@@ -115,7 +117,7 @@ def draw_slot(rng: random.Random, level: int, pool: SharedPool,
               templates: Dict[int, Piece]) -> Optional[int]:
     """抽一格商店：先按等级定档，再在该档有存量的物种中均匀抽。
 
-    抽中即从共享池**预留**一张（同一批 5 格可能抽到同种——各自占一张），
+    抽中即从共享池**预留**一张（同一批 4 格可能抽到同种——各自占一张），
     买家买入时不再扣池；该档全空时逐档下潜（极端情况：终局 3 费被买光）。
     """
     odds = LEVEL_ODDS[min(max(level, 1), max(LEVEL_ODDS))]
@@ -133,7 +135,7 @@ def draw_slot(rng: random.Random, level: int, pool: SharedPool,
 
 
 class Shop:
-    """一名玩家的商店：5 格，roll 从共享池抽，买走即出池，刷新归还重抽。"""
+    """一名玩家的商店：4 格，roll 从共享池抽，买走即出池，刷新归还重抽。"""
 
     def __init__(self, pool: SharedPool, templates: Dict[int, Piece]) -> None:
         self.pool = pool
