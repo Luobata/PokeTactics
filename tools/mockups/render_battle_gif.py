@@ -90,6 +90,17 @@ WEATHER_PALETTES = {
 }
 WEATHER_MESSAGES = {"rain": "下雨了！", "sun": "阳光强烈！",
                     "sand": "沙暴肆虐了！", "hail": "开始下冰雹了！"}
+# 现有 FNT1 子集缺这四字；补充固定 16px 单色字模，无系统字体运行依赖。
+WEATHER_GLYPHS = {
+    "肆": (0x0000, 0x0000, 0x2260, 0x3f68, 0x31fc, 0x3e6e, 0x33ff, 0x366c,
+           0x31fc, 0x336c, 0x7ffe, 0x3c66, 0x27ff, 0x7f60, 0x7260, 0x0060),
+    "虐": (0x0000, 0x0000, 0x0380, 0x03fc, 0x2384, 0x3ffe, 0x33be, 0x33fc,
+           0x3bcc, 0x31fc, 0x3018, 0x37fc, 0x3606, 0x3ffe, 0x6608, 0x47fc),
+    "雨": (0x0000, 0x0000, 0x0006, 0x7fff, 0x0180, 0x0188, 0x3ffc, 0x35ec,
+           0x37bc, 0x37bc, 0x318c, 0x37bc, 0x37bc, 0x318c, 0x31bc, 0x311c),
+    "雹": (0x0000, 0x0000, 0x0018, 0x1ff8, 0x3ffe, 0x618e, 0x6180, 0x1df0,
+           0x1d10, 0x1ffc, 0x3fd8, 0x38d8, 0x5fd8, 0x18ba, 0x1816, 0x1ffe),
+}
 WEATHER_ICONS = {
     "rain": (("0110", "1111", "0000", "1010"), (104, 139, 163)),
     "sun": (("1001", "0110", "0110", "1001"), (193, 139, 43)),
@@ -120,6 +131,19 @@ def draw_pixel_icon(img, xy, rows, color):
         for x, bit in enumerate(row):
             if bit == "1":
                 draw.point((xy[0] + x, xy[1] + y), fill=color)
+
+
+def draw_weather_text(img, xy, text, font):
+    draw_text(img, xy, text, font, INK)
+    draw = ImageDraw.Draw(img)
+    offset = 0
+    for ch in text:
+        if ch in WEATHER_GLYPHS and not font.text(ch).getbbox():
+            for y, row in enumerate(WEATHER_GLYPHS[ch]):
+                for x in range(16):
+                    if row & (1 << (15 - x)):
+                        draw.point((xy[0] + offset + x, xy[1] + y), fill=INK)
+        offset += text_width(ch)
 
 
 @lru_cache(maxsize=5)
@@ -490,7 +514,7 @@ class BattleAnimation:
     def _active_statuses(self, au, T):
         # sim 的 flinch 只发 apply；这个短促反馈按其 0.3s 视觉寿命自行隐去。
         return [kind for kind in STATUS_ICONS if kind in au.statuses
-                and (kind != "flinch" or 0 <= T - au.statuses[kind] < 0.3)]
+                and (kind != "flinch" or 0 <= effect_frame(T - au.statuses[kind]) < 3)]
 
     def _reset(self) -> None:
         for au in self.units.values():
@@ -951,7 +975,7 @@ class BattleAnimation:
             # 底座外沿完整闭合的 2px 金描边；画在精灵之后，背侧也清晰可见。
             halo = Image.new("RGBA", (BCELL + 6, 18))
             hd = ImageDraw.Draw(halo)
-            alpha = (160, 208, 255, 255, 208, 160)[effect_frame(T) % 6]
+            alpha = 208 if frozen else (160, 208, 255, 255, 208, 160)[effect_frame(T) % 6]
             hd.ellipse((1, 1, BCELL + 4, 16), outline=FULL_GOLD + (alpha,), width=2)
             img.alpha_composite(halo, (px_ - 3, foot - 8))
         if dying and 0 <= age < FPS_DT and budget.take(1):
@@ -1285,7 +1309,10 @@ class BattleAnimation:
         # 40px 棋盘后日志只有 48px：按原消息寿命分页，一次完整显示一行。
         lines = wrap_text(text, W - 36)
         line = lines[min(len(lines) - 1, max(0, int((T - t0) / 0.6)))]
-        draw_text(img, (10, y0 + 24), line, self.font, HP_RED if "拔群" in line else INK)
+        if self.weather_name in WEATHER_MESSAGES and 0 <= T <= 1.8:
+            draw_weather_text(img, (10, y0 + 24), line, self.font)
+        else:
+            draw_text(img, (10, y0 + 24), line, self.font, HP_RED if "拔群" in line else INK)
         if int(T * 4) % 2 == 0:
             cx, cy = W - 18, H - 10
             draw.polygon(((cx - 3, cy - 3), (cx + 3, cy - 3), (cx, cy)), fill=INK)

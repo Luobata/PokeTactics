@@ -300,3 +300,65 @@ QualityGate 最终本地返回 `gate=pass`、`raw_gate=pass`、`block_merge=fals
 对本期开始快照核对：seed 7／11 事件列表逐项一致；重复取帧／回卷对照 **20 组通过**；`AnimUnit`、事件初始化、`_reset`、`_ensure`、`_apply`、`frame`、移动插值、切镜及最终 GIF 量化函数 AST 均不变，`decoders.py` SHA256 不变。无 `sim/`、`data/` 或事件／回放修改。三份 Python 源码编译和 `git diff --check` 通过。
 
 QualityGate 本地返回 `gate=pass`、`raw_gate=pass`、`block_merge=false`、`execution_complete=true`、`quality_confidence=full`、`incomplete_engines=[]`，actionable／shadow／advisory／deferred／waived 均为 0，修复轮次 0，无 guard 停止原因。不过本会话未注册 QualityGate MCP，runner 依赖不齐，三个 Python 路径无匹配规则，中央规则上下文和语义评审不可用；`agent_action=local_checks_passed` 不代表语义评审完成。Mutation 保持 `disabled`、未执行（CLI 返回 `not_applicable`）。本期验收依据为上述像素检查、裸跑计时、视觉检查及回放对照。
+
+## 第 6 期：天气与状态渲染
+
+依据 `docs/05-weather.md §3`、`docs/06-status-buffs.md §3` 补齐渲染。天气仍由 `BattleAnimation(weather_name=...)` 接入，状态只消费已有事件；本期没有修改 `sim/`、数值、阵容、几率或默认状态开关。
+
+### 视觉实现
+
+天气地砖采用缓存色板查表：草地、沙地各保留原来的三色关系，观战格单独替换底色。雨为约 0.85 亮度的蓝灰，晴为暖黄，沙为土黄，雹为冷白；不对精灵或整幅画面乘色，不产生软边或逐像素混合色。每种天气固定 **8 粒**，雨为三列错落的 1×4px 雨丝，晴为缓慢斜移的 2×2px 亮块，沙为横飞 2×1px 沙点，雹为快速下落的 2×2px 白点。位置只由帧号和序号计算，同时计入原棋盘粒子预算。
+
+开场消息窗显示「下雨了！」「阳光强烈！」「沙暴肆虐了！」「开始下冰雹了！」，保留 1.8s；HUD 右侧增加 4×4px 天气图标。实看发现 FNT1 字库缺少「雨、肆、虐、雹」，已在渲染器补齐四个固定单色字模，并加入缺字检查；无需更换解码器或运行时加载系统字体。
+
+状态带在逻辑脚点上方 7px 开始，占 **6px 高、最多 20px 宽（3 个槽）**。火点橙、骷髅紫、闪电黄、雪花白、2×3px 的 Z 为蓝；畏缩补一枚短促的米色星点。兼容事件实际使用的 `para` 和契约中的 `paralysis`；畏缩没有 expire 事件，因此按 3 帧寿命隐去。已有光墙、反射壁、剑舞事件也可显示图标及对应底座细环。
+
+HP 条移到逻辑格顶上方 10px，精灵最多上溢 4px；能量条留在脚下。状态带及两条读数最后重绘，再一起随棋盘震屏。中毒隔帧使用 15% 紫色的固定四种替代色，冰冻使用四种冷白替代色，并锁定位置、身体姿态及压缩帧，刷新不会跳姿态；灼伤脚边每帧两粒橙色火点。DOT tick 更新回放 HP，绿色／紫色数字为 scale=1，复用原伤害数字避让。expire、死亡、倒放均清理或重建状态，不读取模拟器终局状态容器。
+
+### 天气与既有红线
+
+执行：
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 tools/mockups/fx_visibility_check.py --output /tmp/poke-phase6/final
+```
+
+`weather` 检查直接构造 `BattleAnimation(weather_name=...)`，阵容来自场景库，开关与 `/anim` 默认 `synergy=False` 一致。同 seed、同阵容分别跑有／无天气；另外对同一事件流仅关闭视觉天气，排除数值变化对 diff 的贡献。逐帧比较 **240×240 棋盘区域的 RGB 变化像素数**，不计 HUD／消息窗，也不把全屏切镜当成棋盘特效证据；切镜期间仍量测底层棋盘。两种对照的最低读数在本次样本中相同。
+
+| 天气 | seed 7 最低 diff／检查帧数 | seed 11 最低 diff／检查帧数 | 红线 |
+| --- | ---: | ---: | ---: |
+| rain | **23,433px／90** | **23,494px／79** | ≥1,200px |
+| sun | **23,439px／88** | **23,509px／79** | ≥1,200px |
+| sand | **26,434px／65** | **25,296px／69** | ≥1,200px |
+| hail（复用雨场景阵容，直接传 hail） | **23,429px／90** | **23,500px／79** | ≥1,200px |
+
+四天气共 **639 帧**全部通过；每格调色板外像素 **0**，粒子数量及棋盘边界检查通过。原有 84 物种 × 7 压缩相位的 **588 张缩图**仍为调色板外像素 0、半透明像素 0，三联图 6 个样本 diff 为 0。
+
+| 既有检查（默认 seed 7／11） | seed 7 | seed 11 | 红线 |
+| --- | ---: | ---: | ---: |
+| 普攻独立首帧最低 diff | 848px | 816px | ≥600px |
+| 大招独立首帧最低 diff | 57,600px | 1,832px | ≥1,500px |
+| 开战活跃帧最低 diff | 17,366px | 21,201px | ≥2,500px |
+| 横向精灵重叠 | 0px | 0px | ≤4px |
+| 状态条连续遮挡 | 0 帧 | 0 帧 | ≤2 帧 |
+| 完整 GIF 导出进程 | **2.800s** | **2.646s** | ≤8s |
+
+新增天气／状态场景也检查 crowding 和状态条遮挡：最大重叠 0px，最长遮挡 **1 帧**，未越过 2 帧红线。17 系双变体、力度边界、地痕寿命和动作分桶检查继续通过。完整导出包含初始化、逐帧渲染、量化、两尺寸 GIF、分镜和三联图写盘，输出隔离在 `/tmp/poke-phase6/export-{seed}`；两种尺寸的 GIF 均逐帧解码通过，seed 7／11 为 80／74 个编码帧，总时长 10.2／9.7s。
+
+### 状态图标带人工抽查（3 帧）
+
+检查实际场景帧并按原尺寸与最近邻放大查看；下列均是未被切镜覆盖的画面。坐标记录为震屏前 6px 图标槽的左上角。
+
+| 场景／seed／时间 | 对应事件与单位 | 图标抽查结论 |
+| --- | --- | --- |
+| status_shock／7／0.3s（第 3 帧） | 0.3s flinch apply，idx 8 宝石海星 | (17,131) 米色星点 7px 可见，开战横幅未覆盖图标；与头顶 HP 分离。 |
+| status_shock／7／3.1s（第 31 帧） | 3.1s flinch apply，idx 8 宝石海星 | 同一底座位置星点重新出现，7px 全部保留；跳字和命中效果未遮图标。 |
+| status_shock／14／5.6s（第 56 帧） | 4.5s para apply，idx 9 蚊香泳士 | (137,211) 黄色闪电 8px 可见，头顶 HP 与脚下能量条均不压住图标。 |
+
+默认 seed 7／11 实际分别有 **3／8 次 apply**，均为畏缩；逐帧核对 **9／24 个挂状态单位帧**，图标彩色像素全部保留。另对 seed 14 全场运行 `status_checks`，覆盖真实麻痹，**52 个单位帧**通过，重叠与状态条遮挡均为 0。没有提高状态几率来制造样本。
+
+渲染夹具覆盖全部六种减益、para 别名、冰冻刷新后四帧身体像素一致、DOT HP 与两枚 scale=1 数字的独立位置、14 个状态色板／压缩组合、expire、死亡清理、三槽上限和倒放重建。也查看了六状态身体对照图，冰冻静态冷白、中毒紫色、灼伤脚边粒子及睡眠 Z 均可辨认。
+
+直接调用场景后台 `render_battle` 并读取导出 PNG：seed 7 的 rain／sun／sand／status_shock 分别 **1.316／1.240／0.994／0.924s**，输出 105／103／80／93 帧；四种天气开场文案及 HUD 图标均已实看。Python 源码编译、`git diff --check` 通过；检查器默认两种子退出 0、失败数 0。
+
+QualityGate 本地返回 `gate=pass`、`raw_gate=pass`、`block_merge=false`、`execution_complete=true`、`quality_confidence=full`、`incomplete_engines=[]`，actionable／shadow／advisory／deferred／waived 均为 0，修复轮次 0，无 guard 停止原因。当前会话未注册 QualityGate MCP，runner 与仓库 capsule 不完整，中央规则上下文及语义评审不可用；`agent_action=local_checks_passed` 不代表语义评审通过。Mutation 保持 disabled、未执行（CLI 返回 not_applicable）。有效验收依据为上面的像素、回放、视觉及导出检查。

@@ -16,11 +16,14 @@
 遮挡（≤2 帧），以及全属性变体、力度边界、地痕寿命和物种动作覆盖。
 第 5 期新增 palette_purity（含全部压缩相位）与 scale_compare 三联图核对，
 在 40px 格和 32/34px 目标盒下继续执行原可见度红线。
+第 6 期直调 BattleAnimation(weather_name)，逐帧检查同阵容无天气对照
+与同事件流视觉隔离对照（均 ≥1200px），并核对真实 status_shock 图标。
 """
 
 import argparse
 import copy
 import json
+import sys
 import time
 from collections import defaultdict
 from itertools import combinations
@@ -30,8 +33,14 @@ from PIL import Image, ImageChops, ImageDraw
 
 import render_battle_gif as r
 
+sys.path.insert(0, str(r.ROOT))
+from tools.acceptance.server import SCENARIOS  # noqa: E402
+import status as status_mod  # noqa: E402
+import synergy as synergy_mod  # noqa: E402
+
 
 LIMITS = {"attack": 600, "land": 1500, "opening": 2500}
+WEATHER_LIMIT = 1200
 MAX_BOARD_OVERLAP = 4
 
 
@@ -357,6 +366,217 @@ def scale_compare_checks(anim):
     return {"species": 6, "source_px": source.width, "samples": samples, "failures": failures}
 
 
+def scenario_animation(seed, name, assets, weather_name=None):
+    """共享线上场景阵容，开关只在构造期间启用，绝不修改 sim 文件。"""
+    sc = SCENARIOS[name]
+    pieces = {p.name: p for group in r.build_roster().values() for p in group}
+    previous, previous_synergy = status_mod.STATUS_ON, synergy_mod.SYNERGIES_ON
+    try:
+        status_mod.STATUS_ON = bool(sc.get("status"))
+        synergy_mod.SYNERGIES_ON = False  # /anim 的默认 synergy=False。
+        return r.BattleAnimation([pieces[n] for n in sc["a"]], [pieces[n] for n in sc["b"]],
+                                 seed, assets.front, assets.pal, assets.font,
+                                 weather_name=weather_name)
+    finally:
+        status_mod.STATUS_ON = previous
+        synergy_mod.SYNERGIES_ON = previous_synergy
+
+
+def weather_checks(seed, assets, output):
+    failures, rows = [], []
+    rect = (r.BX, r.BY, r.BX + r.BCOLS * r.BCELL, r.BY + r.BROWS * r.BCELL)
+    for weather in r.WEATHER_PALETTES:
+        scenario = f"weather_{weather}" if weather != "hail" else "weather_rain"
+        anim = scenario_animation(seed, scenario, assets, weather)
+        clear = scenario_animation(seed, scenario, assets)
+        samples, visual_samples = [], []
+        maximum_overlap, meter_streak, max_streak, meter_checks = 0, 0, 0, 0
+        t, end = 0.0, max(e[0] for e in anim.events) + 1.2
+        while t <= end:
+            anim._ensure(t)
+            clear._ensure(t)
+            board = board_frame(anim, t)
+            # 同 seed 同阵容无天气；另外只关闭渲染天气，排除数值臂造成的 diff。
+            reference = board_frame(clear, t)
+            visual_clear = copy.copy(anim)
+            visual_clear.weather_name = None
+            isolated = board_frame(visual_clear, t)
+            count = diff_pixels(reference.crop(rect), board.crop(rect))
+            visual_count = diff_pixels(isolated.crop(rect), board.crop(rect))
+            samples.append(count)
+            visual_samples.append(visual_count)
+            if min(count, visual_count) < WEATHER_LIMIT:
+                failures.append({"kind": "weather", "weather": weather, "t": round(t, 4),
+                                 "diff_1x": count, "visual_only_diff_1x": visual_count})
+            overlap, _, meters, obscured, layer_failures = unit_layer_checks(anim, t, board)
+            maximum_overlap = max(maximum_overlap, overlap)
+            meter_checks += meters
+            meter_streak = meter_streak + 1 if obscured else 0
+            max_streak = max(max_streak, meter_streak)
+            failures.extend(layer_failures)
+            particles = r.weather_particles(weather, t)
+            if len(particles) != 8 or any(not (r.BX <= x <= rect[2] - w and
+                                            r.BY <= y <= rect[3] - h)
+                                         for x, y, w, h, _ in particles):
+                failures.append({"kind": "weather_particles", "weather": weather, "t": t})
+            if r.effect_frame(t) == 10:
+                save_pair(output, f"seed-{seed}-weather-{weather}", isolated, board)
+            t += r.FPS_DT
+        # 每格只能出现其原有颜色的天气替代色，不接受整图滤镜或软边。
+        before, after = r.board_floor(None), r.board_floor(weather)
+        replacements = dict(zip(r.FLOOR_COLORS, r.WEATHER_PALETTES[weather]))
+        off_palette = 0
+        for cy in range(r.BROWS):
+            for cx in range(r.BCOLS):
+                tile = (cx * r.BCELL, cy * r.BCELL, (cx + 1) * r.BCELL, (cy + 1) * r.BCELL)
+                allowed = {replacements.get(c[:3], c[:3]) + (255,)
+                           for _, c in before.crop(tile).getcolors(r.BCELL ** 2)}
+                off_palette += sum(n for n, c in after.crop(tile).getcolors(r.BCELL ** 2)
+                                   if c not in allowed)
+        if off_palette or max_streak > 2:
+            failures.append({"kind": "weather_layers", "weather": weather,
+                             "off_palette_pixels": off_palette, "meter_occlusion": max_streak})
+        for char in r.WEATHER_MESSAGES[weather]:
+            glyph = Image.new("RGBA", (16, 16))
+            r.draw_weather_text(glyph, (0, 0), char, anim.font)
+            if not glyph.getbbox():
+                failures.append({"kind": "weather_message_missing_glyph", "char": char})
+        rows.append({"weather": weather, "frames": len(samples), "min_1x": min(samples),
+                     "visual_only_min_1x": min(visual_samples), "threshold_1x": WEATHER_LIMIT,
+                     "off_palette_pixels": off_palette, "particles_per_frame": 8,
+                     "max_overlap_px": maximum_overlap, "meter_checks": meter_checks,
+                     "max_meter_occlusion_frames": max_streak})
+    return {"samples": rows, "failures": failures}
+
+
+def status_checks(seed, assets, output):
+    anim = scenario_animation(seed, "status_shock", assets)
+    failures, samples = [], []
+    applies = [ev for ev in anim.events if ev[1] == "status" and ev[4] == "apply"]
+    if not applies:
+        failures.append({"kind": "status_fixture", "reason": "no status apply events"})
+    t, end, checked = 0.0, max(e[0] for e in anim.events) + 1.2, 0
+    meter_streak, max_streak, max_overlap = 0, 0, 0
+    while t <= end:
+        display = anim.frame(t).convert("RGB")
+        board = board_frame(anim, t)
+        overlap, _, _, obscured, layer_failures = unit_layer_checks(anim, t, board)
+        max_overlap = max(max_overlap, overlap)
+        meter_streak = meter_streak + 1 if obscured else 0
+        max_streak = max(max_streak, meter_streak)
+        failures.extend(layer_failures)
+        for idx, au in anim.units.items():
+            kinds = anim._active_statuses(au, t)[:3]
+            if not kinds or au.dying(t):
+                continue
+            layer = Image.new("RGBA", (r.W, r.H))
+            anim._draw_status_band(layer, au, t)
+            bounds = layer.getbbox()
+            if bounds is None or bounds[3] - bounds[1] != 6 or bounds[2] - bounds[0] > 20:
+                failures.append({"kind": "status_band", "t": t, "unit": idx, "bounds": bounds})
+                continue
+            checked += 1
+            meters = Image.new("RGBA", (r.W, r.H))
+            anim._draw_unit_meters(meters, au, t, anim._unit_pose(au, t))
+            shake, visible, colored = anim._board_shake(t), 0, 0
+            for y in range(bounds[1], bounds[3]):
+                for x in range(bounds[0], bounds[2]):
+                    pixel = layer.getpixel((x, y))
+                    if pixel[3] and meters.getpixel((x, y))[3]:
+                        failures.append({"kind": "status_meter_overlap", "t": t, "unit": idx})
+                    if pixel[3] and pixel[:3] != r.INK:
+                        colored += 1
+                        visible += int(board.getpixel((x, y + shake)) == pixel[:3])
+            if not colored or visible != colored:
+                failures.append({"kind": "status_visibility", "t": t, "unit": idx,
+                                 "expected": colored, "visible": visible})
+            covered = any(c[0] <= t < c[1] for c in anim.cutins)
+            if not covered and (not samples or t - samples[-1]["t"] >= 0.5):
+                row = {"t": round(t, 4), "unit": idx, "kinds": kinds,
+                       "icon_pixels": visible, "bounds": bounds}
+                samples.append(row)
+                if output:
+                    display.save(output / f"seed-{seed}-status-{t:.1f}-unit-{idx}.png")
+        t += r.FPS_DT
+    if not checked or max_streak > 2:
+        failures.append({"kind": "status_coverage", "checked": checked, "meter_occlusion": max_streak})
+    return {"apply_events": len(applies), "checked_unit_frames": checked, "samples": samples,
+            "max_overlap_px": max_overlap, "max_meter_occlusion_frames": max_streak,
+            "failures": failures}
+
+
+def status_contract_checks(assets):
+    """补齐真实电队不覆盖的状态：只向独立回放夹具注入公开事件。"""
+    anim = copy.copy(assets)
+    anim.units = {i: copy.deepcopy(assets.units[i]) for i in range(6)}
+    kinds = ("burn", "poison", "para", "freeze", "sleep", "flinch")
+    anim.events = [(0., "deploy", i, (i % 3 * 2, i // 3 * 2)) for i in range(6)]
+    anim.events += [(1., "status", i, kind, "apply", 0) for i, kind in enumerate(kinds)]
+    anim.events += [(1.2, "status", 0, "burn", "tick", 3),
+                    (1.2, "status", 1, "poison", "tick", 4),
+                    (1.4, "status", 3, "freeze", "apply", 0)]
+    anim.events += [(2., "status", i, kind, "expire", 0) for i, kind in enumerate(kinds)]
+    anim._reset()
+    failures, checked = [], []
+    before = anim.frame(0.9)
+    applied = anim.frame(1.)
+    for i, kind in enumerate(kinds):
+        canonical = "paralysis" if kind == "para" else kind
+        if anim._active_statuses(anim.units[i], 1.) != [canonical]:
+            failures.append({"kind": "status_apply", "status": kind})
+        checked.append(canonical)
+    # 冻结后的位置、压缩、四颜色与完整身体像素均保持不变（含刷新）。
+    frozen_frames = []
+    for t in (1., 1.1, 1.5, 1.9):
+        anim._ensure(t)
+        au = anim.units[3]
+        layer = Image.new("RGBA", (r.W, r.H))
+        anim._draw_unit(layer, au, t, anim._unit_pose(au, t), r.ParticleBudget())
+        frozen_frames.append(layer)
+    if any(diff_pixels(frozen_frames[0], frame) for frame in frozen_frames[1:]):
+        failures.append({"kind": "freeze_motion"})
+    for i, damage in ((0, 3), (1, 4)):
+        if anim.units[i].hp != anim.units[i].u.max_hp - damage:
+            failures.append({"kind": "status_dot_hp", "unit": i})
+    if anim._active_statuses(anim.units[5], 1.9):
+        failures.append({"kind": "flinch_lifetime"})
+    # DOT 与普攻使用同一个避让器，同时发生也保持 scale=1 和独立位置。
+    calls = []
+    anim._draw_damage_number = lambda img, xy, text, color, scale: calls.append((xy, color, scale))
+    anim._ensure(1.2)
+    anim.floats.append((1.2, *anim.units[0].render_px(1.2), "-12", (255, 255, 255)))
+    anim._draw_floats(Image.new("RGBA", (r.W, r.H)), 1.2)
+    dot_calls = [call for call in calls if call[1] in r.DOT_COLORS.values()]
+    if len(dot_calls) != 2 or any(call[2] != 1 for call in dot_calls) or len({c[0] for c in calls}) != 3:
+        failures.append({"kind": "status_dot_numbers", "calls": calls})
+    del anim._draw_damage_number
+    # 各身体状态仍只有四种替代色，alpha 保留二值；天气不改精灵色板。
+    for status in ("poison", "freeze"):
+        for squash in range(7):
+            sprite = anim._status_sprite(6, 3, squash, status)
+            pixels = sprite.getcolors(sprite.width * sprite.height)
+            if len({c[:3] for _, c in pixels if c[3]}) > 4 or any(c[3] not in (0, 255) for _, c in pixels):
+                failures.append({"kind": "status_palette", "status": status, "squash": squash})
+    anim._ensure(2.)
+    if any(au.statuses for au in anim.units.values()):
+        failures.append({"kind": "status_expire"})
+    if diff_pixels(before, anim.frame(0.9)) or diff_pixels(applied, anim.frame(1.)):
+        failures.append({"kind": "status_rewind"})
+    # 1 减益 + 2 增益只占 20×6px；死亡无须 expire 即清除图标。
+    for kind in r.BUFF_KINDS:
+        anim._apply((1., "status", 0, kind, "apply", 0))
+    layer = Image.new("RGBA", (r.W, r.H))
+    anim._draw_status_band(layer, anim.units[0], 1.)
+    left, top, right, bottom = layer.getbbox()
+    if (right - left, bottom - top) != (20, 6):
+        failures.append({"kind": "status_band_cap"})
+    anim._apply((1.1, "die", 0))
+    if anim.units[0].statuses:
+        failures.append({"kind": "status_death_cleanup"})
+    return {"kinds": checked, "frozen_frames": len(frozen_frames),
+            "dot_numbers": len(dot_calls), "palette_variants": 14, "failures": failures}
+
+
 def check_seed(seed, output=None):
     start = time.perf_counter()
     anim = make_animation(seed)
@@ -462,6 +682,15 @@ def check_seed(seed, output=None):
     failures.extend(comparison["failures"])
     summary["palette_purity"] = {k: v for k, v in purity.items() if k != "failures"}
     summary["scale_compare"] = {k: v for k, v in comparison.items() if k != "failures"}
+    weather = weather_checks(seed, anim, output)
+    statuses = status_checks(seed, anim, output)
+    status_contracts = status_contract_checks(anim)
+    failures.extend(weather["failures"])
+    failures.extend(statuses["failures"])
+    failures.extend(status_contracts["failures"])
+    summary["weather"] = {k: v for k, v in weather.items() if k != "failures"}
+    summary["status"] = {k: v for k, v in statuses.items() if k != "failures"}
+    summary["status_contracts"] = {k: v for k, v in status_contracts.items() if k != "failures"}
     report = {"seed": seed, "summary": summary, "frames": rows, "isolated": isolated,
               "styles": styles, "motions": motions,
               "failures": failures, "elapsed_seconds": round(time.perf_counter() - start, 3)}
