@@ -14,6 +14,8 @@
 阈值直接应用于 240×320 原尺寸，比任务要求的 2× 可见度更严格。
 第 4 期增加实际精灵 alpha 包围盒的 board_crowding（≤4px）、状态条
 遮挡（≤2 帧），以及全属性变体、力度边界、地痕寿命和物种动作覆盖。
+第 5 期新增 palette_purity（含全部压缩相位）与 scale_compare 三联图核对，
+在 40px 格和 32/34px 目标盒下继续执行原可见度红线。
 """
 
 import argparse
@@ -131,7 +133,7 @@ def save_pair(output, name, before, after):
 
 
 def unit_layer_checks(anim, t, board):
-    """直接量测实际 NEAREST/动作压缩后的 alpha 包围盒和最终血条像素。"""
+    """直接量测实际 BOX+量化/动作压缩后的 alpha 包围盒和最终血条像素。"""
     shown, failures = [], []
     checked_meters, obscured_meters = 0, 0
     for idx, au in anim.units.items():
@@ -144,7 +146,7 @@ def unit_layer_checks(anim, t, board):
         px, py = au.render_px(t)
         shown.append((idx, round((py - r.BY) / r.BCELL), px, box))
         # 插值原点可含小数，最终图像取整容差为 0.5px。
-        if box[1] < py - 4.5 or sprite.width != (30 if au.u.piece.tier == 3 else 28):
+        if box[1] < py - 4.5 or sprite.width != (34 if au.u.piece.tier == 3 else 32):
             failures.append({"kind": "board_fit", "t": round(t, 4), "unit": idx,
                              "bbox": box, "cell_y": py})
         expected = Image.new("RGBA", (r.W, r.H))
@@ -255,14 +257,11 @@ def motion_contract_checks(anim):
         representatives.setdefault(profile[1], piece)
         source = anim.front.image(sid, anim.pal)
         sprite = anim._board_sprite(sid, piece.tier)
-        expected = 30 if piece.tier == 3 else 28
+        expected = 34 if piece.tier == 3 else 32
         scales.add((source.width, expected, round(expected / source.width, 6)))
-        # 最近邻不能混出新颜色；等比缩放的静态画布宽高必须相等。
-        colors = {c for _, c in source.getcolors(source.width * source.height) if c[3]}
-        if (sprite.size != (expected, expected)
-                or any(c[3] and c not in colors
-                       for _, c in sprite.getcolors(sprite.width * sprite.height))):
-            failures.append({"kind": "nearest_sprite_fit", "species": sid})
+        # 颜色归入独立 palette_purity；静态目标盒保持等比。
+        if sprite.size != (expected, expected):
+            failures.append({"kind": "sprite_fit", "species": sid})
     attack_signatures, idle_signatures, hit_responses = {}, {}, {}
     for piece in roster:
         profile = anim._motion_profile(piece.species_id)
@@ -294,6 +293,68 @@ def motion_contract_checks(anim):
             "idle_types": len(buckets[0]), "attack_types": len(buckets[1]),
             "hit_types": len(buckets[2]), "walk_rates": sorted(buckets[3]),
             "scales": sorted(scales), "failures": failures}
+
+
+def palette_purity_checks(anim):
+    """按 pal.for_species 的四原色验收真实缓存缩图，含 0–6px 动作压缩。"""
+    failures, checked, visible, off_palette, partial_alpha = [], 0, 0, 0, 0
+    roster = [p for group in r.build_roster().values() for p in group]
+    for piece in roster:
+        allowed = {tuple(c) for c in anim.pal.for_species(piece.species_id)}
+        for squash in range(7):
+            sprite = anim._board_sprite(piece.species_id, piece.tier, squash)
+            pixels = sprite.getcolors(sprite.width * sprite.height)
+            invalid = sum(n for n, c in pixels if c[3] and c[:3] not in allowed)
+            partial = sum(n for n, c in pixels if c[3] not in (0, 255))
+            nonempty = sum(n for n, c in pixels if c[3])
+            checked += 1
+            visible += nonempty
+            off_palette += invalid
+            partial_alpha += partial
+            expected = 34 if piece.tier == 3 else 32
+            if (invalid or partial or not nonempty
+                    or sprite.size != (expected, expected - squash)):
+                failures.append({"kind": "palette_purity", "species": piece.species_id,
+                                 "squash": squash, "off_palette_pixels": invalid,
+                                 "partial_alpha_pixels": partial, "visible_pixels": nonempty,
+                                 "size": sprite.size})
+    # 防止验收样本失去敏感性：该 56→34 BOX 原图确实会产生调色板外颜色。
+    mixed = anim.front.image(6, anim.pal).resize((34, 34), Image.Resampling.BOX)
+    allowed = set(anim.pal.for_species(6))
+    unquantized = sum(n for n, c in mixed.getcolors(34 * 34) if c[3] and c[:3] not in allowed)
+    if not unquantized:
+        failures.append({"kind": "palette_purity_fixture", "reason": "BOX has no mixed colors"})
+    return {"species_checked": len({p.species_id for p in roster}), "sprites_checked": checked,
+            "squash_phases": 7, "visible_pixels": visible, "off_palette_pixels": off_palette,
+            "partial_alpha_pixels": partial_alpha, "unquantized_box_off_palette_pixels": unquantized,
+            "failures": failures}
+
+
+def scale_compare_checks(anim):
+    """核对已交付 PNG 的三种 1×/4× 呈现，不把展示图误做等宽拉伸。"""
+    path = r.ROOT / "docs/design/mockups/scale_compare.png"
+    failures, samples = [], []
+    if not path.is_file():
+        return {"failures": [{"kind": "scale_compare", "reason": "missing PNG"}]}
+    with Image.open(path) as opened:
+        image = opened.convert("RGB")
+    expected = r.scale_compare_image(anim.front, anim.pal, anim.font)
+    if image.size != expected.size or diff_pixels(image, expected):
+        failures.append({"kind": "scale_compare", "reason": "stale or incorrect PNG"})
+    source = anim.front.image(6, anim.pal)
+    for i, sprite in enumerate((source.resize((28, 28), Image.Resampling.NEAREST),
+                                anim._board_sprite(6, 3), source)):
+        for zoom, baseline in ((1, 140), (4, 424)):
+            enlarged = sprite.resize((sprite.width * zoom, sprite.height * zoom), Image.Resampling.NEAREST)
+            tile = Image.new("RGBA", enlarged.size, r.PAPER + (255,))
+            tile.alpha_composite(enlarged)
+            x = 12 + i * 244 + (232 - enlarged.width) // 2
+            region = image.crop((x, baseline - enlarged.height, x + enlarged.width, baseline))
+            count = diff_pixels(region, tile)
+            samples.append({"size_px": sprite.width, "zoom": zoom, "diff_pixels": count})
+            if count:
+                failures.append({"kind": "scale_compare", **samples[-1]})
+    return {"species": 6, "source_px": source.width, "samples": samples, "failures": failures}
 
 
 def check_seed(seed, output=None):
@@ -395,6 +456,12 @@ def check_seed(seed, output=None):
     failures.extend(styles["failures"])
     motions = motion_contract_checks(anim)
     failures.extend(motions["failures"])
+    purity = palette_purity_checks(anim)
+    failures.extend(purity["failures"])
+    comparison = scale_compare_checks(anim)
+    failures.extend(comparison["failures"])
+    summary["palette_purity"] = {k: v for k, v in purity.items() if k != "failures"}
+    summary["scale_compare"] = {k: v for k, v in comparison.items() if k != "failures"}
     report = {"seed": seed, "summary": summary, "frames": rows, "isolated": isolated,
               "styles": styles, "motions": motions,
               "failures": failures, "elapsed_seconds": round(time.perf_counter() - start, 3)}

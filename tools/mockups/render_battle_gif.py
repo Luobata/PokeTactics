@@ -11,7 +11,7 @@ v3 修正（v2 遗留的真 bug）：
 3. 死亡/击退/攻击动画全部加 `0 <=` 时间下界。
 
 视觉层与静态稿共用三色地砖、米色窗框、底座与红 HP 条。棋盘精灵
-用 NEAREST 等比缩入 28/30px，特写保留原尺寸，保留前后遮挡与调色板；精灵
+用 BOX + 物种四原色量化缩入 32/34px，特写保留原尺寸，保留前后遮挡；精灵
 命中以整只闪白、双色爆点和轨迹强调。事件游标、回放状态、时长与
 固定调色板量化均不变。
 
@@ -35,12 +35,13 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT / "sim"))
 from decoders import Front, Font16, Palettes  # noqa: E402
 from render_mockups import (  # noqa: E402
-    H, W, INK, PAPER, FRAME, NIGHT, ENERGY, HP_RED, HP_LOW,
+    H, W, CELL, BOARD_X, BOARD_Y, BOARD_FOOT, INK, PAPER, FRAME, NIGHT, ENERGY, HP_RED, HP_LOW,
     TYPE_COLORS, TIER_COLORS, GRASS_A, GRASS_B, SAND_A, SAND_B,
     arena_dot, draw_hud, draw_small_number, draw_text, draw_pixel_text,
     draw_floor_tile, draw_divider, draw_base, draw_meter, draw_spark,
     pixel_window, draw_message_window, draw_cutin_stage, draw_cutin_sprites,
     draw_nameplate, draw_effect_badge, text_width, wrap_text,
+    board_sprite_size, scale_sprite, scale_compare_image,
 )
 from combat import Battle  # noqa: E402
 from data import pokedex  # noqa: E402
@@ -58,18 +59,17 @@ HIT_LIFE = 3 * FPS_DT
 PARTICLE_LIMIT = 192
 OPENING_LIFE = 4 * FPS_DT
 FULL_GOLD = (255, 208, 64)
-BOARD_FOOT = 26  # 30px 精灵顶端最多越过所在格 4px；底座前沿仍在格内。
 SCAR_FRAMES = 8
 
-# GIF 棋盘 = C-sym 布局（docs/10 §1.1/§1.5）：6 列 × 6 视觉行 × 34px（204px 宽居中）。
+# GIF 棋盘 = C-sym 布局（docs/10 §1.1/§1.5）：6 列 × 6 视觉行 × 40px（240px 满宽）。
 # 视觉行分区：0 敌备战行（虚线观战格）/ 1-2 敌方战场（沙色）/ 3-4 己方战场
 # （草绿）/ 5 我备战行（虚线观战格）。sim 战斗网格只有 4 行（combat.ROWS=4），
 # 战斗行 r 经 VIS_ROW_OFF 映射到视觉行 r+1；备战行不落战斗单位（不参战）。
-BCOLS, BROWS, BCELL = 6, 6, 34
+BCOLS, BROWS, BCELL = 6, 6, CELL
 VIS_ROW_OFF = 1                    # 战斗行 0-3 → 视觉行 1-4
 ENEMY_ROWS, ALLY_ROWS = (1, 2), (3, 4)   # 视觉行的战场分区
 BENCH_ROWS = (0, 5)                # 视觉行的双备战行
-BX, BY = (W - BCOLS * BCELL) // 2, 28
+BX, BY = BOARD_X, BOARD_Y
 
 GRASS = (GRASS_A, GRASS_B)
 SAND = (SAND_A, SAND_B)
@@ -488,8 +488,8 @@ class BattleAnimation:
                                 enemy=cy in ENEMY_ROWS, bench=cy in BENCH_ROWS)
         draw_divider(img, BX, BY + 3 * BCELL, BCOLS * BCELL)
         draw = ImageDraw.Draw(img)
-        draw.rectangle((BX - 1, BY - 1, BX + BCOLS * BCELL, BY + BROWS * BCELL),
-                       outline=INK)
+        draw.line((BX, BY - 1, BX + BCOLS * BCELL - 1, BY - 1), fill=INK)
+        draw.line((BX, BY + BROWS * BCELL, BX + BCOLS * BCELL - 1, BY + BROWS * BCELL), fill=INK)
         self._draw_ground_scars(img, T)
         shown = sorted((au for au in self.units.values() if au.visible(T)),
                        key=lambda a: a.render_px(T)[1])
@@ -704,10 +704,10 @@ class BattleAnimation:
 
     @lru_cache(maxsize=1024)
     def _board_sprite(self, species_id, tier, squash=0):
-        box = 30 if tier == 3 else 28
+        box = board_sprite_size(tier)
         source = self.front.image(species_id, self.pal)
-        # 等比缩完整源画布；仅动作相位允许纵向压缩，不做平滑/像素倍增后裁切。
-        return source.resize((box, box - squash), Image.Resampling.NEAREST)
+        # 每个动作相位直接从源图 BOX + 量化，避免多次重采样损失细节。
+        return scale_sprite(source, self.pal.for_species(species_id), (box, box - squash))
 
     def _sprite_placement(self, au, T, pose):
         sprite = self._board_sprite(au.u.piece.species_id, au.u.piece.tier,
@@ -735,7 +735,7 @@ class BattleAnimation:
                                   px_ + BCELL // 2 + r, foot + r // 2), outline=PAPER)
 
         sprite, anchor_x, anchor_y = self._sprite_placement(au, T, pose)
-        # 残影只复制已缩小的 alpha 蒙版，保持 NEAREST 三色像素边缘。
+        # 残影只复制量化后精灵的二值 alpha 蒙版，保留干净的像素边缘。
         if not dying:
             trail = next((a for a in reversed(au.attacks)
                           if HIT_DELAY <= T - a[0] < ATTACK_ANIM), None)
@@ -800,9 +800,9 @@ class BattleAnimation:
         c = HP_RED if frac > 0.25 or int(T * 10) % 4 < 2 else HP_LOW
         full = au.energy >= 80
         ec = (ENERGY if int(T * 10) % 4 < 2 else PAPER) if full else ENERGY
-        # 3px 槽分别留在脚下；第 30 行露出底座费用铆钉。
-        draw_meter(img, px_ + 3, py_ + 27, BCELL - 6, frac, c, height=3)
-        draw_meter(img, px_ + 3, py_ + 31, BCELL - 6, au.energy / 80, ec, height=3)
+        # 34×4px 双槽；第 34 行露出底座费用铆钉，能量条止于第 38 行。
+        draw_meter(img, px_ + 3, py_ + BOARD_FOOT, BCELL - 6, frac, c, height=4)
+        draw_meter(img, px_ + 3, py_ + BOARD_FOOT + 5, BCELL - 6, au.energy / 80, ec, height=4)
 
     def _ground_scars(self, T):
         """印记固定在落点格；从已发生的事件推导，不添加回放状态。"""
@@ -1083,26 +1083,17 @@ class BattleAnimation:
         y0 = BY + BROWS * BCELL + 4
         # 固定日志外框填满原有底部留白；消息出现/消退条件完全不变。
         pixel_window(img, (1, y0, 238, H - 2))
-        draw_text(img, (12, y0 + 4), "战斗记录", self.font, INK)
+        draw_text(img, (10, y0 + 4), "战斗记录", self.font, INK)
         draw_pixel_text(img, (186, y0 + 8), f"{T:04.1f}", INK)
         draw = ImageDraw.Draw(img)
         draw.line((11, y0 + 20, W - 12, y0 + 20), fill=FRAME)
         if not text or T < t0 - 0.2 or T > t0 + 1.8:
-            draw_text(img, (12, y0 + 30), "自动战斗中……", self.font, INK)
-            draw_text(img, (12, y0 + 58), "第 13 轮 · 自动战斗", self.font, INK)
+            draw_text(img, (10, y0 + 24), "自动战斗中……", self.font, INK)
             return
-        head, _, tail = text.partition("！")
-        lines = [(head + "！", INK)]
-        if tail.strip():
-            lines.append((tail.strip(), HP_RED if "拔群" in tail else INK))
-        # 外框已绘制；中文 16px / 英文 8px，按像素宽折行。
-        row = y0 + 26
-        for line, color in lines:
-            for part in wrap_text(line, W - 24):
-                if row + 15 > H - 8:
-                    break
-                draw_text(img, (12, row), part, self.font, color)
-                row += 18
+        # 40px 棋盘后日志只有 48px：按原消息寿命分页，一次完整显示一行。
+        lines = wrap_text(text, W - 36)
+        line = lines[min(len(lines) - 1, max(0, int((T - t0) / 0.6)))]
+        draw_text(img, (10, y0 + 24), line, self.font, HP_RED if "拔群" in line else INK)
         if int(T * 4) % 2 == 0:
             cx, cy = W - 18, H - 10
             draw.polygon(((cx - 3, cy - 3), (cx + 3, cy - 3), (cx, cy)), fill=INK)
@@ -1215,6 +1206,7 @@ def main() -> None:
     qframes = quantize_frames(frames)
     out = ROOT / "docs" / "design" / "mockups"
     out.mkdir(parents=True, exist_ok=True)
+    scale_compare_image(front, pal, font).save(out / "scale_compare.png")
     qframes[0].save(out / "battle_anim.gif", save_all=True,
                     append_images=qframes[1:], duration=int(FPS_DT * 1000),
                     loop=0)

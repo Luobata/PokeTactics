@@ -260,3 +260,43 @@ QualityGate 本地结果为 `gate=pass`、`raw_gate=pass`、`block_merge=false`�
 与本期开始快照比较：`AnimUnit`、`BattleAnimation.__init__`、`_reset`、`_ensure`、`_apply`、`frame`、`_casting_phase`、`_cutin_frame` 和量化函数 AST 均不变；棋盘几何、移动插值与事件时长常量不变。seed 7／11 事件流相同，22 组重复取帧／回卷／截断未来事件／绘制无状态写回对照通过；编译与 `git diff --check` 通过。未修改 `sim/`、`data/`、`decoders.py` 或静态渲染脚本。
 
 QualityGate 最终本地返回 `gate=pass`、`raw_gate=pass`、`block_merge=false`、`execution_complete=true`、`quality_confidence=full`、`incomplete_engines=[]`；actionable／shadow／advisory／deferred／waived finding 均为 0，修复轮次 0，无 guard 停止原因。当前任务未注册 QualityGate MCP，runner 依赖不齐，两个 Python 路径也没有匹配规则；中央规则上下文和语义评审不可用，`agent_action` 仅为 `local_checks_passed`，不据此声称语义评审通过。Mutation 按默认 `disabled`，未执行（CLI 返回 `not_applicable`）。有效验收依据为上述像素读数、动作／变体夹具、回放对照及完整渲染。原量化函数仍有 Pillow `getdata` 弃用提示，本期未改该受保护函数，脚本均正常退出。
+
+## 第 5 期：清晰度治理（格子 40px + 调色板量化缩放）
+
+第 4 期缩小后，任意比例最近邻丢失细节的问题比预期明显。本期将 C-sym 动画棋盘恢复为 **6 列 × 6 视觉行 × 40px**，`BX=0`、`BY=28`，横向覆盖全部 240px；敌我备战观战行共用 40px 格。上下框线位于 y=27／268，棋盘到 y=267，底部日志从 y=272 开始。日志适配剩余 48px：标题与时间一行、消息一行，长消息在原有显示寿命内每 0.6s 换行显示。动画与静态稿共用尺寸常量和缩图函数。
+
+精灵 **1／2 费为 32px，3 费为 34px**。脚点从格内 26px 下移到 30px，按实际 alpha 包围盒限制向上溢出不超过 4px，保留原动作横向 ±3px 和前后排层次。底座宽从 32px 增至 38px；血条、能量条均为 **34×4px**，分别占格内 y=30–33／35–38，中间 y=34 保留费用铆钉。静态准备页、战斗页和备战精灵同步使用新缩图与底座布局，商店和特写精灵继续使用原素材尺寸。
+
+缩放在渲染层完成：`Image.Resampling.BOX` 对完整源画布做面积平均，再将每个像素的 RGB 按平方欧氏距离吸附到 `pal.for_species` 返回的 **4 色调色板**，不抖动。RGBA 平均使用预乘 alpha，避免透明背景污染颜色；覆盖率以 128 为界归为 0／255，防止合成到地砖后留下混色软边。0–6px 动作压缩的每一相位都从源图直接重采样，并按物种／费用／压缩量缓存，没有二次缩放。
+
+| 源尺寸 | 1／2 费目标与比例 | 3 费目标与比例 |
+| --- | --- | --- |
+| 40px | 32px，0.800000× | 当前池无此组合 |
+| 48px | 32px，0.666667× | 34px，0.708333× |
+| 56px | 32px，0.571429× | 34px，0.607143× |
+
+[scale_compare.png](mockups/scale_compare.png) 使用同一只 **56px 喷火龙（#006）**，依次展示第 4 期 28px NEAREST、本期 34px BOX＋量化、原始 56px。上排是各自原生尺寸，下排统一 4× 最近邻放大，保持真实大小差异和同一基线，方便检查眼睛、翼缘与尾部轮廓；图中没有将三种呈现拉伸到同宽。裸跑 `render_battle_gif.py` 会重新生成此图。
+
+### 验收读数
+
+`fx_visibility_check.py` 新增 **`palette_purity`** 与 **`scale_compare`** 两项检查：前者遍历当前池全部 **84 个物种 × 7 个压缩相位 = 588 张缩图**，共检查 **279,865 个可见像素**，调色板外像素 **0**、半透明像素 **0**；后者核对已保存 PNG 和三种尺寸的 1×／4× 共 **6 个样本**，差异均为 **0px**。未量化的 56→34 BOX 对照包含 **233 个调色板外像素**，确认样本能暴露遗漏量化的问题。
+
+| 检查（均为 1× 原尺寸） | seed 7 | seed 11 | 红线 |
+| --- | ---: | ---: | ---: |
+| `board_crowding` 最大横向重叠 | **0px**，423 对 | **0px**，456 对 | ≤4px |
+| 血条／能量条连续遮挡 | **0 帧**，566 次核对 | **0 帧**，580 次核对 | ≤2 帧 |
+| opening 活跃帧最低 diff | **17,290** | **20,776** | ≥2,500 |
+| attack 活跃帧最低 diff | **9,513** | **8,254** | ≥600 |
+| land 活跃帧最低 diff | **3,358** | **1,832** | ≥1,500 |
+| opening 独立首帧 diff | 54,104 | 54,241 | ≥2,500 |
+| attack 独立首帧最低 diff | **848** | **816** | ≥600 |
+| land 独立首帧最低 diff | **57,600** | **1,832** | ≥1,500 |
+| 完整渲染进程耗时（含 PNG、双尺寸 GIF、分镜导出） | **2.80s**，默认裸跑 | **2.76s** | ≤8s |
+
+可见度阈值未改；棋盘面积和单位姿态改变后，各帧 diff 读数不要求与第 4 期逐项相等。原有 17 系双变体、伤害力度边界、地痕寿命及动作分桶检查继续通过。`render_battle_gif.py` 和 `fx_visibility_check.py` 裸跑均退出 0；检查器两组种子合计 5.38s、0 失败。静态脚本 `render_mockups.py` 裸跑退出 0、0.39s，准备／战斗／特写合成稿及 overview 已同步导出。
+
+查看了三联图、静态准备页和实际量化 GIF 的多个棋盘帧。默认两尺寸 GIF 全部解码通过：80 个编码帧，总时长 10,200ms；seed 11 为 74 帧、9,700ms。原采样窗仍为 102／97 个 100ms 采样帧，GIF 合并相同帧的行为不变。
+
+对本期开始快照核对：seed 7／11 事件列表逐项一致；重复取帧／回卷对照 **20 组通过**；`AnimUnit`、事件初始化、`_reset`、`_ensure`、`_apply`、`frame`、移动插值、切镜及最终 GIF 量化函数 AST 均不变，`decoders.py` SHA256 不变。无 `sim/`、`data/` 或事件／回放修改。三份 Python 源码编译和 `git diff --check` 通过。
+
+QualityGate 本地返回 `gate=pass`、`raw_gate=pass`、`block_merge=false`、`execution_complete=true`、`quality_confidence=full`、`incomplete_engines=[]`，actionable／shadow／advisory／deferred／waived 均为 0，修复轮次 0，无 guard 停止原因。不过本会话未注册 QualityGate MCP，runner 依赖不齐，三个 Python 路径无匹配规则，中央规则上下文和语义评审不可用；`agent_action=local_checks_passed` 不代表语义评审完成。Mutation 保持 `disabled`、未执行（CLI 返回 `not_applicable`）。本期验收依据为上述像素检查、裸跑计时、视觉检查及回放对照。

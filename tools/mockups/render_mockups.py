@@ -15,6 +15,7 @@ from decoders import Front, Font16, Palettes
 
 W, H = 240, 320
 CELL = 40
+BOARD_FOOT = 30  # 34px 目标盒允许向上溢出 4px。
 BOARD_X, BOARD_Y = 0, 28
 HUD_H, SHOP_H = 28, 48
 
@@ -218,8 +219,55 @@ def draw_meter(img, x, y, width, frac, color=HP_RED, height=5):
 
 
 def draw_meters(img, x, y, width, hp, energy, hp_color=HP_RED, energy_color=ENERGY):
-    draw_meter(img, x, y, width, hp, hp_color)
-    draw_meter(img, x, y + 6, width, energy or 0, energy_color, height=3)
+    draw_meter(img, x, y, width, hp, hp_color, height=4)
+    draw_meter(img, x, y + 5, width, energy or 0, energy_color, height=4)
+
+
+def board_sprite_size(tier):
+    return 34 if tier == 3 else 32
+
+
+def scale_sprite(source, palette, size):
+    """面积平均后按 RGB 平方距离吸附到物种四原色；覆盖率半数取整。
+
+    RGBA BOX 使用预乘 alpha，透明背景不污染边缘 RGB。量化不抖动，
+    alpha 收为 0/255，防止半透明边缘与地砖再次混色。
+    """
+    averaged = source.resize(size, Image.Resampling.BOX)
+    colors = tuple(tuple(c) for c in palette)
+    mapped = {}
+    for _, rgba in averaged.getcolors(averaged.width * averaged.height):
+        rgb, alpha = rgba[:3], rgba[3]
+        nearest = min(colors, key=lambda c: sum((a - b) ** 2 for a, b in zip(rgb, c)))
+        mapped[rgba] = nearest + (255 if alpha >= 128 else 0,)
+    sprite = Image.new("RGBA", size)
+    pixels = averaged.load()
+    sprite.putdata([mapped[pixels[x, y]] for y in range(size[1]) for x in range(size[0])])
+    return sprite
+
+
+def scale_compare_image(front, pal, font):
+    """同一 56px 喷火龙：原生尺寸与统一 4× 像素放大，供人眼比对。"""
+    source = front.image(6, pal)
+    if source.size != (56, 56):
+        raise ValueError("scale_compare requires a 56px source")
+    samples = (source.resize((28, 28), Image.Resampling.NEAREST),
+               scale_sprite(source, pal.for_species(6), (34, 34)), source)
+    img = Image.new("RGBA", (744, 452), NIGHT + (255,))
+    draw_text(img, (12, 12), "喷火龙 · 精灵缩放对比", font, PAPER)
+    for i, (sprite, title, label) in enumerate(zip(
+            samples, ("第4期", "第5期", "原尺寸"),
+            ("28 PX / NEAREST", "34 PX / BOX+PAL", "56 PX / SOURCE"))):
+        x = 12 + i * 244
+        pixel_window(img, (x, 44, x + 231, 439))
+        draw_text(img, (x + 8, 52), title, font, INK)
+        draw_pixel_text(img, (x + 8, 76), label, INK)
+        draw_pixel_text(img, (x + 8, 146), "1X", INK)
+        draw_pixel_text(img, (x + 8, 174), "4X", INK)
+        img.alpha_composite(sprite, (x + (232 - sprite.width) // 2, 140 - sprite.height))
+        enlarged = sprite.resize((sprite.width * 4, sprite.height * 4), Image.Resampling.NEAREST)
+        img.alpha_composite(enlarged, (x + (232 - enlarged.width) // 2, 424 - enlarged.height))
+    return img.convert("RGB")
 
 
 def draw_floor_tile(img, x, y, size, cx, cy, enemy, bench=False):
@@ -287,15 +335,16 @@ def draw_piece(img: Image, front: Front, pal: Palettes, font: Font16,
                hp_frac: float = None, energy_frac: float = None,
                selected: bool = False, casting: bool = False) -> None:
     x, y = BOARD_X + cx * CELL, BOARD_Y + cy * CELL
-    foot = y + CELL - (16 if hp_frac is not None else 10)
-    draw_base(img, x + 3, foot, CELL - 6, types, tier, casting)
-    sprite = front.image(pid, pal)
+    foot = y + BOARD_FOOT
+    draw_base(img, x + 1, foot, CELL - 2, types, tier, casting)
+    box = board_sprite_size(tier)
+    sprite = scale_sprite(front.image(pid, pal), pal.for_species(pid), (box, box))
     bounds = sprite.getbbox()
-    lift = 2 if casting else 0
+    lift = min(2, BOARD_FOOT - (bounds[3] - bounds[1]) + 4) if casting else 0
     img.alpha_composite(sprite, (x + (CELL - sprite.width) // 2,
                                  foot - bounds[3] - lift))
     if hp_frac is not None:
-        draw_meters(img, x + 4, y + CELL - 9, CELL - 8, hp_frac, energy_frac)
+        draw_meters(img, x + 3, y + BOARD_FOOT, CELL - 6, hp_frac, energy_frac)
     if selected:
         draw_cursor(img, x, y, CELL)
     if casting:
@@ -367,7 +416,8 @@ def draw_shop(img: Image, front: Front, pal: Palettes, font: Font16,
 def board_frame(img: Image) -> None:
     draw_divider(img, BOARD_X, BOARD_Y + 3 * CELL, 6 * CELL)
     draw = ImageDraw.Draw(img)
-    draw.rectangle((0, BOARD_Y, W - 1, BOARD_Y + 6 * CELL - 1), outline=INK)
+    draw.line((0, BOARD_Y - 1, W - 1, BOARD_Y - 1), fill=INK)
+    draw.line((0, BOARD_Y + 6 * CELL, W - 1, BOARD_Y + 6 * CELL), fill=INK)
 
 
 def draw_message_window(img, font, box, lines, cursor=True):
