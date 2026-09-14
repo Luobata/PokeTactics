@@ -1205,8 +1205,9 @@ canvas{display:block;width:480px;max-width:92vw;image-rendering:pixelated;backgr
   <div id="actions">
     <button id="btn-refresh" onclick="api('refresh')">刷新（2 金）</button>
     <button id="btn-xp" onclick="api('levelup')">买经验（4 金 +4XP）</button>
+    <button id="btn-fill" onclick="fillBoard()">一键上场</button>
     <button id="btn-fight" class="primary" onclick="endPrep()">开战 ▶</button>
-    <span id="warnfight">⚠ 上场为空！开战将不战而败掉血，也不会有战斗画面</span>
+    <span id="warnfight">⚠ 上场为空</span>
   </div>
   <p class="muted" id="tips">准备阶段不限时；开战后自动战斗。败方掉血 = 2 + 对方存活棋子 × 阶段系数；每 5 轮野怪轮掉装备组件。HP 归零淘汰，活到最后就是冠军。</p>
 </section>
@@ -1303,8 +1304,17 @@ function render(){
     `<div class="shopcell off"><div class="nm muted">空</div></div>`).join('');
   $('btn-refresh').disabled=$('btn-xp').disabled=$('btn-fight').disabled=!canBuy;
   $('btn-fight').style.display=(S.phase==='prep')?'':'none';
-  /* 空场防呆：闪烁警告条（动画黑屏的根因就是空场开战 → 无帧可播） */
-  $('warnfight').style.display=(S.phase==='prep'&&y.alive&&y.on_board===0)?'inline-block':'none';
+  /* 空场防呆：按当前状态给下一步指引（2026-09-14 用户反馈——棋子买了/
+     选中了但还在备战时，「上场为空」读起来像矛盾，改为指引文案） */
+  const wf=$('warnfight');
+  const benchN=S.bench.filter(Boolean).length;
+  if(S.phase==='prep'&&y.alive&&y.on_board===0){
+    wf.style.display='inline-block';
+    wf.textContent=selLoc?'→ 已选中棋子：点击棋盘任意格完成上场':
+      (benchN?'⚠ 棋子还在备战席（'+benchN+' 只）：点棋子 → 点棋盘格上场，或点「一键上场」':
+              '⚠ 上场为空：先从下方商店买几只棋子');
+  }else wf.style.display='none';
+  $('btn-fill').style.display=(S.phase==='prep'&&y.alive&&benchN&&y.on_board<y.pop)?'':'none';
   /* 羁绊 */
   $('syn').innerHTML=S.synergies.length?S.synergies.map(s=>`<div class="syrow ${s.tier?'on':''}">
     <span class="dot" style="background:${s.color}"></span><b>${s.zh}</b> ×${s.n}
@@ -1360,9 +1370,23 @@ function onCell(loc){
   const from=selLoc;selLoc=null;
   api('move',{from,to:loc});
 }
+async function fillBoard(){
+  /* 一键上场：把备战棋子依次搬到棋盘空格（前排 g0 先填），人口满/备战空即停 */
+  if(!S||S.phase!=='prep'||!S.you.alive)return;
+  for(let k=0;k<12;k++){
+    if(S.you.on_board>=S.you.pop){toast('人口已满（买经验升级可上场更多）');break;}
+    const bi=S.bench.findIndex(Boolean);
+    if(bi<0)break;
+    let hole=null;
+    for(const r of [0,1]){for(let c=0;c<6;c++){if(!S.board[r][c]){hole=`g${r},${c}`;break;}}if(hole)break;}
+    if(!hole)break;
+    const j=await api('move',{from:'b'+bi,to:hole});
+    if(!j.ok)break;
+  }
+}
 async function endPrep(){
   if(S.board[0].every(c=>!c)&&S.board[1].every(c=>!c)&&S.you.alive){
-    if(!confirm('上场为空：开战将不战而败（掉血且没有战斗画面）。\n\n建议先从商店买几只棋子并点击上场。\n确定仍然开战？'))return;
+    if(!confirm('上场为空：开战将不战而败（掉血且没有战斗画面）。\n\n建议先从商店买几只棋子并点击上场（或点「一键上场」）。\n确定仍然开战？'))return;
   }
   const j=await api('end_prep');
   if(j.ok)openBattle();
