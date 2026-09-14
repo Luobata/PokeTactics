@@ -337,7 +337,11 @@ def _fmt_event(anim, e: tuple) -> str:
     if kind == "die":
         return f"<b>{name(e[2])} 倒下</b>"
     if kind == "combo":
-        return f"<b>⚡ {e[4]}（{e[3]}系齐射）</b>"
+        tz = {"ELECTRIC": "电", "WATER": "水", "FIRE": "火", "GRASS": "草",
+              "POISON": "毒", "FLYING": "飞行", "NORMAL": "一般", "BUG": "虫",
+              "GROUND": "地面", "ROCK": "岩", "FIGHTING": "格斗", "PSYCHIC": "超能",
+              "GHOST": "幽灵", "DRAGON": "龙", "ICE": "冰", "STEEL": "钢", "DARK": "恶"}
+        return f"<b>⚡ {e[4]}（{tz.get(e[3], e[3])}系齐射）</b>"
     if kind == "regen":
         return f"{name(e[2])} 回复 +{e[3]}"
     if kind == "status":
