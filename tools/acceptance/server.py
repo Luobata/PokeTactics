@@ -72,6 +72,15 @@ ul{margin:6px 0;padding-left:20px}li{margin:3px 0}
 <li>右侧事件流与画面逐条对齐（同种子 → 同事件流 → 同画面）</li>
 </ul></details>
 
+<h2>系统控制台<span class="badge ok">每系统一页</span></h2>
+<div class="launch">
+<a href="/anim?seed=11"><button>动画验收台（战斗回放）</button></a>
+<a href="/roster"><button>棋子库（84 只 · 排序筛选）</button></a>
+<a href="/match"><button>单局模拟（8 bot 锦标赛）</button></a>
+<a href="/experiments"><button>实验台（8 个对照实验）</button></a>
+<a href="/synergy"><button>羁绊表（17 系）</button></a>
+</div>
+
 <h2>静态设计稿<span class="badge ok">已上稿</span></h2>
 <div class="grid">
 <a class="card" href="/mockups/prep_hd6x.png" target="_blank"><img src="/mockups/prep_hd6x.png"><span>准备页 · 方案C（HD 1440×1920）</span></a>
@@ -315,12 +324,150 @@ def _fmt_event(anim, e: tuple) -> str:
     return f"— end {e[2]}"
 
 
+
+
+# ---- 全系统控制台（每系统一个后台页）----
+CONSOLE_CSS = """
+*{box-sizing:border-box}body{margin:0;background:#f2efe5;color:#29302b;font:14px/1.6 ui-monospace,"PingFang SC",monospace}
+main{max-width:1080px;margin:auto;padding:24px}header{border-bottom:2px solid #29302b;padding-bottom:12px;margin-bottom:20px}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:15px;margin:20px 0 8px}p{margin:6px 0;color:#555e54}a{color:#355c3d}
+label{display:block;font-size:12px;margin:10px 0 4px}
+input,select,button{font:inherit;color:inherit;background:#fffdf5;border:1px solid #899081;border-radius:3px;padding:8px}
+button{cursor:pointer;min-height:38px}button:hover{background:#e2e8d8}button.primary{background:#355c3d;color:#fff;border-color:#355c3d}
+table{border-collapse:collapse;width:100%;background:#fffdf5;font-size:12px}
+th,td{border:1px solid #b9b3a0;padding:4px 8px;text-align:left}th{background:#e6e0cf;cursor:pointer}
+tr:hover td{background:#e2e8d8}.tierbar{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
+pre{background:#fffdf5;border:1px solid #899081;border-radius:4px;padding:10px;font-size:12px;white-space:pre-wrap;max-height:520px;overflow:auto}
+.cardrow{display:flex;gap:10px;flex-wrap:wrap}.card{background:#fffdf5;border:1px solid #899081;border-radius:6px;padding:10px;width:230px}
+.card button{width:100%;margin-top:6px}.muted{color:#8b938a;font-size:12px}
+.tabs{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.tabs a{text-decoration:none;color:inherit;border:1px solid #899081;border-radius:4px 4px 0 0;padding:4px 12px;font-size:13px;background:#e9e4d3}
+.tabs a.on{background:#355c3d;color:#fff;border-color:#355c3d;font-weight:600}
+"""
+
+NAV = ('<div class="tabs"><a href="/">总览</a><a href="/anim?seed=11">动画验收台</a>'
+       '<a href="/roster">棋子库</a><a href="/match">单局模拟</a>'
+       '<a href="/experiments">实验台</a><a href="/synergy">羁绊表</a></div>')
+
+ROSTER_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
+               "<title>棋子库 · PokeTactics</title><style>" + CONSOLE_CSS + "</style>"
+               "<main><header><h1>棋子库</h1>" + NAV + "</header>"
+               "<p>84 只池 · BST 定档（S2）。点列头排序。</p>"
+               "<label>筛选 <input id=q placeholder=中文名/属性/招式… style=width:280px></label>"
+               "<div id=out>加载中…</div></main>"
+               "<script>fetch('/api/roster').then(r=>r.json()).then(rows=>{"
+               "let sortKey='tier',asc=true;"
+               "const draw=()=>{const q=document.getElementById('q').value;"
+               "const f=rows.filter(r=>!q||Object.values(r).join('').includes(q));"
+               "f.sort((a,b)=>(asc?1:-1)*(a[sortKey]>b[sortKey]?1:a[sortKey]<b[sortKey]?-1:0));"
+               "document.getElementById('out').innerHTML='<table><tr>'+"
+               "['tier','name','bst','types','move','range','level'].map(k=>"
+               "'<th data-k='+k+'>'+'档位/名称/BST/属性/招牌招/射程/等级'.split('/')[['tier','name','bst','types','move','range','level'].indexOf(k)]+'</th>').join('')+'</tr>'+"
+               "f.map(r=>'<tr><td><span class=tierbar style=background:'+r.color+'></span>'+r.tier+'费</td>"
+               "<td><b>'+r.name+'</b></td><td>'+r.bst+'</td><td>'+r.types+'</td>"
+               "<td>'+r.move+'</td><td>'+(r.range>1?'远程':'近战')+'</td><td>L'+r.level+'</td></tr>').join('')+'</table>';"
+               "document.querySelectorAll('th').forEach(th=>th.onclick=()=>{sortKey=th.dataset.k;asc=!asc;draw();});};"
+               "draw();document.getElementById('q').oninput=draw;});</script></body></html>")
+
+MATCH_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
+              "<title>单局模拟 · PokeTactics</title><style>" + CONSOLE_CSS + "</style>"
+              "<main><header><h1>单局模拟（8 bot 锦标赛）</h1>" + NAV + "</header>"
+              "<label>master_seed <input id=seed type=number value=100 min=1 max=99999></label> "
+              "<button class=primary onclick=run()>跑一局</button>"
+              "<span class=muted>首次约 2-4 秒；同种子逐字节可复现（S7 分层子流）</span>"
+              "<pre id=out>点「跑一局」开始</pre></main>"
+              "<script>function run(){document.getElementById('out').textContent='运行中…';"
+              "fetch('/api/match?seed='+document.getElementById('seed').value)"
+              ".then(r=>r.text()).then(t=>document.getElementById('out').textContent=t);}</script>"
+              "</body></html>")
+
+EXP_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
+            "<title>实验台 · PokeTactics</title><style>" + CONSOLE_CSS + "</style>"
+            "<main><header><h1>实验台</h1>" + NAV + "</header>"
+            "<p>服务端子进程执行既有对照实验（结果按 参数+sim 源哈希 缓存）。</p>"
+            "<div class=cardrow id=cards>加载中…</div><pre id=out></pre></main>"
+            "<script>const EXPS={effectiveness:'克制×倍率×等级 六臂',melee:'近远程补偿六臂',"
+            "tiering:'BST 档位同质化',synergy:'羁绊开/关',weather:'四天气',status:'状态/Buff',"
+            "balance:'ICE/BUG 平衡',match:'M2 四条验收(50局)'};"
+            "fetch('/api/experiments').then(r=>r.json()).then(names=>{"
+            "document.getElementById('cards').innerHTML=names.map(n=>"
+            "'<div class=card><b>'+n+'</b><br><span class=muted>'+(EXPS[n]||'')+'</span>"
+            "<button onclick=run(this) data-n='+n+'>运行</button></div>').join('');});"
+            "function run(b){document.getElementById('out').textContent='运行中…（最长 60s）';"
+            "fetch('/api/experiment?name='+b.dataset.n).then(r=>r.text())"
+            ".then(t=>document.getElementById('out').textContent=t);}</script></body></html>")
+
+SYN_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
+            "<title>羁绊表 · PokeTactics</title><style>" + CONSOLE_CSS + "</style>"
+            "<main><header><h1>17 系羁绊表（S3，默认开）</h1>" + NAV + "</header>"
+            "<div id=out>加载中…</div></main>"
+            "<script>fetch('/api/synergy').then(r=>r.json()).then(t=>{"
+            "document.getElementById('out').innerHTML='<table><tr><th>属性</th><th>(2)</th><th>(4)</th><th>(6)</th></tr>'+"
+            "t.map(r=>'<tr><td><span class=tierbar style=background:'+r[3]+'></span><b>'+r[0]+'</b></td>"
+            "<td>'+r[1]+'</td><td>'+r[2]+'</td><td>'+r[4]+'</td></tr>').join('')+'</table>';});</script>"
+            "</body></html>")
+
+
+
+def _sim_state_hash() -> str:
+    h = hashlib.sha256()
+    for rel in ("sim/combat.py", "sim/synergy.py", "sim/roster.py", "sim/status.py",
+                "sim/weather.py", "sim/match.py", "sim/shop.py", "sim/bots.py",
+                "sim/economy.py", "sim/rng.py", "sim/items.py"):
+        f = ROOT / rel
+        if f.exists():
+            h.update(rel.encode())
+            h.update(f.read_bytes())
+    return h.hexdigest()[:10]
+
+
+_EXP_CACHE = {}
+
+
+WHITELIST = {
+    "effectiveness": ["sim/experiment_effectiveness.py", "--games", "400", "--seed", "3"],
+    "melee": ["sim/experiment_melee.py", "--games", "400", "--seed", "9"],
+    "tiering": ["sim/experiment_tiering.py"],
+    "synergy": ["sim/experiment_synergy.py", "--games", "400"],
+    "weather": ["sim/experiment_weather.py", "--games", "400", "--seed", "3"],
+    "status": ["sim/experiment_status.py", "--games", "400", "--seed", "12"],
+    "balance": ["sim/experiment_balance.py", "--games", "400"],
+    "match": ["sim/experiment_match.py", "--games", "20", "--seed", "5"],
+}
+
+
+def run_experiment(name: str) -> str:
+    """白名单实验 / __match_<seed> 单局：服务端子进程执行，按 参数+sim 源哈希 缓存。"""
+    import subprocess
+    import sys as _sys
+    if name.startswith("__match_"):
+        cmd = [_sys.executable, "sim/match.py", "--bots", "8",
+               "--seed", name.split("_")[-1]]
+    elif name in WHITELIST:
+        cmd = [_sys.executable] + WHITELIST[name]
+    else:
+        raise ValueError(f"未知实验: {name}")
+    key = (name, _sim_state_hash())
+    if key not in _EXP_CACHE:
+        r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=180)
+        _EXP_CACHE[key] = (r.stdout or "") + (("\n[stderr]\n" + r.stderr) if r.stderr else "")
+    return _EXP_CACHE[key]
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, directory=str(ROOT), **kwargs)
 
     def log_message(self, fmt, *args) -> None:
         pass  # 安静模式；准备动作单独打点
+
+    def _txt(self, text: str, status: int = 200) -> None:
+        body = text.encode()
+        self.send_response(status)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def _json(self, data, status: int = 200) -> None:
         body = json.dumps(data, ensure_ascii=False).encode()
@@ -355,6 +502,15 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+        elif parsed.path in ("/roster", "/match", "/experiments", "/synergy"):
+            page = {"/roster": ROSTER_HTML, "/match": MATCH_HTML,
+                    "/experiments": EXP_HTML, "/synergy": SYN_HTML}[parsed.path]
+            body = page.encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
         elif parsed.path == "/api/prepare":
             seed = int(qs.get("seed", ["7"])[0])
             syn_on = qs.get("synergy", ["1"])[0] == "1"
@@ -363,6 +519,69 @@ class Handler(SimpleHTTPRequestHandler):
             print(f"[acceptance] seed={seed} 帧渲染+缓存 "
                   f"{time.time() - t0:.1f}s（key={meta['key']}）")
             self._json(meta)
+        elif parsed.path == "/api/roster":
+            from roster import build_roster
+            from data import pokedex
+            dex = pokedex()
+            rows = []
+            for tier, pieces in sorted(build_roster().items()):
+                for pc in pieces:
+                    b = dex.species[pc.species_id]["base"]
+                    mv = dex.moves.get(pc.move_id) if pc.move_id else None
+                    from render_mockups import TYPE_COLORS
+                    rows.append({
+                        "tier": tier, "name": pc.name,
+                        "bst": dex.bst(pc.species_id),
+                        "types": "/".join(pc.types),
+                        "move": (mv.get("name_zh") or mv["name"]) if mv else "—",
+                        "range": pc.distance, "level": pc.level,
+                        "color": "#{:02x}{:02x}{:02x}".format(*TYPE_COLORS[pc.types[0]]),
+                    })
+            rows.sort(key=lambda r: (r["tier"], -r["bst"]))
+            self._json(rows)
+        elif parsed.path == "/api/match":
+            seed = int(qs.get("seed", ["100"])[0])
+            with _LOCK:  # match 子进程读共享文件，串行化避免缓存竞态
+                out = run_experiment(f"__match_{seed}")
+            self._txt(out)
+        elif parsed.path == "/api/experiments":
+            self._json(sorted(set(WHITELIST) - {k for k in WHITELIST if k.startswith("__")}))
+        elif parsed.path == "/api/experiment":
+            name = qs.get("name", [""])[0]
+            try:
+                self._txt(run_experiment(name))
+            except Exception as exc:
+                self._txt(f"运行失败: {exc}")
+        elif parsed.path == "/api/synergy":
+            import json as _j
+            out = []
+            try:
+                import synergy as syn
+                import re as _re
+                from render_mockups import TYPE_COLORS
+                tbl = getattr(syn, "SYNERGY_TABLE", None) or getattr(syn, "TIERS", None)
+                KEY_ZH = {"speed": "攻速", "dmg": "伤害", "hp": "HP", "heal": "回复",
+                          "dr": "减伤", "cap": "大招上限", "energy": "回能",
+                          "spdef": "特防", "def": "防御", "atk": "攻击"}
+                if isinstance(tbl, dict):
+                    for t, spec in sorted(tbl.items()):
+                        tiers = spec.get("tiers", {}) if isinstance(spec, dict) else {}
+                        def fmt(n):
+                            d = tiers.get(n)
+                            if not d:
+                                return "—"
+                            parts = []
+                            for k, v in d.items():
+                                val = v if isinstance(v, str) else f"{round(v * 100, 1)}%"
+                                parts.append(f"{KEY_ZH.get(k, k)}+{val}")
+                            return " ".join(parts)
+                        low = fmt(1) + ("；" + fmt(2) if tiers.get(2) else "") if tiers.get(1) else fmt(2)
+                        out.append([t, low or "—", fmt(4),
+                                    "#{:02x}{:02x}{:02x}".format(*TYPE_COLORS.get(t, (120, 120, 120))),
+                                    fmt(6)])
+            except Exception as exc:
+                out.append(["读取失败", str(exc), "", "#888", ""])
+            self._json(out)
         elif parsed.path == "/api/reports":
             files = sorted(p.name for p in (ROOT / "reports").glob("*.md"))
             self._json(files)
