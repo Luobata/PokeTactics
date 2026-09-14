@@ -226,9 +226,12 @@ def draw_cross(draw, cx, cy, radius, color):
 
 
 def draw_type_variant(draw, mtype, cx, cy, p, direction):
-    """第二轮廓；无新增粒子，沿用原有预算中的主体图形。"""
+    """第二轮廓；无新增粒子，沿用原有预算中的主体图形。
+
+    2026-09-14 缩幅：radius 18+18p → 12+12p（用户反馈特效盖住精灵）。
+    """
     color = TYPE_COLORS.get(mtype, FRAME)
-    radius = 18 + round(18 * p)
+    radius = 12 + round(12 * p)
 
     def point(x, y):
         return (round(cx + x * math.cos(direction) - y * math.sin(direction)),
@@ -361,21 +364,21 @@ def draw_fx(draw, mtype: str, T: float, cutin_key: tuple) -> None:
             y = sy + (ty - sy) * k - 34 * 4 * k * (1 - k)
             draw.ellipse((x - 2, y - 2, x + 2, y + 2), fill=c1 if i % 2 else c2)
         if p > 0.75:
-            r = 6 + int(16 * (p - 0.75) / 0.25)
+            r = 4 + int(11 * (p - 0.75) / 0.25)
             draw.ellipse((tx - r, ty - r // 2, tx + r, ty + r // 2),
                          outline=c2)
     elif style == "orbit":
         for i in range(7):
             ang = p * 7 + i * 0.9
-            r = 22 + 6 * ((p * 3 + i) % 2)
+            r = 15 + 4 * ((p * 3 + i) % 2)
             x, y = tx + r * 0.8 * math.cos(ang), ty + r * 0.6 * math.sin(ang)
             col = c1 if i % 2 else c2
             draw.rectangle((x - 1, y - 2, x + 2, y + 1), fill=col)
     elif style == "rings":
         for i in range(3):
             pr = (p + i / 3) % 1.0
-            r = 8 + int(40 * pr)
-            if r < 46:
+            r = 6 + int(26 * pr)
+            if r < 34:
                 draw.ellipse((tx - r, ty - r, tx + r, ty + r),
                              outline=c1 if i % 2 else c2)
     elif style == "wisps":
@@ -388,17 +391,17 @@ def draw_fx(draw, mtype: str, T: float, cutin_key: tuple) -> None:
     elif style == "shards":
         for i in range(7):
             ang = i * math.tau / 7 + 0.3
-            r0, r1 = 6 + 20 * p, 12 + 30 * p
+            r0, r1 = 4 + 13 * p, 8 + 20 * p
             draw.line((tx + r0 * math.cos(ang), ty + r0 * math.sin(ang),
                        tx + r1 * math.cos(ang), ty + r1 * math.sin(ang)),
                       fill=c1 if i % 2 else c2, width=2)
     elif style == "debris":
         if p < 0.3:
-            r = 4 + int(18 * p / 0.3)
+            r = 3 + int(12 * p / 0.3)
             draw.ellipse((tx - r, ty - r, tx + r, ty + r), outline=c2)
         for i in range(8):
             ang = i * math.tau / 8 + 0.2
-            d = 8 + 30 * p
+            d = 6 + 20 * p
             x, y = tx + d * math.cos(ang), ty + d * 0.7 * math.sin(ang)
             draw.rectangle((x - 1, y - 1, x + 2, y + 2),
                            fill=c1 if i % 2 else c2)
@@ -1077,13 +1080,19 @@ class BattleAnimation:
                     line = [(round(sx0 + (cx - sx0) * k / 8),
                              round(sy0 + (cy - sy0) * k / 8 - 9 * 4 * k / 8 * (1 - k / 8)))
                             for k in range(9)]
-                draw.line(line, fill=color, width=3)
+                draw.line(line, fill=color, width=4)
                 draw.line(line, fill=PAPER, width=1)
-            # 轻击的小白芯外留空心冲击环，三档均守住原可见度红线。
-            radius = (11, 18, 22)[strength] + phase * 4 + (4 if variant else 0)
-            if strength == 0:
-                ring = 22 + phase * 4
-                draw.ellipse((cx - ring, cy - ring, cx + ring, cy + ring), outline=color, width=3)
+            # 2026-09-14 用户反馈「特效有点大，宝可梦看不清」+ 视觉复检：
+            # 实心星形（会盖住精灵本体）缩到精灵的 60-75%（半径 9-12 +
+            # 相位/变体增量），冲击体积改由精灵外圈的细描边环与火花承担
+            # （环在外不遮本体、计入 fx_visibility 可见度 diff）。
+            # 三档语义保留（半径差 + 重击十字），红线复测通过。
+            radius = (9, 11, 12)[strength] + phase * 2 + (2 if variant else 0)
+            ring = 20 + strength * 4 + phase * 3
+            draw.ellipse((cx - ring, cy - ring, cx + ring, cy + ring),
+                         outline=color, width=3)
+            draw.ellipse((cx - ring + 2, cy - ring + 2, cx + ring - 2, cy + ring - 2),
+                         outline=PAPER, width=1)
             for size, fill in ((radius, color), (radius * 0.58, PAPER)):
                 points = []
                 for i in range(16):
@@ -1093,11 +1102,11 @@ class BattleAnimation:
                                    round(cy + r * math.sin(angle))))
                 draw.polygon(points, fill=fill)
             if strength == 2:
-                draw_cross(draw, cx, cy, 28 + phase * 3, color)
+                draw_cross(draw, cx, cy, 15 + phase * 2, color)
             # 保留八粒与 12px 行程，整体沿攻击向前漂移，背向粒子更短。
             for i in budget.take(8, required=True):
                 angle = direction + i * math.tau / 8
-                radius = 18 + phase * 6
+                radius = 15 + phase * 3
                 drift = 6 + phase * 4
                 x = round(cx + radius * math.cos(angle) + drift * math.cos(direction))
                 y = round(cy + radius * math.sin(angle) + drift * math.sin(direction))
@@ -1121,17 +1130,18 @@ class BattleAnimation:
             sxp, syp = self.units[c[2]].render_px(T)
             direction = math.atan2(ty - syp, tx - sxp)
             variant = fx_variant(T, c[2])
-            # 格子闪光保持 alpha 160 整整三帧，状态条在所有特效之后重绘。
+            # 格子闪光 alpha 160→110（3 帧不变）：精灵在落点帧仍可辨认
+            #（2026-09-14 缩幅修订，可见度红线由外环/星形承担）。
             if phase < 3:
                 draw.rectangle((int(tx) + 1, int(ty) + 1,
                                 int(tx) + BCELL - 2, int(ty) + BCELL - 2),
-                               fill=c2 + (160,))
-            r = 20 + round(20 * p)
+                               fill=c2 + (110,))
+            r = 13 + round(13 * p)
             draw.ellipse((cx - r, cy - r, cx + r, cy + r), outline=c2, width=4)
             draw.ellipse((cx - r + 3, cy - r + 3, cx + r - 3, cy + r - 3),
                          outline=PAPER, width=2)
             if eff >= 2 and phase < 3:
-                rr = 25 + phase * 5
+                rr = 16 + phase * 3
                 draw.ellipse((cx - rr, cy - rr, cx + rr, cy + rr),
                              outline=HP_RED, width=3)
                 for i in range(8):
