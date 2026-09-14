@@ -122,6 +122,11 @@ def team_winrate(names_a: tuple, names_b: tuple, games: int, weather_name,
 
 import synergy as _syn
 _syn.SYNERGIES_ON = False  # 本报告基线建立于羁绊关（2026-09-14 起默认开）
+# 2026-09-14 成套翻开后钉关保基线（与 tiering/effectiveness 同款）：齐射
+# 对 6 连单色队有克制不对称放大（水箭龟×6 的 WATER 齐射 2x 打火队 →
+# 水vs火锚 62%→100%），本表口径为纯天气乘区，钉住三系统
+import combo as _cb, items as _it, status as _st
+_cb.COMBOS_ON = False; _it.ITEMS_ON = False; _st.STATUS_ON = False
 
 
 def main() -> None:

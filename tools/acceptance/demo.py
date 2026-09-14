@@ -1131,6 +1131,10 @@ input,select{font:inherit;color:inherit;background:#fffdf5;border:1px solid #899
 .cell .ring{position:absolute;left:8px;right:8px;bottom:2px;height:7px;border:2px solid #29302b;border-radius:4px;z-index:1;pointer-events:none}
 .cell .cnt{position:absolute;top:1px;right:3px;font-size:11px;color:#fff;background:#355c3d;border-radius:3px;padding:0 3px;z-index:3}
 .cell .eq{position:absolute;top:1px;left:3px;font-size:10px;text-decoration:none;color:#5a4a00;background:radial-gradient(circle,#ffd040,#c99b4a);border-radius:50%;width:16px;height:16px;line-height:16px;text-align:center;z-index:3;font-style:normal}
+.cell .rng{position:absolute;bottom:2px;right:2px;font-size:10px;font-style:normal;color:#fff;border-radius:3px;padding:0 3px;line-height:14px;z-index:3}
+.cell .rng.near{background:#8a4a2f}.cell .rng.far{background:#2f5a8a}
+#warnfight{display:none;color:#fff;background:#8a2f27;border-radius:4px;padding:6px 10px;font-size:12px;animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.55}}
 .cell.has-item{box-shadow:0 0 0 2px #e0a010 inset}
 .cell.sel{outline:3px solid #355c3d;outline-offset:1px;z-index:5}
 .cell.pickme{outline:3px dashed #c99b4a;outline-offset:1px}
@@ -1202,6 +1206,7 @@ canvas{display:block;width:480px;max-width:92vw;image-rendering:pixelated;backgr
     <button id="btn-refresh" onclick="api('refresh')">刷新（2 金）</button>
     <button id="btn-xp" onclick="api('levelup')">买经验（4 金 +4XP）</button>
     <button id="btn-fight" class="primary" onclick="endPrep()">开战 ▶</button>
+    <span id="warnfight">⚠ 上场为空！开战将不战而败掉血，也不会有战斗画面</span>
   </div>
   <p class="muted" id="tips">准备阶段不限时；开战后自动战斗。败方掉血 = 2 + 对方存活棋子 × 阶段系数；每 5 轮野怪轮掉装备组件。HP 归零淘汰，活到最后就是冠军。</p>
 </section>
@@ -1248,12 +1253,16 @@ async function api(cmd,params={}){
 function newGame(){api('new',{seed:$('seedin').value||'7'}).then(j=>{if(j.ok){sid=j.sid;selLoc=equipKey=null;toast('对局开始：先买几只棋子上场吧');}});}
 /* ---------- 渲染 ---------- */
 function pieceCell(v,loc,cls){
-  if(!v)return `<div class="cell ${cls}"></div>`;
+  /* 空格子也带 data-loc（仅我方格）——2026-09-14 E2E 发现的 UI 级根因：
+     空格无 data-loc 则点击委托命中不了，玩家没有任何途径把棋子放上场
+     （只能空场开战 → 无帧 → 播放器黑屏）。敌方格保持不可点。 */
+  if(!v)return `<div class="cell ${cls}"${(cls.includes('ally')||cls.includes('bench'))&&loc?` data-loc="${loc}"`:''}></div>`;
   const sel=(selLoc===loc)?' sel':'';
   const pick=(equipKey&&(cls.includes('ally')||cls.includes('bench')))?' pickme':'';
   return `<div class="cell ${cls}${sel}${pick}${v.item?' has-item':''}" data-loc="${loc}" title="${v.name} ${v.tier}费 ${v.types.join('/')} ${v.ranged?'远程':'近战'} 招式:${v.move}${v.item?' 装备:'+v.item_name:''}">
     <img loading="lazy" src="/demo/sprite/${v.sid}.png" draggable="false">
     <i class="ring" style="border-color:${v.colors[0]}"></i>
+    <i class="rng ${v.ranged?'far':'near'}" title="${v.ranged?'远程（射程3）':'近战（射程1·突进）'}">${v.ranged?'远':'近'}</i>
     ${v.copies>=2?`<b class="cnt">×${Math.min(v.copies,3)}</b>`:''}
     ${v.item?'<i class="eq">装</i>':''}</div>`;
 }
@@ -1290,10 +1299,12 @@ function render(){
   /* 商店 */
   const canBuy=S.phase==='prep'&&y.alive;
   $('shop').innerHTML=S.shop.map((v,i)=>v?`<div class="shopcell ${canBuy?'':'off'}" data-shop="${i}" title="${v.types.join('/')} ${v.ranged?'远程':'近战'} · ${v.move}">
-    <img loading="lazy" src="/demo/sprite/${v.sid}.png"><div class="nm">${v.name}</div><div class="pr">🪙${v.price} · ${v.tier}费</div></div>`:
+    <img loading="lazy" src="/demo/sprite/${v.sid}.png"><div class="nm">${v.name}</div><div class="pr">🪙${v.price} · ${v.tier}费 · <b style="color:${v.ranged?'#2f5a8a':'#8a4a2f'}">${v.ranged?'远程':'近战'}</b></div></div>`:
     `<div class="shopcell off"><div class="nm muted">空</div></div>`).join('');
   $('btn-refresh').disabled=$('btn-xp').disabled=$('btn-fight').disabled=!canBuy;
   $('btn-fight').style.display=(S.phase==='prep')?'':'none';
+  /* 空场防呆：闪烁警告条（动画黑屏的根因就是空场开战 → 无帧可播） */
+  $('warnfight').style.display=(S.phase==='prep'&&y.alive&&y.on_board===0)?'inline-block':'none';
   /* 羁绊 */
   $('syn').innerHTML=S.synergies.length?S.synergies.map(s=>`<div class="syrow ${s.tier?'on':''}">
     <span class="dot" style="background:${s.color}"></span><b>${s.zh}</b> ×${s.n}
@@ -1350,8 +1361,9 @@ function onCell(loc){
   api('move',{from,to:loc});
 }
 async function endPrep(){
-  if(S.board[0].every(c=>!c)&&S.board[1].every(c=>!c)&&S.you.alive)
-    toast('警告：场上没有棋子，将不战而败！',true);
+  if(S.board[0].every(c=>!c)&&S.board[1].every(c=>!c)&&S.you.alive){
+    if(!confirm('上场为空：开战将不战而败（掉血且没有战斗画面）。\n\n建议先从商店买几只棋子并点击上场。\n确定仍然开战？'))return;
+  }
   const j=await api('end_prep');
   if(j.ok)openBattle();
 }
@@ -1372,7 +1384,20 @@ function openBattle(){
   if(S.phase==='over'&&S.over){rep.push('<hr><b>最终排名</b><ol style="margin:6px 0;padding-left:22px">'+S.over.ranking.map(r=>`<li class="${r.rank===1?'rank1':''}">${r.is_you?'★ ':''}${r.name}</li>`).join('')+'</ol>');}
   $('battle-report').innerHTML=rep.join('');
   $('btn-next').textContent=S.phase==='over'?'查看终局 ▶':'下一轮 ▶';
-  if(!bmeta||!bmeta.n){$('bhead').textContent='战斗结算';$('cv').getContext('2d').clearRect(0,0,240,320);$('bstatus').textContent='本场无战斗画面（空场判负/幽灵轮空）';$('evlist').innerHTML='';return;}
+  if(!bmeta||!bmeta.n){
+    $('bhead').textContent='战斗结算';
+    const ctx=$('cv').getContext('2d');
+    ctx.clearRect(0,0,240,320);
+    /* 空场等原因没有帧：画布上直接给出大字说明，不再留黑屏 */
+    ctx.fillStyle='#e8e2cf';ctx.textAlign='center';
+    ctx.font='bold 18px monospace';ctx.fillText('本场无战斗画面',120,132);
+    ctx.font='13px monospace';ctx.fillStyle='#b9b3a0';
+    const why=S.you&&!S.you.alive?'你已被淘汰（观战快进）':
+      (S.you&&S.you.on_board===0?'我方空场 · 不战而败掉血':'空场判负 / 野怪轮空');
+    ctx.fillText(why,120,158);
+    ctx.fillText('下一轮记得买棋上场',120,178);
+    $('bstatus').textContent='本场无战斗画面（'+(S.you&&S.you.on_board===0?'我方空场':'空场判负/轮空')+'）';
+    $('evlist').innerHTML='<div class="muted">本场景没有战斗事件流</div>';return;}
   $('bhead').textContent=`第 ${bmeta.round} 轮战斗 vs ${bmeta.opp_name}`;
   bevs=bmeta.events||[];
   $('evlist').innerHTML=bevs.map((e,i)=>`<div id="ev${i}">[${e.t.toFixed(1)}] ${e.text}</div>`).join('');

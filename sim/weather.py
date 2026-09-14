@@ -48,15 +48,24 @@ def active():
     return ACTIVE
 
 
-def damage_mult(move) -> float:
+_UNSET = object()      # 「未传参」哨兵：与合法值 None（无天气）区分
+
+
+def damage_mult(move, active=_UNSET) -> float:
     """天气对单次伤害的乘区。move=None（无属性普攻）恒为 1.0。
+
+    active 显式传本场天气（combat.Battle 的调用方式）。2026-09-14 修订：
+    进程级 ACTIVE 在验收后台多线程下会交叉污染（/anim 渲染与 /demo
+    战斗并行时两把锁互不知情），战斗解算一律按 Battle 实例传参；
+    不传 active 则回落进程级 ACTIVE（experiment_* 单线程臂的兼容路径）。
 
     只看招式属性、不看攻方属性（与克制判定同源）——草系放阳光烈焰在晴天
     加成、水系放水炮在雨天加成，判定线唯一。
     """
-    if move is None or ACTIVE is None:
+    name = ACTIVE if active is _UNSET else active
+    if move is None or name is None:
         return 1.0
-    w = WEATHERS[ACTIVE]
+    w = WEATHERS[name]
     mtype = move.get("type")
     if mtype in w.get("boost", ()):
         return w.get("boost_mult", BOOST_MULT)

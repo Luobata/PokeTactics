@@ -115,7 +115,10 @@ class Battle:
 
     def __init__(self, comp_a: list, comp_b: list, rng: random.Random,
                  layout: str = "random", weather_name=None) -> None:
-        weather_mod.set_active(weather_name)  # 全局天气（实验按臂；后台在锁内渲染）
+        # S11 天气按 Battle 实例持有（2026-09-14 修订：原 set_active 全局写
+        # 在验收后台多线程下会交叉污染——/anim 与 /demo 并行时互改对方天气；
+        # damage_mult 由 _final_damage 显式传 self.weather_name）
+        self.weather_name = weather_name
         self.rng = rng
         self.dex = pokedex()
         self.units: list = []
@@ -349,7 +352,8 @@ class Battle:
         事件流里的 attack/cast 伤害即此处的最终落地值（渲染契约：
         数字与掉血一致）。羁绊全中性时与旧实现逐点等价。
         """
-        dmg = int(dmg * weather_mod.damage_mult(move))  # S11 天气乘区（默认 1.0）
+        dmg = int(dmg * weather_mod.damage_mult(
+            move, self.weather_name))  # S11 天气乘区（实例级，默认 1.0）
         if target.range == 1:  # 近战受伤减免（均衡实验）
             dmg = int(dmg * (1.0 - melee_resist()))
         # ---- S3 羁绊结算钩子 ----
