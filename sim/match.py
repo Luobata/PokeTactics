@@ -69,6 +69,10 @@ class Match:
         self.rounds_with_damage = 0         # 死锁自查：有人掉血的轮数
         self.decide_times: list = []        # 每次 bot 决策耗时(ms)
         self.battles = 0
+        # S5 逐成品测量（items_on 时写入；纯读零随机，不影响子流/结果，
+        # experiment_items 消费）：每场战斗的载体单位表现 + 出局者装备快照
+        self.item_battle_log: list = []     # [(item_key|None, damage, casts, alive)]
+        self.item_exit_snapshots: list = []  # 被淘汰 bot 出局时的在装成品
 
     # ---- 工具 ----
     def alive(self) -> list:
@@ -95,10 +99,20 @@ class Match:
         """
         return self._derive(round_no, "battle", index)
 
+    def _log_item_battle(self, res: dict) -> None:
+        """S5 逐成品战斗贡献记账（experiment_items 消费；纯读零随机）。"""
+        for u in res["units"]:
+            self.item_battle_log.append(
+                (getattr(u, "item_key", None), u.damage_dealt, u.casts,
+                 u.alive))
+
     def _eliminate(self, bot: Bot, round_no: int) -> None:
         """淘汰：定名次，棋子/商店全部归还共享池（卡池恢复，可被别人买走）。"""
         bot.alive = False
         bot.rank = len(self.alive()) + 1
+        if items_mod.items_on():   # S5 测量：出局时的在装成品快照（纯读）
+            self.item_exit_snapshots.extend(
+                o.item for o in bot.all_pieces() if o.item is not None)
         for owned in bot.all_pieces():
             for sid in owned.sources:
                 self.pool.put(sid)
@@ -183,6 +197,8 @@ class Match:
                              layout="back").run()
                 battle_i += 1
                 self.battles += 1
+                if items_mod.items_on():
+                    self._log_item_battle(res)
                 factor = economy.stage_factor(round_no)
                 surv = res["survivors"]
                 if res["winner"] == 0:
@@ -216,6 +232,8 @@ class Match:
                          self._battle_rng(round_no, battle_i),
                          layout="back").run()
             self.battles += 1
+            if items_mod.items_on():
+                self._log_item_battle(res)
             dmg = 0
             if res["winner"] == 1:
                 dmg = economy.loss_damage(round_no, res["survivors"][1])
@@ -267,6 +285,8 @@ class Match:
                          layout="back").run()
             battle_i += 1
             self.battles += 1
+            if items_mod.items_on():
+                self._log_item_battle(res)
             if res["winner"] == 0:   # 野怪轮不改连胜连败（docs/03 §5 惯例）
                 # 掉金走 pve 子流：counter = 存活者序（docs/09 §2.2 野怪轮掉金）
                 b.gold += self._derive(round_no, "pve", i).randint(*PVE_GOLD)
@@ -322,16 +342,27 @@ class Match:
                 "equips": sum(b.item_equips for b in self.bots),
                 "stone_triggers": sum(b.stone_triggers for b in self.bots),
                 "lucky_eggs": items_mod.lucky_egg_count(self.bots),
-                # 通信进化终点现存（胡地 65/怪力 68/耿鬼 94）按来源分账：
-                # len(sources)==2 = 进化石单人进化；>=4 = 3合1（持装备门）
+                # 通信进化终点（胡地 65/怪力 68/耿鬼 94）按来源分账：
+                # len(sources)==2 = 直购中段 + 进化石单人进化；
+                # len(sources)>=4 且中段（勇基拉/豪力/鬼斯通）不足 3 张 =
+                # 中段本身是基础族 3合1 产物再吃石头（两系统叠加，正常玩法）；
+                # sources 里中段 ≥3 张 = 「中段×3 直接合并」——2026-09-14
+                # 裁定后结构性不可能（唯一通道=进化石），读数应恒 0
                 "stone_forms": sum(1 for b in self.bots
                                    for o in b.all_pieces()
                                    if o.piece.species_id in {65, 68, 94}
                                    and len(o.sources) == 2),
-                "trade_merges": sum(1 for b in self.bots
-                                    for o in b.all_pieces()
-                                    if o.piece.species_id in {65, 68, 94}
-                                    and len(o.sources) >= 4),
+                "stone_on_merged": sum(
+                    1 for b in self.bots for o in b.all_pieces()
+                    if o.piece.species_id in {65, 68, 94}
+                    and len(o.sources) >= 4
+                    and o.sources.count({65: 64, 68: 67, 94: 93}[
+                        o.piece.species_id]) < 3),
+                "trade_merges": sum(
+                    1 for b in self.bots for o in b.all_pieces()
+                    if o.piece.species_id in {65, 68, 94}
+                    and o.sources.count({65: 64, 68: 67, 94: 93}[
+                        o.piece.species_id]) >= 3),
             },
         }
 

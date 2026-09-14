@@ -9,7 +9,8 @@
 - 卖出价 = 累计投入 - 1（1 费保底全价，TFT 同款）；
 - 3 合 1 自动进化（S2 §1）：备战/场上凑齐 3 只同图鉴号 → 下一进化形态，
   sources 记账（基础 3 只 + 进化形态各占 1 张池），卖出时全部归还；
-- 通信进化（勇基拉/豪力/鬼斯通）需装备（S2 §1.5），M2 无装备 → 暂缓合成；
+- 通信进化（勇基拉/豪力/鬼斯通）不走 3 合 1（S2 §1.5，2026-09-14 修订）：
+  唯一通道 = 进化石（sim/items.py，装备到中段形态上即单人进化）；
   分支进化（伊布）本版走 next_evolution 确定性取水伊布（真三选一归 S9 UI）。
 
 随机只走调用方传入的 rng（宪法 2.2）。零 IO。
@@ -19,7 +20,6 @@ import random
 from typing import Dict, List, Optional
 
 from data import pokedex
-import items as items_mod   # S5 装备：通信进化持装备门（items_on 时生效）
 from roster import (LEVEL_BY_TIER, RANGED, MELEE, Piece, build_roster,
                     tier_for_bst)
 
@@ -40,8 +40,11 @@ LEVEL_ODDS: Dict[int, tuple] = {
     7: (30, 45, 25),
 }
 
-# 通信进化族（勇基拉→胡地、豪力→怪力、鬼斯通→耿鬼）：需持有装备（S2 §1.5，
-# 装备 S5 接线前暂缓合成——M2 边界，见报告）
+# 通信进化族（勇基拉→胡地、豪力→怪力、鬼斯通→耿鬼）：不走 3 合 1——
+# 2026-09-14 用户裁定（S2 §1.5 修订）：通信进化唯一通道 = 进化石
+# （sim/items.py：装备到中段形态上即单人进化，不消耗·每局一次）。
+# 原「3 合 1 需持任意装备」门已删除（50 局读数仅触发 1 次，与进化石
+# 实质互斥，见 reports/s5-items-2026-09-14.md §4）。
 TRADE_EVOLUTIONS = frozenset({64, 67, 93})
 
 
@@ -178,10 +181,11 @@ def try_combine(board: List[OwnedPiece], bench: List[OwnedPiece],
     """3 合 1 自动进化（S2 §1）：凑齐 3 只同图鉴号立即合成下一形态。
 
     在 board+bench 上反复扫描直到无可合成；合成品优先落 bench（备战），
-    池中无进化形态存量时保持原状等待（S2 §1.4）。S5 装备条款（S2 §1.5）：
-    通信进化族（勇基拉/豪力/鬼斯通）的 3 合 1 要求选中三只中至少一只
-    **持有任意装备**——装备随棋子进入新形态（不消耗）；选中三只里多余
-    的持装备者卸回 inventory（每单位 1 格）。items 关闭时维持旧门（暂缓）。
+    池中无进化形态存量时保持原状等待（S2 §1.4）。
+    S2 §1.5（2026-09-14 修订）：通信进化族（勇基拉/豪力/鬼斯通）不走
+    3 合 1——唯一通道是进化石（bots 持石单人进化），凑 3 只保持原状。
+    装备继承（S2 §1.2）对普通族照旧：三只中首个持装备者的装备随棋子
+    进入新形态，其余持装备者卸回 inventory（每单位 1 格）。
     返回日志（无进化则空表）。
     """
     dex = pokedex()
@@ -200,14 +204,9 @@ def try_combine(board: List[OwnedPiece], bench: List[OwnedPiece],
             nxt = dex.next_evolution(sid)
             if nxt is None:
                 continue                       # 终形态不再合成（S2 §1.7）
-            three = group[:3]                  # board 在前、bench 在后，确定性
             if sid in TRADE_EVOLUTIONS:
-                holders = [o for o in group if o.item is not None]
-                if not (items_mod.items_on() and holders):
-                    continue                   # 通信进化需持装备（S5 前暂缓）
-                # 优先让持装备者入选（否则被前两只无装备者占坑卡死合成）
-                three = [holders[0]] + [o for o in group
-                                       if o is not holders[0]][:2]
+                continue                       # 通信族不走 3合1（进化石唯一通道）
+            three = group[:3]                  # board 在前、bench 在后，确定性
             if pool.remaining.get(nxt, 0) <= 0:
                 continue                       # 池中无该形态，等待
             pool.take(nxt)

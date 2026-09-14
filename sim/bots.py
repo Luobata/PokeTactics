@@ -123,6 +123,9 @@ class Bot:
         self.item_crafts = 0                    # 合成次数
         self.item_equips = 0                    # 装备次数
         self.stone_triggers = 0                 # 进化石触发的通信进化数
+        # 逐成品合成统计（items.craft_best 写入，experiment_items 汇总）
+        self.craft_stats = {"calls": 0, "made": {}, "no_pair": {},
+                            "gated": {}, "shadow": {}}
 
     # ---- 通用视图 ----
     def all_pieces(self) -> list:
@@ -165,8 +168,11 @@ class Bot:
 
     # ---- S5 装备整理（L1+；items_on 时启用）----
     def _items_pass(self, round_no: int, others: list) -> None:
-        """合成（优先级表，人格差异）→ 进化石通信进化 → 通信 3合1 解锁 → 装备。
+        """合成（优先级表，人格差异 + 场景门）→ 进化石通信进化 → 装备。
 
+        2026-09-14 裁定/平衡修订：通信进化唯一通道 = 进化石（原「3 合 1
+        持装备门」删除，见 S2 §1.5）；合成/装备加场景门（围巾同系才合、
+        落后方先合幸运蛋、防御件给坦克——细则见各分步注释）。
         全程确定性（无 rng）：合成/装备次序由固定序与棋子列表序决定。
         顺序在 _select_board 之前——进化/合成改变棋子池，上场选择要看
         新形态；装备本身不影响上场评分（power 是纯 BST）。
@@ -174,20 +180,26 @@ class Bot:
         if not items_mod.items_on() or self.ability == 0:
             return
         dex = pokedex()
-        # 1) 合成：组件 ≥2 即按优先级出成品（幸运蛋达全场上限则让位；
-        #    无通信进化目标/石头已用则不烧进化石，组件留作后续特定配方）
+        # 1) 合成：组件 ≥2 即按优先级出成品。场景门（gate）：
+        #    围巾只在持有同系棋子时才合（切系损耗，docs/07 §2）——无同系
+        #    载体的围巾是死装备；幸运蛋达全场上限让位；无通信进化目标/
+        #    石头已用则不烧进化石（组件留作后续特定配方）
         stone_ok = not self.stone_used and any(
             o.piece.species_id in items_mod.STONE_TARGETS
             for o in self.all_pieces())
-        priority = items_mod.craft_priority(self.pers_key, stone_ok)
+        behind = self._is_behind(others)   # 落后方：幸运蛋提前（追赶条款）
+        priority = items_mod.craft_priority(self.pers_key, stone_ok, behind)
+        craft_gate = self._craft_gate(round_no)
         while True:
             lucky_ok = items_mod.lucky_egg_count(others) < \
                 items_mod.LUCKY_EGG_GLOBAL_CAP
             if items_mod.craft_best(self.inventory, priority, lucky_ok,
-                                    stone_ok) is None:
+                                    stone_ok, stats=self.craft_stats,
+                                    gate=craft_gate) is None:
                 break
             self.item_crafts += 1
-        # 2) 进化石：装备到通信族中段形态上即触发通信进化（不消耗、每局一次）
+        # 2) 进化石：装备到通信族中段形态上即触发通信进化（不消耗、每局一次；
+        #    2026-09-14 裁定后的唯一通道——3 合 1 通道已删除）
         if "evo_stone" in self.inventory.finished and not self.stone_used:
             for o in sorted(self.all_pieces(),
                             key=lambda x: -dex.bst(x.piece.species_id)):
@@ -202,42 +214,95 @@ class Bot:
                     self.stone_used = True
                     self.stone_triggers += 1
                     break
-        # 3) 通信 3合1 解锁：3 只通信族 + 任意非进化石成品 → 装上即合成
-        for sid in sorted(shop_mod.TRADE_EVOLUTIONS):
-            if self.count_species(sid) < 3:
-                continue
-            spare = [k for k in self.inventory.finished if k != "evo_stone"]
-            if not spare:
-                continue
-            target = next((o for o in self.all_pieces()
-                           if o.piece.species_id == sid and o.item is None), None)
-            if target is None:
-                continue
-            self.inventory.finished.remove(spare[0])
-            target.item = spare[0]
-            self.item_equips += 1
-            self.combines += len(try_combine(
-                self.board, self.bench, self.pool, self.templates,
-                self.inventory))
-        # 4) 装备：战斗件按优先级给主 C（BST 最高、空手者），幸运蛋给最弱棋；
-        #    进化石只走上面的通信进化通道（不占无目标的棋子格）
-        by_bst = sorted(self.all_pieces(),
-                        key=lambda o: -dex.bst(o.piece.species_id))
+        # 3) 装备：按成品类别定向（针对性使用条件，2026-09-14 平衡修订）；
+        #    幸运蛋给最弱棋（不占主 C 的 1 格）；进化石只走上面的通信进化
+        #    通道（不占无目标的棋子格）
         for key in [k for k in self.inventory.finished
                     if k not in ("lucky_egg", "evo_stone")]:
-            for o in by_bst:
-                if o.item is None:
-                    self.inventory.finished.remove(key)
-                    o.item = key
-                    self.item_equips += 1
-                    break
+            target = self._item_target(key)
+            if target is not None:
+                self.inventory.finished.remove(key)
+                target.item = key
+                self.item_equips += 1
         if "lucky_egg" in self.inventory.finished:
+            by_bst = sorted(self.all_pieces(),
+                            key=lambda o: -dex.bst(o.piece.species_id))
             for o in reversed(by_bst):        # 最弱棋背蛋（不占主 C 的 1 格）
                 if o.item is None:
                     self.inventory.finished.remove("lucky_egg")
                     o.item = "lucky_egg"
                     self.item_equips += 1
                     break
+
+    def _is_behind(self, others: list) -> bool:
+        """落后方判定（与 items.drop_weights 同口径）：hp 不高于存活均值——
+        幸运蛋等追赶件对落后方提前（docs/03 §5 / docs/07 §1 追赶渠道）。"""
+        alive = [b.hp for b in others if b.alive]
+        return self.hp <= sum(alive) / max(1, len(alive))
+
+    def _craft_gate(self, round_no: int):
+        """合成场景门（针对性使用条件，2026-09-14 平衡修订）：
+
+        - 三色围巾按系别棋子池深设门（池越深门槛越高——单只同系载体
+          说不上「围绕该系组阵」，切系损耗 docs/07 §2）：水（池内
+          ~20 只）**≥3 只**、火（~8 只）**≥2 只**、电（仅 5 只）
+          **≥1 只**，或该系在主羁绊目标里（L2 定向中）。逐系读数
+          校准：统一 ≥2 时黄围巾 3.2% 低于 5% 底线、家族又略超线，
+          按池深分档后各系均落带内；
+        - 其余成品全放行（天气石靠配方改窄压制，见 items.py 修订注）。
+        确定性（纯查表）。
+        """
+        counts = {}
+        for o in self.all_pieces():
+            for t in o.piece.types:
+                counts[t] = counts.get(t, 0) + 1
+        targets = set(self.target_types)
+        # 门限随池深：WATER ~20 只 → 3；FIRE ~8 只 → 2；ELECTRIC 5 只 → 1
+        need_of = {"WATER": 3, "FIRE": 2, "ELECTRIC": 1}
+
+        def gate(key: str) -> bool:
+            if key.startswith("scarf_"):
+                t = key.rsplit("_", 1)[1].upper()
+                return counts.get(t, 0) >= need_of.get(t, 2) or t in targets
+            return True
+        return gate
+
+    def _item_target(self, key: str):
+        """装备去向（针对性使用条件，2026-09-14 平衡修订）：
+
+        - 三色围巾 → 最强**同系**空手单位（无同系时落到通用主 C 兜底）；
+        - 聚光镜 → 空手中特攻最高者（大招流载体：大招走特攻/威力乘区）；
+        - 专爱头巾/疾风羽 → BST 最高空手者、远程优先（主 C 输出位）；
+        - 防御件（剩饭/气势披带/亮粉/天气石）→ 最坦空手单位（近战优先：
+          闪避/减伤/反斩杀/前排续航都在承伤位兑现，v1 全堆 BST 主 C
+          让防御件的场景天然错位）。
+        确定性：并列取棋子列表序（max 首个最大值）。
+        """
+        dex = pokedex()
+        free = [o for o in self.all_pieces() if o.item is None]
+        if not free:
+            return None
+        if key.startswith("scarf_"):
+            t = key.rsplit("_", 1)[1].upper()
+            on_type = [o for o in free if t in o.piece.types]
+            pool = on_type or free
+            return max(pool, key=lambda o: dex.bst(o.piece.species_id))
+        if key == "focus_lens":
+            return max(free, key=lambda o: (
+                dex.species[o.piece.species_id]["base"]["special_attack"],
+                dex.bst(o.piece.species_id)))
+        if key in ("choice_band", "swift_feather"):
+
+            def carry_rank(o: OwnedPiece) -> tuple:
+                ranged = o.piece.distance > 1
+                return (ranged, dex.bst(o.piece.species_id),
+                        dex.species[o.piece.species_id]["base"]["special_attack"])
+            return max(free, key=carry_rank)
+
+        def tank_rank(o: OwnedPiece) -> tuple:
+            b = dex.species[o.piece.species_id]["base"]
+            return (o.piece.distance == 1, b["hp"] + 2 * b["defense"])
+        return max(free, key=tank_rank)
 
     def _unequip(self, owned: OwnedPiece) -> None:
         """卸下装备回仓库（卖棋自动卸下，无惩罚——docs/07 §3）。"""
@@ -365,9 +430,10 @@ class Bot:
         if copies == 1:
             score += 600 if valuable else 250    # 第 2 只：3 合 1 进度
         elif copies >= 2:
-            # 通信族第 3 只：装备关 = 合不成（S2 §1.5 暂缓），不追；
-            # 装备开 = 可用任意成品解锁合成，按正常复制件估值
-            if sid in shop_mod.TRADE_EVOLUTIONS and not items_mod.items_on():
+            # 通信族第 3 只：3 合 1 通道已裁撤（2026-09-14 裁定：唯一通道=
+            # 进化石单人进化，只需 1 只中段形态），第 3 只无合并价值，
+            # 维持 −800 暂缓罚（装备开关两臂一致——原「装备开解除」随门删除）
+            if sid in shop_mod.TRADE_EVOLUTIONS:
                 score += -800
             else:
                 score += 900 if valuable else 300
