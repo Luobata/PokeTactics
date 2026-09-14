@@ -21,6 +21,7 @@ from data import (BASIC_POWER, ENERGY_MAX, ENERGY_PER_ATTACK,
                   eff_mult, melee_move_mult, melee_resist, pokedex,
                   ranged_interval_mult)
 from roster import Piece
+import combo as combo_mod    # S10 组合技 A：默认 COMBOS_ON=False（docs/04）
 import synergy  # S3 羁绊：默认 SYNERGIES_ON=False，零随机、零事件流变更
 import status as status_mod   # S12 状态/Buff：默认 STATUS_ON=False（docs/06）
 import weather as weather_mod  # S11 天气：默认无天气（docs/05）
@@ -121,10 +122,11 @@ class Battle:
         self.events: list = []
         self._deploy(comp_a, team=0, rows=ROWS_ALLY, layout=layout)
         self._deploy(comp_b, team=1, rows=ROWS_ENEMY, layout=layout)
+        # S5 协议：comp 元素可能带 (Piece, item) 二元组——羁绊/齐射只看裸 Piece
+        plain_a = [e[0] if isinstance(e, tuple) else e for e in comp_a]
+        plain_b = [e[0] if isinstance(e, tuple) else e for e in comp_b]
+        self._plain_comps = (plain_a, plain_b)  # S10 齐射计数用（deploy 后不变）
         if synergy.synergies_on():  # S3：按场上当前形态一次性结算（无随机）
-            # S5 协议：comp 元素可能带 (Piece, item) 二元组——羁绊只看裸 Piece
-            plain_a = [e[0] if isinstance(e, tuple) else e for e in comp_a]
-            plain_b = [e[0] if isinstance(e, tuple) else e for e in comp_b]
             synergy.apply([u for u in self.units if u.team == 0], plain_a)
             synergy.apply([u for u in self.units if u.team == 1], plain_b)
         status_mod.init_battle(self)  # S12：状态容器（默认无操作）
@@ -153,6 +155,8 @@ class Battle:
     # ---- 主循环 ----
     def run(self) -> dict:
         t = 0.0
+        if combo_mod.combos_on():   # S10 齐射：deploy 后 t=0 的开场组合招
+            self._opening_volley()
         # S3 持续羁绊（水之治疗等）+ S5 剩饭：每 1s 一跳；v1 不入事件流
         regen_units = [u for u in self.units
                        if u.synergy_heal > 0 or u.item_heal > 0]
@@ -211,6 +215,54 @@ class Battle:
         near = min(enemies, key=lambda e: (_manhattan(u.pos, e.pos), e.idx))
         u.target_idx = near.idx
         return near
+
+    def _opening_volley(self) -> None:
+        """S10 齐射（sim/combo.py 定义触发与数值骨架）：t=0 的开场组合招。
+
+        每队按「计数 ≥ 各系最高档」放**至多一轮**（双最高档只触发计数
+        最高的一系，见 combo.volley_pick）：一条 (0.0, "combo", team,
+        属性, 名称) 横幅事件 + 每发一条既有 attack 事件，伤害走
+        _final_damage 全链（克制/天气/羁绊乘区/承伤上限/减伤/装备）。
+        必中、不回能、不触发状态施加；计入 damage_dealt（战报统计同
+        口径）。齐射伤害骰走本场 battle 子流，确定性不变。
+        """
+        for team in (0, 1):
+            mates = [u for u in self.units if u.team == team]
+            volleys = combo_mod.opening_volley(
+                mates, self._plain_comps[team], self.dex)
+            for v in volleys:
+                self.events.append((0.0, "combo", team, v["type"], v["name"]))
+                volley_move = {"type": v["type"], "name": v["name"]}
+                special = self.dex.move_is_special(volley_move)
+                for u, power in v["shots"]:
+                    if not u.alive:
+                        continue  # 对方齐射在先（双齐射互射），本发不再离手
+                    enemies = [e for e in self.units
+                               if e.alive and e.team != team]
+                    if not enemies:
+                        return
+                    target = min(enemies, key=lambda e: (
+                        _manhattan(u.pos, e.pos), e.idx))
+                    u.target_idx = target.idx  # 与 _target 同键，锁定最近敌人
+                    stab = STAB_BONUS if v["type"] in u.piece.types else 1.0
+                    eff = eff_mult(self.dex.multiplier(
+                        v["type"], target.piece.types))
+                    dmg = _damage(self.rng, u.piece.level, power,
+                                  u.attack_stat(special),
+                                  target.defense_stat(special), stab, eff)
+                    dmg = self._final_damage(u, target, volley_move, dmg)
+                    self.events.append((0.0, "attack", u.idx, target.idx, dmg))
+                    target.hp -= dmg
+                    u.damage_dealt += dmg
+                    # S5 气势披带（施加点，与 _strike 同语义）：致命伤保留 1 HP
+                    if (target.hp <= 0 and target.item_sash
+                            and not target.item_sash_used):
+                        target.item_sash_used = True
+                        target.hp = 1
+                        self.events.append((0.0, "sash", target.idx))
+                    if target.hp <= 0:
+                        target.hp = 0
+                        self.events.append((0.0, "die", target.idx))
 
     def _step_toward(self, u: Unit, goal: tuple) -> None:
         """BFS 最短路走第一步（绕开占用格；终点视为可通行）。

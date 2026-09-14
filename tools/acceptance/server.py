@@ -239,8 +239,10 @@ def render_battle(seed: int, synergy: bool = False, scenario: str = None) -> dic
     if not meta_path.exists():
         with _LOCK:
             if not meta_path.exists():
+                import combo as combo_mod
                 prev_syn = syn.SYNERGIES_ON
                 prev_status = status_mod.STATUS_ON
+                prev_combo = combo_mod.COMBOS_ON
                 syn.SYNERGIES_ON = synergy  # 仅在锁内翻转，渲染完还原
                 front, pal, font = Front(), Palettes(), Font16()
                 roster = build_roster()
@@ -254,10 +256,12 @@ def render_battle(seed: int, synergy: bool = False, scenario: str = None) -> dic
                     comp_b = [find(n) for n in sc["b"]]
                     weather = sc.get("weather")
                     status_mod.STATUS_ON = bool(sc.get("status"))
+                    combo_mod.COMBOS_ON = bool(sc.get("combo"))
                 else:
                     comp_a = [find(n) for n in ("雷丘", "妙蛙花", "隆隆岩", "怪力", "水伊布")]
                     comp_b = [find(n) for n in ("暴鲤龙", "喷火龙", "胡地", "大比鸟", "霸王花")]
                     weather = None
+                    combo_mod.COMBOS_ON = False
                 anim = BattleAnimation(comp_a, comp_b, seed, front, pal, font,
                                        weather_name=weather)
                 t_end = max(e[0] for e in anim.events)
@@ -279,6 +283,7 @@ def render_battle(seed: int, synergy: bool = False, scenario: str = None) -> dic
                                    "text": _fmt_event(anim, e)})
                 syn.SYNERGIES_ON = prev_syn
                 status_mod.STATUS_ON = prev_status
+                combo_mod.COMBOS_ON = prev_combo
                 fx_moments = [("0.2", "开战演出")]
                 first_atk = next((e[0] for e in anim.events
                                   if e[1] == "attack"), None)
@@ -331,6 +336,8 @@ def _fmt_event(anim, e: tuple) -> str:
         return f"<b>{name(e[2])} 的 {_move_zh(e[4])}</b> → {name(e[3])}{tail}"
     if kind == "die":
         return f"<b>{name(e[2])} 倒下</b>"
+    if kind == "combo":
+        return f"<b>⚡ {e[4]}（{e[3]}系齐射）</b>"
     if kind == "regen":
         return f"{name(e[2])} 回复 +{e[3]}"
     if kind == "status":
@@ -493,6 +500,10 @@ SCENARIOS = {
                      "weather": None, "status": True},
     "balance_pair": {"exp": "balance", "label": "平衡 · 水vs岩（上限检验）",
                      "a": ["水箭龟"] * 6, "b": ["隆隆岩"] * 6, "weather": None},
+    "combo_volley": {"exp": "combo", "label": "组合技 · 电(6)雷霆万钧齐射（自动开）",
+                     "a": ["雷丘", "皮卡丘", "三合一磁怪", "小磁怪", "雷伊布", "雷丘"],
+                     "b": ["水箭龟", "水伊布", "宝石海星", "蚊香泳士", "哥达鸭", "拉普拉斯"],
+                     "weather": None, "combo": True},
 }
 SCENARIO_SEED_DEFAULT = 7
 
