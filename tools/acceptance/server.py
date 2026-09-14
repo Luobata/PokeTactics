@@ -30,7 +30,7 @@ sys.path.insert(0, str(ROOT / "tools" / "mockups"))
 sys.path.insert(0, str(ROOT / "sim"))
 
 FPS_DT = 0.1
-META_REV = "r2"  # meta 生成逻辑版本：变更高级此号使缓存整体失效
+META_REV = "r3"  # r3: 事件格式器汉化（combo 属性）  # meta 生成逻辑版本：变更高级此号使缓存整体失效
 _LOCK = threading.Lock()
 _CACHE = {}  # seed -> (key, meta)
 
