@@ -27,6 +27,12 @@
 sell(loc) / refresh / levelup / move(from,to)（棋盘↔备战互移，含交换）/
 craft(item) / equip(item,loc) / unequip(loc) / end_prep / next。
 金币/人口/容量校验全部服务端，错误返回中文原因（ok=false，HTTP 恒 200）。
+
+自动试玩（2026-09-15）：「▶ 自动试玩」按钮——客户端按决策优先级
+（合成→装备→上场→买棋→升级→刷新→卖冗余→开战）驱动完整一局到终局
+排名，战斗动画照常逐场播放（倍速随播放器档位）。近战前排/远程后排
+的摆位与角标语义一致；后台标签自动暂停；全部走公开动作 API，
+对局可事后复盘（与 E2E 同轨）。
 """
 
 import io
@@ -1206,6 +1212,7 @@ canvas{display:block;width:480px;max-width:92vw;image-rendering:pixelated;backgr
     <button id="btn-refresh" onclick="api('refresh')">刷新（2 金）</button>
     <button id="btn-xp" onclick="api('levelup')">买经验（4 金 +4XP）</button>
     <button id="btn-fill" onclick="fillBoard()">一键上场</button>
+    <button id="btn-auto" onclick="toggleAuto()">▶ 自动试玩</button>
     <button id="btn-fight" class="primary" onclick="endPrep()">开战 ▶</button>
     <span id="warnfight">⚠ 上场为空</span>
   </div>
@@ -1384,8 +1391,120 @@ async function fillBoard(){
     if(!j.ok)break;
   }
 }
+/* ---------- 自动试玩：客户端驱动完整一局（买棋→摆位→开战→播动画→下一轮→终局） ---------- */
+let autoOn=false,autoGen=0;
+const autoSleep=ms=>new Promise(r=>setTimeout(r,ms));
+function toggleAuto(){
+  autoOn=!autoOn;autoGen++;
+  const b=$('btn-auto');
+  b.textContent=autoOn?'⏸ 停止自动试玩':'▶ 自动试玩';
+  b.classList.toggle('primary',autoOn);
+  if(autoOn){const g=autoGen;autoLoop(g);toast('自动试玩开始：全程自动决策与播放，可随时接手');}
+}
+function autoStop(msg){if(!autoOn)return;autoOn=false;autoGen++;$('btn-auto').classList.remove('primary');$('btn-auto').textContent='▶ 自动试玩';if(msg)toast(msg);}
+function autoBoardPieces(){return [...S.board[0],...S.board[1]].filter(Boolean);}
+function autoTypeCounts(){const c={};autoBoardPieces().forEach(v=>v.types.forEach(t=>c[t]=(c[t]||0)+1));return c;}
+function autoTargetCell(v){
+  /* 近战前排（g0 贴中线）、远程后排（g1）——与角标语义一致 */
+  const rows=v&&v.ranged?[1,0]:[0,1];
+  for(const r of rows)for(let c=0;c<6;c++)if(!S.board[r][c])return `g${r},${c}`;
+  return null;
+}
+function autoWantBuy(){
+  const y=S.you,mine=[...autoBoardPieces(),...S.bench.filter(Boolean)];
+  if(S.bench.filter(Boolean).length>=y.bench_cap-1&&y.on_board>=y.pop)return -1;
+  const tc=autoTypeCounts();
+  let best=-1,score=-1;
+  S.shop.forEach((c,i)=>{
+    if(!c||y.gold-c.price<2)return;
+    let s=c.tier*10;
+    s+=mine.filter(v=>v.sid===c.sid).length*55;          /* 复制件：3合1 进度 */
+    s+=c.types.reduce((a,t)=>a+(tc[t]||0)*9,0);          /* 供主羁绊 */
+    if(s>score){score=s;best=i;}
+  });
+  return best;
+}
+function autoFirstFreeHand(){
+  for(const r of [0,1])for(let c=0;c<6;c++){const v=S.board[r][c];if(v&&!v.item)return `g${r},${c}`;}
+  for(let i=0;i<S.bench.length;i++){if(S.bench[i]&&!S.bench[i].item)return 'b'+i;}
+  return null;
+}
+function autoAllFreeHands(){
+  const spots=[];
+  for(const r of [0,1])for(let c=0;c<6;c++){if(S.board[r][c]&&!S.board[r][c].item)spots.push(`g${r},${c}`);}
+  for(let i=0;i<S.bench.length;i++){if(S.bench[i]&&!S.bench[i].item)spots.push('b'+i);}
+  return spots;
+}
+let autoSkipRound=-1,autoSkipItems=new Set();
+function autoTickSkip(){
+  if(S&&S.round!==autoSkipRound){autoSkipRound=S.round;autoSkipItems.clear();}
+}
+async function autoStep(){
+  if(!S)return;
+  if(S.phase==='over'){
+    const my=(S.over&&S.over.ranking||[]).find(e=>e.is_you);
+    autoStop('自动试玩结束：'+(my?`第 ${my.rank} 名（${S.round} 轮）`:'终局'));return;
+  }
+  if(S.phase==='prep'){
+    if(!S.you.alive){await api('next');return;}          /* 淘汰后观战快进 */
+    const y=S.you;
+    autoTickSkip();
+    /* 决策优先级：合成 → 装备 → 上场 → 买棋 → 升级 → 刷新 → 卖冗余 → 开战。
+       合成/装备失败（如进化石只走通信进化、围巾无载体）不 return——
+       穿透到下一优先级继续行动，该成品本轮记跳防反复空打（R11 卡死
+       根因：进化石装备被拒 + 状态不变 → 空闲超时）。 */
+    for(const c of S.items.craftable||[]){
+      if(autoSkipItems.has('craft:'+c.key))continue;
+      const j=await api('craft',{item:c.key});
+      if(j.ok)return;
+      autoSkipItems.add('craft:'+c.key);
+    }
+    for(const f of S.items.finished||[]){
+      if(autoSkipItems.has('equip:'+f.key))continue;
+      let done=false;
+      for(const loc of autoAllFreeHands()){
+        const j=await api('equip',{item:f.key,loc});
+        if(j.ok){done=true;break;}
+      }
+      if(done)return;
+      autoSkipItems.add('equip:'+f.key);
+    }
+    if(y.on_board<y.pop){
+      const bi=S.bench.findIndex(Boolean);
+      if(bi>=0){const cell=autoTargetCell(S.bench[bi]);if(cell){await api('move',{from:'b'+bi,to:cell});return;}}
+    }
+    const want=autoWantBuy();
+    if(want>=0){await api('buy',{i:want});return;}
+    if(y.gold>=8&&y.level<7&&S.round>=4){await api('levelup');return;}
+    if(y.gold>=8&&S.round>=6&&autoWantBuy()<0&&S.bench.filter(Boolean).length<y.bench_cap-2){await api('refresh');return;}
+    if(S.bench.filter(Boolean).length>=y.bench_cap){await api('sell',{loc:'b'+(S.bench.filter(Boolean).length-1)});return;}
+    await api('end_prep');openBattle();return;
+  }
+  /* battle：等动画播完再进下一轮（无帧场面短等即走） */
+  if(!$('overlay').classList.contains('show'))openBattle();
+  if(bn>0&&(playing||bcur<bn-1))return;
+  await api('next');
+}
+async function autoLoop(gen){
+  /* 卡死盯防的签名含全部会动的量（轮次/相位/金币/人口/等级/XP/备战/成品/
+     播放游标）：准备期升级连买经验不涨轮次、战斗期逐帧播放不涨轮次，
+     都是正常推进——只有签名完全不变才计空闲 */
+  const sig=()=>S?[S.round,S.phase,S.you.gold,S.you.on_board,S.you.level,
+    S.you.xp,S.bench.filter(Boolean).length,(S.items.finished||[]).length,
+    (S.items.craftable||[]).length,bcur].join('|'):'';
+  let last=sig(),idle=0;
+  while(autoOn&&gen===autoGen){
+    if(document.hidden){await autoSleep(600);continue;}   /* 后台标签不推进 */
+    try{await autoStep();}catch(e){/* 单步失败退避重试 */}
+    const now=sig();
+    idle=now!==last?0:idle+1;
+    last=now;
+    if(idle>60){autoStop('自动试玩空闲超时停止（疑似异常）');return;}
+    await autoSleep(S&&S.phase==='prep'?560:650);
+  }
+}
 async function endPrep(){
-  if(S.board[0].every(c=>!c)&&S.board[1].every(c=>!c)&&S.you.alive){
+  if(!autoOn&&S.board[0].every(c=>!c)&&S.board[1].every(c=>!c)&&S.you.alive){
     if(!confirm('上场为空：开战将不战而败（掉血且没有战斗画面）。\n\n建议先从商店买几只棋子并点击上场（或点「一键上场」）。\n确定仍然开战？'))return;
   }
   const j=await api('end_prep');
