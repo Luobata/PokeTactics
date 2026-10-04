@@ -1,0 +1,52 @@
+{
+  "passed": true,
+  "seed_failures": {
+    "7": 0,
+    "11": 0
+  },
+  "attack_isolated_min_px": {
+    "7": 712,
+    "11": 788
+  },
+  "area_ratios": {
+    "6": 3.12,
+    "65": 3.195,
+    "143": 3.022,
+    "76": 2.269
+  },
+  "rituals_all_true": true,
+  "solid_stars": [
+    {
+      "sprite_px": 32,
+      "solid_px": 23,
+      "limit_px": 24,
+      "light_medium_heavy_px": [
+        19,
+        21,
+        23
+      ]
+    },
+    {
+      "sprite_px": 34,
+      "solid_px": 25,
+      "limit_px": 25,
+      "light_medium_heavy_px": [
+        21,
+        23,
+        25
+      ]
+    }
+  ],
+  "body_fx_overlap_px": 0,
+  "deterministic_clips": 48,
+  "persisted_frames_hash_verified": 701,
+  "skill_frames_unchanged": 41,
+  "tracked_changes": [
+    "tools/mockups/profile_range.py",
+    "tools/mockups/r1_contract_check.py",
+    "tools/mockups/render_battle_gif.py",
+    "tools/mockups/vfx_separation_check.py"
+  ],
+  "ownership_scope_passed": true,
+  "base_commit": "093db4ea8ce73022d3647bd61b51fb2b0707ea50"
+}

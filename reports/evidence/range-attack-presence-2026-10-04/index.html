@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh"><meta charset="utf-8">
+<title>单体靶场 · 平A / 技能</title><style>
+body{background:#eee6ce;color:#292b24;font:16px monospace;margin:24px}
+button,select{font:inherit;background:#faf1d4;color:#292b24;padding:8px;border:2px solid #756e53}
+img{image-rendering:pixelated;width:480px;height:640px;border:4px solid #756e53}
+main{display:flex;gap:24px;flex-wrap:wrap}p{max-width:560px}</style>
+<h1>单体靶场 · 平A / 技能</h1><p>真实 Battle 事件 · 四色精灵 · 10 FPS · 训练用生命值加厚。
+平A：清晰弹道、单环星形、标准跳字。技能：脚底蓄力、双外环、微震与大跳字。木桩受击段启用轻触反击。</p>
+<select id="clip"></select><button id="play">暂停</button>
+<button id="prev">上一帧</button><button id="next">下一帧</button>
+<input id="seek" type="range" min="0" value="0"><span id="label"></span>
+<main><img id="frame" alt="靶场逐帧动画"><pre id="info"></pre></main>
+<script>
+let clips=[],index=0,running=true;const $=id=>document.getElementById(id);
+function show(){let c=clips[$('clip').value||0];if(!c)return;
+index=(index+c.frames)%c.frames;$('frame').src=c.path+'/frame-'+String(index).padStart(3,'0')+'.png';
+$('seek').max=c.frames-1;$('seek').value=index;$('label').textContent=(index+1)+' / '+c.frames;
+$('info').textContent=JSON.stringify(c,null,2)}
+fetch('manifest.json').then(r=>r.json()).then(m=>{clips=m.clips;clips.forEach((c,i)=>{
+let o=document.createElement('option');o.value=i;o.textContent=c.species+' / '+c.scene+' / '+c.action;
+$('clip').appendChild(o)});show()}).catch(e=>{$('info').textContent='请在此目录运行 python3 -m http.server 后打开本页。 '+e});
+$('clip').onchange=()=>{index=0;show()};$('play').onclick=()=>{running=!running;$('play').textContent=running?'暂停':'播放'};
+$('prev').onclick=()=>{running=false;index--;show()};$('next').onclick=()=>{running=false;index++;show()};
+$('seek').oninput=e=>{running=false;index=Number(e.target.value);show()};
+setInterval(()=>{if(running){index++;show()}},100);
+</script></html>

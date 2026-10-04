@@ -1,0 +1,152 @@
+{
+  "agent_session_id": "01a1068a-0bba-7540-a41e-2c2b5956dea8",
+  "agent_turn_id": "",
+  "cache": {
+    "hit": false,
+    "key": "40c01fec2325f5cecd42d6a1",
+    "stored": false,
+    "ttl_sec": 0
+  },
+  "changed_paths": [
+    "tools/mockups/render_battle_gif.py",
+    "tools/mockups/profile_range.py",
+    "tools/mockups/r1_contract_check.py",
+    "tools/mockups/vfx_separation_check.py"
+  ],
+  "checked_files": 1,
+  "correlation_id": "",
+  "decision": {
+    "actionable_block_findings": 0,
+    "advisory_incomplete_engines": [],
+    "block_merge": false,
+    "blocking_execution_complete": true,
+    "blocking_incomplete_engines": [],
+    "deferred_block_findings": 0,
+    "engine_results_are_raw_signals": true,
+    "execution_complete": true,
+    "gate": "pass",
+    "incomplete_engines": [],
+    "mutation_status": "not_applicable",
+    "quality_confidence": "full",
+    "raw_gate": "pass",
+    "runtime_incidents": [],
+    "scope": "final_quality_gate_decision",
+    "source": "qualitygate.gate.orchestrator",
+    "validation_lanes": {
+      "go_rules": {
+        "checked_files": 0,
+        "finding_count": 0,
+        "status": "completed"
+      },
+      "production_compile": {
+        "affected_scope_count": 0,
+        "finding_count": 0,
+        "status": "not_applicable"
+      },
+      "ut_compile": {
+        "affected_scope_count": 0,
+        "blocked_scope_count": 0,
+        "finding_count": 0,
+        "status": "not_applicable"
+      },
+      "ut_rules": {
+        "finding_count": 0,
+        "reason": "no changed *_test.go files",
+        "status": "not_applicable"
+      }
+    }
+  },
+  "findings_count": 0,
+  "git": {
+    "base_ref": "",
+    "base_sha": "",
+    "branch": "main",
+    "detached": false,
+    "diff_fingerprint": "866c20821ba581d0b260c20bdb25436ed54b10bf595a00470b8c589ae799fb21",
+    "dirty": true,
+    "head_sha": "093db4ea8ce73022d3647bd61b51fb2b0707ea50",
+    "remote_url": "https://github.com/Luobata/PokeTactics"
+  },
+  "kind": "qualitygate.run_telemetry",
+  "lifecycle": {
+    "agent_session_id": "01a1068a-0bba-7540-a41e-2c2b5956dea8",
+    "attempt_id": "40c01fec2325f5cecd42d6a1:67338:1791111475220651000",
+    "changed_paths": [
+      "tools/mockups/render_battle_gif.py",
+      "tools/mockups/profile_range.py",
+      "tools/mockups/r1_contract_check.py",
+      "tools/mockups/vfx_separation_check.py"
+    ],
+    "completed_at_unix_ms": 1791111475894,
+    "deadline_at_unix_ms": 1791111535084,
+    "elapsed_ms": 810.0,
+    "failure_kind": "",
+    "git": {
+      "base_ref": "",
+      "base_sha": "",
+      "branch": "main",
+      "detached": false,
+      "diff_fingerprint": "f8844a3be6cea4ce31c2605e8869d5b4dcb96c6040b0e1e44f4af0957a61eb23",
+      "dirty": true,
+      "head_sha": "093db4ea8ce73022d3647bd61b51fb2b0707ea50",
+      "remote_url": "https://github.com/Luobata/PokeTactics"
+    },
+    "heartbeat_at_unix_ms": 1791111475894,
+    "kind": "qualitygate.gate_attempt",
+    "mode": "local",
+    "reason": "",
+    "repo": "",
+    "run_id": "40c01fec2325f5cecd42d6a1",
+    "schema_version": 1,
+    "stage": "starting",
+    "started_at_unix_ms": 1791111475084,
+    "status": "completed",
+    "timeout_sec": 60,
+    "timeout_source": "argument"
+  },
+  "mode": "local",
+  "parent_run_id": "",
+  "repair_context_kind": "",
+  "repair_intent_id": "",
+  "repair_session_id": "",
+  "repo": "",
+  "run_id": "40c01fec2325f5cecd42d6a1",
+  "schema_version": 1,
+  "source_head_sha": "",
+  "source_mr_number": 0,
+  "spans": [
+    {
+      "bucket": "static",
+      "elapsed_ms": null,
+      "findings": 0,
+      "name": "script_rules",
+      "raw_findings": 0,
+      "status": "skipped",
+      "timeout_sec": null
+    },
+    {
+      "bucket": "mutation_gate",
+      "elapsed_ms": null,
+      "findings": 0,
+      "name": "ut_mutation_gate",
+      "status": "skipped"
+    },
+    {
+      "bucket": "orchestrator",
+      "elapsed_ms": 468.2,
+      "findings": 0,
+      "name": "quality_gate.total",
+      "status": "ok"
+    }
+  ],
+  "summary_counts": {
+    "deferred_block": 0,
+    "fixed_by_agent": 0,
+    "not_actioned": 0,
+    "open_block": 0,
+    "open_warn": 0
+  },
+  "tool_call_id": "",
+  "ts_unix_ms": 1791111475894,
+  "workspace": "/Users/bytedance/luobata/PokeTactics"
+}

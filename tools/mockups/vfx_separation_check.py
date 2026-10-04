@@ -4,6 +4,7 @@ import copy
 import hashlib
 import json
 import math
+from pathlib import Path
 from unittest.mock import patch
 
 from PIL import Image, ImageChops, ImageDraw
@@ -13,6 +14,7 @@ from profile_range import make_scene
 from skill_vfx import ARCHS, draw_skill, skill_profile
 
 OUT = r.ROOT / 'reports/evidence/vfx-separation-2026-10-04'
+AREA_RATIO_MIN = 1.7
 
 
 def pixels(layer):
@@ -106,6 +108,8 @@ def checks(output=None):
         anim = make_scene(sid, 'dummy', 7)
         attack = next(e for e in anim.events if e[1] == 'attack' and e[2] == 0)
         cast = next(e for e in anim.events if e[1] == 'cast' and e[2] == 0)
+        anim._ensure(attack[0])
+        attack_has_no_charge = anim._casting_phase(anim.units[0], attack[0]) is None
         anim._ensure(cast[0])
         c = next(c for c in anim.cutins if c[0] == cast[0] and c[2] == 0)
         times = (attack[0] + anim._attack_delay(attack), c[1])
@@ -138,18 +142,48 @@ def checks(output=None):
                 probe._draw_board_fx(Image.new('RGBA', (r.W, r.H)), at, r.ParticleBudget(), {})
             feedback.append({'outer_rings': len(rings), 'shake_px': abs(probe._board_shake(at)),
                              'digit_height_px': round(7 * max(scales)) if scales else 0})
-        phases = []
+        phases, base_phases = [], []
         for step in range(round((c[1] - c[0]) / r.FPS_DT)):
             t = c[0] + step * r.FPS_DT
             anim._ensure(t)
             phases.append(anim._casting_phase(anim.units[0], t))
+            with patch.object(r, 'draw_base', wraps=r.draw_base) as base:
+                anim._draw_unit(Image.new('RGBA', (r.W, r.H)), anim.units[0], t,
+                                anim._unit_pose(anim.units[0], t), r.ParticleBudget())
+                base_phases.append(base.call_args.args[-1])
         windup = round(len([p for p in phases if p is not None]) * r.FPS_DT, 2)
         ratio = round(peaks[1] / peaks[0], 3)
-        require(ratio >= 1.5, f'FX area >=1.5x {sid}: {ratio}')
-        require(.3 <= windup <= .5, f'windup >=.3s {sid}: {windup}')
-        require(feedback[0]['outer_rings'] == 1 and feedback[1]['outer_rings'] >= 2, f'rings {sid}')
-        require(feedback[0]['shake_px'] == 0 and feedback[1]['shake_px'] == 2, f'shake {sid}')
-        require(feedback[0]['digit_height_px'] == 7 and feedback[1]['digit_height_px'] == 8, f'font {sid}')
+        # Energy-ready preview is an independent fixture: sim may consume 80
+        # energy in the same tick, so a real pre-cast frame need not retain it.
+        unit = copy.deepcopy(anim.units[0])
+        unit.reset()
+        energy_rings = []
+        original = ImageDraw.ImageDraw.ellipse
+        def energy_ring(draw, box, *args, **kwargs):
+            color = kwargs.get('outline', ())
+            if tuple(color[:3]) == r.FULL_GOLD and len(color) == 4 and kwargs.get('width') == 2:
+                energy_rings.append(color[3])
+            return original(draw, box, *args, **kwargs)
+        energy_counts = []
+        with patch.object(ImageDraw.ImageDraw, 'ellipse', energy_ring):
+            for energy, t in [(79, 2.)] + [(80, 2. + i * r.FPS_DT) for i in range(6)]:
+                unit.energy = energy
+                before = len(energy_rings)
+                anim._draw_unit(Image.new('RGBA', (r.W, r.H)), unit, t,
+                                (80, 120, None), r.ParticleBudget())
+                energy_counts.append(len(energy_rings) - before)
+        rituals = {
+            'attack_has_no_charge': attack_has_no_charge,
+            'charge_0_4_to_0_5s': .4 <= windup <= .5,
+            'charge_base_progresses': all(p is not None for p in base_phases) and len(set(base_phases)) > 1,
+            'single_vs_double_outer_rings': feedback[0]['outer_rings'] == 1 and feedback[1]['outer_rings'] >= 2,
+            'skill_only_2px_shake': feedback[0]['shake_px'] == 0 and feedback[1]['shake_px'] == 2,
+            'standard_vs_large_digits': feedback[0]['digit_height_px'] == 7 and feedback[1]['digit_height_px'] == 8,
+            'energy_ready_breathing_ring': energy_counts == [0] + [1] * 6 and len(set(energy_rings)) == 3,
+        }
+        require(peaks[1] / peaks[0] >= AREA_RATIO_MIN, f'FX area >={AREA_RATIO_MIN}x {sid}: {ratio}')
+        for name, passed in rituals.items():
+            require(passed, f'ritual {name} {sid}')
         # Frame API and presentation API produce identical same-time pixels,
         # and rewind restores them byte-for-byte.
         hashes = []
@@ -170,6 +204,9 @@ def checks(output=None):
         pairs.append({'species': sid, 'skill': skill_profile(sid), 'events': [attack, cast],
                       'frame_times': moments, 'visible_fx_pixels': peaks, 'cast_attack_area_ratio': ratio,
                       'charge_seconds': [0, windup], 'feedback': feedback, 'frame_sha256': hashes})
+        pairs[-1].update({'rituals': rituals, 'rituals_all_true': all(rituals.values()),
+                         'area_ratio_passed': peaks[1] / peaks[0] >= AREA_RATIO_MIN,
+                         'charge_base_phases': base_phases, 'energy_preview_alpha': energy_rings})
     motion = motion_checks(require)
     # All nine primitives under both tiers, all release phases, zero/full budgets.
     templates, peak_budget = [], 0
@@ -223,14 +260,19 @@ def checks(output=None):
     with patch('skill_vfx._skill_of', None):
         require(all(skill_profile(s)['tier'] == 'signature' for s in (6,65,143)), 'signature fallback')
         require(skill_profile(76)['tier'] == 'generic', 'generic fallback')
-    return {'thresholds': {'area_ratio_min': 1.5, 'charge_seconds_min': .3, 'attack_charge_seconds': 0,
+    return {'thresholds': {'area_ratio_min': AREA_RATIO_MIN, 'charge_seconds_min': .4, 'attack_charge_seconds': 0,
+                           'rule': 'area ratio >=1.7 AND every ritual predicate true',
                            'outer_rings': [1,2], 'shake_px': [0,2], 'digit_height_px': [7,8]},
             'pairs': pairs, 'motion': motion, 'templates': templates, 'peak_render_particles': peak_budget,
             'hard_cap_stress': b.used, 'failures': failures, 'passed': not failures}
 
 
 if __name__ == '__main__':
-    result = checks(OUT)
-    (OUT / 'separation.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', type=Path, default=OUT)
+    args = parser.parse_args()
+    result = checks(args.output)
+    (args.output / 'separation.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps(result, ensure_ascii=False, indent=2))
     raise SystemExit(0 if result['passed'] else 1)

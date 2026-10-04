@@ -689,8 +689,8 @@ class BattleAnimation:
                     y += 1 if effect_frame(age) % 2 else -1
                 return round(x), round(y)
             x, y = point(age / duration)
-            draw.line((x - 2, y, x + 2, y), fill=color, width=2)
-            draw.point((x, y - 1), fill=PAPER)
+            draw.line((x - 2, y, x + 2, y), fill=color, width=3)
+            draw.line((x - 2, y, x + 2, y), fill=PAPER, width=1)
             for i in budget.take(2):
                 xx, yy = point(max(0, age / duration - (i + 1) * .075))
                 draw.rectangle((xx, yy, xx + 1, yy + 1), fill=color if i % 2 else PAPER)
@@ -1176,15 +1176,16 @@ class BattleAnimation:
                     line = [(round(sx0 + (cx - sx0) * k / 8),
                              round(sy0 + (cy - sy0) * k / 8 - 9 * 4 * k / 8 * (1 - k / 8)))
                             for k in range(9)]
-                draw.line(line, fill=color, width=2)
+                draw.line(line, fill=color, width=3)
                 draw.line(line, fill=PAPER, width=1)
-            # Solid star <=60% of the sprite. One translucent outer ring
-            # retains the unchanged visibility floor without camera emphasis.
-            radius = min(math.floor((math.floor(board_sprite_size(target.u.piece.tier) * .60) - 1) / 2),
+            # Inclusive diameter stays <=75%; reserve 1px radius per weight
+            # tier so the cap cannot flatten light/medium/heavy into one size.
+            cap = (math.floor(board_sprite_size(target.u.piece.tier) * .75) - 1) // 2
+            radius = min(cap - (2 - strength),
                          (9, 11, 12)[strength] + phase * 2 + (2 if variant else 0))
             ring = 27 + phase * 3
             draw.ellipse((cx - ring, cy - ring, cx + ring, cy + ring),
-                         outline=color + (176,), width=4)
+                         outline=color + (208,), width=4)
             for size, fill in ((radius, color), (radius * 0.58, PAPER)):
                 points = []
                 for i in range(16):
@@ -1193,8 +1194,8 @@ class BattleAnimation:
                     points.append((round(cx + r * math.cos(angle)),
                                    round(cy + r * math.sin(angle))))
                 draw.polygon(points, fill=fill)
-            for i in budget.take(4):
-                angle = direction + i * math.tau / 4
+            for i in budget.take(6):
+                angle = direction + i * math.tau / 6
                 rr = ring + 4
                 x, y = round(cx + rr * math.cos(angle)), round(cy + rr * math.sin(angle))
                 draw.line((x, y, x + round(3 * math.cos(angle)), y + round(3 * math.sin(angle))), fill=color, width=2)

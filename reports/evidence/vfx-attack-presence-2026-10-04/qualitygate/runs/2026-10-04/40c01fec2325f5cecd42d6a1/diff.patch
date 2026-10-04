@@ -1,0 +1,303 @@
+diff --git a/tools/mockups/profile_range.py b/tools/mockups/profile_range.py
+index bd257ec..314aec2 100644
+--- a/tools/mockups/profile_range.py
++++ b/tools/mockups/profile_range.py
+@@ -33,7 +33,7 @@ button,select{font:inherit;background:#faf1d4;color:#292b24;padding:8px;border:2
+ img{image-rendering:pixelated;width:480px;height:640px;border:4px solid #756e53}
+ main{display:flex;gap:24px;flex-wrap:wrap}p{max-width:560px}</style>
+ <h1>单体靶场 · 平A / 技能</h1><p>真实 Battle 事件 · 四色精灵 · 10 FPS · 训练用生命值加厚。
+-平A：细弹道、单环、小跳字。技能：脚底蓄力、双外环、重反馈。木桩受击段启用轻触反击。</p>
++平A：清晰弹道、单环星形、标准跳字。技能：脚底蓄力、双外环、微震与大跳字。木桩受击段启用轻触反击。</p>
+ <select id="clip"></select><button id="play">暂停</button>
+ <button id="prev">上一帧</button><button id="next">下一帧</button>
+ <input id="seek" type="range" min="0" value="0"><span id="label"></span>
+diff --git a/tools/mockups/r1_contract_check.py b/tools/mockups/r1_contract_check.py
+index 84f0f3d..7ec799e 100644
+--- a/tools/mockups/r1_contract_check.py
++++ b/tools/mockups/r1_contract_check.py
+@@ -4,6 +4,7 @@ import copy
+ import json
+ import math
+ from pathlib import Path
++from unittest.mock import patch
+ 
+ from PIL import Image, ImageChops, ImageDraw
+ 
+@@ -53,6 +54,17 @@ def checks():
+     require(layer.getbbox() is None, "one-frame preparation before projectile")
+     probe._draw_projectiles(layer, 1. + r.FPS_DT, r.ParticleBudget())
+     require(layer.getbbox() is not None, "projectile launch")
++    lines = []
++    original_line = ImageDraw.ImageDraw.line
++    def record_line(draw, xy, *args, **kwargs):
++        lines.append({'width': kwargs.get('width', 1), 'fill': kwargs.get('fill')})
++        return original_line(draw, xy, *args, **kwargs)
++    with patch.object(ImageDraw.ImageDraw, 'line', record_line):
++        probe._draw_projectiles(Image.new('RGBA', (r.W, r.H)), 1. + r.FPS_DT, r.ParticleBudget())
++    require(lines[:2] == [
++        {'width': 3, 'fill': r.TYPE_COLORS[probe.units[0].u.piece.types[0]]},
++        {'width': 1, 'fill': r.PAPER}], '3px attribute projectile with 1px paper lining')
++    samples['projectile_strokes'] = lines[:2]
+     first_delay = probe._attack_delay(probe.events[2])
+     probe.units[0].u.range *= 2
+     require(probe._attack_delay(probe.events[2]) > first_delay, "inverse range speed")
+@@ -84,18 +96,22 @@ def checks():
+         ImageDraw.ImageDraw.polygon = record_polygon
+         for tier in (1, 3):
+             star.units[1].u.piece.tier = tier
+-            polygons.clear()
++            tier_sizes = []
+             for damage in (5, 10, 20):
++                polygons.clear()
+                 for onset in (1., 1.1):
+                     star.events = [(onset, "attack", 0, 1, damage)]
+                     star._cursor = 1
+                     for phase in range(3):
+                         star._draw_board_fx(Image.new("RGBA", (r.W, r.H)),
+                                             onset + .1 + phase * .1, r.ParticleBudget(), {})
+-            diameter = max(polygons)
+-            limit = math.floor(r.board_sprite_size(tier) * .60)
+-            require(diameter <= limit, f"solid star 60% tier {tier}")
+-            solid_sizes.append({"sprite_px": r.board_sprite_size(tier), "solid_px": diameter, "limit_px": limit})
++                tier_sizes.append(max(polygons))
++            diameter = max(tier_sizes)
++            limit = math.floor(r.board_sprite_size(tier) * .75)
++            require(diameter <= limit, f"solid star 75% tier {tier}")
++            require(tier_sizes[0] < tier_sizes[1] < tier_sizes[2], f"distinct impact weights tier {tier}")
++            solid_sizes.append({"sprite_px": r.board_sprite_size(tier), "solid_px": diameter,
++                                "limit_px": limit, "light_medium_heavy_px": tier_sizes})
+     finally:
+         ImageDraw.ImageDraw.polygon = original_polygon
+     samples["solid_star_bounds"] = solid_sizes
+@@ -113,7 +129,8 @@ def checks():
+     motions = []
+     max_body_overlap = 0
+     peak_budget = 0
+-    for sid in (6, 65, 143):
++    overlap_frames = 0
++    for sid in (6, 65, 143, 76):
+         a = make_scene(sid, "dummy", 7)
+         au = a.units[0]
+         gait = a._gait(au)
+@@ -131,24 +148,28 @@ def checks():
+         first = a.frame(event[0] + .1, show_cutins=False)
+         a.frame(event[0] + 1, show_cutins=False)
+         require(a.frame(event[0] + .1, show_cutins=False).tobytes() == first.tobytes(), f"signature rewind {sid}")
+-        quiet = copy.copy(a)
+-        quiet._draw_board_fx = lambda *_: None
+-        t = event[0] + r.SIGNATURES[sid].windup + .1
+-        a._ensure(t)
+-        with_fx, without_fx = [Image.new("RGBA", (r.W, r.H)) for _ in range(2)]
+-        a._draw_board(with_fx, t)
+-        quiet._draw_board(without_fx, t)
+-        delta = ImageChops.difference(with_fx.convert("RGB"), without_fx.convert("RGB"))
+-        for unit in a.units.values():
+-            pose = a._unit_pose(unit, t)
+-            if not unit.visible(t) or pose is None:
+-                continue
+-            body, x, y = a._sprite_placement(unit, t, pose)
+-            y += a._board_shake(t)
+-            for yy in range(body.height):
+-                for xx in range(body.width):
+-                    if body.getpixel((xx, yy))[3] and 0 <= x + xx < r.W and 0 <= y + yy < r.H:
+-                        max_body_overlap += int(any(delta.getpixel((x + xx, y + yy))))
++        cast_end = next(c[1] for c in a.cutins if c[0] == event[0] and c[2] == 0)
++        attack = next(e for e in a.events if e[1] == 'attack' and e[2] == 0)
++        hit_times = [attack[0] + a._attack_delay(attack) + i * .1 for i in range(3)]
++        for t in hit_times + [cast_end + i * .1 for i in range(6)]:
++            a._ensure(t)
++            quiet = copy.copy(a)
++            quiet._draw_board_fx = lambda *_: None
++            with_fx, without_fx = [Image.new("RGBA", (r.W, r.H)) for _ in range(2)]
++            a._draw_board(with_fx, t)
++            quiet._draw_board(without_fx, t)
++            delta = ImageChops.difference(with_fx.convert("RGB"), without_fx.convert("RGB"))
++            overlap_frames += 1
++            for unit in a.units.values():
++                pose = a._unit_pose(unit, t)
++                if not unit.visible(t) or pose is None:
++                    continue
++                body, x, y = a._sprite_placement(unit, t, pose)
++                y += a._board_shake(t)
++                for yy in range(body.height):
++                    for xx in range(body.width):
++                        if body.getpixel((xx, yy))[3] and 0 <= x + xx < r.W and 0 <= y + yy < r.H:
++                            max_body_overlap += int(any(delta.getpixel((x + xx, y + yy))))
+         for phase in range(12):
+             budget = r.ParticleBudget()
+             a._draw_board_fx(Image.new("RGBA", (r.W, r.H)), event[0] + phase * .1, budget, {})
+@@ -158,14 +179,19 @@ def checks():
+     require(max_body_overlap == 0, "VFX covers opaque sprite pixels")
+     require(peak_budget <= r.PARTICLE_LIMIT, "real scene particle budget")
+     samples["opaque_body_fx_overlap_pixels"] = max_body_overlap
++    samples["opaque_body_fx_overlap_frames"] = overlap_frames
+     samples["peak_sampled_fx_particles"] = peak_budget
+     samples["gait"] = motions
+     return {"samples": samples, "failures": failures, "passed": not failures}
+ 
+ 
+ if __name__ == "__main__":
++    import argparse
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--output', type=Path, default=r.ROOT / 'reports/evidence/r1-contracts-2026-10-04.json')
++    args = parser.parse_args()
+     result = checks()
+-    out = r.ROOT / "reports/evidence/r1-contracts-2026-10-04.json"
++    out = args.output
+     out.parent.mkdir(parents=True, exist_ok=True)
+     out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
+     print(json.dumps(result, ensure_ascii=False, indent=2))
+diff --git a/tools/mockups/render_battle_gif.py b/tools/mockups/render_battle_gif.py
+index b3d6371..adcb2f8 100644
+--- a/tools/mockups/render_battle_gif.py
++++ b/tools/mockups/render_battle_gif.py
+@@ -689,8 +689,8 @@ class BattleAnimation:
+                     y += 1 if effect_frame(age) % 2 else -1
+                 return round(x), round(y)
+             x, y = point(age / duration)
+-            draw.line((x - 2, y, x + 2, y), fill=color, width=2)
+-            draw.point((x, y - 1), fill=PAPER)
++            draw.line((x - 2, y, x + 2, y), fill=color, width=3)
++            draw.line((x - 2, y, x + 2, y), fill=PAPER, width=1)
+             for i in budget.take(2):
+                 xx, yy = point(max(0, age / duration - (i + 1) * .075))
+                 draw.rectangle((xx, yy, xx + 1, yy + 1), fill=color if i % 2 else PAPER)
+@@ -1176,15 +1176,16 @@ class BattleAnimation:
+                     line = [(round(sx0 + (cx - sx0) * k / 8),
+                              round(sy0 + (cy - sy0) * k / 8 - 9 * 4 * k / 8 * (1 - k / 8)))
+                             for k in range(9)]
+-                draw.line(line, fill=color, width=2)
++                draw.line(line, fill=color, width=3)
+                 draw.line(line, fill=PAPER, width=1)
+-            # Solid star <=60% of the sprite. One translucent outer ring
+-            # retains the unchanged visibility floor without camera emphasis.
+-            radius = min(math.floor((math.floor(board_sprite_size(target.u.piece.tier) * .60) - 1) / 2),
++            # Inclusive diameter stays <=75%; reserve 1px radius per weight
++            # tier so the cap cannot flatten light/medium/heavy into one size.
++            cap = (math.floor(board_sprite_size(target.u.piece.tier) * .75) - 1) // 2
++            radius = min(cap - (2 - strength),
+                          (9, 11, 12)[strength] + phase * 2 + (2 if variant else 0))
+             ring = 27 + phase * 3
+             draw.ellipse((cx - ring, cy - ring, cx + ring, cy + ring),
+-                         outline=color + (176,), width=4)
++                         outline=color + (208,), width=4)
+             for size, fill in ((radius, color), (radius * 0.58, PAPER)):
+                 points = []
+                 for i in range(16):
+@@ -1193,8 +1194,8 @@ class BattleAnimation:
+                     points.append((round(cx + r * math.cos(angle)),
+                                    round(cy + r * math.sin(angle))))
+                 draw.polygon(points, fill=fill)
+-            for i in budget.take(4):
+-                angle = direction + i * math.tau / 4
++            for i in budget.take(6):
++                angle = direction + i * math.tau / 6
+                 rr = ring + 4
+                 x, y = round(cx + rr * math.cos(angle)), round(cy + rr * math.sin(angle))
+                 draw.line((x, y, x + round(3 * math.cos(angle)), y + round(3 * math.sin(angle))), fill=color, width=2)
+diff --git a/tools/mockups/vfx_separation_check.py b/tools/mockups/vfx_separation_check.py
+index 820ff96..6d1d0a0 100644
+--- a/tools/mockups/vfx_separation_check.py
++++ b/tools/mockups/vfx_separation_check.py
+@@ -4,6 +4,7 @@ import copy
+ import hashlib
+ import json
+ import math
++from pathlib import Path
+ from unittest.mock import patch
+ 
+ from PIL import Image, ImageChops, ImageDraw
+@@ -13,6 +14,7 @@ from profile_range import make_scene
+ from skill_vfx import ARCHS, draw_skill, skill_profile
+ 
+ OUT = r.ROOT / 'reports/evidence/vfx-separation-2026-10-04'
++AREA_RATIO_MIN = 1.7
+ 
+ 
+ def pixels(layer):
+@@ -138,18 +140,47 @@ def checks(output=None):
+                 probe._draw_board_fx(Image.new('RGBA', (r.W, r.H)), at, r.ParticleBudget(), {})
+             feedback.append({'outer_rings': len(rings), 'shake_px': abs(probe._board_shake(at)),
+                              'digit_height_px': round(7 * max(scales)) if scales else 0})
+-        phases = []
++        phases, base_phases = [], []
+         for step in range(round((c[1] - c[0]) / r.FPS_DT)):
+             t = c[0] + step * r.FPS_DT
+             anim._ensure(t)
+             phases.append(anim._casting_phase(anim.units[0], t))
++            with patch.object(r, 'draw_base', wraps=r.draw_base) as base:
++                anim._draw_unit(Image.new('RGBA', (r.W, r.H)), anim.units[0], t,
++                                anim._unit_pose(anim.units[0], t), r.ParticleBudget())
++                base_phases.append(base.call_args.args[-1])
+         windup = round(len([p for p in phases if p is not None]) * r.FPS_DT, 2)
+         ratio = round(peaks[1] / peaks[0], 3)
+-        require(ratio >= 1.5, f'FX area >=1.5x {sid}: {ratio}')
+-        require(.3 <= windup <= .5, f'windup >=.3s {sid}: {windup}')
+-        require(feedback[0]['outer_rings'] == 1 and feedback[1]['outer_rings'] >= 2, f'rings {sid}')
+-        require(feedback[0]['shake_px'] == 0 and feedback[1]['shake_px'] == 2, f'shake {sid}')
+-        require(feedback[0]['digit_height_px'] == 7 and feedback[1]['digit_height_px'] == 8, f'font {sid}')
++        # Energy-ready preview is an independent fixture: sim may consume 80
++        # energy in the same tick, so a real pre-cast frame need not retain it.
++        unit = copy.deepcopy(anim.units[0])
++        unit.reset()
++        energy_rings = []
++        original = ImageDraw.ImageDraw.ellipse
++        def energy_ring(draw, box, *args, **kwargs):
++            color = kwargs.get('outline', ())
++            if tuple(color[:3]) == r.FULL_GOLD and len(color) == 4 and kwargs.get('width') == 2:
++                energy_rings.append(color[3])
++            return original(draw, box, *args, **kwargs)
++        energy_counts = []
++        with patch.object(ImageDraw.ImageDraw, 'ellipse', energy_ring):
++            for energy, t in [(79, 2.)] + [(80, 2. + i * r.FPS_DT) for i in range(6)]:
++                unit.energy = energy
++                before = len(energy_rings)
++                anim._draw_unit(Image.new('RGBA', (r.W, r.H)), unit, t,
++                                (80, 120, None), r.ParticleBudget())
++                energy_counts.append(len(energy_rings) - before)
++        rituals = {
++            'charge_0_4_to_0_5s': .4 <= windup <= .5,
++            'charge_base_progresses': all(p is not None for p in base_phases) and len(set(base_phases)) > 1,
++            'single_vs_double_outer_rings': feedback[0]['outer_rings'] == 1 and feedback[1]['outer_rings'] >= 2,
++            'skill_only_2px_shake': feedback[0]['shake_px'] == 0 and feedback[1]['shake_px'] == 2,
++            'standard_vs_large_digits': feedback[0]['digit_height_px'] == 7 and feedback[1]['digit_height_px'] == 8,
++            'energy_ready_breathing_ring': energy_counts == [0] + [1] * 6 and len(set(energy_rings)) == 3,
++        }
++        require(peaks[1] / peaks[0] >= AREA_RATIO_MIN, f'FX area >={AREA_RATIO_MIN}x {sid}: {ratio}')
++        for name, passed in rituals.items():
++            require(passed, f'ritual {name} {sid}')
+         # Frame API and presentation API produce identical same-time pixels,
+         # and rewind restores them byte-for-byte.
+         hashes = []
+@@ -170,6 +201,8 @@ def checks(output=None):
+         pairs.append({'species': sid, 'skill': skill_profile(sid), 'events': [attack, cast],
+                       'frame_times': moments, 'visible_fx_pixels': peaks, 'cast_attack_area_ratio': ratio,
+                       'charge_seconds': [0, windup], 'feedback': feedback, 'frame_sha256': hashes})
++        pairs[-1].update({'rituals': rituals, 'rituals_all_true': all(rituals.values()),
++                         'charge_base_phases': base_phases, 'energy_preview_alpha': energy_rings})
+     motion = motion_checks(require)
+     # All nine primitives under both tiers, all release phases, zero/full budgets.
+     templates, peak_budget = [], 0
+@@ -223,14 +256,19 @@ def checks(output=None):
+     with patch('skill_vfx._skill_of', None):
+         require(all(skill_profile(s)['tier'] == 'signature' for s in (6,65,143)), 'signature fallback')
+         require(skill_profile(76)['tier'] == 'generic', 'generic fallback')
+-    return {'thresholds': {'area_ratio_min': 1.5, 'charge_seconds_min': .3, 'attack_charge_seconds': 0,
++    return {'thresholds': {'area_ratio_min': AREA_RATIO_MIN, 'charge_seconds_min': .4, 'attack_charge_seconds': 0,
++                           'rule': 'area ratio >=1.7 AND every ritual predicate true',
+                            'outer_rings': [1,2], 'shake_px': [0,2], 'digit_height_px': [7,8]},
+             'pairs': pairs, 'motion': motion, 'templates': templates, 'peak_render_particles': peak_budget,
+             'hard_cap_stress': b.used, 'failures': failures, 'passed': not failures}
+ 
+ 
+ if __name__ == '__main__':
+-    result = checks(OUT)
+-    (OUT / 'separation.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
++    import argparse
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--output', type=Path, default=OUT)
++    args = parser.parse_args()
++    result = checks(args.output)
++    (args.output / 'separation.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
+     print(json.dumps(result, ensure_ascii=False, indent=2))
+     raise SystemExit(0 if result['passed'] else 1)

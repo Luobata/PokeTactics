@@ -1,0 +1,88 @@
+{
+  "skill_frames": [
+    {
+      "species": 6,
+      "frames": 11,
+      "before_after_identical": true,
+      "sha256": [
+        "0f6e3ec5c19520cb09f7c7b8741627dbba190c5410d8fa22d26fdcfc6eb2ef5e",
+        "481d104718562f040a36f5aab8171534f04976fc5ff87223e3e3306dfd54c304",
+        "78cca96a37f15679df98313005270b40ea730df55caeb16365fd150b0c08a897",
+        "87b243c5d7ce0d8f129c5b6a0114c407397a5f7839cfdda8b3c9b5f9bcebcee5",
+        "09b21761bd4f492d9f16ef9d91cf4027a31310ba6c1c96eb7acd5c88b440c027",
+        "869719c90062f65373e608937ad3ba5db8a1af09f5bd98e4d7b9acc972089e21",
+        "5a6dcdce6b9724329e9352a59f7babbdccaced5140e87c6e90e1ef230dbd717d",
+        "a4cbec2d21348f601ed17756081039d2aa2dd66d95f72d04ce7921a5a67d0adb",
+        "daa30d77845f3b175cc39103eeb878439f8468d4d5dbcdb3f278e19e56132ded",
+        "fb84de911f8683d942be98ab4f3d915d8372f83223c02755364a2b36d295d2a4",
+        "17f7c690f67456d864cc018bae98098118315e784df6012936d8ba2b0447916b"
+      ]
+    },
+    {
+      "species": 65,
+      "frames": 10,
+      "before_after_identical": true,
+      "sha256": [
+        "151a661e2eb2a70b73978221db2f6e547a06976b813f82ab1d443313b4081b2f",
+        "6cd3ad5f98591087e6b861c255ac6b8d24b78f0aee2bd247702faa64143a8604",
+        "8891f8ffdd60bbbe50f7d7a54ac324aba593981d949393cbe680692ba0951384",
+        "8b71d42786812e2705bca7bd9c9a0914b9261d81ae5d690685a09fd4d4ed8621",
+        "1284af5bfbba3d7d64992d6fd0ef26bf57f03ff779870980837927ad3da81d56",
+        "48133844a372ca444128eb225b7ebedbabc9a8cad0e1fc5a5af15ec3cbd94a1f",
+        "8f230a94c2b5730074f751cf79644606f3348ac6b95a3b6afb931db300bf543b",
+        "d1f2ac97261a3ba9d13e8519df50c37529ba6c4fb9049cb52f92200f08bae986",
+        "93ed14fe15296f02e2d7a96b6a239a913b451baea9bf39cb34fe703f3114564d",
+        "ab03c42d715ea9bdbe205a1cd63c6b19caf8359f3b0e24177649f675f6ba9bf5"
+      ]
+    },
+    {
+      "species": 143,
+      "frames": 10,
+      "before_after_identical": true,
+      "sha256": [
+        "96ea2c5f875c01c377b14af559b8a4c2622c8a188121950a043b60acc5458266",
+        "43666e5fa6efdb231356722cbccbe299acd1cbc46e1d5010cd676d5705035044",
+        "4b5ddec7bc054f4dc36c0a1c29a7df3b49111619aafedb58b5342f95a7ca5a9b",
+        "ffc1740d44de6ce20234c18a5dc4a261048c5302c6c9e7117353d6a3747eadd3",
+        "661284a173459c9ea9e946f9031261db7725307298c03af3c085b28c3079392b",
+        "0e308e9a399a15080aa27294c51cb9b3f3ba6f1d7b66a99fefad5c49577a047b",
+        "ff5de607eccb9b5158da255bc42d30c480d7ebd0a3cb3a4db72ffe6d6b278a15",
+        "3c3bc75b2710c16cd3ddc2e4a046a78e99c7050c82ccf9d284ef30be62b57142",
+        "a81847ed7feeddd3a329708671c25b51829aed631161f339c0b4de372a6f713a",
+        "3d62090c50de99beb397df492ae114a27a346044f83243626e4e45d6df91859e"
+      ]
+    },
+    {
+      "species": 76,
+      "frames": 10,
+      "before_after_identical": true,
+      "sha256": [
+        "350995ca07eb3e633855b1cdecc9f3a9bf9bcd34b717762667841ee64bd47370",
+        "d5ae62b92266652b9639242b3ce2b2f9eec2caece8af9d587e5add636019d079",
+        "a9b6d9f29fca19b816bbaa6d16775145dd034e5bff99e6f130002ea37e9a03c9",
+        "bd1e06dbdafa45b90a32c2e1e0acfcd77c7886333fa41f2a36aa53c9be6fea79",
+        "c3f9181a4122e6881e8f89c55ea8fb2d1b210bb38c85b3caf4faf067654176a2",
+        "a745c7035d726cec90419d429a23e00268bd43aee91ac8fa46b13ee184082135",
+        "f9648dcf518dfaec95dcde7f57daeff193cd80fe14af758f4bee8612eea0d6d7",
+        "8240f783f1cedc76073a44663e67e32b2ad3c631f2c6ba5503008be2b3130cf9",
+        "cc90977b03c9cf97ca9cb92a0fc0c41bf080fe2cbb0dc884c0f4465a7c901ef8",
+        "776897f64d232a687c0f5fdbf669cfc430c4e357a6dbf59f1e8aa3a380a87282"
+      ]
+    }
+  ],
+  "unchanged_files": {
+    "tools/mockups/profile_vfx.py": {
+      "sha256": "aff3a37b2669084bda8dd21714d2dcb67f02af7703dea1e8e295fe98fb504381",
+      "identical_to_093db4e": true
+    },
+    "tools/mockups/skill_vfx.py": {
+      "sha256": "c10cddbb1038163ea9fc613cb98157ed5156891b18c115b0357bf2102ad643a4",
+      "identical_to_093db4e": true
+    },
+    "tools/mockups/fx_visibility_check.py": {
+      "sha256": "c6f823d61c70170ca5cf6b7d8fc7d28be2037c869e47b8ee1aae209991e3df37",
+      "identical_to_093db4e": true
+    }
+  },
+  "passed": true
+}
