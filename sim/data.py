@@ -19,15 +19,18 @@ SPECIAL_TYPES = frozenset(
 # ---- 数值公式常量区（骨架占位值，等 sim 平衡报告后再调）----
 BASIC_POWER = 40          # 普攻威力（无属性撞击类）
 STAB_BONUS = 1.5          # 本系加成（Same-Type Attack Bonus）
-ENERGY_PER_ATTACK = 15    # 普攻命中回能
+ENERGY_PER_ATTACK = 21    # 普攻命中回能（R2 节奏定配：攻速 ×2.2 的部分
+                           # 补偿 ×1.4——大招更晚更有分量，但每场仍可多次
+                           # 放出而非攒不满；历史实验钉回 15）
 ENERGY_PER_HIT_TAKEN = 10  # 受击回能
 ENERGY_MAX = 80
 # 速度(5~150) -> 攻击间隔秒：快龙/豪力蜂类约 0.65s，铁甲蛹类约 1.1s
 SPEED_TO_ATTACK_INTERVAL = lambda speed: 1.0 / (0.6 + speed / 150.0)  # noqa: E731
-# R2 节奏定参（2026-10-04 用户裁定「动画速度过快→都推进」的第 3 层）：
-# 普攻间隔整体 ×1.5——消融实验（experiment_pacing）证明攻速是节奏主杠杆
-# （战斗中位 7.5→10.1s、首招 5.5→7.9s）。历史实验钉回 1.0 保基线。
-ATTACK_INTERVAL_MULT = 1.5
+# R2 节奏定参（2026-10-04 两轮校准：×1.5→用户反馈仍偏快→×2.2）：
+# 普攻间隔整体 ×2.2——随机局中位 14.1s / p90 22.4s / 首招 10.5s，
+# 落 docs/13 §6 的 14-20s 带下沿（王者自走棋方向，用户裁定「不用
+# 到那么慢」——×3.0 的 19.3s 中位为上界参考）。历史实验钉回 1.0。
+ATTACK_INTERVAL_MULT = 2.2
 MOVE_TICK = 0.5           # 移动一格的耗时（秒）
 MAX_BATTLE_SECONDS = 45.0  # 超时判平（防龟缩）
 

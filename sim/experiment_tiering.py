@@ -136,6 +136,7 @@ import profiles as _pf
 _pf.PROFILES_ON = False  # R1 单体档案（2026-09-15）：钉关保基线（胡地建档影响近远锚点）  # 2026-09-14 成套翻开后钉关保基线
 import combat as _cb
 _cb.ATTACK_INTERVAL_MULT = 1.0  # R2 节奏定参（2026-10-04）：钉回旧攻速保基线
+_cb.ENERGY_PER_ATTACK = 15  # R2 能量补偿钉回旧值
 
 
 def main() -> None:

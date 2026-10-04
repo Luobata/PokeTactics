@@ -38,8 +38,11 @@ LATE_GAME_ROUND = 18  # 后期：全体追加刷新预算
 PERSONALITIES = {
     "saver":    {"label": "攒钱型·火箭队干部", "reserve_start": 10,
                  "reserve_gain": 5, "reserve_cap": 50, "pivot_round": 12,
-                 "late_cap": 30, "refresh_max": 1,
+                 "late_cap": 32, "refresh_max": 1,
                  "level_mode": "slow", "pivot_tol": 0},
+                 # late_cap 30→32（2026-10-04 R2 节奏二调）：×2.2 攻速 +
+                 # 回能补偿下 saver 两种子 32%/39% 冠军又起——再收一档
+                 # 变现期（20→30→32 的同手法第三步）
                  # late_cap 20→30（2026-09-14 平衡 pass）：变现期更晚兑现——
                  # 读数里 20 的 saver 决赛圈 40% 冠军碾压全场，30 压回 33% 且
                  # 人格极差 1.29→0.80（experiment_matchbalance v4 臂）
