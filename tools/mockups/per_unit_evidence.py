@@ -6,6 +6,7 @@ isolates recorded events so idle/death/long windups cannot be hidden by another
 action. Cast supplements retain the entire real battle. No acceptance code edits.
 """
 import argparse
+import builtins
 import copy
 import hashlib
 import json
@@ -20,7 +21,7 @@ from unittest.mock import patch
 from PIL import Image, ImageChops, ImageDraw
 import render_battle_gif as r
 import profile_range as training
-from motion import species_motion, RIGS, MotionSystem, Pose, REST, transform, sample, windup
+from motion import species_motion, RIGS, MotionSystem, Pose, REST, transform, sample, windup, frame_dt
 from skill_vfx import AUTHORED_SKILLS, draw_authored_phase, draw_contact_field
 
 OUT = r.ROOT / 'reports/evidence/per-unit-2026-10-04'
@@ -32,17 +33,24 @@ def digest(frames):
     return training.frame_hash(frames)
 
 
-def baseline():
-    names = ('profile_vfx','skill_vfx','render_battle_gif','profile_range')
+def baseline(commit='49a0d46'):
+    names = (('motion',) if commit != '49a0d46' else ()) + ('profile_vfx','skill_vfx','render_battle_gif','profile_range')
     saved = {name:sys.modules.get(name) for name in names}
     loaded, hashes = {}, {}
     try:
         for name in names:
             path = r.ROOT/'tools/mockups'/f'{name}.py'
-            source = subprocess.check_output(['git','show',f'49a0d46:tools/mockups/{name}.py'],cwd=r.ROOT)
+            source = subprocess.check_output(['git','show',f'{commit}:tools/mockups/{name}.py'],cwd=r.ROOT)
             hashes[name] = hashlib.sha256(source).hexdigest()
             module = types.ModuleType(name)
             module.__file__ = str(path)
+            # Keep deferred imports (cast_windup -> motion) inside the archive
+            # after the live sys.modules bindings have been restored.
+            def archived_import(module_name, *args, **kwargs):
+                if module_name in loaded:
+                    return loaded[module_name]
+                return builtins.__import__(module_name, *args, **kwargs)
+            module.__dict__['__builtins__'] = {**vars(builtins), '__import__': archived_import}
             sys.modules[name] = module
             exec(compile(source,str(path),'exec'),module.__dict__)
             loaded[name] = module
@@ -83,21 +91,22 @@ def fixture(sid,scene,state,seed=7):
     anim.events=deployments+([event] if event else [])
     anim.playback_clock=r.PlaybackClock(anim.events)
     anim._reset()
+    dt=frame_dt(state) if sid in species_motion else .1
     if state=='idle':
         times=[at+i*.1 for i in range(max(8,len(species_motion.get(sid,{}).get('idle',[]))))]
     elif state=='walk':
-        times=[at+i*.1 for i in range(len(species_motion.get(sid,{}).get('walk',[0]*4)))]
+        times=[at+i*dt for i in range(len(species_motion.get(sid,{}).get('walk',[0]*4)))]
     elif state=='windup':
-        times=[at+i*.1 for i in range(len(species_motion.get(sid,{}).get('windup',[0,0,0])))]
+        times=[at+i*dt for i in range(len(species_motion.get(sid,{}).get('windup',[0,0,0])))]
     elif state=='strike':
         prep=windup(sid) if sid in species_motion else r.HIT_DELAY
         count=len(species_motion[sid]['strike'])+len(species_motion[sid]['recover']) if sid in species_motion else 5
-        times=[at+prep+i*.1 for i in range(count)]
+        times=[at+prep+i*dt for i in range(count)]
     elif state=='hit':
-        times=[at+anim._attack_delay(event)+i*.1 for i in range(3)]
+        times=[at+anim._attack_delay(event)+i*dt for i in range(len(species_motion.get(sid,{}).get('hit',[0]*3)))]
     else:
-        times=[at+i*.1 for i in range(6)]
-    return anim,times,{'event':event,'isolation':'recorded event + deployment at event positions', 'sim_times':times}
+        times=[at+i*dt for i in range(len(species_motion.get(sid,{}).get('death',[0]*6)))]
+    return anim,times,{'event':event,'isolation':'recorded event + deployment at event positions', 'sim_times':times, 'frame_duration_ms':round(dt*1000), 'duration_seconds':len(times)*dt}
 
 
 def frames_at(anim,times):
@@ -143,7 +152,7 @@ def contracts(output):
         return probe
     for sid,states in species_motion.items():
         require(set(states)==set(STATES)|{'recover'},f'{sid}: states')
-        require(.2<=windup(sid)<=.4,f'{sid}: windup')
+        require(.25<=windup(sid)<=.5,f'{sid}: windup')
         motion_hashes[sid]=hashlib.sha256(json.dumps(states,sort_keys=True).encode()).hexdigest()
         deformed=[]
         for state,frames in states.items():
@@ -250,7 +259,7 @@ def save_clip(output,sid,scene,state,frames,meta):
     dest=output/rel
     dest.mkdir(parents=True,exist_ok=True)
     for i,im in enumerate(frames): im.save(dest/f'frame-{i:03d}.png')
-    frames[0].save(dest/'animation.gif',save_all=True,append_images=frames[1:],duration=100,loop=0,disposal=2)
+    frames[0].save(dest/'animation.gif',save_all=True,append_images=frames[1:],duration=meta.get('frame_duration_ms',100),loop=0,disposal=2)
     sheet=Image.new('RGB',(r.W*len(frames),r.H+24),r.PAPER)
     ImageDraw.Draw(sheet).text((4,5),f'{sid} / {scene} / {state}',fill=r.INK)
     for i,im in enumerate(frames): sheet.paste(im.convert('RGB'),(i*r.W,24))
@@ -259,12 +268,12 @@ def save_clip(output,sid,scene,state,frames,meta):
             'sha256':digest(frames),'deterministic':True,**meta}
 
 
-def range_artifacts(output,old_r):
+def range_artifacts(output,old_r,baseline_commit='49a0d46'):
     clips=[]
     masters=[]
     for sid in species_motion:
         rows=[]
-        columns=max(8,len(species_motion[sid]['idle']))
+        columns=max(8, *(len(seq) for seq in species_motion[sid].values()), len(species_motion[sid]['strike'])+len(species_motion[sid]['recover']))
         compare=Image.new('RGB',(r.W*2*len(STATES),r.H+24),r.PAPER)
         for si,scene in enumerate(training.SCENES):
             for j,state in enumerate(STATES):
@@ -282,15 +291,15 @@ def range_artifacts(output,old_r):
                     legacy=old_fixture(anim,old_r).frame(times[ix],show_cutins=False)
                     compare.paste(legacy.convert('RGB'),(j*2*r.W,24))
                     compare.paste(frames[ix].convert('RGB'),((j*2+1)*r.W,24))
-                    ImageDraw.Draw(compare).text((j*2*r.W+4,5),f'{sid}/{state}   49a0d46 | AUTHORED',fill=r.INK)
+                    ImageDraw.Draw(compare).text((j*2*r.W+4,5),f'{sid}/{state}   {baseline_commit} | AUTHORED',fill=r.INK)
             # Full Battle skill sample: checks the actual move and event adapter.
-            anim=training.make_scene(sid,scene,7)
+            anim=training.make_scene(sid,scene,7,'skill')
             event=next(e for e in anim.events if e[1]=='cast' and e[2]==0)
             times=[event[0]+i*.1 for i in range(round(r.cast_windup(sid)*10)+6)]
             frames=frames_at(anim,times)
-            again=training.make_scene(sid,scene,7)
+            again=training.make_scene(sid,scene,7,'skill')
             assert digest(frames)==digest(frames_at(again,times))
-            clips.append(save_clip(output,sid,scene,'skill',frames,{'event':event,'sim_times':times,'move':r.skill_profile(sid)}))
+            clips.append(save_clip(output,sid,scene,'skill',frames,{'event':event,'sim_times':times,'move':r.skill_profile(sid),'frame_duration_ms':100,'duration_seconds':len(times)*.1,'fixture_action':'skill'}))
         sheet=Image.new('RGB',(r.W*columns,(r.H+24)*len(rows)),r.PAPER)
         for i,row in enumerate(rows): sheet.paste(row,(0,i*(r.H+24)))
         sheet.save(output/f'{sid}-all-frames.png')
@@ -311,9 +320,9 @@ def range_artifacts(output,old_r):
     (output/'manifest.json').write_text(json.dumps({'clips':clips,'six_state_clips':288,
         'skill_clips':48,'frames':sum(c['frames'] for c in clips),
         'fixture':'Six-state clips isolate recorded Battle events. Skill clips use complete real battles. Death uses HP=1 training fixture.'},ensure_ascii=False,indent=2)+'\n')
-    html=training.PROFILE_RANGE_HTML.replace('单体靶场 · 平A / 技能','16 只独立动作与技能靶场').replace('真实 Battle 事件 · 四色精灵','真实事件隔离六状态 + 完整 Battle 技能 · 左右对比见下方 · 四色精灵')
+    html=training.PROFILE_RANGE_HTML.replace('单体靶场 · 平A / 技能','16 只独立动作与技能靶场').replace('真实 Battle 事件 · 四色精灵','真实事件隔离六状态 + 完整 Battle 技能 · 左右对比见下方 · 四色精灵').replace('10 FPS', '动作 20 FPS / idle 与技能 10 FPS')
     html += '<p>状态说明：strike 片段含 recover；hit 是叠加轨。六状态隔离真实事件，死亡训练 HP=1。技能片段保留完整战斗。</p>'
-    html += ''.join(f'<p><a href="{sid}-summary.png">{sid} 六状态+技能</a> · <a href="{sid}-comparison.png">49a0d46 / authored 左右对照</a> · <a href="{sid}-all-frames.png">全部状态帧</a></p>' for sid in species_motion)
+    html += ''.join(f'<p><a href="{sid}-summary.png">{sid} 六状态+技能</a> · <a href="{sid}-comparison.png">{baseline_commit} / authored 左右对照</a> · <a href="{sid}-all-frames.png">全部状态帧</a></p>' for sid in species_motion)
     (output/'index.html').write_text(html)
 
 
@@ -413,7 +422,7 @@ def hard_checks(output):
     if failures:raise SystemExit(1)
 
 
-def benchmark(output,old_r):
+def benchmark(output,old_r,baseline_commit='49a0d46'):
     # Same immutable event streams and schedule, warmed independently. Paired
     # rounds alternate order, avoid PNG/hash/I/O during the timing interval.
     new=[training.make_scene(sid,'melee',7) for sid in species_motion]
@@ -441,7 +450,7 @@ def benchmark(output,old_r):
     before=statistics.median(x['before_ms'] for x in results)
     after=statistics.median(x['after_ms'] for x in results)
     delta=(after/before-1)*100
-    data={'passed':delta<=15,'baseline':'49a0d46','species':list(species_motion),
+    data={'passed':delta<=15,'baseline':baseline_commit,'species':list(species_motion),
           'frames_per_round':400,'rounds':results,'baseline_median_ms':before,'authored_median_ms':after,'increase_percent':delta}
     (output/'benchmark.json').write_text(json.dumps(data,indent=2)+'\n')
     print('benchmark',before,after,delta,data['passed'],flush=True)
@@ -452,18 +461,19 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--mode',choices=('contracts','range','hard','benchmark','all'),default='all')
     parser.add_argument('--out',type=Path,default=OUT)
+    parser.add_argument('--baseline',default='49a0d46')
     args=parser.parse_args()
     args.out.mkdir(parents=True,exist_ok=True)
-    loaded,hashes=baseline()
-    (args.out/'baseline-source.json').write_text(json.dumps({'commit':'49a0d46','sha256':hashes},indent=2)+'\n')
+    loaded,hashes=baseline(args.baseline)
+    (args.out/'baseline-source.json').write_text(json.dumps({'commit':args.baseline,'sha256':hashes},indent=2)+'\n')
     if args.mode in ('contracts','all'):
         a=contracts(args.out)
         b=fallback(args.out,loaded['render_battle_gif'])
         if not a['passed'] or not b['passed']:raise SystemExit(1)
     if args.mode in ('range','all'):
-        range_artifacts(args.out,loaded['render_battle_gif'])
+        range_artifacts(args.out,loaded['render_battle_gif'],args.baseline)
         detail_atlases(args.out)
     if args.mode in ('hard','all'):hard_checks(args.out)
-    if args.mode in ('benchmark','all'):benchmark(args.out,loaded['render_battle_gif'])
+    if args.mode in ('benchmark','all'):benchmark(args.out,loaded['render_battle_gif'],args.baseline)
 
 if __name__=='__main__':main()

@@ -24,6 +24,10 @@ ENERGY_PER_HIT_TAKEN = 10  # 受击回能
 ENERGY_MAX = 80
 # 速度(5~150) -> 攻击间隔秒：快龙/豪力蜂类约 0.65s，铁甲蛹类约 1.1s
 SPEED_TO_ATTACK_INTERVAL = lambda speed: 1.0 / (0.6 + speed / 150.0)  # noqa: E731
+# R2 节奏定参（2026-10-04 用户裁定「动画速度过快→都推进」的第 3 层）：
+# 普攻间隔整体 ×1.5——消融实验（experiment_pacing）证明攻速是节奏主杠杆
+# （战斗中位 7.5→10.1s、首招 5.5→7.9s）。历史实验钉回 1.0 保基线。
+ATTACK_INTERVAL_MULT = 1.5
 MOVE_TICK = 0.5           # 移动一格的耗时（秒）
 MAX_BATTLE_SECONDS = 45.0  # 超时判平（防龟缩）
 

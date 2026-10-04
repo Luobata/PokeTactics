@@ -35,12 +35,15 @@ profiles.PROFILES_ON = False   # 量全局节奏，不量角色
 
 
 def set_arm(arm):
-    """臂内改 combat 命名空间的换算常量（Unit 初始化运行期读取）。"""
-    combat.SPEED_TO_ATTACK_INTERVAL = _slow_interval if arm in ("A1", "A4") \
-        else _orig_interval
-    combat.MOVE_TICK = _ORIG_MOVE * (1.3 if arm in ("A2", "A4") else 1.0)
-    combat.ENERGY_PER_ATTACK = int(_ORIG_EPA * (0.85 if arm in ("A3", "A4") else 1.0))
-    combat.ENERGY_PER_HIT_TAKEN = int(_ORIG_EPHT * (0.85 if arm in ("A3", "A4") else 1.0))
+    """臂内改 combat 命名空间的换算常量（Unit 初始化运行期读取）。
+    2026-10-04 更新：攻速 ×1.5 已转正为默认（data.ATTACK_INTERVAL_MULT），
+    本实验改为直接切该乘数——A0=旧节奏、A1=现默认、A2=远期 ×2.0；
+    移动/能量消融臂固定攻速旧值以保持单一变量。"""
+    combat.ATTACK_INTERVAL_MULT = {"A0": 1.0, "A1": 1.5, "A2": 2.0,
+                                   "M0": 1.0, "E0": 1.0}[arm]
+    combat.MOVE_TICK = _ORIG_MOVE * (1.3 if arm == "M0" else 1.0)
+    combat.ENERGY_PER_ATTACK = int(_ORIG_EPA * (0.85 if arm == "E0" else 1.0))
+    combat.ENERGY_PER_HIT_TAKEN = int(_ORIG_EPHT * (0.85 if arm == "E0" else 1.0))
 
 
 _orig_interval = combat.SPEED_TO_ATTACK_INTERVAL
@@ -97,7 +100,7 @@ def main():
     print(f"{'臂':<6}{'时长中位':>8}{'p90':>7}{'超时率':>7}{'首招中位':>9}"
           f"{'怪力vs胡地':>10}{'水vs火':>8}")
     rows = {}
-    for arm in ("A0", "A1", "A2", "A3", "A4"):
+    for arm in ("A0", "A1", "A2", "M0", "E0"):
         set_arm(arm)
         m = metrics(args.games, args.seed, args.pairs)
         rows[arm] = m
@@ -105,8 +108,8 @@ def main():
         print(f"{arm:<6}{m['med']:>7.1f}s{m['p90']:>6.1f}s{m['timeout']:>7.0%}"
               f"{fc:>9}{m['mk_anchor']:>10.0%}{m['wf_anchor']:>8.0%}")
     set_arm("A0")
-    b, a4 = rows["A0"], rows["A4"]
-    print(f"\n判读：组合臂时长 {b['med']:.1f}s → {a4['med']:.1f}s"
+    b, a4 = rows["A0"], rows["A1"]
+    print(f"\n判读：默认节奏（A1，攻速×1.5 已转正）vs 旧节奏 A0"
           f"（目标带 14-20s 的中后期候选，见 docs/13 §6）；"
           f"怪力vs胡地锚 {b['mk_anchor']:.0%} → {a4['mk_anchor']:.0%}；"
           f"超时率 {b['timeout']:.0%} → {a4['timeout']:.0%}。"

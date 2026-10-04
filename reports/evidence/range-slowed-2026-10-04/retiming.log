@@ -1,0 +1,74 @@
+/Users/bytedance/luobata/PokeTactics/tools/mockups/slowed_animation_check.py:33: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  colors = set(source.getdata())
+/Users/bytedance/luobata/PokeTactics/tools/mockups/slowed_animation_check.py:52: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  palette_bad += sum(1 for c in sprite.getdata() if c[3] and c not in colors)
+{
+  "timing": {
+    "idle": {
+      "clips": 48,
+      "before_mean_seconds": 0.8500000000000001,
+      "after_mean_seconds": 0.8500000000000001,
+      "ratio": 1.0,
+      "before_frames": 408,
+      "after_frames": 408
+    },
+    "walk": {
+      "clips": 48,
+      "before_mean_seconds": 0.42500000000000004,
+      "after_mean_seconds": 0.6375,
+      "ratio": 1.4999999999999998,
+      "before_frames": 204,
+      "after_frames": 612
+    },
+    "windup": {
+      "clips": 48,
+      "before_mean_seconds": 0.3125,
+      "after_mean_seconds": 0.403125,
+      "ratio": 1.29,
+      "before_frames": 150,
+      "after_frames": 387
+    },
+    "strike": {
+      "clips": 48,
+      "before_mean_seconds": 0.50625,
+      "after_mean_seconds": 0.65625,
+      "ratio": 1.2962962962962963,
+      "before_frames": 243,
+      "after_frames": 630
+    },
+    "hit": {
+      "clips": 48,
+      "before_mean_seconds": 0.3,
+      "after_mean_seconds": 0.4,
+      "ratio": 1.3333333333333335,
+      "before_frames": 144,
+      "after_frames": 384
+    },
+    "death": {
+      "clips": 48,
+      "before_mean_seconds": 0.6,
+      "after_mean_seconds": 0.75,
+      "ratio": 1.25,
+      "before_frames": 288,
+      "after_frames": 720
+    },
+    "charge": {
+      "before_min": 0.2,
+      "before_max": 0.4,
+      "after_min": 0.4,
+      "after_max": 0.5
+    }
+  },
+  "regression": {
+    "passed": true,
+    "failures": [],
+    "authored_frames_checked": 1015,
+    "key_pose_pixel_checks": 601,
+    "internal_gap_pixels": 0,
+    "empty_cels": 0,
+    "off_palette_pixels": 0,
+    "dissolve_masks_preserved": 198,
+    "idle_key_cycle_mean_seconds": 0.65,
+    "baseline": "968f42f"
+  }
+}

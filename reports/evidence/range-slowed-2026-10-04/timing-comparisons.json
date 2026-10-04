@@ -1,0 +1,54 @@
+[
+  {
+    "species": 6,
+    "rows": [
+      "walk",
+      "attack chain",
+      "hit",
+      "death"
+    ],
+    "frames": 40,
+    "frame_duration_ms": 50,
+    "duration_seconds": 2,
+    "sha256": "f9794c8a7b8914add7d8719267704cc2fb5d5b208badb02c0786c4cabbfee48e"
+  },
+  {
+    "species": 143,
+    "rows": [
+      "walk",
+      "attack chain",
+      "hit",
+      "death"
+    ],
+    "frames": 40,
+    "frame_duration_ms": 50,
+    "duration_seconds": 2,
+    "sha256": "877b7aa26ae3ea879ed660213901d0257e6bf152e2a7b8ad8fab455e278ee034"
+  },
+  {
+    "species": 95,
+    "rows": [
+      "walk",
+      "attack chain",
+      "hit",
+      "death"
+    ],
+    "frames": 40,
+    "frame_duration_ms": 50,
+    "duration_seconds": 2,
+    "sha256": "be04cd3f51d04ab36038841941c79bf1b2687a01982fbcc7e7dff949bdfc24eb"
+  },
+  {
+    "species": 18,
+    "rows": [
+      "walk",
+      "attack chain",
+      "hit",
+      "death"
+    ],
+    "frames": 40,
+    "frame_duration_ms": 50,
+    "duration_seconds": 2,
+    "sha256": "b189ad83c997b70ebec94c8876c9fb50901fb10a7cb97c10ceceed82b27973d5"
+  }
+]

@@ -45,7 +45,7 @@ def skill_profile(sid):
 def cast_windup(sid):
     if sid in AUTHORED_SKILLS:
         from motion import windup
-        return windup(sid)
+        return min(.5, max(.4, windup(sid)))
     return SIGNATURES[sid].windup if sid in SIGNATURES else .4
 
 

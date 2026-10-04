@@ -1220,7 +1220,7 @@ canvas{display:block;width:480px;max-width:92vw;image-rendering:pixelated;backgr
     <canvas id="cv" width="240" height="320"></canvas>
     <div class="bctl">
       <button onclick="btoggle()" id="bplay">▶ 播放</button>
-      <select id="bspeed" onchange="bspeed()"><option value="1">1x</option><option value="2" selected>2x</option><option value="4">4x</option></select>
+      <select id="bspeed" onchange="bspeed()"><option value="1" selected>1x</option><option value="2">2x</option><option value="4">4x</option></select>
       <button onclick="breplay()">↻ 重播</button>
       <button onclick="bskip()">跳过 ⏭</button>
     </div>
@@ -1506,7 +1506,7 @@ async function nextRound(){
   if(j.ok&&S.phase==='over')toast('对局结束');
 }
 /* ---------- 战斗回放 ---------- */
-let frames=[],bcur=0,bn=0,btimer=null,bspeedv=2,playing=false,bevs=[],bmeta=null;
+let frames=[],bcur=0,bn=0,btimer=null,bspeedv=1,playing=false,bevs=[],bmeta=null;
 function openBattle(){
   bmeta=S.last_battle;frames=[];bcur=0;playing=false;btimer&&clearInterval(btimer);btimer=null;
   $('overlay').classList.add('show');

@@ -1,0 +1,2739 @@
+{
+  "kind": "native-canvas-exact-viewer-script; virtual timers; local PNG IO",
+  "browser_executed": false,
+  "viewer_sha256": "95b6abdbef3c5e138c3b516645bfe82ff61ac5cda296877ff2017ab0c480c261",
+  "pages": [
+    {
+      "page": "range-slowed-2026-10-04",
+      "clips": [
+        {
+          "path": "6/dummy/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/dummy/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/dummy/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/dummy/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/dummy/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/melee/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/melee/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/melee/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/melee/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/melee/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/ranged/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/ranged/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/ranged/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/ranged/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "6/ranged/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/dummy/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/dummy/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/dummy/windup",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/dummy/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/dummy/skill",
+          "frames": 11,
+          "ticks": 22,
+          "seek_checks": 11,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/melee/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/melee/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/melee/windup",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/melee/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/melee/skill",
+          "frames": 11,
+          "ticks": 22,
+          "seek_checks": 11,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/ranged/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/ranged/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/ranged/windup",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/ranged/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "65/ranged/skill",
+          "frames": 11,
+          "ticks": 22,
+          "seek_checks": 11,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/dummy/idle",
+          "frames": 16,
+          "ticks": 32,
+          "seek_checks": 16,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/dummy/walk",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/dummy/windup",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/dummy/strike",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/dummy/skill",
+          "frames": 11,
+          "ticks": 22,
+          "seek_checks": 11,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/melee/idle",
+          "frames": 16,
+          "ticks": 32,
+          "seek_checks": 16,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/melee/walk",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/melee/windup",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/melee/strike",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/melee/skill",
+          "frames": 11,
+          "ticks": 22,
+          "seek_checks": 11,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/ranged/idle",
+          "frames": 16,
+          "ticks": 32,
+          "seek_checks": 16,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/ranged/walk",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/ranged/windup",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/ranged/strike",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "143/ranged/skill",
+          "frames": 11,
+          "ticks": 22,
+          "seek_checks": 11,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/dummy/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/dummy/walk",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/dummy/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/dummy/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/dummy/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/melee/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/melee/walk",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/melee/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/melee/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/melee/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/ranged/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/ranged/walk",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/ranged/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/ranged/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "149/ranged/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/dummy/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/dummy/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/dummy/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/dummy/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/dummy/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/melee/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/melee/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/melee/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/melee/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/melee/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/ranged/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/ranged/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/ranged/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/ranged/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "9/ranged/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/dummy/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/dummy/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/dummy/windup",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/dummy/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/dummy/skill",
+          "frames": 11,
+          "ticks": 22,
+          "seek_checks": 11,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/melee/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/melee/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/melee/windup",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/melee/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/melee/skill",
+          "frames": 11,
+          "ticks": 22,
+          "seek_checks": 11,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/ranged/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/ranged/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/ranged/windup",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/ranged/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "3/ranged/skill",
+          "frames": 11,
+          "ticks": 22,
+          "seek_checks": 11,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/dummy/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/dummy/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/dummy/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/dummy/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/dummy/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/melee/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/melee/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/melee/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/melee/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/melee/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/ranged/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/ranged/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/ranged/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/ranged/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "94/ranged/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/dummy/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/dummy/walk",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/dummy/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/dummy/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/dummy/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/melee/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/melee/walk",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/melee/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/melee/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/melee/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/ranged/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/ranged/walk",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/ranged/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/ranged/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "131/ranged/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/dummy/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/dummy/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/dummy/windup",
+          "frames": 5,
+          "ticks": 10,
+          "seek_checks": 5,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/dummy/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/dummy/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/melee/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/melee/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/melee/windup",
+          "frames": 5,
+          "ticks": 10,
+          "seek_checks": 5,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/melee/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/melee/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/ranged/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/ranged/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/ranged/windup",
+          "frames": 5,
+          "ticks": 10,
+          "seek_checks": 5,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/ranged/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "59/ranged/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/dummy/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/dummy/walk",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/dummy/windup",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/dummy/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/dummy/skill",
+          "frames": 11,
+          "ticks": 22,
+          "seek_checks": 11,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/melee/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/melee/walk",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/melee/windup",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/melee/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/melee/skill",
+          "frames": 11,
+          "ticks": 22,
+          "seek_checks": 11,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/ranged/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/ranged/walk",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/ranged/windup",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/ranged/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "130/ranged/skill",
+          "frames": 11,
+          "ticks": 22,
+          "seek_checks": 11,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/dummy/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/dummy/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/dummy/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/dummy/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/dummy/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/melee/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/melee/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/melee/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/melee/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/melee/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/ranged/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/ranged/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/ranged/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/ranged/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "31/ranged/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/dummy/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/dummy/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/dummy/windup",
+          "frames": 5,
+          "ticks": 10,
+          "seek_checks": 5,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/dummy/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/dummy/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/melee/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/melee/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/melee/windup",
+          "frames": 5,
+          "ticks": 10,
+          "seek_checks": 5,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/melee/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/melee/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/ranged/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/ranged/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/ranged/windup",
+          "frames": 5,
+          "ticks": 10,
+          "seek_checks": 5,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/ranged/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "34/ranged/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/dummy/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/dummy/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/dummy/windup",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/dummy/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/dummy/skill",
+          "frames": 11,
+          "ticks": 22,
+          "seek_checks": 11,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/melee/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/melee/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/melee/windup",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/melee/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/melee/skill",
+          "frames": 11,
+          "ticks": 22,
+          "seek_checks": 11,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/ranged/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/ranged/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/ranged/windup",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/ranged/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "76/ranged/skill",
+          "frames": 11,
+          "ticks": 22,
+          "seek_checks": 11,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/dummy/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/dummy/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/dummy/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/dummy/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/dummy/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/melee/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/melee/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/melee/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/melee/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/melee/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/ranged/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/ranged/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/ranged/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/ranged/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "95/ranged/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/dummy/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/dummy/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/dummy/windup",
+          "frames": 5,
+          "ticks": 10,
+          "seek_checks": 5,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/dummy/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/dummy/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/melee/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/melee/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/melee/windup",
+          "frames": 5,
+          "ticks": 10,
+          "seek_checks": 5,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/melee/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/melee/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/ranged/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/ranged/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/ranged/windup",
+          "frames": 5,
+          "ticks": 10,
+          "seek_checks": 5,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/ranged/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "18/ranged/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/dummy/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/dummy/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/dummy/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/dummy/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/dummy/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/dummy/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/dummy/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/melee/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/melee/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/melee/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/melee/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/melee/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/melee/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/melee/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/ranged/idle",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/ranged/walk",
+          "frames": 12,
+          "ticks": 24,
+          "seek_checks": 12,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/ranged/windup",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/ranged/strike",
+          "frames": 13,
+          "ticks": 26,
+          "seek_checks": 13,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/ranged/hit",
+          "frames": 8,
+          "ticks": 16,
+          "seek_checks": 8,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/ranged/death",
+          "frames": 15,
+          "ticks": 30,
+          "seek_checks": 15,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        },
+        {
+          "path": "26/ranged/skill",
+          "frames": 10,
+          "ticks": 20,
+          "seek_checks": 10,
+          "blank_ticks": 0,
+          "pixel_mismatches": 0
+        }
+      ],
+      "faults": [
+        {
+          "case": "slow-load-seek-switch-stale-completion",
+          "hold_ticks": 30,
+          "passed": true
+        },
+        {
+          "case": "longest-clip-pending-seek",
+          "frames": 11,
+          "passed": true
+        },
+        {
+          "case": "404-hold-retry",
+          "hold_ticks": 30,
+          "passed": true
+        },
+        {
+          "case": "corrupt-hold-retry",
+          "hold_ticks": 30,
+          "passed": true
+        },
+        {
+          "case": "size-hold-retry",
+          "hold_ticks": 30,
+          "passed": true
+        },
+        {
+          "case": "timeout-hold-retry",
+          "hold_ticks": 30,
+          "passed": true
+        }
+      ],
+      "peak_inflight": 4,
+      "cache_bytes": 2457600
+    }
+  ],
+  "playback_ticks": 7272,
+  "seek_checks": 3636,
+  "blank_ticks": 0,
+  "pixel_mismatches": 0,
+  "passed": true
+}

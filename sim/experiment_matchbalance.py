@@ -48,10 +48,11 @@ VAR_LIMIT = 7 * 0.40    # 人格平均名次方差（既有线）
 
 # v1 冻结基线（修订前快照；其余臂的 diff 就近叠加）
 V1 = {"shop_slots": 5, "bench": 9, "follow_lag": 0, "saver_late_cap": 20,
-      "stage": ((1, 1), (9, 2), (17, 3))}
+      "stage": ((1, 1), (9, 2), (17, 3)), "atk_mult": 1.0}
 # v4 修订态 = 当前源码（所见即所得，防表演进漂移）
 V4 = {"shop_slots": 4, "bench": 6, "follow_lag": 1, "saver_late_cap": 30,
-      "stage": ((1, 1), (10, 2), (18, 3))}
+      # 2026-10-04 R2 节奏定参后当前态：STAGE (11,20) + 攻速 ×1.5 默认
+      "stage": ((1, 1), (11, 2), (20, 3)), "atk_mult": None}  # None=当前默认
 
 ORIG_LEVEL_TARGET = bots_mod.Bot._level_target
 
@@ -74,6 +75,11 @@ def make_level_target(follow_lag: int):
 
 def set_arm(cfg: dict) -> None:
     """切臂：全部为模块级量/人格表项，Match 构造/调用期读取，改即生效。"""
+    import combat as _cb
+    import data as _data
+    # R2 节奏定参（2026-10-04）：v1-v3 是历史快照钉旧攻速；v4=None 用当前默认
+    _cb.ATTACK_INTERVAL_MULT = _data.ATTACK_INTERVAL_MULT \
+        if cfg.get("atk_mult") is None else cfg["atk_mult"]
     shop_mod.SHOP_SLOTS = cfg["shop_slots"]
     bots_mod.BENCH_SIZE = cfg["bench"]
     bots_mod.Bot._level_target = make_level_target(cfg["follow_lag"])

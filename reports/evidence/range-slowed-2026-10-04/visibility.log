@@ -1,0 +1,330 @@
+R1 CONTRACTS {"samples": {"energy": "new attack/cast + legacy fallback + rewind", "clock": {"windows": [1.0, 2.0], "speeds": [1, 2, 4], "duration": 0.35, "rate": 0.3}, "projectile_colors": [[184, 72, 64], [242, 232, 201]], "projectile": "launch / inverse speed / death cancellation", "solid_star_bounds": [{"sprite_px": 32, "solid_px": 23, "limit_px": 24, "light_medium_heavy_px": [19, 21, 23]}, {"sprite_px": 34, "solid_px": 25, "limit_px": 25, "light_medium_heavy_px": [21, 23, 25]}], "attack_impact": {"rim_circles": 2, "star_contours": 1, "ring_alpha": 255, "ring_width_px": 1, "sparks": 6, "stroke_widths_px": [3, 1]}, "particle_budgets": [[0, 0], [1, 1], [8, 8], [192, 192]], "opaque_body_fx_overlap_pixels": 0, "opaque_body_fx_overlap_frames": 36, "peak_sampled_fx_particles": 16, "gait": [{"species": 6, "two_pose_diff_pixels": 257, "floating": true, "period": 0.24}, {"species": 65, "two_pose_diff_pixels": 179, "floating": true, "period": 0.24}, {"species": 143, "two_pose_diff_pixels": 339, "floating": false, "period": 0.8}, {"species": 76, "two_pose_diff_pixels": 414, "floating": false, "period": 0.5333333333333333}]}, "failures": [], "passed": true}
+seed=7 t= 0.0 board1x=53955 board2x=215820 display1x=53955 PASS opening:0
+seed=7 t= 0.1 board1x=43811 board2x=175244 display1x=43830 PASS opening:1
+seed=7 t= 0.2 board1x=43885 board2x=175540 display1x=43899 PASS opening:2
+seed=7 t= 0.3 board1x= 3920 board2x= 15680 display1x= 3929 PASS opening:3
+seed=7 t= 0.4 board1x=14281 board2x= 57124 display1x=14302 PASS attack:9>3:0,attack:3>9:0,damage-number
+  isolated attack 9>3: 763px / 3052px (1x / 2x)
+  isolated attack 3>9: 844px / 3376px (1x / 2x)
+seed=7 t= 0.5 board1x= 6892 board2x= 27568 display1x= 6913 PASS attack:4>5:0,attack:8>0:0,attack:9>3:1,attack:3>9:1,damage-number
+  isolated attack 4>5: 778px / 3112px (1x / 2x)
+  isolated attack 8>0: 844px / 3376px (1x / 2x)
+seed=7 t= 0.6 board1x= 8350 board2x= 33400 display1x= 8364 PASS attack:4>5:1,attack:8>0:1,attack:9>3:2,attack:3>9:2,damage-number
+seed=7 t= 0.7 board1x= 7485 board2x= 29940 display1x= 7503 PASS attack:4>5:2,attack:8>0:2,attack:0>5:0,damage-number
+  isolated attack 0>5: 900px / 3600px (1x / 2x)
+seed=7 t= 0.8 board1x= 5490 board2x= 21960 display1x= 5506 PASS attack:1>5:0,attack:4>5:3,attack:8>0:3,attack:6>2:0,attack:0>5:1,damage-number
+  isolated attack 1>5: 798px / 3192px (1x / 2x)
+  isolated attack 6>2: 660px / 2640px (1x / 2x)
+seed=7 t= 0.9 board1x= 6444 board2x= 25776 display1x= 6450 PASS attack:1>5:1,attack:6>2:1,attack:0>5:2,damage-number
+seed=7 t= 1.0 board1x= 5256 board2x= 21024 display1x= 5285 PASS attack:1>5:2,attack:6>2:2,attack:0>5:3,attack:7>2:0,damage-number
+  isolated attack 7>2: 699px / 2796px (1x / 2x)
+seed=7 t= 1.1 board1x= 6262 board2x= 25048 display1x= 6281 PASS attack:1>5:3,attack:6>2:3,attack:7>2:1,attack:5>0:0,damage-number
+  isolated attack 5>0: 854px / 3416px (1x / 2x)
+seed=7 t= 1.2 board1x= 4542 board2x= 18168 display1x= 4556 PASS attack:7>2:2,attack:5>0:1,damage-number
+seed=7 t= 1.3 board1x= 3886 board2x= 15544 display1x= 3895 PASS attack:7>2:3,attack:5>0:2,damage-number
+seed=7 t= 1.4 board1x= 5974 board2x= 23896 display1x= 5995 PASS attack:5>0:3,attack:2>6:0,damage-number
+  isolated attack 2>6: 727px / 2908px (1x / 2x)
+seed=7 t= 1.5 board1x= 5121 board2x= 20484 display1x= 5142 PASS attack:2>6:1,damage-number
+seed=7 t= 1.6 board1x= 3777 board2x= 15108 display1x= 3791 PASS attack:2>6:2,damage-number
+seed=7 t= 1.7 board1x= 5519 board2x= 22076 display1x= 5537 PASS attack:2>6:3,attack:8>0:0,damage-number
+  isolated attack 8>0: 844px / 3376px (1x / 2x)
+seed=7 t= 1.8 board1x= 6305 board2x= 25220 display1x= 6321 PASS attack:7>2:0,attack:6>2:0,attack:8>0:1,damage-number
+  isolated attack 7>2: 700px / 2800px (1x / 2x)
+  isolated attack 6>2: 627px / 2508px (1x / 2x)
+seed=7 t= 1.9 board1x=54914 board2x=219656 display1x=54920 PASS attack:7>2:1,attack:6>2:1,attack:8>0:2,attack:0>5:0,attack:4>5:0,death:0:0,damage-number
+  isolated attack 0>5: 900px / 3600px (1x / 2x)
+  isolated attack 4>5: 769px / 3076px (1x / 2x)
+seed=7 t= 2.0 board1x=54894 board2x=219576 display1x=54918 PASS attack:7>2:2,attack:6>2:2,attack:8>0:3,attack:0>5:1,attack:4>5:1,attack:9>3:0,attack:3>9:0,death:0:1,damage-number
+  isolated attack 9>3: 812px / 3248px (1x / 2x)
+  isolated attack 3>9: 844px / 3376px (1x / 2x)
+seed=7 t= 2.1 board1x=54904 board2x=219616 display1x=54923 PASS attack:7>2:3,attack:6>2:3,attack:1>5:0,attack:0>5:2,attack:4>5:2,attack:9>3:1,attack:3>9:1,death:0:2,death:2:0,damage-number
+  isolated attack 1>5: 793px / 3172px (1x / 2x)
+seed=7 t= 2.2 board1x=54902 board2x=219608 display1x=54916 PASS attack:1>5:1,attack:0>5:3,attack:4>5:3,attack:9>3:2,attack:3>9:2,death:0:3,death:2:1,damage-number
+seed=7 t= 2.3 board1x= 4680 board2x= 18720 display1x= 4689 PASS attack:1>5:2,death:2:2,damage-number
+seed=7 t= 2.4 board1x= 3875 board2x= 15500 display1x= 3896 PASS attack:1>5:3,death:2:3,damage-number
+seed=7 t= 2.5 board1x= 5222 board2x= 20888 display1x= 5243 PASS damage-number
+seed=7 t= 2.6 board1x= 3698 board2x= 14792 display1x= 3712 PASS damage-number
+seed=7 t= 2.7 board1x= 3981 board2x= 15924 display1x= 3999 PASS damage-number
+seed=7 t= 2.8 board1x= 3623 board2x= 14492 display1x= 3639 PASS damage-number
+seed=7 t= 2.9 board1x= 3512 board2x= 14048 display1x= 3518 PASS damage-number
+seed=7 t= 3.0 board1x= 2613 board2x= 10452 display1x= 2632 PASS damage-number
+seed=7 t= 3.1 board1x= 4183 board2x= 16732 display1x= 4202 PASS damage-number
+seed=7 t= 3.2 board1x= 2541 board2x= 10164 display1x= 2555 PASS damage-number
+seed=7 t= 3.3 board1x= 4898 board2x= 19592 display1x= 4907 PASS attack:8>3:0,damage-number
+  isolated attack 8>3: 854px / 3416px (1x / 2x)
+seed=7 t= 3.4 board1x= 5831 board2x= 23324 display1x= 5852 PASS attack:8>3:1,attack:4>5:0,damage-number
+  isolated attack 4>5: 779px / 3116px (1x / 2x)
+seed=7 t= 3.5 board1x= 5064 board2x= 20256 display1x= 5085 PASS attack:1>5:0,attack:8>3:2,attack:4>5:1,damage-number
+  isolated attack 1>5: 787px / 3148px (1x / 2x)
+seed=7 t= 3.6 board1x= 5414 board2x= 21656 display1x= 5428 PASS attack:1>5:1,attack:6>3:0,attack:4>5:2,attack:9>3:0,damage-number
+  isolated attack 6>3: 798px / 3192px (1x / 2x)
+  isolated attack 9>3: 765px / 3060px (1x / 2x)
+seed=7 t= 3.7 board1x= 5617 board2x= 22468 display1x= 5635 PASS attack:1>5:2,attack:6>3:1,attack:7>3:0,attack:4>5:3,attack:5>1:0,attack:9>3:1,damage-number
+  isolated attack 7>3: 803px / 3212px (1x / 2x)
+  isolated attack 5>1: 746px / 2984px (1x / 2x)
+seed=7 t= 3.8 board1x= 7158 board2x= 28632 display1x= 7174 PASS attack:1>5:3,attack:6>3:2,attack:7>3:1,attack:5>1:1,attack:9>3:2,attack:3>9:0,damage-number
+  isolated attack 3>9: 846px / 3384px (1x / 2x)
+seed=7 t= 3.9 board1x= 5095 board2x= 20380 display1x= 5101 PASS attack:7>3:2,attack:5>1:2,attack:3>9:1,death:3:0,damage-number
+seed=7 t= 4.0 board1x= 4288 board2x= 17152 display1x= 4319 PASS attack:5>1:3,attack:3>9:2,death:3:1,damage-number
+seed=7 t= 4.1 board1x= 6289 board2x= 25156 display1x= 6308 PASS death:3:2,damage-number
+seed=7 t= 4.2 board1x= 3984 board2x= 15936 display1x= 3998 PASS death:3:3,damage-number
+seed=7 t= 4.3 board1x= 5258 board2x= 21032 display1x= 5267 PASS death:5:0,damage-number
+seed=7 t= 4.4 board1x= 5327 board2x= 21308 display1x= 5348 PASS death:5:1,damage-number
+seed=7 t= 4.5 board1x= 3632 board2x= 14528 display1x= 3653 PASS death:5:2,damage-number
+seed=7 t= 4.6 board1x= 4026 board2x= 16104 display1x= 4040 PASS death:5:3,damage-number
+seed=7 t= 4.7 board1x= 5768 board2x= 23072 display1x= 5786 PASS damage-number
+seed=7 t= 4.8 board1x= 4471 board2x= 17884 display1x= 4487 PASS damage-number
+seed=7 t= 4.9 board1x= 4471 board2x= 17884 display1x= 4477 PASS damage-number
+seed=7 t= 5.0 board1x= 3632 board2x= 14528 display1x= 3663 PASS attack:4>8:0,damage-number
+  isolated attack 4>8: 774px / 3096px (1x / 2x)
+seed=7 t= 5.1 board1x= 8111 board2x= 32444 display1x= 8130 PASS attack:4>8:1,damage-number
+seed=7 t= 5.2 board1x= 6731 board2x= 26924 display1x= 6745 PASS attack:4>8:2,damage-number
+seed=7 t= 5.3 board1x= 2713 board2x= 10852 display1x= 2722 PASS attack:4>8:3,damage-number
+seed=7 t= 5.4 board1x= 3805 board2x= 15220 display1x= 3826 PASS damage-number
+seed=7 t= 5.5 board1x= 3499 board2x= 13996 display1x= 3520 PASS full:1,damage-number
+seed=7 t= 5.6 board1x= 2100 board2x=  8400 display1x= 2114 PASS full:1,damage-number
+seed=7 t= 5.7 board1x= 3467 board2x= 13868 display1x= 3485 PASS attack:8>1:0,damage-number
+  isolated attack 8>1: 725px / 2900px (1x / 2x)
+seed=7 t= 5.8 board1x= 3007 board2x= 12028 display1x= 3023 PASS attack:8>1:1,damage-number
+seed=7 t= 5.9 board1x= 5259 board2x= 21036 display1x= 5265 PASS attack:8>1:2,attack:9>1:0,damage-number
+  isolated attack 9>1: 654px / 2616px (1x / 2x)
+seed=7 t= 6.0 board1x= 4225 board2x= 16900 display1x= 4249 PASS attack:8>1:3,attack:9>1:1,damage-number
+seed=7 t= 6.1 board1x= 3296 board2x= 13184 display1x= 3315 PASS attack:9>1:2,full:8,damage-number
+seed=7 t= 6.2 board1x= 2613 board2x= 10452 display1x= 2627 PASS attack:9>1:3,full:8,damage-number
+seed=7 t= 6.3 board1x= 3389 board2x= 13556 display1x= 3398 PASS attack:1>8:0,full:8,damage-number
+  isolated attack 1>8: 806px / 3224px (1x / 2x)
+seed=7 t= 6.4 board1x= 5036 board2x= 20144 display1x= 5057 PASS attack:1>8:1,attack:4>8:0,full:8,damage-number
+  isolated attack 4>8: 784px / 3136px (1x / 2x)
+seed=7 t= 6.5 board1x= 4630 board2x= 18520 display1x= 4651 PASS attack:1>8:2,attack:4>8:1,full:8,damage-number
+seed=7 t= 6.6 board1x= 3519 board2x= 14076 display1x= 3533 PASS attack:1>8:3,attack:4>8:2,full:1,damage-number
+seed=7 t= 6.7 board1x= 2958 board2x= 11832 display1x= 2976 PASS attack:4>8:3,full:1,damage-number
+seed=7 t= 6.8 board1x= 1977 board2x=  7908 display1x= 1993 PASS full:1,full:7,damage-number
+seed=7 t= 6.9 board1x= 3587 board2x= 14348 display1x= 3593 PASS attack:8>1:0,full:1,full:7,damage-number
+  isolated attack 8>1: 725px / 2900px (1x / 2x)
+seed=7 t= 7.0 board1x= 2735 board2x= 10940 display1x= 2763 PASS attack:8>1:1,full:1,full:7,damage-number
+seed=7 t= 7.1 board1x= 3039 board2x= 12156 display1x= 3058 PASS attack:8>1:2,full:1,full:7,full:8,damage-number
+seed=7 t= 7.2 board1x= 2527 board2x= 10108 display1x= 2541 PASS attack:8>1:3,full:1,full:7,full:8,damage-number
+seed=7 t= 7.3 board1x= 3666 board2x= 14664 display1x= 3675 PASS full:1,full:7,full:8,damage-number
+seed=7 t= 7.4 board1x= 2059 board2x=  8236 display1x= 2080 PASS full:1,full:7,full:8,damage-number
+seed=7 t= 7.5 board1x= 2484 board2x=  9936 display1x= 2505 PASS attack:9>1:0,full:1,full:7,full:8,damage-number
+  isolated attack 9>1: 652px / 2608px (1x / 2x)
+seed=7 t= 7.6 board1x= 3314 board2x= 13256 display1x= 3328 PASS attack:7>1:0,attack:9>1:1,full:1,full:4,full:7,full:8,damage-number
+  isolated attack 7>1: 685px / 2740px (1x / 2x)
+seed=7 t= 7.7 board1x= 5626 board2x= 22504 display1x= 5644 PASS attack:7>1:1,attack:9>1:2,attack:1>8:0,death:1:0,full:4,charge:7,full:8,damage-number
+  isolated attack 1>8: 803px / 3212px (1x / 2x)
+seed=7 t= 7.8 board1x= 4847 board2x= 19388 display1x= 4863 PASS [cutin-covered] attack:7>1:2,attack:9>1:3,attack:1>8:1,death:1:1,full:4,charge:7,full:8,damage-number
+seed=7 t= 7.9 board1x= 5093 board2x= 20372 display1x= 5099 PASS [cutin-covered] attack:7>1:3,attack:1>8:2,attack:4>8:0,death:1:2,full:4,charge:7,full:8,damage-number
+  isolated attack 4>8: 784px / 3136px (1x / 2x)
+seed=7 t= 8.0 board1x= 3912 board2x= 15648 display1x= 3938 PASS [cutin-covered] attack:1>8:3,attack:4>8:1,death:1:3,full:4,charge:7,full:8,damage-number
+seed=7 t= 8.1 board1x= 6805 board2x= 27220 display1x= 7851 PASS [cutin-covered] attack:4>8:2,full:4,charge:7,full:8,damage-number
+seed=7 t= 8.2 board1x=57194 board2x=228776 display1x=57208 PASS [cutin-covered] attack:4>8:3,land:7>1:0,full:4,charge:7,full:8,shake:+2,damage-number
+seed=7 t= 8.3 board1x=57345 board2x=229380 display1x=57370 PASS land:7>1:1,full:4,full:8,shake:-2,damage-number
+  isolated land 7>1: 57600px / 230400px (1x / 2x)
+seed=7 t= 8.4 board1x=12479 board2x= 49916 display1x=12500 PASS land:7>1:2,full:4,full:8,damage-number
+seed=7 t= 8.5 board1x= 4069 board2x= 16276 display1x= 4090 PASS land:7>1:3,full:4,full:8,damage-number
+seed=7 t= 8.6 board1x= 5313 board2x= 21252 display1x= 5343 PASS land:7>1:4,full:4,full:8,damage-number
+seed=7 t= 8.7 board1x= 6188 board2x= 24752 display1x= 6206 PASS attack:8>4:0,land:7>1:5,full:4,full:8,damage-number
+  isolated attack 8>4: 729px / 2916px (1x / 2x)
+seed=7 t= 8.8 board1x= 5109 board2x= 20436 display1x= 5141 PASS attack:8>4:1,full:4,full:8,damage-number
+seed=7 t= 8.9 board1x= 4871 board2x= 19484 display1x= 5709 PASS attack:8>4:2,full:4,full:8,damage-number
+seed=7 t= 9.0 board1x= 2460 board2x=  9840 display1x= 2476 PASS full:4,full:8,damage-number
+seed=7 t= 9.1 board1x= 3768 board2x= 15072 display1x= 4113 PASS charge:4,full:8,damage-number
+seed=7 t= 9.2 board1x= 3592 board2x= 14368 display1x= 3606 PASS [cutin-covered] charge:4,full:8,full:9,damage-number
+seed=7 t= 9.3 board1x= 2345 board2x=  9380 display1x= 2354 PASS [cutin-covered] attack:7>4:0,charge:4,full:8,full:9,damage-number
+  isolated attack 7>4: 642px / 2568px (1x / 2x)
+seed=7 t= 9.4 board1x= 3334 board2x= 13336 display1x= 3885 PASS [cutin-covered] attack:7>4:1,charge:4,full:8,full:9,damage-number
+seed=7 t= 9.5 board1x=11720 board2x= 46880 display1x=11741 PASS [cutin-covered] attack:7>4:2,land:4>8:0,charge:4,full:8,full:9,shake:+2,damage-number
+seed=7 t= 9.6 board1x=17662 board2x= 70648 display1x=62529 PASS attack:9>4:0,land:4>8:1,charge:8,full:9,shake:-2,damage-number
+  isolated attack 9>4: 663px / 2652px (1x / 2x)
+  isolated land 4>8: 1702px / 6808px (1x / 2x)
+seed=7 t= 9.7 board1x=13538 board2x= 54152 display1x=14047 PASS [cutin-covered] attack:9>4:1,land:4>8:2,charge:8,full:9,damage-number
+seed=7 t= 9.8 board1x= 4283 board2x= 17132 display1x=62355 PASS [cutin-covered] attack:9>4:2,land:4>8:3,charge:8,full:9,damage-number
+seed=7 t= 9.9 board1x= 3093 board2x= 12372 display1x= 3773 PASS [cutin-covered] land:4>8:4,charge:8,full:9,damage-number
+seed=7 t=10.0 board1x=57080 board2x=228320 display1x=57119 PASS [cutin-covered] land:4>8:5,land:8>4:0,charge:8,full:9,shake:+2,damage-number
+seed=7 t=10.1 board1x=57371 board2x=229484 display1x=66174 PASS land:8>4:1,full:9,shake:-2,damage-number
+  isolated land 8>4: 57600px / 230400px (1x / 2x)
+seed=7 t=10.2 board1x=14394 board2x= 57576 display1x=14354 PASS attack:7>4:0,land:8>4:2,full:9,damage-number
+  isolated attack 7>4: 642px / 2568px (1x / 2x)
+seed=7 t=10.3 board1x= 4008 board2x= 16032 display1x=62619 PASS attack:7>4:1,land:8>4:3,full:9,damage-number
+seed=7 t=10.4 board1x= 4261 board2x= 17044 display1x= 4282 PASS attack:7>4:2,land:8>4:4,full:9,damage-number
+seed=7 t=10.5 board1x= 3560 board2x= 14240 display1x= 3581 PASS land:8>4:5,full:9,damage-number
+seed=7 t=10.6 board1x= 3623 board2x= 14492 display1x= 3653 PASS death:8:0,full:9,damage-number
+seed=7 t=10.7 board1x= 1810 board2x=  7240 display1x= 1828 PASS death:8:1,full:9,damage-number
+seed=7 t=10.8 board1x= 2698 board2x= 10792 display1x= 3404 PASS death:4:0,death:8:2,charge:9,damage-number
+seed=7 t=10.9 board1x= 2562 board2x= 10248 display1x= 2568 PASS [cutin-covered] death:4:1,death:8:3,charge:9,damage-number
+seed=7 t=11.0 board1x= 1753 board2x=  7012 display1x= 1782 PASS [cutin-covered] death:4:2,charge:9,damage-number
+seed=7 t=11.1 board1x=  818 board2x=  3272 display1x= 1798 PASS [cutin-covered] death:4:3,charge:9,damage-number
+seed=7 t=11.2 board1x=57203 board2x=228812 display1x=57217 PASS [cutin-covered] land:9>4:0,charge:9,shake:+2,damage-number
+seed=7 t=11.3 board1x=57459 board2x=229836 display1x=66151 PASS land:9>4:1,shake:-2,damage-number
+  isolated land 9>4: 57600px / 230400px (1x / 2x)
+seed=7 t=11.4 board1x=12195 board2x= 48780 display1x=13904 PASS land:9>4:2,damage-number
+seed=7 t=11.5 board1x= 1990 board2x=  7960 display1x=62835 PASS land:9>4:3,damage-number
+seed=7 t=11.6 board1x= 2388 board2x=  9552 display1x= 2418 PASS land:9>4:4,damage-number
+seed=7 t=11.7 board1x= 2280 board2x=  9120 display1x= 2298 PASS land:9>4:5,damage-number
+seed=7 t=11.8 board1x= 2339 board2x=  9356 display1x= 2371 PASS damage-number
+seed=7 t=11.9 board1x= 2464 board2x=  9856 display1x= 2470 PASS damage-number
+seed=7 t=12.0 board1x=  723 board2x=  2892 display1x=  747 PASS damage-number
+SUMMARY seed=7: {"opening": {"frames": 4, "min_1x": 3920, "max_1x": 53955, "isolated_min_1x": 53955}, "attack": {"frames": 68, "min_1x": 2345, "max_1x": 57194, "isolated_min_1x": 627}, "land": {"frames": 23, "min_1x": 1990, "max_1x": 57459, "isolated_min_1x": 1702}, "board_crowding": {"max_overlap_px": 0, "limit_px": 4, "checked_pairs": 638}, "meter_occlusion": {"checked_units": 819, "obscured_frames": 0, "max_consecutive_frames": 0, "limit_frames": 2}, "palette_purity": {"species_checked": 84, "sprites_checked": 588, "squash_phases": 7, "visible_pixels": 279865, "off_palette_pixels": 0, "partial_alpha_pixels": 0, "unquantized_box_off_palette_pixels": 233}, "scale_compare": {"species": 6, "source_px": 56, "samples": [{"size_px": 28, "zoom": 1, "diff_pixels": 0}, {"size_px": 28, "zoom": 4, "diff_pixels": 0}, {"size_px": 34, "zoom": 1, "diff_pixels": 0}, {"size_px": 34, "zoom": 4, "diff_pixels": 0}, {"size_px": 56, "zoom": 1, "diff_pixels": 0}, {"size_px": 56, "zoom": 4, "diff_pixels": 0}]}, "weather": {"samples": [{"weather": "rain", "frames": 69, "min_1x": 29999, "visual_only_min_1x": 29840, "threshold_1x": 1200, "off_palette_pixels": 0, "particles_per_frame": 8, "max_overlap_px": 0, "meter_checks": 608, "max_meter_occlusion_frames": 0}, {"weather": "sun", "frames": 84, "min_1x": 30398, "visual_only_min_1x": 29651, "threshold_1x": 1200, "off_palette_pixels": 0, "particles_per_frame": 8, "max_overlap_px": 0, "meter_checks": 740, "max_meter_occlusion_frames": 0}, {"weather": "sand", "frames": 148, "min_1x": 29970, "visual_only_min_1x": 29892, "threshold_1x": 1200, "off_palette_pixels": 0, "particles_per_frame": 8, "max_overlap_px": 0, "meter_checks": 1102, "max_meter_occlusion_frames": 0}, {"weather": "hail", "frames": 70, "min_1x": 29867, "visual_only_min_1x": 29867, "threshold_1x": 1200, "off_palette_pixels": 0, "particles_per_frame": 8, "max_overlap_px": 0, "meter_checks": 628, "max_meter_occlusion_frames": 0}]}, "status": {"apply_events": 4, "checked_unit_frames": 12, "samples": [{"t": 0.1, "unit": 7, "kinds": ["flinch"], "icon_pixels": 7, "bounds": [217, 131, 223, 137]}, {"t": 3.4, "unit": 4, "kinds": ["flinch"], "icon_pixels": 7, "bounds": [217, 171, 223, 177]}, {"t": 4.9, "unit": 4, "kinds": ["flinch"], "icon_pixels": 7, "bounds": [217, 171, 223, 177]}], "max_overlap_px": 0, "max_meter_occlusion_frames": 0}, "status_contracts": {"kinds": ["burn", "poison", "paralysis", "freeze", "sleep", "flinch"], "frozen_frames": 4, "dot_numbers": 2, "palette_variants": 14}}
+PASS seed=7: 0 failures, 27.842s
+seed=11 t= 0.0 board1x=54198 board2x=216792 display1x=54198 PASS opening:0
+seed=11 t= 0.1 board1x=43347 board2x=173388 display1x=43366 PASS opening:1
+seed=11 t= 0.2 board1x=43447 board2x=173788 display1x=43461 PASS opening:2
+seed=11 t= 0.3 board1x= 5920 board2x= 23680 display1x= 5929 PASS opening:3
+seed=11 t= 0.4 board1x=15735 board2x= 62940 display1x=15756 PASS attack:4>7:0,damage-number
+  isolated attack 4>7: 775px / 3100px (1x / 2x)
+seed=11 t= 0.5 board1x= 7702 board2x= 30808 display1x= 7723 PASS attack:4>7:1,attack:9>4:0,damage-number
+  isolated attack 9>4: 773px / 3092px (1x / 2x)
+seed=11 t= 0.6 board1x= 7043 board2x= 28172 display1x= 7057 PASS attack:4>7:2,attack:9>4:1,damage-number
+seed=11 t= 0.7 board1x= 9998 board2x= 39992 display1x=10016 PASS attack:4>7:3,attack:9>4:2,damage-number
+seed=11 t= 0.8 board1x= 7353 board2x= 29412 display1x= 7369 PASS attack:7>4:0,damage-number
+  isolated attack 7>4: 770px / 3080px (1x / 2x)
+seed=11 t= 0.9 board1x= 6474 board2x= 25896 display1x= 6480 PASS attack:7>4:1,attack:6>1:0,attack:1>5:0,damage-number
+  isolated attack 6>1: 807px / 3228px (1x / 2x)
+  isolated attack 1>5: 782px / 3128px (1x / 2x)
+seed=11 t= 1.0 board1x= 7414 board2x= 29656 display1x= 7443 PASS attack:7>4:2,attack:6>1:1,attack:1>5:1,damage-number
+seed=11 t= 1.1 board1x= 9590 board2x= 38360 display1x= 9609 PASS attack:6>1:2,attack:1>5:2,damage-number
+seed=11 t= 1.2 board1x= 7309 board2x= 29236 display1x= 7323 PASS attack:6>1:3,attack:1>5:3,attack:5>1:0,damage-number
+  isolated attack 5>1: 918px / 3672px (1x / 2x)
+seed=11 t= 1.3 board1x= 6302 board2x= 25208 display1x= 6311 PASS attack:5>1:1,damage-number
+seed=11 t= 1.4 board1x= 5644 board2x= 22576 display1x= 5665 PASS attack:5>1:2,attack:0>7:0,damage-number
+  isolated attack 0>7: 854px / 3416px (1x / 2x)
+seed=11 t= 1.5 board1x= 6028 board2x= 24112 display1x= 6049 PASS attack:5>1:3,attack:0>7:1,attack:3>5:0,damage-number
+  isolated attack 3>5: 853px / 3412px (1x / 2x)
+seed=11 t= 1.6 board1x= 7330 board2x= 29320 display1x= 7344 PASS attack:0>7:2,attack:8>0:0,attack:3>5:1,damage-number
+  isolated attack 8>0: 907px / 3628px (1x / 2x)
+seed=11 t= 1.7 board1x= 6632 board2x= 26528 display1x= 6650 PASS attack:0>7:3,attack:7>4:0,attack:8>0:1,attack:3>5:2,damage-number
+  isolated attack 7>4: 778px / 3112px (1x / 2x)
+seed=11 t= 1.8 board1x= 6736 board2x= 26944 display1x= 6752 PASS attack:7>4:1,attack:8>0:2,attack:3>5:3,damage-number
+seed=11 t= 1.9 board1x= 6578 board2x= 26312 display1x= 6584 PASS attack:7>4:2,attack:8>0:3,attack:4>7:0,damage-number
+  isolated attack 4>7: 811px / 3244px (1x / 2x)
+seed=11 t= 2.0 board1x= 6381 board2x= 25524 display1x= 6405 PASS attack:6>1:0,attack:4>7:1,damage-number
+  isolated attack 6>1: 810px / 3240px (1x / 2x)
+seed=11 t= 2.1 board1x= 6267 board2x= 25068 display1x= 6286 PASS attack:6>1:1,attack:4>7:2,attack:9>4:0,damage-number
+  isolated attack 9>4: 763px / 3052px (1x / 2x)
+seed=11 t= 2.2 board1x=54908 board2x=219632 display1x=54922 PASS attack:6>1:2,attack:4>7:3,attack:9>4:1,death:7:0,damage-number
+seed=11 t= 2.3 board1x=54890 board2x=219560 display1x=54899 PASS attack:6>1:3,attack:1>5:0,attack:9>4:2,death:7:1,damage-number
+  isolated attack 1>5: 793px / 3172px (1x / 2x)
+seed=11 t= 2.4 board1x= 4112 board2x= 16448 display1x= 4133 PASS attack:1>5:1,death:7:2,damage-number
+seed=11 t= 2.5 board1x= 5608 board2x= 22432 display1x= 5629 PASS attack:1>5:2,attack:5>1:0,death:7:3,damage-number
+  isolated attack 5>1: 865px / 3460px (1x / 2x)
+seed=11 t= 2.6 board1x= 7076 board2x= 28304 display1x= 7090 PASS attack:1>5:3,attack:5>1:1,attack:7>4:0,damage-number
+  isolated attack 7>4: 770px / 3080px (1x / 2x)
+seed=11 t= 2.7 board1x= 6252 board2x= 25008 display1x= 6270 PASS attack:5>1:2,attack:7>4:1,damage-number
+seed=11 t= 2.8 board1x= 7232 board2x= 28928 display1x= 7248 PASS attack:5>1:3,attack:7>4:2,attack:8>0:0,damage-number
+  isolated attack 8>0: 904px / 3616px (1x / 2x)
+seed=11 t= 2.9 board1x= 5173 board2x= 20692 display1x= 5179 PASS attack:8>0:1,damage-number
+seed=11 t= 3.0 board1x= 4159 board2x= 16636 display1x= 4178 PASS attack:8>0:2,damage-number
+seed=11 t= 3.1 board1x= 7024 board2x= 28096 display1x= 7043 PASS attack:6>1:0,attack:8>0:3,attack:3>5:0,damage-number
+  isolated attack 6>1: 807px / 3228px (1x / 2x)
+  isolated attack 3>5: 858px / 3432px (1x / 2x)
+seed=11 t= 3.2 board1x= 6664 board2x= 26656 display1x= 6678 PASS attack:6>1:1,attack:3>5:1,damage-number
+seed=11 t= 3.3 board1x= 5254 board2x= 21016 display1x= 5263 PASS attack:6>1:2,attack:3>5:2,damage-number
+seed=11 t= 3.4 board1x= 5444 board2x= 21776 display1x= 5465 PASS attack:6>1:3,attack:3>5:3,attack:4>5:0,damage-number
+  isolated attack 4>5: 773px / 3092px (1x / 2x)
+seed=11 t= 3.5 board1x=55148 board2x=220592 display1x=55169 PASS attack:2>5:0,attack:4>5:1,death:1:0,damage-number
+  isolated attack 2>5: 842px / 3368px (1x / 2x)
+seed=11 t= 3.6 board1x=55124 board2x=220496 display1x=55138 PASS attack:2>5:1,attack:4>5:2,death:1:1,damage-number
+seed=11 t= 3.7 board1x= 5445 board2x= 21780 display1x= 5463 PASS attack:2>5:2,attack:1>5:0,attack:4>5:3,attack:9>4:0,death:1:2,damage-number
+  isolated attack 1>5: 787px / 3148px (1x / 2x)
+  isolated attack 9>4: 765px / 3060px (1x / 2x)
+seed=11 t= 3.8 board1x= 6582 board2x= 26328 display1x= 6598 PASS attack:2>5:3,attack:1>5:1,attack:9>4:1,attack:0>8:0,death:1:3,damage-number
+  isolated attack 0>8: 703px / 2812px (1x / 2x)
+seed=11 t= 3.9 board1x= 5067 board2x= 20268 display1x= 5073 PASS attack:1>5:2,attack:9>4:2,attack:0>8:1,damage-number
+seed=11 t= 4.0 board1x= 5185 board2x= 20740 display1x= 5216 PASS attack:1>5:3,attack:0>8:2,attack:8>0:0,damage-number
+  isolated attack 8>0: 912px / 3648px (1x / 2x)
+seed=11 t= 4.1 board1x= 4773 board2x= 19092 display1x= 4792 PASS attack:0>8:3,attack:8>0:1,damage-number
+seed=11 t= 4.2 board1x= 3577 board2x= 14308 display1x= 3591 PASS attack:8>0:2,damage-number
+seed=11 t= 4.3 board1x= 3520 board2x= 14080 display1x= 3529 PASS attack:8>0:3,damage-number
+seed=11 t= 4.4 board1x= 2534 board2x= 10136 display1x= 2555 PASS damage-number
+seed=11 t= 4.5 board1x= 1779 board2x=  7116 display1x= 1800 PASS damage-number
+seed=11 t= 4.6 board1x= 2832 board2x= 11328 display1x= 2846 PASS death:5:0,damage-number
+seed=11 t= 4.7 board1x= 4700 board2x= 18800 display1x= 4718 PASS death:5:1,damage-number
+seed=11 t= 4.8 board1x= 5455 board2x= 21820 display1x= 5471 PASS death:5:2,damage-number
+seed=11 t= 4.9 board1x= 4759 board2x= 19036 display1x= 4765 PASS death:5:3,damage-number
+seed=11 t= 5.0 board1x= 5941 board2x= 23764 display1x= 5972 PASS attack:0>8:0,attack:4>9:0,damage-number
+  isolated attack 0>8: 703px / 2812px (1x / 2x)
+  isolated attack 4>9: 737px / 2948px (1x / 2x)
+seed=11 t= 5.1 board1x= 6446 board2x= 25784 display1x= 6465 PASS attack:6>3:0,attack:5>2:0,attack:0>8:1,attack:4>9:1,damage-number
+  isolated attack 6>3: 765px / 3060px (1x / 2x)
+  isolated attack 5>2: 770px / 3080px (1x / 2x)
+seed=11 t= 5.2 board1x= 8377 board2x= 33508 display1x= 8391 PASS attack:6>3:1,attack:5>2:1,attack:0>8:2,attack:4>9:2,attack:8>0:0,damage-number
+  isolated attack 8>0: 910px / 3640px (1x / 2x)
+seed=11 t= 5.3 board1x= 8717 board2x= 34868 display1x= 8726 PASS attack:6>3:2,attack:5>2:2,attack:0>8:3,attack:8>0:1,attack:9>4:0,damage-number
+  isolated attack 9>4: 771px / 3084px (1x / 2x)
+seed=11 t= 5.4 board1x= 6739 board2x= 26956 display1x= 6760 PASS attack:5>2:3,attack:8>0:2,attack:9>4:1,damage-number
+seed=11 t= 5.5 board1x= 4686 board2x= 18744 display1x= 4707 PASS attack:8>0:3,attack:9>4:2,damage-number
+seed=11 t= 5.6 board1x= 4623 board2x= 18492 display1x= 4637 PASS damage-number
+seed=11 t= 5.7 board1x= 3402 board2x= 13608 display1x= 3420 PASS full:6,damage-number
+seed=11 t= 5.8 board1x= 3371 board2x= 13484 display1x= 3387 PASS full:6,damage-number
+seed=11 t= 5.9 board1x= 3146 board2x= 12584 display1x= 3152 PASS full:6,damage-number
+seed=11 t= 6.0 board1x= 3781 board2x= 15124 display1x= 3805 PASS full:6,damage-number
+seed=11 t= 6.1 board1x= 3883 board2x= 15532 display1x= 3902 PASS full:0,full:6,damage-number
+seed=11 t= 6.2 board1x= 5668 board2x= 22672 display1x= 5682 PASS attack:6>3:0,attack:0>8:0,full:0,full:6
+  isolated attack 6>3: 765px / 3060px (1x / 2x)
+  isolated attack 0>8: 703px / 2812px (1x / 2x)
+seed=11 t= 6.3 board1x= 6641 board2x= 26564 display1x= 6650 PASS attack:6>3:1,attack:0>8:1,attack:3>6:0,full:0,full:6,damage-number
+  isolated attack 3>6: 856px / 3424px (1x / 2x)
+seed=11 t= 6.4 board1x= 7126 board2x= 28504 display1x= 7147 PASS attack:6>3:2,attack:0>8:2,attack:8>0:0,attack:3>6:1,full:0,full:6,damage-number
+  isolated attack 8>0: 910px / 3640px (1x / 2x)
+seed=11 t= 6.5 board1x= 6802 board2x= 27208 display1x= 6823 PASS attack:0>8:3,attack:8>0:1,attack:4>9:0,attack:3>6:2,full:0,full:6,damage-number
+  isolated attack 4>9: 773px / 3092px (1x / 2x)
+seed=11 t= 6.6 board1x= 6130 board2x= 24520 display1x= 6144 PASS attack:8>0:2,attack:4>9:1,attack:3>6:3,full:0,full:4,full:6,damage-number
+seed=11 t= 6.7 board1x= 5477 board2x= 21908 display1x= 5495 PASS attack:8>0:3,attack:4>9:2,full:0,full:4,full:6,damage-number
+seed=11 t= 6.8 board1x= 5030 board2x= 20120 display1x= 5046 PASS attack:2>6:0,full:0,full:4,charge:6,damage-number
+  isolated attack 2>6: 868px / 3472px (1x / 2x)
+seed=11 t= 6.9 board1x= 4088 board2x= 16352 display1x= 4094 PASS [cutin-covered] attack:2>6:1,attack:9>4:0,full:0,full:4,charge:6,damage-number
+  isolated attack 9>4: 771px / 3084px (1x / 2x)
+seed=11 t= 7.0 board1x= 3975 board2x= 15900 display1x= 4003 PASS [cutin-covered] attack:2>6:2,attack:9>4:1,full:0,full:4,charge:6,full:8,damage-number
+seed=11 t= 7.1 board1x= 4633 board2x= 18532 display1x= 5344 PASS [cutin-covered] attack:2>6:3,attack:9>4:2,full:0,full:4,charge:6,full:8,damage-number
+seed=11 t= 7.2 board1x=57020 board2x=228080 display1x=57034 PASS [cutin-covered] land:6>3:0,full:0,full:4,charge:6,full:8,shake:+2,damage-number
+seed=11 t= 7.3 board1x=57433 board2x=229732 display1x=57458 PASS land:6>3:1,death:0:0,full:4,full:8,shake:-2,damage-number
+  isolated land 6>3: 57600px / 230400px (1x / 2x)
+seed=11 t= 7.4 board1x=14087 board2x= 56348 display1x=14108 PASS attack:0>8:0,land:6>3:2,death:0:1,full:4,full:8,damage-number
+  isolated attack 0>8: 700px / 2800px (1x / 2x)
+seed=11 t= 7.5 board1x= 3866 board2x= 15464 display1x= 3887 PASS attack:0>8:1,land:6>3:3,death:0:2,full:4,full:8,damage-number
+seed=11 t= 7.6 board1x= 4827 board2x= 19308 display1x= 4857 PASS attack:0>8:2,land:6>3:4,death:0:3,full:4,full:8,damage-number
+seed=11 t= 7.7 board1x= 5200 board2x= 20800 display1x= 5218 PASS attack:0>8:3,land:6>3:5,full:4,full:8,full:9,damage-number
+seed=11 t= 7.8 board1x= 4821 board2x= 19284 display1x= 4853 PASS full:3,full:4,full:8,full:9,damage-number
+seed=11 t= 7.9 board1x= 5036 board2x= 20144 display1x= 5042 PASS attack:3>6:0,full:3,full:4,full:8,full:9,damage-number
+  isolated attack 3>6: 856px / 3424px (1x / 2x)
+seed=11 t= 8.0 board1x= 5286 board2x= 21144 display1x= 5312 PASS attack:4>9:0,attack:3>6:1,full:3,full:4,full:8,full:9,damage-number
+  isolated attack 4>9: 775px / 3100px (1x / 2x)
+seed=11 t= 8.1 board1x= 4750 board2x= 19000 display1x= 4785 PASS attack:4>9:1,attack:3>6:2,full:3,full:4,full:8,full:9,damage-number
+seed=11 t= 8.2 board1x= 4710 board2x= 18840 display1x= 4724 PASS attack:4>9:2,attack:3>6:3,full:3,full:4,full:8,full:9,damage-number
+seed=11 t= 8.3 board1x= 5142 board2x= 20568 display1x= 5167 PASS full:3,full:4,full:8,full:9,damage-number
+seed=11 t= 8.4 board1x= 3512 board2x= 14048 display1x= 3533 PASS attack:6>3:0,full:3,full:4,full:8,full:9,damage-number
+  isolated attack 6>3: 767px / 3068px (1x / 2x)
+seed=11 t= 8.5 board1x= 6228 board2x= 24912 display1x= 6249 PASS attack:6>3:1,attack:2>6:0,attack:9>4:0,full:3,full:4,full:8,full:9,damage-number
+  isolated attack 2>6: 919px / 3676px (1x / 2x)
+  isolated attack 9>4: 763px / 3052px (1x / 2x)
+seed=11 t= 8.6 board1x= 6897 board2x= 27588 display1x= 6927 PASS attack:6>3:2,attack:2>6:1,attack:9>4:1,full:3,full:4,full:8,full:9,damage-number
+seed=11 t= 8.7 board1x= 5105 board2x= 20420 display1x= 5123 PASS attack:2>6:2,attack:9>4:2,full:3,full:4,full:8,full:9,damage-number
+seed=11 t= 8.8 board1x= 3161 board2x= 12644 display1x= 3193 PASS attack:2>6:3,full:3,full:4,full:8,full:9,damage-number
+seed=11 t= 8.9 board1x= 2636 board2x= 10544 display1x= 2642 PASS full:3,full:4,full:8,full:9,damage-number
+seed=11 t= 9.0 board1x= 3698 board2x= 14792 display1x= 3714 PASS death:3:0,full:4,full:8,full:9,damage-number
+seed=11 t= 9.1 board1x= 2690 board2x= 10760 display1x= 3385 PASS death:3:1,full:4,full:8,full:9,damage-number
+seed=11 t= 9.2 board1x= 2871 board2x= 11484 display1x= 2885 PASS death:3:2,charge:4,full:8,full:9,damage-number
+seed=11 t= 9.3 board1x= 3131 board2x= 12524 display1x= 3140 PASS [cutin-covered] death:3:3,death:4:0,charge:8,full:9,damage-number
+seed=11 t= 9.4 board1x= 3909 board2x= 15636 display1x= 3930 PASS [cutin-covered] death:4:1,charge:8,full:9
+seed=11 t= 9.5 board1x= 3241 board2x= 12964 display1x= 3262 PASS [cutin-covered] death:4:2,charge:8,full:9
+seed=11 t= 9.6 board1x=57060 board2x=228240 display1x=57764 PASS [cutin-covered] land:4>9:0,death:4:3,charge:8,full:9,shake:+2,damage-number
+seed=11 t= 9.7 board1x= 4902 board2x= 19608 display1x=65736 PASS [cutin-covered] land:4>9:1,land:8>4:0,charge:8,full:9,shake:+2,damage-number
+  isolated land 4>9: 57600px / 230400px (1x / 2x)
+seed=11 t= 9.8 board1x=57345 board2x=229380 display1x=19956 PASS land:4>9:2,land:8>4:1,death:2:0,charge:9,shake:-2,damage-number
+  isolated land 8>4: 57600px / 230400px (1x / 2x)
+seed=11 t= 9.9 board1x=13487 board2x= 53948 display1x=17434 PASS [cutin-covered] land:4>9:3,land:8>4:2,death:2:1,charge:9,damage-number
+seed=11 t=10.0 board1x= 5114 board2x= 20456 display1x=63108 PASS [cutin-covered] land:4>9:4,land:8>4:3,death:2:2,charge:9,damage-number
+seed=11 t=10.1 board1x= 5075 board2x= 20300 display1x= 6055 PASS [cutin-covered] land:4>9:5,land:8>4:4,death:2:3,charge:9,damage-number
+seed=11 t=10.2 board1x=57139 board2x=228556 display1x=57153 PASS [cutin-covered] attack:2>6:0,land:8>4:5,land:9>2:0,charge:9,shake:+2,damage-number
+  isolated attack 2>6: 866px / 3464px (1x / 2x)
+seed=11 t=10.3 board1x=57419 board2x=229676 display1x=66191 PASS attack:2>6:1,land:9>2:1,shake:-2,damage-number
+  isolated land 9>2: 57600px / 230400px (1x / 2x)
+seed=11 t=10.4 board1x=11742 board2x= 46968 display1x=13908 PASS attack:2>6:2,land:9>2:2,damage-number
+seed=11 t=10.5 board1x= 3695 board2x= 14780 display1x=63249 PASS attack:2>6:3,land:9>2:3,damage-number
+seed=11 t=10.6 board1x= 4176 board2x= 16704 display1x= 4206 PASS land:9>2:4,damage-number
+seed=11 t=10.7 board1x= 2685 board2x= 10740 display1x= 2703 PASS land:9>2:5,damage-number
+seed=11 t=10.8 board1x= 3065 board2x= 12260 display1x= 3097 PASS damage-number
+seed=11 t=10.9 board1x= 2613 board2x= 10452 display1x= 2619 PASS damage-number
+seed=11 t=11.0 board1x= 1582 board2x=  6328 display1x= 1611 PASS damage-number
+SUMMARY seed=11: {"opening": {"frames": 4, "min_1x": 5920, "max_1x": 54198, "isolated_min_1x": 54198}, "attack": {"frames": 73, "min_1x": 3161, "max_1x": 57419, "isolated_min_1x": 700}, "land": {"frames": 18, "min_1x": 2685, "max_1x": 57433, "isolated_min_1x": 57600}, "board_crowding": {"max_overlap_px": 0, "limit_px": 4, "checked_pairs": 684}, "meter_occlusion": {"checked_units": 831, "obscured_frames": 0, "max_consecutive_frames": 0, "limit_frames": 2}, "palette_purity": {"species_checked": 84, "sprites_checked": 588, "squash_phases": 7, "visible_pixels": 279865, "off_palette_pixels": 0, "partial_alpha_pixels": 0, "unquantized_box_off_palette_pixels": 233}, "scale_compare": {"species": 6, "source_px": 56, "samples": [{"size_px": 28, "zoom": 1, "diff_pixels": 0}, {"size_px": 28, "zoom": 4, "diff_pixels": 0}, {"size_px": 34, "zoom": 1, "diff_pixels": 0}, {"size_px": 34, "zoom": 4, "diff_pixels": 0}, {"size_px": 56, "zoom": 1, "diff_pixels": 0}, {"size_px": 56, "zoom": 4, "diff_pixels": 0}]}, "weather": {"samples": [{"weather": "rain", "frames": 81, "min_1x": 30070, "visual_only_min_1x": 29659, "threshold_1x": 1200, "off_palette_pixels": 0, "particles_per_frame": 8, "max_overlap_px": 0, "meter_checks": 679, "max_meter_occlusion_frames": 0}, {"weather": "sun", "frames": 86, "min_1x": 30472, "visual_only_min_1x": 28758, "threshold_1x": 1200, "off_palette_pixels": 0, "particles_per_frame": 8, "max_overlap_px": 0, "meter_checks": 777, "max_meter_occlusion_frames": 0}, {"weather": "sand", "frames": 87, "min_1x": 29626, "visual_only_min_1x": 29597, "threshold_1x": 1200, "off_palette_pixels": 0, "particles_per_frame": 8, "max_overlap_px": 0, "meter_checks": 780, "max_meter_occlusion_frames": 0}, {"weather": "hail", "frames": 92, "min_1x": 29653, "visual_only_min_1x": 29653, "threshold_1x": 1200, "off_palette_pixels": 0, "particles_per_frame": 8, "max_overlap_px": 0, "meter_checks": 764, "max_meter_occlusion_frames": 0}]}, "status": {"apply_events": 7, "checked_unit_frames": 18, "samples": [{"t": 0.1, "unit": 4, "kinds": ["flinch"], "icon_pixels": 7, "bounds": [97, 171, 103, 177]}, {"t": 3.2, "unit": 11, "kinds": ["flinch"], "icon_pixels": 7, "bounds": [217, 171, 223, 177]}, {"t": 4.7, "unit": 9, "kinds": ["flinch"], "icon_pixels": 7, "bounds": [97, 171, 103, 177]}, {"t": 5.6, "unit": 9, "kinds": ["flinch"], "icon_pixels": 7, "bounds": [97, 171, 103, 177]}, {"t": 6.2, "unit": 11, "kinds": ["flinch"], "icon_pixels": 7, "bounds": [217, 171, 223, 177]}], "max_overlap_px": 0, "max_meter_occlusion_frames": 0}, "status_contracts": {"kinds": ["burn", "poison", "paralysis", "freeze", "sleep", "flinch"], "frozen_frames": 4, "dot_numbers": 2, "palette_variants": 14}}
+PASS seed=11: 0 failures, 27.089s

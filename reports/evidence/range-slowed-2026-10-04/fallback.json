@@ -1,0 +1,229 @@
+{
+  "passed": true,
+  "samples": [
+    {
+      "species": 19,
+      "state": "idle",
+      "frames": 8,
+      "equal": true,
+      "before": "387f6bc1028456fb1fd84ced8cf22fe06e0efd8783f5baf6c16483ebaa76d3c7",
+      "after": "387f6bc1028456fb1fd84ced8cf22fe06e0efd8783f5baf6c16483ebaa76d3c7"
+    },
+    {
+      "species": 19,
+      "state": "walk",
+      "frames": 4,
+      "equal": true,
+      "before": "17cc24d4ee8e6b194cb357a9383e25ece82eb5546da95a7bf434c58a583d9331",
+      "after": "17cc24d4ee8e6b194cb357a9383e25ece82eb5546da95a7bf434c58a583d9331"
+    },
+    {
+      "species": 19,
+      "state": "windup",
+      "frames": 3,
+      "equal": true,
+      "before": "35dddd5ba2528344657619b713a7274f7cee2205760bcae8d79a520cc5ff2e2d",
+      "after": "35dddd5ba2528344657619b713a7274f7cee2205760bcae8d79a520cc5ff2e2d"
+    },
+    {
+      "species": 19,
+      "state": "strike",
+      "frames": 5,
+      "equal": true,
+      "before": "5450e73bbae80c21266d4e65fa2c0c52814daaa8310d592e351f8f0d44a2eaca",
+      "after": "5450e73bbae80c21266d4e65fa2c0c52814daaa8310d592e351f8f0d44a2eaca"
+    },
+    {
+      "species": 19,
+      "state": "hit",
+      "frames": 3,
+      "equal": true,
+      "before": "f0bf8799ceb44df8016c1e48245804e6e5a7265abefc4c50b4e2f469245fe8ee",
+      "after": "f0bf8799ceb44df8016c1e48245804e6e5a7265abefc4c50b4e2f469245fe8ee"
+    },
+    {
+      "species": 19,
+      "state": "death",
+      "frames": 6,
+      "equal": true,
+      "before": "94ae7cb453756aba26dc210a0c026b9f2f929fbb7efa8ed2191d43b744e2a3fe",
+      "after": "94ae7cb453756aba26dc210a0c026b9f2f929fbb7efa8ed2191d43b744e2a3fe"
+    },
+    {
+      "species": 19,
+      "state": "skill",
+      "frames": 10,
+      "equal": true,
+      "before": "c1f183d72bf6c2daa56e841837538a0e29977f2f131d1004ff8aa145426c24f3",
+      "after": "c1f183d72bf6c2daa56e841837538a0e29977f2f131d1004ff8aa145426c24f3"
+    },
+    {
+      "species": 22,
+      "state": "idle",
+      "frames": 8,
+      "equal": true,
+      "before": "a38d12e8e1ae2b2e5df9fea3b3b2707b2c57c5bdb5241688d2809a2051135f8d",
+      "after": "a38d12e8e1ae2b2e5df9fea3b3b2707b2c57c5bdb5241688d2809a2051135f8d"
+    },
+    {
+      "species": 22,
+      "state": "walk",
+      "frames": 4,
+      "equal": true,
+      "before": "2b52eda80a128f901707950fd9b05b093f1dcb0fd406826677ae4d646001e94d",
+      "after": "2b52eda80a128f901707950fd9b05b093f1dcb0fd406826677ae4d646001e94d"
+    },
+    {
+      "species": 22,
+      "state": "windup",
+      "frames": 3,
+      "equal": true,
+      "before": "492725576e3bf41c6c3a50fd4b07dd8234837f46472adcc1366f91f06b2a481d",
+      "after": "492725576e3bf41c6c3a50fd4b07dd8234837f46472adcc1366f91f06b2a481d"
+    },
+    {
+      "species": 22,
+      "state": "strike",
+      "frames": 5,
+      "equal": true,
+      "before": "09f975de4c1881d8e562fcfd11f0dc7b4eea9e8ad6a1dab576700fdac11ed099",
+      "after": "09f975de4c1881d8e562fcfd11f0dc7b4eea9e8ad6a1dab576700fdac11ed099"
+    },
+    {
+      "species": 22,
+      "state": "hit",
+      "frames": 3,
+      "equal": true,
+      "before": "872ceefe3a280f0c4e2cc6200ae37830dab9b0e1f6a29a6a43e83f56ce9019c9",
+      "after": "872ceefe3a280f0c4e2cc6200ae37830dab9b0e1f6a29a6a43e83f56ce9019c9"
+    },
+    {
+      "species": 22,
+      "state": "death",
+      "frames": 6,
+      "equal": true,
+      "before": "35d76d59fd7f3841bad1c7ca072f8fd07c005b3eb543eeaea01c7bdd382b1e8e",
+      "after": "35d76d59fd7f3841bad1c7ca072f8fd07c005b3eb543eeaea01c7bdd382b1e8e"
+    },
+    {
+      "species": 22,
+      "state": "skill",
+      "frames": 10,
+      "equal": true,
+      "before": "ff6323ed14d1ca4f884702a084eb5daad5d08d49e8808d85e4c1f483a710e99e",
+      "after": "ff6323ed14d1ca4f884702a084eb5daad5d08d49e8808d85e4c1f483a710e99e"
+    },
+    {
+      "species": 45,
+      "state": "idle",
+      "frames": 8,
+      "equal": true,
+      "before": "ea41750c62b3f3b0cd2cdf615988441f08bb9b1bc2419f1f0b221ac42362a768",
+      "after": "ea41750c62b3f3b0cd2cdf615988441f08bb9b1bc2419f1f0b221ac42362a768"
+    },
+    {
+      "species": 45,
+      "state": "walk",
+      "frames": 4,
+      "equal": true,
+      "before": "3d3aa2424d6054f9919b97284022e6c1ad45eacbb210c2ad5e1e32b96957a3fc",
+      "after": "3d3aa2424d6054f9919b97284022e6c1ad45eacbb210c2ad5e1e32b96957a3fc"
+    },
+    {
+      "species": 45,
+      "state": "windup",
+      "frames": 3,
+      "equal": true,
+      "before": "d4c8a1231e31c646a03619f88568618527f85fce58270c3c41f876eba558c836",
+      "after": "d4c8a1231e31c646a03619f88568618527f85fce58270c3c41f876eba558c836"
+    },
+    {
+      "species": 45,
+      "state": "strike",
+      "frames": 5,
+      "equal": true,
+      "before": "36101184bd6dbbf661ce2f7779da308b11c5e32986085e5429e013253c10c233",
+      "after": "36101184bd6dbbf661ce2f7779da308b11c5e32986085e5429e013253c10c233"
+    },
+    {
+      "species": 45,
+      "state": "hit",
+      "frames": 3,
+      "equal": true,
+      "before": "8fb3eb3e6a4eb1c44f56505f6b6a8b3816a212748ad6b7a9cc631f4d265656ec",
+      "after": "8fb3eb3e6a4eb1c44f56505f6b6a8b3816a212748ad6b7a9cc631f4d265656ec"
+    },
+    {
+      "species": 45,
+      "state": "death",
+      "frames": 6,
+      "equal": true,
+      "before": "65be90531eba338ee6eafc8d1eb9c617e1ccaa90faa6a049d67558565fd04317",
+      "after": "65be90531eba338ee6eafc8d1eb9c617e1ccaa90faa6a049d67558565fd04317"
+    },
+    {
+      "species": 45,
+      "state": "skill",
+      "frames": 10,
+      "equal": true,
+      "before": "14b8627c8cf406520ed15f288a24c0d80c30f21a5b898ad32555dda93870260d",
+      "after": "14b8627c8cf406520ed15f288a24c0d80c30f21a5b898ad32555dda93870260d"
+    },
+    {
+      "species": 134,
+      "state": "idle",
+      "frames": 8,
+      "equal": true,
+      "before": "7acc328674284f08136e43b1f07c87d57b640bfc4461eee9a794aa68da7b82ae",
+      "after": "7acc328674284f08136e43b1f07c87d57b640bfc4461eee9a794aa68da7b82ae"
+    },
+    {
+      "species": 134,
+      "state": "walk",
+      "frames": 4,
+      "equal": true,
+      "before": "5679e48db843cdeac7e2b5229ebb5c58f8bd48cfb5907948d66c12624d364ccc",
+      "after": "5679e48db843cdeac7e2b5229ebb5c58f8bd48cfb5907948d66c12624d364ccc"
+    },
+    {
+      "species": 134,
+      "state": "windup",
+      "frames": 3,
+      "equal": true,
+      "before": "ec8ae86dfbcbd14a3bdfaefc21d3126568dcb4d6dee4824a5e18c60a7f649592",
+      "after": "ec8ae86dfbcbd14a3bdfaefc21d3126568dcb4d6dee4824a5e18c60a7f649592"
+    },
+    {
+      "species": 134,
+      "state": "strike",
+      "frames": 5,
+      "equal": true,
+      "before": "1e5c538d3d01e8f7b6e67a8d6f44cbdfbff040e99a662645e50e4d6b9d336a04",
+      "after": "1e5c538d3d01e8f7b6e67a8d6f44cbdfbff040e99a662645e50e4d6b9d336a04"
+    },
+    {
+      "species": 134,
+      "state": "hit",
+      "frames": 3,
+      "equal": true,
+      "before": "06f20cdf525731c9d648ab788c5346b985e1c63e06c45d6d46391c087b9568df",
+      "after": "06f20cdf525731c9d648ab788c5346b985e1c63e06c45d6d46391c087b9568df"
+    },
+    {
+      "species": 134,
+      "state": "death",
+      "frames": 6,
+      "equal": true,
+      "before": "29c6b77a16f364dfb952909f1fd5300236124cce8c597ff0f4adb3816810d2d7",
+      "after": "29c6b77a16f364dfb952909f1fd5300236124cce8c597ff0f4adb3816810d2d7"
+    },
+    {
+      "species": 134,
+      "state": "skill",
+      "frames": 10,
+      "equal": true,
+      "before": "a5445dc9eeb92bef592ebf4d509a62205b6ca166ec4cb7fe5b979d9a9e1660de",
+      "after": "a5445dc9eeb92bef592ebf4d509a62205b6ca166ec4cb7fe5b979d9a9e1660de"
+    }
+  ]
+}

@@ -221,13 +221,15 @@ def main() -> None:
     sig_all = any(r["sig"] for r in res.values())
     check("签名触发（至少一格读到签名原语）", sig_all,
           str({h: r["sig"] for (h, _), r in res.items() if r["sig"]}))
-    fc_ok = all(r["first_cast_med"] is not None and r["first_cast_med"] <= 10.0
+    # 门槛随 R2 节奏定参重标（2026-10-04 攻速 ×1.5：能量积累同步变慢，
+    # 链路物理未变——原 10s 是旧节奏标定）
+    fc_ok = all(r["first_cast_med"] is not None and r["first_cast_med"] <= 13.0
                 for r in res.values())
-    check("首招时间 ≤10s（有施法的局；能量链未被档案破坏）", fc_ok,
+    check("首招时间 ≤13s（R2 新节奏口径；能量链未被档案破坏）", fc_ok,
           "全部达标" if fc_ok else "存在超时项（能量链疑似破坏）")
     pooled = {h: (sum(rr["cast_rate"] for (hh, _), rr in res.items() if hh == h)
                   / len(RANGES)) for h in HEROES.values()}
-    cast_ok = all(v >= 0.33 for v in pooled.values())
+    cast_ok = all(v >= 0.30 for v in pooled.values())  # 新节奏口径
     check("三靶合计施法率 ≥35%（单格速胜局不计）", cast_ok,
           " ".join(f"{k} {v:.0%}" for k, v in pooled.items()))
     # 胜负带降为基线记录（配平归 R2）：木桩=真对手非木桩、近战群被

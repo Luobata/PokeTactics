@@ -46,7 +46,7 @@ from render_mockups import (  # noqa: E402
 )
 from profile_vfx import SIGNATURES, PlaybackClock, gait_profile, pose_sprite
 from skill_vfx import skill_profile, cast_windup, draw_skill
-from motion import MotionSystem, Pose, species_motion, windup as motion_windup, offsets, transform
+from motion import MotionSystem, Pose, species_motion, windup as motion_windup, duration as motion_duration, offsets, transform
 from pixel_vfx import (trajectory_point, projectile, impact_star, impact_rim,
                        light, debris, hit_sprite, feather_flash, number_rise, exposure_age)
 from combat import Battle  # noqa: E402
@@ -486,10 +486,12 @@ class AnimUnit:
         return (t - self.move_t0) / MOVE_SMOOTH
 
     def visible(self, t: float) -> bool:
-        """Four death frames followed by 0.2s sinking/fade, unless the cell is reused."""
+        """Keep authored death visible for its full retimed sinking/dissolve."""
         if self.die_t is None:
             return True
-        return t <= self.die_t + 6 * FPS_DT
+        sid = self.u.piece.species_id
+        length = motion_duration(sid, 'death') if sid in species_motion else 6 * FPS_DT
+        return t <= self.die_t + length
 
     def dying(self, t: float) -> bool:
         return self.die_t is not None and t >= self.die_t
@@ -680,6 +682,9 @@ class BattleAnimation:
             sid = self.units[ev[2]].u.piece.species_id
             prep = motion_windup(sid) if sid in species_motion else FPS_DT
             age, duration = T - ev[0] - prep, self._attack_delay(ev) - prep
+            # 1.4 - 1.0 - .4 can be slightly negative at the authored launch.
+            if sid in species_motion and -1e-8 < age < 0:
+                age = 0.
             if not 0 <= age < duration or self._projectile_cancelled(ev):
                 continue
             source = self.units[ev[2]]
@@ -887,7 +892,8 @@ class BattleAnimation:
         return [ev for ev in self.events[:self._cursor]
                 if ev[1] == "attack" and ev[4] > 0
                 and not self._projectile_cancelled(ev)
-                and 0 <= effect_frame(T - ev[0] - self._attack_delay(ev)) < 3]
+                and 0 <= effect_frame(T - ev[0] - self._attack_delay(ev)) <
+                (4 if self.units[ev[3]].u.piece.species_id in species_motion else 3)]
 
     def _unit_pose(self, au, T):
         """绘制坐标供精灵、特效和最后一层状态条共用，不写回单位。"""

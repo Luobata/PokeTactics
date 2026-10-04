@@ -116,6 +116,7 @@ async function loadClip(c, token, controller) {
 }
 async function selectClip(n) {
   selected = n;
+  scheduleTick();
   index = 0;
   active = null;
   const token = ++generation;
@@ -159,6 +160,11 @@ function seek(n) {
   controls();
   if (active) present();
 }
+let playbackTimer;
+function scheduleTick() {
+  clearInterval(playbackTimer);
+  playbackTimer = setInterval(tick, clips[selected]?.frame_duration_ms || 100);
+}
 function tick() {
   if (running && active) {
     index = (index + 1) % clips[selected].frames;
@@ -196,4 +202,4 @@ fetch('manifest.json', {cache: 'no-store'}).then(response => {
   $('label').textContent = '清单载入失败';
   $('info').textContent = '请在仓库目录运行 python3 -m http.server 后打开本页。 ' + e.message;
 });
-setInterval(tick, 100);
+scheduleTick();

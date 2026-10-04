@@ -1,0 +1,29 @@
+{
+  "baseline": "968f42f",
+  "head_at_validation": "968f42f6db7cdcd105d104de05c58559ed6ad184",
+  "modified_code_sha256": {
+    "tools/mockups/motion.py": "23cbe037c4ee277160b3ecdb0399c2321b9308502520098f1048cbdcbf1dbd22",
+    "tools/mockups/render_battle_gif.py": "6450f5a367151e596fae982142c8b93bc7774f43667d1c5b2b603ab7c2097688",
+    "tools/mockups/skill_vfx.py": "0bf9920f1db23110d1ae7c1865f685c158db7d70988133986df5a180d16e8e24",
+    "tools/mockups/per_unit_evidence.py": "2b7d098f47f0b4ad9cae11e948c4726ea3f80f10e37c603678f974f9baf0a111",
+    "tools/mockups/range_viewer.js": "95b6abdbef3c5e138c3b516645bfe82ff61ac5cda296877ff2017ab0c480c261",
+    "tools/mockups/range_viewer_check.cjs": "ee4c0cb1ed82f8906a9dcaef7a2a39275050ebbe1ac670e6b3fd7a7671355126",
+    "tools/mockups/slowed_animation_check.py": "1e32a52faf59979b16e491c60bac2f144e626bdf90cb98035270d7e0289fa7fa"
+  },
+  "checks": {
+    "contracts": true,
+    "fallback": true,
+    "hard-contracts": true,
+    "retiming-contracts": true,
+    "artifact-audit": true,
+    "viewer-equivalent": true
+  },
+  "fx_failures": {
+    "7": 0,
+    "11": 0
+  },
+  "deterministic_clips": 336,
+  "frames": 3636,
+  "comparison_groups": 4,
+  "scope": "This task wrote only tools/mockups/** and reports/**. Concurrent mainline changes are excluded."
+}

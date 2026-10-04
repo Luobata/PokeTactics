@@ -11,7 +11,8 @@ const crypto = require('node:crypto');
 const {createCanvas, loadImage} = require('@napi-rs/canvas');
 const {PNG} = require('pngjs');
 const ROOT = path.resolve(__dirname, '../..');
-const OUT = path.join(ROOT, 'reports/evidence/blank-frames-2026-10-04/viewer-equivalent.json');
+const pages = process.argv.length > 2 ? process.argv.slice(2) : ['range-slowed-2026-10-04'];
+const OUT = path.join(ROOT, 'reports/evidence', pages[0], 'viewer-equivalent.json');
 const hash = b => crypto.createHash('sha256').update(b).digest('hex');
 const yieldIO = () => new Promise(resolve => setImmediate(resolve));
 async function until(fn) {
@@ -30,11 +31,12 @@ function setup(page) {
   el.frame = stage;
   const io = {mode: 'normal', requests: 0, inFlight: 0, peak: 0, blocked: [], failedAttempts: 0};
   const deadlines = new Map(), requestsInProgress = new Set();
-  let nextTimer = 1, tick;
+  let nextTimer = 1, tick, intervalMs;
   const sandbox = {
     console, AbortController, DOMException,
     document: {getElementById: id => el[id], createElement: tag => tag === 'canvas' ? createCanvas(1,1) : {}},
-    setInterval: fn => { tick = fn; return 1; },
+    setInterval: (fn, ms) => { tick = fn; intervalMs = ms; return 1; },
+    clearInterval: () => {},
     setTimeout: (fn, ms) => { const id = nextTimer++; deadlines.set(id, {fn,ms}); return id; },
     clearTimeout: id => deadlines.delete(id),
     fetch: async (url, opts = {}) => {
@@ -67,7 +69,7 @@ function setup(page) {
   };
   vm.createContext(sandbox);
   vm.runInContext(source, sandbox, {filename:page+'/index.html'});
-  return {dir, el, stage, io, deadlines, eval:s => vm.runInContext(s,sandbox), tick:()=>tick()};
+  return {dir, el, stage, io, deadlines, eval:s => vm.runInContext(s,sandbox), tick:()=>tick(), cadence:()=>intervalMs};
 }
 function pixels(h) { return h.stage.getContext('2d').getImageData(0,0,240,320).data; }
 function expected(h, c, n) {
@@ -149,7 +151,7 @@ async function faults(h, clips) {
 (async () => {
   const result = {kind:'native-canvas-exact-viewer-script; virtual timers; local PNG IO',browser_executed:false,
     viewer_sha256:hash(fs.readFileSync(path.join(__dirname,'range_viewer.js'))),pages:[],playback_ticks:0,seek_checks:0,blank_ticks:0,pixel_mismatches:0,passed:false};
-  for (const page of ['per-unit-2026-10-04','range-refined-2026-10-04']) {
+  for (const page of pages) {
     const h = setup(page);
     await until(() => h.stage.dataset.status === 'ready');
     h.eval('running=false');
@@ -159,6 +161,7 @@ async function faults(h, clips) {
       await select(h,n);
       const c = clips[n], digests = Array.from({length:c.frames},(_,i)=>expected(h,c,i));
       verify(h,digests[0]);
+      assert.equal(h.cadence(), c.frame_duration_ms || 100, 'timer matches clip cadence');
       const requests = h.io.requests;
       h.eval('running=true');
       for(let j=1;j<=c.frames*2;j++) {h.tick();verify(h,digests[j%c.frames]);result.playback_ticks++;}

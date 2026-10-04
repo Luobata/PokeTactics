@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "failures": [],
+  "authored_frames_checked": 1015,
+  "key_pose_pixel_checks": 601,
+  "internal_gap_pixels": 0,
+  "empty_cels": 0,
+  "off_palette_pixels": 0,
+  "dissolve_masks_preserved": 198,
+  "idle_key_cycle_mean_seconds": 0.65,
+  "baseline": "968f42f"
+}

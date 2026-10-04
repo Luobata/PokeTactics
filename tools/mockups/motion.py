@@ -1,4 +1,4 @@
-"""Authored 10 Hz single-cel animation. No simulation state is mutated.
+"""Authored single-cel animation: 10 Hz idle, 20 Hz retimed actions. No simulation state is mutated.
 
 Frames are (forward_px, down_px, scale_x_percent, scale_y_percent,
 clockwise_degrees, dissolve_quarters). Local rigs move integer source slices;
@@ -142,6 +142,46 @@ species_motion = {
  'death': [(0,-1,99,101,-5,0),(-1,-2,97,99,-10,1),(-1,-3,95,97,-15,1),(-1,-4,93,95,-20,2),(-1,-5,91,93,-25,3),(-1,-6,89,91,-30,3)]},
 }
 
+# Retiming preserves the authored keys, amplitude and order. Insert integer
+# in-betweens at 20 Hz; keep dissolve discrete and hold the last non-loop key.
+# RIG_PHASES retain the original local-part phase instead of speeding up wings
+# and tails when the whole-body sequence gains frames.
+KEYFRAMES = {sid: {state: tuple(frames) for state, frames in states.items()}
+             for sid, states in species_motion.items()}
+SLOWDOWN = {'walk': 1.5, 'windup': 1.3, 'strike': 1.3,
+            'recover': 1.3, 'hit': 4/3, 'death': 1.25}
+RIG_PHASES = {}
+for _sid, _states in species_motion.items():
+    RIG_PHASES[_sid] = {}
+    for _state, _keys in KEYFRAMES[_sid].items():
+        if _state == 'idle':
+            RIG_PHASES[_sid][_state] = tuple(range(len(_keys)))
+            continue
+        _count = round(len(_keys) * 2 * SLOWDOWN[_state])
+        _frames, _phases = [], []
+        for _i, _key in enumerate(_keys):
+            _steps = round((_i+1)*_count/len(_keys)) - round(_i*_count/len(_keys))
+            _next = (_i+1) % len(_keys) if _state == 'walk' else min(_i+1, len(_keys)-1)
+            for _j in range(_steps):
+                _mix = _j / _steps
+                _frames.append(tuple(round(a+(b-a)*_mix) for a,b in zip(_key[:5], _keys[_next][:5])) + (_key[5],))
+                _phases.append(_i + _mix if _next != _i else float(_i))
+        _states[_state] = _frames
+        RIG_PHASES[_sid][_state] = tuple(_phases)
+
+
+def frame_dt(state):
+    return .1 if state == 'idle' else .05
+
+
+def duration(sid, state):
+    return len(species_motion[sid][state]) * frame_dt(state)
+
+
+def rig_phase(sid, state, index):
+    return RIG_PHASES[sid][state][index]
+
+
 # Region cuts in percent of the occupied sprite, with a separate phase track.
 # Each tuple = (left, top, right, bottom, dx_track, dy_track). Crops are made
 # from the original cel. Internal attachments extend the nearest edge pixel;
@@ -177,12 +217,12 @@ class Pose:
 
 
 def windup(sid):
-    return len(species_motion[sid]['windup']) / 10
+    return duration(sid, 'windup')
 
 
 def sample(sid, state, age):
     frames = species_motion[sid][state]
-    index = max(0, math.floor((age + 1e-8) * 10))
+    index = max(0, math.floor((age + 1e-8) / frame_dt(state)))
     index = index % len(frames) if state in ('idle', 'walk') else min(index, len(frames)-1)
     return index, frames[index]
 
@@ -201,8 +241,8 @@ class MotionSystem:
             return None
         if 'freeze' in au.statuses and not au.dying(t):
             t = min(t, au.statuses['freeze'])
-        strike_length = len(species_motion[sid]['strike']) / 10
-        release_length = strike_length + len(species_motion[sid]['recover']) / 10
+        strike_length = duration(sid, 'strike')
+        release_length = strike_length + duration(sid, 'recover')
         state, age, direction = 'idle', t, (1. if au.u.team == 0 else -1., 0.)
         if au.dying(t):
             state, age = 'death', t - au.die_t
@@ -225,12 +265,12 @@ class MotionSystem:
             if onset is not None:
                 elapsed = t-onset
                 if elapsed < prep-1e-8:
-                    state, age = 'windup', min(elapsed, windup(sid)-.001)
+                    state, age = 'windup', min(elapsed * windup(sid) / prep, windup(sid)-.001)
                 elif elapsed < prep+strike_length-1e-8:
                     state, age = 'strike', elapsed-prep
                 else:
                     state, age = 'recover', elapsed-prep-strike_length
-            elif 0 <= t-au.move_t0 < len(species_motion[sid]['walk']) / 10:
+            elif 0 <= t-au.move_t0 < duration(sid, 'walk'):
                 state, age = 'walk', t-au.move_t0
         index, frame = sample(sid,state,age)
         hit, hit_dir = REST, direction
@@ -238,7 +278,7 @@ class MotionSystem:
             impacts = [(e[0]+anim._attack_delay(e), e[2]) for e in anim._recent_hits(t)
                        if e[3] == au.u.idx]
             impacts += [(c[1],c[2]) for c in anim.cutins
-                        if c[3] == au.u.idx and c[6] > 0 and 0 <= t-c[1] < .3]
+                        if c[3] == au.u.idx and c[6] > 0 and 0 <= t-c[1] < duration(sid, 'hit')]
             if impacts:
                 at, attacker = max(impacts)
                 _, hit = sample(sid,'hit',t-at)
@@ -255,7 +295,7 @@ def offsets(pose):
             f[1]+f[0]*pose.direction[1]+h[1]+h[0]*pose.hit_direction[1])
 
 
-def rig_cel(cel, sid, index):
+def rig_cel(cel, sid, index, next_index=None):
     """Translate parts with edge extrusion only at their internal attachments.
 
     The silhouette-facing edge is free to move. A vacated internal edge uses
@@ -269,7 +309,10 @@ def rig_cel(cel, sid, index):
     for left, top, right, bottom, xs, ys in RIGS[sid]:
         box = (left*w//100, top*h//100, right*w//100, bottom*h//100)
         tile = cel.crop(box)
-        dx, dy = xs[index % len(xs)], ys[index % len(ys)]
+        key = math.floor(index)
+        mix = index - key
+        dx, dy = (round(track[key % len(track)] * (1-mix) +
+                        track[(key+1 if next_index is None else next_index) % len(track)] * mix) for track in (xs, ys))
         out.paste((0, 0, 0, 0), box)
         # Extend only the strip exposed by translation at an internal cut.
         l = dx if dx > 0 and box[0] > 0 else 0
@@ -296,8 +339,10 @@ def transform(sprite, sid, pose):
         return sprite
     cel = sprite.crop(bounds)
     w,h = cel.size
-    rigged = rig_cel(cel, sid, pose.index)
-    if sid == 65 and pose.state in ('idle', 'windup') and pose.index % 4 in (1, 3):
+    phase = rig_phase(sid, pose.state, pose.index)
+    next_index = 0 if pose.state == 'walk' and math.floor(phase) == len(KEYFRAMES[sid]['walk'])-1 else None
+    rigged = rig_cel(cel, sid, phase, next_index)
+    if sid == 65 and pose.state in ('idle', 'windup') and math.floor(phase) % 4 in (1, 3):
         # Highlight the existing spoon pixels; do not add an external white blob.
         bright = max((c for c in cel.getdata() if c[3]), key=lambda c: sum(c[:3]))
         draw = ImageDraw.Draw(rigged)

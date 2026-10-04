@@ -1,0 +1,10 @@
+{
+  "commit": "968f42f",
+  "sha256": {
+    "motion": "4c9d376065827dc8c595e9e52f081b1c1b7c95446aa32f4ac907cb97a98f0f71",
+    "profile_vfx": "4b08f1feaa4babf9c3d3321f0e23d1506931c972c1730053317fe7150d9a3011",
+    "skill_vfx": "511e8e1cff1995e0a80cbf41707a249453689405d682ee93d153f99474222360",
+    "render_battle_gif": "a12135cc57fa9068d41d19cc27986d5b4e1c7b0f997a70b8222481bb3c2645e7",
+    "profile_range": "e94be4699acc4cf3c4df7e766a6f2ad9fa131d1a71da79990c64358642d3a546"
+  }
+}

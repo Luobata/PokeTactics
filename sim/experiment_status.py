@@ -229,6 +229,8 @@ import synergy as _syn
 _syn.SYNERGIES_ON = False  # 本报告基线建立于羁绊关（2026-09-14 起默认开）
 import profiles as _pf
 _pf.PROFILES_ON = False  # R1 单体档案（2026-09-15）：钉关保基线
+import combat as _cb
+_cb.ATTACK_INTERVAL_MULT = 1.0  # R2 节奏定参（2026-10-04）：钉回旧攻速保基线
 
 
 def main() -> None:

@@ -1,0 +1,56 @@
+{
+  "idle": {
+    "clips": 48,
+    "before_mean_seconds": 0.8500000000000001,
+    "after_mean_seconds": 0.8500000000000001,
+    "ratio": 1.0,
+    "before_frames": 408,
+    "after_frames": 408
+  },
+  "walk": {
+    "clips": 48,
+    "before_mean_seconds": 0.42500000000000004,
+    "after_mean_seconds": 0.6375,
+    "ratio": 1.4999999999999998,
+    "before_frames": 204,
+    "after_frames": 612
+  },
+  "windup": {
+    "clips": 48,
+    "before_mean_seconds": 0.3125,
+    "after_mean_seconds": 0.403125,
+    "ratio": 1.29,
+    "before_frames": 150,
+    "after_frames": 387
+  },
+  "strike": {
+    "clips": 48,
+    "before_mean_seconds": 0.50625,
+    "after_mean_seconds": 0.65625,
+    "ratio": 1.2962962962962963,
+    "before_frames": 243,
+    "after_frames": 630
+  },
+  "hit": {
+    "clips": 48,
+    "before_mean_seconds": 0.3,
+    "after_mean_seconds": 0.4,
+    "ratio": 1.3333333333333335,
+    "before_frames": 144,
+    "after_frames": 384
+  },
+  "death": {
+    "clips": 48,
+    "before_mean_seconds": 0.6,
+    "after_mean_seconds": 0.75,
+    "ratio": 1.25,
+    "before_frames": 288,
+    "after_frames": 720
+  },
+  "charge": {
+    "before_min": 0.2,
+    "before_max": 0.4,
+    "after_min": 0.4,
+    "after_max": 0.5
+  }
+}

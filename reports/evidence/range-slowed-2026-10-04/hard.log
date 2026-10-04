@@ -1,0 +1,3 @@
+/Users/bytedance/luobata/PokeTactics/tools/mockups/per_unit_evidence.py:377: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  for c in sprite.getdata():
+hard {'passed': True, 'failures': [], 'checked_cast_frames': 990, 'opaque_body_fx_overlap_pixels': 0, 'authored_motion_frames': 1015, 'off_palette_pixels': 0, 'partial_alpha_pixels': 0, 'sampled_board_fx_particle_peak': 50, 'saturated_budget': 192}

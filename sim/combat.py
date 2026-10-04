@@ -15,9 +15,10 @@
 """
 
 import random
-from data import (BASIC_POWER, ENERGY_MAX, ENERGY_PER_ATTACK,
-                  ENERGY_PER_HIT_TAKEN, MAX_BATTLE_SECONDS, MOVE_TICK,
-                  SPEED_TO_ATTACK_INTERVAL, STAB_BONUS, basic_takes_eff,
+from data import (ATTACK_INTERVAL_MULT, BASIC_POWER, ENERGY_MAX,
+                  ENERGY_PER_ATTACK, ENERGY_PER_HIT_TAKEN, MAX_BATTLE_SECONDS,
+                  MOVE_TICK, SPEED_TO_ATTACK_INTERVAL, STAB_BONUS,
+                  basic_takes_eff,
                   eff_mult, melee_move_mult, melee_resist, pokedex,
                   ranged_interval_mult)
 from roster import Piece
@@ -57,7 +58,8 @@ class Unit:
         self.defense = int(2 * base["defense"] * lv / 100) + 5
         self.sp_attack = int(2 * base["special_attack"] * lv / 100) + 5
         self.sp_defense = int(2 * base["special_defense"] * lv / 100) + 5
-        interval = SPEED_TO_ATTACK_INTERVAL(base["speed"])
+        interval = SPEED_TO_ATTACK_INTERVAL(base["speed"]) \
+            * ATTACK_INTERVAL_MULT     # R2 节奏定参：攻速 ×1.5（历史实验钉 1.0）
         if piece.distance > 1:  # 远程：均衡实验的出手惩罚
             interval *= ranged_interval_mult()
         self.range = piece.distance
