@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "checks": [
+    "equipment_target_confirmation",
+    "incompatible_tm_rejected",
+    "compatible_tm_learned",
+    "synergy_localization",
+    "sleep_wake_no_commit",
+    "real_battle_frames",
+    "automatic_result",
+    "round_two_once",
+    "home_expedition_collection"
+  ],
+  "startSeq": 4278,
+  "finalBattleSequence": 4281,
+  "consoleErrors": []
+}

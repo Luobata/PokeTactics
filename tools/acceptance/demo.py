@@ -872,6 +872,22 @@ def _item_effect(key: str, stat_mode='legacy') -> str:
     return "，".join(parts) or "—"
 
 
+def _synergy_effect_text(effects) -> str:
+    names = {"speed": "攻速", "dmg": "伤害", "hp": "生命", "dr": "减伤",
+             "energy": "回能", "sp_defense": "特防", "defense": "双防",
+             "atk": "双攻", "ult_dmg": "大招伤害"}
+    parts = []
+    for key, value in effects.items():
+        percent = f"{value * 100:g}%"
+        if key == "ult_cap":
+            parts.append(f"单次大招承伤≤{percent}最大生命")
+        elif key == "heal":
+            parts.append(f"每秒回复{percent}最大生命")
+        else:
+            parts.append(f"{names.get(key, key)}+{percent}")
+    return " · ".join(parts)
+
+
 def _synergy_view(sess) -> list:
     from render_mockups import TYPE_COLORS
     comp = [o.piece for o in sess.player.board]
@@ -886,13 +902,7 @@ def _synergy_view(sess) -> list:
         nxt = next((x for x in rungs if x > n), None)
         eff = ""
         if tier:
-            key_zh = {"speed": "攻速", "dmg": "伤害", "hp": "HP", "heal": "回复",
-                      "dr": "减伤", "cap": "大招上限", "energy": "回能",
-                      "sp_defense": "特防", "defense": "防御", "atk": "攻击"}
-            eff = " ".join(
-                f"{key_zh.get(k, k)}+{round(v * 100, 1) if isinstance(v, float) else v}%"
-                if not isinstance(v, str) else f"{key_zh.get(k, k)}{v}"
-                for k, v in spec["tiers"][tier].items())
+            eff = _synergy_effect_text(spec["tiers"][tier])
         out.append({"type": t, "zh": TYPE_ZH.get(t, t), "n": n, "tier": tier,
                     "next": nxt, "need": (nxt - n) if nxt else 0,
                     "color": _hex(TYPE_COLORS.get(t, (120, 120, 120))),
@@ -1527,10 +1537,10 @@ canvas{display:block;width:480px;max-width:92vw;image-rendering:pixelated;backgr
 #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#292c35;color:#f2e8c9;padding:10px 18px;border-radius:6px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:99;max-width:80vw;font-size:13px}
 #toast.show{opacity:.96}
 #toast.err{background:#8a2f27;color:#fff}
-</style></head><body><main>
+</style><link rel="stylesheet" href="/tools/acceptance/ui_theme.css"></head><body data-page="demo"><main>
 <header>
-<h1>宝可梦自走棋 · Web 可玩 Demo</h1>
-<span class="muted">1 玩家 + 7 bot · 全系统开启（羁绊/装备/齐射/天气/状态）</span>
+<h1>宝可梦自走棋 · 战术棋盘</h1>
+<span class="muted">招募伙伴，搭配羁绊，排出你的上场阵容。</span>
 <span style="flex:1"></span>
 <input id="seedin" type="number" placeholder="随机种子" style="width:110px" title="留空随机；填整数可复现对局">
 <button class="primary" onclick="newGame()">开新经典对局</button>
@@ -1538,7 +1548,7 @@ canvas{display:block;width:480px;max-width:92vw;image-rendering:pixelated;backgr
 <a id="device-link" href="/device">三键设备试玩</a>
 <a href="/" class="muted">← 验收后台</a>
 </header>
-<div class="panel" style="margin-bottom:12px">
+<details class="save-tools"><summary>存档与备份 · 每次成功操作后自动保存</summary><div class="panel">
   <button onclick="api('save')">保存进度</button>
   <button onclick="resumeGame()">继续存档</button>
   <button onclick="downloadBackup()">下载备份</button>
@@ -1547,6 +1557,7 @@ canvas{display:block;width:480px;max-width:92vw;image-rendering:pixelated;backgr
   <p id="save-status" class="muted">每次操作成功后自动保存到本机服务；下载备份可另行保管。</p>
   <div id="import-preview" hidden><p id="import-info"></p><button class="primary" onclick="confirmImport()">确认导入并保留当前进度备份</button><button onclick="cancelImport()">取消导入</button></div>
 </div>
+</details>
 <div id="expedition-status" class="panel" hidden></div>
 <div id="hud" class="muted">加载中…</div>
 <div class="cols">
@@ -1660,7 +1671,7 @@ function render(){
   $('device-link').href='/device?sid='+encodeURIComponent(S.sid);
   const y=S.you;
   const ex=S.expedition; $('expedition-status').hidden=!ex;
-  if(ex)$('expedition-status').textContent='主搭档 '+ex.partner+' · '+ex.trait+'｜'+(ex.active?'本场载体：'+ex.active:'尚未上场，特性未激活')+'。'+ex.description+(ex.technique?' 学习 '+ex.technique.name+'：'+ex.technique.description:'')+' 【同费用基础预算 v1】';
+  if(ex)$('expedition-status').textContent='主搭档 '+ex.partner+' · '+ex.trait+'｜'+(ex.active?'当前伙伴：'+ex.active:'尚未上场，特性未激活')+'。'+ex.description+(ex.technique?' 学习 '+ex.technique.name+'：'+ex.technique.description:'');
   $('save-status').textContent=(S.profile_warning||'')+(S.save?.sequence?'已保存 · 第 '+S.save.sequence+' 次提交。':'')+(S.save?.warning||'每次操作自动保存；服务重启后可继续。');
   /* HUD */
   const w=S.weather;

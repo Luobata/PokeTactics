@@ -14,9 +14,9 @@ MAX_DEVICES = 8
 _LOCK = threading.RLock()
 
 
-def row(label, action, *, detail="", subtitle="", disabled=False, **data):
+def row(label, action, *, detail="", subtitle="", disabled=False, portrait=None, icon="", **data):
     return {"label": label, "action": action, "detail": detail, "subtitle": subtitle,
-            "disabled": disabled, "data": data}
+            "disabled": disabled, "portrait": portrait, "icon": icon, "data": data}
 
 
 def owned_rows(state):
@@ -156,7 +156,8 @@ class Device:
 
     def _uid_row(self, loc, piece, action="piece", **data):
         uid = piece.get("uid")
-        return row(piece["name"], action, subtitle=("备战 " if loc.startswith("b") else "上场 ") + loc,
+        position = f"备战席 · 第 {int(loc[1:])+1} 格" if loc.startswith("b") else f"战场 · 第 {int(loc[1])+1} 行 {int(loc[3:])+1} 列"
+        return row(piece["name"], action, subtitle=position, portrait=piece,
                    detail=piece_detail(piece), disabled=uid is None, uid=uid, **data)
 
     def rows(self):
@@ -183,6 +184,8 @@ class Device:
                 compatible = kind != "technique" or self.loadout["partner"] in entry.get("partners", [])
                 locked = not entry.get("unlocked")
                 choices.append(row(entry["name"], "choose_loadout", detail=entry.get("description", ""),
+                                   portrait={"sid": entry["id"], "name": entry["name"]} if kind == "partner" else None,
+                                   icon=kind,
                                    subtitle="尚未解锁" if locked else "搭档不兼容" if not compatible else "已解锁",
                                    disabled=locked or not compatible, kind=kind, value=entry["id"]))
             return choices
@@ -195,6 +198,7 @@ class Device:
                     for c in self.profile.get("challenges", [])]
         if page == "dex":
             return [row(p["name"] if p.get("seen") else "未发现", "show_detail",
+                        portrait={"sid": p["id"], "name": p["name"]} if p.get("seen") else None, icon="dex",
                         subtitle=f"No.{p['id']:03d}", detail=(p["name"] + "\n" +
                         " / ".join(label for flag, label in (("seen", "已见"), ("fielded", "已上场"), ("won", "已获胜")) if p.get(flag)))
                         if p.get("seen") else "在商店或战斗中遇见后收录。") for p in self.profile.get("dex", [])]
@@ -205,7 +209,7 @@ class Device:
                     row("保存 / 返回主页", "open", page="system")]
         if page == "shop":
             entries = [row(p["name"] if p else "空货架", "buy", subtitle=f"{p.get('price', p['tier'])} 金" if p else "已售出",
-                           detail=piece_detail(p) if p else "", disabled=not p, i=i)
+                           detail=piece_detail(p) if p else "", portrait=p, disabled=not p, i=i)
                        for i, p in enumerate(state.get("shop", []))]
             return entries + [row(f"刷新 · {you.get('refresh_cost', 2)} 金", "command", command="refresh"),
                               row("解除锁定" if you.get("shop_locked") else "锁定商店", "command", command="lock"),
@@ -219,7 +223,7 @@ class Device:
             for c in range(6):
                 p, loc = cells[c], f"b{c}" if r == 2 else f"g{r},{c}"
                 entries.append(row(f"{c+1} · {p['name'] if p else '空位'}", "cell", detail=piece_detail(p) if p else "",
-                                   loc=loc, uid=p.get("uid") if p else None))
+                                   portrait=p, loc=loc, uid=p.get("uid") if p else None))
             return entries
         if page == "piece":
             found = self._find_uid(ctx.get("uid"))
@@ -236,12 +240,12 @@ class Device:
             return [row("成品装备 · 使用", "open", page="finished"), row("组件 · 合成", "open", page="craft"),
                     row("招式机器 · 教学", "open", page="techniques"), row("已收取物资", "open", page="drops")]
         if page in ("finished", "equip_items"):
-            return [row(i["name"], "equip_choose", detail=i.get("effect", ""), item=i["key"], uid=ctx.get("uid"))
+            return [row(i["name"], "equip_choose", detail=i.get("effect", ""), icon="item", item=i["key"], uid=ctx.get("uid"))
                     for i in state.get("items", {}).get("finished", [])]
         if page == "craft":
-            return [row(i["name"], "craft_confirm", subtitle=i.get("recipe", ""), detail=i.get("effect", ""), item=i["key"])
+            return [row(i["name"], "craft_confirm", subtitle=i.get("recipe", ""), detail=i.get("effect", ""), icon="craft", item=i["key"])
                     for i in state.get("items", {}).get("craftable", [])] + [
-                    row(f"{i['name']} ×{i['n']}", "show_detail", detail="组件已在仓库，集齐配方即可合成。")
+                    row(f"{i['name']} ×{i['n']}", "show_detail", detail="组件已在仓库，集齐配方即可合成。", icon="craft")
                     for i in state.get("items", {}).get("components", [])]
         if page == "drops":
             return [row("物资已自动入仓", "show_detail", detail="野怪掉落已在战斗结算时保存；此页只查看，不会重复领取。"),
@@ -249,7 +253,7 @@ class Device:
                     *[row(f"{i['name']} ×{i['n']}", "show_detail", detail="仓库组件") for i in state.get("items", {}).get("components", [])]]
         if page in ("techniques", "learn_items"):
             return [row(f"{i['name']} ×{i.get('count', 1)}", "technique_choose", detail=i.get("description", ""),
-                        technique=i["id"], name=i["name"], uid=ctx.get("uid"))
+                        icon="technique", technique=i["id"], name=i["name"], uid=ctx.get("uid"))
                     for i in state.get("techniques", {}).get("inventory", []) if i.get("count", 1) > 0]
         if page == "targets":
             entries = []
@@ -272,7 +276,7 @@ class Device:
             pieces = [p for cells in opp.get("rows", []) for p in cells if p] + opp.get("bench", [])
             return [row("训练家排名", "open", page="standings"),
                     row(opp.get("name", "对手尚未揭晓"), "show_detail", detail="准备期显示已知对手快照，配对后更新。"),
-                    *[row(p.get("name", "对手棋子"), "show_detail", detail=piece_detail(p)) for p in pieces if isinstance(p, dict)]]
+                    *[row(p.get("name", "对手棋子"), "show_detail", detail=piece_detail(p), portrait=p) for p in pieces if isinstance(p, dict)]]
         if page in ("standings", "over"):
             standings = (state.get("over") or {}).get("ranking", state.get("standings", []))
             return [row(f"{p.get('rank') or '—'} · {'你' if p.get('is_you') else p['name']}", "show_detail",
@@ -312,6 +316,7 @@ class Device:
         self._confirm(label, "learn", now, uid=uid, technique=technique, replace="1" if old else "0")
 
     def back(self, now):
+        self.message = ""
         if self.stack:
             self.page, self.selected, self.context = self.stack.pop()
             self.input.block(now)
@@ -319,6 +324,7 @@ class Device:
             self._go("home", now, replace=True)
 
     def activate(self, item, now):
+        self.message = ""
         if item.get("disabled"):
             self.message = item.get("subtitle") or "当前不可操作"
             return
@@ -429,6 +435,7 @@ class Device:
         self.selected = min(self.selected, max(0, len(entries) - 1)) if self.page != "detail" else self.selected
         if kind == "detail":
             if entries and entries[self.selected].get("detail"):
+                self.message = ""
                 self._go("detail", now, title=entries[self.selected]["label"], text=entries[self.selected]["detail"])
             return
         if kind != "click":
@@ -439,6 +446,7 @@ class Device:
             else:
                 self.selected = max(0, min(self.selected + (-1 if key == "A" else 1), len(self._detail_pages()) - 1))
         elif key in ("A", "B"):
+            self.message = ""
             self.selected = max(0, min(self.selected + (-1 if key == "A" else 1), len(entries) - 1))
         elif entries:
             self.activate(entries[self.selected], now)
@@ -469,6 +477,31 @@ class Device:
                   "footer": footer, "message": self.message, "hud": self.state.get("you"),
                   "round": self.state.get("round"), "board": self.state.get("board", []),
                   "bench": self.state.get("bench", []), "row": self.context.get("row")}
+        # Presentation data only. The client draws the saved formation, but every
+        # action, target UID and confirmation remains owned by this controller.
+        if self.page in ("prep", "shop", "board_rows", "board_columns", "move_rows", "move_columns", "piece"):
+            screen["choices"] = [{k: v for k, v in entry.items() if k not in ("action", "data")} | {"index": i}
+                                 for i, entry in enumerate(entries)]
+        opponent = self.state.get("opponent") or {}
+        screen["scene"] = {
+            "opponent": {"name": opponent.get("name", "等待配对"), "rows": opponent.get("rows", [])},
+            "weather": self.state.get("weather", {}),
+            "synergies": self.state.get("synergies", []),
+            "loadout_partner": self.loadout.get("partner"),
+            "inventory": {
+                "items": len(self.state.get("items", {}).get("finished", [])),
+                "components": sum(i["n"] for i in self.state.get("items", {}).get("components", [])),
+                "techniques": sum(i.get("count", 1) for i in self.state.get("techniques", {}).get("inventory", []))},
+            "result": {k: v for k, v in (self.state.get("last_battle") or {}).items()
+                       if k in ("headline", "winner", "survivors", "duration", "opp_name")},
+        }
+        focus_uid = self.context.get("uid") or self.context.get("params", {}).get("uid")
+        focused = self._find_uid(focus_uid) if focus_uid else None
+        if focused:
+            screen["focus"] = {"loc": focused[0], "piece": focused[1]}
+        if entries and self.page != "detail":
+            screen["active"] = {k: v for k, v in entries[self.selected].items() if k not in ("action", "data")}
+        screen["can_back"] = bool(self.stack) or self.page != "home"
         if self.page == "confirm":
             screen["prompt"] = self.context["label"]
         if self.page == "detail":

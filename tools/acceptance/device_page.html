@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PokeTactics · 掌上战局</title><style>/* DEVICE_STYLE */</style></head>
+<body>
+<header class="app-header"><a class="wordmark" href="/device"><span class="brand-mark" aria-hidden="true"></span>POKÉTACTICS<span class="edition">掌上战局</span></a><nav aria-label="页面导航"><a href="/device" aria-current="page">掌机</a><a href="/expedition">远征手册</a><a href="/demo" id="web-game-link">完整棋盘</a><a href="/animation-lab">动画图鉴</a><a href="/animation-editor">动作编辑</a></nav></header>
+<main>
+<section class="console" aria-label="PokeTactics 三键设备">
+<div class="brand"><span>POKÉTACTICS</span><span class="power"><i class="led"></i>FIELD SYSTEM</span></div>
+<div class="bezel"><div class="screen-wrap"><canvas id="screen" width="240" height="320" aria-label="只读游戏屏幕" aria-describedby="screen-text"></canvas></div></div>
+<div id="screen-text" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+<div class="controls">
+<div class="key-wrap"><button class="key" data-key="A" aria-label="A 上一项">A</button><span class="key-label">上一个</span></div>
+<div class="key-wrap"><button class="key" data-key="B" aria-label="B 下一项，长按返回">B</button><span class="key-label">下一个 / 返回</span></div>
+<div class="key-wrap"><button class="key" data-key="C" aria-label="C 确认，长按详情或关屏">C</button><span class="key-label">确认 / 详情</span></div>
+</div>
+</section>
+<aside class="guide">
+<div class="eyebrow">POCKET FIELD GUIDE / 01</div><h1>准备下一场对战</h1>
+<p class="intro">招募伙伴，调整站位。<br>让每位队友发挥所长。</p>
+<div class="context"><span class="section-label">当前操作</span><p id="context-hint">正在读取旅程…</p></div>
+<dl class="key-guide"><div><dt><kbd>A</kbd><kbd>B</kbd></dt><dd>切换选项、棋盘行列</dd></div><div><dt><kbd>C</kbd></dt><dd>确认当前选择</dd></div><div><dt>按住 B</dt><dd>返回上一层 / 取消</dd></div><div><dt>按住 C</dt><dd>0.6 秒看详情 · 1.5 秒关屏</dd></div></dl>
+<p class="keyboard-note">键盘也可使用 ↑ ↓ Enter 或 A B C。<br>关屏后，第一按只唤醒屏幕。</p>
+<div class="display-settings"><label for="display-scale">显示尺寸</label><select id="display-scale"><option value="auto">自动 · 整数缩放</option><option value="1">原生 1×</option><option value="2">放大 2×</option></select></div>
+<div class="save-status"><span class="save-dot" aria-hidden="true"></span><div><b>每次成功操作，自动存档</b><p id="status" role="status" aria-live="polite">正在连接掌机…</p></div></div>
+</aside>
+</main>
+<footer class="page-footer"><span>本地单机 · 三键操作</span><span>240 × 320 原生画面</span></footer>
+<script>/* DEVICE_RENDERER */
+/* DEVICE_INPUT */</script></body></html>

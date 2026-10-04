@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "checks": [
+    "old_error_dismissed_on_navigation",
+    "repeat_error_still_reported",
+    "compact_home_subtitle",
+    "teaching_confirmation_portrait",
+    "explicit_2x_resets_for_320px_phone",
+    "web_header_alignment"
+  ],
+  "consoleErrors": []
+}

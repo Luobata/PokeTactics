@@ -1,0 +1,15 @@
+./Users/bytedance/luobata/PokeTactics/tools/mockups/character_rigs.py:246: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  opaque = [pixel[:3] for pixel in cel.getdata() if pixel[3]]
+./Users/bytedance/luobata/PokeTactics/tools/mockups/motion.py:443: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  bright = max((c for c in cel.getdata() if c[3]), key=lambda c: sum(c[:3]))
+................................................................../Users/bytedance/luobata/PokeTactics/tools/mockups/character_rigs.py:234: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  color = max((pixel for pixel in cel.getdata() if pixel[3]),
+....../Users/bytedance/luobata/PokeTactics/tests/test_character_rigs.py:95: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  colors={pixel[:3] for pixel in source.getdata() if pixel[3]}
+/Users/bytedance/luobata/PokeTactics/tests/test_character_rigs.py:98: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  self.assertLessEqual({pixel[:3] for pixel in image.getdata() if pixel[3]},colors)
+............................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 294 tests in 17.599s
+
+OK

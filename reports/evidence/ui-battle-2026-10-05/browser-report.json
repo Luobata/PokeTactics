@@ -1,0 +1,49 @@
+{
+  "status": "passed",
+  "screenshots": [
+    "animation-editor-desktop.png",
+    "animation-editor-mobile.png",
+    "animation-lab-desktop.png",
+    "animation-lab-mobile.png",
+    "demo-desktop.png",
+    "demo-mobile.png",
+    "device-board-cell.png",
+    "device-board-row.png",
+    "device-confirm.png",
+    "device-detail.png",
+    "device-empty-tm.png",
+    "device-inventory.png",
+    "device-move-target.png",
+    "device-moved.png",
+    "device-piece.png",
+    "device-prep-desktop.png",
+    "device-prep-mobile.png",
+    "device-shop-insufficient-gold.png",
+    "device-shop.png",
+    "expedition-desktop.png",
+    "expedition-mobile.png"
+  ],
+  "desktopScale": {
+    "width": 480,
+    "height": 640
+  },
+  "mobile": {
+    "width": 390,
+    "canvas": 240,
+    "keys": [
+      {
+        "bottom": 529.78125,
+        "top": 490.78125
+      },
+      {
+        "bottom": 529.78125,
+        "top": 490.78125
+      },
+      {
+        "bottom": 529.78125,
+        "top": 490.78125
+      }
+    ]
+  },
+  "consoleErrors": []
+}

@@ -332,6 +332,11 @@ class DeviceControlsContracts(unittest.TestCase):
         self.assertIn("无法学习", self.state["screen"]["message"])
         self.assertEqual(self.device.sequence, seq)
         self.assertEqual(session.player.inventory.techniques["surf"], 1)
+        self.long("B")
+        self.assertEqual(self.state["screen"]["message"], "")
+        self.choose("冲浪"); self.click("C")
+        self.assertIn("无法学习", self.state["screen"]["message"])
+        self.assertEqual(self.device.sequence, seq)
 
     def test_details_paginate_and_lists_scroll_with_only_three_keys(self):
         self.choose("挑战与图鉴"); self.choose("宝可梦图鉴")
@@ -385,6 +390,44 @@ class DeviceControlsContracts(unittest.TestCase):
         self.assertNotIn("if(pending){suppressed", html)
         self.assertIn("40", controls.piece_detail({"name": "测试", "item_effect": "开场获得40能量"}))
 
+    def test_graphical_formation_and_portraits_follow_saved_targets(self):
+        self.classic()
+        self.choose("商店")
+        screen = self.state["screen"]
+        self.assertEqual(len(screen["choices"]), 7)
+        self.assertEqual(screen["active"]["portrait"], self.device.state["shop"][0])
+        self.assertEqual(screen["scene"]["opponent"]["rows"], self.device.state["opponent"]["rows"])
+        for choice in screen["choices"]:
+            self.assertNotIn("action", choice)
+            self.assertNotIn("data", choice)
+        self.click("C")
+        uid = self.device.state["bench"][0]["uid"]
+        sequence = self.device.sequence
+        self.choose("棋盘与备战"); self.choose("备战席")
+        screen = self.state["screen"]
+        self.assertEqual(len(screen["choices"]), 6)
+        self.assertEqual(screen["active"]["portrait"]["uid"], uid)
+        self.click("C")
+        self.assertEqual(self.state["screen"]["focus"]["piece"]["uid"], uid)
+        self.assertEqual(self.state["screen"]["focus"]["loc"], "b0")
+        self.choose("移动 / 交换"); self.choose("战场第一行")
+        # Empty destination stays empty, while the moving portrait remains tied
+        # to its source UID. Inspecting/painting must never deploy a piece.
+        self.assertIsNone(self.state["screen"]["active"]["portrait"])
+        self.assertEqual(self.state["screen"]["focus"]["loc"], "b0")
+        self.assertEqual(self.device.sequence, sequence)
+        self.click("C")
+        self.assertEqual(self.state["screen"]["board"][0][0]["uid"], uid)
+        self.assertEqual(self.device.sequence, sequence + 1)
+
+    def test_synergy_copy_explains_caps_and_time_units(self):
+        self.assertEqual(demo._synergy_effect_text({"ult_dmg": .10}), "大招伤害+10%")
+        self.assertEqual(demo._synergy_effect_text({"heal": .005}), "每秒回复0.5%最大生命")
+        self.assertEqual(demo._synergy_effect_text({"ult_cap": .60}), "单次大招承伤≤60%最大生命")
+        for spec in demo.syn_mod.SYNERGY_TABLE.values():
+            for effects in spec["tiers"].values():
+                self.assertNotIn("_", demo._synergy_effect_text(effects))
+
     @unittest.skipUnless(shutil.which("node"), "Node is required for browser transport fault injection")
     def test_client_tick_does_not_swallow_keys_and_network_recovery_never_replays_action(self):
         browser_script = device_page.HTML.split("<script>", 1)[1].split("</script>", 1)[0]
@@ -394,7 +437,7 @@ const noop=()=>{};const fakeContext=new Proxy({}, {get:(t,k)=>t[k]||noop,set:(t,
 const classes={add:noop,remove:noop};const buttons=['A','B','C'].map(key=>({dataset:{key},classList:classes,addEventListener:noop}));
 const elements={screen:{getContext:()=>fakeContext},status:{textContent:''},'screen-text':{textContent:''}};
 global.document={getElementById:id=>elements[id],querySelector:()=>({classList:classes}),querySelectorAll:()=>buttons,addEventListener:noop,hidden:false};
-global.window={addEventListener:noop};global.location={search:''};global.history={replaceState:noop};global.localStorage={getItem:()=>'',setItem:noop};
+const handlers={};global.window={addEventListener:(name,handler)=>handlers[name]=handler};global.location={search:''};global.history={replaceState:noop};global.localStorage={getItem:()=>'',setItem:noop};
 global.setInterval=noop;let calls=[],failPhase=null;
 global.fetch=async url=>{const phase=new URL(url,'http://host').searchParams.get('phase');calls.push(phase);if(phase===failPhase){failPhase=null;throw Error('response lost after server receives request')}return {json:async()=>({ok:true,device_id:'testdevice',sid:'',sleeping:false,screen:{page:'home',title:'测试',rows:[],footer:[],message:'就绪'}})}};
 '''
@@ -409,6 +452,14 @@ calls=[];down('C');await chain;failPhase='up';up('C');await chain;
 queue('tick');await chain;
 assert.deepEqual(calls,['down','up','cancel','state']);
 assert.equal(calls.filter(p=>p==='up').length,1);assert.equal(pressed.size,0);
+// Host display settings must not become game input, and changing focus while
+// a key is held must still release that key (rather than accidentally sleeping).
+calls=[];
+handlers.keydown({key:'ArrowDown',target:{closest:()=>true},preventDefault:noop});await chain;
+assert.deepEqual(calls,[]);
+handlers.keydown({key:'c',target:{closest:()=>false},preventDefault:noop});await chain;
+handlers.keyup({key:'c',target:{closest:()=>true},preventDefault:noop});await chain;
+assert.deepEqual(calls,['down','up']);assert.equal(pressed.size,0);
 '''
         result = subprocess.run([shutil.which("node"), "-"], input="(async()=>{\n" + setup + browser_script + verify + "\n})().catch(e=>{console.error(e);process.exit(1)})",
                                 text=True, capture_output=True, timeout=15)
