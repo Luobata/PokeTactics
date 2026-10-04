@@ -61,10 +61,11 @@ def checks():
         return original_line(draw, xy, *args, **kwargs)
     with patch.object(ImageDraw.ImageDraw, 'line', record_line):
         probe._draw_projectiles(Image.new('RGBA', (r.W, r.H)), 1. + r.FPS_DT, r.ParticleBudget())
-    require(lines[:2] == [
-        {'width': 3, 'fill': r.TYPE_COLORS[probe.units[0].u.piece.types[0]]},
-        {'width': 1, 'fill': r.PAPER}], '3px attribute projectile with 1px paper lining')
-    samples['projectile_strokes'] = lines[:2]
+    # Semantic fire head replaces the old fixed horizontal paper-lined bolt.
+    colors = {p[:3] for p in layer.getdata() if p[3]}
+    require(colors <= {r.TYPE_COLORS[probe.units[0].u.piece.types[0]], r.PAPER},
+            'projectile uses only attribute / paper palette')
+    samples['projectile_colors'] = sorted(colors)
     first_delay = probe._attack_delay(probe.events[2])
     probe.units[0].u.range *= 2
     require(probe._attack_delay(probe.events[2]) > first_delay, "inverse range speed")
@@ -116,7 +117,7 @@ def checks():
         ImageDraw.ImageDraw.polygon = original_polygon
     samples["solid_star_bounds"] = solid_sizes
 
-    # The first melee hit keeps one ring, a paper-lined stroke and six sparks.
+    # Compact double rim plus fine star contour; six rays reuse spark budget.
     star.events = [(1., 'attack', 0, 1, 20)]
     star._cursor = 1
     lines.clear()
@@ -126,10 +127,9 @@ def checks():
                          side_effect=ImageDraw.ImageDraw.ellipse) as ellipses:
         star._draw_board_fx(Image.new('RGBA', (r.W, r.H)), 1.1, hit_budget, {})
     require([line['width'] for line in lines[:2]] == [3, 1], '3px melee stroke / 1px lining')
-    require(ellipses.call_count == 1 and ellipses.call_args.kwargs['outline'][3] == 208,
-            'single light-weight impact ring')
+    require(ellipses.call_count == 3, 'double impact rim and fine star contour')
     require(hit_budget.used == 6, 'six impact sparks')
-    samples['attack_impact'] = {'rings': ellipses.call_count, 'ring_alpha': 208,
+    samples['attack_impact'] = {'rim_circles': 2, 'star_contours': 1, 'ring_alpha': 255,
                                 'ring_width_px': ellipses.call_args.kwargs['width'],
                                 'sparks': hit_budget.used, 'stroke_widths_px': [line['width'] for line in lines[:2]]}
 

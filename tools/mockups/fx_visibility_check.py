@@ -545,7 +545,7 @@ def status_contract_checks(assets):
         failures.append({"kind": "flinch_lifetime"})
     # DOT 与普攻使用同一个避让器，同时发生也保持 scale=1 和独立位置。
     calls = []
-    anim._draw_damage_number = lambda img, xy, text, color, scale: calls.append((xy, color, scale))
+    anim._draw_damage_number = lambda img, xy, text, color, scale, **kwargs: calls.append((xy, color, scale))
     anim._ensure(1.2)
     anim.floats.append((1.2, *anim.units[0].render_px(1.2), "-12", (255, 255, 255)))
     anim._draw_floats(Image.new("RGBA", (r.W, r.H)), 1.2)

@@ -33,7 +33,7 @@ button,select{font:inherit;background:#faf1d4;color:#292b24;padding:8px;border:2
 img{image-rendering:pixelated;width:480px;height:640px;border:4px solid #756e53}
 main{display:flex;gap:24px;flex-wrap:wrap}p{max-width:560px}</style>
 <h1>单体靶场 · 平A / 技能</h1><p>真实 Battle 事件 · 四色精灵 · 10 FPS · 训练用生命值加厚。
-平A：清晰弹道、单环星形、标准跳字。技能：脚底蓄力、双外环、微震与大跳字。木桩受击段启用轻触反击。</p>
+平A：渐细尾迹、属性弹体、紧邻双描边环与弹跳数字。技能：脚底蓄力、多重外环、微震与大跳字。木桩受击段启用轻触反击。</p>
 <select id="clip"></select><button id="play">暂停</button>
 <button id="prev">上一帧</button><button id="next">下一帧</button>
 <input id="seek" type="range" min="0" value="0"><span id="label"></span>

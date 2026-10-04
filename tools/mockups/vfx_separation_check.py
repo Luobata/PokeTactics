@@ -126,7 +126,7 @@ def checks(output=None):
             moments.append(t)
             _, _, probe = isolated_fx(anim, event, at)
             calls = []
-            probe._draw_damage_number = lambda img, xy, text, color, scale: calls.append((color, scale))
+            probe._draw_damage_number = lambda img, xy, text, color, scale, **kwargs: calls.append((color, scale))
             probe._draw_floats(Image.new('RGBA', (r.W, r.H)), at + .01)
             expected_color = (255,255,255) if event[1] == 'attack' else ((255,90,70) if cast[5] > 1 else (255,220,60))
             scales = [scale for color, scale in calls if color == expected_color]
@@ -141,7 +141,8 @@ def checks(output=None):
             with patch.object(ImageDraw.ImageDraw, 'ellipse', record):
                 probe._draw_board_fx(Image.new('RGBA', (r.W, r.H)), at, r.ParticleBudget(), {})
             feedback.append({'outer_rings': len(rings), 'shake_px': abs(probe._board_shake(at)),
-                             'digit_height_px': round(7 * max(scales)) if scales else 0})
+                             'digit_height_px': round(7 * max(scales)) if scales else 0,
+                             'rim_radii_px': sorted(set((box[2]-box[0])/2 for box in rings))})
         phases, base_phases = [], []
         for step in range(round((c[1] - c[0]) / r.FPS_DT)):
             t = c[0] + step * r.FPS_DT
@@ -176,7 +177,10 @@ def checks(output=None):
             'attack_has_no_charge': attack_has_no_charge,
             'charge_0_4_to_0_5s': .4 <= windup <= .5,
             'charge_base_progresses': all(p is not None for p in base_phases) and len(set(base_phases)) > 1,
-            'single_vs_double_outer_rings': feedback[0]['outer_rings'] == 1 and feedback[1]['outer_rings'] >= 2,
+            'compact_rim_vs_spaced_skill_rims': feedback[0]['outer_rings'] == 2
+                and feedback[0]['rim_radii_px'] == [27,29]
+                and feedback[1]['outer_rings'] >= 4
+                and max(feedback[1]['rim_radii_px'])-min(feedback[1]['rim_radii_px']) >= 8,
             'skill_only_2px_shake': feedback[0]['shake_px'] == 0 and feedback[1]['shake_px'] == 2,
             'standard_vs_large_digits': feedback[0]['digit_height_px'] == 7 and feedback[1]['digit_height_px'] == 8,
             'energy_ready_breathing_ring': energy_counts == [0] + [1] * 6 and len(set(energy_rings)) == 3,
@@ -262,7 +266,7 @@ def checks(output=None):
         require(skill_profile(76)['tier'] == 'generic', 'generic fallback')
     return {'thresholds': {'area_ratio_min': AREA_RATIO_MIN, 'charge_seconds_min': .4, 'attack_charge_seconds': 0,
                            'rule': 'area ratio >=1.7 AND every ritual predicate true',
-                           'outer_rings': [1,2], 'shake_px': [0,2], 'digit_height_px': [7,8]},
+                           'outer_rings_diameter_ge_52': [2,4], 'basic_rim_gap_radius_px': 2, 'skill_rim_span_min_px': 8, 'shake_px': [0,2], 'digit_height_px': [7,8]},
             'pairs': pairs, 'motion': motion, 'templates': templates, 'peak_render_particles': peak_budget,
             'hard_cap_stress': b.used, 'failures': failures, 'passed': not failures}
 

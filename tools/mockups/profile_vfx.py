@@ -5,6 +5,7 @@ import math
 from PIL import Image, ImageDraw
 
 from render_mockups import PAPER, FRAME, INK, TYPE_COLORS
+from pixel_vfx import debris
 
 
 @dataclass(frozen=True)
@@ -157,7 +158,7 @@ def signature_cast(img, sid, source, target, age, windup, budget, emblem=None, c
             a = i * math.tau / 8
             x = tx + round(radius * math.cos(a))
             y = ty + 8 + round(radius * .5 * math.sin(a))
-            draw.rectangle((x, y, x + 2, y + 1), fill=INK)
+            debris(draw, x, y, a, INK)
         for i in budget.take(3):
             x, y = tx - 26 + i * 25, ty + 40 - round(p * 17) - i * 3
             points = [(x, y), (x + 5, y), (x, y + 5), (x + 5, y + 5)]

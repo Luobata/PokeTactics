@@ -1,0 +1,17 @@
+{
+  "head": "d7139f9289efbb4f0041494e304711b376616e86",
+  "python_files_compiled": 10,
+  "ownership_passed": true,
+  "sources": {
+    "tools/mockups/fx_visibility_check.py": "67c45869758958dd5fda93767c9d4b01464d808a85e0939c837e7b6e332c3b6b",
+    "tools/mockups/pixel_vfx.py": "76332a024b25ceb84a4e751aaad3f9a0aa0aa1aaef315f57755a34b2f9273b1c",
+    "tools/mockups/profile_range.py": "02eb3ee2ddc07fcbcb3940b6736d5ab5c993269b9c5c796745d2c77db0b73fdf",
+    "tools/mockups/profile_vfx.py": "4b08f1feaa4babf9c3d3321f0e23d1506931c972c1730053317fe7150d9a3011",
+    "tools/mockups/r1_contract_check.py": "93e5188433eefd1af51fd452fdd44df7e03cbdccbe9170d241988b7b3258f06a",
+    "tools/mockups/refinement_check.py": "8dc330c0d0c49b30e8d957d77db3cda8c63c8f9f8390fb39b0fc96b5fb2eb317",
+    "tools/mockups/refinement_evidence.py": "bc7edebcb30196a83e366a322aa87bd83beef409962d6bac41e5272195e50c87",
+    "tools/mockups/render_battle_gif.py": "02a7e04cbe00139914c0ecd032cac8dfb135d880af311b9d95084da6c7ae42e8",
+    "tools/mockups/skill_vfx.py": "5b923a3192d0993ef91bb91e2614b6cb3d51ea8b3c3a915303ba9f17e5c07b80",
+    "tools/mockups/vfx_separation_check.py": "44b60c8b4db1a359ad7752c13d3ab8734ed98e5b03b7eb37ed06f1f2a2b99a15"
+  }
+}

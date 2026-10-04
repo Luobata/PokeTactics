@@ -1,0 +1,113 @@
+{
+  "samples": {
+    "energy": "new attack/cast + legacy fallback + rewind",
+    "clock": {
+      "windows": [
+        1.0,
+        2.0
+      ],
+      "speeds": [
+        1,
+        2,
+        4
+      ],
+      "duration": 0.35,
+      "rate": 0.3
+    },
+    "projectile_colors": [
+      [
+        184,
+        72,
+        64
+      ],
+      [
+        242,
+        232,
+        201
+      ]
+    ],
+    "projectile": "launch / inverse speed / death cancellation",
+    "solid_star_bounds": [
+      {
+        "sprite_px": 32,
+        "solid_px": 23,
+        "limit_px": 24,
+        "light_medium_heavy_px": [
+          19,
+          21,
+          23
+        ]
+      },
+      {
+        "sprite_px": 34,
+        "solid_px": 25,
+        "limit_px": 25,
+        "light_medium_heavy_px": [
+          21,
+          23,
+          25
+        ]
+      }
+    ],
+    "attack_impact": {
+      "rim_circles": 2,
+      "star_contours": 1,
+      "ring_alpha": 255,
+      "ring_width_px": 1,
+      "sparks": 6,
+      "stroke_widths_px": [
+        3,
+        1
+      ]
+    },
+    "particle_budgets": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        8,
+        8
+      ],
+      [
+        192,
+        192
+      ]
+    ],
+    "opaque_body_fx_overlap_pixels": 0,
+    "opaque_body_fx_overlap_frames": 36,
+    "peak_sampled_fx_particles": 17,
+    "gait": [
+      {
+        "species": 6,
+        "two_pose_diff_pixels": 257,
+        "floating": true,
+        "period": 0.24
+      },
+      {
+        "species": 65,
+        "two_pose_diff_pixels": 179,
+        "floating": true,
+        "period": 0.24
+      },
+      {
+        "species": 143,
+        "two_pose_diff_pixels": 339,
+        "floating": false,
+        "period": 0.8
+      },
+      {
+        "species": 76,
+        "two_pose_diff_pixels": 414,
+        "floating": false,
+        "period": 0.5333333333333333
+      }
+    ]
+  },
+  "failures": [],
+  "passed": true
+}

@@ -46,6 +46,8 @@ from render_mockups import (  # noqa: E402
 )
 from profile_vfx import SIGNATURES, PlaybackClock, gait_profile, pose_sprite
 from skill_vfx import skill_profile, cast_windup, draw_skill
+from pixel_vfx import (trajectory_point, projectile, impact_star, impact_rim,
+                       light, debris, hit_sprite, feather_flash, number_rise, exposure_age)
 from combat import Battle  # noqa: E402
 from data import pokedex  # noqa: E402
 from roster import build_roster  # noqa: E402
@@ -323,7 +325,7 @@ def effect_frame(age):
     return math.floor((age + 1e-9) / FPS_DT)
 
 
-def draw_fx(draw, mtype: str, T: float, cutin_key: tuple) -> None:
+def draw_fx(draw, mtype: str, T: float, cutin_key: tuple, img=None) -> None:
     """按属性画一帧技能特效（特效相位 0.3~0.9）。"""
     style, colors = FX_STYLE.get(mtype, FX_STYLE["NORMAL"])
     phase = (T - cutin_key[0]) / CUTIN_LEN
@@ -349,13 +351,17 @@ def draw_fx(draw, mtype: str, T: float, cutin_key: tuple) -> None:
             draw.point((tx + (i * 13 + effect_frame(T) * 3) % 21 - 10,
                         ty + (i * 7 + effect_frame(T) * 5) % 21 - 10),
                        fill=c1)
+    elif style in ("travel", "arc") and img is not None:
+        path = "arc" if style == "arc" else "line"
+        projectile(img, lambda k: trajectory_point((sx,sy),(tx,ty),k,path),
+                   exposure_age(p*.6,.6), .6, mtype, c1, ParticleBudget(9))
     elif style == "travel":
         for i in range(9):
             k = (p + i / 18) % 1.0
             x = sx + (tx - sx) * k + (i - 4) * 2.2 * k
             y = sy + (ty - sy) * k - (i % 3) * 2 * (1 - k)
             col = c1 if k < 0.6 else c2
-            draw.rectangle((x, y, x + 2, y + 2), fill=col)
+            light(draw, x, y, col)
     elif style == "arc":
         for i in range(7):
             k = (p + i / 14) % 1.0
@@ -374,7 +380,7 @@ def draw_fx(draw, mtype: str, T: float, cutin_key: tuple) -> None:
             r = 15 + 4 * ((p * 3 + i) % 2)
             x, y = tx + r * 0.8 * math.cos(ang), ty + r * 0.6 * math.sin(ang)
             col = c1 if i % 2 else c2
-            draw.rectangle((x - 1, y - 2, x + 2, y + 1), fill=col)
+            light(draw, x, y, col)
     elif style == "rings":
         for i in range(3):
             pr = (p + i / 3) % 1.0
@@ -388,7 +394,7 @@ def draw_fx(draw, mtype: str, T: float, cutin_key: tuple) -> None:
             x = tx + (i - 3) * 6 + 5 * ((pr * 4 + i) % 2 - 0.5)
             y = ty + 18 - 44 * pr
             col = c1 if i % 2 else c2
-            draw.rectangle((x, y, x + 2, y + 4), fill=col)
+            light(draw, x, y, col)
     elif style == "shards":
         for i in range(7):
             ang = i * math.tau / 7 + 0.3
@@ -404,8 +410,7 @@ def draw_fx(draw, mtype: str, T: float, cutin_key: tuple) -> None:
             ang = i * math.tau / 8 + 0.2
             d = 6 + 20 * p
             x, y = tx + d * math.cos(ang), ty + d * 0.7 * math.sin(ang)
-            draw.rectangle((x - 1, y - 1, x + 2, y + 2),
-                           fill=c1 if i % 2 else c2)
+            debris(draw, x, y, ang, c1 if i % 2 else c2)
 
 
 class AnimUnit:
@@ -672,28 +677,47 @@ class BattleAnimation:
             age, duration = T - ev[0] - FPS_DT, self._attack_delay(ev) - FPS_DT
             if not 0 <= age < duration or self._projectile_cancelled(ev):
                 continue
-            if not budget.take(1):
-                continue
             source = self.units[ev[2]]
-            sid = source.u.piece.species_id
-            a, b = self._event_position(ev[2], ev[0]), self._event_position(ev[3], ev[0])
-            signature = SIGNATURES.get(sid)
-            trajectory = signature.trajectory if signature else "line"
+            a, b, trajectory = self._projectile_path(ev)
             color = TYPE_COLORS[source.u.piece.types[0]]
-            def point(progress):
-                x = a[0] + BCELL // 2 + (b[0] - a[0]) * progress
-                y = a[1] + 14 + (b[1] - a[1]) * progress
-                if trajectory == "arc":
-                    y -= 16 * 4 * progress * (1 - progress)
-                elif trajectory == "jitter":
-                    y += 1 if effect_frame(age) % 2 else -1
-                return round(x), round(y)
-            x, y = point(age / duration)
-            draw.line((x - 2, y, x + 2, y), fill=color, width=3)
-            draw.line((x - 2, y, x + 2, y), fill=PAPER, width=1)
-            for i in budget.take(2):
-                xx, yy = point(max(0, age / duration - (i + 1) * .075))
-                draw.rectangle((xx, yy, xx + 1, yy + 1), fill=color if i % 2 else PAPER)
+            projectile(img, lambda p: trajectory_point(a, b, p, trajectory),
+                       exposure_age(age,duration), duration, source.u.piece.types[0], color, budget)
+
+    def _projectile_path(self, ev):
+        a = self._event_position(ev[2], ev[0])
+        b = self._event_position(ev[3], ev[0])
+        signature = SIGNATURES.get(self.units[ev[2]].u.piece.species_id)
+        return ((a[0] + BCELL // 2, a[1] + 14),
+                (b[0] + BCELL // 2, b[1] + 14),
+                signature.trajectory if signature else "line")
+
+    def _impact_direction(self, au, T):
+        """One hit frame; melee faces attacker, ranged follows arrival tangent."""
+        if au.dying(T) or "freeze" in au.statuses:
+            return None
+        for ev in reversed(self._recent_hits(T)):
+            if ev[3] == au.u.idx and effect_frame(T-ev[0]-self._attack_delay(ev)) == 0:
+                a,b,path = self._projectile_path(ev)
+                if self.units[ev[2]].u.range > 1:
+                    a = trajectory_point(a,b,.9,path)
+                return b[0]-a[0], b[1]-a[1]
+        for c in reversed(self.cutins):
+            if c[3] == au.u.idx and c[6] > 0 and effect_frame(T-c[1]) == 0:
+                a,b = self._event_position(c[2],c[0]), self._event_position(c[3],c[0])
+                return b[0]-a[0], b[1]-a[1]
+        return None
+
+    def _draw_impact_preview(self, img, T):
+        draw = ImageDraw.Draw(img)
+        impacts = [(e[0]+self._attack_delay(e), e[3], e[0])
+                   for e in self.events[:self._cursor] if e[1] == "attack"
+                   and e[4] > 0 and not self._projectile_cancelled(e)]
+        impacts += [(c[1],c[3],c[0]) for c in self.cutins if c[6] > 0]
+        for at, idx, onset in impacts:
+            if effect_frame(T-at) == -1:
+                x,y = self._event_position(idx,onset)
+                for dx,dy in ((-1,-1),(1,-1),(-1,1),(1,1)):
+                    draw.point((round(x+BCELL//2+dx*19),round(y+14+dy*19)), fill=PAPER)
 
     def _draw_signatures(self, img, T, budget):
         for c in self.cutins:
@@ -715,12 +739,22 @@ class BattleAnimation:
                             0, min(y + 12, uy + BOARD_FOOT) - max(y - 12, uy))
                 return score
             emblem = min(candidates, key=overlap)
-            profile = {**skill_profile(sid), "type": c[7]}
+            profile = {**skill_profile(sid), "type": c[7],
+                       "target_size": board_sprite_size(self.units[c[3]].u.piece.tier)}
             draw_skill(img, profile, (a[0] + 20, a[1] + 16),
                        (b[0] + 20, b[1] + 16), T - c[0], c[1] - c[0],
                        budget, variant=c[2] % 2, emblem=emblem)
 
     def _draw_board(self, img: Image, T: float) -> None:
+        # All sprite poses, flashes and FX share this frame's hit selection.
+        # Scoped to this draw only: isolated probes and rewind cannot reuse it.
+        self._frame_hit_context = (id(self), T, self._recent_hits(T))
+        try:
+            self._render_board(img, T)
+        finally:
+            self._frame_hit_context = None
+
+    def _render_board(self, img: Image, T: float) -> None:
         # C-sym 分区（自上而下）：敌备战 1 行 / 敌战场 2 行 / 我战场 2 行 /
         # 我备战 1 行；备战行用观战格底色（bench=True），不落战斗单位。
         img.paste(board_floor(self.weather_name), (BX, BY))
@@ -839,6 +873,9 @@ class BattleAnimation:
                   "开战！", self.font, PAPER)
 
     def _recent_hits(self, T):
+        context = getattr(self, '_frame_hit_context', None)
+        if context is not None and context[:2] == (id(self), T):
+            return context[2]
         return [ev for ev in self.events[:self._cursor]
                 if ev[1] == "attack" and ev[4] > 0
                 and not self._projectile_cancelled(ev)
@@ -965,13 +1002,24 @@ class BattleAnimation:
     def _sprite_placement(self, au, T, pose):
         sprite = self._board_sprite(au.u.piece.species_id, au.u.piece.tier,
                                     self._sprite_squash(au, T))
+        if not au.dying(T):
+            status = "freeze" if "freeze" in au.statuses else (
+                "poison" if "poison" in au.statuses and effect_frame(T) % 2 == 0 else None)
+            if status:
+                sprite = self._status_sprite(au.u.piece.species_id, au.u.piece.tier,
+                                             self._sprite_squash(au,T), status)
         if not au.dying(T) and "freeze" not in au.statuses:
             gait = self._gait(au)
             phase = int((T + 1e-9) / (gait.period / 2)) % 2
             sprite = pose_sprite(sprite, gait, phase, au.moving(T) > 0)
+        direction = self._impact_direction(au, T)
+        if direction is not None:
+            sprite = hit_sprite(sprite, direction)
         x = max(BX, min(BX + BCOLS * BCELL - sprite.width,
                        round(pose[0] + (BCELL - sprite.width) / 2)))
         y = pose[1] + BOARD_FOOT - sprite.getbbox()[3]
+        if direction is not None:
+            y = max(y, math.ceil(au.render_px(T)[1]-4.5)-sprite.getbbox()[1])
         return sprite, x, y
 
     @lru_cache(maxsize=1024)
@@ -1016,7 +1064,8 @@ class BattleAnimation:
             for i in budget.take(2, minimum=2, required=True):
                 rise = (effect_frame(T) + i * 3) % 6
                 x, y = px + (7 if i == 0 else BCELL - 8), foot - 2 - rise
-                draw.rectangle((x, y, x + 1, y + 1), fill=STATUS_ORANGE if rise < 3 else HP_LOW)
+                draw.line((x, y+2, x+1, y), fill=STATUS_ORANGE if rise < 3 else HP_LOW)
+                draw.point((x+1,y), fill=PAPER)
         if "paralysis" in kinds and effect_frame(T) % 6 == 0 and budget.take(1):
             draw_pixel_icon(img, (px + BCELL - 6, foot - 14), ("01", "10", "01"), FULL_GOLD)
         if "sleep" in kinds and budget.take(1):
@@ -1039,11 +1088,6 @@ class BattleAnimation:
 
         sprite, anchor_x, anchor_y = self._sprite_placement(au, T, pose)
         frozen = "freeze" in au.statuses and not dying
-        status_tint = "freeze" if frozen else (
-            "poison" if "poison" in au.statuses and effect_frame(T) % 2 == 0 and not dying else None)
-        if status_tint:
-            sprite = self._status_sprite(u.piece.species_id, u.piece.tier,
-                                         self._sprite_squash(au, T), status_tint)
         # 残影只复制量化后精灵的二值 alpha 蒙版，保留干净的像素边缘。
         if not dying and not frozen:
             if effect_frame(T - au.move_t0) in (0, 1):
@@ -1062,14 +1106,15 @@ class BattleAnimation:
             origin = au.blink[1] if au.blink and abs(au.blink[0] - teleport[0]) < 1e-9 else au.render_px(T)
             self._draw_echo(img, sprite, round(origin[0] + (BCELL - sprite.width) / 2),
                             round(origin[1] + BOARD_FOOT - sprite.getbbox()[3]), STATUS_PURPLE, 128)
-        hit_flash = bool(teleport and effect_frame(T - teleport[0]) == 1) or any(ev[3] == u.idx and effect_frame(T - ev[0] - self._attack_delay(ev)) == 0
-                        for ev in self._recent_hits(T))
-        if hit_flash and not frozen:
-            white = Image.new("RGBA", sprite.size, (255, 255, 255, 255))
-            white.putalpha(sprite.getchannel("A"))
-            img.alpha_composite(white, (anchor_x, anchor_y))
-        else:
-            img.alpha_composite(sprite, (anchor_x, anchor_y))
+        hit_phases = [effect_frame(T-ev[0]-self._attack_delay(ev))
+                      for ev in self._recent_hits(T) if ev[3] == u.idx]
+        hit_phases += [effect_frame(T-c[1]) for c in self.cutins
+                       if c[3] == u.idx and c[6] > 0 and 0 <= effect_frame(T-c[1]) <= 1]
+        if teleport and effect_frame(T-teleport[0]) == 1:
+            hit_phases.append(0)
+        if not frozen and any(p in (0,1) for p in hit_phases):
+            sprite = feather_flash(sprite, recovery=0 not in hit_phases)
+        img.alpha_composite(sprite, (anchor_x, anchor_y))
         self._draw_status_body(img, au, T, pose, budget)
         if not dying and au.energy >= 80:
             # 底座外沿完整闭合的 2px 金描边；画在精灵之后，背侧也清晰可见。
@@ -1151,6 +1196,7 @@ class BattleAnimation:
     def _draw_board_fx(self, img, T, budget, poses):
         """统一棋盘粒子预算；线框原语与实体粒子分开计数。"""
         draw = ImageDraw.Draw(img)
+        self._draw_impact_preview(img, T)
         self._draw_projectiles(img, T, budget)
         self._draw_signatures(img, T, budget)
         for ev in self._recent_hits(T):
@@ -1183,22 +1229,12 @@ class BattleAnimation:
             cap = (math.floor(board_sprite_size(target.u.piece.tier) * .75) - 1) // 2
             radius = min(cap - (2 - strength),
                          (9, 11, 12)[strength] + phase * 2 + (2 if variant else 0))
-            ring = 27 + phase * 3
-            draw.ellipse((cx - ring, cy - ring, cx + ring, cy + ring),
-                         outline=color + (208,), width=4)
-            for size, fill in ((radius, color), (radius * 0.58, PAPER)):
-                points = []
-                for i in range(16):
-                    angle = direction + i * math.tau / 16
-                    r = size if i % 2 == 0 else size * (0.38 if variant else 0.65)
-                    points.append((round(cx + r * math.cos(angle)),
-                                   round(cy + r * math.sin(angle))))
-                draw.polygon(points, fill=fill)
-            for i in budget.take(6):
-                angle = direction + i * math.tau / 6
-                rr = ring + 4
-                x, y = round(cx + rr * math.cos(angle)), round(cy + rr * math.sin(angle))
-                draw.line((x, y, x + round(3 * math.cos(angle)), y + round(3 * math.sin(angle))), fill=color, width=2)
+            ring = 29 + phase * 3
+            impact_rim(img, (cx,cy), ring, color, phase, budget, direction)
+            contact = board_sprite_size(target.u.piece.tier) * .4
+            impact_star(draw, round(cx-contact*math.cos(direction)),
+                        round(cy-contact*math.sin(direction)), radius, direction, color,
+                        effect_frame(ev[0]) * 31 + ev[2])
         # 消散不依赖精灵是否已眨眼隐藏：最后一帧只留上升粒子。
         for au in self.units.values():
             if au.die_t is None or not (0 <= effect_frame(T - au.die_t) < 4):
@@ -1210,8 +1246,8 @@ class BattleAnimation:
                 drift = math.sin(phase * math.pi + i * 1.7) * 2
                 xx = round(x + BCELL // 2 + (i - 2.5) * 5 + drift)
                 yy = round(y + BCELL - 20 - phase * 20 - (i % 2) * 3)
-                draw.rectangle((xx - 1, yy - 2, xx + 2, yy + 2), fill=color)
-                draw.line((xx, yy - 1, xx, yy + 1), fill=PAPER)
+                light(draw, xx, yy, color)
+                draw.point((xx, yy), fill=PAPER)
     def _draw_telegraph(self, img: Image, cells: list, color) -> None:
         """④ 范围预警钩子：AoE 招式命中前 1 帧对格子集合画半透明高亮。
 
@@ -1243,7 +1279,7 @@ class BattleAnimation:
             # Basic digits are 7px tall; skill digits are exactly 1px taller.
             scale = 1 if color in DOT_COLORS.values() or color == (255, 255, 255) else 8 / 7
             fx = max(6, min(W - len(text) * 6 * scale - 6, x + 6))
-            rise = int(14 * (1 - (1 - age / FLOAT_LIFE) ** 2))  # easeOut 上升
+            rise = number_rise(age, FLOAT_LIFE)
             fy = max(32, y - 6 - rise)
             if age > FLOAT_LIFE - 0.2 and int(age * 10) % 2 == 1:
                 continue  # 消失前眨两下
@@ -1271,23 +1307,29 @@ class BattleAnimation:
             if abs(fx - (x + 6)) > width:
                 origin = (int(x + BCELL // 2), int(y + 5))
                 ImageDraw.Draw(img).line((origin, (fx, fy + 4)), fill=INK)
-            self._draw_damage_number(img, (fx, fy), text, color, scale)
+            heavy = any(e[1] == "attack" and abs(e[0]+self._attack_delay(e)-t) < 1e-8
+                        and text == f"-{e[4]}" and impact_tier(e[4], self.units[e[3]].u.max_hp) == 2
+                        for e in self.events[:self._cursor])
+            heavy = heavy or any(abs(c[1]-t) < 1e-8 and text == f"-{c[6]}"
+                                 for c in self.cutins)
+            self._draw_damage_number(img, (fx, fy), text, color, scale, heavy=heavy)
 
     @staticmethod
-    def _draw_damage_number(img, xy, text, color, scale):
-        """透明底数字，全方向 2px 黑描边，避免大号实心数字牌盖住棋盘。"""
+    def _draw_damage_number(img, xy, text, color, scale, heavy=False):
+        """透明数字；普通 1px 描边，重击再加 1px，字形高度不变。"""
         color = {(255, 255, 255): PAPER, (255, 220, 60): FULL_GOLD,
                  (255, 90, 70): HP_LOW}.get(color, color)
         glyph = Image.new("RGBA", (len(text) * 6 - 1, 7))
         draw_pixel_text(glyph, (0, 0), text, color, 1)
         glyph = glyph.resize((round(glyph.width * scale), round(7 * scale)), Image.Resampling.NEAREST)
-        size = (glyph.width + 4, glyph.height + 4)
+        edge = 2 if heavy else 1
+        size = (glyph.width + edge*2, glyph.height + edge*2)
         digits = Image.new("RGBA", size)
-        digits.paste(glyph, (2, 2))
+        digits.paste(glyph, (edge, edge))
         outline = Image.new("RGBA", size, (0, 0, 0, 255))
-        outline.putalpha(digits.getchannel("A").filter(ImageFilter.MaxFilter(5)))
+        outline.putalpha(digits.getchannel("A").filter(ImageFilter.MaxFilter(edge*2+1)))
         outline.alpha_composite(digits)
-        img.alpha_composite(outline, (int(xy[0]) - 2, int(xy[1]) - 2))
+        img.alpha_composite(outline, (int(xy[0]) - edge, int(xy[1]) - edge))
 
     def _draw_message(self, img: Image, T: float) -> None:
         t0, text = self.msg
@@ -1326,7 +1368,7 @@ class BattleAnimation:
             # 判定相位保持，白闪改为目标周围的四个十字，不覆盖精灵调色板。
             for x, y in ((24, 100), (88, 106), (33, 140), (83, 138)):
                 draw_spark(img, x, y)
-        draw_fx(ImageDraw.Draw(img), mtype, T, (c[0], ci))
+        draw_fx(ImageDraw.Draw(img), mtype, T, (c[0], ci), img=img)
         frac = max(0.0, self.units[ti].hp / target.max_hp)
         draw_nameplate(img, self.font, (9, 35, 135, 75), target.piece.name, frac)
         draw_nameplate(img, self.font, (108, 86, 230, 126), caster.piece.name,
