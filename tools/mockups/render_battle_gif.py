@@ -46,6 +46,7 @@ from render_mockups import (  # noqa: E402
 )
 from profile_vfx import SIGNATURES, PlaybackClock, gait_profile, pose_sprite
 from skill_vfx import skill_profile, cast_windup, draw_skill
+from motion import MotionSystem, Pose, species_motion, windup as motion_windup, offsets, transform
 from pixel_vfx import (trajectory_point, projectile, impact_star, impact_rim,
                        light, debris, hit_sprite, feather_flash, number_rise, exposure_age)
 from combat import Battle  # noqa: E402
@@ -652,12 +653,14 @@ class BattleAnimation:
 
     def _attack_delay(self, ev):
         au = self.units[ev[2]]
+        prep = motion_windup(au.u.piece.species_id) if au.u.piece.species_id in species_motion else HIT_DELAY
         if au.u.range <= 1:
-            return HIT_DELAY
+            return prep
         a, b = self._event_position(ev[2], ev[0]), self._event_position(ev[3], ev[0])
         distance = math.hypot(a[0] - b[0], a[1] - b[1])
         # px/s = 800 / range. Quantize arrival to the 10fps effect grid.
-        return max(.2, math.ceil(distance * au.u.range / 800 / FPS_DT) * FPS_DT)
+        duration = max(.2, math.ceil(distance * au.u.range / 800 / FPS_DT) * FPS_DT)
+        return duration + prep - HIT_DELAY if au.u.piece.species_id in species_motion else duration
 
     def _event_position(self, idx, t):
         """Historical event positions, unaffected by later movement or a rewind."""
@@ -674,7 +677,9 @@ class BattleAnimation:
         for ev in self.events[:self._cursor]:
             if ev[1] != "attack" or self.units[ev[2]].u.range <= 1:
                 continue
-            age, duration = T - ev[0] - FPS_DT, self._attack_delay(ev) - FPS_DT
+            sid = self.units[ev[2]].u.piece.species_id
+            prep = motion_windup(sid) if sid in species_motion else FPS_DT
+            age, duration = T - ev[0] - prep, self._attack_delay(ev) - prep
             if not 0 <= age < duration or self._projectile_cancelled(ev):
                 continue
             source = self.units[ev[2]]
@@ -739,7 +744,8 @@ class BattleAnimation:
                             0, min(y + 12, uy + BOARD_FOOT) - max(y - 12, uy))
                 return score
             emblem = min(candidates, key=overlap)
-            profile = {**skill_profile(sid), "type": c[7],
+            profile = skill_profile(sid)
+            profile = {**profile, "type": profile.get("type", c[7]),
                        "target_size": board_sprite_size(self.units[c[3]].u.piece.tier)}
             draw_skill(img, profile, (a[0] + 20, a[1] + 16),
                        (b[0] + 20, b[1] + 16), T - c[0], c[1] - c[0],
@@ -749,10 +755,12 @@ class BattleAnimation:
         # All sprite poses, flashes and FX share this frame's hit selection.
         # Scoped to this draw only: isolated probes and rewind cannot reuse it.
         self._frame_hit_context = (id(self), T, self._recent_hits(T))
+        self._motion_context = {}
         try:
             self._render_board(img, T)
         finally:
             self._frame_hit_context = None
+            self._motion_context = None
 
     def _render_board(self, img: Image, T: float) -> None:
         # C-sym 分区（自上而下）：敌备战 1 行 / 敌战场 2 行 / 我战场 2 行 /
@@ -898,6 +906,18 @@ class BattleAnimation:
         age = (T - au.die_t) if dying else 0
         casting = self._casting_phase(au, T)
 
+        if u.piece.species_id in species_motion:
+            if dying and effect_frame(age) >= 6:
+                return None
+            motion = self._authored_motion(au, T)
+            ox, oy = offsets(motion)
+            if not dying and T < .35:
+                oy -= 10 * (1-T/.35)**2
+            body = self._board_sprite(u.piece.species_id,u.piece.tier)
+            bounds = body.getbbox()
+            rise_limit = BOARD_FOOT-(bounds[3]-bounds[1])+4
+            return (round(x+max(-3,min(3,ox))),
+                    round(y+max(-rise_limit,oy if dying else min(3,oy))),casting)
         idle, _, sensitive, tempo, amplitude, walk_hz = self._motion_profile(u.piece.species_id)
         ox, oy, _ = self._attack_motion(au, T)
         for kt, kdx, kdy in au.knockbacks[-1:]:
@@ -982,6 +1002,8 @@ class BattleAnimation:
                 (attack[2] * thrust - jump) * amplitude, squash)
 
     def _sprite_squash(self, au, T):
+        if au.u.piece.species_id in species_motion:
+            return 0
         if "freeze" in au.statuses and not au.dying(T):
             return au.frozen_squash
         if au.u.piece.species_id == 143 and any(
@@ -1008,19 +1030,41 @@ class BattleAnimation:
             if status:
                 sprite = self._status_sprite(au.u.piece.species_id, au.u.piece.tier,
                                              self._sprite_squash(au,T), status)
-        if not au.dying(T) and "freeze" not in au.statuses:
+        authored = au.u.piece.species_id in species_motion
+        if authored:
+            motion = self._authored_motion(au,T)
+            status = 'freeze' if 'freeze' in au.statuses and not au.dying(T) else (
+                'poison' if 'poison' in au.statuses and effect_frame(T)%2 == 0 and not au.dying(T) else None)
+            sprite = self._authored_sprite(au.u.piece.species_id,au.u.piece.tier,status,
+                motion.state,motion.index,motion.frame,motion.hit,motion.direction[0]>=0)
+        elif not au.dying(T) and "freeze" not in au.statuses:
             gait = self._gait(au)
             phase = int((T + 1e-9) / (gait.period / 2)) % 2
             sprite = pose_sprite(sprite, gait, phase, au.moving(T) > 0)
         direction = self._impact_direction(au, T)
-        if direction is not None:
+        if direction is not None and not authored:
             sprite = hit_sprite(sprite, direction)
         x = max(BX, min(BX + BCOLS * BCELL - sprite.width,
                        round(pose[0] + (BCELL - sprite.width) / 2)))
         y = pose[1] + BOARD_FOOT - sprite.getbbox()[3]
-        if direction is not None:
+        if direction is not None or authored:
             y = max(y, math.ceil(au.render_px(T)[1]-4.5)-sprite.getbbox()[1])
         return sprite, x, y
+
+    def _authored_motion(self, au, T):
+        cache = getattr(self, '_motion_context', None)
+        key = (au.u.idx,T)
+        if cache is not None and key in cache:
+            return cache[key]
+        pose = MotionSystem.resolve(self,au,T)
+        if cache is not None:
+            cache[key] = pose
+        return pose
+
+    @lru_cache(maxsize=4096)
+    def _authored_sprite(self, sid, tier, status, state, index, frame, hit, right):
+        sprite = self._status_sprite(sid,tier,0,status) if status else self._board_sprite(sid,tier)
+        return transform(sprite,sid,Pose(state,index,frame,(1 if right else -1,0),hit))
 
     @lru_cache(maxsize=1024)
     def _status_sprite(self, species_id, tier, squash, status):
@@ -1096,7 +1140,7 @@ class BattleAnimation:
                 if budget.take(1):
                     self._draw_echo(img, sprite, anchor_x + round((old_x - now_x) * .45),
                                     anchor_y + round((old_y - now_y) * .45), FRAME, 48)
-        if dying and age >= .4:
+        if dying and age >= .4 and u.piece.species_id not in species_motion:
             sprite = sprite.copy()
             opacity = max(0, min(255, round(255 * (.6 - age) / .2)))
             sprite.putalpha(sprite.getchannel("A").point(lambda a: a * opacity // 255))
@@ -1125,9 +1169,10 @@ class BattleAnimation:
             img.alpha_composite(halo, (px_ - 3, foot - 8))
         if dying and 0 <= age < FPS_DT and budget.take(1):
             draw_spark(img, px_ + BCELL // 2, foot + 3)
+        prep = motion_windup(u.piece.species_id) if u.piece.species_id in species_motion else HIT_DELAY
         strike = [a for a in au.attacks if not frozen and u.range <= 1
-                  and HIT_DELAY <= T - a[0] < ATTACK_ANIM
-                  and (u.piece.species_id != 143 or effect_frame(T - a[0]) == 1)]
+                  and prep <= T - a[0] < (prep+.2 if u.piece.species_id in species_motion else ATTACK_ANIM)
+                  and (u.piece.species_id != 143 or effect_frame(T - a[0] - prep) == 0)]
         if strike:
             _, adx, ady = strike[-1]
             cx0 = anchor_x + sprite.width // 2

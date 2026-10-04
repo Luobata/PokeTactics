@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "baseline": "49a0d46",
+  "authored_species": 16,
+  "fallback_species": 68,
+  "motion_unique": 16,
+  "skill_body_unique": 16,
+  "contact_unique": 16,
+  "state_clips": 288,
+  "skill_clips": 48,
+  "deterministic_frames": 1875,
+  "fallback_equal_frames": 156,
+  "visibility_failures": {
+    "7": 0,
+    "11": 0
+  },
+  "occlusion_pixels": 0,
+  "particle_peak_sampled_fx": 60,
+  "render_increase_percent": 0.8041842733804705,
+  "central_semantic_review": "unavailable_host_not_registered"
+}

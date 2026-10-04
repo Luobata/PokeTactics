@@ -71,13 +71,17 @@ def make_scene(species_id, scene, seed, action="attack"):
     for unit, pos in zip(battle.units, positions):
         unit.pos = pos
         unit.max_hp *= 8 if unit.team == 0 else 12
+        if action == "skill":
+            unit.max_hp *= 4
+        if action == "death" and unit.team == 0:
+            unit.max_hp = 1
         unit.hp = unit.max_hp
         if unit.team:
             unit.range = 3 if scene == "ranged" else 1
             if scene == "dummy":
                 # Stationary training posts; touch-back only in the hit clip.
                 unit.range = 8
-                unit.next_act = 1. if action == "hit" else 1e6
+                unit.next_act = 1. if action in ("hit", "death") else 1e6
                 unit.attack = unit.sp_attack = 1
             if action == "move":
                 unit.next_act = max(unit.next_act, 2.5)

@@ -1,0 +1,22 @@
+contracts True []
+fallback True []
+range 6 21 clips
+range 65 21 clips
+range 143 21 clips
+range 149 21 clips
+range 9 21 clips
+range 3 21 clips
+range 94 21 clips
+range 131 21 clips
+range 59 21 clips
+range 130 21 clips
+range 31 21 clips
+range 34 21 clips
+range 76 21 clips
+range 95 21 clips
+range 18 21 clips
+range 26 21 clips
+/Users/bytedance/luobata/PokeTactics/tools/mockups/per_unit_evidence.py:365: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  for c in sprite.getdata():
+hard {'passed': True, 'failures': [], 'checked_cast_frames': 876, 'opaque_body_fx_overlap_pixels': 0, 'authored_motion_frames': 447, 'off_palette_pixels': 0, 'partial_alpha_pixels': 0, 'sampled_board_fx_particle_peak': 60, 'saturated_budget': 192}
+benchmark 3.86492481 3.8960059275 0.8041842733804705 True

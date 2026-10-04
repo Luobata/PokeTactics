@@ -1,0 +1,16 @@
+{
+  "head": "49a0d46ec2c6c97573a6899c04f8a43a166a43e9",
+  "changed_paths_outside_allowed": [],
+  "python_compile_files": 8,
+  "source_sha256": {
+    "tools/mockups/motion.py": "b0ecf6f003f2c5c72b8af8ae84767b9d621fdd7452acb89f7c644b4f40ed0c5e",
+    "tools/mockups/skill_vfx.py": "511e8e1cff1995e0a80cbf41707a249453689405d682ee93d153f99474222360",
+    "tools/mockups/render_battle_gif.py": "a12135cc57fa9068d41d19cc27986d5b4e1c7b0f997a70b8222481bb3c2645e7",
+    "tools/mockups/per_unit_evidence.py": "577f71f38309b045fc8f1a2513b6ffd789401753b839af0dda41e019ce0c39e3",
+    "tools/mockups/profile_range.py": "954045d953eb8c39695921214360d1a5bf3ee738a5ca3450318b064137f73159",
+    "tools/mockups/r1_contract_check.py": "d4e9614828268c6083bfbc36209f1107d76ff1e99845946e23e507f893f09be4",
+    "tools/mockups/fx_visibility_check.py": "158d2c0a756e594567c591ddfcd6c446b15dfed8d180de8c522426d5e944a005",
+    "tools/mockups/vfx_separation_check.py": "81b5542d5817b67e3bc782bf842089f6af80e94360cbd98b3a911d1f6dddceeb"
+  },
+  "git_diff_check": "pass"
+}

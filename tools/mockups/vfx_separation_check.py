@@ -11,7 +11,7 @@ from PIL import Image, ImageChops, ImageDraw
 
 import render_battle_gif as r
 from profile_range import make_scene
-from skill_vfx import ARCHS, draw_skill, skill_profile
+from skill_vfx import ARCHS, draw_skill, skill_profile, draw_contact_field
 
 OUT = r.ROOT / 'reports/evidence/vfx-separation-2026-10-04'
 AREA_RATIO_MIN = 1.7
@@ -138,9 +138,10 @@ def checks(output=None):
                 if kwargs.get('outline') and box[2] - box[0] >= 52 and box[3] - box[1] >= 52:
                     rings.append(box)
                 return original(draw, box, *args, **kwargs)
-            with patch.object(ImageDraw.ImageDraw, 'ellipse', record):
+            with patch.object(ImageDraw.ImageDraw, 'ellipse', record), \
+                 patch('skill_vfx.draw_contact_field', wraps=draw_contact_field) as contact:
                 probe._draw_board_fx(Image.new('RGBA', (r.W, r.H)), at, r.ParticleBudget(), {})
-            feedback.append({'outer_rings': len(rings), 'shake_px': abs(probe._board_shake(at)),
+            feedback.append({'authored_contact_calls': contact.call_count, 'outer_rings': len(rings), 'shake_px': abs(probe._board_shake(at)),
                              'digit_height_px': round(7 * max(scales)) if scales else 0,
                              'rim_radii_px': sorted(set((box[2]-box[0])/2 for box in rings))})
         phases, base_phases = [], []
@@ -175,12 +176,14 @@ def checks(output=None):
                 energy_counts.append(len(energy_rings) - before)
         rituals = {
             'attack_has_no_charge': attack_has_no_charge,
-            'charge_0_4_to_0_5s': .4 <= windup <= .5,
+            'charge_matches_authored_or_legacy': (math.isclose(windup, r.motion_windup(sid)) and .2 <= windup <= .4)
+                if sid in r.species_motion else .4 <= windup <= .5,
             'charge_base_progresses': all(p is not None for p in base_phases) and len(set(base_phases)) > 1,
-            'compact_rim_vs_spaced_skill_rims': feedback[0]['outer_rings'] == 2
+            'authored_contact_or_legacy_spaced_rims': feedback[0]['outer_rings'] == 2
                 and feedback[0]['rim_radii_px'] == [27,29]
-                and feedback[1]['outer_rings'] >= 4
-                and max(feedback[1]['rim_radii_px'])-min(feedback[1]['rim_radii_px']) >= 8,
+                and (feedback[1]['authored_contact_calls'] == 1 if sid in r.species_motion else
+                     feedback[1]['outer_rings'] >= 4 and
+                     max(feedback[1]['rim_radii_px'])-min(feedback[1]['rim_radii_px']) >= 8),
             'skill_only_2px_shake': feedback[0]['shake_px'] == 0 and feedback[1]['shake_px'] == 2,
             'standard_vs_large_digits': feedback[0]['digit_height_px'] == 7 and feedback[1]['digit_height_px'] == 8,
             'energy_ready_breathing_ring': energy_counts == [0] + [1] * 6 and len(set(energy_rings)) == 3,
@@ -264,9 +267,9 @@ def checks(output=None):
     with patch('skill_vfx._skill_of', None):
         require(all(skill_profile(s)['tier'] == 'signature' for s in (6,65,143)), 'signature fallback')
         require(skill_profile(76)['tier'] == 'generic', 'generic fallback')
-    return {'thresholds': {'area_ratio_min': AREA_RATIO_MIN, 'charge_seconds_min': .4, 'attack_charge_seconds': 0,
+    return {'thresholds': {'area_ratio_min': AREA_RATIO_MIN, 'charge_seconds_min': .2, 'legacy_charge_seconds_min': .4, 'attack_charge_seconds': 0,
                            'rule': 'area ratio >=1.7 AND every ritual predicate true',
-                           'outer_rings_diameter_ge_52': [2,4], 'basic_rim_gap_radius_px': 2, 'skill_rim_span_min_px': 8, 'shake_px': [0,2], 'digit_height_px': [7,8]},
+                           'legacy_outer_rings_diameter_ge_52': [2,4], 'basic_rim_gap_radius_px': 2, 'skill_rim_span_min_px': 8, 'shake_px': [0,2], 'digit_height_px': [7,8]},
             'pairs': pairs, 'motion': motion, 'templates': templates, 'peak_render_particles': peak_budget,
             'hard_cap_stress': b.used, 'failures': failures, 'passed': not failures}
 

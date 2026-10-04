@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "failures": [],
+  "checked_cast_frames": 876,
+  "opaque_body_fx_overlap_pixels": 0,
+  "authored_motion_frames": 447,
+  "off_palette_pixels": 0,
+  "partial_alpha_pixels": 0,
+  "sampled_board_fx_particle_peak": 60,
+  "saturated_budget": 192
+}

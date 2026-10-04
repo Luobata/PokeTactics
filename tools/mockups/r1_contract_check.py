@@ -46,13 +46,13 @@ def checks():
     samples["clock"] = {"windows": clock.starts, "speeds": [1, 2, 4], "duration": .35, "rate": .3}
 
     probe.events = [(0., "deploy", 0, (0, 3)), (0., "deploy", 1, (3, 0)),
-                    (1., "attack", 0, 1, 1), (1.1, "die", 1)]
+                    (1., "attack", 0, 1, 1), (1.6, "die", 1)]
     probe._reset()
     probe._ensure(1.)
     layer = Image.new("RGBA", (r.W, r.H))
     probe._draw_projectiles(layer, 1., r.ParticleBudget())
-    require(layer.getbbox() is None, "one-frame preparation before projectile")
-    probe._draw_projectiles(layer, 1. + r.FPS_DT, r.ParticleBudget())
+    require(layer.getbbox() is None, "authored preparation before projectile")
+    probe._draw_projectiles(layer, 1. + r.motion_windup(6), r.ParticleBudget())
     require(layer.getbbox() is not None, "projectile launch")
     lines = []
     original_line = ImageDraw.ImageDraw.line
@@ -60,7 +60,7 @@ def checks():
         lines.append({'width': kwargs.get('width', 1), 'fill': kwargs.get('fill')})
         return original_line(draw, xy, *args, **kwargs)
     with patch.object(ImageDraw.ImageDraw, 'line', record_line):
-        probe._draw_projectiles(Image.new('RGBA', (r.W, r.H)), 1. + r.FPS_DT, r.ParticleBudget())
+        probe._draw_projectiles(Image.new('RGBA', (r.W, r.H)), 1. + r.motion_windup(6), r.ParticleBudget())
     # Semantic fire head replaces the old fixed horizontal paper-lined bolt.
     colors = {p[:3] for p in layer.getdata() if p[3]}
     require(colors <= {r.TYPE_COLORS[probe.units[0].u.piece.types[0]], r.PAPER},
@@ -69,9 +69,9 @@ def checks():
     first_delay = probe._attack_delay(probe.events[2])
     probe.units[0].u.range *= 2
     require(probe._attack_delay(probe.events[2]) > first_delay, "inverse range speed")
-    probe._ensure(1.1)
+    probe._ensure(1.6)
     layer = Image.new("RGBA", (r.W, r.H))
-    probe._draw_projectiles(layer, 1.1, r.ParticleBudget())
+    probe._draw_projectiles(layer, 1.6, r.ParticleBudget())
     require(layer.getbbox() is None, "dead target dissipates")
     require(not probe._recent_hits(1.8), "cancelled projectile has no later hit")
     samples["projectile"] = "launch / inverse speed / death cancellation"
@@ -105,7 +105,7 @@ def checks():
                     star._cursor = 1
                     for phase in range(3):
                         star._draw_board_fx(Image.new("RGBA", (r.W, r.H)),
-                                            onset + .1 + phase * .1, r.ParticleBudget(), {})
+                                            onset + star._attack_delay(star.events[0]) + phase * .1, r.ParticleBudget(), {})
                 tier_sizes.append(max(polygons))
             diameter = max(tier_sizes)
             limit = math.floor(r.board_sprite_size(tier) * .75)
@@ -125,7 +125,8 @@ def checks():
     with patch.object(ImageDraw.ImageDraw, 'line', record_line), \
             patch.object(ImageDraw.ImageDraw, 'ellipse', autospec=True,
                          side_effect=ImageDraw.ImageDraw.ellipse) as ellipses:
-        star._draw_board_fx(Image.new('RGBA', (r.W, r.H)), 1.1, hit_budget, {})
+        star._draw_board_fx(Image.new('RGBA', (r.W, r.H)),
+                            1. + star._attack_delay(star.events[0]), hit_budget, {})
     require([line['width'] for line in lines[:2]] == [3, 1], '3px melee stroke / 1px lining')
     require(ellipses.call_count == 3, 'double impact rim and fine star contour')
     require(hit_budget.used == 6, 'six impact sparks')

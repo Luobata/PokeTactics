@@ -196,6 +196,9 @@ def style_contract_checks(anim, output):
         au.from_px = au.to_px = (r.BX + (1 + i * 2) * r.BCELL, r.BY + 2 * r.BCELL)
         au.u.max_hp = 100
         au.u.range = 1
+    # This fixture checks the generic two-variant language. Authored Raichu now
+    # has one species-specific move; use unregistered Rattata for this legacy gate.
+    probe.units[0].u.piece.species_id = 19
     probe.units[3] = probe.units[0]  # 奇数 idx，同一施法者位置/材质，隔离变体差异。
     failures, coverage = [], []
     atlas = Image.new("RGB", (r.W * 2, r.H * len(r.FX_VARIANTS)), r.NIGHT)

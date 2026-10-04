@@ -1,0 +1,579 @@
+{
+  "thresholds": {
+    "area_ratio_min": 1.7,
+    "charge_seconds_min": 0.2,
+    "legacy_charge_seconds_min": 0.4,
+    "attack_charge_seconds": 0,
+    "rule": "area ratio >=1.7 AND every ritual predicate true",
+    "outer_rings_diameter_ge_52": [
+      2,
+      4
+    ],
+    "basic_rim_gap_radius_px": 2,
+    "skill_rim_span_min_px": 8,
+    "shake_px": [
+      0,
+      2
+    ],
+    "digit_height_px": [
+      7,
+      8
+    ]
+  },
+  "pairs": [
+    {
+      "species": 6,
+      "skill": {
+        "name": "喷射火焰",
+        "arch": "splash",
+        "tier": "signature",
+        "species_id": 6,
+        "move_id": 53,
+        "type": "FIRE",
+        "design": "wing_furnace"
+      },
+      "events": [
+        [
+          1.6000000000000003,
+          "attack",
+          0,
+          3,
+          22,
+          15
+        ],
+        [
+          6.399999999999993,
+          "cast",
+          0,
+          3,
+          "flamethrower",
+          0.5,
+          38,
+          0
+        ]
+      ],
+      "frame_times": [
+        2.5000000000000004,
+        7.099999999999993
+      ],
+      "visible_fx_pixels": [
+        643,
+        2248
+      ],
+      "cast_attack_area_ratio": 3.496,
+      "charge_seconds": [
+        0,
+        0.3
+      ],
+      "feedback": [
+        {
+          "authored_contact_calls": 0,
+          "outer_rings": 2,
+          "shake_px": 0,
+          "digit_height_px": 7,
+          "rim_radii_px": [
+            27.0,
+            29.0
+          ]
+        },
+        {
+          "authored_contact_calls": 1,
+          "outer_rings": 0,
+          "shake_px": 2,
+          "digit_height_px": 8,
+          "rim_radii_px": []
+        }
+      ],
+      "frame_sha256": [
+        "e649f2d342453bc928a1746ec3de1bf47e4a343f66b832ed46b7fd8b69c94df6",
+        "883b1d6242197d8c3cb57e42842c73654a6121507ddd1591ee22e4282fbf4966"
+      ],
+      "rituals": {
+        "attack_has_no_charge": true,
+        "charge_matches_authored_or_legacy": true,
+        "charge_base_progresses": true,
+        "authored_contact_or_legacy_spaced_rims": true,
+        "skill_only_2px_shake": true,
+        "standard_vs_large_digits": true,
+        "energy_ready_breathing_ring": true
+      },
+      "rituals_all_true": true,
+      "area_ratio_passed": true,
+      "charge_base_phases": [
+        [
+          0.0,
+          "FIRE"
+        ],
+        [
+          0.33333333333333237,
+          "FIRE"
+        ],
+        [
+          0.6666666666666676,
+          "FIRE"
+        ]
+      ],
+      "energy_preview_alpha": [
+        255,
+        255,
+        208,
+        160,
+        160,
+        208
+      ]
+    },
+    {
+      "species": 65,
+      "skill": {
+        "name": "精神强念",
+        "arch": "blink_strike",
+        "tier": "signature",
+        "species_id": 65,
+        "move_id": 94,
+        "type": "PSYCHIC",
+        "design": "spoon_focus"
+      },
+      "events": [
+        [
+          1.6000000000000003,
+          "attack",
+          0,
+          3,
+          25,
+          15
+        ],
+        [
+          5.799999999999995,
+          "cast",
+          0,
+          3,
+          "psychic_m",
+          1.0,
+          88,
+          0
+        ]
+      ],
+      "frame_times": [
+        2.6000000000000005,
+        6.199999999999996
+      ],
+      "visible_fx_pixels": [
+        619,
+        1578
+      ],
+      "cast_attack_area_ratio": 2.549,
+      "charge_seconds": [
+        0,
+        0.4
+      ],
+      "feedback": [
+        {
+          "authored_contact_calls": 0,
+          "outer_rings": 2,
+          "shake_px": 0,
+          "digit_height_px": 7,
+          "rim_radii_px": [
+            27.0,
+            29.0
+          ]
+        },
+        {
+          "authored_contact_calls": 1,
+          "outer_rings": 5,
+          "shake_px": 2,
+          "digit_height_px": 8,
+          "rim_radii_px": [
+            26.0,
+            30.0,
+            32.0,
+            39.0,
+            42.0
+          ]
+        }
+      ],
+      "frame_sha256": [
+        "05821c16507ab33efd3d52233be76430eea6bc7af7a68ee3cab21324e06b5d3c",
+        "9b99e7a0f61cdab64d26d2e49906c958d3bc6b8c3138729242e3739ec2300bea"
+      ],
+      "rituals": {
+        "attack_has_no_charge": true,
+        "charge_matches_authored_or_legacy": true,
+        "charge_base_progresses": true,
+        "authored_contact_or_legacy_spaced_rims": true,
+        "skill_only_2px_shake": true,
+        "standard_vs_large_digits": true,
+        "energy_ready_breathing_ring": true
+      },
+      "rituals_all_true": true,
+      "area_ratio_passed": true,
+      "charge_base_phases": [
+        [
+          0.0,
+          "PSYCHIC"
+        ],
+        [
+          0.2499999999999989,
+          "PSYCHIC"
+        ],
+        [
+          0.5,
+          "PSYCHIC"
+        ],
+        [
+          0.7499999999999989,
+          "PSYCHIC"
+        ]
+      ],
+      "energy_preview_alpha": [
+        255,
+        255,
+        208,
+        160,
+        160,
+        208
+      ]
+    },
+    {
+      "species": 143,
+      "skill": {
+        "name": "破坏光线",
+        "arch": "slam_heal",
+        "tier": "signature",
+        "species_id": 143,
+        "move_id": 63,
+        "type": "NORMAL",
+        "design": "belly_capacitor"
+      },
+      "events": [
+        [
+          1.6000000000000003,
+          "attack",
+          0,
+          3,
+          12,
+          15
+        ],
+        [
+          9.99999999999998,
+          "cast",
+          0,
+          3,
+          "hyper_beam",
+          0.5,
+          35,
+          0
+        ]
+      ],
+      "frame_times": [
+        2.2000000000000006,
+        10.89999999999998
+      ],
+      "visible_fx_pixels": [
+        552,
+        1826
+      ],
+      "cast_attack_area_ratio": 3.308,
+      "charge_seconds": [
+        0,
+        0.4
+      ],
+      "feedback": [
+        {
+          "authored_contact_calls": 0,
+          "outer_rings": 2,
+          "shake_px": 0,
+          "digit_height_px": 7,
+          "rim_radii_px": [
+            27.0,
+            29.0
+          ]
+        },
+        {
+          "authored_contact_calls": 1,
+          "outer_rings": 0,
+          "shake_px": 2,
+          "digit_height_px": 8,
+          "rim_radii_px": []
+        }
+      ],
+      "frame_sha256": [
+        "5ae1054843be7acf64d27f18103925de0ca9537ea88fba193b974d419ef775dc",
+        "e187d831cee27cfc0a405f9c022293a69aef31aa4e135d41561a18f76bba3238"
+      ],
+      "rituals": {
+        "attack_has_no_charge": true,
+        "charge_matches_authored_or_legacy": true,
+        "charge_base_progresses": true,
+        "authored_contact_or_legacy_spaced_rims": true,
+        "skill_only_2px_shake": true,
+        "standard_vs_large_digits": true,
+        "energy_ready_breathing_ring": true
+      },
+      "rituals_all_true": true,
+      "area_ratio_passed": true,
+      "charge_base_phases": [
+        [
+          0.0,
+          "NORMAL"
+        ],
+        [
+          0.2499999999999989,
+          "NORMAL"
+        ],
+        [
+          0.4999999999999978,
+          "NORMAL"
+        ],
+        [
+          0.7500000000000011,
+          "NORMAL"
+        ]
+      ],
+      "energy_preview_alpha": [
+        255,
+        255,
+        208,
+        160,
+        160,
+        208
+      ]
+    },
+    {
+      "species": 76,
+      "skill": {
+        "name": "地震",
+        "arch": "mend",
+        "tier": "generic",
+        "species_id": 76,
+        "move_id": 89,
+        "type": "GROUND",
+        "design": "fault_front"
+      },
+      "events": [
+        [
+          2.1000000000000005,
+          "attack",
+          0,
+          3,
+          12,
+          15
+        ],
+        [
+          9.299999999999983,
+          "cast",
+          0,
+          3,
+          "earthquake",
+          2.0,
+          96,
+          0
+        ]
+      ],
+      "frame_times": [
+        2.7000000000000006,
+        10.199999999999983
+      ],
+      "visible_fx_pixels": [
+        567,
+        2686
+      ],
+      "cast_attack_area_ratio": 4.737,
+      "charge_seconds": [
+        0,
+        0.4
+      ],
+      "feedback": [
+        {
+          "authored_contact_calls": 0,
+          "outer_rings": 2,
+          "shake_px": 0,
+          "digit_height_px": 7,
+          "rim_radii_px": [
+            27.0,
+            29.0
+          ]
+        },
+        {
+          "authored_contact_calls": 1,
+          "outer_rings": 0,
+          "shake_px": 2,
+          "digit_height_px": 8,
+          "rim_radii_px": []
+        }
+      ],
+      "frame_sha256": [
+        "1db8cc73732678b138beb289a39874ff0d231eac4be058dd461de3d0bee802d9",
+        "7986984d2b595ab29187cda3480196a13b2a6528646f59cfa4491ffe95d3b5d4"
+      ],
+      "rituals": {
+        "attack_has_no_charge": true,
+        "charge_matches_authored_or_legacy": true,
+        "charge_base_progresses": true,
+        "authored_contact_or_legacy_spaced_rims": true,
+        "skill_only_2px_shake": true,
+        "standard_vs_large_digits": true,
+        "energy_ready_breathing_ring": true
+      },
+      "rituals_all_true": true,
+      "area_ratio_passed": true,
+      "charge_base_phases": [
+        [
+          0.0,
+          "ROCK"
+        ],
+        [
+          0.2499999999999989,
+          "ROCK"
+        ],
+        [
+          0.4999999999999978,
+          "ROCK"
+        ],
+        [
+          0.7500000000000011,
+          "ROCK"
+        ]
+      ],
+      "energy_preview_alpha": [
+        255,
+        255,
+        208,
+        160,
+        160,
+        208
+      ]
+    }
+  ],
+  "motion": {
+    "idle_species": 84,
+    "attack_preparation_seconds": 0.1,
+    "reverse_offset_px": 1,
+    "death_extension_samples": [
+      {
+        "t": 1.4,
+        "pose_y": 125,
+        "alpha_sum": 26265
+      },
+      {
+        "t": 1.5,
+        "pose_y": 126,
+        "alpha_sum": 23970
+      }
+    ],
+    "step_dust_particles": 2
+  },
+  "templates": [
+    {
+      "tier": "generic",
+      "arch": "double_strike",
+      "unique_frames": 10,
+      "max_pixels": 2054
+    },
+    {
+      "tier": "generic",
+      "arch": "charge",
+      "unique_frames": 10,
+      "max_pixels": 2157
+    },
+    {
+      "tier": "generic",
+      "arch": "bulwark",
+      "unique_frames": 10,
+      "max_pixels": 2352
+    },
+    {
+      "tier": "generic",
+      "arch": "mend",
+      "unique_frames": 10,
+      "max_pixels": 2101
+    },
+    {
+      "tier": "generic",
+      "arch": "volley_shot",
+      "unique_frames": 10,
+      "max_pixels": 2054
+    },
+    {
+      "tier": "generic",
+      "arch": "heavy_blow",
+      "unique_frames": 10,
+      "max_pixels": 2131
+    },
+    {
+      "tier": "generic",
+      "arch": "splash",
+      "unique_frames": 10,
+      "max_pixels": 2569
+    },
+    {
+      "tier": "generic",
+      "arch": "blink_strike",
+      "unique_frames": 10,
+      "max_pixels": 3006
+    },
+    {
+      "tier": "generic",
+      "arch": "slam_heal",
+      "unique_frames": 10,
+      "max_pixels": 2523
+    },
+    {
+      "tier": "signature",
+      "arch": "double_strike",
+      "unique_frames": 10,
+      "max_pixels": 2054
+    },
+    {
+      "tier": "signature",
+      "arch": "charge",
+      "unique_frames": 10,
+      "max_pixels": 2157
+    },
+    {
+      "tier": "signature",
+      "arch": "bulwark",
+      "unique_frames": 10,
+      "max_pixels": 2352
+    },
+    {
+      "tier": "signature",
+      "arch": "mend",
+      "unique_frames": 10,
+      "max_pixels": 2101
+    },
+    {
+      "tier": "signature",
+      "arch": "volley_shot",
+      "unique_frames": 10,
+      "max_pixels": 2054
+    },
+    {
+      "tier": "signature",
+      "arch": "heavy_blow",
+      "unique_frames": 10,
+      "max_pixels": 2131
+    },
+    {
+      "tier": "signature",
+      "arch": "splash",
+      "unique_frames": 10,
+      "max_pixels": 2569
+    },
+    {
+      "tier": "signature",
+      "arch": "blink_strike",
+      "unique_frames": 10,
+      "max_pixels": 3006
+    },
+    {
+      "tier": "signature",
+      "arch": "slam_heal",
+      "unique_frames": 10,
+      "max_pixels": 2523
+    }
+  ],
+  "peak_render_particles": 53,
+  "hard_cap_stress": 192,
+  "failures": [],
+  "passed": true
+}
