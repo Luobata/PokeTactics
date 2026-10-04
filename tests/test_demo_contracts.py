@@ -193,7 +193,7 @@ class DemoContracts(unittest.TestCase):
         self.session.begin_round(1)
         self.addCleanup(demo.SESSIONS.pop, self.session.sid, None)
         created = []
-        def create(seed):
+        def create(seed, params=None):
             self.session.seed = seed
             created.append(seed)
             demo.SESSIONS[self.session.sid] = self.session

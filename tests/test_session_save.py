@@ -160,6 +160,9 @@ class SessionSaveContracts(unittest.TestCase):
 
     def test_semantically_invalid_snapshots_are_rejected(self):
         changes = [lambda p: p["pool"].__setitem__("1", p["pool"]["1"] - 1),
+                   lambda p: p.__setitem__("last_battle", {"winner": 0, "duration": "broken"}),
+                   lambda p: p.__setitem__("last_battle", {"winner": 0, "survivors": {"0": -1, "1": 2}}),
+                   lambda p: p.__setitem__("last_battle", {"winner": 0, "injected": True}),
                    lambda p: p["seats"][0].__setitem__("gold", -1),
                    lambda p: p.__setitem__("phase", "combat-in-progress"),
                    lambda p: p.__setitem__("pairs", [[0, 0]]),

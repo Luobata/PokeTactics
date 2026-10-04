@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "checks": [
+    "real_process_restart",
+    "no_duplicate_income",
+    "grid_shop_inventory",
+    "export_inspect_import",
+    "corrupt_import_preserves_current",
+    "restore_preimport_checkpoint",
+    "first_import"
+  ],
+  "backup_bytes": 9225,
+  "storage": "temporary_directory"
+}

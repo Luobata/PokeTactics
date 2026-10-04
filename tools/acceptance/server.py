@@ -624,7 +624,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json({"ok": False, "error": str(exc)}, 400)
             except (OSError, RuntimeError) as exc:
                 return self._json({"ok": False, "error": "预览生成失败：" + str(exc)}, 500)
-        if parsed.path not in ("/api/demo/import", "/api/demo/import/inspect"):
+        profile_import = parsed.path in ("/api/expedition/import", "/api/expedition/import/inspect")
+        if not profile_import and parsed.path not in ("/api/demo/import", "/api/demo/import/inspect"):
             return self.send_error(404)
         if self.headers.get("Origin") not in (None, f"http://{self.headers.get('Host')}"):
             return self._json({"ok": False, "error": "只允许本地页面导入"}, 403)
@@ -634,13 +635,17 @@ class Handler(SimpleHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", "0"))
         except ValueError:
             return self._json({"ok": False, "error": "无效文件长度"}, 400)
-        if not 0 < length <= 512 * 1024:
-            return self._json({"ok": False, "error": "备份必须小于512KB且非空"}, 413)
+        limit = 8 * 1024 * 1024 if profile_import else 512 * 1024
+        if not 0 < length <= limit:
+            return self._json({"ok": False, "error": f"备份必须非空且不超过 {limit // 1024}KB"}, 413)
         self.connection.settimeout(15)
         raw = self.rfile.read(length)
         if len(raw) != length:
             return self._json({"ok": False, "error": "备份传输不完整"}, 400)
         params = urllib.parse.parse_qs(parsed.query)
+        if profile_import:
+            from expedition import import_profile
+            return self._json(import_profile(raw, parsed.path.endswith("/inspect")))
         self._json(demo_mod.import_backup(raw, params.get("sid", [None])[0],
                                          inspect_only=parsed.path.endswith("/inspect")))
 
@@ -860,6 +865,33 @@ class Handler(SimpleHTTPRequestHandler):
                 self.send_header("Content-Length", str(len(body)))
                 self.end_headers()
                 self.wfile.write(body)
+        elif parsed.path == "/expedition":
+            from expedition_page import EXPEDITION_HTML
+            body = EXPEDITION_HTML.encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        elif parsed.path == "/api/expedition/profile":
+            from expedition import api_profile
+            self._json(api_profile())
+        elif parsed.path == "/api/expedition/backup":
+            from expedition import store
+            try:
+                with demo_mod._LOCK:
+                    profile_store = store()
+                    raw = (profile_store.store.export_checkpoint() if qs.get("checkpoint", ["0"])[0] == "1"
+                           else profile_store.export_backup())
+            except Exception as exc:
+                return self._json({"ok": False, "error": str(exc)}, 400)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Disposition", 'attachment; filename="PokeTactics-profile.ptsave"')
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
         elif parsed.path == "/demo":
             # Web 可玩 Demo（tools/acceptance/demo.py 提供页面与会话引擎）
             body = demo_mod.DEMO_HTML.encode()

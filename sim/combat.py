@@ -20,6 +20,8 @@
 专属附属效果另发 (t, "skill_effect", caster, target, arch, effect, payload)，
 payload.cast_index/event_count 指向主 cast 与紧随标记的原事件包；几何快照
 和伤害/治疗/能量数值仅供演出，不改变解算，旧事件字段保持原样。
+可选搭档事件为 (t, "partner_effect", caster, target, partner_id, effect, payload)；
+其治疗、回能仍同时输出 unit_state，attack/cast 索引不变。
 
 随机契约 v2：仍只消费传入的 rng，但按队伍内容/本地部署顺序绑定抽样，
 同刻按开战抽取的 initiative 排序；完全相同的两队先公平掷币绑定随机序列。
@@ -42,6 +44,8 @@ import weather as weather_mod  # S11 天气：默认无天气（docs/05）
 import items as items_mod     # S5 装备：comp 元素可带 (Piece, item) 二元组（docs/07）
 import profiles as profiles_mod  # R1 单体档案（docs/13 §5）：有理由的覆盖项
 import skills as skills_mod      # 通用/专属两级技能（2026-10-04 用户裁定）
+import partners as partners_mod
+import stat_budget
 
 TICK = 0.1  # 解算步长（秒）
 # ---- C-sym 棋盘（docs/10 §1.3/§1.5，2026-09-14 sim 联动落地）----
@@ -58,7 +62,8 @@ ROWS_ALLY = (2, 3)    # 己方战场行；"back" 从 r=3 后排起填
 class Unit:
     """场上的一名棋子（战斗态）。"""
 
-    def __init__(self, piece: Piece, team: int, pos: tuple) -> None:
+    def __init__(self, piece: Piece, team: int, pos: tuple,
+                 stat_mode: str = "legacy") -> None:
         dex = pokedex()
         base = dex.species[piece.species_id]["base"]
         lv = piece.level
@@ -73,6 +78,17 @@ class Unit:
         self.sp_defense = int(2 * base["special_defense"] * lv / 100) + 5
         interval = SPEED_TO_ATTACK_INTERVAL(base["speed"]) \
             * ATTACK_INTERVAL_MULT     # R2 节奏定参：攻速 ×1.5（历史实验钉 1.0）
+        self.stat_mode = stat_mode
+        self.base_budget = None
+        self.budget_points = None
+        if stat_mode == "budget_v1":
+            panel = stat_budget.unit_stats(piece)
+            for name in ("max_hp", "attack", "defense", "sp_attack", "sp_defense"):
+                setattr(self, name, panel[name])
+            interval = panel["attack_interval"]
+            self.base_budget, self.budget_points = panel["budget"], panel["points"]
+        elif stat_mode != "legacy":
+            raise ValueError("unknown stat mode")
         if profiles_mod.effective_range(piece) > 1:  # 档案覆盖后的远程惩罚
             interval *= ranged_interval_mult()
         self.range = profiles_mod.effective_range(piece)
@@ -80,11 +96,18 @@ class Unit:
         self.ult_arch = None
         self.temp_dr = 0.0          # 通用技能「铁壁」：临时受伤减免
         self.temp_dr_until = -1.0
+        self.partner_id = None
+        self.partner_trait_uses = 0
+        self.technique = None
+        self.technique_used = False
+        self.partner_dr = 0.0
+        self.partner_dr_until = -1.0
         # ---- UnitProfile（docs/13 R1）：有理由的覆盖项，其余回落推导 ----
         prof = profiles_mod.get(piece.species_id)
         if prof is not None:
-            self.max_hp = int(self.max_hp * prof["hp_mult"])
-            interval *= prof["atk_interval_mult"]
+            if stat_mode == "legacy":
+                self.max_hp = int(self.max_hp * prof["hp_mult"])
+                interval *= prof["atk_interval_mult"]
             self.move_mult = prof["move_mult"]
         # ---- 两级技能（skills.skill_of）：专属主角团沿用档案原语，
         #      其余单位按定位分配通用原语；开关关闭时 None（旧行为）----
@@ -149,11 +172,23 @@ class Battle:
 
     def __init__(self, comp_a: list, comp_b: list, rng: random.Random,
                  layout: str = "random", weather_name=None,
-                 positions_a=None, positions_b=None) -> None:
+                 positions_a=None, positions_b=None, team_options=None,
+                 stat_mode: str = "legacy") -> None:
         # S11 天气按 Battle 实例持有（2026-09-14 修订：原 set_active 全局写
         # 在验收后台多线程下会交叉污染——/anim 与 /demo 并行时互改对方天气；
         # damage_mult 由 _final_damage 显式传 self.weather_name）
         self.weather_name = weather_name
+        if stat_mode not in ("legacy", "budget_v1"):
+            raise ValueError("unknown stat mode")
+        self.stat_mode = stat_mode
+        if team_options is None:
+            team_options = (None, None)
+        if not isinstance(team_options, (tuple, list)) or len(team_options) != 2:
+            raise ValueError("team_options must contain two team loadouts")
+        if any(option is not None and not isinstance(option, dict) for option in team_options):
+            raise ValueError("each team loadout must be a dictionary or None")
+        self.team_options = tuple(partners_mod.validate_loadout(option)
+                                  for option in team_options)
         self.rng = rng
         self.dex = pokedex()
         self.units: list = []
@@ -185,6 +220,14 @@ class Battle:
                             self.rng.random()) for p in spots]
         self._deploy(comp_a, team=0, plan=plans[0])
         self._deploy(comp_b, team=1, plan=plans[1])
+        for team, option in enumerate(self.team_options):
+            if option is not None:
+                family = partners_mod.family_ids(option["partner"])
+                partner = next((u for u in self.units if u.team == team
+                                and u.piece.species_id in family), None)
+                if partner is not None:
+                    partner.partner_id = option["partner"]
+                    partner.technique = option["technique"]
         # S5 协议：comp 元素可能带 (Piece, item) 二元组——羁绊/齐射只看裸 Piece
         plain_a = [e[0] if isinstance(e, tuple) else e for e in comp_a]
         plain_b = [e[0] if isinstance(e, tuple) else e for e in comp_b]
@@ -196,6 +239,7 @@ class Battle:
         self.duration = 0.0
         for unit in self.units:
             self._emit_state(unit, 0.0)
+        self._opening_partner_traits()
 
     @staticmethod
     def _local_pos(pos, team):
@@ -227,14 +271,20 @@ class Battle:
             entries.append((piece.species_id, piece.tier, piece.level,
                             piece.move_id or 0, piece.distance, str(item)))
         local = tuple(self._local_pos(p, team) for p in positions) if positions is not None else ()
-        return tuple(entries), local
+        option = self.team_options[team]
+        # An absent partner has no combat or random-sequence effect. For present
+        # partners, bind rolls to the loadout too, preserving rotated side swaps.
+        active = option is not None and any(
+            entry[0] in partners_mod.family_ids(option["partner"]) for entry in entries)
+        loadout = (option["partner"], option["technique"] or "") if active else (0, "")
+        return tuple(entries), local, loadout
 
     def _deploy(self, comp: list, team: int, plan: list) -> None:
         for local_idx, (entry, (pos, next_act, initiative)) in enumerate(zip(comp, plan)):
             # S5 装备协议：comp 元素可为 (Piece, item_key) 二元组（带装备）或
             # 裸 Piece（无装备——prototype/野怪波次走此路径，行为不变）
             piece, item_key = entry if isinstance(entry, tuple) else (entry, None)
-            unit = Unit(piece, team, pos)
+            unit = Unit(piece, team, pos, stat_mode=self.stat_mode)
             if item_key is not None:   # S5 施加点（S3 synergy.apply 同模式）
                 items_mod.apply_to_unit(unit, item_key)
             unit.next_act = next_act
@@ -278,6 +328,12 @@ class Battle:
     def _act(self, u: Unit, t: float) -> None:
         if status_mod.stunned(u, t):  # S12：冰冻/睡眠期间不行动（默认 False）
             u.next_act = t + 0.2
+            return
+        if (u.technique == "rest" and not u.technique_used
+                and u.hp <= u.max_hp / 2):
+            u.technique_used = True
+            self._partner_heal(u, u, .25, t, "rest")
+            u.next_act = t + u.attack_interval * status_mod.speed_mult(u)
             return
         target = self._target(u)
         if target is None:
@@ -419,6 +475,7 @@ class Battle:
             return
         if move:
             # Geometry is fixed before damage/death/displacement changes occupancy.
+            cast_target_pos = target.pos
             line_victims = self._line_victims(u, target) if u.ult_arch == profiles_mod.ARCH_LINE else []
             hit = self.rng.randrange(100) < (move.get("accuracy") or 100)
             dmg = self._move_damage(u, target, move) if hit else 0
@@ -528,6 +585,7 @@ class Battle:
                 u.temp_dr_until = t + 3.0
             if u.ult_arch == "mend" and u.alive:
                 self._heal(u, int(u.max_hp * 0.20), t)
+            self._partner_after_cast(u, target, t, cast_target_pos, dmg > 0)
         else:
             special = u.sp_attack > u.attack
             if basic_takes_eff():
@@ -542,6 +600,8 @@ class Battle:
                 u.energy = min(ENERGY_MAX, u.energy + int(
                     ENERGY_PER_ATTACK * (1.0 + u.synergy_energy + u.item_energy)))
             self._land_hit(u, target, dmg, t, primary=True)
+            if dmg > 0:
+                self._partner_after_basic(u, target, t)
 
     def _land_hit(self, attacker, target, damage, t, move=None, primary=False, cast=False):
         """Resolve a damage packet and emit its authoritative post-hit state.
@@ -568,6 +628,87 @@ class Battle:
         self._emit_state(target, t)
         if primary:
             status_mod.on_hit(self, attacker, target, move, t, damage=damage)
+        if (damage > 0 and target.alive and target.partner_id == 143
+                and target.partner_trait_uses == 0 and target.hp <= target.max_hp / 2):
+            target.partner_trait_uses += 1
+            for mate in self._partner_mates(target, wounded=True)[:2]:
+                self._partner_heal(target, mate, .15, t, "share_lunch")
+
+    def _partner_mates(self, unit, wounded=False):
+        mates = [mate for mate in self.units if mate is not unit and mate.alive
+                 and mate.team == unit.team and _manhattan(unit.pos, mate.pos) <= 2
+                 and (not wounded or mate.hp < mate.max_hp)]
+        return sorted(mates, key=lambda mate: (
+            (mate.hp / mate.max_hp if wounded else 0), self._target_key(unit, mate)))
+
+    def _partner_event(self, unit, target, effect, t, **payload):
+        """Optional annotation; HP and energy remain authoritative unit_state data."""
+        self.events.append((t, "partner_effect", unit.idx, target.idx,
+                            unit.partner_id, effect, payload))
+
+    def _partner_heal(self, unit, target, fraction, t, effect):
+        amount = min(target.max_hp - target.hp, int(target.max_hp * fraction))
+        if amount > 0 and target.alive:
+            self._partner_event(unit, target, effect, t, amount=amount)
+            self._heal(target, amount, t)
+
+    def _partner_energy(self, unit, target, amount, t, effect):
+        gained = min(ENERGY_MAX - target.energy, amount)
+        if gained > 0:
+            self._partner_event(unit, target, effect, t, energy=gained)
+            target.energy += gained
+            self._emit_state(target, t)
+
+    def _opening_partner_traits(self):
+        for team in self._team_order:
+            for unit in self.units:
+                if unit.team != team or unit.partner_id != 9:
+                    continue
+                unit.partner_trait_uses = 1
+                for mate in self._partner_mates(unit)[:2]:
+                    mate.partner_dr, mate.partner_dr_until = .20, 6.0
+                    self._partner_event(unit, mate, "shell_guard", 0.0,
+                                        reduction=.20, duration=6.0)
+
+    def _partner_after_cast(self, unit, target, t, target_pos, caused_damage):
+        if unit.partner_trait_uses == 0 and unit.partner_id in (3, 6):
+            unit.partner_trait_uses = 1
+            if unit.partner_id == 3:
+                for mate in self._partner_mates(unit, wounded=True)[:1]:
+                    self._partner_heal(unit, mate, .20, t, "bloom")
+            elif unit.partner_id == 6:
+                for mate in self._partner_mates(unit)[:2]:
+                    self._partner_energy(unit, mate, 18, t, "wing_rally")
+        if unit.technique == "surf" and not unit.technique_used and caused_damage:
+            unit.technique_used = True
+            victims = sorted((enemy for enemy in self.units if enemy.alive
+                              and enemy.team != unit.team and enemy is not target
+                              and _manhattan(target_pos, enemy.pos) <= 1),
+                             key=lambda enemy: self._target_key(unit, enemy))
+            for victim in victims[:2]:
+                damage = self._move_damage(unit, victim, {
+                    "name": "冲浪", "type": "WATER", "power": 35})
+                self._partner_event(unit, victim, "surf", t, damage=damage)
+                self._land_hit(unit, victim, damage, t)
+
+    def _partner_after_basic(self, unit, target, t):
+        if unit.partner_id == 26 and unit.partner_trait_uses < 2:
+            unit.partner_trait_uses += 1
+            mate = min(self._partner_mates(unit), key=lambda candidate: (
+                candidate.energy, self._target_key(unit, candidate)), default=None)
+            if mate is not None:
+                self._partner_energy(unit, mate, 16, t, "relay")
+        if unit.technique == "cut" and not unit.technique_used:
+            unit.technique_used = True
+            victim = min((enemy for enemy in self.units if enemy.alive
+                          and enemy.team != unit.team and enemy is not target
+                          and _manhattan(target.pos, enemy.pos) <= 1),
+                         key=lambda enemy: self._target_key(unit, enemy), default=None)
+            if victim is not None:
+                move = {"name": "居合斩", "type": "NORMAL", "power": 35}
+                damage = self._move_damage(unit, victim, move)
+                self._partner_event(unit, victim, "cut", t, damage=damage)
+                self._land_hit(unit, victim, damage, t)
 
     @contextmanager
     def _skill_effect(self, caster, target, effect, t, cast_index, **details):
@@ -669,8 +810,10 @@ class Battle:
             move, self.weather_name))  # S11 天气乘区（实例级，默认 1.0）
         # 通用技能「铁壁」：临时受伤减免（bulwark 施法后 3s；
         # 到期判定用本 tick 的 self.duration，_strike 同拍一致）
-        if target.temp_dr > 0 and target.temp_dr_until >= self.duration:
-            dmg = int(dmg * (1.0 - target.temp_dr))
+        temporary_dr = target.temp_dr if target.temp_dr_until >= self.duration else 0.0
+        partner_dr = target.partner_dr if target.partner_dr_until >= self.duration else 0.0
+        if max(temporary_dr, partner_dr) > 0:
+            dmg = int(dmg * (1.0 - max(temporary_dr, partner_dr)))
         if target.range == 1:  # 近战受伤减免（均衡实验）
             dmg = int(dmg * (1.0 - melee_resist()))
         # ---- S3 羁绊结算钩子 ----

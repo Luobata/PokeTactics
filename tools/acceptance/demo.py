@@ -64,6 +64,7 @@ from match import (PVE_GOLD, PVE_WAVES, Match as _Match,  # noqa: E402
                    weather_for_round)
 from shop import (build_templates, make_piece, sell_value,  # noqa: E402
                   try_combine)
+from expedition import status as expedition_status, sync_profile  # noqa: E402
 
 MAX_ROUNDS = 31          # 与 sim/match 相同的轮数上限（超限按 HP 排名收官）
 BENCH_CAP = 6            # 我方备战行 6 格（docs/10 §1.1 C-sym）
@@ -124,7 +125,8 @@ def sprite_png(species_id: int):
     """/demo/sprite/<id>.png：40/48/56px 源图直接出 PNG（Web 端 CSS 缩放）。"""
     if species_id in _SPRITES:
         return _SPRITES[species_id]
-    if not (1 <= species_id <= 151):
+    from data import pokedex
+    if not (1 <= species_id <= 65535) or species_id not in pokedex().species:
         return None
     front, pal, _ = _assets()
     buf = io.BytesIO()
@@ -135,7 +137,7 @@ def sprite_png(species_id: int):
 
 # ---------------------------------------------------------------- 渲染包装
 def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
-                          positions_a=None, hud_snapshot=None):
+                          positions_a=None, hud_snapshot=None, **battle_options):
     """玩家战斗：DemoBattleAnimation（layout=back + 外部子流）解算并出全帧。
 
     解算与渲染同源：内部那次 Battle 就是本场的权威结果（胜者/存活数），
@@ -150,7 +152,8 @@ def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
 
         def __init__(self, a, b, battle_rng, front, pal, font):
             battle = Battle(a, b, battle_rng, layout="back",
-                            weather_name=weather_name, positions_a=positions_a)
+                            weather_name=weather_name, positions_a=positions_a,
+                            **battle_options)
             self.sim_result = battle.run()
             super().__init__(a, b, 0, front, pal, font,
                              weather_name=weather_name, battle=battle,
@@ -218,6 +221,17 @@ def _fmt_event(anim, e: tuple) -> str:
         return f"<b>⚡ {e[4]}（{TYPE_ZH.get(e[3], e[3])}系齐射）</b>"
     if kind == "regen":
         return f"{name(e[2])} 回复 +{e[3]}"
+    if kind == "partner_effect":
+        label = {"shell_guard": "并肩坚壳", "bloom": "共生花园",
+                 "wing_rally": "振翼鼓舞", "relay": "接力电流",
+                 "share_lunch": "分享便当", "cut": "居合斩",
+                 "surf": "冲浪", "rest": "睡觉"}.get(e[5], "搭档特性")
+        info = e[6]
+        effect = (f"伤害 {info['damage']}" if "damage" in info else
+                  f"回复 {info['amount']}" if "amount" in info else
+                  f"能量 +{info['energy']}" if "energy" in info else
+                  f"减伤 {info.get('reduction', 0):.0%}，持续 {info.get('duration', 0):g} 秒")
+        return f"<b>{name(e[2])} · {label}</b> → {name(e[3])}（{effect}）"
     if kind == "status":
         zh = {"burn": "灼伤", "poison": "中毒", "para": "麻痹", "paralysis": "麻痹",
               "freeze": "冰冻", "sleep": "睡眠", "flinch": "畏缩",
@@ -310,6 +324,34 @@ class Session:
         self.player_battles = 0
         self.final_team = None
         self.eliminated_round = None
+        self.run_id = uuid.uuid4().hex
+        self.expedition = None
+        self.discoveries = {"seen": [], "fielded": [], "won": []}
+
+    def battle_options(self, a=None, b=None):
+        if self.expedition is None:
+            return {}
+        # Every fight in this run, including bot/ghost/PVE, uses the same budget.
+        return {"stat_mode": "budget_v1", "team_options": [
+            {k: self.expedition[k] for k in ("partner", "technique")}
+            if seat is self.player else None for seat in (a, b)]}
+
+    def observe(self, fielded=(), won=()):
+        seen = {o.piece.species_id for o in self.player.all_pieces()}
+        seen.update(s for s in self.player.shop.slots if s is not None)
+        for entry in self.opponent_comp or []:
+            seen.add((entry[0] if isinstance(entry, tuple) else entry).species_id)
+        if self.round_no > 0 and self.round_no % 5 == 0 and self.player.alive:
+            seen.update(PVE_WAVES[min(self.round_no // 5 - 1, len(PVE_WAVES) - 1)])
+        for key, incoming in (("seen", seen | set(fielded) | set(won)),
+                              ("fielded", set(fielded) | set(won)), ("won", won)):
+            self.discoveries[key] = sorted(set(self.discoveries[key]) | set(incoming))
+
+    def progress_snapshot(self):
+        return {"run_id": self.run_id, **copy.deepcopy(self.discoveries),
+                "round": self.eliminated_round or self.round_no,
+                "finished": not self.player.alive or self.phase == "over",
+                "rank": self.player.rank}
 
     # ---- 工具 ----
     @property
@@ -445,6 +487,7 @@ class Session:
         if self.phase != "prep":
             raise DemoError("当前不是准备阶段（先看完战斗再进下一轮）")
         r = self.round_no
+        self.observe(fielded=[o.piece.species_id for o in self.player.board])
         weather = weather_for_round(r)
         if weather is not None:
             self._say(f"天气：{weather_mod.WEATHERS[weather]['label']}"
@@ -467,7 +510,8 @@ class Session:
         """bot 对 bot：秒算，只留结果（与 match._pvp_round 同轨）。"""
         return Battle(a.battle_comp(), b.battle_comp(),
                       rng_mod.derive(self.seed, r, "battle", battle_i),
-                      layout="back", weather_name=weather).run()
+                      layout="back", weather_name=weather,
+                      **self.battle_options(a, b)).run()
 
     def _resolve_pvp(self, r, weather):
         events = []
@@ -524,10 +568,14 @@ class Session:
                     dmg[id(b)] = economy.loss_damage(r, len(a.battle_comp()))
                     self._streak(a, True), self._streak(b, False)
                     note = f"{a.name} 不战而胜"
+                    if a is p:
+                        self.observe(won=[o.piece.species_id for o in p.board])
                 elif b.battle_comp():
                     dmg[id(a)] = economy.loss_damage(r, len(b.battle_comp()))
                     self._streak(b, True), self._streak(a, False)
                     note = f"{b.name} 不战而胜"
+                    if b is p:
+                        self.observe(won=[o.piece.species_id for o in p.board])
                 else:
                     note = "双方空场，无事发生"
                 if p in (a, b):
@@ -550,7 +598,8 @@ class Session:
                 res = Battle(odd.battle_comp(), self.ghost_src.battle_comp(),
                              rng_mod.derive(self.seed, r, "battle", battle_i),
                              layout="back", weather_name=weather,
-                             positions_b=ghost_positions).run()
+                             positions_b=ghost_positions,
+                             **self.battle_options(odd, self.ghost_src)).run()
             else:   # 空场打幽灵：不战而败（保底掉血，Battle 空队会崩所以不走解算）
                 res = {"winner": 1,
                        "survivors": {0: 0, 1: len(self.ghost_src.battle_comp())}}
@@ -583,7 +632,8 @@ class Session:
                 else:
                     res = Battle(e.battle_comp(), list(wave),
                                  rng_mod.derive(self.seed, r, "battle", battle_i),
-                                 layout="back", weather_name=weather).run()
+                                 layout="back", weather_name=weather,
+                                 **self.battle_options(e)).run()
                 battle_i += 1
                 if res["winner"] == 0:
                     gold = rng_mod.derive(self.seed, r, "pve", i).randint(*PVE_GOLD)
@@ -639,7 +689,8 @@ class Session:
             comp_a, comp_b, rng, weather, out_dir,
             positions_a=me.battle_positions(),
             hud_snapshot={"hp": max(0, me.hp), "gold": me.gold,
-                          "level": me.level, "round": r})
+                          "level": me.level, "round": r},
+            **self.battle_options(me, opp))
         meta["round"] = r
         meta["render_s"] = round(time.time() - t0, 1)
         meta["pve"] = pve
@@ -647,6 +698,8 @@ class Session:
         meta["opp_name"] = (opp.name if opp is not None else
                             (self.opp_view or {}).get("name", "野怪"))
         winner = meta["winner"]
+        if winner == 0:
+            self.observe(won=[o.piece.species_id for o in me.board])
         meta["headline"] = ("你 获胜！" if winner == 0 else
                             "你 失败……" if winner == 1 else "平局")
         self.last_battle = meta
@@ -755,8 +808,10 @@ def _item_effect(key: str) -> str:
                 for t, p in v.items()))
         elif isinstance(v, bool):
             parts.append(ITEM_KEY_ZH.get(k, k))
+        elif k == "gold_per_round":
+            parts.append(f"每轮金币+{v:g}")
         else:
-            parts.append(f"{ITEM_KEY_ZH.get(k, k)}+{round(v * 100)}%")
+            parts.append(f"{ITEM_KEY_ZH.get(k, k)}+{v * 100:g}%")
     return "，".join(parts) or "—"
 
 
@@ -866,6 +921,8 @@ def state_json(sess) -> dict:
         "last_battle": sess.last_battle,
         "save": {"sequence": getattr(sess, "save_sequence", None),
                  "warning": getattr(sess, "save_warning", None)},
+        "expedition": expedition_status(sess),
+        "profile_warning": getattr(sess, "profile_warning", None),
         "player_result": ({"rank": p.rank, "round": sess.eliminated_round or sess.round_no,
                            "team": sess.final_team if sess.final_team is not None else
                            [_piece_view(o.piece, o.item) for o in p.board]}
@@ -1076,12 +1133,16 @@ def act_unequip(sess, loc: str):
     return f"卸下 {items_mod.FINISHED[key]['name']}（回仓库）"
 
 
-def _new_session(seed: int) -> Session:
+def _new_session(seed: int, params=None) -> Session:
+    from expedition import configure, deploy_starter
+    sess = Session(seed)
+    configure(sess, params or {})
+    sess.begin_round(1)
+    deploy_starter(sess)
+    sess.observe()
     if len(SESSIONS) >= MAX_SESSIONS:
         oldest = next(iter(SESSIONS))
         _drop_session(oldest)
-    sess = Session(seed)
-    sess.begin_round(1)   # R1 准备阶段：首轮收入 + 免费商店（与 match 同轨）
     SESSIONS[sess.sid] = sess
     return sess
 
@@ -1102,7 +1163,7 @@ def _apply_action(params: dict):
                     seed = int(params["seed"]) if params.get("seed") else secrets.randbits(32)
                 except ValueError:
                     raise DemoError("种子必须是整数")
-                sess = _new_session(seed)
+                sess = _new_session(seed, params)
                 return {"ok": True, "sid": sess.sid,
                         "state": state_json(sess)}
             sid = params.get("sid", "")
@@ -1188,6 +1249,7 @@ def _publish_loaded(loaded, sid):
     if len(SESSIONS) >= MAX_SESSIONS and sid not in SESSIONS:
         _drop_session(next(iter(SESSIONS)))
     SESSIONS[sid] = session
+    sync_profile(session)
     return {"ok": True, "sid": sid, "state": state_json(session),
             "msg": "进度已恢复，不会重复结算收入或奖励"}
 
@@ -1216,9 +1278,14 @@ def api_action(params: dict):
             if cmd != "state":
                 sid = result.get("sid", sid)
                 session = SESSIONS[sid]
+                session.observe()
                 info = _save_store(sid).save(session)
                 session.save_sequence = info.sequence
+                sync_profile(session)
                 result["state"] = state_json(session)
+            elif sid in SESSIONS and not getattr(SESSIONS[sid], "save_blocked", False):
+                sync_profile(SESSIONS[sid])
+                result["state"] = state_json(SESSIONS[sid])
             return result
         except Exception as exc:
             if getattr(exc, "commit_uncertain", False):
@@ -1367,7 +1434,8 @@ canvas{display:block;width:480px;max-width:92vw;image-rendering:pixelated;backgr
 <span class="muted">1 玩家 + 7 bot · 全系统开启（羁绊/装备/齐射/天气/状态）</span>
 <span style="flex:1"></span>
 <input id="seedin" type="number" placeholder="随机种子" style="width:110px" title="留空随机；填整数可复现对局">
-<button class="primary" onclick="newGame()">开新对局</button>
+<button class="primary" onclick="newGame()">开新经典对局</button>
+<a href="/expedition">远征手册 · 挑战 / 主搭档</a>
 <a href="/" class="muted">← 验收后台</a>
 </header>
 <div class="panel" style="margin-bottom:12px">
@@ -1379,6 +1447,7 @@ canvas{display:block;width:480px;max-width:92vw;image-rendering:pixelated;backgr
   <p id="save-status" class="muted">每次操作成功后自动保存到本机服务；下载备份可另行保管。</p>
   <div id="import-preview" hidden><p id="import-info"></p><button class="primary" onclick="confirmImport()">确认导入并保留当前进度备份</button><button onclick="cancelImport()">取消导入</button></div>
 </div>
+<div id="expedition-status" class="panel" hidden></div>
 <div id="hud" class="muted">加载中…</div>
 <div class="cols">
 <section>
@@ -1489,7 +1558,9 @@ function pieceCell(v,loc,cls){
 function render(){
   if(!S)return;
   const y=S.you;
-  $('save-status').textContent=(S.save?.sequence?'已保存 · 第 '+S.save.sequence+' 次提交。':'')+(S.save?.warning||'每次操作自动保存；服务重启后可继续。');
+  const ex=S.expedition; $('expedition-status').hidden=!ex;
+  if(ex)$('expedition-status').textContent='主搭档 '+ex.partner+' · '+ex.trait+'｜'+(ex.active?'本场载体：'+ex.active:'尚未上场，特性未激活')+'。'+ex.description+(ex.technique?' 学习 '+ex.technique.name+'：'+ex.technique.description:'')+' 【同费用基础预算 v1】';
+  $('save-status').textContent=(S.profile_warning||'')+(S.save?.sequence?'已保存 · 第 '+S.save.sequence+' 次提交。':'')+(S.save?.warning||'每次操作自动保存；服务重启后可继续。');
   /* HUD */
   const w=S.weather;
   $('hud').innerHTML=[
@@ -1797,5 +1868,5 @@ function bspeed(){bspeedv=+$('bspeed').value;if(playing){stopPlay();play();}}
 function closeBattle(){++loadToken;stopPlay();$('overlay').classList.remove('show');}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopPlay();});
 /* ---------- 启动 ---------- */
-(async()=>{if(savedSlot())await resumeGame();else newGame();})();
+(async()=>{const query=new URLSearchParams(location.search);if(query.get('new')==='classic'){history.replaceState(null,'','/demo');newGame();return;}const linked=query.get('sid');if(linked&&/^[a-f0-9]{12}$/.test(linked))sid=linked;if(sid||savedSlot())await resumeGame();else newGame();})();
 </script></body></html>"""

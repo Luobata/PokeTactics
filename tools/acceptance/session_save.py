@@ -7,6 +7,7 @@ calls begin_round, decide, roll or combat: income/rewards cannot be replayed.
 import copy
 import hashlib
 import json
+import math
 from collections import Counter
 from pathlib import Path
 
@@ -50,7 +51,7 @@ def comp_record(comp):
 
 class SessionCodec:
     game_id = "poketactics"
-    schema_version = 1
+    schema_version = 2
 
     def encode(self, state):
         seats = []
@@ -76,6 +77,8 @@ class SessionCodec:
                     ("winner", "survivors", "duration", "round", "pve", "ghost") if key in meta}
                    if meta else None)
         payload = {"rules": rules_fingerprint(), "seed": state.seed, "round": state.round_no,
+                "expedition_state": {"run_id": state.run_id, "loadout": state.expedition,
+                                     "discoveries": state.discoveries},
                 "phase": state.phase, "seats": seats,
                 "pool": {str(k): v for k, v in state.pool.remaining.items()},
                 "pairs": [[a.seat, b.seat] for a, b in state.pairs] if state.pairs is not None else None,
@@ -92,8 +95,10 @@ class SessionCodec:
         return json.loads(json.dumps(payload, ensure_ascii=False, allow_nan=False))
 
     def decode(self, payload, schema_version):
-        if schema_version != 1:
+        if type(schema_version) is not int or schema_version not in (1, 2):
             raise ValueError("不支持的 PokeTactics 存档版本")
+        if schema_version == 2 and "expedition_state" not in payload:
+            raise ValueError("远征存档缺少永久对局编号")
         try:
             return self._decode(payload)
         except (KeyError, TypeError, AttributeError, IndexError) as exc:
@@ -110,7 +115,7 @@ class SessionCodec:
         held = Counter()
 
         def piece(record, owned=True):
-            sid = integer(record["species"], 1, 151, "species")
+            sid = integer(record["species"], 1, 65535, "species")
             if sid not in state.templates:
                 raise ValueError("存档包含当前版本不支持的棋子")
             item = record["item"]
@@ -283,12 +288,32 @@ class SessionCodec:
                             if data["final_team"] is not None else None)
         summary = data["last_battle"]
         if summary is not None:
+            if not isinstance(summary, dict) or set(summary) - {
+                    "winner", "survivors", "duration", "round", "pve", "ghost"}:
+                raise ValueError("战斗结算摘要字段无效")
             winner = summary["winner"]
             if winner is not None:
                 integer(winner, 0, 1, "winner")
-            state.last_battle = {"n": 0, "winner": winner, "round": state.round_no, "restored": True,
+            if "survivors" in summary:
+                survivors = summary["survivors"]
+                if not isinstance(survivors, dict) or set(survivors) != {"0", "1"}:
+                    raise ValueError("战斗存活数量无效")
+                for value in survivors.values():
+                    integer(value, 0, 12, "survivors")
+            if "duration" in summary:
+                duration = summary["duration"]
+                if type(duration) not in (int, float) or not math.isfinite(duration) or not 0 <= duration <= 10000:
+                    raise ValueError("战斗时长无效")
+            if "round" in summary:
+                integer(summary["round"], 1, state.round_no, "battle round")
+            for key in ("pve", "ghost"):
+                if key in summary and type(summary[key]) is not bool:
+                    raise ValueError("战斗类别无效")
+            state.last_battle = {**copy.deepcopy(summary), "n": 0, "winner": winner, "round": state.round_no, "restored": True,
                                  "headline": "已恢复战后结算，结果不会重复发放",
                                  "opp_name": (state.opp_view or {}).get("name", "对手"), "events": []}
         state.save_warning = ("规则已更新，后续回合使用当前规则；历史回放不可重演"
                               if data["rules"] != rules_fingerprint() else None)
+        from expedition import decode_extension
+        decode_extension(state, data)
         return state

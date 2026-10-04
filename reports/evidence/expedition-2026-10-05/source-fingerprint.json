@@ -1,0 +1,22 @@
+{
+  "base": "e2246f3dc924eaf30cbba95a203ca2c11c47da0b",
+  "files": {
+    "sim/combat.py": "4c9831901d0154b471d0c6420349a0abb0ac721f1af84ae56b10ec9585ba6459",
+    "sim/experiment_partner_budget.py": "340d9947ba1d22ed58a83f1c837c255f3cb8165b9d77b170fa6466618718ac84",
+    "sim/metagame.py": "6994be25666c92020b4b76ff9c66a23a364764692247522a03372f697b781982",
+    "sim/partners.py": "02fc8ff77488e11bcb502f69529873986e4da85bfc4be1f941141b69990632c8",
+    "sim/stat_budget.py": "19834bef39384d3b034081ed9198ede1e31e2a7ddb45201d0194b1c8099e6aac",
+    "tests/test_demo_contracts.py": "c6e111dcff42ab1addbca09f8089456012a4e340b4a29ec875d7fcf800582969",
+    "tests/test_expedition_contracts.py": "82f982bfb05d3a8bbeb4a06610ad45ad3252deb4cd866547e18db4ddc6547e06",
+    "tests/test_meta_profile.py": "a0d611a3d9827e847cd0e31ec766a292a041f9f076e3190d48f12f9294dc2956",
+    "tests/test_partners.py": "56eb8e08d683058f85fe40d6a0c623cfb7378cd4ee984339a45408c98cedc9ed",
+    "tests/test_session_save.py": "74883159ca7a115d04625fe6bab16a352e6f0c0eab5a78f5e4a991c0ac007389",
+    "tests/test_stat_budget.py": "da4fd9daddf3f8b6a4869bf302018fc9c390388d856d014c9cd98ba2294f8c44",
+    "tools/acceptance/demo.py": "da49975a872c651198218cce61056742607c2f1236b9a377a9c93b1b27b153aa",
+    "tools/acceptance/expedition.py": "f0fee8bb3038b0eccc690fcb33715482e0add78e3de2a6963c82b41e7115a0af",
+    "tools/acceptance/expedition_page.py": "6f1e170529480a8cbcb0db6c753801c1e1b109fc0fd2e4afe5c8bb897d93fc65",
+    "tools/acceptance/meta_profile.py": "3096a8b6b598ea65cd375ff49a5ce4a56425a75d40c64679b2661dc438e5fec3",
+    "tools/acceptance/server.py": "87bc7187bf4e5503137100776634f5f446e8e7bb1bc18bc64b1199c65cbb6b1e",
+    "tools/acceptance/session_save.py": "99cf16fcfe4e6a7f84911f4c1a669b1a6795635b2f931d37bb88258a30cd371f"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "base_checks": {
+    "passed": 5,
+    "failed": 0,
+    "skipped": 4
+  },
+  "unit_tests": 246,
+  "targeted_after_final_ui_and_catalog_changes": {
+    "session": 12,
+    "expedition": 12,
+    "compileall": "pass",
+    "inline_js_syntax": "pass",
+    "persistence_restart": "pass",
+    "strict_battle_summary_import": "pass"
+  },
+  "demo": {
+    "games": 2,
+    "seeds": [
+      7,
+      42
+    ],
+    "battles": 25,
+    "frames": 6283,
+    "http_200": 728
+  },
+  "budget": {
+    "species": 84,
+    "same_tier_point_error": 0,
+    "mirror_and_swap_battles": 1440,
+    "cross_species_battles": 32256,
+    "balance_validated": false
+  },
+  "manual_browser": "browser-review.md",
+  "reviewers": [
+    "independent-app-review.md",
+    "independent-combat-review.md"
+  ],
+  "qualitygate": {
+    "local_gate": "pass",
+    "central_mcp": "unavailable_in_session",
+    "effective_rules_snapshot": {},
+    "mutation": "disabled_not_executed",
+    "not_a_substitute_for_tests": true
+  },
+  "limitations": "../../../docs/20-expedition-partners-and-budgets.md"
+}
