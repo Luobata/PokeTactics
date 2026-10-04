@@ -1,0 +1,55 @@
+{
+  "seed": 7,
+  "teams": [
+    [
+      6,
+      19,
+      63,
+      31,
+      75,
+      12
+    ],
+    [
+      9,
+      1,
+      2,
+      10,
+      18,
+      130
+    ]
+  ],
+  "initial_conditions": "normal HP and energy; unmodified Battle",
+  "result": {
+    "winner": 1,
+    "duration": 11.699999999999974,
+    "survivors": {
+      "0": 0,
+      "1": 5
+    }
+  },
+  "rendered_frames": 137,
+  "gif_frames": 81,
+  "clip_start": 2.7,
+  "clip_end": 10.7,
+  "gif": "mixed-battle.gif",
+  "casts_by_species": {
+    "6": 1,
+    "19": 0,
+    "63": 1,
+    "31": 1,
+    "75": 0,
+    "12": 1,
+    "9": 1,
+    "1": 1,
+    "2": 1,
+    "10": 0,
+    "18": 1,
+    "130": 1
+  },
+  "frame_sha256": "2290e491ff6941ff6dfa34cc82be8d2d24d512842ff159a431a73b61d92f678a",
+  "event_sha256": "fc1fb464f32bec366a29b34fa8e0e88746ae970d81d0214c0fa040007d638f81",
+  "events_preserved": true,
+  "particle_peak": 43,
+  "track_peak": 3,
+  "scope": "PC 6v6 mixed battle; not balance or ESP32 performance validation"
+}

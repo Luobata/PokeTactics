@@ -1,0 +1,28 @@
+{
+  "base": "db01c57102c948a1b05ed9868dbb3e41afd36d4b",
+  "files": {
+    "sim/combat.py": "4fce903808891eed90b7fadac561a66bd0f4e34944a3169974d0887a0f405377",
+    "sim/experiment_profiles.py": "c6dc8eb0372e0b03269d0d62117ddaf16a008f3fe6cccaf24aabb2f632f71a1d",
+    "sim/profiles.py": "b1b02ef37b0b9da2eb8427c3807c48c27ee884a3f80830a94af7fbcb6f334759",
+    "sim/roster.py": "cd73d70615a14c2f9042644fa8e2cd8127fca5917519a68848cae44d4393a04e",
+    "sim/skills.py": "827d756c5e2f5ad1c28dbb24dbd14241a690c2a9b48350e04d36384d5f897200",
+    "tests/test_animation_preview.py": "c55b4cf7a509fa753cf4d377be809bcca5fe18b238b8523492b8d55f5a7988f7",
+    "tests/test_art_manifest.py": "31600bc658625fb94ecb9f8c7f70ea1e84fb5ff171ea2856170be3543ccb94c7",
+    "tests/test_character_catalog.py": "ef2b1230fa4978a8d3a1f93fa4b456dd9fc59c4cc6e111e906a4e5f2b7e13b36",
+    "tests/test_demo_contracts.py": "57cad7c77d0ff4f3934072369caa464f8892f508954ac3a8fe4f8183e664e43d",
+    "tests/test_fallback_animation.py": "c46e12c190d8d14e91f4ff01e0a35742671c8d13ae71362217f3a0b8b677ec3a",
+    "tests/test_roster_extension_contracts.py": "e72679e53c88a9e95496c72a2be01c5ee7150270560721f2e4359cf1abccbfda",
+    "tools/acceptance/animation_editor.html": "f7705f9289405e5eabd2da5a63b51937d8518feebc98bc407c5c19a7d20f95cb",
+    "tools/acceptance/animation_lab.html": "e4fb09f787e57fe9f5a8da899300beaf826eac7bcdb33111389b1a115caedb25",
+    "tools/acceptance/animation_preview.py": "2b46fa7898606ecfe99a1ef8edd747d098b70091294979f54cf046c97ee5c143",
+    "tools/acceptance/demo.py": "399137074c7e4ea376baae75cd0b16c3d809cd4f554d1f85894bf9d8f04129e0",
+    "tools/mockups/animation_showcase.py": "98fc88ac19d4ef24bdcae9a4e342fdc90c89a64e91513b5de756ec6cab2fe040",
+    "tools/mockups/art_manifest.py": "2be3a53791e51e4da6f568fb15e2949d659058e7b81f27b735bdd1b909971901",
+    "tools/mockups/character_catalog.py": "ce6b73a428442248ac948188ebc35b8e85dbb173b3bc7da18816c5ce7d216bfc",
+    "tools/mockups/decoders.py": "a39938b815e0e3b453d7fa01bbe32cf34f847c5705def944882e49c13d320330",
+    "tools/mockups/motion.py": "3205f7ec3c0e86a3f107988183823ed46803cdcce959ec584d365658e47a4940",
+    "tools/mockups/profile_range.py": "bd5c2c2e968483a46ccc5fbd9ad14d90040ad3a53eeb2708a757c38bf816b281",
+    "tools/mockups/render_battle_gif.py": "3e328cfa6c754ec0f380b950835546ba68d952dfbfec9b08ee6de2212e828ee0",
+    "tools/mockups/roster_showcase.py": "15ec642d26be5cd312e2ef4c1fa87470099f210f3279b98a2faaf3ce141a4306"
+  }
+}

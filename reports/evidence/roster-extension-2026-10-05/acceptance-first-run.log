@@ -1,0 +1,291 @@
+
+[RUN] unit_tests: /Users/bytedance/.pyenv/versions/3.12.0/bin/python3 -m unittest discover -s tests -v
+test_cache_pruning_is_bounded_and_preserves_current_pair_and_unowned_files (test_animation_preview.AnimationPreviewContracts.test_cache_pruning_is_bounded_and_preserves_current_pair_and_unowned_files) ... ok
+test_failed_pairs_cannot_fill_cache_or_evict_the_last_success (test_animation_preview.AnimationPreviewContracts.test_failed_pairs_cannot_fill_cache_or_evict_the_last_success) ... /Users/bytedance/luobata/PokeTactics/tools/mockups/character_rigs.py:246: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  opaque = [pixel[:3] for pixel in cel.getdata() if pixel[3]]
+ok
+test_failed_render_preserves_existing_cache_and_cleans_partial_frames (test_animation_preview.AnimationPreviewContracts.test_failed_render_preserves_existing_cache_and_cleans_partial_frames) ... /Users/bytedance/luobata/PokeTactics/tools/mockups/motion.py:443: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  bright = max((c for c in cel.getdata() if c[3]), key=lambda c: sum(c[:3]))
+ok
+test_json_and_request_limits (test_animation_preview.AnimationPreviewContracts.test_json_and_request_limits) ... ok
+test_preset_roundtrip_and_input_do_not_leak_between_instances (test_animation_preview.AnimationPreviewContracts.test_preset_roundtrip_and_input_do_not_leak_between_instances) ... ok
+test_presets_reject_unknown_fields_nonfinite_types_and_future_versions (test_animation_preview.AnimationPreviewContracts.test_presets_reject_unknown_fields_nonfinite_types_and_future_versions) ... ok
+test_source_revision_invalidates_cache (test_animation_preview.AnimationPreviewContracts.test_source_revision_invalidates_cache) ... ok
+test_visual_edit_changes_pixels_but_preserves_timing_hp_and_base (test_animation_preview.AnimationPreviewContracts.test_visual_edit_changes_pixels_but_preserves_timing_hp_and_base) ... ok
+test_character_catalog_distinguishes_real_mechanisms_and_planned_parts (test_animation_preview.AnimationPreviewHTTPContracts.test_character_catalog_distinguishes_real_mechanisms_and_planned_parts) ... ok
+test_http_preset_validation_requires_marker_and_same_origin (test_animation_preview.AnimationPreviewHTTPContracts.test_http_preset_validation_requires_marker_and_same_origin) ... ok
+test_blink_preserves_origin_then_disappears_before_destination (test_animation_timeline.AnimationTimelineContracts.test_blink_preserves_origin_then_disappears_before_destination) ... ok
+test_cast_energy_stays_visible_through_windup_then_uses_authoritative_state (test_animation_timeline.AnimationTimelineContracts.test_cast_energy_stays_visible_through_windup_then_uses_authoritative_state) ... ok
+test_death_never_precedes_its_last_landed_state (test_animation_timeline.AnimationTimelineContracts.test_death_never_precedes_its_last_landed_state) ... ok
+test_dense_battle_has_finite_cinematics_signature_tracks_and_particles (test_animation_timeline.AnimationTimelineContracts.test_dense_battle_has_finite_cinematics_signature_tracks_and_particles) ... ok
+test_heavy_hero_has_crouch_lift_and_downward_contact (test_animation_timeline.AnimationTimelineContracts.test_heavy_hero_has_crouch_lift_and_downward_contact) ... ok
+test_hero_rhythm_and_body_poses_are_distinct (test_animation_timeline.AnimationTimelineContracts.test_hero_rhythm_and_body_poses_are_distinct) ... ok
+test_legacy_lethal_attack_does_not_cancel_its_own_projectile (test_animation_timeline.AnimationTimelineContracts.test_legacy_lethal_attack_does_not_cancel_its_own_projectile) ... ok
+test_lethal_projectile_arrives_before_hp_and_death_change (test_animation_timeline.AnimationTimelineContracts.test_lethal_projectile_arrives_before_hp_and_death_change) ... ok
+test_seek_speed_skip_and_independent_same_seed_render_identical_pixels (test_animation_timeline.AnimationTimelineContracts.test_seek_speed_skip_and_independent_same_seed_render_identical_pixels) ... ok
+test_unit_state_order_and_final_result_match_raw_simulation (test_animation_timeline.AnimationTimelineContracts.test_unit_state_order_and_final_result_match_raw_simulation) ... ok
+test_atlas_metadata_cannot_point_at_different_species_pixels (test_art_manifest.ArtManifestContracts.test_atlas_metadata_cannot_point_at_different_species_pixels) ... ok
+test_core_pixel_cels_are_exported_and_tampering_cannot_fake_provenance (test_art_manifest.ArtManifestContracts.test_core_pixel_cels_are_exported_and_tampering_cannot_fake_provenance) ... ok
+test_export_is_stable_across_fresh_processes_and_has_no_host_path (test_art_manifest.ArtManifestContracts.test_export_is_stable_across_fresh_processes_and_has_no_host_path) ... ok
+test_integer_export_matches_python_samples_at_clip_boundaries (test_art_manifest.ArtManifestContracts.test_integer_export_matches_python_samples_at_clip_boundaries) ... ok
+test_inventing_an_animation_catalog_entry_cannot_fake_coverage (test_art_manifest.ArtManifestContracts.test_inventing_an_animation_catalog_entry_cannot_fake_coverage) ... ok
+test_malformed_binary_layout_and_palette_index_are_rejected (test_art_manifest.ArtManifestContracts.test_malformed_binary_layout_and_palette_index_are_rejected) ... ok
+test_missing_animation_reference_is_not_hidden_by_revision (test_art_manifest.ArtManifestContracts.test_missing_animation_reference_is_not_hidden_by_revision) ... ok
+test_missing_asset_is_a_hard_failure (test_art_manifest.ArtManifestContracts.test_missing_asset_is_a_hard_failure) ... ok
+test_modified_asset_and_forged_hash_are_rejected (test_art_manifest.ArtManifestContracts.test_modified_asset_and_forged_hash_are_rejected) ... ok
+test_pc_evidence_is_separate_from_configuration_and_esp32_claims (test_art_manifest.ArtManifestContracts.test_pc_evidence_is_separate_from_configuration_and_esp32_claims) ... ok
+test_planned_rigs_cannot_be_reported_as_implemented (test_art_manifest.ArtManifestContracts.test_planned_rigs_cannot_be_reported_as_implemented) ... ok
+test_real_byte_ranges_hashes_and_declared_coverage_match_inputs (test_art_manifest.ArtManifestContracts.test_real_byte_ranges_hashes_and_declared_coverage_match_inputs) ... ok
+test_traversal_in_resource_reference_is_rejected (test_art_manifest.ArtManifestContracts.test_traversal_in_resource_reference_is_rejected) ... ok
+test_counter_and_equipment_use_the_combat_role (test_bot_value_contracts.BotValueContracts.test_counter_and_equipment_use_the_combat_role) ... ok
+test_full_bench_replaces_terminal_duplicate_before_stronger_single (test_bot_value_contracts.BotValueContracts.test_full_bench_replaces_terminal_duplicate_before_stronger_single) ... ok
+test_full_bench_still_protects_legal_pair (test_bot_value_contracts.BotValueContracts.test_full_bench_still_protects_legal_pair) ... ok
+test_l1_buys_unrelated_legal_third_copy_and_combines (test_bot_value_contracts.BotValueContracts.test_l1_buys_unrelated_legal_third_copy_and_combines) ... ok
+test_l1_can_still_buy_terminal_duplicate_for_board_types (test_bot_value_contracts.BotValueContracts.test_l1_can_still_buy_terminal_duplicate_for_board_types) ... ok
+test_l1_does_not_buy_unrelated_terminal_or_trade_duplicate (test_bot_value_contracts.BotValueContracts.test_l1_does_not_buy_unrelated_terminal_or_trade_duplicate) ... ok
+test_l1_full_bench_buys_profile_upgrade_and_selects_it (test_bot_value_contracts.BotValueContracts.test_l1_full_bench_buys_profile_upgrade_and_selects_it) ... ok
+test_legal_evolutions_keep_pair_and_completion_bonus (test_bot_value_contracts.BotValueContracts.test_legal_evolutions_keep_pair_and_completion_bonus) ... ok
+test_profile_range_controls_actual_back_row_and_disabled_fallback (test_bot_value_contracts.BotValueContracts.test_profile_range_controls_actual_back_row_and_disabled_fallback) ... ok
+test_ranged_penalty_follows_active_range_exactly_once (test_bot_value_contracts.BotValueContracts.test_ranged_penalty_follows_active_range_exactly_once) ... ok
+test_sell_pass_does_not_protect_weaker_terminal_duplicates (test_bot_value_contracts.BotValueContracts.test_sell_pass_does_not_protect_weaker_terminal_duplicates) ... ok
+test_sell_pass_protects_legal_pair_even_when_destination_is_out_of_stock (test_bot_value_contracts.BotValueContracts.test_sell_pass_protects_legal_pair_even_when_destination_is_out_of_stock) ... ok
+test_shop_and_board_include_the_same_profile_value (test_bot_value_contracts.BotValueContracts.test_shop_and_board_include_the_same_profile_value) ... ok
+test_terminal_forms_and_eevee_leaves_have_no_chase_bonus (test_bot_value_contracts.BotValueContracts.test_terminal_forms_and_eevee_leaves_have_no_chase_bonus) ... ok
+test_trade_forms_have_no_pair_bonus_and_keep_third_copy_penalty (test_bot_value_contracts.BotValueContracts.test_trade_forms_have_no_pair_bonus_and_keep_third_copy_penalty) ... ok
+test_all_roster_has_honest_independent_capabilities (test_character_catalog.CharacterCatalogContracts.test_all_roster_has_honest_independent_capabilities) ... ok
+test_existing_dex_member_is_not_in_shop_until_selected (test_character_catalog.CharacterCatalogContracts.test_existing_dex_member_is_not_in_shop_until_selected) ... ok
+test_manifest_supports_uint16_species_ids_beyond_first_generation (test_character_catalog.CharacterCatalogContracts.test_manifest_supports_uint16_species_ids_beyond_first_generation) ... ok
+test_new_family_member_automatically_appears_but_missing_art_is_explicit (test_character_catalog.CharacterCatalogContracts.test_new_family_member_automatically_appears_but_missing_art_is_explicit) ... ok
+test_noncore_default_preview_is_valid_but_unsupported_edits_are_rejected (test_character_catalog.CharacterCatalogContracts.test_noncore_default_preview_is_valid_but_unsupported_edits_are_rejected) ... ok
+test_catalog_distinguishes_delivered_parts_from_plans (test_character_rigs.CharacterRigTests.test_catalog_distinguishes_delivered_parts_from_plans) ... ok
+test_each_delivered_rig_has_distinct_attack_and_cast_pixels (test_character_rigs.CharacterRigTests.test_each_delivered_rig_has_distinct_attack_and_cast_pixels) ... /Users/bytedance/luobata/PokeTactics/tools/mockups/character_rigs.py:234: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  color = max((pixel for pixel in cel.getdata() if pixel[3]),
+ok
+test_extended_vines_survive_source_rectangle_without_clipping (test_character_rigs.CharacterRigTests.test_extended_vines_survive_source_rectangle_without_clipping) ... ok
+test_freeze_stops_part_track_and_death_overrides_it (test_character_rigs.CharacterRigTests.test_freeze_stops_part_track_and_death_overrides_it) ... ok
+test_mirror_is_exact_and_attachment_coordinates_follow_it (test_character_rigs.CharacterRigTests.test_mirror_is_exact_and_attachment_coordinates_follow_it) ... ok
+test_real_claw_cannons_and_vine_anchors_move (test_character_rigs.CharacterRigTests.test_real_claw_cannons_and_vine_anchors_move) ... ok
+test_renderer_seeks_repeat_same_pixels_and_leave_authority_unchanged (test_character_rigs.CharacterRigTests.test_renderer_seeks_repeat_same_pixels_and_leave_authority_unchanged) ... ok
+test_source_palette_alpha_and_input_are_preserved (test_character_rigs.CharacterRigTests.test_source_palette_alpha_and_input_are_preserved) ... /Users/bytedance/luobata/PokeTactics/tests/test_character_rigs.py:95: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  colors={pixel[:3] for pixel in source.getdata() if pixel[3]}
+/Users/bytedance/luobata/PokeTactics/tests/test_character_rigs.py:98: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  self.assertLessEqual({pixel[:3] for pixel in image.getdata() if pixel[3]},colors)
+ok
+test_whole_body_pose_preserves_named_anchors_and_padded_canvas (test_character_rigs.CharacterRigTests.test_whole_body_pose_preserves_named_anchors_and_padded_canvas) ... ok
+test_back_formation_is_a_180_degree_mirror (test_combat_contracts.CombatContracts.test_back_formation_is_a_180_degree_mirror) ... ok
+test_basic_attack_grants_authoritative_energy_with_bonuses (test_combat_contracts.CombatContracts.test_basic_attack_grants_authoritative_energy_with_bonuses) ... ok
+test_blink_with_no_landing_cell_retains_original_target (test_combat_contracts.CombatContracts.test_blink_with_no_landing_cell_retains_original_target) ... ok
+test_both_teams_launch_opening_volley_before_casualties (test_combat_contracts.CombatContracts.test_both_teams_launch_opening_volley_before_casualties) ... ok
+test_cast_really_applies_each_type_status_at_100_percent (test_combat_contracts.CombatContracts.test_cast_really_applies_each_type_status_at_100_percent) ... ok
+test_explicit_positions_and_validation (test_combat_contracts.CombatContracts.test_explicit_positions_and_validation) ... ok
+test_identical_team_sample_has_no_large_side_bias (test_combat_contracts.CombatContracts.test_identical_team_sample_has_no_large_side_bias) ... ok
+test_lethal_primary_skips_second_strike_and_never_duplicates_death (test_combat_contracts.CombatContracts.test_lethal_primary_skips_second_strike_and_never_duplicates_death) ... ok
+test_missed_cast_does_not_apply_status_or_grant_hit_energy (test_combat_contracts.CombatContracts.test_missed_cast_does_not_apply_status_or_grant_hit_energy) ... ok
+test_same_seed_and_rotated_side_swap_preserve_each_unit_result (test_combat_contracts.CombatContracts.test_same_seed_and_rotated_side_swap_preserve_each_unit_result) ... ok
+test_splash_uses_secondary_defense_and_each_modifier_once (test_combat_contracts.CombatContracts.test_splash_uses_secondary_defense_and_each_modifier_once) ... ok
+test_unreachable_charge_falls_back_without_wasted_movement (test_combat_contracts.CombatContracts.test_unreachable_charge_falls_back_without_wasted_movement) ... ok
+test_volley_and_double_strike_do_not_repeat_primary_modifiers (test_combat_contracts.CombatContracts.test_volley_and_double_strike_do_not_repeat_primary_modifiers) ... ok
+test_alive_player_cannot_skip_entire_game (test_demo_contracts.DemoContracts.test_alive_player_cannot_skip_entire_game) ... ok
+test_all_four_corners_reach_authoritative_renderer (test_demo_contracts.DemoContracts.test_all_four_corners_reach_authoritative_renderer) ... ok
+test_board_only_merge_cannot_overflow_full_bench (test_demo_contracts.DemoContracts.test_board_only_merge_cannot_overflow_full_bench) ... ok
+test_enemy_and_pve_preview_use_rotated_back_formation (test_demo_contracts.DemoContracts.test_enemy_and_pve_preview_use_rotated_back_formation) ... ok
+test_full_bench_allows_immediate_merge (test_demo_contracts.DemoContracts.test_full_bench_allows_immediate_merge) ... ok
+test_full_bench_denial_is_atomic_even_when_target_pool_is_empty (test_demo_contracts.DemoContracts.test_full_bench_denial_is_atomic_even_when_target_pool_is_empty) ... ok
+test_human_as_bot_ghost_preserves_rotated_grid (test_demo_contracts.DemoContracts.test_human_as_bot_ghost_preserves_rotated_grid) ... ok
+test_l3_and_ghost_opponent_keep_the_advertised_preparation_order (test_demo_contracts.DemoContracts.test_l3_and_ghost_opponent_keep_the_advertised_preparation_order) ... ok
+test_lock_retains_reserved_slots_and_refresh_unlocks (test_demo_contracts.DemoContracts.test_lock_retains_reserved_slots_and_refresh_unlocks) ... ok
+test_manual_elimination_can_advance_and_finish_with_persistent_result (test_demo_contracts.DemoContracts.test_manual_elimination_can_advance_and_finish_with_persistent_result) ... ok
+test_new_game_accepts_reproducible_seed_or_generates_one (test_demo_contracts.DemoContracts.test_new_game_accepts_reproducible_seed_or_generates_one) ... ok
+test_pool_recovery_cannot_overflow_previously_nonfull_bench (test_demo_contracts.DemoContracts.test_pool_recovery_cannot_overflow_previously_nonfull_bench) ... ok
+test_position_order_matches_piece_order_after_swap (test_demo_contracts.DemoContracts.test_position_order_matches_piece_order_after_swap) ... ok
+test_role_card_uses_effective_profile_range_and_skill (test_demo_contracts.DemoContracts.test_role_card_uses_effective_profile_range_and_skill) ... FAIL
+test_stone_rejection_keeps_equipment_and_resources_unchanged (test_demo_contracts.DemoContracts.test_stone_rejection_keeps_equipment_and_resources_unchanged) ... ok
+test_authored_body_can_render_without_a_part_rig (test_fallback_animation.AssetFallbackContracts.test_authored_body_can_render_without_a_part_rig) ... ok
+test_missing_palette_and_resource_have_localizable_errors (test_fallback_animation.AssetFallbackContracts.test_missing_palette_and_resource_have_localizable_errors) ... ok
+test_missing_transparent_and_truncated_sprites_identify_species_and_file (test_fallback_animation.AssetFallbackContracts.test_missing_transparent_and_truncated_sprites_identify_species_and_file) ... ok
+test_new_id_decodes_without_a_generation_limit (test_fallback_animation.AssetFallbackContracts.test_new_id_decodes_without_a_generation_limit) ... ok
+test_every_roster_member_has_a_real_precharged_cast_and_visible_frames (test_fallback_animation.RosterPreviewContracts.test_every_roster_member_has_a_real_precharged_cast_and_visible_frames) ... ok
+test_generic_body_prepares_until_release_and_recovers_with_timeline (test_fallback_animation.RosterPreviewContracts.test_generic_body_prepares_until_release_and_recovers_with_timeline) ... ok
+test_missing_sprite_fails_before_any_bbox_or_style_lookup (test_fallback_animation.RosterPreviewContracts.test_missing_sprite_fails_before_any_bbox_or_style_lookup) ... ok
+test_move_hit_and_death_preview_keep_real_events (test_fallback_animation.RosterPreviewContracts.test_move_hit_and_death_preview_keep_real_events) ... ok
+test_previously_truncated_ranged_attacks_include_impact_and_settle (test_fallback_animation.RosterPreviewContracts.test_previously_truncated_ranged_attacks_include_impact_and_settle) ... ok
+test_branch_leaves_do_not_merge_or_change_equipment (test_growth_contracts.GrowthContracts.test_branch_leaves_do_not_merge_or_change_equipment) ... ok
+test_eevee_branch_choice_is_stable (test_growth_contracts.GrowthContracts.test_eevee_branch_choice_is_stable) ... ok
+test_merge_keeps_investment_sources_and_every_item (test_growth_contracts.GrowthContracts.test_merge_keeps_investment_sources_and_every_item) ... ok
+test_missing_destination_stock_does_not_consume_anything (test_growth_contracts.GrowthContracts.test_missing_destination_stock_does_not_consume_anything) ... ok
+test_no_inventory_does_not_discard_extra_items (test_growth_contracts.GrowthContracts.test_no_inventory_does_not_discard_extra_items) ... ok
+test_only_direct_children_are_evolutions (test_growth_contracts.GrowthContracts.test_only_direct_children_are_evolutions) ... ok
+test_recursive_merge_keeps_all_nine_base_copies (test_growth_contracts.GrowthContracts.test_recursive_merge_keeps_all_nine_base_copies) ... ok
+test_single_item_can_merge_without_inventory (test_growth_contracts.GrowthContracts.test_single_item_can_merge_without_inventory) ... ok
+test_trade_forms_still_require_stone (test_growth_contracts.GrowthContracts.test_trade_forms_still_require_stone) ... ok
+test_balance_health_failure_returns_nonzero_and_restores_state (test_match_contracts.ExperimentIsolationContracts.test_balance_health_failure_returns_nonzero_and_restores_state) ... ok
+test_balance_main_restores_state_on_failure (test_match_contracts.ExperimentIsolationContracts.test_balance_main_restores_state_on_failure) ... ok
+test_current_balance_restores_all_fields_after_each_predecessor (test_match_contracts.ExperimentIsolationContracts.test_current_balance_restores_all_fields_after_each_predecessor) ... ok
+test_historical_energy_is_not_derived_from_live_energy (test_match_contracts.ExperimentIsolationContracts.test_historical_energy_is_not_derived_from_live_energy) ... ok
+test_importing_pacing_has_no_gameplay_side_effect (test_match_contracts.ExperimentIsolationContracts.test_importing_pacing_has_no_gameplay_side_effect) ... ok
+test_pacing_arms_are_order_independent_in_state_and_behavior (test_match_contracts.ExperimentIsolationContracts.test_pacing_arms_are_order_independent_in_state_and_behavior) ... ok
+test_pacing_main_restores_state_on_failure (test_match_contracts.ExperimentIsolationContracts.test_pacing_main_restores_state_on_failure) ... ok
+test_every_pve_wave_receives_its_scheduled_weather (test_match_contracts.MatchWeatherContracts.test_every_pve_wave_receives_its_scheduled_weather) ... ok
+test_regular_and_ghost_pvp_share_round_weather (test_match_contracts.MatchWeatherContracts.test_regular_and_ghost_pvp_share_round_weather) ... ok
+test_all_eight_real_skills_expose_flight_and_land_hp_at_authoritative_impact (test_move_effects.MoveEffectContracts.test_all_eight_real_skills_expose_flight_and_land_hp_at_authoritative_impact) ... ok
+test_every_move_has_visible_distinct_charge_stream_contact_and_afterwork (test_move_effects.MoveEffectContracts.test_every_move_has_visible_distinct_charge_stream_contact_and_afterwork) ... ok
+test_motion_scale_changes_native_body_pose_without_retiming (test_move_effects.MoveEffectContracts.test_motion_scale_changes_native_body_pose_without_retiming) ... ok
+test_original_material_cels_have_three_different_frames_and_four_opaque_inks (test_move_effects.MoveEffectContracts.test_original_material_cels_have_three_different_frames_and_four_opaque_inks) ... ok
+test_override_validation_and_detached_values (test_move_effects.MoveEffectContracts.test_override_validation_and_detached_values) ... ok
+test_palette_density_and_size_are_visible_controls_not_metadata (test_move_effects.MoveEffectContracts.test_palette_density_and_size_are_visible_controls_not_metadata) ... ok
+test_renderer_instances_share_real_battle_without_visual_or_state_contamination (test_move_effects.MoveEffectContracts.test_renderer_instances_share_real_battle_without_visual_or_state_contamination) ... ok
+test_repeated_tracks_cannot_overrun_budget_and_dont_touch_hud (test_move_effects.MoveEffectContracts.test_repeated_tracks_cannot_overrun_budget_and_dont_touch_hud) ... ok
+test_dot_lethal_and_healing_have_authoritative_snapshots (test_replay_contracts.ReplayContracts.test_dot_lethal_and_healing_have_authoritative_snapshots) ... ok
+test_every_hit_matches_live_state_including_combo_cast_and_secondary_hits (test_replay_contracts.ReplayContracts.test_every_hit_matches_live_state_including_combo_cast_and_secondary_hits) ... ok
+test_hud_draws_supplied_match_snapshot (test_replay_contracts.ReplayContracts.test_hud_draws_supplied_match_snapshot) ... ok
+test_sash_primary_then_lethal_secondary_replays_one_death (test_replay_contracts.ReplayContracts.test_sash_primary_then_lethal_secondary_replays_one_death) ... ok
+test_all_loaded_species_have_a_cast_without_changing_learnsets (test_roster_extension_contracts.RosterExtensionContracts.test_all_loaded_species_have_a_cast_without_changing_learnsets) ... ok
+test_experiment_coverage_uses_dynamic_pool_and_detects_nonexecuting_species (test_roster_extension_contracts.RosterExtensionContracts.test_experiment_coverage_uses_dynamic_pool_and_detects_nonexecuting_species) ... ok
+test_generic_neutral_payload_uses_stronger_current_stat_and_matching_defense (test_roster_extension_contracts.RosterExtensionContracts.test_generic_neutral_payload_uses_stronger_current_stat_and_matching_defense) ... ok
+test_new_id_in_selected_family_inherits_generic_combat_contract (test_roster_extension_contracts.RosterExtensionContracts.test_new_id_in_selected_family_inherits_generic_combat_contract) ... ok
+test_no_move_generic_casts_consume_energy_and_execute_their_arch (test_roster_extension_contracts.RosterExtensionContracts.test_no_move_generic_casts_consume_energy_and_execute_their_arch) ... ok
+test_overlapping_family_anchors_do_not_change_roster_or_shop_weights (test_roster_extension_contracts.RosterExtensionContracts.test_overlapping_family_anchors_do_not_change_roster_or_shop_weights) ... ok
+test_partial_profiles_keep_neutral_defaults_and_generic_identity (test_roster_extension_contracts.RosterExtensionContracts.test_partial_profiles_keep_neutral_defaults_and_generic_identity) ... ok
+test_profiles_off_preserves_no_move_basic_only_and_existing_moves (test_roster_extension_contracts.RosterExtensionContracts.test_profiles_off_preserves_no_move_basic_only_and_existing_moves) ... ok
+test_backend_capacity_delete_and_path_restrictions (test_runtime_storage.FileBackendContracts.test_backend_capacity_delete_and_path_restrictions) ... ok
+test_directory_fsync_failure_is_explicitly_uncertain (test_runtime_storage.FileBackendContracts.test_directory_fsync_failure_is_explicitly_uncertain) ... ok
+test_disk_roundtrip_and_replace_failure_leave_old_bytes (test_runtime_storage.FileBackendContracts.test_disk_roundtrip_and_replace_failure_leave_old_bytes) ... ok
+test_file_fsync_failure_occurs_before_replace (test_runtime_storage.FileBackendContracts.test_file_fsync_failure_occurs_before_replace) ... ok
+test_namespace_and_key_symlinks_are_not_followed (test_runtime_storage.FileBackendContracts.test_namespace_and_key_symlinks_are_not_followed) ... ok
+test_backup_roundtrip_and_local_sequence_do_not_inherit_foreign_counter (test_runtime_storage.RuntimeStorageContracts.test_backup_roundtrip_and_local_sequence_do_not_inherit_foreign_counter) ... ok
+test_bad_checksum_does_not_trust_poisoned_version_or_sequence (test_runtime_storage.RuntimeStorageContracts.test_bad_checksum_does_not_trust_poisoned_version_or_sequence) ... ok
+test_both_corrupt_slots_are_not_empty (test_runtime_storage.RuntimeStorageContracts.test_both_corrupt_slots_are_not_empty) ... ok
+test_capacity_applies_to_whole_envelope_and_preserves_previous (test_runtime_storage.RuntimeStorageContracts.test_capacity_applies_to_whole_envelope_and_preserves_previous) ... ok
+test_checkpoint_failure_aborts_import_before_data_slots_change (test_runtime_storage.RuntimeStorageContracts.test_checkpoint_failure_aborts_import_before_data_slots_change) ... ok
+test_corrupt_or_truncated_new_slot_falls_back_to_old (test_runtime_storage.RuntimeStorageContracts.test_corrupt_or_truncated_new_slot_falls_back_to_old) ... ok
+test_decode_validation_rejects_checksum_valid_invalid_game_state (test_runtime_storage.RuntimeStorageContracts.test_decode_validation_rejects_checksum_valid_invalid_game_state) ... ok
+test_duplicate_keys_bad_types_and_nonfinite_json_are_rejected (test_runtime_storage.RuntimeStorageContracts.test_duplicate_keys_bad_types_and_nonfinite_json_are_rejected) ... ok
+test_empty_is_distinct_from_corrupt_and_error_does_not_authorize_save (test_runtime_storage.RuntimeStorageContracts.test_empty_is_distinct_from_corrupt_and_error_does_not_authorize_save) ... ok
+test_equal_sequence_with_different_verified_payloads_is_ambiguous (test_runtime_storage.RuntimeStorageContracts.test_equal_sequence_with_different_verified_payloads_is_ambiguous) ... ok
+test_game_namespaces_are_isolated_and_cross_game_import_is_refused (test_runtime_storage.RuntimeStorageContracts.test_game_namespaces_are_isolated_and_cross_game_import_is_refused) ... ok
+test_import_checkpoints_unsaved_current_state_before_data_write (test_runtime_storage.RuntimeStorageContracts.test_import_checkpoints_unsaved_current_state_before_data_write) ... ok
+test_import_preserves_persisted_checkpoint (test_runtime_storage.RuntimeStorageContracts.test_import_preserves_persisted_checkpoint) ... ok
+test_invalid_import_and_invalid_checkpoint_do_not_write (test_runtime_storage.RuntimeStorageContracts.test_invalid_import_and_invalid_checkpoint_do_not_write) ... ok
+test_legacy_migration_is_read_only_until_explicit_save (test_runtime_storage.RuntimeStorageContracts.test_legacy_migration_is_read_only_until_explicit_save) ... ok
+test_namespace_and_slot_reject_paths_and_unicode (test_runtime_storage.RuntimeStorageContracts.test_namespace_and_slot_reject_paths_and_unicode) ... ok
+test_read_failure_does_not_fall_back_or_create_new_save (test_runtime_storage.RuntimeStorageContracts.test_read_failure_does_not_fall_back_or_create_new_save) ... ok
+test_sequence_does_not_override_schema_compatibility (test_runtime_storage.RuntimeStorageContracts.test_sequence_does_not_override_schema_compatibility) ... ok
+test_slots_alternate_and_newest_sequence_wins (test_runtime_storage.RuntimeStorageContracts.test_slots_alternate_and_newest_sequence_wins) ... ok
+test_unconfirmed_cleanup_reports_commit_uncertainty_and_keeps_checkpoint (test_runtime_storage.RuntimeStorageContracts.test_unconfirmed_cleanup_reports_commit_uncertainty_and_keeps_checkpoint) ... ok
+test_valid_newer_schema_or_storage_version_blocks_load_and_mutation (test_runtime_storage.RuntimeStorageContracts.test_valid_newer_schema_or_storage_version_blocks_load_and_mutation) ... ok
+test_write_failure_torn_write_and_ambiguous_write_preserve_current (test_runtime_storage.RuntimeStorageContracts.test_write_failure_torn_write_and_ambiguous_write_preserve_current) ... ok
+test_corrupt_import_cannot_change_current_save_or_memory (test_session_save.SessionSaveContracts.test_corrupt_import_cannot_change_current_save_or_memory) ... ok
+test_export_import_and_undo_preserve_both_versions (test_session_save.SessionSaveContracts.test_export_import_and_undo_preserve_both_versions) ... ok
+test_failed_purchase_persistence_rolls_back_memory_and_disk (test_session_save.SessionSaveContracts.test_failed_purchase_persistence_rolls_back_memory_and_disk) ... ok
+test_first_import_and_import_after_restart_do_not_encode_none (test_session_save.SessionSaveContracts.test_first_import_and_import_after_restart_do_not_encode_none) ... ok
+test_merge_history_and_stone_sources_are_not_reconstructed_from_species (test_session_save.SessionSaveContracts.test_merge_history_and_stone_sources_are_not_reconstructed_from_species) ... ok
+test_new_game_never_overwrites_previous_game_slot (test_session_save.SessionSaveContracts.test_new_game_never_overwrites_previous_game_slot) ... ok
+test_process_restart_restores_grid_inventory_shop_and_cursor_without_income (test_session_save.SessionSaveContracts.test_process_restart_restores_grid_inventory_shop_and_cursor_without_income) ... ok
+test_restored_and_uninterrupted_games_match_through_pve_and_weather (test_session_save.SessionSaveContracts.test_restored_and_uninterrupted_games_match_through_pve_and_weather) ... ok
+test_rule_fingerprint_is_not_a_build_lock (test_session_save.SessionSaveContracts.test_rule_fingerprint_is_not_a_build_lock) ... ok
+test_semantically_invalid_snapshots_are_rejected (test_session_save.SessionSaveContracts.test_semantically_invalid_snapshots_are_rejected) ... ok
+test_uncertain_commit_blocks_actions_until_disk_is_reloaded (test_session_save.SessionSaveContracts.test_uncertain_commit_blocks_actions_until_disk_is_reloaded) ... ok
+test_uncertain_first_save_returns_a_recovery_handle (test_session_save.SessionSaveContracts.test_uncertain_first_save_returns_a_recovery_handle) ... ok
+test_basic_projectiles_consume_species_attachment_points (test_signature_presentation.SignaturePresentationContracts.test_basic_projectiles_consume_species_attachment_points) ... ok
+test_energy_return_uses_logged_caster_position_before_same_tick_push (test_signature_presentation.SignaturePresentationContracts.test_energy_return_uses_logged_caster_position_before_same_tick_push) ... ok
+test_real_effects_are_visible_only_at_their_owned_impact (test_signature_presentation.SignaturePresentationContracts.test_real_effects_are_visible_only_at_their_owned_impact) ... ok
+test_zero_heal_and_zero_energy_do_not_draw_success_feedback (test_signature_presentation.SignaturePresentationContracts.test_zero_heal_and_zero_energy_do_not_draw_success_feedback) ... ok
+test_all_eight_bind_real_moves_and_profile_gate (test_signature_skills.SignatureSkills.test_all_eight_bind_real_moves_and_profile_gate) ... ok
+test_directed_evidence_has_bounded_causal_packets_and_real_geometry (test_signature_skills.SignatureSkills.test_directed_evidence_has_bounded_causal_packets_and_real_geometry) ... ok
+test_effective_damage_counts_sash_overkill_and_dead_packets_once (test_signature_skills.SignatureSkills.test_effective_damage_counts_sash_overkill_and_dead_packets_once) ... ok
+test_energy_drain_uses_actual_post_hit_energy_and_authoritative_states (test_signature_skills.SignatureSkills.test_energy_drain_uses_actual_post_hit_energy_and_authoritative_states) ... ok
+test_flinch_helper_is_bounded_dead_safe_and_does_not_consume_rng (test_signature_skills.SignatureSkills.test_flinch_helper_is_bounded_dead_safe_and_does_not_consume_rng) ... ok
+test_ground_target_interrupts_chain_and_dead_primary_can_still_anchor_it (test_signature_skills.SignatureSkills.test_ground_target_interrupts_chain_and_dead_primary_can_still_anchor_it) ... ok
+test_immunity_is_zero_for_electric_ground_ghost_and_nonzero_resists_keep_floor (test_signature_skills.SignatureSkills.test_immunity_is_zero_for_electric_ground_ghost_and_nonzero_resists_keep_floor) ... ok
+test_lightning_hops_from_previous_target_with_fractions_and_no_repeat (test_signature_skills.SignatureSkills.test_lightning_hops_from_previous_target_with_fractions_and_no_repeat) ... ok
+test_new_signature_same_seed_and_rotated_side_swap_are_symmetric (test_signature_skills.SignatureSkills.test_new_signature_same_seed_and_rotated_side_swap_are_symmetric) ... ok
+test_quake_each_neighbor_has_own_damage_immunity_and_control_gate (test_signature_skills.SignatureSkills.test_quake_each_neighbor_has_own_damage_immunity_and_control_gate) ... ok
+test_quake_immune_primary_does_not_cancel_other_neighbors_and_status_switch_works (test_signature_skills.SignatureSkills.test_quake_immune_primary_does_not_cancel_other_neighbors_and_status_switch_works) ... ok
+test_solar_full_allies_or_tiny_actual_damage_create_no_heal (test_signature_skills.SignatureSkills.test_solar_full_allies_or_tiny_actual_damage_create_no_heal) ... ok
+test_solar_heals_lowest_fraction_nearby_including_self_and_clamps_overkill (test_signature_skills.SignatureSkills.test_solar_heals_lowest_fraction_nearby_including_self_and_clamps_overkill) ... ok
+test_water_ray_has_one_cell_width_forward_boundary_and_two_side_limit (test_signature_skills.SignatureSkills.test_water_ray_has_one_cell_width_forward_boundary_and_two_side_limit) ... ok
+test_water_resolves_sides_before_knockback_and_miss_has_no_effect (test_signature_skills.SignatureSkills.test_water_resolves_sides_before_knockback_and_miss_has_no_effect) ... ok
+test_chain_side_hits_bind_to_cast_but_same_tick_new_attack_does_not (test_signature_timeline.SignatureTimelineContracts.test_chain_side_hits_bind_to_cast_but_same_tick_new_attack_does_not) ... ok
+test_drain_updates_both_energy_bars_only_at_the_owned_cast_impact (test_signature_timeline.SignatureTimelineContracts.test_drain_updates_both_energy_bars_only_at_the_owned_cast_impact) ... ok
+test_healing_fences_the_patients_previous_independent_action (test_signature_timeline.SignatureTimelineContracts.test_healing_fences_the_patients_previous_independent_action) ... ok
+test_knockback_starts_on_hit_while_victim_is_still_recovering (test_signature_timeline.SignatureTimelineContracts.test_knockback_starts_on_hit_while_victim_is_still_recovering) ... ok
+test_quake_side_hit_and_control_share_the_main_cast_impact (test_signature_timeline.SignatureTimelineContracts.test_quake_side_hit_and_control_share_the_main_cast_impact) ... ok
+test_solar_third_party_healing_waits_for_impact_and_survives_rewind (test_signature_timeline.SignatureTimelineContracts.test_solar_third_party_healing_waits_for_impact_and_survives_rewind) ... ok
+
+======================================================================
+FAIL: test_role_card_uses_effective_profile_range_and_skill (test_demo_contracts.DemoContracts.test_role_card_uses_effective_profile_range_and_skill)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/bytedance/luobata/PokeTactics/tests/test_demo_contracts.py", line 214, in test_role_card_uses_effective_profile_range_and_skill
+    self.assertEqual(abra["skill_name"], "普通攻击")
+AssertionError: '散射' != '普通攻击'
+- 散射
++ 普通攻击
+
+
+----------------------------------------------------------------------
+Ran 201 tests in 13.782s
+
+FAILED (failures=1)
+[FAILED] unit_tests
+  process exited with 1
+  failure verdict in command output
+
+[RUN] compile: /Users/bytedance/.pyenv/versions/3.12.0/bin/python3 -m compileall -q sim tools tests esp32_runtime
+[PASSED] compile
+
+[RUN] diff_check: git diff --check
+[PASSED] diff_check
+
+[RUN] persistence_restart: /Users/bytedance/.pyenv/versions/3.12.0/bin/python3 tools/acceptance/persistence_selftest.py
+{
+  "status": "passed",
+  "checks": [
+    "real_process_restart",
+    "no_duplicate_income",
+    "grid_shop_inventory",
+    "export_inspect_import",
+    "corrupt_import_preserves_current",
+    "restore_preimport_checkpoint",
+    "first_import"
+  ],
+  "backup_bytes": 9077,
+  "storage": "temporary_directory"
+}
+[PASSED] persistence_restart
+
+[RUN] animation_samples: /Users/bytedance/.pyenv/versions/3.12.0/bin/python3 tools/mockups/animation_showcase.py --out .build/animation-b
+{"out": "/Users/bytedance/luobata/PokeTactics/.build/animation-b", "clips": 16, "frame_ms_p95": 7.835}
+[PASSED] animation_samples
+
+[RUN] art_export: /Users/bytedance/.pyenv/versions/3.12.0/bin/python3 tools/mockups/art_manifest.py --output .build/animation-b/art-manifest.json
+{"output": ".build/animation-b/art-manifest.json", "revision": "dd9edece6ac53a400ef894ae09922c84140411e0c641ddde3dfb560ee3cd7db3", "resource_bytes": 135573, "coverage": {"roster_species": 84, "atlas_species": 151, "layered_core_visual_species": [3, 6, 9, 26, 65, 76, 94, 143], "part_rig_species": [3, 6, 9], "planned_part_rig_species": [26, 65, 76, 94, 143], "authored_motion_species": 16, "authored_skill_visual_species": 16, "gameplay_signature_species": 8, "gameplay_generic_species": 76, "no_cast_species": []}}
+[PASSED] art_export
+
+[RUN] art_verify: /Users/bytedance/.pyenv/versions/3.12.0/bin/python3 tools/mockups/art_manifest.py --verify .build/animation-b/art-manifest.json
+PASS .build/animation-b/art-manifest.json
+[PASSED] art_verify
+
+[RUN] demo: /Users/bytedance/.pyenv/versions/3.12.0/bin/python3 tools/acceptance/demo_selftest.py --seeds 7,42
+自起临时验收后台：http://127.0.0.1:62931（pid 43061）
+== Web Demo 整局自测（种子 [7, 42]，操作流种子 20260914）==
+  seed=7     轮数=31  名次=8  玩家战斗=12场/2866帧 进化=0 合成=1 装备=0 操作ok=88 被拒=14 金币校验=35 耗时=31.3s
+  seed=42    轮数=31  名次=8  玩家战斗=13场/3417帧 进化=0 合成=1 装备=0 操作ok=79 被拒=25 金币校验=35 耗时=37.7s
+== 全部通过（69.0s）｜HTTP 状态分布 {200: 728} ==
+[PASSED] demo
+
+[RUN] balance: /Users/bytedance/.pyenv/versions/3.12.0/bin/python3 sim/experiment_match.py --games 40 --seed 20261004
+同种子重放自检: 通过（淘汰顺序+排名一致）
+
+== M2 批量局验收（40 局 × 8 bot，上限 31 轮）==
+1) 局长: 均值 30.7 / 中位 31 / 区间 [27, 31]  目标 (28, 34)  → PASS（打满上限 31 轮 28 局 / 提前决出 12 局）
+   人格平均名次: balanced 4.31  copycat 5.66  roller 3.96  saver 4.06
+2) 人格名次方差: 0.467 < 7×40%=2.8  → PASS（各人格组内方差 balanced=4.84 copycat=2.82 roller=6.36 saver=5.11）
+3) 决策耗时: p99 2.70ms / 均值 0.64ms / 单点最大 34.12ms（perf_counter 含 OS 调度抖动，判据看 p99）  → PASS
+4) 无死锁: 掉血轮占比 83%，存在非野怪轮无掉血的局 0 个  → PASS
+   能力层平均名次: L0 7.97  L1 3.31  L2 4.50  L3 4.60（弱 bot 先走、决赛圈 L2/L3 = 难度爬坡）
+   羁绊成型: 293 人次，均值 R9.7；场均 3合1 16.2 次；冠军人格分布 balanced×8 copycat×1 roller×18 saver×13
+== 四条验收：全部通过 ==
+[PASSED] balance
+
+Selected checks: failed; JSON: /Users/bytedance/luobata/PokeTactics/.build/acceptance/batch-e.json

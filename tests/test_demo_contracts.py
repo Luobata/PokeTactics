@@ -211,8 +211,8 @@ class DemoContracts(unittest.TestCase):
         self.assertEqual(view["role"], "瞬移刺客")
         self.assertIn("闪现", view["skill_description"])
         abra = demo._piece_view(self.session.templates[63])
-        self.assertEqual(abra["skill_name"], "普通攻击")
-        self.assertIn("没有可释放", abra["skill_description"])
+        self.assertEqual(abra["skill_name"], "散射")
+        self.assertIn("40%", abra["skill_description"])
 
 
 if __name__ == "__main__":

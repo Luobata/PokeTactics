@@ -29,7 +29,8 @@ python3 tools/mockups/art_manifest.py --output .build/animation-b/art-manifest.j
     <dl class="stats" aria-label="动画样本实测"><div class="stat"><dt>已读取动画片段</dt><dd id="clip-count">—</dd></div><div class="stat"><dt>PC 帧耗时 p50</dt><dd><span id="host-p50">—</span> <small>ms</small></dd></div><div class="stat"><dt>PC 帧耗时 p95</dt><dd><span id="host-p95">—</span> <small>ms</small></dd></div><div class="stat"><dt>原生画布</dt><dd id="frame-size">—</dd></div></dl>
     <section aria-labelledby="compare-title"><div class="section-heading"><h2 id="compare-title">01 / 角色动作对照</h2><label class="view-option"><input id="static-only" type="checkbox">只看静态分镜</label></div><div class="tabs" id="hero-tabs" role="tablist" aria-label="选择角色"></div><div id="hero-panel" role="tabpanel" aria-labelledby="tab-6"><p class="role" id="hero-role">角色信息等待美术清单。</p><div class="coverage-detail" style="margin-bottom:18px"><p id="hero-skill"></p><p id="hero-tactic"></p><p id="hero-rig"></p></div><div id="clips" class="clips"></div></div></section>
     <section aria-labelledby="contact-title"><div class="section-heading"><div><h2 id="contact-title">02 / 五阶段分镜</h2><p>按原始像素展示；窄屏可横向滚动。</p></div><div class="contact-switch" aria-label="分镜类型"><button type="button" data-contact="cast" aria-pressed="true">大招</button><button type="button" data-contact="attack" aria-pressed="false">普攻</button></div></div><div class="contact-shell"><div class="contact-scroll" tabindex="0" aria-label="五阶段分镜，可横向滚动"><img id="contact-image" class="contact-image" alt="核心角色大招五阶段分镜"></div><p id="contact-error" class="image-error" hidden></p><p class="contact-help">分镜保留生成器的阶段标签。每张动作卡展示 manifest 中的开始、释放、命中和恢复结束时间。</p></div></section>
-    <section aria-labelledby="coverage-title"><div class="section-heading"><h2 id="coverage-title">03 / 美术与移植范围</h2><p>读取 art-manifest.json</p></div><dl class="coverage"><div><dt>可购角色</dt><dd id="roster-count">—</dd></div><div><dt>精灵资源记录</dt><dd id="atlas-count">—</dd></div><div><dt>独立身体动作</dt><dd id="motion-count">—</dd></div><div><dt>独立技能演出</dt><dd id="skill-count">—</dd></div></dl><div class="coverage-detail"><p id="layered-coverage">本轮分层特效覆盖未提供。</p><p id="rig-coverage">物种部件覆盖未提供。</p><p id="skill-coverage">技能机制覆盖未提供。</p><p id="resource-bytes">资源字节数未提供。</p><p id="sample-clock">采样时间未提供。</p><p class="hash" id="art-revision">资源 revision 未提供。</p></div><div class="scope"><p>PC 数据来自指定靶场样本，不代表满人口战斗或 ESP32 真机性能。配置上限与实际峰值分别展示。</p><p id="device-claim"></p><p id="port-state">设备移植状态等待资源清单。</p></div></section>
+    <section aria-labelledby="roster-title"><div class="section-heading"><h2 id="roster-title">03 / 全上场池预览</h2><p id="all-roster-status">正在读取角色能力…</p></div><div class="coverage-detail"><label for="all-species">选择任意上场宝可梦 </label><select id="all-species" disabled></select><p id="all-capability"></p><p id="all-skill"></p><a id="all-editor" href="/animation-editor">打开该角色的动作预览 →</a><p>上方是核心角色的精选样片；这里按当前上场池自动生成，新增角色无需维护页面名单。</p></div></section>
+    <section aria-labelledby="coverage-title"><div class="section-heading"><h2 id="coverage-title">04 / 美术与移植范围</h2><p>读取 art-manifest.json</p></div><dl class="coverage"><div><dt>可购角色</dt><dd id="roster-count">—</dd></div><div><dt>精灵资源记录</dt><dd id="atlas-count">—</dd></div><div><dt>独立身体动作</dt><dd id="motion-count">—</dd></div><div><dt>独立技能演出</dt><dd id="skill-count">—</dd></div></dl><div class="coverage-detail"><p id="layered-coverage">本轮分层特效覆盖未提供。</p><p id="rig-coverage">物种部件覆盖未提供。</p><p id="skill-coverage">技能机制覆盖未提供。</p><p id="resource-bytes">资源字节数未提供。</p><p id="sample-clock">采样时间未提供。</p><p class="hash" id="art-revision">资源 revision 未提供。</p></div><div class="scope"><p>PC 数据来自指定靶场样本，不代表满人口战斗或 ESP32 真机性能。配置上限与实际峰值分别展示。</p><p id="device-claim"></p><p id="port-state">设备移植状态等待资源清单。</p></div></section>
     <footer class="footer"><span>只读生成物 · 不运行战斗模拟 · 无外部资源</span><span>证据目录 /.build/animation-b/</span></footer>
   </main>
   <template id="clip-template"><article class="clip"><div class="clip-head"><h3></h3><span class="clip-meta"></span></div><div class="clip-body"><div class="screen-wrap"><a class="screen-link" target="_blank" rel="noopener"><img class="screen" width="240" height="320"></a><p class="static-note" hidden>动态图已隐藏。请查看下方五阶段分镜。</p><p class="clip-image-error image-error" hidden></p><p class="image-note">240 × 320 · 原生像素 · 点击打开原图</p></div><div class="clip-data"><p class="mini-title">演出时间 / 秒</p><ol class="timing"></ol><dl class="metric-list"></dl></div></div><div class="change"><div><span>目标 HP：命中前 → 命中时</span><strong class="hp-change"></strong></div><div><span>目标能量：命中前 → 命中时</span><strong class="energy-change"></strong></div></div><div class="clip-foot"></div><details class="baseline"><summary>与上版 68eeb71 对比</summary><div class="baseline-body"><p>下方为上版片段，上方为当前片段。两段各自原速播放，未做事件同步。</p><a class="screen-link baseline-link" target="_blank" rel="noopener"><img class="screen baseline-image" width="240" height="320"></a><p class="baseline-static" hidden>已启用只看静态分镜。关闭该选项后可展开查看旧版 GIF。</p><p class="baseline-error image-error" hidden></p></div></details></article></template>
@@ -193,7 +194,30 @@ python3 tools/mockups/art_manifest.py --output .build/animation-b/art-manifest.j
     $('static-only').checked = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
     $('static-only').addEventListener('change',renderHero);
     $('reload').addEventListener('click', () => location.reload());
-    load();
+    async function loadRoster() {
+      try {
+        const response = await fetch('/api/animation/characters',{cache:'no-store'});
+        if (!response.ok) throw new Error('HTTP '+response.status);
+        const {characters} = await response.json();
+        const entries = Object.values(characters);
+        const picker = $('all-species'); picker.replaceChildren();
+        entries.forEach(entry => { const option = document.createElement('option'); option.value = entry.species;
+          option.textContent = '#'+String(entry.species).padStart(3,'0')+' '+entry.name; picker.append(option); });
+        picker.disabled = false;
+        text('all-roster-status',entries.length+' 只 · 读取当前规则与资源');
+        const body = {part_rig:'专属部件',authored_pose:'手编整身',procedural:'通用程序化'};
+        const effects = {layered:'分层专属',authored:'手编招式',archetype:'通用模板',none:'无'};
+        function select() {
+          const entry = characters[picker.value], cap = entry.capabilities;
+          text('all-capability',entry.name+' / '+entry.cost+' 费 / 射程 '+entry.range+' 格 / 身体：'+body[cap.body]+' / 特效：'+effects[cap.effect]);
+          text('all-skill',entry.skill.name+' · '+entry.skill.description+(cap.resource_ready ? '' : '；'+cap.resource_errors.join('；')));
+          $('all-editor').href = '/animation-editor?species='+entry.species;
+          $('all-editor').textContent = '打开 '+entry.name+' 的动作预览 →';
+        }
+        picker.addEventListener('change',select); select();
+      } catch (error) { text('all-roster-status','角色能力读取失败：'+error.message); }
+    }
+    load(); loadRoster();
   })();
   </script>
 </body>

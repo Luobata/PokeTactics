@@ -18,6 +18,17 @@ from PIL import Image
 POKEWALK = Path(__file__).resolve().parent.parent.parent.parent / "ESP32-PokemonGo" / "assets"
 
 
+class AssetError(ValueError):
+    """A required rendering resource is absent or cannot produce visible pixels."""
+
+
+def _read_resource(path):
+    try:
+        return path.read_bytes()
+    except OSError as exc:
+        raise AssetError(f"cannot read art resource {path}: {exc}") from exc
+
+
 def _rgb565(v: int) -> tuple:
     r, g, b = (v >> 11) & 31, (v >> 5) & 63, v & 31
     return (r * 255 // 31, g * 255 // 63, b * 255 // 31)
@@ -27,7 +38,8 @@ class Front:
     """FRNT：头 <4sHH，段目录 <HHII>×n（size, per, count, offset），记录 = u16 id + per 字节。"""
 
     def __init__(self, path: Path = None) -> None:
-        d = (path or POKEWALK / "gen1_front.bin").read_bytes()
+        self.path = Path(path) if path is not None else POKEWALK / "gen1_front.bin"
+        d = _read_resource(self.path)
         magic, ver, nseg = struct.unpack("<4sHH", d[:8])
         assert magic == b"FRNT", magic
         segs, p = [], 8
@@ -45,10 +57,17 @@ class Front:
                 self.blob_of[pid] = d[q + 2:q + 2 + per]
                 q += 2 + per
 
+    def size_for_species(self, pid: int) -> int:
+        if pid not in self.size_of or pid not in self.blob_of:
+            raise AssetError(f"species {pid}: missing front sprite in {self.path}")
+        return self.size_of[pid]
+
     def image(self, pid: int, pal: "Palettes", shiny: bool = False) -> Image.Image:
         """解码为 RGBA。映射与固件 render.c 一致：色号 3 = 透明，0-2 -> 调色板前 3 色。"""
-        size = self.size_of[pid]
+        size = self.size_for_species(pid)
         blob = self.blob_of[pid]
+        if len(blob) != size * size // 4:
+            raise AssetError(f"species {pid}: truncated front sprite in {self.path}")
         colors = pal.for_species(pid, shiny)  # [c0, c1, c2, (c3 备用)]
         img = Image.new("RGBA", (size, size))
         px = img.load()
@@ -59,6 +78,8 @@ class Front:
                 idx = (byte >> (6 - 2 * (bit % 4))) & 3
                 if idx != 3:
                     px[x, y] = colors[idx] + (255,)
+        if img.getbbox() is None:
+            raise AssetError(f"species {pid}: front sprite has no visible pixels in {self.path}")
         return img
 
 
@@ -66,7 +87,8 @@ class Palettes:
     """PALS：头 <4sHHHH>（nsets, ncolors, count）+ (2×nsets) 套 ×4 色 + count 字节索引。"""
 
     def __init__(self, path: Path = None) -> None:
-        d = (path or POKEWALK / "palettes.bin").read_bytes()
+        self.path = Path(path) if path is not None else POKEWALK / "palettes.bin"
+        d = _read_resource(self.path)
         magic, ver, nsets, ncolors, count = struct.unpack("<4sHHHH", d[:12])
         assert magic == b"PALS", magic
         body = d[12:]
@@ -80,7 +102,11 @@ class Palettes:
         self._map = body[2 * nsets * set_bytes:2 * nsets * set_bytes + count]
 
     def for_species(self, pid: int, shiny: bool = False) -> list:
+        if type(pid) is not int or not 1 <= pid <= len(self._map):
+            raise AssetError(f"species {pid}: missing palette mapping in {self.path}")
         base = self._map[pid - 1] + (self.nsets if shiny else 0)
+        if self._map[pid - 1] >= self.nsets or base >= len(self._sets):
+            raise AssetError(f"species {pid}: invalid palette index in {self.path}")
         return self._sets[base]
 
 
@@ -88,7 +114,7 @@ class Font16:
     """FNT1：头 <4sHHHI>（size, per, count）+ count×u16 码点 + count×per 字节 1bpp 行主序。"""
 
     def __init__(self, path: Path = None) -> None:
-        d = (path or POKEWALK / "font16.bin").read_bytes()
+        d = _read_resource(Path(path) if path is not None else POKEWALK / "font16.bin")
         magic, ver, size, per, count = struct.unpack("<4sHHHI", d[:14])
         assert magic == b"FNT1", magic
         self.size, self.count = size, count

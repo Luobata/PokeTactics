@@ -1,0 +1,7 @@
+{
+  "gate_coverage": "not_effective",
+  "effective_rules_snapshot": {},
+  "central_semantic": "unavailable",
+  "mutation": "not executed; disabled by environment",
+  "note": "CLI reports pass but supplies no effective rules. Independent review and project tests were run separately."
+}

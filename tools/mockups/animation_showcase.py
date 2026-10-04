@@ -14,7 +14,8 @@ import statistics
 import time
 
 from PIL import Image, ImageDraw
-from profile_range import make_scene, make_signature_scene
+from profile_range import make_preview_scene
+from roster import build_roster
 from render_battle_gif import quantize_frames
 
 HEROES = (6,9,3,26,65,94,76,143)
@@ -32,17 +33,18 @@ def export(out, seed=7, species=None):
     rows={'attack':[], 'cast':[]}
     all_ms=[]
     heroes = HEROES if species is None else tuple(species)
-    if not heroes or len(set(heroes)) != len(heroes) or set(heroes)-set(HEROES):
-        raise ValueError("species must be a nonempty unique subset of core hero ids")
+    roster_ids = {p.species_id for group in build_roster().values() for p in group}
+    if not heroes or len(set(heroes)) != len(heroes) or set(heroes)-roster_ids:
+        raise ValueError("species must be a nonempty unique subset of roster ids")
     for sid in heroes:
         for kind in ('attack','cast'):
-            anim=(make_signature_scene(sid,seed) if kind=='cast' else make_scene(sid,'dummy',seed))
+            anim=make_preview_scene(sid,kind,seed)
             candidates=[a for a in anim.timeline.actions
                         if a.attacker==0 and a.kind==kind and not a.secondary]
             damage_index=6 if kind=='cast' else 4
             action=next((a for a in candidates if anim.events[a.source_index][damage_index]>0),candidates[0])
             start=max(0., action.start-.25)
-            end=action.impact+.95
+            end=max(action.impact+.95,action.recover_end+.25)
             times=[round(start+i*STEP,6) for i in range(round((end-start)/STEP)+1)]
             frames=[]; measurements=[]; particle_peak=0; tracks_peak=0
             for t in times:
@@ -90,7 +92,7 @@ def export(out, seed=7, species=None):
                             'frame_ms_p95':round(sorted(measurements)[int((len(measurements)-1)*.95)],3),
                             'frame_ms_max':round(max(measurements),3),
                             'simulation_duration':anim.events[-1][0],
-                            'training_scene': 'precharged_signature' if kind=='cast' else 'stationary_posts',
+                            'training_scene': 'precharged_skill' if kind=='cast' else 'stationary_posts',
                             'skill_effects': [list(ev) for ev in anim.timeline.events if ev[1]=='skill_effect'],
                             'presentation_duration':anim.presentation_duration})
     for kind,sheets in rows.items():

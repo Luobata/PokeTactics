@@ -376,7 +376,7 @@ def rig_cel(cel, sid, index, next_index=None):
     w, h = cel.size
     out = cel.copy()
     parts = []
-    for left, top, right, bottom, xs, ys in RIGS[sid]:
+    for left, top, right, bottom, xs, ys in RIGS.get(sid, ()):
         box = (left*w//100, top*h//100, right*w//100, bottom*h//100)
         tile = cel.crop(box)
         key = math.floor(index)

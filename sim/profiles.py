@@ -128,10 +128,21 @@ def profiles_on() -> bool:
 
 
 def get(species_id: int):
-    """取档案；未建档或开关关闭返回 None（调用方回落推导链）。"""
+    """取启用的覆盖档案；缺省字段中性，None 射程沿用棋子推导值。"""
     if not PROFILES_ON:
         return None
-    return PROFILE.get(species_id)
+    overrides = PROFILE.get(species_id)
+    if overrides is None:
+        return None
+    profile = {"role": "通用技能", "range": None, "hp_mult": 1.0,
+               "atk_interval_mult": 1.0, "move_mult": 1.0,
+               "value_mult": 1.0, "ult": None, **overrides}
+    profile["ai"] = {"kite": False, "retreat_below_hp": None,
+                     **overrides.get("ai", {})}
+    profile["vfx"] = dict(overrides.get("vfx", {}))
+    if profile["ult"] is not None:
+        profile["ult"] = dict(profile["ult"])
+    return profile
 
 
 def bot_value_mult(species_id: int) -> float:
@@ -143,4 +154,4 @@ def bot_value_mult(species_id: int) -> float:
 def effective_range(piece) -> int:
     """Combat, positioning and equipment agree on an active range override."""
     profile = get(piece.species_id)
-    return profile["range"] if profile else piece.distance
+    return profile["range"] if profile and profile["range"] is not None else piece.distance

@@ -717,20 +717,15 @@ def _piece_view(piece, item=None):
     from data import pokedex
     from render_mockups import TYPE_COLORS
     dex = pokedex()
-    mv = dex.moves.get(piece.move_id) if piece.move_id else None
+    from skills import resolve_cast, GENERIC_DESCRIPTIONS
+    mv = resolve_cast(piece)
     from profiles import get as profile_of
     from skills import skill_of
     profile = profile_of(piece.species_id)
     skill = skill_of(piece.species_id)
-    descriptions = {
-        "double_strike": "命中后追加一次45%伤害；每次命中分别结算防御",
-        "charge": "向敌人突进最多2格；无法进入射程时对原目标施法",
-        "heavy_blow": "命中后击退目标1格；无空格时不击退",
-        "volley_shot": "额外攻击目标附近最多2名敌人，各40%伤害",
-        "bulwark": "施法后自身获得3秒35%减伤",
-        "mend": "施法时回复20%最大生命",
-    }
-    distance = profile.get("range", piece.distance) if profile else piece.distance
+    descriptions = GENERIC_DESCRIPTIONS
+    from profiles import effective_range
+    distance = effective_range(piece)
     return {
         "sid": piece.species_id, "name": piece.name, "tier": piece.tier,
         "types": [TYPE_ZH.get(t, t) for t in piece.types],
@@ -739,7 +734,7 @@ def _piece_view(piece, item=None):
         "ranged": distance > 1, "range": distance,
         "role": profile["role"] if profile else ("远程输出" if distance > 1 else "近战"),
         "skill_name": (skill["name"] if skill else "属性招式") if mv else "普通攻击",
-        "skill_description": (profile["ult"]["note"] if profile else
+        "skill_description": (profile["ult"].get("note", descriptions.get(skill["arch"], skill["name"])) if profile and profile.get("ult") else
                               descriptions.get(skill["arch"], "") if skill else "能量满时释放属性招式")
                               if mv else "当前形态没有可释放的属性招式，仅进行普通攻击",
         "move": (mv.get("name_zh") or mv["name"]) if mv else "—",

@@ -94,7 +94,7 @@ def _front(data):
             base = start + record * (per + 2)
             sid, = _unpack("<H", data, base)
             key = f"front/{sid}"
-            if not 1 <= sid <= 151 or key in atlas:
+            if not 1 <= sid <= 65535 or key in atlas:
                 raise ManifestError("invalid/duplicate FRNT species")
             blob = data[base + 2:base + 2 + per]
             atlas[key] = {"asset": "front", "species_id": sid, "offset": base + 2,
@@ -201,7 +201,7 @@ def build_manifest(*, asset_root=None, pc_metrics=None):
     provenance = json.loads(_file(asset_root, "pokemon_art_sources.json"))
     clips, rigs = _motion_clips(motion)
     character_rigs = modules["character_rigs"].manifest_data()
-    characters = modules["character_catalog"].character_catalog()
+    characters = modules["character_catalog"].character_catalog(asset_root=asset_root)
     for arch in visual.ARCHS:
         clips[f"vfx.{arch}"] = {"kind": "procedural_python", "frames_exported": False,
                                 "source": "tools/mockups/skill_vfx.py", "archetype": arch}
@@ -225,10 +225,13 @@ def build_manifest(*, asset_root=None, pc_metrics=None):
     actors = {}
     for sid, piece in sorted(roster.items()):
         profile, skill = profiles.get(sid), skills.skill_of(sid)
+        character = characters[str(sid)]
+        if not character["capabilities"]["resource_ready"]:
+            raise ManifestError("; ".join(character["capabilities"]["resource_errors"]))
         authored = sid in motion.species_motion
         body = ({name: f"motion.{sid}.{name}" for name in STATES} if authored else
                 {name: f"fallback.{name}" for name in ("gait", "attack", "hit", "death")})
-        has_move = piece.move_id is not None
+        has_move = skills.resolve_cast(piece) is not None
         special = visual.AUTHORED_SKILLS.get(sid)
         vfx_key = (f"vfx.core.{sid}" if sid in core_effects and has_move else
                    f"vfx.{sid}.{piece.move_id}" if special and special[0] == piece.move_id
@@ -396,7 +399,13 @@ def validate_manifest(manifest, *, asset_root=None):
                     raise ManifestError(f"invalid integer animation frame: {key}")
             if any(len(phase) != 2 or type(phase[0]) is not int or type(phase[1]) is not int or phase[1] <= 0 for phase in clip["rig_phase"]):
                 raise ManifestError(f"invalid rig phase: {key}")
+    expected_characters = modules["character_catalog"].character_catalog(asset_root=asset_root)
     for key, actor in manifest["actors"].items():
+        character = expected_characters.get(str(actor["species_id"]))
+        if actor.get("character") != character or character is None:
+            raise ManifestError(f"actor capability does not match implementation: {key}")
+        if actor["skill"]["can_cast"] != character["skill"]["can_cast"]:
+            raise ManifestError(f"actor cast capability mismatch: {key}")
         if actor["atlas_key"] not in manifest["atlas"] or actor["palette_asset"] not in blobs:
             raise ManifestError(f"missing actor asset: {key}")
         references = list(actor["animations"].values()) + [actor["skill"]["animation_key"]]

@@ -85,9 +85,7 @@ class Unit:
         if prof is not None:
             self.max_hp = int(self.max_hp * prof["hp_mult"])
             interval *= prof["atk_interval_mult"]
-            self.range = prof["range"]
             self.move_mult = prof["move_mult"]
-            self.ult_arch = prof["ult"]["arch"]
         # ---- 两级技能（skills.skill_of）：专属主角团沿用档案原语，
         #      其余单位按定位分配通用原语；开关关闭时 None（旧行为）----
         if self.ult_arch is None:
@@ -372,7 +370,8 @@ class Battle:
 
     def _move_damage(self, unit, target, move, fraction=1.0):
         """Each hit owns its target's defense/type calculation and one modifier chain."""
-        special = self.dex.move_is_special(move)
+        special = (unit.sp_attack > unit.attack if move.get("damage_stat") == "best"
+                   else self.dex.move_is_special(move))
         stab = STAB_BONUS if move["type"] in unit.piece.types else 1.0
         eff = eff_mult(self.dex.multiplier(move["type"], target.piece.types))
         raw = _damage(self.rng, unit.piece.level, move["power"],
@@ -380,8 +379,7 @@ class Battle:
         return self._final_damage(unit, target, move, int(raw * fraction))
 
     def _strike(self, u: Unit, target: Unit, t: float) -> None:
-        move = self.dex.moves[u.piece.move_id] if (
-            u.energy >= ENERGY_MAX and u.piece.move_id) else None
+        move = skills_mod.resolve_cast(u.piece) if u.energy >= ENERGY_MAX else None
         if move and u.ult_arch == profiles_mod.ARCH_BLINK:
             weakest = min((e for e in self.units if e.alive and e.team != u.team),
                           key=lambda e: (e.hp, self._target_key(u, e)), default=None)

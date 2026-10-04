@@ -1,0 +1,28 @@
+{
+  "base": "db01c57102c948a1b05ed9868dbb3e41afd36d4b",
+  "scope": "batch E worktree",
+  "sim": {
+    "agent": "/root/batch_e_review",
+    "verdict": "pass",
+    "closed": [
+      "Minimal ult.arch profile missing note crashed demo and catalog; fallback descriptions and regression added."
+    ]
+  },
+  "presentation": {
+    "agent": "/root/batch_e_presentation_review",
+    "verdict": "pass",
+    "closed": [
+      "Truncated sprite marked ready by catalog; byte-length check and regression added."
+    ],
+    "independent_checks": [
+      "84 species primary attack at four presentation phases and <=100 clip frames",
+      "Six generic archetypes side damage/healing/knockback timing",
+      "6v6 natural-energy mixed-battle exporter"
+    ]
+  },
+  "limits": [
+    "76 noncore species default preview only",
+    "No ESP32 performance claim",
+    "No full balance claim"
+  ]
+}

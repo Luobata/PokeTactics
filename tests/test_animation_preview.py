@@ -27,7 +27,7 @@ class AnimationPreviewContracts(unittest.TestCase):
         good = {"schema_version": 1, "species": 6, "settings": {}}
         self.assertEqual(preview.normalize_preset(good)["settings"]["palette"], "classic")
         invalid = [{**good, "schema_version": 2}, {**good, "schema_version": True},
-                   {**good, "species": 25}, {**good, "species": "6"},
+                   {**good, "species": 999}, {**good, "species": "6"},
                    {**good, "url": "file:///tmp/a"},
                    {**good, "settings": {"unknown": 1}},
                    {**good, "settings": {"palette": "unknown"}}]
@@ -152,9 +152,10 @@ class AnimationPreviewHTTPContracts(unittest.TestCase):
             body = json.load(response)
         self.assertTrue(body["ok"])
         characters = body["characters"]
-        self.assertEqual(len(characters), 8)
+        self.assertEqual(len(characters), 84)
         for sid, character in characters.items():
-            self.assertEqual(character["skill"]["move_id"], pokedex().signature_move(int(sid))["id"])
+            move = pokedex().signature_move(int(sid))
+            self.assertEqual(character["skill"]["move_id"], move["id"] if move else None)
         self.assertTrue(characters["3"]["rig"]["implemented"])
         self.assertIn("藤鞭", characters["3"]["motion_notes"]["attack"])
         self.assertIn("日光束", characters["3"]["skill"]["name"])

@@ -30,6 +30,15 @@ GENERIC_NAMES = {
     "volley_shot": "散射", "bulwark": "铁壁", "mend": "自愈",
 }
 
+GENERIC_DESCRIPTIONS = {
+    "double_strike": "主命中后追加一次 45% 伤害打击",
+    "charge": "向最远敌人突进至多 2 格，能贴身时转为攻击该目标",
+    "heavy_blow": "命中后将目标击退 1 格，目标身后有空位时生效",
+    "volley_shot": "命中后再攻击距目标最近的至多 2 名敌人，各 40% 伤害",
+    "bulwark": "施法后自身获得 3 秒 35% 减伤",
+    "mend": "施法时恢复自身最大生命的 20%",
+}
+
 # 定位阈值（pokedex base 种族值口径；与 roster 的远近程判定同源）。
 # 全 151 种族值 hp+2def 分布约 55-330、中位 200：260 取上四分位外
 # 的「硬坦」带（读数校准：320 时全池仅 2 只入坦，bulwark 分配为 0）
@@ -58,9 +67,10 @@ def skill_of(species_id: int):
     定位 → 通用池奇偶分流。确定性：同 species_id 恒同结果。
     """
     prof = profiles.get(species_id)
-    if prof is not None:
-        return {"name": prof["ult"]["note"].split("：")[0],
-                "arch": prof["ult"]["arch"], "tier": "signature"}
+    ult = prof["ult"] if prof else None
+    if ult and ult.get("arch"):
+        return {"name": ult.get("note", ult["arch"]).split("：")[0],
+                "arch": ult["arch"], "tier": "signature"}
     if not profiles.profiles_on():
         return None
     from data import pokedex
@@ -68,7 +78,8 @@ def skill_of(species_id: int):
     if species_id not in dex.species:
         return None
     base = dex.species[species_id]["base"]
-    ranged = base["special_attack"] > base["attack"]
+    ranged = (prof["range"] > 1 if prof and prof["range"] is not None else
+              base["special_attack"] > base["attack"])
     pool = _ROLE_POOL[_role_of(base, ranged)]
     arch = pool[species_id % len(pool)]
     return {"name": GENERIC_NAMES[arch], "arch": arch, "tier": "generic"}
@@ -77,3 +88,24 @@ def skill_of(species_id: int):
 def arch_of(species_id: int):
     s = skill_of(species_id)
     return s["arch"] if s else None
+
+
+def resolve_cast(piece):
+    """Executable cast payload, shared by combat and presentation consumers.
+
+    Learned damaging moves retain their existing data and damage rules. A
+    generic skill with no learned damaging move uses a neutral BASIC_POWER
+    payload and the unit's stronger current attack stat. Its id remains None:
+    this is a game skill, not a move inserted into the species' learnset.
+    With profiles disabled, a no-move piece keeps its historical basic-only
+    behavior. This function does not check energy or mutate the piece/dex.
+    """
+    from data import BASIC_POWER, pokedex
+    if piece.move_id is not None:
+        return pokedex().moves[piece.move_id]
+    skill = skill_of(piece.species_id)
+    if skill is None or skill["tier"] != "generic":
+        return None
+    return {"id": None, "name": "generic_" + skill["arch"],
+            "name_zh": skill["name"], "type": "NONE", "power": BASIC_POWER,
+            "accuracy": 100, "effect": None, "damage_stat": "best"}

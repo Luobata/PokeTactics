@@ -26,6 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import profiles  # noqa: E402
 from combat import Battle  # noqa: E402
+from data import ENERGY_MAX  # noqa: E402
 from roster import build_roster  # noqa: E402
 
 HEROES = {6: "喷火龙", 65: "胡地", 143: "卡比兽"}
@@ -124,18 +125,31 @@ def drift_check(seed: int) -> tuple:
 
 
 def skill_coverage_check(battles: int, seed: int) -> dict:
-    """两级技能验收（2026-10-04 用户裁定：通用+专属）：
-    1) 全池 84 只技能分配覆盖（含 3 专属 + 6 通用原语都在用）；
-    2) 每个通用原语在 N 场随机局里至少真实触发一次。"""
+    """验技能分配、逐物种满能施法，以及随机局内通用原语实际触发。"""
     import skills
     from collections import Counter
     roster = build_roster()
-    all_pieces = [p for ps in roster.values() for p in ps]
+    by_species = {p.species_id: p for ps in roster.values() for p in ps}
+    all_pieces = [by_species[sid] for sid in sorted(by_species)]
     assign = Counter()
+    missing_skills, missing_casts = [], []
     for p in all_pieces:
         s = skills.skill_of(p.species_id)
-        assign[(s["tier"], s["arch"])] += 1
-    cov = len(all_pieces)
+        if s is None:
+            missing_skills.append(p.species_id)
+        else:
+            assign[(s["tier"], s["arch"])] += 1
+        # Close, unequipped mirror target isolates executability from survival,
+        # natural energy generation, team synergy and random roster selection.
+        fixture = Battle([p], [p], random.Random(seed + p.species_id),
+                         positions_a=[(1, 2)], positions_b=[(1, 1)])
+        caster = fixture.units[0]
+        caster.energy = ENERGY_MAX
+        fixture._act(caster, 0.0)
+        if caster.casts != 1 or not any(e[1] == "cast" and e[2] == caster.idx
+                                        for e in fixture.events):
+            missing_casts.append(p.species_id)
+    cov = sum(assign.values())
     arches_in_use = {a for (_t, a) in assign}
     trig = Counter()
 
@@ -172,7 +186,9 @@ def skill_coverage_check(battles: int, seed: int) -> dict:
         bt = Battle(a, b, rng)
         bt.run()
         trig.update(sig(bt.events, bt.units))
-    return {"coverage": cov, "assign": dict(assign),
+    return {"coverage": cov, "expected": len(all_pieces), "assign": dict(assign),
+            "missing_skills": missing_skills, "missing_casts": missing_casts,
+            "cast_coverage": len(all_pieces) - len(missing_casts),
             "arches": arches_in_use, "triggers": dict(trig)}
 
 
@@ -197,13 +213,14 @@ def main() -> None:
           "有差异" if hero_diff else "无差异！（档案接线悬空）")
 
     sk = skill_coverage_check(80, args.seed + 500)
-    gen_arches = set(sk["assign"]) - {("signature", a) for a in
-                                      ("splash", "blink_strike", "slam_heal")}
-    check("技能全池覆盖（84 只 + 6 通用原语在用）",
-          sk["coverage"] == 84 and {a for _t, a in gen_arches} ==
+    gen_arches = {arch for (tier, arch) in sk["assign"] if tier == "generic"}
+    check("技能全池覆盖（动态棋子池 + 6 通用原语在用）",
+          sk["coverage"] == sk["expected"] and gen_arches ==
           {"double_strike", "charge", "heavy_blow", "volley_shot",
            "bulwark", "mend"},
-          f"覆盖 {sk['coverage']}/84，分配 {sk['assign']}")
+          f"覆盖 {sk['coverage']}/{sk['expected']}，分配 {sk['assign']}")
+    check("全池逐物种满能可施法", not sk["missing_casts"],
+          f"施法 {sk['cast_coverage']}/{sk['expected']}；未施法 {sk['missing_casts']}")
     missing_trig = [a for a in ("double_strike", "charge", "heavy_blow",
                                 "volley_shot", "bulwark", "mend")
                     if sk["triggers"].get(a, 0) == 0]

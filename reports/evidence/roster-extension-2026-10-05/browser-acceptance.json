@@ -1,0 +1,47 @@
+{
+  "method": "Codex CUA browser AX and screenshot inspection",
+  "origin": "http://127.0.0.1:8807",
+  "checks": [
+    {
+      "page": "/animation-editor",
+      "result": "84 options, grouped 8 signature and 76 generic"
+    },
+    {
+      "species": 63,
+      "action": "cast",
+      "seed": 7,
+      "frames": 36,
+      "impact": 1.05,
+      "target_hp": [
+        756,
+        741
+      ],
+      "target_energy": [
+        0,
+        10
+      ],
+      "observed": "Three targets visibly take scatter hits on impact; phase seek reaches frame17; controls disabled"
+    },
+    {
+      "action": "switch core vivid palette to species19",
+      "result": "Resets palette to classic and disables four unsupported controls"
+    },
+    {
+      "species": 19,
+      "action": "cast",
+      "seed": 7,
+      "frames": 34,
+      "impact": 1.2,
+      "target_hp": [
+        756,
+        731
+      ],
+      "observed": "Preview ready; default pair explicitly identical; generic effect-record scope explained"
+    },
+    {
+      "page": "/animation-lab",
+      "result": "84-species picker; selecting #019 shows melee range1, procedural body, archetype VFX and correct editor link; coverage8/76, no no-cast species"
+    }
+  ],
+  "scope": "Manual browser walkthrough of representative characters; automated tests separately cover full roster"
+}

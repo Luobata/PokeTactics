@@ -50,13 +50,18 @@ def _object(value, allowed, name):
 
 
 def normalize_preset(value):
-    from move_effects import SUPPORTED_SPECIES, normalize_overrides
+    from move_effects import SUPPORTED_SPECIES, normalize_overrides, DEFAULT_VISUAL
+    from character_catalog import character_catalog
     _object(value, ("schema_version", "species", "settings"), "预设")
     if type(value.get("schema_version")) is not int or value["schema_version"] != 1:
         raise ValueError("不支持的动画预设版本")
     sid = value.get("species")
-    if type(sid) is not int or sid not in SUPPORTED_SPECIES:
-        raise ValueError("请选择八个核心角色之一")
+    characters = character_catalog()
+    if type(sid) is not int or str(sid) not in characters:
+        raise ValueError("请选择当前上场池中的宝可梦")
+    capability = characters[str(sid)]["capabilities"]
+    if not capability["resource_ready"]:
+        raise ValueError("；".join(capability["resource_errors"]))
     settings = value.get("settings", {})
     _object(settings, ("palette", "effect_scale", "particle_density", "motion_scale"), "动作设置")
     # HTTP contract uses exactly these bounds, independent of Python coercion.
@@ -67,7 +72,12 @@ def normalize_preset(value):
             raise ValueError(f"{key} 必须在 {low}–{high} 之间")
     if settings.get("palette", "classic") not in ("classic", "vivid"):
         raise ValueError("未知色板")
-    normalized = normalize_overrides({sid: settings})[sid]
+    if sid in SUPPORTED_SPECIES:
+        normalized = normalize_overrides({sid: settings})[sid]
+    else:
+        normalized = {**DEFAULT_VISUAL, **settings}
+        if normalized != DEFAULT_VISUAL:
+            raise ValueError("该角色当前支持默认动作预览，尚未接入表现参数编辑")
     return {"schema_version": 1, "species": sid, "settings": normalized}
 
 
@@ -124,17 +134,16 @@ def _valid_cached(directory):
 
 
 def _render(request, revision):
-    from profile_range import make_scene, make_signature_scene
+    from profile_range import make_preview_scene
     key = _key(request, revision)
     output = CACHE_ROOT / key
     meta = _valid_cached(output)
     if meta:
         output.touch()
         return key, meta
-    overrides = {request["species"]: request["settings"]}
-    anim = (make_signature_scene(request["species"], request["seed"], visual_overrides=overrides)
-            if request["kind"] == "cast" else
-            make_scene(request["species"], "dummy", request["seed"], visual_overrides=overrides))
+    from move_effects import SUPPORTED_SPECIES
+    overrides = {request["species"]: request["settings"]} if request["species"] in SUPPORTED_SPECIES else None
+    anim = make_preview_scene(request["species"], request["kind"], request["seed"], visual_overrides=overrides)
     actions = [a for a in anim.timeline.actions if a.attacker == 0 and
                a.kind == request["kind"] and not a.secondary]
     damage_index = 6 if request["kind"] == "cast" else 4
@@ -142,7 +151,7 @@ def _render(request, revision):
                   actions[0] if actions else None)
     if action is None:
         raise ValueError("本种子没有产生可预览动作")
-    start, end = max(0., action.start-.25), action.impact+.95
+    start, end = max(0., action.start-.25), max(action.impact+.95, action.recover_end+.25)
     count = round((end-start)/DT)+1
     if not 0 < count <= MAX_CLIP_FRAMES:
         raise ValueError("预览片段超出帧数限制")
@@ -165,7 +174,7 @@ def _render(request, revision):
                 "frame_sha256": digest.hexdigest(),
                 "target_before_impact": anim.presentation_state(action.impact-.001)[action.target],
                 "target_at_impact": anim.presentation_state(action.impact)[action.target],
-                "training_scene": "precharged_signature" if request["kind"] == "cast" else "stationary_posts",
+                "training_scene": "precharged_skill" if request["kind"] == "cast" else "stationary_posts",
                 "skill_effects": [{"at": ev[0], "effect": ev[5],
                                    "target": anim.by_idx[ev[3]].piece.name, "payload": ev[6]}
                                   for ev in anim.timeline.events if ev[1] == "skill_effect"

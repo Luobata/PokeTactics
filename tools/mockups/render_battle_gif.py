@@ -34,7 +34,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT / "sim"))
-from decoders import Front, Font16, Palettes  # noqa: E402
+from decoders import AssetError, Front, Font16, Palettes  # noqa: E402
 from render_mockups import (  # noqa: E402
     H, W, CELL, BOARD_X, BOARD_Y, BOARD_FOOT, INK, PAPER, FRAME, NIGHT, ENERGY, HP_RED, HP_LOW,
     TYPE_COLORS, TIER_COLORS, GRASS_A, GRASS_B, SAND_A, SAND_B,
@@ -745,7 +745,7 @@ class BattleAnimation:
 
     def _gait(self, au):
         sid = au.u.piece.species_id
-        return gait_profile(au.u.piece, self.front.size_of[sid],
+        return gait_profile(au.u.piece, self.front.size_for_species(sid),
                             pokedex().species[sid]["base"]["speed"])
 
     def _attack_delay(self, ev):
@@ -1171,7 +1171,7 @@ class BattleAnimation:
 
     @lru_cache(maxsize=151)
     def _motion_profile(self, species_id):
-        size = self.front.size_of[species_id]
+        size = self.front.size_for_species(species_id)
         speed = pokedex().species[species_id]["base"]["speed"]
         weight = (size - 40) / 16
         return (species_id % 3, (species_id // 3) % 3, species_id % 2,
@@ -1180,10 +1180,24 @@ class BattleAnimation:
 
     def _attack_motion(self, au, T):
         _, style, _, tempo, amplitude, _ = self._motion_profile(au.u.piece.species_id)
-        attack = next((a for a in reversed(au.attacks)
-                       if 0 <= T - a[0] < ATTACK_ANIM * tempo), None)
+        def active(attack):
+            timing = self.timeline.action_by_onset.get((au.u.idx, attack[0])) if self._is_presentation else None
+            return attack[0] <= T < (timing.recover_end if timing else attack[0] + ATTACK_ANIM * tempo)
+        attack = next((a for a in reversed(au.attacks) if active(a)), None)
         if attack is None or au.dying(T):
             return 0.0, 0.0, 0
+        timing = self.timeline.action_by_onset.get((au.u.idx, attack[0])) if self._is_presentation else None
+        if timing is not None:
+            if T < timing.release:
+                k = (T - timing.start) / max(.001, timing.release - timing.start)
+                thrust, jump, squash = -1.5 * k, 0, round((2, 5, 4)[style] * k)
+            else:
+                k = min(1., (T - timing.release) / max(.001, timing.recover_end - timing.release))
+                thrust = (3.5, 4, 5)[style] * (1 - k) ** (1 if style == 0 else 2)
+                jump = 3 * math.sin(k * math.pi) if style == 0 else 0
+                squash = round((2, 6, 1)[style] * (1 - k))
+            return (attack[1] * thrust * amplitude,
+                    (attack[2] * thrust - jump) * amplitude, squash)
         if effect_frame(T - attack[0]) == 0:
             return -attack[1], -attack[2], 0
         age = (T - attack[0]) / tempo
@@ -1217,7 +1231,10 @@ class BattleAnimation:
         box = board_sprite_size(tier)
         source = self.front.image(species_id, self.pal)
         # 每个动作相位直接从源图 BOX + 量化，避免多次重采样损失细节。
-        return scale_sprite(source, self.pal.for_species(species_id), (box, box - squash))
+        sprite = scale_sprite(source, self.pal.for_species(species_id), (box, box - squash))
+        if sprite.getbbox() is None:
+            raise AssetError(f"species {species_id}: board sprite has no visible pixels after scaling")
+        return sprite
 
     def _sprite_placement(self, au, T, pose):
         sprite = self._board_sprite(au.u.piece.species_id, au.u.piece.tier,

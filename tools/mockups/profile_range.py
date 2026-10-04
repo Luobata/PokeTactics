@@ -8,6 +8,7 @@ Training fixtures have padded HP and fixed deployment, never fabricated events.
 import argparse
 import hashlib
 import json
+import math
 import random
 from functools import lru_cache
 from pathlib import Path
@@ -96,6 +97,43 @@ def make_signature_scene(species_id, seed=7, visual_overrides=None):
                              visual_overrides=visual_overrides)
 
 
+def make_preview_scene(species_id, kind, seed=7, visual_overrides=None):
+    """Create a real action fixture for any roster species, including generic casts.
+
+    Cast fixtures begin injured and fully charged against three durable water
+    targets. Water has no type immunity, and the cluster exposes generic spread,
+    displacement and healing. Only Battle emits the action and its outcomes.
+    """
+    if kind not in (*ACTIONS, "death"):
+        raise ValueError(f"unknown preview action {kind!r}")
+    if kind != "cast":
+        return make_scene(species_id, "dummy", seed, kind, visual_overrides)
+    if species_id in r.SUPPORTED_SPECIES:
+        return make_signature_scene(species_id, seed, visual_overrides)
+    from data import ENERGY_MAX
+    from experiment_signatures import run_fixture
+    pieces = {p.species_id: p for ps in r.build_roster().values() for p in ps}
+    if species_id not in pieces:
+        raise ValueError(f"species {species_id} is not in the roster")
+    battle = r.Battle([pieces[species_id]], [pieces[9]] * 3, random.Random(seed))
+    for unit, position in zip(battle.units, ((2, 3), (2, 2), (1, 2), (3, 2))):
+        unit.pos = position
+        unit.max_hp *= 6
+        unit.hp = unit.max_hp
+        unit.energy = 0
+        unit.next_act = 1e6
+    caster = battle.units[0]
+    caster.hp = caster.max_hp // 2
+    caster.energy, caster.next_act, caster.target_idx = ENERGY_MAX, .5, 1
+    battle.fixture_target_idx = 1
+    battle.events = [(0., "deploy", unit.idx, unit.pos) for unit in battle.units]
+    for unit in battle.units:
+        battle._emit_state(unit, 0.)
+    run_fixture(battle)
+    return r.BattleAnimation([], [], seed, *_assets(), battle=battle,
+                             visual_overrides=visual_overrides)
+
+
 def _clip(species_id, scene, seed, action):
     anim = make_scene(species_id, scene, seed, action)
     if action == "hit":
@@ -107,23 +145,33 @@ def _clip(species_id, scene, seed, action):
     if not candidates:
         raise RuntimeError(f"no real {action} event for {species_id}/{scene}, seed={seed}")
     event = candidates[0]
-    start = max(0., event[0] - .2)
-    end = event[0] + (1.3 if action == "cast" else .9)
-    if action in ("attack", "hit"):
-        end = max(end, event[0] + anim._attack_delay(event) + .4)
-    if action == "move":
-        start = max(.4, start)
-        # Keep a whole gait period, with at least two true movement events.
-        end = event[0] + 1.3
-    p0 = anim.playback_clock.playback_time(start)
-    p1 = anim.playback_clock.playback_time(end)
-    times = [p0 + i * r.FPS_DT for i in range(round((p1 - p0) / r.FPS_DT) + 1)]
+    source_index = next(i for i, value in enumerate(anim.events) if value is event)
+    timing = next((a for a in anim.timeline.actions if a.source_index == source_index), None)
+    if timing:
+        start = max(0., timing.start - .2)
+        end = max(timing.recover_end + .2, timing.impact + (.6 if action == "cast" else .4))
+    else:
+        # Movement has no ActionTiming, but shares the same causal presentation
+        # stream. Match its payload and original time through the emitted map.
+        scheduled = {at for raw, at in anim.timeline.source_times.values() if raw == event[0]}
+        onset = next(e[0] for e in anim.timeline.events
+                     if e[1:] == event[1:] and e[0] in scheduled)
+        start, end = max(.4, onset - .2), onset + 1.3
+    times = [round(start + i * r.FPS_DT, 6)
+             for i in range(math.ceil((end - start) / r.FPS_DT - 1e-8) + 1)]
     frames = [anim.playback_frame(t, show_cutins=False) for t in times]
-    return frames, {"event": event, "sim_start": start, "sim_end": end,
+    source_end = event[0] + (1.3 if action in ("cast", "move") else .9)
+    if action in ("attack", "hit"):
+        source_end = max(source_end, event[0] + anim._attack_delay(event) + .4)
+    return frames, {"event": event, "source_event_index": source_index,
+                    "sim_start": max(0., event[0] - .2), "sim_end": source_end,
+                    "presentation_start": times[0], "presentation_end": times[-1],
+                    "action_timing": ({name: getattr(timing, name) for name in
+                                       ("start", "release", "impact", "recover_end")} if timing else None),
                     "real_events": len(anim.events), "seed": seed,
                     "skill": r.skill_profile(species_id),
                     "cast_windup_seconds": r.cast_windup(species_id),
-                    "frame_times": [anim.playback_clock.simulation_time(t) for t in times]}
+                    "frame_times": times, "time_domain": "presentation"}
 
 
 def render_species_scene(species_id, scene, seed):

@@ -50,8 +50,8 @@ class ArtManifestContracts(unittest.TestCase):
         actors = self.manifest["actors"]
         self.assertEqual(self.manifest["coverage"]["roster_species"], len(actors))
         self.assertTrue(all(a["atlas_key"] in self.manifest["atlas"] for a in actors.values()))
-        self.assertFalse(actors["species.63"]["skill"]["can_cast"])
-        self.assertIsNone(actors["species.63"]["skill"]["animation_key"])
+        self.assertTrue(actors["species.63"]["skill"]["can_cast"])
+        self.assertEqual(actors["species.63"]["skill"]["animation_key"], "vfx.volley_shot")
         self.assertEqual(self.manifest["budget"]["measurements"]["pc_render"]["status"], "not_measured")
 
     def test_missing_asset_is_a_hard_failure(self):

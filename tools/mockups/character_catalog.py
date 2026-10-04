@@ -17,19 +17,83 @@ TACTICS = {
 }
 
 
-def character_catalog():
-    dex, rigs = pokedex(), rig_catalog()
-    result = {}
-    for sid, (tactic, counterplay, attack, cast) in TACTICS.items():
-        profile, move = profile_of(sid), dex.signature_move(sid)
+# Content can be promoted independently: mechanics, body, parts and effects are
+# separate capabilities. A species never needs to appear in TACTICS to play.
+GENERIC_TACTICS = {
+    "double_strike": ("主命中后追加一次 45% 伤害", "压低单体血量", "用高防单位承接连续攻击。"),
+    "charge": ("施法前向目标突进，最多两格", "缩短接敌距离", "用前排限制突进落点。"),
+    "heavy_blow": ("命中后将目标击退一格，有空格才生效", "打乱敌人阵形", "利用边界或占用格阻止击退。"),
+    "volley_shot": ("主命中外，追加攻击最近两名敌人，各 40% 伤害", "同时压低多个敌人的血量", "多名承伤单位分担散射。"),
+    "bulwark": ("施法后自身获得 3 秒 35% 减伤", "前排持续承伤", "减伤结束后集中输出。"),
+    "mend": ("施法时回复自身最大生命的 20%", "前排自我续航", "集中伤害压过回复。"),
+}
+
+
+def character_catalog(*, pieces=None, asset_root=None):
+    """JSON-safe capability catalog for the active roster, with no ID allowlist.
+
+    Optional inputs let exporters validate the exact asset pack being shipped.
+    Missing art is reported separately from simulation/skill readiness.
+    """
+    from pathlib import Path
+    from roster import build_roster
+    from skills import skill_of, resolve_cast, GENERIC_DESCRIPTIONS
+    from profiles import effective_range
+    from motion import species_motion
+    from skill_vfx import AUTHORED_SKILLS
+    from move_effects import SUPPORTED_SPECIES
+    from decoders import Front, Palettes, POKEWALK
+    root = Path(asset_root) if asset_root is not None else POKEWALK
+    front, palettes = Front(root / "gen1_front.bin"), Palettes(root / "palettes.bin")
+    if pieces is None:
+        pieces = [p for group in build_roster().values() for p in group]
+    rigs, result = rig_catalog(), {}
+    for piece in sorted(pieces, key=lambda p: p.species_id):
+        sid = piece.species_id
+        profile, skill, move = profile_of(sid), skill_of(sid), resolve_cast(piece)
+        signature = bool(skill and skill["tier"] == "signature")
+        rig = rigs.get(str(sid), {"implemented": False, "parts": [], "anchors": {}})
+        errors = []
+        blob = front.blob_of.get(sid)
+        if blob is None:
+            errors.append(f"缺少精灵资源 front/{sid}")
+        elif len(blob) != front.size_of.get(sid, 0) ** 2 // 4:
+            errors.append(f"精灵资源 front/{sid} 数据长度错误")
+        elif not blob or all(b == 255 for b in blob):
+            errors.append(f"精灵资源 front/{sid} 全透明")
+        try:
+            palettes.for_species(sid)
+        except (ValueError, IndexError, KeyError) as exc:
+            errors.append(f"缺少有效色板 species/{sid}: {exc}")
+        arch = skill["arch"] if skill else None
+        description, tactic, counterplay = GENERIC_TACTICS.get(arch, ("使用学习表中的伤害招式", "依照属性与射程安排站位", "用属性克制与站位应对。"))
+        description = GENERIC_DESCRIPTIONS.get(arch, description)
+        attack, cast = "程序化蓄力、出手、回收", "通用技能模板，按真实命中播放"
+        if signature:
+            description = profile["ult"].get("note", GENERIC_DESCRIPTIONS.get(arch, skill["name"]))
+            if sid in TACTICS:
+                tactic, counterplay, attack, cast = TACTICS[sid]
+        elif sid in species_motion:
+            attack = "手编整身动作与真实命中时序"
+        if not move:
+            description, cast = "当前规则下无可施放技能", "不支持施法"
+        authored = AUTHORED_SKILLS.get(sid)
+        authored_vfx = bool(move and authored and authored[0] == move["id"])
+        body = "part_rig" if rig["implemented"] else "authored_pose" if sid in species_motion else "procedural"
+        effect = ("none" if not move else "layered" if sid in SUPPORTED_SPECIES
+                  else "authored" if authored_vfx else "archetype")
+        controls = ["palette", "effect_scale", "particle_density", "motion_scale"] if sid in SUPPORTED_SPECIES else []
         result[str(sid)] = {
-            "species": sid, "name": dex.species[sid]["name_zh"],
-            "role": profile["role"] if profile else "通用技能",
-            "skill": {"move_id": move["id"], "name": move.get("name_zh") or move["name"],
-                      "description": profile["ult"]["note"] if profile else "档案已关闭，使用通用技能规则。",
-                      "tactic": tactic if profile else "通用技能规则",
-                      "counterplay": counterplay if profile else "当前未启用该专属机制。"},
-            "rig": rigs[str(sid)],
-            "motion_notes": {"attack": attack, "cast": cast},
+            "species": sid, "name": piece.name,
+            "role": profile.get("role", "通用技能") if profile else "通用技能",
+            "cost": piece.tier, "range": effective_range(piece),
+            "skill": {"move_id": piece.move_id, "name": (move.get("name_zh") or move["name"]) if move else "无",
+                      "tier": skill["tier"] if skill and move else "legacy" if move else "none",
+                      "arch": arch, "can_cast": bool(move), "fallback_payload": bool(move and piece.move_id is None),
+                      "description": description, "tactic": tactic, "counterplay": counterplay},
+            "rig": rig, "motion_notes": {"attack": attack, "cast": cast},
+            "capabilities": {"body": body, "effect": effect, "resource_ready": not errors,
+                             "resource_errors": errors, "actions": ["attack"] + (["cast"] if move else []),
+                             "editable_controls": controls},
         }
     return result

@@ -1,0 +1,21 @@
+{
+  "final_selected_checks": {
+    "unit_tests": "passed",
+    "compile": "passed",
+    "diff_check": "passed",
+    "persistence_restart": "passed",
+    "animation_samples": "passed",
+    "art_export": "passed",
+    "art_verify": "passed",
+    "demo": "skipped",
+    "balance": "skipped"
+  },
+  "retained_earlier_checks": {
+    "demo": "passed",
+    "balance": "passed"
+  },
+  "closed_initial_failure": "Old Abra-only-basic assertion updated to actual generic scatter skill. First run retained unmodified.",
+  "later_changes": "Presentation missing-note fallback and catalog truncated-resource checks; no later combat or balance changes.",
+  "unit_tests": 203,
+  "all_systems_complete": false
+}

@@ -84,8 +84,13 @@ def build_roster() -> dict:
     """返回 {tier: [Piece, ...]}：84 只（1费 34 / 2费 32 / 3费 18）。"""
     dex = pokedex()
     roster: dict = {1: [], 2: [], 3: []}
+    seen = set()
     for head in CURATED_FAMILIES:
-        for sid in dex.family_of(head):
+        for sid in sorted(dex.family_of(head),
+                          key=lambda sid: (len(dex.species[sid]["lineage"]), sid)):
+            if sid in seen:
+                continue
+            seen.add(sid)
             tier = tier_for_bst(dex.bst(sid))   # S2：按形态自身 BST 定档
             level = LEVEL_BY_TIER[tier]
             base = dex.species[sid]["base"]
