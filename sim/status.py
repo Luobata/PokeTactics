@@ -183,6 +183,27 @@ def speed_mult(unit) -> float:
     return 1.0 / DEBUFFS["para"]["speed"]
 
 
+def apply_flinch(battle, unit, t: float) -> bool:
+    """确定施加既有短畏缩；不占减益槽，受控制保护，不另开递减窗口。
+
+    技能侧命中使用此有限入口，不调用随机 on_hit，也不绕过 STATUS_ON。
+    同拍已有等长/更长停顿时不重复发 apply。
+    """
+    st = getattr(unit, "_st", None)
+    if not STATUS_ON or st is None or not unit.alive:
+        return False
+    if t + _EPS < st.ctrl_until:
+        battle.status_stats["blocked"][(FLINCH_KIND, "dr")] += 1
+        return False
+    until = t + DEBUFFS[FLINCH_KIND]["dur"]
+    if st.stun_until + _EPS >= until:
+        return False
+    st.stun_until = until
+    battle.status_stats["applied"][FLINCH_KIND] += 1
+    battle.events.append((t, "status", unit.idx, FLINCH_KIND, "apply", 0))
+    return True
+
+
 def on_hit(battle, attacker, target, move, t: float, damage=None) -> None:
     """_strike 落伤后：几率施加减益（随机只走 battle.rng，固定顺序保证确定性）。"""
     if not STATUS_ON:

@@ -1,0 +1,48 @@
+{
+  "review_status": "pass",
+  "session_id": "system-optimization",
+  "review_run_id": "batch-d-final",
+  "reviewer_agent_status": "created_then_reused_for_narrow_fix_verification",
+  "review_bundle": ".build/review-d",
+  "dashboard_url": "",
+  "input_fingerprint": "8c1df9bc1c84d172a84ea0b2b8b1b1c85b5d54c472482cfe9a9fa29d55a11ae9",
+  "reviewers": [
+    {
+      "agent": "/root/batch_d_review",
+      "scope": "sim correctness",
+      "verdict": "pass",
+      "closed_findings": [
+        "Bot role classification ignored profile range",
+        "Ranged attack penalty ignored profile range"
+      ],
+      "validation": "15 signature + 15 bot tests; independent role/multiplier reproduction"
+    },
+    {
+      "agent": "/root/batch_d_animation_review",
+      "scope": "animation/editor/event integration",
+      "verdict": "pass",
+      "closed_findings": [
+        "Energy return used post-knockback position",
+        "Basic projectile did not consume body attachment points"
+      ],
+      "validation": "4 presentation tests, exact same-tick knockback repro and draw-call endpoints"
+    }
+  ],
+  "blockers": [],
+  "risks": [
+    "AI ability ordering remains inverted",
+    "40-game sample is not complete role/lineup balance certification",
+    "Only 3 species have implemented part rigs; remaining 5 explicitly planned",
+    "ESP32 port and full keyframe editor not implemented"
+  ],
+  "checks_rerun": [
+    "179 unit tests",
+    "full 9-check acceptance including 40 games",
+    "48 directed first-cast fixtures"
+  ],
+  "next_actions": [
+    "Balance and difficulty redesign",
+    "Remaining five species assets/tracks",
+    "Part keyframe editing"
+  ]
+}

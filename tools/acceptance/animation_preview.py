@@ -124,15 +124,17 @@ def _valid_cached(directory):
 
 
 def _render(request, revision):
-    from profile_range import make_scene
+    from profile_range import make_scene, make_signature_scene
     key = _key(request, revision)
     output = CACHE_ROOT / key
     meta = _valid_cached(output)
     if meta:
         output.touch()
         return key, meta
-    anim = make_scene(request["species"], "dummy", request["seed"],
-                      visual_overrides={request["species"]: request["settings"]})
+    overrides = {request["species"]: request["settings"]}
+    anim = (make_signature_scene(request["species"], request["seed"], visual_overrides=overrides)
+            if request["kind"] == "cast" else
+            make_scene(request["species"], "dummy", request["seed"], visual_overrides=overrides))
     actions = [a for a in anim.timeline.actions if a.attacker == 0 and
                a.kind == request["kind"] and not a.secondary]
     damage_index = 6 if request["kind"] == "cast" else 4
@@ -163,6 +165,11 @@ def _render(request, revision):
                 "frame_sha256": digest.hexdigest(),
                 "target_before_impact": anim.presentation_state(action.impact-.001)[action.target],
                 "target_at_impact": anim.presentation_state(action.impact)[action.target],
+                "training_scene": "precharged_signature" if request["kind"] == "cast" else "stationary_posts",
+                "skill_effects": [{"at": ev[0], "effect": ev[5],
+                                   "target": anim.by_idx[ev[3]].piece.name, "payload": ev[6]}
+                                  for ev in anim.timeline.events if ev[1] == "skill_effect"
+                                  and ev[6]["cast_index"] == action.source_index],
                 "metrics": {"particle_peak": particle_peak, "signature_track_peak": track_peak,
                             "particle_limit": 192, "signature_track_limit": 3,
                             "host_frame_ms_p95": round(sorted(milliseconds)[int((count-1)*.95)], 3),

@@ -83,6 +83,19 @@ def make_scene(species_id, scene, seed, action="attack", visual_overrides=None):
                              visual_overrides=visual_overrides)
 
 
+def make_signature_scene(species_id, seed=7, visual_overrides=None):
+    """A precharged real skill in a layout that exposes its tactical effect.
+
+    Initial HP/energy/positions are recorded inputs, including the injured ally
+    for solar healing. Subsequent damage, links, healing and movement are produced
+    by Battle, not by the showcase or renderer.
+    """
+    from experiment_signatures import make_signature_battle, run_fixture
+    battle = run_fixture(make_signature_battle(species_id, seed))
+    return r.BattleAnimation([], [], seed, *_assets(), battle=battle,
+                             visual_overrides=visual_overrides)
+
+
 def _clip(species_id, scene, seed, action):
     anim = make_scene(species_id, scene, seed, action)
     if action == "hit":

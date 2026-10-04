@@ -7,7 +7,8 @@ Missing species return None: the renderer must execute its original branch.
 """
 from dataclasses import dataclass
 import math
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageOps
+from character_rigs import implemented as has_character_rig, render_rig, _point_after_rotation
 
 REST = (0, 0, 100, 100, 0, 0)
 # Every sequence is authored, including recovery/hit/death; no ID-derived seeds.
@@ -214,6 +215,7 @@ class Pose:
     direction: tuple = (1., 0.)
     hit: tuple = REST
     hit_direction: tuple = (1., 0.)
+    action_kind: str = None
 
 
 def windup(sid):
@@ -244,6 +246,7 @@ class MotionSystem:
         strike_length = duration(sid, 'strike')
         release_length = strike_length + duration(sid, 'recover')
         state, age, direction = 'idle', t, (1. if au.u.team == 0 else -1., 0.)
+        action_kind = None
         if au.dying(t):
             state, age = 'death', t - au.die_t
         else:
@@ -252,12 +255,14 @@ class MotionSystem:
             attack = next((a for a in reversed(au.attacks)
                            if 0 <= t-a[0] < anim._attack_preparation(au.u.idx, a[0])+release_length), None)
             if candidates and (attack is None or candidates[0][0] >= attack[0]):
+                action_kind = 'cast'
                 onset, prep, target = candidates[0]
                 a, b = anim._event_position(au.u.idx,onset), anim._event_position(target,onset)
                 dx, dy = b[0]-a[0], b[1]-a[1]
                 norm = math.hypot(dx,dy) or 1
                 direction = dx/norm,dy/norm
             elif attack:
+                action_kind = 'attack'
                 onset, dx, dy = attack
                 prep, direction = anim._attack_preparation(au.u.idx, onset), (dx,dy)
             else:
@@ -286,7 +291,7 @@ class MotionSystem:
                 dx,dy = a[0]-b[0],a[1]-b[1]
                 norm = math.hypot(dx,dy) or 1
                 hit_dir = dx/norm,dy/norm
-        pose = Pose(state,index,frame,direction,hit,hit_dir)
+        pose = Pose(state,index,frame,direction,hit,hit_dir,action_kind)
         return presentation_pose(sid, pose, anim.visual_config(sid)['motion_scale']) if getattr(anim, '_is_presentation', False) else pose
 
 
@@ -351,7 +356,7 @@ def presentation_pose(sid, pose, motion_scale=1.):
     hit = (round(hit[0]*motion_scale), round(hit[1]*motion_scale),
            round(100+(hit[2]-100)*motion_scale), round(100+(hit[3]-100)*motion_scale),
            round(hit[4]*motion_scale), hit[5])
-    return Pose(pose.state, pose.index, frame, pose.direction, hit, pose.hit_direction)
+    return Pose(pose.state, pose.index, frame, pose.direction, hit, pose.hit_direction, pose.action_kind)
 
 
 def offsets(pose):
@@ -402,6 +407,32 @@ def transform(sprite, sid, pose):
     bounds = sprite.getbbox()
     if not bounds:
         return sprite
+    progress = pose.index / max(1,len(species_motion[sid][pose.state])-1)
+    character = render_rig(sprite,sid,pose.action_kind,pose.state,progress,
+                           facing=1 if pose.direction[0]>=0 else -1)
+    if character is not None:
+        sx,sy = frame[2]*pose.hit[2]/10000,frame[3]*pose.hit[3]/10000
+        scaled = character.resize((max(1,round(character.width*sx)),
+                                    max(1,round(character.height*sy))),Image.Resampling.NEAREST)
+        angle = -(frame[4]+pose.hit[4]) * (1 if pose.direction[0]>=0 else -1)
+        out = scaled.rotate(angle,Image.Resampling.NEAREST,expand=True)
+        def point(xy):
+            position = (xy[0]*scaled.width/character.width,xy[1]*scaled.height/character.height)
+            return tuple(round(v) for v in _point_after_rotation(position,scaled.size,out.size,angle))
+        out.info['foot_anchor'] = point(character.info['foot_anchor'])
+        out.info['rig_anchors'] = {name:point(xy) for name,xy in character.info['rig_anchors'].items()}
+        out.info['rig_parts'] = character.info['rig_parts']
+        dissolve = max(frame[5],pose.hit[5])
+        if dissolve:
+            alpha = out.getchannel('A')
+            alpha.putdata([a if (x%2+2*(y%2)) >= dissolve else 0
+                           for y in range(out.height) for x in range(out.width)
+                           for a in (alpha.getpixel((x,y)),)])
+            out.putalpha(alpha)
+        return out
+    if has_character_rig(sid) and pose.direction[0] >= 0:
+        sprite = ImageOps.mirror(sprite)
+        bounds = sprite.getbbox()
     cel = sprite.crop(bounds)
     w,h = cel.size
     phase = rig_phase(sid, pose.state, pose.index)

@@ -65,7 +65,7 @@ class AnimationPreviewContracts(unittest.TestCase):
             self.assertEqual(base[key], edited[key], key)
         self.assertLessEqual(edited["metrics"]["particle_peak"], 192)
         self.assertEqual(len(edited["frames"]), len(edited["base_frames"]))
-        with patch("profile_range.make_scene", side_effect=AssertionError("cache miss")):
+        with patch("profile_range.make_signature_scene", side_effect=AssertionError("cache miss")):
             self.assertEqual(preview.preview({"species": 6, "kind": "cast", "seed": 7})["frame_sha256"],
                              base["frame_sha256"])
 
@@ -145,6 +145,25 @@ class AnimationPreviewHTTPContracts(unittest.TestCase):
             response = exc
         with response:
             return response.status, json.load(response)
+
+    def test_character_catalog_distinguishes_real_mechanisms_and_planned_parts(self):
+        from data import pokedex
+        with urllib.request.urlopen(self.url + "/api/animation/characters", timeout=10) as response:
+            body = json.load(response)
+        self.assertTrue(body["ok"])
+        characters = body["characters"]
+        self.assertEqual(len(characters), 8)
+        for sid, character in characters.items():
+            self.assertEqual(character["skill"]["move_id"], pokedex().signature_move(int(sid))["id"])
+        self.assertTrue(characters["3"]["rig"]["implemented"])
+        self.assertIn("藤鞭", characters["3"]["motion_notes"]["attack"])
+        self.assertIn("日光束", characters["3"]["skill"]["name"])
+        self.assertFalse(characters["26"]["rig"]["implemented"])
+        import profiles
+        with patch.object(profiles, "PROFILES_ON", False):
+            with urllib.request.urlopen(self.url + "/api/animation/characters", timeout=10) as response:
+                off = json.load(response)
+        self.assertEqual(off["characters"]["26"]["role"], "通用技能")
 
     def test_http_preset_validation_requires_marker_and_same_origin(self):
         raw = b'{"schema_version":1,"species":6,"settings":{}}'

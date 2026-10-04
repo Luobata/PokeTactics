@@ -21,6 +21,7 @@ from data import pokedex
 import economy
 import items as items_mod   # S5 装备：仓库 + 合成/装备策略（L1+）
 import shop as shop_mod
+from profiles import effective_range
 from combat import COLS  # C-sym 棋盘列数（docs/10 §1.5）：列对位随棋盘常量走
 from shop import OwnedPiece, SharedPool, try_combine
 
@@ -82,8 +83,21 @@ def main_types(comp: list) -> list:
     return sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
 
 
+def _species_power(species_id: int) -> int:
+    """买入、卖出和上场共用的单体底价，含启用中的档案倍率。"""
+    import profiles as profiles_mod
+    return int(pokedex().bst(species_id)
+               * profiles_mod.bot_value_mult(species_id))
+
+
+def _can_combine(species_id: int) -> bool:
+    """物种是否有 3 合 1 路径；池暂时缺货仍可保留进化进度。"""
+    return (species_id not in shop_mod.TRADE_EVOLUTIONS
+            and pokedex().next_evolution(species_id) is not None)
+
+
 def power(owned: OwnedPiece, target_types=()) -> int:
-    """棋子战力估值：纯 BST（上场选择/卖出/对位共用的底价）。
+    """棋子战力估值：BST × 档案倍率（买入/上场/卖出/对位共用底价）。
 
     目标羁绊不直接加价：首版读数 L2 给目标棋 +150~+250 上场偏置，
     会用 380 BST 的羁绊棋挤掉 500+ 的散件，名次反而倒挂——
@@ -91,9 +105,7 @@ def power(owned: OwnedPiece, target_types=()) -> int:
     R1 单体档案（docs/13 §5）：建档棋子按档案价值乘数加价——
     溅射/斩杀/坦度原语是 BST 表达不了的强度，不加价 bot 会贱卖主角。
     """
-    import profiles as profiles_mod
-    return int(pokedex().bst(owned.piece.species_id)
-               * profiles_mod.bot_value_mult(owned.piece.species_id))
+    return _species_power(owned.piece.species_id)
 
 
 class Bot:
@@ -145,6 +157,9 @@ class Bot:
     def count_species(self, species_id: int) -> int:
         return sum(1 for o in self.all_pieces()
                    if o.piece.species_id == species_id)
+
+    def _has_combine_progress(self, species_id: int) -> bool:
+        return _can_combine(species_id) and self.count_species(species_id) >= 2
 
     def pop(self) -> int:
         return economy.pop_of(self.level)
@@ -305,14 +320,14 @@ class Bot:
         if key in ("choice_band", "swift_feather"):
 
             def carry_rank(o: OwnedPiece) -> tuple:
-                ranged = o.piece.distance > 1
+                ranged = effective_range(o.piece) > 1
                 return (ranged, dex.bst(o.piece.species_id),
                         dex.species[o.piece.species_id]["base"]["special_attack"])
             return max(free, key=carry_rank)
 
         def tank_rank(o: OwnedPiece) -> tuple:
             b = dex.species[o.piece.species_id]["base"]
-            return (o.piece.distance == 1, b["hp"] + 2 * b["defense"])
+            return (effective_range(o.piece) == 1, b["hp"] + 2 * b["defense"])
         return max(free, key=tank_rank)
 
     def _unequip(self, owned: OwnedPiece) -> None:
@@ -415,12 +430,12 @@ class Bot:
                 do_sell(self.bench[rng.randrange(len(self.bench))])
             return
 
-        # L1+：优先卖「单只、不供目标羁绊、非复制件」的低战力棋
+        # L1+：优先卖不供目标羁绊、没有 3 合 1 进度的低战力棋
         def sell_rank(owned: OwnedPiece) -> tuple:
             off_target = 1 if self.ability >= 2 and not (
                 set(owned.piece.types) & set(self.target_types)) else 0
-            single = 1 if self.count_species(owned.piece.species_id) == 1 else 0
-            return (off_target, single, -power(owned, self.target_types))
+            unprotected = not self._has_combine_progress(owned.piece.species_id)
+            return (off_target, unprotected, -power(owned, self.target_types))
 
         limit = BENCH_SIZE   # L1/L2 都守 6 格硬上限（设备裁定）；差别在卖谁：
         while len(self.bench) > limit:   # L2 按偏离羁绊优先卖，L1 只看战力
@@ -437,20 +452,20 @@ class Bot:
         # 铺场期（还没凑出主羁绊方向、阵容未满编）：什么都能买
         if not self.target_types and len(self.all_pieces()) < self.pop() + 4:
             return 10 ** 9
-        score = pokedex().bst(sid)
+        score = _species_power(sid)
         copies = self.count_species(sid)
         in_target = bool(set(piece.types) & set(self.target_types))
-        valuable = in_target or pokedex().bst(sid) >= 400
-        if copies == 1:
-            score += 600 if valuable else 250    # 第 2 只：3 合 1 进度
-        elif copies >= 2:
+        valuable = in_target or score >= 400
+        if _can_combine(sid):
+            if copies == 1:
+                score += 600 if valuable else 250    # 第 2 只：3 合 1 进度
+            elif copies >= 2:
+                score += 900 if valuable else 300
+        elif copies >= 2 and sid in shop_mod.TRADE_EVOLUTIONS:
             # 通信族第 3 只：3 合 1 通道已裁撤（2026-09-14 裁定：唯一通道=
             # 进化石单人进化，只需 1 只中段形态），第 3 只无合并价值，
             # 维持 −800 暂缓罚（装备开关两臂一致——原「装备开解除」随门删除）
-            if sid in shop_mod.TRADE_EVOLUTIONS:
-                score += -800
-            else:
-                score += 900 if valuable else 300
+            score -= 800
         score += {1: 0, 2: 100, 3: 220}[piece.tier]   # 高档位通用升级价值
         if in_target:
             score += 400            # 供主羁绊
@@ -462,8 +477,9 @@ class Bot:
 
     def _fits(self, piece) -> bool:
         """L1 规则经济（docs/03 §4.1「只买当前阵容族」）：
-        复制件 / 主属性族（板上前 2 属性）/ 明确的高档升级 才买。"""
-        if self.count_species(piece.species_id) >= 1:
+        可合成复制件 / 主属性族（板上前 2 属性）/ 明确的高档升级 才买。"""
+        if (_can_combine(piece.species_id)
+                and self.count_species(piece.species_id) >= 1):
             return True
         if not self.board:          # 空场先铺
             return True
@@ -518,14 +534,13 @@ class Bot:
                 continue
             if len(self.bench) >= BENCH_SIZE:
                 # 备战满：新货价值（含羁绊/复制加成）高于最弱存货才换仓；
-                # 换仓优先牺牲单只（保住 3 合 1 的复制件）
+                # 换仓保护有 3 合 1 进度的复制件
                 def victim_rank(o: OwnedPiece) -> tuple:
-                    single = 0 if self.count_species(
-                        o.piece.species_id) == 1 else 1
-                    return (single, power(o, self.target_types))
+                    protected = self._has_combine_progress(o.piece.species_id)
+                    return (protected, power(o, self.target_types))
                 victim = min(self.bench, key=victim_rank)
                 new_val = self._slot_score(sid) if self.ability >= 2 \
-                    else pokedex().bst(sid)
+                    else _species_power(sid)
                 if self.ability == 0 or power(victim, self.target_types) < new_val:
                     self._unequip(victim)   # S5：卖棋自动卸下回仓库
                     self.gold += shop_mod.sell_owned(victim, self.pool)
@@ -583,8 +598,8 @@ class Bot:
             b = dex.species[o.piece.species_id]["base"]
             return b["hp"] + 2 * b["defense"]
 
-        melee = [o for o in self.board if o.piece.distance == 1]
-        ranged = [o for o in self.board if o.piece.distance > 1]
+        melee = [o for o in self.board if effective_range(o.piece) == 1]
+        ranged = [o for o in self.board if effective_range(o.piece) > 1]
         melee.sort(key=tank_rank)   # 坦克值高的在列表尾 = 前排
         ranged.sort(key=lambda o: -dex.species[o.piece.species_id]
                     ["base"]["special_attack"])  # 主 C 在列表头 = 最后排
@@ -615,8 +630,8 @@ class Bot:
             if cur < COLS and cur != want_col:
                 comp[cur], comp[want_col] = comp[want_col], comp[cur]
 
-        ranged = [o for o in comp if o.piece.distance > 1]
-        melee = [o for o in comp if o.piece.distance == 1]
+        ranged = [o for o in comp if effective_range(o.piece) > 1]
+        melee = [o for o in comp if effective_range(o.piece) == 1]
         if ranged:
             swap_to(max(ranged, key=power), COLS - 1 - opp_carry_col)
         if melee:

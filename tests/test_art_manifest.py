@@ -95,6 +95,19 @@ class ArtManifestContracts(unittest.TestCase):
         with self.assertRaisesRegex(art.ManifestError, "size/hash mismatch"):
             self.validate(self.manifest)
 
+    def test_planned_rigs_cannot_be_reported_as_implemented(self):
+        self.assertEqual(self.manifest["coverage"]["part_rig_species"], [3, 6, 9])
+        self.assertEqual(self.manifest["coverage"]["gameplay_signature_species"], 8)
+        for edit in ("definition", "coverage"):
+            bad = copy.deepcopy(self.manifest)
+            if edit == "definition":
+                bad["animation_data"]["character_rigs"]["species"]["26"]["implemented"] = True
+            else:
+                bad["coverage"]["part_rig_species"].append(26)
+            bad["revision"] = art.content_revision(bad)
+            with self.subTest(edit=edit), self.assertRaisesRegex(art.ManifestError, "character rig"):
+                self.validate(bad)
+
     def test_missing_animation_reference_is_not_hidden_by_revision(self):
         bad = copy.deepcopy(self.manifest)
         bad["actors"]["species.6"]["animations"]["idle"] = "motion.6.nonexistent"

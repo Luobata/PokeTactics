@@ -26,6 +26,37 @@ def grid(value):
     return round(math.ceil((value - 1e-9) / GRID) * GRID, 6)
 
 
+def _effect_packets(events):
+    """Read explicit cast ownership without inferring it from time or species.
+
+    A skill_effect payload's cast_index points into the raw event list, and its
+    event_count owns exactly that many following records. Older replay streams
+    without these optional markers retain the legacy packet scheduling path.
+    """
+    owners, participants = {}, {}
+    for index, ev in enumerate(events):
+        if ev[1] != 'skill_effect' or len(ev) != 7 or not isinstance(ev[6], dict):
+            continue
+        cast_index, count = ev[6].get('cast_index'), ev[6].get('event_count')
+        if (type(cast_index) is not int or type(count) is not int
+                or not 0 <= cast_index < index or count < 1
+                or index + count >= len(events)):
+            continue
+        cast = events[cast_index]
+        if cast[1] != 'cast' or cast[2] != ev[2]:
+            continue
+        affected = participants.setdefault(cast_index, {cast[2], cast[3]})
+        owners[index] = cast_index
+        for child_index in range(index + 1, index + count + 1):
+            child = events[child_index]
+            owners[child_index] = cast_index
+            if child[1] in ('attack', 'cast'):
+                affected.update(child[2:4])
+            elif child[1] in ('move', 'unit_state', 'status', 'regen', 'sash', 'die'):
+                affected.add(child[2])
+    return owners, participants
+
+
 @dataclass(frozen=True)
 class ActionTiming:
     source_index: int
@@ -66,6 +97,8 @@ class AnimationTimeline:
         self.blink_by_event = {}
         self._scheduled = []
         cast_groups = {}
+        effects, cast_participants = _effect_packets(self.source_events)
+        actions_by_source = {}
         packet = None
         previous_t = None
         self.last_impact = 0.
@@ -88,6 +121,7 @@ class AnimationTimeline:
 
         for index, ev in enumerate(self.source_events):
             t, kind = ev[:2]
+            effect_action = actions_by_source.get(effects.get(index))
             if previous_t is None or abs(t - previous_t) > 1e-8:
                 packet = None
             previous_t = t
@@ -97,9 +131,16 @@ class AnimationTimeline:
             elif kind in ('attack', 'cast'):
                 attacker, target = ev[2:4]
                 unit = by_idx[attacker]
-                group = cast_groups.get((t, attacker)) if kind == 'attack' else None
+                group = effect_action if kind == 'attack' else None
+                if group is None and kind == 'attack':
+                    legacy = cast_groups.get((t, attacker))
+                    # Explicit effects have bounded ownership. Another same-tick
+                    # action after their range must get its own windup/recovery.
+                    if legacy is not None and legacy.source_index not in cast_participants:
+                        group = legacy
                 if group is not None:
-                    at = max(group.impact, state_ready[attacker], state_ready[target])
+                    at = (group.impact if effect_action is not None else
+                          max(group.impact, state_ready[attacker], state_ready[target]))
                     timing = ActionTiming(index, kind, attacker, target, at, at, at, at, True,
                                           positions[attacker], positions[target])
                 else:
@@ -117,8 +158,10 @@ class AnimationTimeline:
                         # track even when two bodies occupy adjacent cells.
                         travel = max(CORE_CAST_TRAVEL, travel)
                     delay = base_prep + travel
+                    affected = cast_participants.get(index, {attacker, target})
+                    state_fence = max(state_ready[idx] for idx in affected)
                     start = grid(max(.4, t, action_ready[attacker], state_ready[attacker],
-                                     state_ready[target] - delay))
+                                     state_fence - delay))
                     release = grid(start + base_prep)
                     impact = grid(release + travel)
                     if opening_combo and t == 0 and kind == 'attack':
@@ -130,6 +173,7 @@ class AnimationTimeline:
                                           impact, grid(impact + recovery), False,
                                           positions[attacker], positions[target])
                 self.actions.append(timing)
+                actions_by_source[index] = timing
                 if not timing.secondary:
                     self.action_by_onset[(attacker, timing.start)] = timing
                 emit(ev, timing.start, timing)
@@ -143,9 +187,10 @@ class AnimationTimeline:
                     self.blinks.append(blink)
                     self.blink_by_event[id(moved)] = blink
                 packet = timing
-                state_ready[attacker] = state_ready[target] = timing.impact
+                for idx in cast_participants.get(index, {attacker, target}):
+                    state_ready[idx] = max(state_ready[idx], timing.impact)
+                    last_shift[idx] = timing.impact - t
                 action_ready[attacker] = max(action_ready[attacker], timing.recover_end)
-                last_shift[attacker] = last_shift[target] = timing.impact - t
                 self.last_impact = max(self.last_impact, timing.impact)
                 if kind == 'cast':
                     cast_groups[(t, attacker)] = timing
@@ -154,25 +199,32 @@ class AnimationTimeline:
                         self.cutin_windows.append((timing.release, timing.release + CUTIN_DURATION, index))
             elif kind == 'move':
                 idx = ev[2]
-                if (t,idx) in blink_candidates:
+                if effect_action is None and (t,idx) in blink_candidates:
                     pending_blinks[idx] = (ev, positions[idx])
                     positions[idx] = ev[3]
                     continue
-                at = grid(max(t, state_ready[idx], action_ready[idx]))
+                # Forced displacement belongs to the incoming hit, even while
+                # the victim is recovering from its own earlier action.
+                at = (effect_action.impact if effect_action is not None else
+                      grid(max(t, state_ready[idx], action_ready[idx])))
                 positions[idx] = ev[3]
                 emit(ev, at)
-                state_ready[idx] = action_ready[idx] = at + MOVE_DURATION
+                state_ready[idx] = max(state_ready[idx], at + MOVE_DURATION)
+                action_ready[idx] = max(action_ready[idx], at + MOVE_DURATION)
                 last_shift[idx] = at - t
                 packet = None
             elif kind in ('unit_state', 'status', 'regen', 'sash', 'die'):
                 idx = ev[2]
                 belongs = packet is not None and idx in (packet.attacker, packet.target)
-                at = packet.impact if belongs else max(t + last_shift[idx], state_ready[idx])
+                at = (effect_action.impact if effect_action is not None else
+                      packet.impact if belongs else max(t + last_shift[idx], state_ready[idx]))
                 if kind == 'die':
                     at += HIT_HOLD
                     action_ready[idx] = max(action_ready[idx], at + DEATH_DURATION)
                 emit(ev, at)
                 state_ready[idx] = max(state_ready[idx], at)
+            elif kind == 'skill_effect' and effect_action is not None:
+                emit(ev, effect_action.impact)
             elif kind == 'end':
                 at = max(t, max(action_ready.values(), default=0.),
                          max(state_ready.values(), default=0.))

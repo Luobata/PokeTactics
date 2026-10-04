@@ -14,7 +14,7 @@ import statistics
 import time
 
 from PIL import Image, ImageDraw
-from profile_range import make_scene
+from profile_range import make_scene, make_signature_scene
 from render_battle_gif import quantize_frames
 
 HEROES = (6,9,3,26,65,94,76,143)
@@ -35,8 +35,8 @@ def export(out, seed=7, species=None):
     if not heroes or len(set(heroes)) != len(heroes) or set(heroes)-set(HEROES):
         raise ValueError("species must be a nonempty unique subset of core hero ids")
     for sid in heroes:
-        anim=make_scene(sid,'dummy',seed)
         for kind in ('attack','cast'):
+            anim=(make_signature_scene(sid,seed) if kind=='cast' else make_scene(sid,'dummy',seed))
             candidates=[a for a in anim.timeline.actions
                         if a.attacker==0 and a.kind==kind and not a.secondary]
             damage_index=6 if kind=='cast' else 4
@@ -90,6 +90,8 @@ def export(out, seed=7, species=None):
                             'frame_ms_p95':round(sorted(measurements)[int((len(measurements)-1)*.95)],3),
                             'frame_ms_max':round(max(measurements),3),
                             'simulation_duration':anim.events[-1][0],
+                            'training_scene': 'precharged_signature' if kind=='cast' else 'stationary_posts',
+                            'skill_effects': [list(ev) for ev in anim.timeline.events if ev[1]=='skill_effect'],
                             'presentation_duration':anim.presentation_duration})
     for kind,sheets in rows.items():
         combined=Image.new('RGB',(1200,344*len(sheets)),(238,230,206))

@@ -11,7 +11,7 @@
 </head>
 <body>
 <header class="top"><div class="top-inner"><div class="brand"><span class="pixel" aria-hidden="true"></span><div><div class="eyebrow">POKETACTICS · MOTION WORKBENCH</div><strong>动作编辑工作台</strong></div></div><a href="/animation-lab">← 动画验收</a></div></header>
-<main><div class="intro"><h1>调好动作，再逐帧看一次</h1><p>原始与当前版本共用一段战斗事件。点击生成后，由后端渲染真实帧；修改参数不会自动发起请求。</p></div>
+<main><div class="intro"><h1>调好动作，再逐帧看一次</h1><p>默认参数与调参结果共用一段战斗事件。点击生成后，由后端渲染真实帧；修改参数不会自动发起请求。</p></div>
 <div id="error" class="error" role="alert" hidden></div><p id="notice" class="notice" role="status" aria-live="polite">选择角色与动作，点击「生成预览」开始。</p>
 <div class="workbench">
   <aside class="panel" aria-labelledby="settings-title"><div class="panel-heading"><h2 id="settings-title">01 / 演出参数</h2><span>只影响表现</span></div><form id="settings-form" class="form-body">
@@ -24,12 +24,13 @@
     <div class="form-actions"><button id="render" class="button primary full" type="submit">生成预览</button><button id="defaults" class="button full" type="button">恢复默认参数</button></div>
     <div class="preset-actions"><button id="import" class="button" type="button">导入 JSON</button><button id="export" class="button" type="button" disabled>导出预设</button><input id="file" type="file" accept=".json,application/json" hidden></div><p id="export-note" class="form-note">成功生成预览后可导出。预设保存角色及表现参数，不包含种子和动作类型。</p>
   </form></aside>
-  <div><div id="dirty" class="dirty">尚未应用 · 点击生成预览</div><section class="panel" aria-labelledby="preview-title"><div class="panel-heading"><h2 id="preview-title">02 / 原始与当前</h2><span id="result-label">等待渲染</span></div><div class="preview-pair">
-    <div class="preview-pane"><h3>原始版本<span>同角色、同动作、同种子 · 默认参数</span></h3><div class="screen-box"><canvas id="base-canvas" width="240" height="320" tabindex="0" aria-label="原始动画预览，空格播放暂停，左右逐帧"></canvas><div class="screen-empty"><span>原始帧将在生成后出现</span></div></div><p id="base-caption" class="preview-caption">240 × 320 · 原生像素</p></div>
-    <div class="preview-pane"><h3>当前版本<span>本次成功渲染的参数</span></h3><div class="screen-box"><canvas id="current-canvas" width="240" height="320" tabindex="0" aria-label="当前动画预览，空格播放暂停，左右逐帧"></canvas><div class="screen-empty"><span>当前帧将在生成后出现</span></div></div><p id="current-caption" class="preview-caption">240 × 320 · 原生像素</p></div>
+  <div><div id="dirty" class="dirty">尚未应用 · 点击生成预览</div><section class="panel" aria-labelledby="preview-title"><div class="panel-heading"><h2 id="preview-title">02 / 默认与调参对照</h2><span id="result-label">等待渲染</span></div><div class="preview-pair">
+    <div class="preview-pane"><h3>默认参数<span>同角色、同动作、同种子 · 默认参数</span></h3><div class="screen-box"><canvas id="base-canvas" width="240" height="320" tabindex="0" aria-label="默认动画预览，空格播放暂停，左右逐帧"></canvas><div class="screen-empty"><span>默认帧将在生成后出现</span></div></div><p id="base-caption" class="preview-caption">240 × 320 · 原生像素</p></div>
+    <div class="preview-pane"><h3>调参结果<span>本次成功渲染的参数</span></h3><div class="screen-box"><canvas id="current-canvas" width="240" height="320" tabindex="0" aria-label="调参动画预览，空格播放暂停，左右逐帧"></canvas><div class="screen-empty"><span>调参帧将在生成后出现</span></div></div><p id="current-caption" class="preview-caption">240 × 320 · 原生像素</p></div>
   </div><p id="applied" class="applied">未生成预览。调整表单后仍需点击「生成预览」。</p>
   <div class="transport"><div class="transport-row"><div class="play-buttons"><button id="previous" class="button" type="button" disabled aria-label="上一帧">←</button><button id="play" class="button" type="button" disabled>播放</button><button id="next" class="button" type="button" disabled aria-label="下一帧">→</button></div><label class="speed">倍速<select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label><p id="time" class="time-readout">— / — 帧 · — s</p></div><div class="timeline"><div id="phase-rail" class="phase-rail" aria-hidden="true"><div id="rail-fill" class="rail-fill"></div></div><label for="seek" class="small">拖动检查帧</label><input id="seek" class="seek" type="range" min="0" max="1" step="1" value="0" disabled><div id="phases" class="phase-labels"></div></div><p class="keyboard-help">空格：播放 / 暂停　← →：逐帧　拖动或点击阶段：暂停定位</p></div></section>
-  <div class="evidence"><section class="panel"><h2>03 / 本次命中记录</h2><dl class="hp-grid"><div><dt>命中前 HP</dt><dd id="hp-before">—</dd></div><div><dt>命中时 HP</dt><dd id="hp-at">—</dd></div><div><dt>命中前能量</dt><dd id="energy-before">—</dd></div><div><dt>命中时能量</dt><dd id="energy-at">—</dd></div></dl><p class="evidence-note">由后端返回的目标快照。画面中的实时血条以实际渲染帧为准。</p></section><section class="panel"><h2>04 / 本次渲染数据</h2><dl id="metrics" class="metrics"><div><dt>尚无结果</dt><dd>—</dd></div></dl><p class="evidence-note">PC 预览数据，不等于 ESP32 真机性能。</p></section></div>
+  <section class="panel" style="margin-top:20px" aria-labelledby="character-title"><div class="panel-heading"><h2 id="character-title">角色动作与战术</h2><span id="rig-state">读取中</span></div><div class="form-body"><p id="character-skill"></p><p id="character-tactic" class="form-note"></p><p id="character-counter" class="form-note"></p><p id="character-parts" class="form-note"></p><p id="character-action" class="form-note"></p><p class="form-note">部件结构供检查；本页目前可调整色板、特效、粒子和整体动作幅度。</p></div></section>
+  <div class="evidence"><section class="panel"><h2>03 / 本次命中记录</h2><dl class="hp-grid"><div><dt>命中前 HP</dt><dd id="hp-before">—</dd></div><div><dt>命中时 HP</dt><dd id="hp-at">—</dd></div><div><dt>命中前能量</dt><dd id="energy-before">—</dd></div><div><dt>命中时能量</dt><dd id="energy-at">—</dd></div></dl><p id="skill-outcomes" class="evidence-note"></p><p class="evidence-note">由后端返回的目标快照。大招样本已预充能，部分友军预先受伤，方便检查技能作用。</p></section><section class="panel"><h2>04 / 本次渲染数据</h2><dl id="metrics" class="metrics"><div><dt>尚无结果</dt><dd>—</dd></div></dl><p class="evidence-note">PC 预览数据，不等于 ESP32 真机性能。</p></section></div>
   </div>
 </div><footer class="footer">预览使用本地后端渲染；页面只播放返回的帧。导入文件先经服务器校验，再应用到表单。</footer></main>
 <script>
@@ -42,7 +43,7 @@
   const PHASES = [['start','开始'],['release','释放'],['impact','命中'],['recover_end','恢复结束']];
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
   let applied = null, frame = 0, playing = false, raf = 0, lastTick = null, cursor = 0;
-  let formRevision = 0, rendering = false, importing = false;
+  let formRevision = 0, rendering = false, importing = false, characters = {};
   const finite = value => typeof value === 'number' && Number.isFinite(value);
   const fmt = (value,digits=2) => finite(value) ? value.toLocaleString('zh-CN',{maximumFractionDigits:digits}) : '未提供';
   const write = (id,value) => { $(id).textContent = value; };
@@ -65,7 +66,27 @@
     return {species,kind,seed,settings:settingsCopy({palette:$('palette').value,effect_scale:Number($('effect-scale').value),particle_density:Number($('particle-density').value),motion_scale:Number($('motion-scale').value)})};
   }
   function isDirty() { try { return !applied || JSON.stringify(readForm()) !== JSON.stringify(applied.config); } catch { return true; } }
+  function showCharacter() {
+    const entry = characters[$('species').value];
+    if (!entry) return;
+    write('rig-state',entry.rig.implemented ? '专属部件动作已接入' : '沿用整身动作 · 部件轨待接入');
+    write('character-skill',entry.name+' · '+entry.role+' / '+entry.skill.description);
+    write('character-tactic','站位与用途：'+entry.skill.tactic);
+    write('character-counter','应对方式：'+entry.skill.counterplay);
+    write('character-parts',(entry.rig.implemented ? '已接入部件：' : '计划部件：')+entry.rig.parts.map(part => part.label || part.name).join('、'));
+    write('character-action','当前动作：'+entry.motion_notes[$('kind').value]);
+  }
+  async function loadCharacters() {
+    try {
+      const response = await fetch('/api/animation/characters',{cache:'no-store'});
+      if (!response.ok) throw new Error('角色资料暂不可用');
+      const value = await response.json();
+      if (!value.ok || !value.characters) throw new Error('角色资料格式错误');
+      characters = value.characters; showCharacter();
+    } catch (error) { write('rig-state','资料读取失败'); write('character-skill',error.message); }
+  }
   function updateFormState() {
+    showCharacter();
     [['effect-scale','effect-value'],['particle-density','particle-value'],['motion-scale','motion-value']].forEach(([input,output]) => write(output,fmt(Number($(input).value),4)));
     const dirty = isDirty(); $('dirty').classList.toggle('ready',!dirty);
     write('dirty', rendering ? (dirty ? '正在生成 · 表单可继续修改，后续改动仍需再次应用' : '正在生成当前参数…') : dirty ? (applied ? '有未应用更改 · 下方保留上一次成功预览' : '尚未应用 · 点击生成预览') : '参数已应用 · 画面与当前表单一致');
@@ -97,7 +118,7 @@
     return url.href;
   }
   function validatePreview(result) {
-    if (!Array.isArray(result.frames) || !Array.isArray(result.base_frames) || !result.frames.length || result.frames.length !== result.base_frames.length || result.frames.length > 600) throw new Error('原始与当前帧数量无效或不一致。');
+    if (!Array.isArray(result.frames) || !Array.isArray(result.base_frames) || !result.frames.length || result.frames.length !== result.base_frames.length || result.frames.length > 600) throw new Error('默认与调参帧数量无效或不一致。');
     if (!finite(result.dt) || result.dt <= 0 || result.dt > 1 || !finite(result.clip_start)) throw new Error('预览帧的时间信息无效。');
     const action = result.action;
     if (!action || PHASES.some(([key]) => !finite(action[key])) || PHASES.some(([key],i) => i && action[key] < action[PHASES[i-1][0]])) throw new Error('预览动作阶段时间无效。');
@@ -184,13 +205,18 @@
     write('applied','已渲染：'+settings.palette+' / 特效 '+fmt(settings.effect_scale,4)+' / 粒子 '+fmt(settings.particle_density,4)+' / 动作 '+fmt(settings.motion_scale,4));
     write('base-caption','240 × 320 · '+applied.baseImages.length+' 帧'); write('current-caption','240 × 320 · '+applied.images.length+' 帧');
     [['hp-before',result.target_before_impact?.hp],['hp-at',result.target_at_impact?.hp],['energy-before',result.target_before_impact?.energy],['energy-at',result.target_at_impact?.energy]].forEach(([id,value]) => write(id,fmt(value,0)));
+    const labels = {side_hit:'追加伤害',heal:'治疗',energy_drain:'吸取能量',knockback:'击退',flinch:'畏缩'};
+    write('skill-outcomes',(result.skill_effects || []).map(effect => {
+      const value = effect.payload.damage ?? effect.payload.amount ?? effect.payload.stolen;
+      return fmt(effect.at,2)+'s '+effect.target+' '+(labels[effect.effect] || effect.effect)+(finite(value) ? ' '+value : '');
+    }).join('；') || '本片段没有额外效果记录。');
     showMetrics(result.metrics); showPhases(); paint(0);
   }
   async function render(event) {
     event?.preventDefault(); if (rendering) return;
     let config; try { config = readForm(); } catch (error) { showError(error.message); return; }
     clearError(); const revision = formRevision, resume = !reducedMotion && (!applied || playing); pause(); rendering = true; $('render').disabled = true; write('render','后端渲染中…'); updateFormState();
-    write('notice','正在生成原始与当前版本，请稍候。已有成功预览会保留，表单可以继续修改。');
+    write('notice','正在生成默认与调参结果，请稍候。已有成功预览会保留，表单可以继续修改。');
     try {
       const result = validatePreview(await post('/api/animation/preview',config));
       write('render','正在读取帧…');
@@ -240,6 +266,6 @@
   const query = new URLSearchParams(location.search), species = Number(query.get('species'));
   if (HEROES.includes(species)) $('species').value = species;
   if (['attack','cast'].includes(query.get('kind'))) $('kind').value = query.get('kind');
-  updateFormState();
+  updateFormState(); loadCharacters();
 })();
 </script></body></html>

@@ -192,8 +192,65 @@ def draw_blink_fragments(image, center, progress, budget, config, *, arriving=Fa
         paint.stamp(point,8 if arriving else 7,frame=i+paint.frame)
 
 
+def draw_skill_effect(image, sid, effect, source, target, age, budget, config=None,
+                      payload=None):
+    """Material feedback for an actual, causally scheduled skill_effect record.
+
+    Links start at the authoritative impact, not at an invented second hit time.
+    The caller supplies the logged pre-effect positions. No target selection or
+    resource change is reconstructed by this drawing function.
+    """
+    if sid not in SUPPORTED_SPECIES or not math.isfinite(age) or not 0 <= age < .45:
+        return
+    payload = payload or {}
+    p = age / .45
+    paint = _Painter(image, sid, config or effect_profile(sid), budget, int(age/.05))
+    if effect == 'side_hit' and payload.get('damage', 0) > 0:
+        if sid == 26:
+            dx, dy = target[0]-source[0], target[1]-source[1]
+            length = math.hypot(dx, dy) or 1
+            points = [_mix(source, target, i/8) for i in range(9)]
+            points = [(x + (0 if i in (0,8) else (-1)**(i+paint.frame)*4)*-dy/length,
+                       y + (0 if i in (0,8) else (-1)**(i+paint.frame)*4)*dx/length)
+                      for i, (x,y) in enumerate(points)]
+            paint.path(points, 2 if age < .2 else 1)
+            paint.stamp(target, 11 if age < .2 else 5)
+        elif sid == 9:
+            paint.path([source,target], 4 if age < .2 else 2)
+            for i in range(paint.count(3)):
+                paint.stamp((target[0]+(i-1)*8, target[1]+p*8), 7-i)
+        elif sid == 76:
+            floor_a, floor_b = (source[0],source[1]+17), (target[0],target[1]+17)
+            mid = _mix(floor_a,floor_b,.5)
+            paint.path([floor_a,(mid[0]-3,mid[1]+3),floor_b],2,False)
+            for i in range(paint.count(3)):
+                paint.stamp((floor_b[0]+(i-1)*9, floor_b[1]-math.sin(p*math.pi)*8),7+i)
+    elif effect == 'heal' and payload.get('amount', 0) > 0:
+        # A leaf/solar return identifies the supported ally; the plus is outside
+        # its silhouette so it survives the sprite exclusion mask.
+        for i in range(paint.count(4)):
+            q = min(1., max(0., p*1.6-i*.12))
+            x,y = _mix(source,target,q)
+            paint.stamp((x,y-math.sin(q*math.pi)*12),6,frame=i+paint.frame)
+        x,y = target[0]+18,target[1]-16
+        paint.path([(x-3,y),(x+3,y)],1,False)
+        paint.path([(x,y-3),(x,y+3)],1,False)
+    elif effect == 'energy_drain' and payload.get('stolen', 0) > 0:
+        for i in range(paint.count(4)):
+            q=min(1.,max(0.,p*1.6-i*.1))
+            x,y=_mix(source,target,q)
+            paint.stamp((x,y+math.sin(q*math.pi)*(-9 if i%2 else 9)),5,frame=i+paint.frame)
+    elif effect == 'flinch':
+        # Existing status icon carries the state; these three short shock marks
+        # identify the moment of application without extending its duration.
+        if age < .2:
+            for i in range(3):
+                x,y=target[0]+(i-1)*9,target[1]-22
+                paint.path([(x,y-4),(x,y)],1,False)
+
+
 def draw_move_effect(image, sid, source, target, phase, progress, budget, config=None,
-                     *, basic=False):
+                     *, basic=False, anchors=None):
     """Draw one phase without advancing state; return nothing.
 
     ``phase`` is charge / flight / impact / aftermath, progress is [0,1].
@@ -205,6 +262,9 @@ def draw_move_effect(image, sid, source, target, phase, progress, budget, config
     if not math.isfinite(progress) or not 0 <= progress <= 1:
         return
     config=effect_profile(sid) if config is None else config
+    anchors = anchors or {}
+    source_name = ('left_vine_tip' if basic else 'flower_focus') if sid == 3 else 'mouth'
+    source = anchors.get(source_name, source)
     p=progress; frame=int(p*6)
     paint=_Painter(image,sid,config,budget,frame)
     dx,dy=target[0]-source[0],target[1]-source[1]
@@ -217,9 +277,12 @@ def draw_move_effect(image, sid, source, target, phase, progress, budget, config
     angle=round(-math.degrees(math.atan2(dy,dx))+90)
     if basic:
         if phase=='flight':
-            for j in reversed(range(paint.count(3))):
-                q=max(0,p-j*.075)
-                paint.stamp(_mix(source,target,q),7-j*2,frame=frame+j,angle=angle)
+            sources = ([anchors['left_muzzle'], anchors['right_muzzle']]
+                       if sid == 9 and all(k in anchors for k in ('left_muzzle','right_muzzle')) else [source])
+            for origin in sources:
+                for j in reversed(range(paint.count(3))):
+                    q=max(0,p-j*.075)
+                    paint.stamp(_mix(origin,target,q),7-j*2,frame=frame+j,angle=angle)
         elif phase in ('impact','aftermath'):
             for i in range(paint.count(5 if phase=='impact' else 3)):
                 theta=i*2.399+sid*.1
@@ -232,7 +295,8 @@ def draw_move_effect(image, sid, source, target, phase, progress, budget, config
         count=paint.count(6 if sid in (3,65,26) else 4)
         if sid==9:
             for side in (-1,1):
-                muzzle=(source[0]+side*13,source[1]-7)
+                muzzle=anchors.get('left_muzzle' if side == -1 else 'right_muzzle',
+                                   (source[0]+side*13,source[1]-7))
                 paint.stamp(muzzle,7+round(p*3),frame=frame+side)
                 paint.stamp((muzzle[0],muzzle[1]-8*(1-p)),4,frame=frame)
         elif sid==76:
@@ -244,7 +308,7 @@ def draw_move_effect(image, sid, source, target, phase, progress, budget, config
                 paint.stamp((source[0]+side*(18-p*5),source[1]-4-p*4),8,frame=frame+side)
             paint.stamp(local(source,14),7+round(p*3),frame=frame)
         else:
-            center=(source[0],source[1]-12) if sid==3 else local(source,13)
+            center=(source if 'flower_focus' in anchors else (source[0],source[1]-12)) if sid==3 else local(source,13)
             for i in range(count):
                 theta=(i/count*math.tau)+(p*.6 if sid==65 else 0)
                 r=(22*(1-p)+7)*paint.scale
@@ -266,14 +330,16 @@ def draw_move_effect(image, sid, source, target, phase, progress, budget, config
             # Continuous twin jets, faceted foam edges and independent droplets.
             count=paint.count(5)
             for side in (-1,1):
-                points=[local(_mix(source,target,p*i/8),0,
-                              side*(8*(1-p*i/8)+4)+(1 if (i+frame)%2 else -1))
+                muzzle=anchors.get('left_muzzle' if side == -1 else 'right_muzzle',
+                                   local(source,0,side*8))
+                points=[local(_mix(muzzle,target,p*i/8),0,
+                              side*4*p*i/8+(1 if (i+frame)%2 else -1))
                         for i in range(9)]
                 paint.path(points,width=6)
                 for i in range(count):
                     q=max(0,p-i*.11)
-                    spread=side*(8*(1-q)+6)
-                    paint.stamp(local(_mix(source,target,q),0,spread),7 if i else 13,
+                    spread=side*6*q
+                    paint.stamp(local(_mix(muzzle,target,q),0,spread),7 if i else 13,
                                 frame=i+frame,angle=angle)
         elif sid==3:
             head=_mix(source,target,p)

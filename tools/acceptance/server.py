@@ -663,6 +663,10 @@ class Handler(SimpleHTTPRequestHandler):
         elif parsed.path == "/animation-editor":
             self.path = "/tools/acceptance/animation_editor.html"
             return super().do_GET()
+        elif parsed.path == "/api/animation/characters":
+            from character_catalog import character_catalog
+            with _LOCK:
+                self._json({"ok": True, "characters": character_catalog()})
         elif parsed.path == "/anim":
             seed = int(qs.get("seed", ["7"])[0])
             syn_on = qs.get("synergy", ["1"])[0] == "1"  # 2026-09-14 起 S3 默认开

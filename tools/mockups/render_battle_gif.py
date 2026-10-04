@@ -52,7 +52,7 @@ from pixel_vfx import (trajectory_point, projectile, impact_star, impact_rim,
                        light, debris, hit_sprite, feather_flash, number_rise, exposure_age)
 from animation_timeline import AnimationTimeline, MAX_ACTIVE_SIGNATURES
 from move_effects import (SUPPORTED_SPECIES, normalize_overrides, effect_profile,
-                          draw_move_effect, draw_blink_fragments)
+                          draw_move_effect, draw_blink_fragments, draw_skill_effect)
 from combat import Battle  # noqa: E402
 from data import pokedex  # noqa: E402
 from roster import build_roster  # noqa: E402
@@ -812,8 +812,12 @@ class BattleAnimation:
             a, b, trajectory = self._projectile_path(ev)
             color = TYPE_COLORS[source.u.piece.types[0]]
             if self._is_presentation and sid in SUPPORTED_SPECIES:
+                timing = self._timing(ev)
+                anchor_time = min(T, timing.release) if timing else T
+                anchors = {name: point for name in ('mouth', 'left_muzzle', 'right_muzzle', 'left_vine_tip')
+                           if (point := self._rig_anchor(source, anchor_time, name)) is not None}
                 draw_move_effect(img, sid, a, b, 'flight', age/duration, budget,
-                                 self.visual_config(sid), basic=True)
+                                 self.visual_config(sid), basic=True, anchors=anchors)
             elif ranged_cast:
                 cast_projectile(img, sid, a, b, age, duration,
                                 source.u.piece.types[0], color, budget)
@@ -876,9 +880,13 @@ class BattleAnimation:
                 else:
                     phase, progress = 'aftermath', (T-c[1]-.2)/.4
                 # Freeze the flight origin at release, including blink landing.
+                anchor_time = min(T, release)
+                anchors = {name: point for name in ('mouth', 'left_muzzle', 'right_muzzle', 'flower_focus')
+                           if (point := self._rig_anchor(self.units[c[2]], anchor_time, name)) is not None}
                 draw_move_effect(img, sid, (a[0]+20,a[1]+16), (b[0]+20,b[1]+16),
                                  phase, min(1.,max(0.,progress)), budget,
-                                 self.visual_config(sid))
+                                 self.visual_config(sid), anchors=anchors)
+                self._draw_skill_outcomes(img, T, budget, c)
                 continue
             # Put the small fire emblem on the least crowded rim, keeping its
             # impact anchor on the target. No new full-screen or solid overlay.
@@ -904,6 +912,30 @@ class BattleAnimation:
             draw_skill(img, profile, (a[0] + 20, a[1] + 16),
                        (b[0] + 20, b[1] + 16), age, release - c[0],
                        budget, variant=c[2] % 2, emblem=emblem)
+
+    def _draw_skill_outcomes(self, img, T, budget, cast):
+        """Only explicit simulator effects owned by this active cast draw links."""
+        timing = self.timeline.action_by_onset.get((cast[2], cast[0]))
+        if timing is None:
+            return
+        sid = self.units[cast[2]].u.piece.species_id
+        for ev in self.timeline.recent_events(T, .45):
+            if ev[1] != 'skill_effect' or ev[2] != cast[2]:
+                continue
+            payload = ev[6]
+            if payload.get('cast_index') != timing.source_index:
+                continue
+            effect = ev[5]
+            def point(idx, position):
+                xy = (self.units[idx].cell_px(position) if position is not None else
+                      self._event_position(idx, ev[0]))
+                return xy[0]+20, xy[1]+16
+            source = point(payload.get('origin_idx', ev[2]), payload.get('origin_pos'))
+            target = point(ev[3], payload.get('target_pos'))
+            if effect == 'energy_drain':
+                target = point(ev[2], payload.get('caster_pos'))
+            draw_skill_effect(img, sid, effect, source, target, T-ev[0], budget,
+                              self.visual_config(sid), payload)
 
     def _draw_board(self, img: Image, T: float) -> None:
         # All sprite poses, flashes and FX share this frame's hit selection.
@@ -1202,7 +1234,7 @@ class BattleAnimation:
             status = 'freeze' if 'freeze' in au.statuses and not au.dying(T) else (
                 'poison' if 'poison' in au.statuses and effect_frame(T)%2 == 0 and not au.dying(T) else None)
             sprite = self._authored_sprite(au.u.piece.species_id,au.u.piece.tier,status,
-                motion.state,motion.index,motion.frame,motion.hit,motion.direction[0]>=0)
+                motion.state,motion.index,motion.frame,motion.hit,motion.direction[0]>=0,motion.action_kind)
         elif not au.dying(T) and "freeze" not in au.statuses:
             gait = self._gait(au)
             phase = int((T + 1e-9) / (gait.period / 2)) % 2
@@ -1210,6 +1242,11 @@ class BattleAnimation:
         direction = self._impact_direction(au, T)
         if direction is not None and not authored:
             sprite = hit_sprite(sprite, direction)
+        if 'foot_anchor' in sprite.info:
+            anchor = sprite.info['foot_anchor']
+            # Padding belongs to the local part canvas, not the board cell.
+            # Never clamp the transparent rectangle and shift the actor's foot.
+            return sprite, round(pose[0]+BCELL/2-anchor[0]), round(pose[1]+BOARD_FOOT-anchor[1])
         x = max(BX, min(BX + BCOLS * BCELL - sprite.width,
                        round(pose[0] + (BCELL - sprite.width) / 2)))
         y = pose[1] + BOARD_FOOT - sprite.getbbox()[3]
@@ -1228,9 +1265,18 @@ class BattleAnimation:
         return pose
 
     @lru_cache(maxsize=4096)
-    def _authored_sprite(self, sid, tier, status, state, index, frame, hit, right):
+    def _authored_sprite(self, sid, tier, status, state, index, frame, hit, right, action_kind=None):
         sprite = self._status_sprite(sid,tier,0,status) if status else self._board_sprite(sid,tier)
-        return transform(sprite,sid,Pose(state,index,frame,(1 if right else -1,0),hit))
+        return transform(sprite,sid,Pose(state,index,frame,(1 if right else -1,0),hit,action_kind=action_kind))
+
+    def _rig_anchor(self, au, T, name):
+        """World-space named attachment; fallback actors return None."""
+        pose = self._unit_pose(au,T)
+        if pose is None:
+            return None
+        sprite,x,y = self._sprite_placement(au,T,pose)
+        point = sprite.info.get('rig_anchors',{}).get(name)
+        return (x+point[0],y+point[1]) if point is not None else None
 
     @lru_cache(maxsize=1024)
     def _status_sprite(self, species_id, tier, squash, status):

@@ -28,8 +28,9 @@ SOURCE_FILES = (
     "tools/mockups/render_mockups.py", "tools/mockups/skill_vfx.py",
     "tools/mockups/profile_vfx.py", "tools/mockups/pixel_vfx.py",
     "tools/mockups/move_effects.py",
+    "tools/mockups/character_rigs.py", "tools/mockups/character_catalog.py",
     "sim/data.py", "sim/roster.py", "sim/profiles.py", "sim/skills.py",
-    "sim/combat.py", "data/pokemon.json", "data/moves.json", "data/typechart.json",
+    "sim/combat.py", "sim/status.py", "data/pokemon.json", "data/moves.json", "data/typechart.json",
 )
 
 
@@ -141,7 +142,8 @@ def _modules():
             sys.path.insert(0, path)
     return {name: importlib.import_module(name) for name in (
         "decoders", "motion", "animation_timeline", "render_battle_gif",
-        "render_mockups", "skill_vfx", "move_effects", "profiles", "skills", "roster", "data")}
+        "render_mockups", "skill_vfx", "move_effects", "character_rigs", "character_catalog",
+        "profiles", "skills", "roster", "data")}
 
 
 def _motion_clips(motion):
@@ -198,6 +200,8 @@ def build_manifest(*, asset_root=None, pc_metrics=None):
         entry["palette_index"] = palette_map[entry["species_id"] - 1]
     provenance = json.loads(_file(asset_root, "pokemon_art_sources.json"))
     clips, rigs = _motion_clips(motion)
+    character_rigs = modules["character_rigs"].manifest_data()
+    characters = modules["character_catalog"].character_catalog()
     for arch in visual.ARCHS:
         clips[f"vfx.{arch}"] = {"kind": "procedural_python", "frames_exported": False,
                                 "source": "tools/mockups/skill_vfx.py", "archetype": arch}
@@ -233,6 +237,7 @@ def build_manifest(*, asset_root=None, pc_metrics=None):
             "species_id": sid, "name": piece.name,
             "role_key": f"signature.{sid}" if profile else "ranged" if piece.distance > 1 else "melee",
             "role_label": profile["role"] if profile else ("远程" if piece.distance > 1 else "近战"),
+            "character": characters.get(str(sid)),
             "atlas_key": f"front/{sid}", "palette_asset": "palettes",
             "animations": body, "authored_motion": authored,
             "skill": {"move_id": piece.move_id, "can_cast": has_move,
@@ -264,12 +269,14 @@ def build_manifest(*, asset_root=None, pc_metrics=None):
                        "motion": "PokeTactics authored pose tables and procedural effects around referenced source sprites"},
         "inputs": inputs, "assets": assets, "atlas": atlas,
         "animation_data": {"frame_fields": ["forward_px", "down_px", "scale_x_percent", "scale_y_percent", "clockwise_degrees", "dissolve_quarters"],
-                           "clips": clips, "rigs": rigs, "effect_cels": effect_cels,
+                           "clips": clips, "rigs": rigs, "character_rigs": character_rigs, "effect_cels": effect_cels,
                            "visual_defaults": dict(effect_module.DEFAULT_VISUAL),
                            "portable_status": "integer pose/rig data and indexed effect cels exported; effect choreography and raster transform remain Python"},
         "actors": actors,
         "coverage": {"roster_species": len(actors), "atlas_species": len(atlas),
                      "layered_core_visual_species": sorted(core_effects),
+                     "part_rig_species": sorted(int(sid) for sid, rig in character_rigs["species"].items() if rig["implemented"]),
+                     "planned_part_rig_species": sorted(int(sid) for sid, rig in character_rigs["species"].items() if not rig["implemented"]),
                      "authored_motion_species": sum(a["authored_motion"] for a in actors.values()),
                      "authored_skill_visual_species": sum(a["skill"]["authored_visual"] for a in actors.values()),
                      "gameplay_signature_species": sum(a["skill"]["tier"] == "signature" for a in actors.values()),
@@ -350,6 +357,13 @@ def validate_manifest(manifest, *, asset_root=None):
             raise ManifestError(f"invalid atlas record: {key}")
     clips = manifest["animation_data"]["clips"]
     modules = _modules()
+    expected_rigs = modules["character_rigs"].manifest_data()
+    if manifest["animation_data"].get("character_rigs") != expected_rigs:
+        raise ManifestError("character rigs do not match implementation")
+    for label, enabled in (("part_rig_species", True), ("planned_part_rig_species", False)):
+        expected = sorted(int(sid) for sid, rig in expected_rigs["species"].items() if rig["implemented"] == enabled)
+        if manifest["coverage"].get(label) != expected:
+            raise ManifestError("character rig coverage does not match implementation")
     expected_cels = modules["move_effects"].CELS
     actual_cels = manifest["animation_data"].get("effect_cels", {})
     if set(actual_cels) != set(expected_cels):

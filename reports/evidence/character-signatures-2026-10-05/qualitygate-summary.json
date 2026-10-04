@@ -1,0 +1,25 @@
+{
+  "gate": "pass",
+  "agent_action": {
+    "schema_version": "qualitygate.agent-action.v1",
+    "state": "local_checks_passed",
+    "next_action": "finalize_semantic_and_tests",
+    "task_complete": false,
+    "actionable_block_count": 0,
+    "repair_round": 0,
+    "stop_reasons": [],
+    "repair_findings": [],
+    "required_validation": [
+      "format",
+      "diff_check",
+      "compile",
+      "focused_tests"
+    ],
+    "completion_requires": "current-fingerprint semantic result consumed and relevant validation passed; local PASS alone is insufficient"
+  },
+  "effective_rules_snapshot": {},
+  "effective_coverage": false,
+  "semantic_mcp": "unavailable",
+  "mutation_status": "disabled_not_executed",
+  "reason": "Local gate returned pass with no effective rules; not counted as source quality coverage. Independent reviews and repository validation are separate evidence."
+}

@@ -1,0 +1,1624 @@
+{
+  "seed": 7,
+  "frame_size": [
+    240,
+    320
+  ],
+  "clips": [
+    {
+      "species": 6,
+      "kind": "attack",
+      "gif": "6-attack.gif",
+      "contact": "6-attack-contact.png",
+      "action": {
+        "source_index": 7,
+        "kind": "attack",
+        "attacker": 0,
+        "target": 3,
+        "start": 1.6,
+        "release": 1.9,
+        "impact": 2.15,
+        "recover_end": 2.4,
+        "secondary": false,
+        "source_pos": [
+          1,
+          1
+        ],
+        "target_pos": [
+          4,
+          1
+        ]
+      },
+      "landed_damage": 20,
+      "clip_start": 1.35,
+      "clip_end": 3.0999999999999996,
+      "frames": 36,
+      "fps": 20,
+      "frame_sha256": "b27c4bcb12ec2a7e0e9eb4d93f9cae837ce7ae15f765fe513d34b0f67abd840c",
+      "target_before_impact": {
+        "hp": 1524,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1504,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 5,
+      "signature_track_peak": 0,
+      "frame_ms_p95": 4.548,
+      "frame_ms_max": 8.801,
+      "simulation_duration": 44.90000000000037,
+      "training_scene": "stationary_posts",
+      "skill_effects": [],
+      "presentation_duration": 46.4
+    },
+    {
+      "species": 6,
+      "kind": "cast",
+      "gif": "6-cast.gif",
+      "contact": "6-cast-contact.png",
+      "action": {
+        "source_index": 8,
+        "kind": "cast",
+        "attacker": 0,
+        "target": 1,
+        "start": 0.5,
+        "release": 1.0,
+        "impact": 1.2,
+        "recover_end": 1.45,
+        "secondary": false,
+        "source_pos": [
+          2,
+          3
+        ],
+        "target_pos": [
+          2,
+          2
+        ]
+      },
+      "landed_damage": 50,
+      "clip_start": 0.25,
+      "clip_end": 2.15,
+      "frames": 39,
+      "fps": 20,
+      "frame_sha256": "c5335ec4fc62286da02e8556bc074646a5d58304f39eb7c48a0f759303079a82",
+      "target_before_impact": {
+        "hp": 1446,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1396,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 19,
+      "signature_track_peak": 1,
+      "frame_ms_p95": 6.397,
+      "frame_ms_max": 8.259,
+      "simulation_duration": 0.5,
+      "training_scene": "precharged_signature",
+      "skill_effects": [],
+      "presentation_duration": 2.0
+    },
+    {
+      "species": 9,
+      "kind": "attack",
+      "gif": "9-attack.gif",
+      "contact": "9-attack-contact.png",
+      "action": {
+        "source_index": 7,
+        "kind": "attack",
+        "attacker": 0,
+        "target": 3,
+        "start": 1.6,
+        "release": 1.85,
+        "impact": 2.1,
+        "recover_end": 2.3,
+        "secondary": false,
+        "source_pos": [
+          1,
+          1
+        ],
+        "target_pos": [
+          4,
+          1
+        ]
+      },
+      "landed_damage": 16,
+      "clip_start": 1.35,
+      "clip_end": 3.05,
+      "frames": 35,
+      "fps": 20,
+      "frame_sha256": "82ef8628463c21bc3dfb232f936c5c6357893f2e9301fda5735ff7c3da0d9cb9",
+      "target_before_impact": {
+        "hp": 1524,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1508,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 6,
+      "signature_track_peak": 0,
+      "frame_ms_p95": 4.765,
+      "frame_ms_max": 12.534,
+      "simulation_duration": 44.90000000000037,
+      "training_scene": "stationary_posts",
+      "skill_effects": [
+        [
+          20.25,
+          "skill_effect",
+          0,
+          3,
+          "line_push",
+          "knockback",
+          {
+            "cast_index": 36,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              1,
+              1
+            ],
+            "target_pos": [
+              4,
+              1
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "origin": [
+              4,
+              1
+            ],
+            "destination": [
+              5,
+              1
+            ]
+          }
+        ]
+      ],
+      "presentation_duration": 45.7
+    },
+    {
+      "species": 9,
+      "kind": "cast",
+      "gif": "9-cast.gif",
+      "contact": "9-cast-contact.png",
+      "action": {
+        "source_index": 8,
+        "kind": "cast",
+        "attacker": 0,
+        "target": 1,
+        "start": 0.5,
+        "release": 0.9,
+        "impact": 1.1,
+        "recover_end": 1.3,
+        "secondary": false,
+        "source_pos": [
+          0,
+          3
+        ],
+        "target_pos": [
+          1,
+          2
+        ]
+      },
+      "landed_damage": 50,
+      "clip_start": 0.25,
+      "clip_end": 2.05,
+      "frames": 37,
+      "fps": 20,
+      "frame_sha256": "9481bbf6c10f487468be491b62a1ed1a67b01ba7b87efb085d1e65c087651477",
+      "target_before_impact": {
+        "hp": 1446,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1396,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 28,
+      "signature_track_peak": 1,
+      "frame_ms_p95": 7.38,
+      "frame_ms_max": 8.176,
+      "simulation_duration": 0.5,
+      "training_scene": "precharged_signature",
+      "skill_effects": [
+        [
+          1.1,
+          "skill_effect",
+          0,
+          2,
+          "line_push",
+          "side_hit",
+          {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              0,
+              3
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 25
+          }
+        ],
+        [
+          1.1,
+          "skill_effect",
+          0,
+          3,
+          "line_push",
+          "side_hit",
+          {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              0,
+              3
+            ],
+            "target_pos": [
+              3,
+              0
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 22
+          }
+        ],
+        [
+          1.1,
+          "skill_effect",
+          0,
+          1,
+          "line_push",
+          "knockback",
+          {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              0,
+              3
+            ],
+            "target_pos": [
+              1,
+              2
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "origin": [
+              1,
+              2
+            ],
+            "destination": [
+              1,
+              1
+            ]
+          }
+        ]
+      ],
+      "presentation_duration": 1.9
+    },
+    {
+      "species": 3,
+      "kind": "attack",
+      "gif": "3-attack.gif",
+      "contact": "3-attack-contact.png",
+      "action": {
+        "source_index": 7,
+        "kind": "attack",
+        "attacker": 0,
+        "target": 3,
+        "start": 1.6,
+        "release": 1.85,
+        "impact": 2.1,
+        "recover_end": 2.3,
+        "secondary": false,
+        "source_pos": [
+          1,
+          1
+        ],
+        "target_pos": [
+          4,
+          1
+        ]
+      },
+      "landed_damage": 18,
+      "clip_start": 1.35,
+      "clip_end": 3.05,
+      "frames": 35,
+      "fps": 20,
+      "frame_sha256": "09bdeae0739fc5e5252c16a80b6ae399bd209e4485b39b7bfba6325f2be24f8f",
+      "target_before_impact": {
+        "hp": 1524,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1506,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 5,
+      "signature_track_peak": 0,
+      "frame_ms_p95": 4.622,
+      "frame_ms_max": 7.7,
+      "simulation_duration": 44.90000000000037,
+      "training_scene": "stationary_posts",
+      "skill_effects": [],
+      "presentation_duration": 45.7
+    },
+    {
+      "species": 3,
+      "kind": "cast",
+      "gif": "3-cast.gif",
+      "contact": "3-cast-contact.png",
+      "action": {
+        "source_index": 10,
+        "kind": "cast",
+        "attacker": 0,
+        "target": 2,
+        "start": 0.5,
+        "release": 0.9,
+        "impact": 1.1,
+        "recover_end": 1.3,
+        "secondary": false,
+        "source_pos": [
+          2,
+          3
+        ],
+        "target_pos": [
+          2,
+          2
+        ]
+      },
+      "landed_damage": 335,
+      "clip_start": 0.25,
+      "clip_end": 2.05,
+      "frames": 37,
+      "fps": 20,
+      "frame_sha256": "9e717d7388fd5293a23f510d60dbb561a1839ee389d9a31cc757d470fa18e32f",
+      "target_before_impact": {
+        "hp": 762,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 427,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 15,
+      "signature_track_peak": 1,
+      "frame_ms_p95": 6.341,
+      "frame_ms_max": 10.007,
+      "simulation_duration": 0.5,
+      "training_scene": "precharged_signature",
+      "skill_effects": [
+        [
+          1.1,
+          "skill_effect",
+          0,
+          1,
+          "solar_siphon",
+          "heal",
+          {
+            "cast_index": 10,
+            "event_count": 2,
+            "origin_idx": 2,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              3,
+              3
+            ],
+            "caster_pos": [
+              2,
+              3
+            ],
+            "amount": 117
+          }
+        ]
+      ],
+      "presentation_duration": 1.9
+    },
+    {
+      "species": 26,
+      "kind": "attack",
+      "gif": "26-attack.gif",
+      "contact": "26-attack-contact.png",
+      "action": {
+        "source_index": 7,
+        "kind": "attack",
+        "attacker": 0,
+        "target": 3,
+        "start": 1.6,
+        "release": 1.85,
+        "impact": 2.1,
+        "recover_end": 2.3,
+        "secondary": false,
+        "source_pos": [
+          1,
+          1
+        ],
+        "target_pos": [
+          4,
+          1
+        ]
+      },
+      "landed_damage": 19,
+      "clip_start": 1.35,
+      "clip_end": 3.05,
+      "frames": 35,
+      "fps": 20,
+      "frame_sha256": "d92bc58522ab1e25c3667565b276604efd7caa2bc8917878ab72fd654884d018",
+      "target_before_impact": {
+        "hp": 2892,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 2873,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 5,
+      "signature_track_peak": 0,
+      "frame_ms_p95": 4.885,
+      "frame_ms_max": 7.245,
+      "simulation_duration": 44.90000000000037,
+      "training_scene": "stationary_posts",
+      "skill_effects": [
+        [
+          9.45,
+          "skill_effect",
+          0,
+          1,
+          "chain_lightning",
+          "side_hit",
+          {
+            "cast_index": 19,
+            "event_count": 3,
+            "origin_idx": 3,
+            "origin_pos": [
+              4,
+              1
+            ],
+            "target_pos": [
+              4,
+              0
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "damage": 25,
+            "hop": 1
+          }
+        ],
+        [
+          9.45,
+          "skill_effect",
+          0,
+          2,
+          "chain_lightning",
+          "side_hit",
+          {
+            "cast_index": 19,
+            "event_count": 3,
+            "origin_idx": 1,
+            "origin_pos": [
+              4,
+              0
+            ],
+            "target_pos": [
+              5,
+              0
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "damage": 14,
+            "hop": 2
+          }
+        ],
+        [
+          18.45,
+          "skill_effect",
+          0,
+          1,
+          "chain_lightning",
+          "side_hit",
+          {
+            "cast_index": 44,
+            "event_count": 3,
+            "origin_idx": 3,
+            "origin_pos": [
+              4,
+              1
+            ],
+            "target_pos": [
+              4,
+              0
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "damage": 25,
+            "hop": 1
+          }
+        ],
+        [
+          18.45,
+          "skill_effect",
+          0,
+          2,
+          "chain_lightning",
+          "side_hit",
+          {
+            "cast_index": 44,
+            "event_count": 3,
+            "origin_idx": 1,
+            "origin_pos": [
+              4,
+              0
+            ],
+            "target_pos": [
+              5,
+              0
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "damage": 16,
+            "hop": 2
+          }
+        ],
+        [
+          27.45,
+          "skill_effect",
+          0,
+          1,
+          "chain_lightning",
+          "side_hit",
+          {
+            "cast_index": 70,
+            "event_count": 3,
+            "origin_idx": 3,
+            "origin_pos": [
+              4,
+              1
+            ],
+            "target_pos": [
+              4,
+              0
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "damage": 24,
+            "hop": 1
+          }
+        ],
+        [
+          27.45,
+          "skill_effect",
+          0,
+          2,
+          "chain_lightning",
+          "side_hit",
+          {
+            "cast_index": 70,
+            "event_count": 3,
+            "origin_idx": 1,
+            "origin_pos": [
+              4,
+              0
+            ],
+            "target_pos": [
+              5,
+              0
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "damage": 15,
+            "hop": 2
+          }
+        ],
+        [
+          36.45,
+          "skill_effect",
+          0,
+          1,
+          "chain_lightning",
+          "side_hit",
+          {
+            "cast_index": 93,
+            "event_count": 3,
+            "origin_idx": 3,
+            "origin_pos": [
+              4,
+              1
+            ],
+            "target_pos": [
+              4,
+              0
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "damage": 23,
+            "hop": 1
+          }
+        ],
+        [
+          36.45,
+          "skill_effect",
+          0,
+          2,
+          "chain_lightning",
+          "side_hit",
+          {
+            "cast_index": 93,
+            "event_count": 3,
+            "origin_idx": 1,
+            "origin_pos": [
+              4,
+              0
+            ],
+            "target_pos": [
+              5,
+              0
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "damage": 15,
+            "hop": 2
+          }
+        ],
+        [
+          45.45,
+          "skill_effect",
+          0,
+          1,
+          "chain_lightning",
+          "side_hit",
+          {
+            "cast_index": 116,
+            "event_count": 3,
+            "origin_idx": 3,
+            "origin_pos": [
+              4,
+              1
+            ],
+            "target_pos": [
+              4,
+              0
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "damage": 23,
+            "hop": 1
+          }
+        ],
+        [
+          45.45,
+          "skill_effect",
+          0,
+          2,
+          "chain_lightning",
+          "side_hit",
+          {
+            "cast_index": 116,
+            "event_count": 3,
+            "origin_idx": 1,
+            "origin_pos": [
+              4,
+              0
+            ],
+            "target_pos": [
+              5,
+              0
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "damage": 15,
+            "hop": 2
+          }
+        ]
+      ],
+      "presentation_duration": 46.45
+    },
+    {
+      "species": 26,
+      "kind": "cast",
+      "gif": "26-cast.gif",
+      "contact": "26-cast-contact.png",
+      "action": {
+        "source_index": 8,
+        "kind": "cast",
+        "attacker": 0,
+        "target": 1,
+        "start": 0.5,
+        "release": 0.9,
+        "impact": 1.1,
+        "recover_end": 1.3,
+        "secondary": false,
+        "source_pos": [
+          0,
+          3
+        ],
+        "target_pos": [
+          0,
+          2
+        ]
+      },
+      "landed_damage": 90,
+      "clip_start": 0.25,
+      "clip_end": 2.05,
+      "frames": 37,
+      "fps": 20,
+      "frame_sha256": "97d3a473b8b89e37691be29c1e641d760e2d7ea8bb40e87005c1d514185ff7f4",
+      "target_before_impact": {
+        "hp": 756,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 666,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 28,
+      "signature_track_peak": 1,
+      "frame_ms_p95": 6.011,
+      "frame_ms_max": 7.599,
+      "simulation_duration": 0.5,
+      "training_scene": "precharged_signature",
+      "skill_effects": [
+        [
+          1.1,
+          "skill_effect",
+          0,
+          2,
+          "chain_lightning",
+          "side_hit",
+          {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 1,
+            "origin_pos": [
+              0,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 50,
+            "hop": 1
+          }
+        ],
+        [
+          1.1,
+          "skill_effect",
+          0,
+          3,
+          "chain_lightning",
+          "side_hit",
+          {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 2,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              4,
+              2
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 32,
+            "hop": 2
+          }
+        ]
+      ],
+      "presentation_duration": 1.9
+    },
+    {
+      "species": 65,
+      "kind": "attack",
+      "gif": "65-attack.gif",
+      "contact": "65-attack-contact.png",
+      "action": {
+        "source_index": 7,
+        "kind": "attack",
+        "attacker": 0,
+        "target": 3,
+        "start": 1.6,
+        "release": 1.85,
+        "impact": 2.1,
+        "recover_end": 2.3,
+        "secondary": false,
+        "source_pos": [
+          1,
+          1
+        ],
+        "target_pos": [
+          4,
+          1
+        ]
+      },
+      "landed_damage": 24,
+      "clip_start": 1.35,
+      "clip_end": 3.05,
+      "frames": 35,
+      "fps": 20,
+      "frame_sha256": "eb210fe8e2fa6ca7646610aecb4999da028a92de85ee04f8bd804d40f4abb599",
+      "target_before_impact": {
+        "hp": 1524,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1500,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 5,
+      "signature_track_peak": 0,
+      "frame_ms_p95": 4.477,
+      "frame_ms_max": 6.595,
+      "simulation_duration": 44.90000000000037,
+      "training_scene": "stationary_posts",
+      "skill_effects": [],
+      "presentation_duration": 45.7
+    },
+    {
+      "species": 65,
+      "kind": "cast",
+      "gif": "65-cast.gif",
+      "contact": "65-cast-contact.png",
+      "action": {
+        "source_index": 9,
+        "kind": "cast",
+        "attacker": 0,
+        "target": 3,
+        "start": 0.5,
+        "release": 0.95,
+        "impact": 1.15,
+        "recover_end": 1.35,
+        "secondary": false,
+        "source_pos": [
+          3,
+          1
+        ],
+        "target_pos": [
+          3,
+          2
+        ]
+      },
+      "landed_damage": 58,
+      "clip_start": 0.25,
+      "clip_end": 2.0999999999999996,
+      "frames": 38,
+      "fps": 20,
+      "frame_sha256": "54a3bb2f668590581ca923bee5d261edf69768fc7d7cfca9a3cdb6b32606fbeb",
+      "target_before_impact": {
+        "hp": 723,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 665,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 11,
+      "signature_track_peak": 1,
+      "frame_ms_p95": 5.286,
+      "frame_ms_max": 7.515,
+      "simulation_duration": 0.5,
+      "training_scene": "precharged_signature",
+      "skill_effects": [],
+      "presentation_duration": 1.95
+    },
+    {
+      "species": 94,
+      "kind": "attack",
+      "gif": "94-attack.gif",
+      "contact": "94-attack-contact.png",
+      "action": {
+        "source_index": 7,
+        "kind": "attack",
+        "attacker": 0,
+        "target": 3,
+        "start": 1.6,
+        "release": 1.85,
+        "impact": 2.1,
+        "recover_end": 2.3,
+        "secondary": false,
+        "source_pos": [
+          1,
+          1
+        ],
+        "target_pos": [
+          4,
+          1
+        ]
+      },
+      "landed_damage": 23,
+      "clip_start": 1.35,
+      "clip_end": 3.05,
+      "frames": 35,
+      "fps": 20,
+      "frame_sha256": "e3a3954cba355269cffaedc769e63db21f778efa1ec87394de10d248ee0cae19",
+      "target_before_impact": {
+        "hp": 1524,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1501,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 5,
+      "signature_track_peak": 0,
+      "frame_ms_p95": 4.631,
+      "frame_ms_max": 6.931,
+      "simulation_duration": 44.90000000000037,
+      "training_scene": "stationary_posts",
+      "skill_effects": [
+        [
+          9.05,
+          "skill_effect",
+          0,
+          3,
+          "energy_drain",
+          "energy_drain",
+          {
+            "cast_index": 19,
+            "event_count": 2,
+            "origin_idx": 3,
+            "origin_pos": [
+              4,
+              1
+            ],
+            "target_pos": [
+              4,
+              1
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "stolen": 20,
+            "gained": 10
+          }
+        ],
+        [
+          17.55,
+          "skill_effect",
+          0,
+          3,
+          "energy_drain",
+          "energy_drain",
+          {
+            "cast_index": 39,
+            "event_count": 2,
+            "origin_idx": 3,
+            "origin_pos": [
+              4,
+              1
+            ],
+            "target_pos": [
+              4,
+              1
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "stolen": 20,
+            "gained": 10
+          }
+        ],
+        [
+          26.05,
+          "skill_effect",
+          0,
+          3,
+          "energy_drain",
+          "energy_drain",
+          {
+            "cast_index": 58,
+            "event_count": 2,
+            "origin_idx": 3,
+            "origin_pos": [
+              4,
+              1
+            ],
+            "target_pos": [
+              4,
+              1
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "stolen": 20,
+            "gained": 10
+          }
+        ],
+        [
+          34.55,
+          "skill_effect",
+          0,
+          3,
+          "energy_drain",
+          "energy_drain",
+          {
+            "cast_index": 76,
+            "event_count": 2,
+            "origin_idx": 3,
+            "origin_pos": [
+              4,
+              1
+            ],
+            "target_pos": [
+              4,
+              1
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "stolen": 20,
+            "gained": 10
+          }
+        ],
+        [
+          43.05,
+          "skill_effect",
+          0,
+          3,
+          "energy_drain",
+          "energy_drain",
+          {
+            "cast_index": 94,
+            "event_count": 2,
+            "origin_idx": 3,
+            "origin_pos": [
+              4,
+              1
+            ],
+            "target_pos": [
+              4,
+              1
+            ],
+            "caster_pos": [
+              1,
+              1
+            ],
+            "stolen": 20,
+            "gained": 10
+          }
+        ]
+      ],
+      "presentation_duration": 45.7
+    },
+    {
+      "species": 94,
+      "kind": "cast",
+      "gif": "94-cast.gif",
+      "contact": "94-cast-contact.png",
+      "action": {
+        "source_index": 8,
+        "kind": "cast",
+        "attacker": 0,
+        "target": 1,
+        "start": 0.5,
+        "release": 0.9,
+        "impact": 1.1,
+        "recover_end": 1.3,
+        "secondary": false,
+        "source_pos": [
+          2,
+          3
+        ],
+        "target_pos": [
+          2,
+          2
+        ]
+      },
+      "landed_damage": 6,
+      "clip_start": 0.25,
+      "clip_end": 2.05,
+      "frames": 37,
+      "fps": 20,
+      "frame_sha256": "528032da4d575483dea944a392563616d24528addded6b6aa558f9661d872c8c",
+      "target_before_impact": {
+        "hp": 762,
+        "energy": 35,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 756,
+        "energy": 25,
+        "die_t": null
+      },
+      "particle_peak": 13,
+      "signature_track_peak": 1,
+      "frame_ms_p95": 4.795,
+      "frame_ms_max": 7.176,
+      "simulation_duration": 0.5,
+      "training_scene": "precharged_signature",
+      "skill_effects": [
+        [
+          1.1,
+          "skill_effect",
+          0,
+          1,
+          "energy_drain",
+          "energy_drain",
+          {
+            "cast_index": 8,
+            "event_count": 2,
+            "origin_idx": 1,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "caster_pos": [
+              2,
+              3
+            ],
+            "stolen": 20,
+            "gained": 10
+          }
+        ]
+      ],
+      "presentation_duration": 1.9
+    },
+    {
+      "species": 76,
+      "kind": "attack",
+      "gif": "76-attack.gif",
+      "contact": "76-attack-contact.png",
+      "action": {
+        "source_index": 9,
+        "kind": "attack",
+        "attacker": 0,
+        "target": 3,
+        "start": 2.1,
+        "release": 2.35,
+        "impact": 2.4,
+        "recover_end": 2.6,
+        "secondary": false,
+        "source_pos": [
+          3,
+          1
+        ],
+        "target_pos": [
+          4,
+          1
+        ]
+      },
+      "landed_damage": 11,
+      "clip_start": 1.85,
+      "clip_end": 3.3499999999999996,
+      "frames": 31,
+      "fps": 20,
+      "frame_sha256": "b7322a8678ba8cf9b3277e25fabf1ce557414febf48e3ab38b01a588b72853c2",
+      "target_before_impact": {
+        "hp": 1524,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1513,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 5,
+      "signature_track_peak": 0,
+      "frame_ms_p95": 4.114,
+      "frame_ms_max": 4.841,
+      "simulation_duration": 44.90000000000037,
+      "training_scene": "stationary_posts",
+      "skill_effects": [
+        [
+          25.2,
+          "skill_effect",
+          0,
+          3,
+          "quake_break",
+          "flinch",
+          {
+            "cast_index": 38,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              3,
+              1
+            ],
+            "target_pos": [
+              4,
+              1
+            ],
+            "caster_pos": [
+              3,
+              1
+            ],
+            "duration": 0.3
+          }
+        ],
+        [
+          37.7,
+          "skill_effect",
+          0,
+          3,
+          "quake_break",
+          "flinch",
+          {
+            "cast_index": 56,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              3,
+              1
+            ],
+            "target_pos": [
+              4,
+              1
+            ],
+            "caster_pos": [
+              3,
+              1
+            ],
+            "duration": 0.3
+          }
+        ]
+      ],
+      "presentation_duration": 45.9
+    },
+    {
+      "species": 76,
+      "kind": "cast",
+      "gif": "76-cast.gif",
+      "contact": "76-cast-contact.png",
+      "action": {
+        "source_index": 8,
+        "kind": "cast",
+        "attacker": 0,
+        "target": 1,
+        "start": 0.5,
+        "release": 0.9,
+        "impact": 1.1,
+        "recover_end": 1.3,
+        "secondary": false,
+        "source_pos": [
+          2,
+          2
+        ],
+        "target_pos": [
+          2,
+          1
+        ]
+      },
+      "landed_damage": 88,
+      "clip_start": 0.25,
+      "clip_end": 2.05,
+      "frames": 37,
+      "fps": 20,
+      "frame_sha256": "e76b57c4e340b16662669eac50e05f5b8a75f0110591e6692ba3ab35ee72300b",
+      "target_before_impact": {
+        "hp": 1446,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1358,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 36,
+      "signature_track_peak": 1,
+      "frame_ms_p95": 5.983,
+      "frame_ms_max": 7.344,
+      "simulation_duration": 0.5,
+      "training_scene": "precharged_signature",
+      "skill_effects": [
+        [
+          1.1,
+          "skill_effect",
+          0,
+          1,
+          "quake_break",
+          "flinch",
+          {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "duration": 0.3
+          }
+        ],
+        [
+          1.1,
+          "skill_effect",
+          0,
+          2,
+          "quake_break",
+          "side_hit",
+          {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              1,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "damage": 39
+          }
+        ],
+        [
+          1.1,
+          "skill_effect",
+          0,
+          2,
+          "quake_break",
+          "flinch",
+          {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              1,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "duration": 0.3
+          }
+        ],
+        [
+          1.1,
+          "skill_effect",
+          0,
+          3,
+          "quake_break",
+          "side_hit",
+          {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              3,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "damage": 35
+          }
+        ],
+        [
+          1.1,
+          "skill_effect",
+          0,
+          3,
+          "quake_break",
+          "flinch",
+          {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              3,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "duration": 0.3
+          }
+        ]
+      ],
+      "presentation_duration": 1.9
+    },
+    {
+      "species": 143,
+      "kind": "attack",
+      "gif": "143-attack.gif",
+      "contact": "143-attack-contact.png",
+      "action": {
+        "source_index": 9,
+        "kind": "attack",
+        "attacker": 0,
+        "target": 3,
+        "start": 1.6,
+        "release": 2.05,
+        "impact": 2.1,
+        "recover_end": 2.45,
+        "secondary": false,
+        "source_pos": [
+          3,
+          1
+        ],
+        "target_pos": [
+          4,
+          1
+        ]
+      },
+      "landed_damage": 11,
+      "clip_start": 1.35,
+      "clip_end": 3.05,
+      "frames": 35,
+      "fps": 20,
+      "frame_sha256": "12f01e580db8af2e8f0c958c312751327f81d4347374f6e6a8e9d2d447717377",
+      "target_before_impact": {
+        "hp": 1524,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1513,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 5,
+      "signature_track_peak": 0,
+      "frame_ms_p95": 4.293,
+      "frame_ms_max": 6.555,
+      "simulation_duration": 44.90000000000037,
+      "training_scene": "stationary_posts",
+      "skill_effects": [],
+      "presentation_duration": 45.7
+    },
+    {
+      "species": 143,
+      "kind": "cast",
+      "gif": "143-cast.gif",
+      "contact": "143-cast-contact.png",
+      "action": {
+        "source_index": 8,
+        "kind": "cast",
+        "attacker": 0,
+        "target": 1,
+        "start": 0.5,
+        "release": 1.1,
+        "impact": 1.3,
+        "recover_end": 1.65,
+        "secondary": false,
+        "source_pos": [
+          2,
+          2
+        ],
+        "target_pos": [
+          2,
+          1
+        ]
+      },
+      "landed_damage": 130,
+      "clip_start": 0.25,
+      "clip_end": 2.25,
+      "frames": 41,
+      "fps": 20,
+      "frame_sha256": "2eaecbeb7dd25d4165767cf4192203c6b4a26ef6ec585cd92b7a841071137298",
+      "target_before_impact": {
+        "hp": 1446,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1316,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 24,
+      "signature_track_peak": 1,
+      "frame_ms_p95": 5.816,
+      "frame_ms_max": 6.212,
+      "simulation_duration": 0.5,
+      "training_scene": "precharged_signature",
+      "skill_effects": [],
+      "presentation_duration": 2.1
+    }
+  ],
+  "clock": "presentation seconds, no additional PlaybackClock mapping",
+  "limits": {
+    "particles_per_frame": 192,
+    "signature_tracks": 3,
+    "portrait_windows_per_battle": 2,
+    "portrait_seconds_each": 0.2
+  },
+  "host_frame_ms_p50": 4.091,
+  "host_frame_ms_p95": 6.05,
+  "device_claim": "Desktop Pillow evidence only; ESP32 performance is not measured."
+}

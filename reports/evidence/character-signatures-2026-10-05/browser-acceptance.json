@@ -1,0 +1,69 @@
+{
+  "method": "Manual CUA interaction in existing browser tabs plus native generated contact-sheet inspection",
+  "base_url": "http://127.0.0.1:8807",
+  "observations": [
+    {
+      "page": "/animation-lab",
+      "result": "passed",
+      "observed": [
+        "16 clips",
+        "8 species tabs",
+        "8 signature / 75 generic / Abra no cast",
+        "3 implemented part rigs and 5 planned",
+        "current art revision d6117d4ef0f012c2b0d2912fd38b39526021edb5a85c3ec7cb29706da8a47188"
+      ]
+    },
+    {
+      "page": "/animation-editor",
+      "species": 3,
+      "kind": "cast",
+      "seed": 7,
+      "result": "passed",
+      "observed": [
+        "real 37-frame clip generated",
+        "impact button jumps to frame 18 at 1.1 seconds",
+        "main target HP 762 -> 427",
+        "Snorlax heal 117 recorded at 1.1 seconds; plus117 visible on actual canvas",
+        "flower and left/right vines marked implemented"
+      ]
+    },
+    {
+      "page": "/animation-editor",
+      "species": 26,
+      "kind": "cast",
+      "seed": 7,
+      "result": "passed",
+      "observed": [
+        "real 37-frame clip generated",
+        "impact button jumps to frame 18 at 1.1 seconds",
+        "main target HP 756 -> 666",
+        "side hit records 50 and 32 at 1.1 seconds",
+        "canvas shows links between three distinct targets",
+        "ears and tail explicitly planned; whole-body fallback remains"
+      ]
+    },
+    {
+      "artifact": "samples/9-cast-contact.png",
+      "result": "inspected",
+      "observed": [
+        "twin water source and front line",
+        "two additional hit targets",
+        "primary displacement after contact"
+      ]
+    },
+    {
+      "artifact": "samples/26-cast-contact.png",
+      "result": "inspected",
+      "observed": [
+        "separate charge and primary contact",
+        "chain connects targets",
+        "damage and HUD remain visible"
+      ]
+    }
+  ],
+  "scope_limits": [
+    "No new device testing",
+    "Browser checks cover selected flows; automated tests cover all eight fixture kinds",
+    "Large-angle independent art remains pending"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "base_commit": "bf74c49",
+  "scope": "changed source files; final code after review fixes",
+  "sha256": "8c1df9bc1c84d172a84ea0b2b8b1b1c85b5d54c472482cfe9a9fa29d55a11ae9",
+  "files": {
+    "sim/bots.py": "d0d00713a71f92a79595dd85bf906ed52db6568f3af732d678b4504ff440a1c4",
+    "sim/combat.py": "9d234d78611cd56c3f6e94e6888629698d4f8b82929d9f0f2733e795940e5665",
+    "sim/experiment_signatures.py": "b6932906df9098ee79414d4074aabac4ad661701f60b776fa99f2f27a4a968af",
+    "sim/profiles.py": "9b8ba987d20badaea7b5c3493e0aefe25e511f48eeb2bf66376b2a19ca308bf4",
+    "sim/skills.py": "eaa6ba625939df05a248d90432816b5528c07779a57ef41f525fb16a9ef3aab0",
+    "sim/status.py": "42f7cb524a30487ce9ab8c8dd7703dfeb2e7d02759c34d7a9aa5cb7b2aa2bcc9",
+    "tests/test_animation_preview.py": "d3e9f7766b37f1fd196e1d833e05e622e54867516fdb3239ad07286a683b0167",
+    "tests/test_art_manifest.py": "3b2cf80dd0dbe11b1a3836b4a6deb67c0da0bb14182f029a438874cfb41d52d9",
+    "tests/test_bot_value_contracts.py": "9b7ea0acc18d54b90fac4f29a0c52feca667532eaf27480a06e753feff6c46bd",
+    "tests/test_character_rigs.py": "1b7bf184248d38ae6423eb79028c6fcea7ae08ee8b27cc407875821e21406399",
+    "tests/test_signature_presentation.py": "bae4a74ac986d2528ecda04e9a3fe3dce71a60bfaca1950684cf55c2892bf28e",
+    "tests/test_signature_skills.py": "830688850a5d0e4e6f7d0e278a0073cd543e5f6e29cc8c12ffdf6abcb1586390",
+    "tests/test_signature_timeline.py": "ccd27483ceaa5b5aea85b7c479d889c18b2a1c308420d49c4c2434e3754c2d60",
+    "tools/acceptance/animation_editor.html": "f774318399252c9ecab6445a0a315c50885d8ef3992cd5ef9003fc288aed682d",
+    "tools/acceptance/animation_lab.html": "3cca2b6c51061fad3c6a6cab33e331b2811246ecf08b01c3c664fef7858f4f9a",
+    "tools/acceptance/animation_preview.py": "e4495a9a37482f425f8d2cccb58618162b666a9aedda582b2cea4263512571d6",
+    "tools/acceptance/server.py": "04fabb92e970a592baa34ab90cc3c0def54a92e3b0b02856c4987c6aad55f7ce",
+    "tools/mockups/animation_showcase.py": "703fee1c7f477e6657cb15dba450e3c8fd10b6ecde50d1b0404ac2419e0bd8b1",
+    "tools/mockups/animation_timeline.py": "aecd32af48953a647ec961a1f612f1210a22eb38dbdb24545adb6969cd616e5b",
+    "tools/mockups/art_manifest.py": "ba69facaf1cf73a00a41573d5ef32bb0e882b4512f6a901daa3a13a5f25ef9e0",
+    "tools/mockups/character_catalog.py": "b88de8d94f6321cc51f88a487c33f798bce7c0782de27d29705e576ffa977ede",
+    "tools/mockups/character_rigs.py": "68dc22cf32d18ffcaca44f06300a383ba3ee4243aa0f538213d52dab99fc1d25",
+    "tools/mockups/motion.py": "415fb88343418bc68c47f453479efdeed4807dd2b047fddb2bd67ad4dd9c9733",
+    "tools/mockups/move_effects.py": "136636903bce7aa8b78ee769d4798089551d658f4dd47127a4946d2879de6dfc",
+    "tools/mockups/profile_range.py": "d965be86ef447f0b315fba2b25b906663e56618ed9e873e2be234fcfb1dc723e",
+    "tools/mockups/render_battle_gif.py": "448e465aae30aa57650fcdc8609d3b49e16cb716c1f57a11d05093010d721395"
+  }
+}

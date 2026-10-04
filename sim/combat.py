@@ -17,6 +17,9 @@
 受方能量，cast 在攻方能量后追加受方能量。每次命中、治疗、DOT、开战后
 输出 (t, "unit_state", idx, hp, energy)，这是回放的权威状态。伤害事件仅
 描述伤害与演出，不能由其种类推断回能。齐射和侧命中都不回能。
+专属附属效果另发 (t, "skill_effect", caster, target, arch, effect, payload)，
+payload.cast_index/event_count 指向主 cast 与紧随标记的原事件包；几何快照
+和伤害/治疗/能量数值仅供演出，不改变解算，旧事件字段保持原样。
 
 随机契约 v2：仍只消费传入的 rng，但按队伍内容/本地部署顺序绑定抽样，
 同刻按开战抽取的 initiative 排序；完全相同的两队先公平掷币绑定随机序列。
@@ -24,6 +27,7 @@
 """
 
 import random
+from contextlib import contextmanager
 from data import (ATTACK_INTERVAL_MULT, BASIC_POWER, ENERGY_MAX,
                   ENERGY_PER_ATTACK, ENERGY_PER_HIT_TAKEN, MAX_BATTLE_SECONDS,
                   MOVE_TICK, SPEED_TO_ATTACK_INTERVAL, STAB_BONUS,
@@ -69,9 +73,9 @@ class Unit:
         self.sp_defense = int(2 * base["special_defense"] * lv / 100) + 5
         interval = SPEED_TO_ATTACK_INTERVAL(base["speed"]) \
             * ATTACK_INTERVAL_MULT     # R2 节奏定参：攻速 ×1.5（历史实验钉 1.0）
-        if piece.distance > 1:  # 远程：均衡实验的出手惩罚
+        if profiles_mod.effective_range(piece) > 1:  # 档案覆盖后的远程惩罚
             interval *= ranged_interval_mult()
-        self.range = piece.distance
+        self.range = profiles_mod.effective_range(piece)
         self.move_mult = 1.0
         self.ult_arch = None
         self.temp_dr = 0.0          # 通用技能「铁壁」：临时受伤减免
@@ -131,7 +135,10 @@ def _manhattan(a: tuple, b: tuple) -> int:
 def _damage(rng: random.Random, level: int, power: int, atk: int, dfn: int,
             stab: float, eff: float) -> int:
     base = int(int(int(2 * level / 5 + 2) * power * atk / dfn) / 50) + 2
-    return max(1, int(base * stab * eff * rng.uniform(0.85, 1.0)))
+    rolled = int(base * stab * eff * rng.uniform(0.85, 1.0))
+    # Immunity is zero; retain the minimum one only for nonzero effectiveness.
+    # Keep consuming the same damage roll even for immune targets.
+    return 0 if eff == 0 else max(1, rolled)
 
 
 class Battle:
@@ -413,11 +420,16 @@ class Battle:
             self.events.append((t, "miss", u.idx, target.idx))
             return
         if move:
+            # Geometry is fixed before damage/death/displacement changes occupancy.
+            line_victims = self._line_victims(u, target) if u.ult_arch == profiles_mod.ARCH_LINE else []
             hit = self.rng.randrange(100) < (move.get("accuracy") or 100)
             dmg = self._move_damage(u, target, move) if hit else 0
             u.energy = 0
             u.casts += 1
+            hp_before = target.hp
+            cast_index = len(self.events)
             self._land_hit(u, target, dmg, t, move=move, primary=True, cast=True)
+            lost_hp = max(0, hp_before - target.hp)
             # Side hits are independent damage calculations. The primary hit is
             # already resolved, so a lethal first hit never emits a second death.
             if dmg > 0 and u.ult_arch in (profiles_mod.ARCH_SPLASH, profiles_mod.ARCH_SLAM):
@@ -430,6 +442,76 @@ class Battle:
                         u, victim, move, profiles_mod.SIDE_HIT_FRAC), t)
             if dmg > 0 and u.ult_arch == profiles_mod.ARCH_SLAM and u.alive:
                 self._heal(u, int(u.max_hp * profiles_mod.SLAM_SELF_HEAL), t)
+            if dmg > 0 and u.ult_arch == profiles_mod.ARCH_LINE:
+                for victim in line_victims:
+                    side_damage = self._move_damage(u, victim, move, profiles_mod.LINE_SIDE_FRAC)
+                    with self._skill_effect(u, victim, "side_hit", t, cast_index,
+                                            damage=side_damage, origin_idx=u.idx):
+                        self._land_hit(u, victim, side_damage, t)
+                if target.alive:
+                    away = self._knock_cell(target, u.pos)
+                    if away is not None:
+                        with self._skill_effect(u, target, "knockback", t, cast_index,
+                                                origin=target.pos, destination=away):
+                            target.pos = away
+                            self.events.append((t, "move", target.idx, target.pos))
+            if lost_hp > 0 and u.ult_arch == profiles_mod.ARCH_SOLAR:
+                wounded = [v for v in self.units if v.alive and v.team == u.team
+                           and v.hp < v.max_hp and _manhattan(u.pos, v.pos) <= 2]
+                patient = min(wounded, key=lambda v: (
+                    v.hp / v.max_hp, self._target_key(u, v)), default=None)
+                if patient is not None:
+                    healed = min(patient.max_hp - patient.hp,
+                                 int(lost_hp * profiles_mod.SOLAR_HEAL_FRAC))
+                    with self._skill_effect(u, patient, "heal", t, cast_index,
+                                            amount=healed, origin_idx=target.idx):
+                        self._heal(patient, healed, t)
+            if dmg > 0 and u.ult_arch == profiles_mod.ARCH_CHAIN:
+                previous, struck = target, {target.idx}
+                for hop, fraction in enumerate(profiles_mod.CHAIN_FRACS, 1):
+                    nearby = [v for v in self.units if v.alive and v.team != u.team
+                              and v.idx not in struck and _manhattan(previous.pos, v.pos) <= 2]
+                    victim = min(nearby, key=lambda v: (
+                        _manhattan(previous.pos, v.pos), self._target_key(u, v)), default=None)
+                    if victim is None:
+                        break
+                    struck.add(victim.idx)
+                    side_damage = self._move_damage(u, victim, move, fraction)
+                    with self._skill_effect(u, victim, "side_hit", t, cast_index,
+                                            damage=side_damage, origin_idx=previous.idx, hop=hop):
+                        self._land_hit(u, victim, side_damage, t)
+                    if side_damage <= 0:  # Ground immunity interrupts conduction.
+                        break
+                    previous = victim
+            if dmg > 0 and u.ult_arch == profiles_mod.ARCH_DRAIN:
+                # Transfer after primary hit energy; odd stolen values round down.
+                stolen = min(profiles_mod.ENERGY_DRAIN_MAX, target.energy)
+                if stolen:
+                    gained = min(ENERGY_MAX - u.energy, stolen // 2)
+                    with self._skill_effect(u, target, "energy_drain", t, cast_index,
+                                            stolen=stolen, gained=gained, origin_idx=target.idx):
+                        target.energy -= stolen
+                        u.energy += gained
+                        self._emit_state(u, t)
+                        self._emit_state(target, t)
+            if hit and u.ult_arch == profiles_mod.ARCH_QUAKE:
+                if lost_hp > 0:
+                    with self._skill_effect(u, target, "flinch", t, cast_index,
+                                            duration=status_mod.DEBUFFS["flinch"]["dur"]):
+                        status_mod.apply_flinch(self, target, t)
+                victims = sorted((v for v in self.units if v.alive and v.team != u.team
+                                  and v is not target and _manhattan(v.pos, u.pos) <= 1),
+                                 key=lambda v: self._target_key(u, v))
+                for victim in victims:
+                    hp_before = victim.hp
+                    side_damage = self._move_damage(u, victim, move, profiles_mod.QUAKE_SIDE_FRAC)
+                    with self._skill_effect(u, victim, "side_hit", t, cast_index,
+                                            damage=side_damage, origin_idx=u.idx):
+                        self._land_hit(u, victim, side_damage, t)
+                    if victim.hp < hp_before:
+                        with self._skill_effect(u, victim, "flinch", t, cast_index,
+                                                duration=status_mod.DEBUFFS["flinch"]["dur"]):
+                            status_mod.apply_flinch(self, victim, t)
             if dmg > 0 and u.ult_arch == "heavy_blow" and target.alive:
                 away = self._knock_cell(target, u.pos)
                 if away is not None:
@@ -480,13 +562,57 @@ class Battle:
         else:
             self.events.append((t, "attack", attacker.idx, target.idx, damage,
                                 attacker.energy, target.energy))
+        hp_before = max(0, target.hp)
         target.hp -= damage
-        attacker.damage_dealt += damage
         self._death_check(target, t)
+        attacker.damage_dealt += max(0, hp_before - target.hp)
         self._emit_state(attacker, t)
         self._emit_state(target, t)
         if primary:
             status_mod.on_hit(self, attacker, target, move, t, damage=damage)
+
+    @contextmanager
+    def _skill_effect(self, caster, target, effect, t, cast_index, **details):
+        """Annotate a finite effect packet without changing any legacy event ABI.
+
+        cast_index is an absolute index into the original Battle.events stream;
+        event_count identifies exactly the following events owned by this effect.
+        Playback can bind third-party heals/movement to their real cast, even if
+        a second unrelated action shares this timestamp. Empty effects disappear.
+        """
+        origin_idx = details.get("origin_idx", caster.idx)
+        payload = {"cast_index": cast_index, "event_count": 0,
+                   "origin_idx": origin_idx, "origin_pos": self.units[origin_idx].pos,
+                   "target_pos": target.pos, "caster_pos": caster.pos, **details}
+        marker_index = len(self.events)
+        self.events.append((t, "skill_effect", caster.idx, target.idx,
+                            caster.ult_arch, effect, payload))
+        yield
+        payload["event_count"] = len(self.events) - marker_index - 1
+        if not payload["event_count"]:
+            self.events.pop()
+
+    def _line_victims(self, attacker, target):
+        """Snapshot a one-cell-wide forward ray, continuing to the board edge.
+
+        The lane has perpendicular half-width 0.5 cells and excludes positions
+        behind/on the caster's perpendicular plane. At most two other enemies,
+        ordered by forward projection, are selected before any hit or knockback.
+        Integer squared cross products keep diagonal boundaries deterministic.
+        """
+        dx, dy = target.pos[0] - attacker.pos[0], target.pos[1] - attacker.pos[1]
+        length_sq = dx * dx + dy * dy
+        if not length_sq:
+            return []
+        candidates = []
+        for victim in self.units:
+            if not victim.alive or victim.team == attacker.team or victim is target:
+                continue
+            vx, vy = victim.pos[0] - attacker.pos[0], victim.pos[1] - attacker.pos[1]
+            projection, cross = vx * dx + vy * dy, vx * dy - vy * dx
+            if projection > 0 and 4 * cross * cross <= length_sq:
+                candidates.append((projection, self._target_key(attacker, victim), victim))
+        return [entry[2] for entry in sorted(candidates, key=lambda entry: entry[:2])[:2]]
 
     def _emit_state(self, unit, t):
         self.events.append((t, "unit_state", unit.idx, unit.hp, unit.energy))

@@ -54,7 +54,7 @@ _ROLE_POOL = {
 def skill_of(species_id: int):
     """单位的技能档案：{"name","arch","tier"}；开关关闭/无档案 → None。
 
-    专属 = profiles.PROFILE 的三个主角（arch 真源在 profile）；其余按
+    专属 = profiles.PROFILE 的八个核心角色（arch 真源在 profile）；其余按
     定位 → 通用池奇偶分流。确定性：同 species_id 恒同结果。
     """
     prof = profiles.get(species_id)
@@ -64,7 +64,6 @@ def skill_of(species_id: int):
     if not profiles.profiles_on():
         return None
     from data import pokedex
-    from roster import build_roster
     dex = pokedex()
     if species_id not in dex.species:
         return None

@@ -1,0 +1,5358 @@
+{
+  "kind": "directed_first_cast",
+  "balance_validated": false,
+  "seeds": [
+    7,
+    11,
+    29
+  ],
+  "checks": {
+    "all_enabled_cast": true,
+    "disabled_arches_silent": true,
+    "all_five_mechanics_observed": true,
+    "all_eight_change_events": true
+  },
+  "observed_effects": {
+    "6": [],
+    "9": [
+      "knockback",
+      "side_hit"
+    ],
+    "3": [
+      "heal"
+    ],
+    "26": [
+      "side_hit"
+    ],
+    "65": [],
+    "94": [
+      "energy_drain"
+    ],
+    "76": [
+      "flinch",
+      "side_hit"
+    ],
+    "143": []
+  },
+  "rows": [
+    {
+      "species_id": 6,
+      "name": "喷火龙",
+      "seed": 7,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "flamethrower",
+        1.0,
+        50,
+        0,
+        10
+      ],
+      "actual_damage": 50,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 562,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1210,
+          "energy": 10,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 6,
+      "name": "喷火龙",
+      "seed": 7,
+      "profiles_on": true,
+      "arch": "splash",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "flamethrower",
+        1.0,
+        50,
+        0,
+        10
+      ],
+      "actual_damage": 100,
+      "side_hits": [
+        [
+          0.5,
+          "attack",
+          0,
+          2,
+          25,
+          0,
+          0
+        ],
+        [
+          0.5,
+          "attack",
+          0,
+          3,
+          25,
+          0,
+          0
+        ]
+      ],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 562,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1396,
+          "energy": 10,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1421,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1421,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 6,
+      "name": "喷火龙",
+      "seed": 11,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "flamethrower",
+        1.0,
+        52,
+        0,
+        10
+      ],
+      "actual_damage": 52,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [
+        [
+          0.5,
+          "status",
+          1,
+          "burn",
+          "apply",
+          0
+        ]
+      ],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 562,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1208,
+          "energy": 10,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 6,
+      "name": "喷火龙",
+      "seed": 11,
+      "profiles_on": true,
+      "arch": "splash",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "flamethrower",
+        1.0,
+        52,
+        0,
+        10
+      ],
+      "actual_damage": 104,
+      "side_hits": [
+        [
+          0.5,
+          "attack",
+          0,
+          2,
+          27,
+          0,
+          0
+        ],
+        [
+          0.5,
+          "attack",
+          0,
+          3,
+          25,
+          0,
+          0
+        ]
+      ],
+      "moves": [],
+      "heals": [],
+      "statuses": [
+        [
+          0.5,
+          "status",
+          1,
+          "burn",
+          "apply",
+          0
+        ]
+      ],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 562,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1394,
+          "energy": 10,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1419,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1421,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 6,
+      "name": "喷火龙",
+      "seed": 29,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "flamethrower",
+        1.0,
+        56,
+        0,
+        10
+      ],
+      "actual_damage": 56,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [
+        [
+          0.5,
+          "status",
+          1,
+          "burn",
+          "apply",
+          0
+        ]
+      ],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 562,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1204,
+          "energy": 10,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 6,
+      "name": "喷火龙",
+      "seed": 29,
+      "profiles_on": true,
+      "arch": "splash",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "flamethrower",
+        1.0,
+        56,
+        0,
+        10
+      ],
+      "actual_damage": 111,
+      "side_hits": [
+        [
+          0.5,
+          "attack",
+          0,
+          2,
+          28,
+          0,
+          0
+        ],
+        [
+          0.5,
+          "attack",
+          0,
+          3,
+          27,
+          0,
+          0
+        ]
+      ],
+      "moves": [],
+      "heals": [],
+      "statuses": [
+        [
+          0.5,
+          "status",
+          1,
+          "burn",
+          "apply",
+          0
+        ]
+      ],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 562,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1390,
+          "energy": 10,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1418,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1419,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 9,
+      "name": "水箭龟",
+      "seed": 7,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "hydro_pump",
+        1.0,
+        50,
+        0,
+        10
+      ],
+      "actual_damage": 50,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 567,
+          "energy": 0,
+          "pos": [
+            0,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1210,
+          "energy": 10,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            3,
+            0
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 9,
+      "name": "水箭龟",
+      "seed": 7,
+      "profiles_on": true,
+      "arch": "line_push",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "hydro_pump",
+        1.0,
+        50,
+        0,
+        10
+      ],
+      "actual_damage": 97,
+      "side_hits": [
+        [
+          0.5,
+          "attack",
+          0,
+          2,
+          25,
+          0,
+          0
+        ],
+        [
+          0.5,
+          "attack",
+          0,
+          3,
+          22,
+          0,
+          0
+        ]
+      ],
+      "moves": [
+        [
+          0.5,
+          "move",
+          1,
+          [
+            1,
+            1
+          ]
+        ]
+      ],
+      "heals": [],
+      "statuses": [],
+      "effects": [
+        {
+          "event_index": 11,
+          "target": 2,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              0,
+              3
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 25
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              2,
+              25,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              567,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              2,
+              1421,
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 15,
+          "target": 3,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              0,
+              3
+            ],
+            "target_pos": [
+              3,
+              0
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 22
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              3,
+              22,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              567,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              3,
+              1424,
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 19,
+          "target": 1,
+          "effect": "knockback",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              0,
+              3
+            ],
+            "target_pos": [
+              1,
+              2
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "origin": [
+              1,
+              2
+            ],
+            "destination": [
+              1,
+              1
+            ]
+          },
+          "events": [
+            [
+              0.5,
+              "move",
+              1,
+              [
+                1,
+                1
+              ]
+            ]
+          ]
+        }
+      ],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 567,
+          "energy": 0,
+          "pos": [
+            0,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1396,
+          "energy": 10,
+          "pos": [
+            1,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1421,
+          "energy": 0,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1424,
+          "energy": 0,
+          "pos": [
+            3,
+            0
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 9,
+      "name": "水箭龟",
+      "seed": 11,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "hydro_pump",
+        1.0,
+        52,
+        0,
+        10
+      ],
+      "actual_damage": 52,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 567,
+          "energy": 0,
+          "pos": [
+            0,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1208,
+          "energy": 10,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            3,
+            0
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 9,
+      "name": "水箭龟",
+      "seed": 11,
+      "profiles_on": true,
+      "arch": "line_push",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "hydro_pump",
+        1.0,
+        52,
+        0,
+        10
+      ],
+      "actual_damage": 101,
+      "side_hits": [
+        [
+          0.5,
+          "attack",
+          0,
+          2,
+          25,
+          0,
+          0
+        ],
+        [
+          0.5,
+          "attack",
+          0,
+          3,
+          24,
+          0,
+          0
+        ]
+      ],
+      "moves": [
+        [
+          0.5,
+          "move",
+          1,
+          [
+            1,
+            1
+          ]
+        ]
+      ],
+      "heals": [],
+      "statuses": [],
+      "effects": [
+        {
+          "event_index": 11,
+          "target": 2,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              0,
+              3
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 25
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              2,
+              25,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              567,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              2,
+              1421,
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 15,
+          "target": 3,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              0,
+              3
+            ],
+            "target_pos": [
+              3,
+              0
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 24
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              3,
+              24,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              567,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              3,
+              1422,
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 19,
+          "target": 1,
+          "effect": "knockback",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              0,
+              3
+            ],
+            "target_pos": [
+              1,
+              2
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "origin": [
+              1,
+              2
+            ],
+            "destination": [
+              1,
+              1
+            ]
+          },
+          "events": [
+            [
+              0.5,
+              "move",
+              1,
+              [
+                1,
+                1
+              ]
+            ]
+          ]
+        }
+      ],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 567,
+          "energy": 0,
+          "pos": [
+            0,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1394,
+          "energy": 10,
+          "pos": [
+            1,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1421,
+          "energy": 0,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1422,
+          "energy": 0,
+          "pos": [
+            3,
+            0
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 9,
+      "name": "水箭龟",
+      "seed": 29,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "hydro_pump",
+        1.0,
+        56,
+        0,
+        10
+      ],
+      "actual_damage": 56,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 567,
+          "energy": 0,
+          "pos": [
+            0,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1204,
+          "energy": 10,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            3,
+            0
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 9,
+      "name": "水箭龟",
+      "seed": 29,
+      "profiles_on": true,
+      "arch": "line_push",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "hydro_pump",
+        1.0,
+        56,
+        0,
+        10
+      ],
+      "actual_damage": 105,
+      "side_hits": [
+        [
+          0.5,
+          "attack",
+          0,
+          2,
+          24,
+          0,
+          0
+        ],
+        [
+          0.5,
+          "attack",
+          0,
+          3,
+          25,
+          0,
+          0
+        ]
+      ],
+      "moves": [
+        [
+          0.5,
+          "move",
+          1,
+          [
+            1,
+            1
+          ]
+        ]
+      ],
+      "heals": [],
+      "statuses": [],
+      "effects": [
+        {
+          "event_index": 11,
+          "target": 2,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              0,
+              3
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 24
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              2,
+              24,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              567,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              2,
+              1422,
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 15,
+          "target": 3,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              0,
+              3
+            ],
+            "target_pos": [
+              3,
+              0
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 25
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              3,
+              25,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              567,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              3,
+              1421,
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 19,
+          "target": 1,
+          "effect": "knockback",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              0,
+              3
+            ],
+            "target_pos": [
+              1,
+              2
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "origin": [
+              1,
+              2
+            ],
+            "destination": [
+              1,
+              1
+            ]
+          },
+          "events": [
+            [
+              0.5,
+              "move",
+              1,
+              [
+                1,
+                1
+              ]
+            ]
+          ]
+        }
+      ],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 567,
+          "energy": 0,
+          "pos": [
+            0,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1390,
+          "energy": 10,
+          "pos": [
+            1,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1422,
+          "energy": 0,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1421,
+          "energy": 0,
+          "pos": [
+            3,
+            0
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 3,
+      "name": "妙蛙花",
+      "seed": 7,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        2,
+        "solarbeam",
+        4.0,
+        335,
+        0,
+        10
+      ],
+      "actual_damage": 335,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 571,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 298,
+          "energy": 0,
+          "pos": [
+            3,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 427,
+          "energy": 10,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            4,
+            0
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 4,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            5,
+            1
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 3,
+      "name": "妙蛙花",
+      "seed": 7,
+      "profiles_on": true,
+      "arch": "solar_siphon",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        2,
+        "solarbeam",
+        4.0,
+        335,
+        0,
+        10
+      ],
+      "actual_damage": 335,
+      "side_hits": [],
+      "moves": [],
+      "heals": [
+        [
+          0.5,
+          "regen",
+          1,
+          117
+        ]
+      ],
+      "statuses": [],
+      "effects": [
+        {
+          "event_index": 13,
+          "target": 1,
+          "effect": "heal",
+          "payload": {
+            "cast_index": 10,
+            "event_count": 2,
+            "origin_idx": 2,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              3,
+              3
+            ],
+            "caster_pos": [
+              2,
+              3
+            ],
+            "amount": 117
+          },
+          "events": [
+            [
+              0.5,
+              "regen",
+              1,
+              117
+            ],
+            [
+              0.5,
+              "unit_state",
+              1,
+              459,
+              0
+            ]
+          ]
+        }
+      ],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 571,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 459,
+          "energy": 0,
+          "pos": [
+            3,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 427,
+          "energy": 10,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            4,
+            0
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 4,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            5,
+            1
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 3,
+      "name": "妙蛙花",
+      "seed": 11,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        2,
+        "solarbeam",
+        4.0,
+        363,
+        0,
+        10
+      ],
+      "actual_damage": 363,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 571,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 298,
+          "energy": 0,
+          "pos": [
+            3,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 399,
+          "energy": 10,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            4,
+            0
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 4,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            5,
+            1
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 3,
+      "name": "妙蛙花",
+      "seed": 11,
+      "profiles_on": true,
+      "arch": "solar_siphon",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        2,
+        "solarbeam",
+        4.0,
+        363,
+        0,
+        10
+      ],
+      "actual_damage": 363,
+      "side_hits": [],
+      "moves": [],
+      "heals": [
+        [
+          0.5,
+          "regen",
+          1,
+          127
+        ]
+      ],
+      "statuses": [],
+      "effects": [
+        {
+          "event_index": 13,
+          "target": 1,
+          "effect": "heal",
+          "payload": {
+            "cast_index": 10,
+            "event_count": 2,
+            "origin_idx": 2,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              3,
+              3
+            ],
+            "caster_pos": [
+              2,
+              3
+            ],
+            "amount": 127
+          },
+          "events": [
+            [
+              0.5,
+              "regen",
+              1,
+              127
+            ],
+            [
+              0.5,
+              "unit_state",
+              1,
+              469,
+              0
+            ]
+          ]
+        }
+      ],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 571,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 469,
+          "energy": 0,
+          "pos": [
+            3,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 399,
+          "energy": 10,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            4,
+            0
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 4,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            5,
+            1
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 3,
+      "name": "妙蛙花",
+      "seed": 29,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        2,
+        "solarbeam",
+        4.0,
+        346,
+        0,
+        10
+      ],
+      "actual_damage": 346,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 571,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 298,
+          "energy": 0,
+          "pos": [
+            3,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 416,
+          "energy": 10,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            4,
+            0
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 4,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            5,
+            1
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 3,
+      "name": "妙蛙花",
+      "seed": 29,
+      "profiles_on": true,
+      "arch": "solar_siphon",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        2,
+        "solarbeam",
+        4.0,
+        346,
+        0,
+        10
+      ],
+      "actual_damage": 346,
+      "side_hits": [],
+      "moves": [],
+      "heals": [
+        [
+          0.5,
+          "regen",
+          1,
+          121
+        ]
+      ],
+      "statuses": [],
+      "effects": [
+        {
+          "event_index": 13,
+          "target": 1,
+          "effect": "heal",
+          "payload": {
+            "cast_index": 10,
+            "event_count": 2,
+            "origin_idx": 2,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              3,
+              3
+            ],
+            "caster_pos": [
+              2,
+              3
+            ],
+            "amount": 121
+          },
+          "events": [
+            [
+              0.5,
+              "regen",
+              1,
+              121
+            ],
+            [
+              0.5,
+              "unit_state",
+              1,
+              463,
+              0
+            ]
+          ]
+        }
+      ],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 571,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 463,
+          "energy": 0,
+          "pos": [
+            3,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 416,
+          "energy": 10,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            4,
+            0
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 4,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            5,
+            1
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 26,
+      "name": "雷丘",
+      "seed": 7,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "thunderbolt",
+        2.0,
+        90,
+        0,
+        10
+      ],
+      "actual_damage": 90,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 490,
+          "energy": 0,
+          "pos": [
+            0,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 666,
+          "energy": 10,
+          "pos": [
+            0,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 756,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 756,
+          "energy": 0,
+          "pos": [
+            4,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 26,
+      "name": "雷丘",
+      "seed": 7,
+      "profiles_on": true,
+      "arch": "chain_lightning",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "thunderbolt",
+        2.0,
+        90,
+        0,
+        10
+      ],
+      "actual_damage": 172,
+      "side_hits": [
+        [
+          0.5,
+          "attack",
+          0,
+          2,
+          50,
+          0,
+          0
+        ],
+        [
+          0.5,
+          "attack",
+          0,
+          3,
+          32,
+          0,
+          0
+        ]
+      ],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [
+        {
+          "event_index": 11,
+          "target": 2,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 1,
+            "origin_pos": [
+              0,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 50,
+            "hop": 1
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              2,
+              50,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              490,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              2,
+              706,
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 15,
+          "target": 3,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 2,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              4,
+              2
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 32,
+            "hop": 2
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              3,
+              32,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              490,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              3,
+              724,
+              0
+            ]
+          ]
+        }
+      ],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 490,
+          "energy": 0,
+          "pos": [
+            0,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 666,
+          "energy": 10,
+          "pos": [
+            0,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 706,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 724,
+          "energy": 0,
+          "pos": [
+            4,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 26,
+      "name": "雷丘",
+      "seed": 11,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "thunderbolt",
+        2.0,
+        97,
+        0,
+        10
+      ],
+      "actual_damage": 97,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 490,
+          "energy": 0,
+          "pos": [
+            0,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 659,
+          "energy": 10,
+          "pos": [
+            0,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 756,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 756,
+          "energy": 0,
+          "pos": [
+            4,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 26,
+      "name": "雷丘",
+      "seed": 11,
+      "profiles_on": true,
+      "arch": "chain_lightning",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "thunderbolt",
+        2.0,
+        97,
+        0,
+        10
+      ],
+      "actual_damage": 183,
+      "side_hits": [
+        [
+          0.5,
+          "attack",
+          0,
+          2,
+          53,
+          0,
+          0
+        ],
+        [
+          0.5,
+          "attack",
+          0,
+          3,
+          33,
+          0,
+          0
+        ]
+      ],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [
+        {
+          "event_index": 11,
+          "target": 2,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 1,
+            "origin_pos": [
+              0,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 53,
+            "hop": 1
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              2,
+              53,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              490,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              2,
+              703,
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 15,
+          "target": 3,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 2,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              4,
+              2
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 33,
+            "hop": 2
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              3,
+              33,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              490,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              3,
+              723,
+              0
+            ]
+          ]
+        }
+      ],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 490,
+          "energy": 0,
+          "pos": [
+            0,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 659,
+          "energy": 10,
+          "pos": [
+            0,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 703,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 723,
+          "energy": 0,
+          "pos": [
+            4,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 26,
+      "name": "雷丘",
+      "seed": 29,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "thunderbolt",
+        2.0,
+        101,
+        0,
+        10
+      ],
+      "actual_damage": 101,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [
+        [
+          0.5,
+          "status",
+          1,
+          "para",
+          "apply",
+          0
+        ]
+      ],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 490,
+          "energy": 0,
+          "pos": [
+            0,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 655,
+          "energy": 10,
+          "pos": [
+            0,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 756,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 756,
+          "energy": 0,
+          "pos": [
+            4,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 26,
+      "name": "雷丘",
+      "seed": 29,
+      "profiles_on": true,
+      "arch": "chain_lightning",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "thunderbolt",
+        2.0,
+        101,
+        0,
+        10
+      ],
+      "actual_damage": 190,
+      "side_hits": [
+        [
+          0.5,
+          "attack",
+          0,
+          2,
+          53,
+          0,
+          0
+        ],
+        [
+          0.5,
+          "attack",
+          0,
+          3,
+          36,
+          0,
+          0
+        ]
+      ],
+      "moves": [],
+      "heals": [],
+      "statuses": [
+        [
+          0.5,
+          "status",
+          1,
+          "para",
+          "apply",
+          0
+        ]
+      ],
+      "effects": [
+        {
+          "event_index": 12,
+          "target": 2,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 1,
+            "origin_pos": [
+              0,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 53,
+            "hop": 1
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              2,
+              53,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              490,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              2,
+              703,
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 16,
+          "target": 3,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 2,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              4,
+              2
+            ],
+            "caster_pos": [
+              0,
+              3
+            ],
+            "damage": 36,
+            "hop": 2
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              3,
+              36,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              490,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              3,
+              720,
+              0
+            ]
+          ]
+        }
+      ],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 490,
+          "energy": 0,
+          "pos": [
+            0,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 655,
+          "energy": 10,
+          "pos": [
+            0,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 703,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 720,
+          "energy": 0,
+          "pos": [
+            4,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 65,
+      "name": "胡地",
+      "seed": 7,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "psychic_m",
+        1.0,
+        58,
+        0,
+        10
+      ],
+      "actual_damage": 58,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 468,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1202,
+          "energy": 10,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 630,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 65,
+      "name": "胡地",
+      "seed": 7,
+      "profiles_on": true,
+      "arch": "blink_strike",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        3,
+        "psychic_m",
+        1.0,
+        58,
+        0,
+        10
+      ],
+      "actual_damage": 58,
+      "side_hits": [],
+      "moves": [
+        [
+          0.5,
+          "move",
+          0,
+          [
+            3,
+            1
+          ]
+        ]
+      ],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 396,
+          "energy": 0,
+          "pos": [
+            3,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1446,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1446,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 665,
+          "energy": 10,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 65,
+      "name": "胡地",
+      "seed": 11,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "psychic_m",
+        1.0,
+        60,
+        0,
+        10
+      ],
+      "actual_damage": 60,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [
+        [
+          0.5,
+          "status",
+          1,
+          "sleep",
+          "apply",
+          0
+        ]
+      ],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 468,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1200,
+          "energy": 10,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": true
+        },
+        {
+          "idx": 2,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 630,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 65,
+      "name": "胡地",
+      "seed": 11,
+      "profiles_on": true,
+      "arch": "blink_strike",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        3,
+        "psychic_m",
+        1.0,
+        60,
+        0,
+        10
+      ],
+      "actual_damage": 60,
+      "side_hits": [],
+      "moves": [
+        [
+          0.5,
+          "move",
+          0,
+          [
+            3,
+            1
+          ]
+        ]
+      ],
+      "heals": [],
+      "statuses": [
+        [
+          0.5,
+          "status",
+          3,
+          "sleep",
+          "apply",
+          0
+        ]
+      ],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 396,
+          "energy": 0,
+          "pos": [
+            3,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1446,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1446,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 663,
+          "energy": 10,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": true
+        }
+      ]
+    },
+    {
+      "species_id": 65,
+      "name": "胡地",
+      "seed": 29,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "psychic_m",
+        1.0,
+        65,
+        0,
+        10
+      ],
+      "actual_damage": 65,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [
+        [
+          0.5,
+          "status",
+          1,
+          "sleep",
+          "apply",
+          0
+        ]
+      ],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 468,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1195,
+          "energy": 10,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": true
+        },
+        {
+          "idx": 2,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 630,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 65,
+      "name": "胡地",
+      "seed": 29,
+      "profiles_on": true,
+      "arch": "blink_strike",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        3,
+        "psychic_m",
+        1.0,
+        65,
+        0,
+        10
+      ],
+      "actual_damage": 65,
+      "side_hits": [],
+      "moves": [
+        [
+          0.5,
+          "move",
+          0,
+          [
+            3,
+            1
+          ]
+        ]
+      ],
+      "heals": [],
+      "statuses": [
+        [
+          0.5,
+          "status",
+          3,
+          "sleep",
+          "apply",
+          0
+        ]
+      ],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 396,
+          "energy": 0,
+          "pos": [
+            3,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1446,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1446,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 658,
+          "energy": 10,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": true
+        }
+      ]
+    },
+    {
+      "species_id": 94,
+      "name": "耿鬼",
+      "seed": 7,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "lick",
+        1.0,
+        6,
+        0,
+        45
+      ],
+      "actual_damage": 6,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 490,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 756,
+          "energy": 45,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 94,
+      "name": "耿鬼",
+      "seed": 7,
+      "profiles_on": true,
+      "arch": "energy_drain",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "lick",
+        1.0,
+        6,
+        0,
+        45
+      ],
+      "actual_damage": 6,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [
+        {
+          "event_index": 11,
+          "target": 1,
+          "effect": "energy_drain",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 2,
+            "origin_idx": 1,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "caster_pos": [
+              2,
+              3
+            ],
+            "stolen": 20,
+            "gained": 10
+          },
+          "events": [
+            [
+              0.5,
+              "unit_state",
+              0,
+              490,
+              10
+            ],
+            [
+              0.5,
+              "unit_state",
+              1,
+              756,
+              25
+            ]
+          ]
+        }
+      ],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 490,
+          "energy": 10,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 756,
+          "energy": 25,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 94,
+      "name": "耿鬼",
+      "seed": 11,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "lick",
+        1.0,
+        7,
+        0,
+        45
+      ],
+      "actual_damage": 7,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 490,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 755,
+          "energy": 45,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 94,
+      "name": "耿鬼",
+      "seed": 11,
+      "profiles_on": true,
+      "arch": "energy_drain",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "lick",
+        1.0,
+        7,
+        0,
+        45
+      ],
+      "actual_damage": 7,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [
+        {
+          "event_index": 11,
+          "target": 1,
+          "effect": "energy_drain",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 2,
+            "origin_idx": 1,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "caster_pos": [
+              2,
+              3
+            ],
+            "stolen": 20,
+            "gained": 10
+          },
+          "events": [
+            [
+              0.5,
+              "unit_state",
+              0,
+              490,
+              10
+            ],
+            [
+              0.5,
+              "unit_state",
+              1,
+              755,
+              25
+            ]
+          ]
+        }
+      ],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 490,
+          "energy": 10,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 755,
+          "energy": 25,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 94,
+      "name": "耿鬼",
+      "seed": 29,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "lick",
+        1.0,
+        7,
+        0,
+        45
+      ],
+      "actual_damage": 7,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 490,
+          "energy": 0,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 755,
+          "energy": 45,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 94,
+      "name": "耿鬼",
+      "seed": 29,
+      "profiles_on": true,
+      "arch": "energy_drain",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "lick",
+        1.0,
+        7,
+        0,
+        45
+      ],
+      "actual_damage": 7,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [
+        {
+          "event_index": 11,
+          "target": 1,
+          "effect": "energy_drain",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 2,
+            "origin_idx": 1,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "caster_pos": [
+              2,
+              3
+            ],
+            "stolen": 20,
+            "gained": 10
+          },
+          "events": [
+            [
+              0.5,
+              "unit_state",
+              0,
+              490,
+              10
+            ],
+            [
+              0.5,
+              "unit_state",
+              1,
+              755,
+              25
+            ]
+          ]
+        }
+      ],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 490,
+          "energy": 10,
+          "pos": [
+            2,
+            3
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 755,
+          "energy": 25,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 762,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 76,
+      "name": "隆隆岩",
+      "seed": 7,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "earthquake",
+        1.0,
+        88,
+        0,
+        10
+      ],
+      "actual_damage": 88,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 571,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1172,
+          "energy": 10,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 76,
+      "name": "隆隆岩",
+      "seed": 7,
+      "profiles_on": true,
+      "arch": "quake_break",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "earthquake",
+        1.0,
+        88,
+        0,
+        10
+      ],
+      "actual_damage": 162,
+      "side_hits": [
+        [
+          0.5,
+          "attack",
+          0,
+          2,
+          39,
+          0,
+          0
+        ],
+        [
+          0.5,
+          "attack",
+          0,
+          3,
+          35,
+          0,
+          0
+        ]
+      ],
+      "moves": [],
+      "heals": [],
+      "statuses": [
+        [
+          0.5,
+          "status",
+          1,
+          "flinch",
+          "apply",
+          0
+        ],
+        [
+          0.5,
+          "status",
+          2,
+          "flinch",
+          "apply",
+          0
+        ],
+        [
+          0.5,
+          "status",
+          3,
+          "flinch",
+          "apply",
+          0
+        ]
+      ],
+      "effects": [
+        {
+          "event_index": 11,
+          "target": 1,
+          "effect": "flinch",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "duration": 0.3
+          },
+          "events": [
+            [
+              0.5,
+              "status",
+              1,
+              "flinch",
+              "apply",
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 13,
+          "target": 2,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              1,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "damage": 39
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              2,
+              39,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              571,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              2,
+              1407,
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 17,
+          "target": 2,
+          "effect": "flinch",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              1,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "duration": 0.3
+          },
+          "events": [
+            [
+              0.5,
+              "status",
+              2,
+              "flinch",
+              "apply",
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 19,
+          "target": 3,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              3,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "damage": 35
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              3,
+              35,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              571,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              3,
+              1411,
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 23,
+          "target": 3,
+          "effect": "flinch",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              3,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "duration": 0.3
+          },
+          "events": [
+            [
+              0.5,
+              "status",
+              3,
+              "flinch",
+              "apply",
+              0
+            ]
+          ]
+        }
+      ],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 571,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1358,
+          "energy": 10,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": true
+        },
+        {
+          "idx": 2,
+          "hp": 1407,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": true
+        },
+        {
+          "idx": 3,
+          "hp": 1411,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": true
+        }
+      ]
+    },
+    {
+      "species_id": 76,
+      "name": "隆隆岩",
+      "seed": 11,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "earthquake",
+        1.0,
+        91,
+        0,
+        10
+      ],
+      "actual_damage": 91,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 571,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1169,
+          "energy": 10,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 76,
+      "name": "隆隆岩",
+      "seed": 11,
+      "profiles_on": true,
+      "arch": "quake_break",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "earthquake",
+        1.0,
+        91,
+        0,
+        10
+      ],
+      "actual_damage": 168,
+      "side_hits": [
+        [
+          0.5,
+          "attack",
+          0,
+          2,
+          39,
+          0,
+          0
+        ],
+        [
+          0.5,
+          "attack",
+          0,
+          3,
+          38,
+          0,
+          0
+        ]
+      ],
+      "moves": [],
+      "heals": [],
+      "statuses": [
+        [
+          0.5,
+          "status",
+          1,
+          "flinch",
+          "apply",
+          0
+        ],
+        [
+          0.5,
+          "status",
+          2,
+          "flinch",
+          "apply",
+          0
+        ],
+        [
+          0.5,
+          "status",
+          3,
+          "flinch",
+          "apply",
+          0
+        ]
+      ],
+      "effects": [
+        {
+          "event_index": 11,
+          "target": 1,
+          "effect": "flinch",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "duration": 0.3
+          },
+          "events": [
+            [
+              0.5,
+              "status",
+              1,
+              "flinch",
+              "apply",
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 13,
+          "target": 2,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              1,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "damage": 39
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              2,
+              39,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              571,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              2,
+              1407,
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 17,
+          "target": 2,
+          "effect": "flinch",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              1,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "duration": 0.3
+          },
+          "events": [
+            [
+              0.5,
+              "status",
+              2,
+              "flinch",
+              "apply",
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 19,
+          "target": 3,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              3,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "damage": 38
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              3,
+              38,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              571,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              3,
+              1408,
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 23,
+          "target": 3,
+          "effect": "flinch",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              3,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "duration": 0.3
+          },
+          "events": [
+            [
+              0.5,
+              "status",
+              3,
+              "flinch",
+              "apply",
+              0
+            ]
+          ]
+        }
+      ],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 571,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1355,
+          "energy": 10,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": true
+        },
+        {
+          "idx": 2,
+          "hp": 1407,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": true
+        },
+        {
+          "idx": 3,
+          "hp": 1408,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": true
+        }
+      ]
+    },
+    {
+      "species_id": 76,
+      "name": "隆隆岩",
+      "seed": 29,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "earthquake",
+        1.0,
+        98,
+        0,
+        10
+      ],
+      "actual_damage": 98,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 571,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1162,
+          "energy": 10,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 76,
+      "name": "隆隆岩",
+      "seed": 29,
+      "profiles_on": true,
+      "arch": "quake_break",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "earthquake",
+        1.0,
+        98,
+        0,
+        10
+      ],
+      "actual_damage": 175,
+      "side_hits": [
+        [
+          0.5,
+          "attack",
+          0,
+          2,
+          37,
+          0,
+          0
+        ],
+        [
+          0.5,
+          "attack",
+          0,
+          3,
+          40,
+          0,
+          0
+        ]
+      ],
+      "moves": [],
+      "heals": [],
+      "statuses": [
+        [
+          0.5,
+          "status",
+          1,
+          "flinch",
+          "apply",
+          0
+        ],
+        [
+          0.5,
+          "status",
+          2,
+          "flinch",
+          "apply",
+          0
+        ],
+        [
+          0.5,
+          "status",
+          3,
+          "flinch",
+          "apply",
+          0
+        ]
+      ],
+      "effects": [
+        {
+          "event_index": 11,
+          "target": 1,
+          "effect": "flinch",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "duration": 0.3
+          },
+          "events": [
+            [
+              0.5,
+              "status",
+              1,
+              "flinch",
+              "apply",
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 13,
+          "target": 2,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              1,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "damage": 37
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              2,
+              37,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              571,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              2,
+              1409,
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 17,
+          "target": 2,
+          "effect": "flinch",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              1,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "duration": 0.3
+          },
+          "events": [
+            [
+              0.5,
+              "status",
+              2,
+              "flinch",
+              "apply",
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 19,
+          "target": 3,
+          "effect": "side_hit",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 3,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              3,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "damage": 40
+          },
+          "events": [
+            [
+              0.5,
+              "attack",
+              0,
+              3,
+              40,
+              0,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              0,
+              571,
+              0
+            ],
+            [
+              0.5,
+              "unit_state",
+              3,
+              1406,
+              0
+            ]
+          ]
+        },
+        {
+          "event_index": 23,
+          "target": 3,
+          "effect": "flinch",
+          "payload": {
+            "cast_index": 8,
+            "event_count": 1,
+            "origin_idx": 0,
+            "origin_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              3,
+              2
+            ],
+            "caster_pos": [
+              2,
+              2
+            ],
+            "duration": 0.3
+          },
+          "events": [
+            [
+              0.5,
+              "status",
+              3,
+              "flinch",
+              "apply",
+              0
+            ]
+          ]
+        }
+      ],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 571,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1348,
+          "energy": 10,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": true
+        },
+        {
+          "idx": 2,
+          "hp": 1409,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": true
+        },
+        {
+          "idx": 3,
+          "hp": 1406,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": true
+        }
+      ]
+    },
+    {
+      "species_id": 143,
+      "name": "卡比兽",
+      "seed": 7,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "hyper_beam",
+        1.0,
+        130,
+        0,
+        10
+      ],
+      "actual_damage": 130,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 895,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1130,
+          "energy": 10,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 143,
+      "name": "卡比兽",
+      "seed": 7,
+      "profiles_on": true,
+      "arch": "slam_heal",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "hyper_beam",
+        1.0,
+        130,
+        0,
+        10
+      ],
+      "actual_damage": 268,
+      "side_hits": [
+        [
+          0.5,
+          "attack",
+          0,
+          2,
+          73,
+          0,
+          0
+        ],
+        [
+          0.5,
+          "attack",
+          0,
+          3,
+          65,
+          0,
+          0
+        ]
+      ],
+      "moves": [],
+      "heals": [
+        [
+          0.5,
+          "regen",
+          0,
+          205
+        ]
+      ],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 1231,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1316,
+          "energy": 10,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1373,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1381,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 143,
+      "name": "卡比兽",
+      "seed": 11,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "hyper_beam",
+        1.0,
+        135,
+        0,
+        10
+      ],
+      "actual_damage": 135,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 895,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1125,
+          "energy": 10,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 143,
+      "name": "卡比兽",
+      "seed": 11,
+      "profiles_on": true,
+      "arch": "slam_heal",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "hyper_beam",
+        1.0,
+        135,
+        0,
+        10
+      ],
+      "actual_damage": 280,
+      "side_hits": [
+        [
+          0.5,
+          "attack",
+          0,
+          2,
+          73,
+          0,
+          0
+        ],
+        [
+          0.5,
+          "attack",
+          0,
+          3,
+          72,
+          0,
+          0
+        ]
+      ],
+      "moves": [],
+      "heals": [
+        [
+          0.5,
+          "regen",
+          0,
+          205
+        ]
+      ],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 1231,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1311,
+          "energy": 10,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1373,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1374,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 143,
+      "name": "卡比兽",
+      "seed": 29,
+      "profiles_on": false,
+      "arch": null,
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "hyper_beam",
+        1.0,
+        147,
+        0,
+        10
+      ],
+      "actual_damage": 147,
+      "side_hits": [],
+      "moves": [],
+      "heals": [],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 895,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1113,
+          "energy": 10,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1260,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    },
+    {
+      "species_id": 143,
+      "name": "卡比兽",
+      "seed": 29,
+      "profiles_on": true,
+      "arch": "slam_heal",
+      "cast": [
+        0.5,
+        "cast",
+        0,
+        1,
+        "hyper_beam",
+        1.0,
+        147,
+        0,
+        10
+      ],
+      "actual_damage": 291,
+      "side_hits": [
+        [
+          0.5,
+          "attack",
+          0,
+          2,
+          70,
+          0,
+          0
+        ],
+        [
+          0.5,
+          "attack",
+          0,
+          3,
+          74,
+          0,
+          0
+        ]
+      ],
+      "moves": [],
+      "heals": [
+        [
+          0.5,
+          "regen",
+          0,
+          205
+        ]
+      ],
+      "statuses": [],
+      "effects": [],
+      "units": [
+        {
+          "idx": 0,
+          "hp": 1231,
+          "energy": 0,
+          "pos": [
+            2,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 1,
+          "hp": 1299,
+          "energy": 10,
+          "pos": [
+            2,
+            1
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 2,
+          "hp": 1376,
+          "energy": 0,
+          "pos": [
+            1,
+            2
+          ],
+          "stunned_after_hit": false
+        },
+        {
+          "idx": 3,
+          "hp": 1372,
+          "energy": 0,
+          "pos": [
+            3,
+            2
+          ],
+          "stunned_after_hit": false
+        }
+      ]
+    }
+  ]
+}
