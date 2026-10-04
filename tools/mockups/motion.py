@@ -183,6 +183,28 @@ def rig_phase(sid, state, index):
     return RIG_PHASES[sid][state][index]
 
 
+def validate_motion(sid):
+    """Fail at the content boundary instead of crashing on a later death/hit."""
+    states = species_motion.get(sid)
+    expected = {'idle', 'walk', 'windup', 'strike', 'recover', 'hit', 'death'}
+    if not isinstance(states, dict) or set(states) != expected:
+        raise ValueError(f'motion/{sid}: requires all seven body states')
+    if set(KEYFRAMES.get(sid, {})) != expected or set(RIG_PHASES.get(sid, {})) != expected:
+        raise ValueError(f'motion/{sid}: missing source keys or phase samples')
+    for state, frames in states.items():
+        if not frames or len(frames) > 128 or len(frames) != len(RIG_PHASES[sid][state]):
+            raise ValueError(f'motion/{sid}/{state}: invalid sample count')
+        for frame in frames:
+            if (not isinstance(frame, (list, tuple)) or len(frame) != 6
+                    or any(type(v) is not int for v in frame)
+                    or not (1 <= frame[2] <= 160 and 1 <= frame[3] <= 160 and 0 <= frame[5] <= 3)):
+                raise ValueError(f'motion/{sid}/{state}: invalid integer pose')
+        if (not KEYFRAMES[sid][state] or any(type(v) not in (float, int) or not math.isfinite(v)
+                or not 0 <= v < len(KEYFRAMES[sid][state]) for v in RIG_PHASES[sid][state])):
+            raise ValueError(f'motion/{sid}/{state}: invalid part phase')
+    return True
+
+
 # Region cuts in percent of the occupied sprite, with a separate phase track.
 # Each tuple = (left, top, right, bottom, dx_track, dy_track). Crops are made
 # from the original cel. Internal attachments extend the nearest edge pixel;

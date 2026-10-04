@@ -1,4 +1,4 @@
-# Portable save runtime reference
+# Portable runtime reference
 
 This package contains no Pokemon rules or state. Python on the host implements
 the reference storage contract; an ESP-IDF NVS backend is **pending**. The
@@ -83,4 +83,20 @@ Run the independent storage contract tests:
 
 ```sh
 python3 -m unittest discover -s tests -p test_runtime_storage.py -v
+```
+
+`animation.py` provides a game-independent 2D track validator and pure integer
+pose sampler. It has no Pillow, battle state, species IDs or frame timer. Tracks
+contain normalized time, displacement, rotation, scale and discrete visibility;
+seek order cannot affect the sampled result. Validate authored data once before
+publishing it. Character structure, sprite cuts and skill choreography stay in
+the game's content/rendering modules. C sampling and a device drawing backend
+remain pending; Python's ties-to-even rounding is part of the reference contract.
+
+```python
+from esp32_runtime.animation import validate_track, sample_track
+
+track = [[0, 0, 0, 0, 100, 100, 1], [1, -4, -2, 30, 110, 100, 1]]
+validate_track(track)
+pose = sample_track(track, .5)
 ```

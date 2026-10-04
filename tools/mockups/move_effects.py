@@ -18,6 +18,11 @@ RANGES = {'effect_scale': (.7, 1.3), 'particle_density': (.5, 1.),
           'motion_scale': (.5, 1.5)}
 FAMILIES = {6: 'flame', 9: 'water', 3: 'solar', 26: 'electric',
             65: 'psychic', 94: 'tongue', 76: 'earth', 143: 'beam'}
+# Existing primitives can be reused by new species without joining the eight
+# bespoke choreography entries. These are effect motifs, never gameplay rules.
+OUTCOME_MOTIFS = {'line_push': 9, 'solar_siphon': 3, 'chain_lightning': 26,
+                  'energy_drain': 94, 'quake_break': 76,
+                  'splash': 6, 'blink_strike': 65, 'slam_heal': 143}
 MOVE_NAMES = {6: '喷射火焰', 9: '水炮', 3: '日光束', 26: '十万伏特',
               65: '精神强念', 94: '舌舔', 76: '地震', 143: '破坏光线'}
 # Four opaque inks per move; zero is transparent. No intermediate alpha/blur.
@@ -193,20 +198,23 @@ def draw_blink_fragments(image, center, progress, budget, config, *, arriving=Fa
 
 
 def draw_skill_effect(image, sid, effect, source, target, age, budget, config=None,
-                      payload=None):
+                      payload=None, *, arch=None):
     """Material feedback for an actual, causally scheduled skill_effect record.
 
     Links start at the authoritative impact, not at an invented second hit time.
     The caller supplies the logged pre-effect positions. No target selection or
     resource change is reconstructed by this drawing function.
     """
-    if sid not in SUPPORTED_SPECIES or not math.isfinite(age) or not 0 <= age < .45:
+    if not math.isfinite(age) or not 0 <= age < .45:
+        return
+    motif = OUTCOME_MOTIFS.get(arch, sid if sid in SUPPORTED_SPECIES else None)
+    if motif is None:
         return
     payload = payload or {}
     p = age / .45
-    paint = _Painter(image, sid, config or effect_profile(sid), budget, int(age/.05))
+    paint = _Painter(image, motif, config or effect_profile(sid), budget, int(age/.05))
     if effect == 'side_hit' and payload.get('damage', 0) > 0:
-        if sid == 26:
+        if motif == 26:
             dx, dy = target[0]-source[0], target[1]-source[1]
             length = math.hypot(dx, dy) or 1
             points = [_mix(source, target, i/8) for i in range(9)]
@@ -215,11 +223,11 @@ def draw_skill_effect(image, sid, effect, source, target, age, budget, config=No
                       for i, (x,y) in enumerate(points)]
             paint.path(points, 2 if age < .2 else 1)
             paint.stamp(target, 11 if age < .2 else 5)
-        elif sid == 9:
+        elif motif == 9:
             paint.path([source,target], 4 if age < .2 else 2)
             for i in range(paint.count(3)):
                 paint.stamp((target[0]+(i-1)*8, target[1]+p*8), 7-i)
-        elif sid == 76:
+        elif motif == 76:
             floor_a, floor_b = (source[0],source[1]+17), (target[0],target[1]+17)
             mid = _mix(floor_a,floor_b,.5)
             paint.path([floor_a,(mid[0]-3,mid[1]+3),floor_b],2,False)

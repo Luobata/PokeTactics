@@ -912,6 +912,8 @@ class BattleAnimation:
             draw_skill(img, profile, (a[0] + 20, a[1] + 16),
                        (b[0] + 20, b[1] + 16), age, release - c[0],
                        budget, variant=c[2] % 2, emblem=emblem)
+            if self._is_presentation:
+                self._draw_skill_outcomes(img, T, budget, c)
 
     def _draw_skill_outcomes(self, img, T, budget, cast):
         """Only explicit simulator effects owned by this active cast draw links."""
@@ -935,7 +937,7 @@ class BattleAnimation:
             if effect == 'energy_drain':
                 target = point(ev[2], payload.get('caster_pos'))
             draw_skill_effect(img, sid, effect, source, target, T-ev[0], budget,
-                              self.visual_config(sid), payload)
+                              self.visual_config(sid), payload, arch=ev[4])
 
     def _draw_board(self, img: Image, T: float) -> None:
         # All sprite poses, flashes and FX share this frame's hit selection.

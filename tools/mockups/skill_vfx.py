@@ -13,7 +13,8 @@ except ImportError:
     _skill_of = None
 
 ARCHS = ('double_strike', 'charge', 'bulwark', 'mend', 'volley_shot',
-         'heavy_blow', 'splash', 'blink_strike', 'slam_heal')
+         'heavy_blow', 'splash', 'blink_strike', 'slam_heal',
+         'line_push', 'solar_siphon', 'chain_lightning', 'energy_drain', 'quake_break')
 FALLBACK = {6: ('splash', '大字爆炎'), 65: ('blink_strike', '精神强念'),
             143: ('slam_heal', '泰山压顶')}
 

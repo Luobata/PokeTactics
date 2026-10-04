@@ -29,6 +29,7 @@ SOURCE_FILES = (
     "tools/mockups/profile_vfx.py", "tools/mockups/pixel_vfx.py",
     "tools/mockups/move_effects.py",
     "tools/mockups/character_rigs.py", "tools/mockups/character_catalog.py",
+    "tools/mockups/action_preview.py", "esp32_runtime/animation.py",
     "sim/data.py", "sim/roster.py", "sim/profiles.py", "sim/skills.py",
     "sim/combat.py", "sim/status.py", "data/pokemon.json", "data/moves.json", "data/typechart.json",
 )

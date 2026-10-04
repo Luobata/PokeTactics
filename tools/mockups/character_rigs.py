@@ -7,14 +7,18 @@ part to extend outside the source rectangle. No battle state or RNG is read.
 """
 from copy import deepcopy
 import math
+from pathlib import Path
+import sys
 
 from PIL import Image, ImageDraw, ImageOps
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from esp32_runtime.animation import TRACK_FIELDS, sample_track, validate_track
 
 SCHEMA_VERSION = 1
 PADDING = 24
 MAX_PARTS = 8
 MAX_VINE_SEGMENTS = 12
-TRACK_FIELDS = ('at', 'dx', 'dy', 'angle', 'scale_x', 'scale_y', 'visible')
 REST = (0, 0, 0, 100, 100, 1)
 PART_LABELS = {'body':'身体', 'far_wing':'远侧翅膀', 'near_arm':'近侧手臂与爪',
                'left_cannon':'左炮筒', 'right_cannon':'右炮筒', 'flower':'花盘',
@@ -128,8 +132,82 @@ _RIGS = {
 }
 
 
+def validate_rig(rig, *, species='unknown'):
+    """Reject unrenderable content with a species/part/phase location.
+
+    Named local parts are optional game content, not a shared humanoid skeleton.
+    The body is controlled by motion.py; this format authors attack/cast parts.
+    """
+    prefix = f'rig/{species}'
+    def fail(message):
+        raise ValueError(f'{prefix}: {message}')
+    if not isinstance(rig, dict) or type(rig.get('implemented')) is not bool:
+        fail('expected a rig with explicit implemented flag')
+    parts = rig.get('parts')
+    if not isinstance(parts, list) or not 1 <= len(parts) <= MAX_PARTS:
+        fail(f'expected 1–{MAX_PARTS} parts')
+    names = []
+    def coordinates(value, size=2):
+        return (isinstance(value, (list, tuple)) and len(value) == size
+                and all(type(v) in (int, float) and 0 <= v <= 100 for v in value))
+    for part in parts:
+        if not isinstance(part, dict) or not isinstance(part.get('name'), str) or not part['name']:
+            fail('part must have a name')
+        name = part['name']
+        if name in names:
+            fail(f'duplicate part {name}')
+        names.append(name)
+        if not coordinates(part.get('pivot_percent')):
+            fail(f'{name}: invalid pivot')
+        if type(part.get('layer')) is not int or not -MAX_PARTS <= part['layer'] <= MAX_PARTS:
+            fail(f'{name}: invalid layer')
+        source = part.get('source', {})
+        if not isinstance(source, dict):
+            fail(f'{name}: invalid source')
+        if source.get('kind') == 'source_slice':
+            box = source.get('bounds_percent')
+            if not coordinates(box, 4) or box[0] >= box[2] or box[1] >= box[3]:
+                fail(f'{name}: invalid source bounds')
+        elif source.get('kind') == 'procedural_pixel_vine':
+            if not coordinates(source.get('origin_percent')):
+                fail(f'{name}: invalid vine origin')
+        else:
+            fail(f'{name}: unsupported source kind')
+    if names[0] != 'body' or parts[0]['source'] != {'kind': 'source_slice', 'bounds_percent': [0, 0, 100, 100]}:
+        fail('first part must be the full source body')
+    anchors = rig.get('anchors')
+    if not isinstance(anchors, dict) or 'foot' not in anchors:
+        fail('missing foot anchor')
+    if anchors['foot'] != {'position_percent': [50, 100]}:
+        fail('foot anchor must use the fixed bottom-center convention')
+    for name, anchor in anchors.items():
+        if (not isinstance(anchor, dict) or not coordinates(anchor.get('position_percent'))
+                or ('part' in anchor and anchor['part'] not in names[1:])):
+            fail(f'anchor {name}: invalid position or unknown part')
+    actions = rig.get('actions')
+    if not isinstance(actions, dict) or set(actions) != {'attack', 'cast'}:
+        fail('expected attack and cast action definitions')
+    for action, tracks in actions.items():
+        if not isinstance(tracks, dict) or bool(tracks) != rig['implemented']:
+            fail(f'{action}: implemented rigs require tracks; planned rigs must have none')
+        for part, phases in tracks.items():
+            if part not in names[1:]:
+                fail(f'{action}/{part}: unknown or whole-body part')
+            if not isinstance(phases, dict) or set(phases) != {'windup', 'strike', 'recover'}:
+                fail(f'{action}/{part}: missing or unknown phases')
+            for phase, keys in phases.items():
+                validate_track(keys, path=f'{prefix}/{action}/{part}/{phase}')
+    if rig.get('track_fields') != list(TRACK_FIELDS) or rig.get('sample_ms') != 50:
+        fail('unsupported track format or sample clock')
+    if rig.get('limits') != {'parts': MAX_PARTS, 'padding_px': PADDING, 'vine_segments': MAX_VINE_SEGMENTS}:
+        fail('unsupported rendering limits')
+    return True
+
+
 def catalog():
     """Detached JSON-safe species definitions; planned rigs are explicitly false."""
+    for sid, rig in _RIGS.items():
+        validate_rig(rig, species=sid)
     return {str(sid): deepcopy(rig) for sid, rig in _RIGS.items()}
 
 
@@ -155,13 +233,7 @@ def sample_rig(sid, kind, state, progress, facing=1):
         default = (*REST[:-1], 0) if part['source']['kind'] == 'procedural_pixel_vine' else REST
         values = default
         if keys:
-            a, b = keys[0], keys[-1]
-            for left, right in zip(keys, keys[1:]):
-                if left[0] <= p <= right[0]:
-                    a, b = left, right
-                    break
-            mix = (p-a[0])/max(1e-9, b[0]-a[0])
-            values = tuple(round(x+(y-x)*mix) for x,y in zip(a[1:-1],b[1:-1])) + (a[-1] if p < b[0] else b[-1],)
+            values = sample_track(keys, p)
         dx, dy, angle, sx, sy, visible = values
         # Source art faces left; canonical authoring is in source-art space.
         flip = -1 if facing >= 0 else 1
@@ -203,6 +275,8 @@ def render_rig(sprite, sid, kind, state, progress, facing=1):
             continue
         box = tuple(round(v*(w if i % 2 == 0 else h)/100)
                     for i,v in enumerate(part['source']['bounds_percent']))
+        if box[0] >= box[2] or box[1] >= box[3]:
+            raise ValueError(f"rig/{sid}/{part['name']}: source slice is empty at {w}x{h}")
         tile = cel.crop(box)
         base.paste((0,0,0,0), box)
         extracted.append((part,box,tile))
@@ -224,7 +298,7 @@ def render_rig(sprite, sid, kind, state, progress, facing=1):
         # whole boundary row/column would produce rectangular stripes in wings.
         candidates = [(x,y) for y in range(tile.height) for x in range(tile.width)
                       if tile.getpixel((x,y))[3]]
-        if candidates:
+        if candidates and pose['visible']:
             nearest = min(candidates,key=lambda xy:(xy[0]-pivot[0])**2+(xy[1]-pivot[1])**2)
             color = tile.getpixel(nearest)
             joint = Image.new('RGBA',out.size)
@@ -236,7 +310,8 @@ def render_rig(sprite, sid, kind, state, progress, facing=1):
                 start = (start[0],origin[1]+box[3]+1)
             ImageDraw.Draw(joint).line((start,end),fill=color,width=3 if part['name']=='flower' else 2)
             layers.append((part['layer']-.5,joint,(0,0)))
-        layers.append((part['layer'],rotated,location))
+        if pose['visible']:
+            layers.append((part['layer'],rotated,location))
         for name, anchor in rig['anchors'].items():
             if anchor.get('part') == part['name']:
                 point = (anchor['position_percent'][0]*scaled.width/100,

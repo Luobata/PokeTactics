@@ -4,7 +4,6 @@ Presets describe presentation only. Rendering never writes game rules, saves or
 global visual defaults. Cache identities include source and packed asset bytes.
 The HTTP adapter serializes rendering with the Demo's shared simulation lock.
 """
-from dataclasses import asdict
 import hashlib
 import json
 import math
@@ -82,12 +81,13 @@ def normalize_preset(value):
 
 
 def normalize_preview(value):
+    from action_preview import PREVIEW_ACTIONS
     _object(value, ("species", "kind", "seed", "settings"), "预览请求")
     preset = normalize_preset({"schema_version": 1, "species": value.get("species"),
                                "settings": value.get("settings", {})})
     kind, seed = value.get("kind", "cast"), value.get("seed", 7)
-    if kind not in ("attack", "cast"):
-        raise ValueError("只支持普攻或大招预览")
+    if not isinstance(kind, str) or kind not in PREVIEW_ACTIONS:
+        raise ValueError("不支持的动作预览")
     if type(seed) is not int or not 0 <= seed <= 2**32-1:
         raise ValueError("种子必须为 0–4294967295 的整数")
     return {"species": preset["species"], "kind": kind, "seed": seed,
@@ -98,6 +98,7 @@ def source_revision():
     files = sorted((ROOT / "tools/mockups").glob("*.py"))
     files += sorted((ROOT / "sim").glob("*.py")) + sorted((ROOT / "data").glob("*.json"))
     files += [Path(__file__)]
+    files += sorted((ROOT / "esp32_runtime").glob("*.py"))
     # Packed asset provenance must invalidate the cache as well as renderer code.
     from decoders import POKEWALK
     files += [POKEWALK / name for name in ("gen1_front.bin", "palettes.bin", "font16.bin")]
@@ -135,6 +136,7 @@ def _valid_cached(directory):
 
 def _render(request, revision):
     from profile_range import make_preview_scene
+    from action_preview import describe_clip
     key = _key(request, revision)
     output = CACHE_ROOT / key
     meta = _valid_cached(output)
@@ -144,14 +146,8 @@ def _render(request, revision):
     from move_effects import SUPPORTED_SPECIES
     overrides = {request["species"]: request["settings"]} if request["species"] in SUPPORTED_SPECIES else None
     anim = make_preview_scene(request["species"], request["kind"], request["seed"], visual_overrides=overrides)
-    actions = [a for a in anim.timeline.actions if a.attacker == 0 and
-               a.kind == request["kind"] and not a.secondary]
-    damage_index = 6 if request["kind"] == "cast" else 4
-    action = next((a for a in actions if anim.events[a.source_index][damage_index] > 0),
-                  actions[0] if actions else None)
-    if action is None:
-        raise ValueError("本种子没有产生可预览动作")
-    start, end = max(0., action.start-.25), max(action.impact+.95, action.recover_end+.25)
+    clip = describe_clip(anim, request["kind"])
+    start, end = clip['clip_start'], clip['clip_end']
     count = round((end-start)/DT)+1
     if not 0 < count <= MAX_CLIP_FRAMES:
         raise ValueError("预览片段超出帧数限制")
@@ -169,16 +165,16 @@ def _render(request, revision):
             metric = anim._presentation_view().last_frame_metrics
             particle_peak = max(particle_peak, metric["particles"])
             track_peak = max(track_peak, metric["signature_tracks"])
-        meta = {"n": count, "dt": DT, "clip_start": start, "action": asdict(action),
+        subject = clip['subject']['unit']
+        meta = {**clip, "n": count, "dt": DT,
                 "settings": request["settings"], "revision": revision,
                 "frame_sha256": digest.hexdigest(),
-                "target_before_impact": anim.presentation_state(action.impact-.001)[action.target],
-                "target_at_impact": anim.presentation_state(action.impact)[action.target],
-                "training_scene": "precharged_skill" if request["kind"] == "cast" else "stationary_posts",
+                "target_before_impact": anim.presentation_state(clip['snapshot_before'])[subject],
+                "target_at_impact": anim.presentation_state(clip['snapshot_at'])[subject],
                 "skill_effects": [{"at": ev[0], "effect": ev[5],
                                    "target": anim.by_idx[ev[3]].piece.name, "payload": ev[6]}
                                   for ev in anim.timeline.events if ev[1] == "skill_effect"
-                                  and ev[6]["cast_index"] == action.source_index],
+                                  and ev[6]["cast_index"] == clip['source_index']],
                 "metrics": {"particle_peak": particle_peak, "signature_track_peak": track_peak,
                             "particle_limit": 192, "signature_track_limit": 3,
                             "host_frame_ms_p95": round(sorted(milliseconds)[int((count-1)*.95)], 3),
@@ -221,7 +217,7 @@ def preview(value):
         try:
             base_key, baseline = _render(base, revision)
             key, meta = _render(request, revision)
-            if meta["action"] != baseline["action"] or meta["n"] != baseline["n"]:
+            if any(meta[k] != baseline[k] for k in ('action', 'phases', 'clip_start', 'clip_end', 'n')):
                 raise ValueError("视觉设置不应改变动作时间轴")
         except Exception:
             # A failed pair must not accumulate newly published base frames or

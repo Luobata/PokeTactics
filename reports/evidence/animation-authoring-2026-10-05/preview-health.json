@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "roster": 84,
+  "actions": [
+    "idle",
+    "move",
+    "attack",
+    "cast",
+    "hit",
+    "death"
+  ],
+  "saved_session_unchanged": true,
+  "checked_save_files": 2
+}

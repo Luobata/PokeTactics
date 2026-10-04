@@ -47,11 +47,24 @@ class AnimationPreviewContracts(unittest.TestCase):
         for raw in (b"", b"x"*8193, b'{"x":1,"x":2}', b'{"x":NaN}', b'\xff', b"["*4000):
             with self.subTest(raw=raw[:30]), self.assertRaises(ValueError):
                 preview.parse_request(raw)
-        for extra in ({"kind": "death"}, {"seed": -1}, {"seed": 2**32},
+        for extra in ({"kind": "victory"}, {"kind": []}, {"seed": -1}, {"seed": 2**32},
                       {"seed": True}, {"frames": 100000}):
             with self.subTest(extra=extra), self.assertRaises(ValueError):
                 preview.normalize_preview({"species": 6, **extra})
         self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_all_action_previews_include_subject_phases_and_bounded_frames(self):
+        for kind in ('idle', 'move', 'hit', 'death'):
+            with self.subTest(kind=kind):
+                result = preview.preview({'species': 19, 'kind': kind})
+                self.assertEqual(result['subject']['unit'], 0)
+                self.assertTrue(result['phases'])
+                self.assertEqual(result['frame_sha256'], result['base_frame_sha256'])
+                self.assertLessEqual(result['n'], preview.MAX_CLIP_FRAMES)
+                self.assertTrue(all((self.root/result['key']/f'{i}.png').is_file() for i in range(result['n'])))
+                if kind == 'death':
+                    self.assertIsNone(result['target_before_impact']['die_t'])
+                    self.assertIsNotNone(result['target_at_impact']['die_t'])
 
     def test_visual_edit_changes_pixels_but_preserves_timing_hp_and_base(self):
         base = preview.preview({"species": 6, "kind": "cast", "seed": 7})

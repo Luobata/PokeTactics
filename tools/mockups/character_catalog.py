@@ -39,9 +39,10 @@ def character_catalog(*, pieces=None, asset_root=None):
     from roster import build_roster
     from skills import skill_of, resolve_cast, GENERIC_DESCRIPTIONS
     from profiles import effective_range
-    from motion import species_motion
+    from motion import species_motion, validate_motion
     from skill_vfx import AUTHORED_SKILLS
     from move_effects import SUPPORTED_SPECIES
+    from action_preview import action_coverage, PREVIEW_ACTIONS
     from decoders import Front, Palettes, POKEWALK
     root = Path(asset_root) if asset_root is not None else POKEWALK
     front, palettes = Front(root / "gen1_front.bin"), Palettes(root / "palettes.bin")
@@ -53,6 +54,10 @@ def character_catalog(*, pieces=None, asset_root=None):
         profile, skill, move = profile_of(sid), skill_of(sid), resolve_cast(piece)
         signature = bool(skill and skill["tier"] == "signature")
         rig = rigs.get(str(sid), {"implemented": False, "parts": [], "anchors": {}})
+        if sid in species_motion:
+            validate_motion(sid)
+        elif rig['implemented']:
+            raise ValueError(f'rig/{sid}: 部件动作需要先提供完整整身动画表')
         errors = []
         blob = front.blob_of.get(sid)
         if blob is None:
@@ -93,7 +98,9 @@ def character_catalog(*, pieces=None, asset_root=None):
                       "description": description, "tactic": tactic, "counterplay": counterplay},
             "rig": rig, "motion_notes": {"attack": attack, "cast": cast},
             "capabilities": {"body": body, "effect": effect, "resource_ready": not errors,
-                             "resource_errors": errors, "actions": ["attack"] + (["cast"] if move else []),
+                             "resource_errors": errors,
+                             "actions": [kind for kind in PREVIEW_ACTIONS if kind != 'cast' or move],
+                             "action_matrix": action_coverage(sid, rig, sid in species_motion, bool(move)),
                              "editable_controls": controls},
         }
     return result

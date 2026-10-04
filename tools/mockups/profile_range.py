@@ -104,8 +104,22 @@ def make_preview_scene(species_id, kind, seed=7, visual_overrides=None):
     targets. Water has no type immunity, and the cluster exposes generic spread,
     displacement and healing. Only Battle emits the action and its outcomes.
     """
-    if kind not in (*ACTIONS, "death"):
+    from action_preview import PREVIEW_ACTIONS
+    if kind not in PREVIEW_ACTIONS:
         raise ValueError(f"unknown preview action {kind!r}")
+    if kind == "idle":
+        pieces = {p.species_id: p for ps in r.build_roster().values() for p in ps}
+        if species_id not in pieces:
+            raise ValueError(f"species {species_id} is not in the roster")
+        battle = r.Battle([pieces[species_id]], [pieces[9]], random.Random(seed),
+                          positions_a=[(0, 3)], positions_b=[(5, 0)])
+        battle.events = [(0., "deploy", unit.idx, unit.pos) for unit in battle.units]
+        for unit in battle.units:
+            battle._emit_state(unit, 0.)
+        # Delay the first real action to create a quiet inspection window.
+        battle._act(battle.units[0], 2.)
+        return r.BattleAnimation([], [], seed, *_assets(), battle=battle,
+                                 visual_overrides=visual_overrides)
     if kind != "cast":
         return make_scene(species_id, "dummy", seed, kind, visual_overrides)
     if species_id in r.SUPPORTED_SPECIES:
