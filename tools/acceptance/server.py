@@ -764,8 +764,11 @@ class Handler(SimpleHTTPRequestHandler):
         elif parsed.path == "/range":
             # R1 单体档案靶场页：profile_range.py 生成的静态查看器
             # （manifest.json + frame-NNN.png 相对路径），经 /reports 路由服务
-            # 指向最新的 range-* 证据目录（按 mtime，与目录名无关）
-            dirs = sorted((ROOT / "reports/evidence").glob("range-*"),
+            # 指向最新的靶场证据目录（range-*/per-unit-*，按 mtime）
+            ev = ROOT / "reports/evidence"
+            dirs = sorted([d for d in ev.iterdir()
+                           if d.is_dir() and (d.name.startswith("range-")
+                                              or d.name.startswith("per-unit-"))],
                           key=lambda d: d.stat().st_mtime)
             idx = dirs[-1] / "index.html" if dirs else None
             if idx is not None and idx.exists():
