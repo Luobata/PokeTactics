@@ -2,25 +2,40 @@
 <title>16 只独立动作与技能靶场</title><style>
 body{background:#eee6ce;color:#292b24;font:16px monospace;margin:24px}
 button,select{font:inherit;background:#faf1d4;color:#292b24;padding:8px;border:2px solid #756e53}
-img{image-rendering:pixelated;width:480px;height:640px;border:4px solid #756e53}
+#frame{image-rendering:pixelated;width:480px;height:640px;border:4px solid #756e53}
 main{display:flex;gap:24px;flex-wrap:wrap}p{max-width:560px}</style>
 <h1>16 只独立动作与技能靶场</h1><p>真实事件隔离六状态 + 完整 Battle 技能 · 左右对比见下方 · 四色精灵 · 10 FPS · 训练用生命值加厚。
 平A：渐细尾迹、属性弹体、紧邻双描边环与弹跳数字。技能：脚底蓄力、多重外环、微震与大跳字。木桩受击段启用轻触反击。</p>
 <select id="clip"></select><button id="play">暂停</button>
 <button id="prev">上一帧</button><button id="next">下一帧</button>
 <input id="seek" type="range" min="0" value="0"><span id="label"></span>
-<main><img id="frame" alt="靶场逐帧动画"><pre id="info"></pre></main>
+<main><canvas id="frame" width="240" height="320"></canvas><pre id="info"></pre></main>
 <script>
-let clips=[],index=0,running=true;const $=id=>document.getElementById(id);
+let clips=[],index=0,running=true,cache={};const $=id=>document.getElementById(id);
+const fctx=(()=>{const cv=$('frame');const c=cv.getContext('2d');c.imageSmoothingEnabled=false;return c;})();
+/* 帧间空白修复：整段预载后 canvas 逐帧绘制——播放期零网络请求，
+   未预载完成不推进（首播显示"载入中"） */
+function preload(c,cb){if(cache[c.path])return cb();
+  const imgs=new Array(c.frames);let left=c.frames;
+  for(let i=0;i<c.frames;i++){const im=new Image();
+    im.onload=im.onerror=()=>{if(--left===0){cache[c.path]=imgs;cb();}};
+    im.src=c.path+'/frame-'+String(i).padStart(3,'0')+'.png';imgs[i]=im;}}
+function draw(c){const im=cache[c.path]&&cache[c.path][index];
+  if(im&&im.width)fctx.drawImage(im,0,0);}
+function upd(c){$('seek').max=c.frames-1;$('seek').value=index;
+  $('label').textContent=(index+1)+' / '+c.frames;
+  $('info').textContent=JSON.stringify(c,null,2)}
 function show(){let c=clips[$('clip').value||0];if(!c)return;
-index=(index+c.frames)%c.frames;$('frame').src=c.path+'/frame-'+String(index).padStart(3,'0')+'.png';
-$('seek').max=c.frames-1;$('seek').value=index;$('label').textContent=(index+1)+' / '+c.frames;
-$('info').textContent=JSON.stringify(c,null,2)}
+  index=(index+c.frames)%c.frames;
+  if(!cache[c.path]){$('label').textContent='载入中…';
+    preload(c,()=>{if(clips[$('clip').value||0]===c){draw(c);upd(c);}});return;}
+  draw(c);upd(c);}
 fetch('manifest.json').then(r=>r.json()).then(m=>{clips=m.clips;clips.forEach((c,i)=>{
 let o=document.createElement('option');o.value=i;o.textContent=c.species+' / '+c.scene+' / '+c.action;
 $('clip').appendChild(o)});show()}).catch(e=>{$('info').textContent='请在此目录运行 python3 -m http.server 后打开本页。 '+e});
 $('clip').onchange=()=>{index=0;show()};$('play').onclick=()=>{running=!running;$('play').textContent=running?'暂停':'播放'};
 $('prev').onclick=()=>{running=false;index--;show()};$('next').onclick=()=>{running=false;index++;show()};
 $('seek').oninput=e=>{running=false;index=Number(e.target.value);show()};
-setInterval(()=>{if(running){index++;show()}},100);
+setInterval(()=>{if(running){let c=clips[$('clip').value||0];
+  if(c&&cache[c.path]){index=(index+1)%c.frames;draw(c);upd(c)}}},100);
 </script></html><p>状态说明：strike 片段含 recover；hit 是叠加轨。六状态隔离真实事件，死亡训练 HP=1。技能片段保留完整战斗。</p><p><a href="6-summary.png">6 六状态+技能</a> · <a href="6-comparison.png">49a0d46 / authored 左右对照</a> · <a href="6-all-frames.png">全部状态帧</a></p><p><a href="65-summary.png">65 六状态+技能</a> · <a href="65-comparison.png">49a0d46 / authored 左右对照</a> · <a href="65-all-frames.png">全部状态帧</a></p><p><a href="143-summary.png">143 六状态+技能</a> · <a href="143-comparison.png">49a0d46 / authored 左右对照</a> · <a href="143-all-frames.png">全部状态帧</a></p><p><a href="149-summary.png">149 六状态+技能</a> · <a href="149-comparison.png">49a0d46 / authored 左右对照</a> · <a href="149-all-frames.png">全部状态帧</a></p><p><a href="9-summary.png">9 六状态+技能</a> · <a href="9-comparison.png">49a0d46 / authored 左右对照</a> · <a href="9-all-frames.png">全部状态帧</a></p><p><a href="3-summary.png">3 六状态+技能</a> · <a href="3-comparison.png">49a0d46 / authored 左右对照</a> · <a href="3-all-frames.png">全部状态帧</a></p><p><a href="94-summary.png">94 六状态+技能</a> · <a href="94-comparison.png">49a0d46 / authored 左右对照</a> · <a href="94-all-frames.png">全部状态帧</a></p><p><a href="131-summary.png">131 六状态+技能</a> · <a href="131-comparison.png">49a0d46 / authored 左右对照</a> · <a href="131-all-frames.png">全部状态帧</a></p><p><a href="59-summary.png">59 六状态+技能</a> · <a href="59-comparison.png">49a0d46 / authored 左右对照</a> · <a href="59-all-frames.png">全部状态帧</a></p><p><a href="130-summary.png">130 六状态+技能</a> · <a href="130-comparison.png">49a0d46 / authored 左右对照</a> · <a href="130-all-frames.png">全部状态帧</a></p><p><a href="31-summary.png">31 六状态+技能</a> · <a href="31-comparison.png">49a0d46 / authored 左右对照</a> · <a href="31-all-frames.png">全部状态帧</a></p><p><a href="34-summary.png">34 六状态+技能</a> · <a href="34-comparison.png">49a0d46 / authored 左右对照</a> · <a href="34-all-frames.png">全部状态帧</a></p><p><a href="76-summary.png">76 六状态+技能</a> · <a href="76-comparison.png">49a0d46 / authored 左右对照</a> · <a href="76-all-frames.png">全部状态帧</a></p><p><a href="95-summary.png">95 六状态+技能</a> · <a href="95-comparison.png">49a0d46 / authored 左右对照</a> · <a href="95-all-frames.png">全部状态帧</a></p><p><a href="18-summary.png">18 六状态+技能</a> · <a href="18-comparison.png">49a0d46 / authored 左右对照</a> · <a href="18-all-frames.png">全部状态帧</a></p><p><a href="26-summary.png">26 六状态+技能</a> · <a href="26-comparison.png">49a0d46 / authored 左右对照</a> · <a href="26-all-frames.png">全部状态帧</a></p>
