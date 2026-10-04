@@ -61,7 +61,7 @@ ul{margin:6px 0;padding-left:20px}li{margin:3px 0}
 
 <h2>动画与美术<span class="badge todo">可目视验收</span></h2>
 <div class="launch">
-<a href="/animation-lab"><button class="primary">三角色动作样片与资源验收</button></a>
+<a href="/animation-lab"><button class="primary">核心角色动作样片与资源验收</button></a>
 <a href="/anim?seed=7"><button class="primary">打开动画验收台（seed=7）</button></a>
 <a href="/anim?seed=11"><button>seed=11 · 12.7s 长战</button></a>
 </div>
