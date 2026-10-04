@@ -8,6 +8,7 @@ import copy
 import hashlib
 import json
 import math
+import re
 from collections import Counter
 from pathlib import Path
 
@@ -41,6 +42,7 @@ def sequence(value, maximum, label):
 
 def owned_record(owned):
     return {"species": owned.piece.species_id, "item": owned.item,
+            "uid": owned.uid, "technique": owned.technique,
             "sources": list(owned.sources), "invested": owned.invested}
 
 
@@ -51,9 +53,10 @@ def comp_record(comp):
 
 class SessionCodec:
     game_id = "poketactics"
-    schema_version = 2
+    schema_version = 3
 
     def encode(self, state):
+        state.ensure_unit_ids()
         seats = []
         for seat in state.seats:
             data = {key: getattr(seat, key) for key in COMMON}
@@ -62,6 +65,7 @@ class SessionCodec:
                          "bench": [owned_record(o) for o in seat.bench],
                          "components": dict(seat.inventory.components),
                          "finished": list(seat.inventory.finished),
+                         "techniques": dict(seat.inventory.techniques),
                          "last_opponent": getattr(getattr(seat, "_last_opp", None), "seat", None)})
             if seat.seat == 0:
                 data.update({"grid": [[r, c, owned_record(seat.grid[(r, c)])]
@@ -77,6 +81,7 @@ class SessionCodec:
                     ("winner", "survivors", "duration", "round", "pve", "ghost") if key in meta}
                    if meta else None)
         payload = {"rules": rules_fingerprint(), "seed": state.seed, "round": state.round_no,
+                "next_unit_id": state.next_unit_id,
                 "expedition_state": {"run_id": state.run_id, "loadout": state.expedition,
                                      "discoveries": state.discoveries},
                 "phase": state.phase, "seats": seats,
@@ -85,27 +90,30 @@ class SessionCodec:
                 "ghost_seat": getattr(state.ghost_seat, "seat", None),
                 "ghost_source": getattr(state.ghost_src, "seat", None),
                 "opponent_comp": comp_record(state.opponent_comp) if state.opponent_comp is not None else None,
+                "opponent_learned": state.opponent_learned,
                 "log": list(state.log), "last_battle": summary,
                 "player_battles": state.player_battles, "player_frames_total": state.player_frames_total,
                 "eliminated_round": state.eliminated_round,
-                "final_team": [{"species": o["sid"], "item": o.get("item")}
+                "final_team": [{"species": o["sid"], "item": o.get("item"),
+                                "technique": (o.get('technique') or {}).get('id')}
                                for o in state.final_team] if state.final_team is not None else None}
         # Normalize tuple-based metric curves and integer-keyed survivor maps;
         # the shared runtime deliberately accepts strict, portable JSON only.
         return json.loads(json.dumps(payload, ensure_ascii=False, allow_nan=False))
 
     def decode(self, payload, schema_version):
-        if type(schema_version) is not int or schema_version not in (1, 2):
+        if type(schema_version) is not int or schema_version not in (1, 2, 3):
             raise ValueError("不支持的 PokeTactics 存档版本")
-        if schema_version == 2 and "expedition_state" not in payload:
+        if schema_version >= 2 and "expedition_state" not in payload:
             raise ValueError("远征存档缺少永久对局编号")
         try:
-            return self._decode(payload)
+            return self._decode(payload, schema_version)
         except (KeyError, TypeError, AttributeError, IndexError) as exc:
             raise ValueError("存档结构不完整或字段类型错误") from exc
 
-    def _decode(self, data):
+    def _decode(self, data, schema_version):
         import demo
+        import techniques
         from bots import PERSONALITIES
         state = demo.Session(integer(data["seed"], -(2 ** 63), 2 ** 63 - 1, "seed"))
         state.round_no = integer(data["round"], 1, demo.MAX_ROUNDS, "round")
@@ -113,6 +121,7 @@ class SessionCodec:
             raise ValueError("无效的对局阶段")
         state.phase = data["phase"]
         held = Counter()
+        unit_ids = set()
 
         def piece(record, owned=True):
             sid = integer(record["species"], 1, 65535, "species")
@@ -133,6 +142,15 @@ class SessionCodec:
             investment = integer(record["invested"], 1, sum(state.templates[s].tier for s in sources), "invested")
             result = demo.shop_mod.OwnedPiece(template, investment)
             result.sources, result.item = list(sources), item
+            uid = record.get('uid')
+            if uid is not None or schema_version >= 3:
+                if not isinstance(uid, str) or not re.fullmatch(r'u[0-9]{8}', uid) or uid == 'u00000000' or uid in unit_ids:
+                    raise ValueError('棋子编号无效或重复')
+                unit_ids.add(uid)
+                result.uid = uid
+            if schema_version >= 3 and 'technique' not in record:
+                raise ValueError('棋子缺少教学记录')
+            result.technique = techniques.validate_learning(sid, record.get('technique'))
             held.update(sources)
             return result
 
@@ -169,7 +187,9 @@ class SessionCodec:
                     if pos in seat.grid:
                         raise ValueError("重复的棋盘格位")
                     seat.grid[pos] = piece(owned)
-                if [owned_record(o) for o in seat.board] != record["board"]:
+                normalized_board = [{**o, 'uid': o.get('uid'), 'technique': o.get('technique')}
+                                    for o in record['board']]
+                if [owned_record(o) for o in seat.board] != normalized_board:
                     raise ValueError("棋盘格位与棋子顺序不一致")
                 seat.refresh_j = integer(record["refresh_j"], 0, 1000000, "refresh_j")
                 if type(record["shop_locked"]) is not bool:
@@ -231,6 +251,12 @@ class SessionCodec:
             if any(key not in demo.items_mod.FINISHED for key in finished):
                 raise ValueError("仓库含未知装备")
             seat.inventory.finished = list(finished)
+            machines = record.get('techniques', dict.fromkeys(techniques.TECHNIQUE_IDS, 0))
+            if schema_version >= 3 and 'techniques' not in record:
+                raise ValueError('缺少技能机仓库')
+            if not isinstance(machines, dict) or set(machines) != set(techniques.TECHNIQUE_IDS):
+                raise ValueError('技能机仓库字段无效')
+            seat.inventory.techniques = {k: integer(v, 0, 1000, 'techniques') for k, v in machines.items()}
         if len(ranks) != len(set(ranks)) or (state.phase == "over" and len(ranks) != 8):
             raise ValueError("名次重复或终局名次不完整")
         if set(data["pool"]) != {str(s) for s in state.templates}:
@@ -264,6 +290,16 @@ class SessionCodec:
                 raise ValueError("准备阶段配对缺少存活席位")
         state.opponent_comp = ([piece(o, owned=False) for o in sequence(data["opponent_comp"], 12, "opponent_comp")]
                                if data["opponent_comp"] is not None else None)
+        opponent_learned = data.get('opponent_learned')
+        if schema_version >= 3 and 'opponent_learned' not in data:
+            raise ValueError('缺少对手教学快照')
+        if opponent_learned is not None:
+            sequence(opponent_learned, 12, 'opponent_learned')
+            if state.opponent_comp is None or len(opponent_learned) != len(state.opponent_comp):
+                raise ValueError('对手教学快照长度无效')
+            state.opponent_learned = [techniques.validate_learning(
+                (p[0] if isinstance(p, tuple) else p).species_id, t)
+                for p, t in zip(state.opponent_comp, opponent_learned)]
         if state.round_no % 5 == 0:
             state.opp_view = state._pve_view(state.round_no)
         else:
@@ -286,6 +322,9 @@ class SessionCodec:
         state.final_team = ([demo._piece_view(p[0], p[1]) if isinstance(p, tuple) else demo._piece_view(p)
                              for p in [piece(o, owned=False) for o in sequence(data["final_team"], 9, "final_team")]]
                             if data["final_team"] is not None else None)
+        for record, view in zip(data['final_team'] or [], state.final_team or []):
+            view['technique'] = techniques.view(techniques.validate_learning(
+                record['species'], record.get('technique')))
         summary = data["last_battle"]
         if summary is not None:
             if not isinstance(summary, dict) or set(summary) - {
@@ -316,4 +355,25 @@ class SessionCodec:
                               if data["rules"] != rules_fingerprint() else None)
         from expedition import decode_extension
         decode_extension(state, data)
+        # Schema 1/2 attached teaching to the partner loadout. Migrate it once to
+        # a concrete unit (or inventory when that family is no longer owned).
+        if state.expedition and state.expedition['technique']:
+            if schema_version >= 3:
+                raise ValueError('教学必须绑定棋子或存放仓库')
+            import partners
+            family = next(p['family_ids'] for p in partners.catalog()
+                          if p['id'] == state.expedition['partner'])
+            machine = state.expedition['technique']
+            target = next((o for o in state.player.all_pieces()
+                           if o.piece.species_id in family and o.technique is None), None)
+            if target is not None:
+                target.technique = techniques.validate_learning(target.piece.species_id, machine)
+            else:
+                state.player.inventory.techniques[machine] += 1
+            state.expedition['technique'] = None
+        minimum = max((int(uid[1:]) for uid in unit_ids), default=0) + 1
+        if schema_version >= 3 and 'next_unit_id' not in data:
+            raise ValueError('缺少棋子编号计数器')
+        state.next_unit_id = integer(data.get('next_unit_id', minimum), minimum, 99999999, 'next_unit_id')
+        state.ensure_unit_ids()
         return state

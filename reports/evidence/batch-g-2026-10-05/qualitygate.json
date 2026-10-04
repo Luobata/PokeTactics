@@ -1,0 +1,26 @@
+{
+  "run_id": "e72de55746ae30136273e3aa",
+  "gate": "pass",
+  "raw_gate": "pass",
+  "block_merge": false,
+  "execution_complete": true,
+  "incomplete_engines": [],
+  "mutation_status": "not_applicable",
+  "quality_confidence": "full",
+  "effective_rules_snapshot": {},
+  "actionable_block_findings": 0,
+  "deferred_block_findings": 0,
+  "mcp_rule_context": "unavailable in this session",
+  "mutation_policy": "QG_LOCAL_MUTATION_ENABLED=0; not executed",
+  "coverage_note": "No script rule matched the Python paths. CLI pass is not semantic, mutation or Python test coverage.",
+  "finding_counts": {
+    "blocking_findings": 0,
+    "advisory_findings": 0,
+    "shadow_findings": 0,
+    "deferred_findings": 0,
+    "waived_findings": 0,
+    "repair_candidates": 0
+  },
+  "repair_rounds": 0,
+  "guard_stop_reason": "No actionable findings returned; local tests and independent review provide the actual Python verification."
+}

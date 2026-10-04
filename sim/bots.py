@@ -335,6 +335,9 @@ class Bot:
         if owned.item is not None:
             self.inventory.finished.append(owned.item)
             owned.item = None
+        if owned.technique is not None:
+            self.inventory.techniques[owned.technique] += 1
+            owned.technique = None
 
     # ---- 升级人口 ----
     def _maybe_buy_xp(self, round_no: int, others: list) -> None:

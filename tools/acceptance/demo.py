@@ -54,6 +54,7 @@ for _p in (str(ROOT), str(ROOT / "sim"), str(ROOT / "tools" / "mockups")):
 
 import economy  # noqa: E402
 import items as items_mod  # noqa: E402
+import techniques as techniques_mod  # noqa: E402
 import rng as rng_mod  # noqa: E402
 import shop as shop_mod  # noqa: E402
 import synergy as syn_mod  # noqa: E402
@@ -320,6 +321,8 @@ class Session:
         self.ghost_src = None
         self.opp_view = None
         self.opponent_comp = None
+        self.opponent_learned = None
+        self.next_unit_id = 1
         self.player_frames_total = 0
         self.player_battles = 0
         self.final_team = None
@@ -329,12 +332,43 @@ class Session:
         self.discoveries = {"seen": [], "fielded": [], "won": []}
 
     def battle_options(self, a=None, b=None):
+        learned = {key: [o.technique for o in seat.board]
+                   for key, seat in (("learned_a", a), ("learned_b", b)) if seat is not None}
+        learned = {k: v for k, v in learned.items() if any(v)}
         if self.expedition is None:
-            return {}
+            return learned
         # Every fight in this run, including bot/ghost/PVE, uses the same budget.
-        return {"stat_mode": "budget_v1", "team_options": [
+        return {**learned, "stat_mode": "budget_v1", "team_options": [
             {k: self.expedition[k] for k in ("partner", "technique")}
             if seat is self.player else None for seat in (a, b)]}
+
+    def ensure_unit_ids(self):
+        for seat in self.seats:
+            for owned in seat.all_pieces():
+                if owned.uid is None:
+                    owned.uid = f"u{self.next_unit_id:08d}"
+                    self.next_unit_id += 1
+
+    def locate_uid(self, uid):
+        self.ensure_unit_ids()
+        for pos, owned in self.player.grid.items():
+            if owned.uid == uid:
+                return owned, f"g{pos[0]},{pos[1]}"
+        for i, owned in enumerate(self.player.bench):
+            if owned.uid == uid:
+                return owned, f"b{i}"
+        raise DemoError("棋子已移动、合成或卖出，请重新选择")
+
+    def teach_bots(self):
+        for seat in self.bots:
+            for technique in techniques_mod.TECHNIQUE_IDS:
+                for owned in seat.board:
+                    if seat.inventory.techniques[technique] <= 0:
+                        break
+                    if owned.technique is None and techniques_mod.compatible_species(
+                            owned.piece.species_id, technique):
+                        owned.technique = technique
+                        seat.inventory.techniques[technique] -= 1
 
     def observe(self, fielded=(), won=()):
         seen = {o.piece.species_id for o in self.player.all_pieces()}
@@ -403,6 +437,7 @@ class Session:
         self.phase = "prep"
         self.last_battle = None
         self.opponent_comp = None
+        self.opponent_learned = None
         for e in self._alive():
             e.gold += economy.round_income(e.gold, e.streak)
             e.gold += items_mod.lucky_egg_income(e)
@@ -421,6 +456,7 @@ class Session:
             if b.alive:
                 b.decide(r, self.seats,
                          rng_mod.derive(self.seed, r, "bots", b.seat))
+        self.teach_bots()
         # 配对：复用 match 规则（无重复对手优先 + 奇数打幽灵），
         # pair 子流每轮现派生，prep 期算好供 UI 展示对手快照（battle 时原样使用）
         self.pairs = None
@@ -467,6 +503,7 @@ class Session:
         if isinstance(src, Bot):
             src.counter_vs(p.board)
         self.opponent_comp = list(src.battle_comp())
+        self.opponent_learned = [o.technique for o in src.board]
         return {"name": name, "hp": src.hp, "level": src.level,
                 "rows": [[_piece_view(o.piece, o.item) if o else None for o in row]
                          for row in self._enemy_rows(src.board)],
@@ -658,6 +695,12 @@ class Session:
                                    items_mod.PVE_DROP_COUNTER + i)
             e.inventory.add_component(rng_d.choice(comps))
             e.item_drops += 1
+            if self.expedition is not None:
+                machine = rng_mod.derive(self.seed, r, "pve", 4096 + e.seat).choice(
+                    techniques_mod.TECHNIQUE_IDS)
+                e.inventory.techniques[machine] += 1
+                if e is p:
+                    self._say(f"技能机入仓：{techniques_mod.view(machine)['name']}；准备阶段可选择兼容棋子学习")
         weights = items_mod.drop_weights(alive)
         for j in range(items_mod.PVE_BONUS_DROPS):
             rng_d = rng_mod.derive(self.seed, r, "pve",
@@ -685,12 +728,17 @@ class Session:
         rng = rng_mod.derive(self.seed, r, "battle", battle_i)
         out_dir = ROOT / ".build" / "demo" / self.sid / f"r{r}"
         t0 = time.time()
+        battle_options = self.battle_options(me, opp)
+        if opp is not None and self.opponent_learned is not None:
+            battle_options.pop("learned_b", None)
+            if any(self.opponent_learned):
+                battle_options["learned_b"] = list(self.opponent_learned)
         meta = _render_battle_frames(
             comp_a, comp_b, rng, weather, out_dir,
             positions_a=me.battle_positions(),
             hud_snapshot={"hp": max(0, me.hp), "gold": me.gold,
                           "level": me.level, "round": r},
-            **self.battle_options(me, opp))
+            **battle_options)
         meta["round"] = r
         meta["render_s"] = round(time.time() - t0, 1)
         meta["pve"] = pve
@@ -716,7 +764,7 @@ class Session:
 
     def _eliminate(self, seat) -> None:
         if isinstance(seat, PlayerSeat):
-            self.final_team = [_piece_view(o.piece, o.item) for o in seat.board]
+            self.final_team = [_owned_view(o) for o in seat.board]
             self.eliminated_round = self.round_no
         seat.alive = False
         seat.rank = len(self._alive()) + 1
@@ -796,7 +844,16 @@ def _piece_view(piece, item=None):
     }
 
 
-def _item_effect(key: str) -> str:
+def _owned_view(owned):
+    return {**_piece_view(owned.piece, owned.item), 'uid': owned.uid,
+            'technique': techniques_mod.view(owned.technique)}
+
+
+def _item_effect(key: str, stat_mode='legacy') -> str:
+    from build_rules import item_description
+    override = item_description(key, stat_mode)
+    if override:
+        return override
     spec = items_mod.FINISHED[key]
     parts = []
     for k, v in spec.items():
@@ -844,7 +901,9 @@ def _synergy_view(sess) -> list:
 
 
 def state_json(sess) -> dict:
+    sess.ensure_unit_ids()
     p = sess.player
+    stat_mode = 'budget_v1' if sess.expedition else 'legacy'
     from render_mockups import TYPE_COLORS
     weather = weather_for_round(sess.round_no)
     wkey = weather or ""
@@ -854,12 +913,16 @@ def state_json(sess) -> dict:
         copies[o.piece.species_id] = copies.get(o.piece.species_id, 0) + 1
     for (r, c), o in p.grid.items():
         v = _piece_view(o.piece, o.item)
+        v.update(uid=o.uid, technique=techniques_mod.view(o.technique))
+        v['item_effect'] = _item_effect(o.item, stat_mode) if o.item else None
         v["copies"] = copies.get(o.piece.species_id, 1)
         v["sell"] = sell_value(o)
         board_rows[r][c] = v
     bench = []
     for o in p.bench:
         v = _piece_view(o.piece, o.item)
+        v.update(uid=o.uid, technique=techniques_mod.view(o.technique))
+        v['item_effect'] = _item_effect(o.item, stat_mode) if o.item else None
         v["copies"] = copies.get(o.piece.species_id, 1)
         v["sell"] = sell_value(o)
         bench.append(v)
@@ -875,7 +938,7 @@ def state_json(sess) -> dict:
     comps = [{"key": k, "name": items_mod.COMPONENT_NAMES[k], "n": n}
              for k, n in p.inventory.components.items() if n > 0]
     finished = [{"key": k, "name": items_mod.FINISHED[k]["name"],
-                 "effect": _item_effect(k)}
+                 "effect": _item_effect(k, stat_mode)}
                 for k in p.inventory.finished]
     craftable = []
     lucky_capped = items_mod.lucky_egg_count(sess.seats) >= \
@@ -890,7 +953,7 @@ def state_json(sess) -> dict:
             continue
         recipe = " + ".join(items_mod.COMPONENT_NAMES[c] for c in pair)
         craftable.append({"key": key, "name": spec["name"],
-                          "effect": _item_effect(key), "recipe": recipe})
+                          "effect": _item_effect(key, stat_mode), "recipe": recipe})
     xp_next = economy.xp_to_next(p.level)
     st = {
         "sid": sess.sid, "seed": sess.seed, "round": sess.round_no,
@@ -912,6 +975,9 @@ def state_json(sess) -> dict:
         "synergies": _synergy_view(sess),
         "items": {"components": comps, "finished": finished,
                   "craftable": craftable},
+        "techniques": {"inventory": [{**t, "count": p.inventory.techniques[t['id']]}
+                                      for t in techniques_mod.catalog()
+                                      if p.inventory.techniques[t['id']] > 0]},
         "opponent": sess.opp_view,
         "standings": [{"name": e.name, "is_you": e is p,
                        "hp": max(0, e.hp), "level": e.level,
@@ -925,7 +991,7 @@ def state_json(sess) -> dict:
         "profile_warning": getattr(sess, "profile_warning", None),
         "player_result": ({"rank": p.rank, "round": sess.eliminated_round or sess.round_no,
                            "team": sess.final_team if sess.final_team is not None else
-                           [_piece_view(o.piece, o.item) for o in p.board]}
+                           [_owned_view(o) for o in p.board]}
                           if not p.alive or sess.phase == "over" else None),
         "stats": {"battles": sess.player_battles,
                   "frames": sess.player_frames_total},
@@ -980,6 +1046,9 @@ def act_sell(sess, loc: str):
     owned, where, key = sess.locate(loc)
     if owned.item is not None and owned.item != "evo_stone":
         p.inventory.finished.append(owned.item)   # 卖棋自动卸回仓库（无惩罚）
+    if owned.technique is not None:
+        p.inventory.techniques[owned.technique] += 1
+        owned.technique = None
     gold = shop_mod.sell_owned(owned, sess.pool)
     p.gold += gold
     if where == "bench":
@@ -1133,6 +1202,29 @@ def act_unequip(sess, loc: str):
     return f"卸下 {items_mod.FINISHED[key]['name']}（回仓库）"
 
 
+def act_learn(sess, uid: str, technique: str, replace=False):
+    _guard_prep(sess)
+    owned, _ = sess.locate_uid(uid)
+    try:
+        techniques_mod.validate_learning(owned.piece.species_id, technique)
+    except ValueError as exc:
+        raise DemoError(str(exc))
+    if technique not in techniques_mod.TECHNIQUE_IDS:
+        raise DemoError("请选择有效的技能机")
+    if owned.technique == technique:
+        raise DemoError("该棋子已经学会这个招式")
+    if owned.technique and not replace:
+        raise DemoError("已有教学招式，请确认替换；旧技能机将返还仓库")
+    inv = sess.player.inventory.techniques
+    if inv[technique] <= 0:
+        raise DemoError("仓库里没有这台技能机")
+    inv[technique] -= 1
+    if owned.technique:
+        inv[owned.technique] += 1
+    owned.technique = technique
+    return f"{owned.piece.name} 学会了 {techniques_mod.view(technique)['name']}"
+
+
 def _new_session(seed: int, params=None) -> Session:
     from expedition import configure, deploy_starter
     sess = Session(seed)
@@ -1203,6 +1295,9 @@ def _apply_action(params: dict):
                                 params.get("loc", ""))
             elif cmd == "unequip":
                 msg = act_unequip(sess, params.get("loc", ""))
+            elif cmd == "learn":
+                msg = act_learn(sess, params.get("uid", ""), params.get("technique", ""),
+                                replace=params.get("replace") == "1")
             elif cmd == "end_prep":
                 sess.end_prep()
                 msg = "战斗结算完成"
@@ -1260,6 +1355,10 @@ def api_action(params: dict):
         sid, cmd = params.get("sid", ""), params.get("cmd", "")
         before = copy.deepcopy(SESSIONS.get(sid)) if cmd not in ("state", "resume") else None
         try:
+            if "expected_sequence" in params and cmd not in ("state", "resume", "new"):
+                current = SESSIONS.get(sid)
+                if current is None or str(getattr(current, "save_sequence", None)) != str(params["expected_sequence"]):
+                    return {"ok": False, "error": "进度已在其他页面更新，请重新选择操作"}
             if getattr(SESSIONS.get(sid), "save_blocked", False) and cmd not in ("state", "resume", "new"):
                 return {"ok": False, "error": "上次保存结果尚未确认，请先点继续存档重新读取"}
             if cmd == "resume":
@@ -1436,6 +1535,7 @@ canvas{display:block;width:480px;max-width:92vw;image-rendering:pixelated;backgr
 <input id="seedin" type="number" placeholder="随机种子" style="width:110px" title="留空随机；填整数可复现对局">
 <button class="primary" onclick="newGame()">开新经典对局</button>
 <a href="/expedition">远征手册 · 挑战 / 主搭档</a>
+<a id="device-link" href="/device">三键设备试玩</a>
 <a href="/" class="muted">← 验收后台</a>
 </header>
 <div class="panel" style="margin-bottom:12px">
@@ -1557,6 +1657,7 @@ function pieceCell(v,loc,cls){
 }
 function render(){
   if(!S)return;
+  $('device-link').href='/device?sid='+encodeURIComponent(S.sid);
   const y=S.you;
   const ex=S.expedition; $('expedition-status').hidden=!ex;
   if(ex)$('expedition-status').textContent='主搭档 '+ex.partner+' · '+ex.trait+'｜'+(ex.active?'本场载体：'+ex.active:'尚未上场，特性未激活')+'。'+ex.description+(ex.technique?' 学习 '+ex.technique.name+'：'+ex.technique.description:'')+' 【同费用基础预算 v1】';
@@ -1624,6 +1725,7 @@ function render(){
   it+='<div class="itrow"><b>可合成</b>：'+(S.items.craftable.length?S.items.craftable.map(c=>`<button onclick="api(\'craft\',{item:\'${c.key}\'})" title="${c.recipe} → ${c.effect}">${c.name}</button>`).join(' '):'<span class="muted">组件凑齐配方后出现</span>')+'</div>';
   it+='<div class="itrow"><b>成品</b>：'+(S.items.finished.length?S.items.finished.map(f=>`<span class="itchip ${equipKey===f.key?'on':''}" data-item="${f.key}" title="${f.effect}（点击后选择棋子装备）">${f.name}</span>`).join(' '):'<span class="muted">无</span>')+'</div>';
   $('items').innerHTML=it;
+  $('items').innerHTML+='<div class="itrow"><b>技能机</b>：'+(S.techniques.inventory.length?S.techniques.inventory.map(t=>escapeText(t.name)+' ×'+t.count).join('、'):'暂无（远征野怪轮掉落）')+' · <a href="/device?sid='+encodeURIComponent(S.sid)+'">三键选择目标并学习</a></div>';
   /* 排名 */
   $('standings').innerHTML=S.standings.map(e=>`<div class="strow ${e.alive?'':'dead'}">
     <b style="width:8em;overflow:hidden;text-overflow:ellipsis">${e.is_you?'★ ':''}${e.name}</b>
@@ -1643,7 +1745,7 @@ function renderInfo(){
   const v=findPiece(selLoc);
   if(!v){selLoc=null;return renderInfo();}
   el.className='';
-  el.innerHTML=`<b>${v.name}</b> · ${v.tier} 费 · ${v.types.join('/')} · ${v.role} · 射程 ${v.range} · 招式「${v.move}」${v.copies>=2?` · 同种已有 ${v.copies} 只（3 只自动进化）`:''}${v.item?` · 装备「${v.item_name}」`:''}<p><b>${v.skill_name}</b>：${v.skill_description}</p>
+  el.innerHTML=`<b>${v.name}</b> · ${v.tier} 费 · ${v.types.join('/')} · ${v.role} · 射程 ${v.range} · 招式「${v.move}」${v.copies>=2?` · 同种已有 ${v.copies} 只（3 只自动进化）`:''}${v.item?` · 装备「${v.item_name}」`:''}<p><b>${v.skill_name}</b>：${v.skill_description}</p>${v.technique?`<p>教学「${v.technique.name}」：${v.technique.description}</p>`:''}${v.item_effect?`<p>${v.item_name}：${v.item_effect}</p>`:''}
   <div class="btns"><button onclick="api('sell',{loc:selLoc}).then(()=>{selLoc=null})">卖出（+${v.sell} 金）</button>
   ${v.item?`<button onclick="api('unequip',{loc:selLoc})">卸下装备</button>`:''}</div>`;
 }

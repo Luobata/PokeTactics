@@ -46,6 +46,8 @@ import profiles as profiles_mod  # R1 单体档案（docs/13 §5）：有理由�
 import skills as skills_mod      # 通用/专属两级技能（2026-10-04 用户裁定）
 import partners as partners_mod
 import stat_budget
+import build_rules
+import techniques as techniques_mod
 
 TICK = 0.1  # 解算步长（秒）
 # ---- C-sym 棋盘（docs/10 §1.3/§1.5，2026-09-14 sim 联动落地）----
@@ -173,7 +175,7 @@ class Battle:
     def __init__(self, comp_a: list, comp_b: list, rng: random.Random,
                  layout: str = "random", weather_name=None,
                  positions_a=None, positions_b=None, team_options=None,
-                 stat_mode: str = "legacy") -> None:
+                 stat_mode: str = "legacy", learned_a=None, learned_b=None) -> None:
         # S11 天气按 Battle 实例持有（2026-09-14 修订：原 set_active 全局写
         # 在验收后台多线程下会交叉污染——/anim 与 /demo 并行时互改对方天气；
         # damage_mult 由 _final_damage 显式传 self.weather_name）
@@ -196,6 +198,8 @@ class Battle:
         self.event_version = 2
         self._dead = set()
         comps = (comp_a, comp_b)
+        self.learned = tuple(self._validate_learning(comp, learned)
+                             for comp, learned in zip(comps, (learned_a, learned_b)))
         positions = (positions_a, positions_b)
         for team in (0, 1):
             self._validate_positions(comps[team], positions[team], team)
@@ -227,7 +231,8 @@ class Battle:
                                 and u.piece.species_id in family), None)
                 if partner is not None:
                     partner.partner_id = option["partner"]
-                    partner.technique = option["technique"]
+                    if partner.technique is None:
+                        partner.technique = option["technique"]
         # S5 协议：comp 元素可能带 (Piece, item) 二元组——羁绊/齐射只看裸 Piece
         plain_a = [e[0] if isinstance(e, tuple) else e for e in comp_a]
         plain_b = [e[0] if isinstance(e, tuple) else e for e in comp_b]
@@ -240,6 +245,16 @@ class Battle:
         for unit in self.units:
             self._emit_state(unit, 0.0)
         self._opening_partner_traits()
+
+    @staticmethod
+    def _validate_learning(comp, learned):
+        if learned is None:
+            return (None,) * len(comp)
+        if not isinstance(learned, list) or len(learned) != len(comp):
+            raise ValueError("learned techniques must be a list matching the team's unit count")
+        return tuple(techniques_mod.validate_learning(
+            (entry[0] if isinstance(entry, tuple) else entry).species_id, technique)
+            for entry, technique in zip(comp, learned))
 
     @staticmethod
     def _local_pos(pos, team):
@@ -274,9 +289,18 @@ class Battle:
         option = self.team_options[team]
         # An absent partner has no combat or random-sequence effect. For present
         # partners, bind rolls to the loadout too, preserving rotated side swaps.
-        active = option is not None and any(
-            entry[0] in partners_mod.family_ids(option["partner"]) for entry in entries)
-        loadout = (option["partner"], option["technique"] or "") if active else (0, "")
+        partner_index = next((index for index, entry in enumerate(entries)
+                              if option is not None and entry[0] in
+                              partners_mod.family_ids(option["partner"])), None)
+        active = partner_index is not None
+        effective_technique = (option["technique"] if active and
+                               self.learned[team][partner_index] is None else None)
+        loadout = (option["partner"], effective_technique or "") if active else (0, "")
+        # Keep the original random ordering for every unlearned legacy team.
+        # A learned skill becomes part of identity only when actually present.
+        learning = tuple(technique or "" for technique in self.learned[team])
+        if any(learning):
+            return tuple(entries), local, loadout, learning
         return tuple(entries), local, loadout
 
     def _deploy(self, comp: list, team: int, plan: list) -> None:
@@ -285,8 +309,10 @@ class Battle:
             # 裸 Piece（无装备——prototype/野怪波次走此路径，行为不变）
             piece, item_key = entry if isinstance(entry, tuple) else (entry, None)
             unit = Unit(piece, team, pos, stat_mode=self.stat_mode)
+            unit.technique = self.learned[team][local_idx]
             if item_key is not None:   # S5 施加点（S3 synergy.apply 同模式）
                 items_mod.apply_to_unit(unit, item_key)
+                build_rules.apply_item_rules(unit, item_key)
             unit.next_act = next_act
             unit.initiative = initiative
             unit.local_idx = local_idx
@@ -435,7 +461,14 @@ class Battle:
         return self._final_damage(unit, target, move, int(raw * fraction))
 
     def _strike(self, u: Unit, target: Unit, t: float) -> None:
-        move = skills_mod.resolve_cast(u.piece) if u.energy >= ENERGY_MAX else None
+        move = build_rules.resolve_cast(u.piece, self.stat_mode) if u.energy >= ENERGY_MAX else None
+        if move and build_rules.energy_targeting(u.piece, self.stat_mode):
+            # Retarget only the cast. Basic attacks retain their normal lock;
+            # a nearby Normal shield can still absorb the Ghost cast for zero.
+            candidates = [e for e in self.units if e.alive and e.team != u.team
+                          and _manhattan(u.pos, e.pos) <= u.range]
+            target = min(candidates, key=lambda e: (-e.energy, self._target_key(u, e)),
+                         default=target)
         if move and u.ult_arch == profiles_mod.ARCH_BLINK:
             weakest = min((e for e in self.units if e.alive and e.team != u.team),
                           key=lambda e: (e.hp, self._target_key(u, e)), default=None)

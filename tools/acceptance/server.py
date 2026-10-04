@@ -865,6 +865,18 @@ class Handler(SimpleHTTPRequestHandler):
                 self.send_header("Content-Length", str(len(body)))
                 self.end_headers()
                 self.wfile.write(body)
+        elif parsed.path == "/device":
+            from device_page import page_html
+            body = page_html().encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        elif parsed.path == "/api/device/input":
+            from device_controls import api_input
+            self._json(api_input({k: v[0] for k, v in qs.items()}))
         elif parsed.path == "/expedition":
             from expedition_page import EXPEDITION_HTML
             body = EXPEDITION_HTML.encode()

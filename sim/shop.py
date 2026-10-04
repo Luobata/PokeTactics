@@ -103,6 +103,8 @@ class OwnedPiece:
         self.invested = invested
         self.sources = [piece.species_id]
         self.item = None   # S5 装备栏：每单位 1 格（None = 空手，docs/07 §3）
+        self.uid = None  # 会话分配稳定编号；移位、教学和进化沿用。
+        self.technique = None
 
     def __repr__(self) -> str:
         return f"{self.piece.name}(T{self.piece.tier},投{self.invested})"
@@ -214,11 +216,24 @@ def try_combine(board: List[OwnedPiece], bench: List[OwnedPiece],
                 continue                       # 池中无该形态，等待
             if inventory is None and sum(o.item is not None for o in three) > 1:
                 continue                       # 无仓库接收多余装备，保持原状
+            from techniques import compatible_species
+            learned = [o.technique for o in three if o.technique]
+            if inventory is None and (len(learned) > 1 or any(
+                    not compatible_species(nxt, t) for t in learned)):
+                continue
             pool.take(nxt)
             new_piece = make_piece(nxt, templates)
             merged_owned = OwnedPiece(new_piece,
                                       invested=sum(o.invested for o in three))
             merged_owned.sources = sum((o.sources for o in three), []) + [nxt]
+            merged_owned.uid = three[0].uid
+            for o in three:
+                if o.technique:
+                    if merged_owned.technique is None and compatible_species(nxt, o.technique):
+                        merged_owned.technique = o.technique
+                    elif inventory is not None:
+                        inventory.techniques[o.technique] += 1
+                    o.technique = None
             # 装备继承（S2 §1.2）：首个持装备者的装备随棋子进入新形态；
             # 其余持装备者卸回仓库（每单位 1 格，不吞装备）
             for o in three:

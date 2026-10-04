@@ -147,6 +147,7 @@ class Inventory:
     def __init__(self) -> None:
         self.components: Dict[str, int] = {c: 0 for c in COMPONENT_ORDER}
         self.finished: List[str] = []   # 待装备的成品 key（合成即完成）
+        self.techniques = dict.fromkeys(('cut', 'surf', 'rest'), 0)
 
     def add_component(self, comp: str) -> None:
         assert comp in self.components, f"未知组件 {comp!r}"

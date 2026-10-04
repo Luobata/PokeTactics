@@ -73,7 +73,8 @@ class ExpeditionContracts(unittest.TestCase):
         self.assertTrue(next(t for t in view['techniques'] if t['id']=='cut')['unlocked'])
         self.assertIsNone(s.expedition['technique'])
         new = self.start(technique='cut')
-        self.assertEqual(new.expedition['technique'], 'cut')
+        self.assertIsNone(new.expedition['technique'])
+        self.assertEqual(new.player.board[0].technique, 'cut')
         self.assertNotEqual(s.run_id, new.run_id)
 
     def test_profile_write_failure_retains_committed_battle_and_resume_retries(self):

@@ -1,0 +1,531 @@
+"""240×320 three-key host navigation; game mutations use demo transactions only."""
+import secrets
+import threading
+import time
+import re
+from dataclasses import dataclass, field
+
+import demo
+import expedition
+from esp32_runtime.input import GestureInput
+
+DEVICES = {}
+MAX_DEVICES = 8
+_LOCK = threading.RLock()
+
+
+def row(label, action, *, detail="", subtitle="", disabled=False, **data):
+    return {"label": label, "action": action, "detail": detail, "subtitle": subtitle,
+            "disabled": disabled, "data": data}
+
+
+def owned_rows(state):
+    for r, cells in enumerate(state.get("board", [])):
+        for c, piece in enumerate(cells):
+            if piece:
+                yield f"g{r},{c}", piece
+    for i, piece in enumerate(state.get("bench", [])):
+        if piece:
+            yield f"b{i}", piece
+
+
+def piece_detail(piece):
+    learned = piece.get("technique") or {}
+    return "\n".join(filter(None, [piece.get("name"), piece.get("role"),
+        " / ".join(piece.get("types", [])), f"射程 {piece.get('range', 1)} · {piece.get('tier', 1)} 金",
+        piece.get("skill_name"), piece.get("skill_description"),
+        f"装备：{piece.get('item_name') or '无'}", piece.get("item_effect"), f"已学：{learned.get('name', '无')}",
+        learned.get("description")]))
+
+
+@dataclass
+class Device:
+    device_id: str
+    input: GestureInput
+    sid: str = ""
+    state: dict = field(default_factory=dict)
+    sequence: object = None
+    page: str = "home"
+    selected: int = 0
+    context: dict = field(default_factory=dict)
+    stack: list = field(default_factory=list)
+    message: str = "A / B 选择，C 确认"
+    busy: bool = False
+    touched: float = 0.0
+    play_started: float = 0.0
+    play_speed: int = 1
+    sleep_started: object = None
+    profile: dict = field(default_factory=dict)
+    loadout: dict = field(default_factory=lambda: {"partner": None, "technique": "none", "item": "none"})
+
+    def _base(self):
+        if not self.state:
+            return "home"
+        if self.state.get("phase") == "over":
+            return "over"
+        if self.state.get("phase") == "battle":
+            return "result"
+        return "prep" if self.state.get("you", {}).get("alive", True) else "spectate"
+
+    def _go(self, page, now, *, replace=False, **context):
+        if not replace:
+            self.stack.append((self.page, self.selected, self.context))
+        else:
+            self.stack.clear()
+        self.page, self.selected, self.context = page, 0, context
+        self.input.block(now)
+
+    def _refresh(self, now):
+        """Pure state read; never auto-resume or save during navigation."""
+        if not self.sid:
+            return False
+        session = demo.SESSIONS.get(self.sid)
+        if session is None:
+            if self.state:
+                self.state, self.sequence = {}, None
+                self._go("home", now, replace=True)
+                self.message = "对局已移出内存，请选择继续存档"
+                return True
+            return False
+        current = demo.state_json(session)
+        changed = bool(self.state) and current.get("save", {}).get("sequence") != self.sequence
+        self.state = current
+        self.sequence = current.get("save", {}).get("sequence")
+        if changed:
+            self._go(self._base(), now, replace=True)
+            self.message = "存档已在另一页面更新，请重新选择目标"
+            self.input.feed("cancel", now=now)
+        return changed
+
+    def _find_uid(self, uid):
+        return next(((loc, p) for loc, p in owned_rows(self.state) if p.get("uid") == uid), None)
+
+    def _catalog(self):
+        result = expedition.api_profile()
+        if result.get("ok"):
+            self.profile = result
+        else:
+            self.message = result.get("error", "无法读取档案")
+        return result.get("ok", False)
+
+    def _commit(self, command, now, **params):
+        # Called under demo._LOCK, including the read/UID resolution/commit boundary.
+        if command not in ("new", "resume"):
+            session = demo.SESSIONS.get(self.sid)
+            fresh = demo.state_json(session) if session else None
+            if fresh is None or fresh.get("save", {}).get("sequence") != self.sequence:
+                self._refresh(now)
+                self.message = "存档已更新，本次操作已取消，请重新选择"
+                return
+            self.state = fresh
+            params["expected_sequence"] = self.sequence
+            uid = params.pop("uid", None)
+            if uid is not None:
+                found = self._find_uid(uid)
+                if found is None:
+                    self._go(self._base(), now, replace=True)
+                    self.message = "目标棋子已变化，请重新选择"
+                    return
+                if command == "learn":
+                    params["uid"] = uid
+                else:
+                    params["from" if command == "move" else "loc"] = found[0]
+        self.busy = True
+        try:
+            result = demo.api_action({"cmd": command, "sid": self.sid, **params})
+        finally:
+            self.busy = False
+            # Reject inputs that arrived while the transaction/render was running.
+            self.input.block(max(now, self.input.clock()))
+        if not result.get("ok"):
+            self.message = result.get("error", "操作未完成")
+            if result.get("recovery_sid"):
+                self.sid = result["recovery_sid"]
+            return
+        self.state = result.get("state", self.state)
+        self.sid = result.get("sid", self.state.get("sid", self.sid))
+        self.sequence = self.state.get("save", {}).get("sequence")
+        self.message = result.get("msg", "已保存")
+        self._go(self._base(), now, replace=True)
+        if command == "end_prep" and (self.state.get("last_battle") or {}).get("n", 0):
+            self.page, self.play_started, self.play_speed = "battle", max(now, self.input.clock()), 1
+
+    def _confirm(self, label, command, now, **params):
+        self._go("confirm", now, label=label, command=command, params=params,
+                 expected_sequence=self.sequence)
+
+    def _uid_row(self, loc, piece, action="piece", **data):
+        uid = piece.get("uid")
+        return row(piece["name"], action, subtitle=("备战 " if loc.startswith("b") else "上场 ") + loc,
+                   detail=piece_detail(piece), disabled=uid is None, uid=uid, **data)
+
+    def rows(self):
+        state, ctx, page = self.state, self.context, self.page
+        you = state.get("you", {})
+        if page == "home":
+            return [row("启程 · 远征", "expedition", detail="选择主搭档、招式机器与开局装备。"),
+                    row("继续存档", "resume", subtitle="继续已保存的这一局" if self.sid else "尚无存档编号", disabled=not self.sid),
+                    row("经典对局", "classic", detail="从商店组建队伍，八位训练家同场竞技。"),
+                    row("挑战与图鉴", "collection")]
+        if page == "expedition":
+            chosen = self.loadout
+            def label(kind):
+                return next((r["name"] for r in self.profile.get(kind + "s", [])
+                             if r["id"] == chosen[kind]), "未选择" if kind == "partner" else "不携带")
+            return [row("主搭档 · " + label("partner"), "loadout", kind="partner"),
+                    row("招式机器 · " + label("technique"), "loadout", kind="technique"),
+                    row("开局装备 · " + label("item"), "loadout", kind="item"),
+                    row("出发", "depart", disabled=chosen["partner"] is None)]
+        if page == "loadout":
+            kind = ctx["kind"]
+            choices = [] if kind == "partner" else [row("不携带", "choose_loadout", kind=kind, value="none")]
+            for entry in self.profile.get(kind + "s", []):
+                compatible = kind != "technique" or self.loadout["partner"] in entry.get("partners", [])
+                locked = not entry.get("unlocked")
+                choices.append(row(entry["name"], "choose_loadout", detail=entry.get("description", ""),
+                                   subtitle="尚未解锁" if locked else "搭档不兼容" if not compatible else "已解锁",
+                                   disabled=locked or not compatible, kind=kind, value=entry["id"]))
+            return choices
+        if page == "collection":
+            return [row("挑战进度", "open", page="challenges"), row("宝可梦图鉴", "open", page="dex")]
+        if page == "challenges":
+            return [row(c.get("name", c.get("id", "挑战")), "show_detail",
+                        subtitle=f"{c.get('progress', c.get('current', 0))} / {c.get('target', '?')}",
+                        detail="\n".join([c.get("description", ""), "奖励：" + "、".join(c.get("rewards", []))]))
+                    for c in self.profile.get("challenges", [])]
+        if page == "dex":
+            return [row(p["name"] if p.get("seen") else "未发现", "show_detail",
+                        subtitle=f"No.{p['id']:03d}", detail=(p["name"] + "\n" +
+                        " / ".join(label for flag, label in (("seen", "已见"), ("fielded", "已上场"), ("won", "已获胜")) if p.get(flag)))
+                        if p.get("seen") else "在商店或战斗中遇见后收录。") for p in self.profile.get("dex", [])]
+        if page == "prep":
+            return [row("商店", "open", page="shop"), row("棋盘与备战", "open", page="board_rows"),
+                    row("仓库与教学", "open", page="inventory"), row("羁绊", "open", page="synergies"),
+                    row("侦察与排名", "open", page="scout"), row("开战", "battle_confirm"),
+                    row("保存 / 返回主页", "open", page="system")]
+        if page == "shop":
+            entries = [row(p["name"] if p else "空货架", "buy", subtitle=f"{p.get('price', p['tier'])} 金" if p else "已售出",
+                           detail=piece_detail(p) if p else "", disabled=not p, i=i)
+                       for i, p in enumerate(state.get("shop", []))]
+            return entries + [row(f"刷新 · {you.get('refresh_cost', 2)} 金", "command", command="refresh"),
+                              row("解除锁定" if you.get("shop_locked") else "锁定商店", "command", command="lock"),
+                              row(f"购买经验 · {you.get('xp_cost', 4)} 金", "command", command="levelup")]
+        if page in ("board_rows", "move_rows"):
+            return [row(label, "choose_row", row=r) for r, label in enumerate(("战场第一行", "战场第二行", "备战席"))]
+        if page in ("board_columns", "move_columns"):
+            r = ctx["row"]
+            cells = list(state.get("bench", [])) + [None] * 6 if r == 2 else state.get("board", [[None]*6]*2)[r]
+            entries = []
+            for c in range(6):
+                p, loc = cells[c], f"b{c}" if r == 2 else f"g{r},{c}"
+                entries.append(row(f"{c+1} · {p['name'] if p else '空位'}", "cell", detail=piece_detail(p) if p else "",
+                                   loc=loc, uid=p.get("uid") if p else None))
+            return entries
+        if page == "piece":
+            found = self._find_uid(ctx.get("uid"))
+            if not found:
+                return [row("棋子已变化，请返回", "back")]
+            piece = found[1]
+            return [row("移动 / 交换", "move_piece", uid=ctx["uid"]),
+                    row("装备道具", "equip_piece", uid=ctx["uid"]),
+                    row("卸下装备", "command", command="unequip", uid=ctx["uid"], disabled=not piece.get("item")),
+                    row("学习招式", "learn_piece", uid=ctx["uid"]),
+                    row(f"卖出 · +{piece.get('sell', 1)} 金", "sell_confirm", uid=ctx["uid"], name=piece["name"]),
+                    row("查看详情", "show_detail", detail=piece_detail(piece))]
+        if page == "inventory":
+            return [row("成品装备 · 使用", "open", page="finished"), row("组件 · 合成", "open", page="craft"),
+                    row("招式机器 · 教学", "open", page="techniques"), row("已收取物资", "open", page="drops")]
+        if page in ("finished", "equip_items"):
+            return [row(i["name"], "equip_choose", detail=i.get("effect", ""), item=i["key"], uid=ctx.get("uid"))
+                    for i in state.get("items", {}).get("finished", [])]
+        if page == "craft":
+            return [row(i["name"], "craft_confirm", subtitle=i.get("recipe", ""), detail=i.get("effect", ""), item=i["key"])
+                    for i in state.get("items", {}).get("craftable", [])] + [
+                    row(f"{i['name']} ×{i['n']}", "show_detail", detail="组件已在仓库，集齐配方即可合成。")
+                    for i in state.get("items", {}).get("components", [])]
+        if page == "drops":
+            return [row("物资已自动入仓", "show_detail", detail="野怪掉落已在战斗结算时保存；此页只查看，不会重复领取。"),
+                    *[row(i["name"], "show_detail", detail=i.get("effect", "")) for i in state.get("items", {}).get("finished", [])],
+                    *[row(f"{i['name']} ×{i['n']}", "show_detail", detail="仓库组件") for i in state.get("items", {}).get("components", [])]]
+        if page in ("techniques", "learn_items"):
+            return [row(f"{i['name']} ×{i.get('count', 1)}", "technique_choose", detail=i.get("description", ""),
+                        technique=i["id"], name=i["name"], uid=ctx.get("uid"))
+                    for i in state.get("techniques", {}).get("inventory", []) if i.get("count", 1) > 0]
+        if page == "targets":
+            entries = []
+            for loc, piece in owned_rows(state):
+                entry = self._uid_row(loc, piece, "target", **ctx)
+                if ctx.get("kind") == "learn":
+                    from techniques import validate_learning
+                    try:
+                        validate_learning(piece["sid"], ctx["technique"])
+                    except ValueError as exc:
+                        entry.update(disabled=True, subtitle=str(exc), detail=piece_detail(piece) + "\n" + str(exc))
+                entries.append(entry)
+            return entries
+        if page == "synergies":
+            return [row(f"{s['zh']} · {s['n']} 位", "show_detail", subtitle=s.get("effect") or f"再需 {s.get('need', 0)} 位",
+                        detail=s.get("effect") or f"按实际上场数量计数，同种副本也计入，还需 {s.get('need', 0)} 位。")
+                    for s in state.get("synergies", [])]
+        if page == "scout":
+            opp = state.get("opponent") or {}
+            pieces = [p for cells in opp.get("rows", []) for p in cells if p] + opp.get("bench", [])
+            return [row("训练家排名", "open", page="standings"),
+                    row(opp.get("name", "对手尚未揭晓"), "show_detail", detail="准备期显示已知对手快照，配对后更新。"),
+                    *[row(p.get("name", "对手棋子"), "show_detail", detail=piece_detail(p)) for p in pieces if isinstance(p, dict)]]
+        if page in ("standings", "over"):
+            standings = (state.get("over") or {}).get("ranking", state.get("standings", []))
+            return [row(f"{p.get('rank') or '—'} · {'你' if p.get('is_you') else p['name']}", "show_detail",
+                        subtitle=f"HP {p.get('hp', 0)}", detail=f"生命 {p.get('hp', 0)}\n名次 {p.get('rank') or '待定'}")
+                    for p in standings] + ([row("返回主页", "home")] if page == "over" else [])
+        if page == "battle":
+            return [row("查看结算", "result"), row(f"播放速度 · {self.play_speed}×", "speed"), row("战报", "report")]
+        if page in ("result", "spectate"):
+            entries = [row("下一轮" if you.get("alive", True) else "观战下一轮", "command", command="next")]
+            if state.get("phase") == "over":
+                entries = [row("查看最终排名", "open", page="over")]
+            if not you.get("alive", True) and state.get("phase") != "over":
+                entries.append(row("观战至终局", "finish_confirm"))
+            return entries + [row("查看战报", "report"), row("已收取物资", "open", page="drops"),
+                              row("训练家排名", "open", page="standings"), row("返回主页", "home")]
+        if page == "system":
+            return [row("保存进度", "command", command="save"), row("继续当前对局", "return_base"), row("返回主页", "home")]
+        if page == "confirm":
+            return [row("取消", "back"), row("确认执行", "confirm")]
+        return []
+
+    def _learn_confirm(self, uid, technique, name, now):
+        found = self._find_uid(uid)
+        if not found:
+            self.message = "目标棋子已变化，请重新选择"
+            return
+        from techniques import validate_learning
+        try:
+            validate_learning(found[1]["sid"], technique)
+        except ValueError as exc:
+            self.message = str(exc)
+            return
+        old = found[1].get("technique")
+        label = f"{found[1]['name']} 学习 {name}"
+        if old:
+            label += f"（覆盖 {old['name']}，旧机器返还仓库）"
+        self._confirm(label, "learn", now, uid=uid, technique=technique, replace="1" if old else "0")
+
+    def back(self, now):
+        if self.stack:
+            self.page, self.selected, self.context = self.stack.pop()
+            self.input.block(now)
+        elif self.page != "home":
+            self._go("home", now, replace=True)
+
+    def activate(self, item, now):
+        if item.get("disabled"):
+            self.message = item.get("subtitle") or "当前不可操作"
+            return
+        action, data = item["action"], dict(item["data"])
+        if action == "open":
+            self._go(data["page"], now)
+        elif action == "home":
+            self._go("home", now, replace=True)
+        elif action == "return_base":
+            self._go(self._base(), now, replace=True)
+        elif action == "back":
+            self.back(now)
+        elif action == "resume":
+            self._commit("resume", now)
+        elif action == "classic":
+            self._confirm("开始新的经典对局", "new", now, mode="classic")
+        elif action in ("expedition", "collection"):
+            if self._catalog():
+                self._go(action, now)
+        elif action == "loadout":
+            self._go("loadout", now, **data)
+        elif action == "choose_loadout":
+            self.loadout[data["kind"]] = data["value"]
+            if data["kind"] == "partner":
+                self.loadout["technique"] = "none"
+            self.back(now)
+        elif action == "depart":
+            self._confirm("远征出发", "new", now, mode="expedition", **self.loadout)
+        elif action == "buy":
+            self._commit("buy", now, **data)
+        elif action == "command":
+            command = data.pop("command")
+            self._commit(command, now, **data)
+        elif action == "choose_row":
+            moving = self.page == "move_rows"
+            self._go("move_columns" if moving else "board_columns", now,
+                     row=data["row"], **({"uid": self.context["uid"]} if moving else {}))
+        elif action == "cell":
+            if self.page == "move_columns":
+                self._commit("move", now, uid=self.context["uid"], to=data["loc"])
+            elif data.get("uid") is not None:
+                self._go("piece", now, uid=data["uid"])
+            else:
+                self.message = "这是空位"
+        elif action == "piece":
+            self._go("piece", now, **data)
+        elif action in ("move_piece", "equip_piece", "learn_piece"):
+            self._go({"move_piece": "move_rows", "equip_piece": "equip_items", "learn_piece": "learn_items"}[action], now, uid=data["uid"])
+        elif action == "sell_confirm":
+            self._confirm("卖出 " + data["name"], "sell", now, uid=data["uid"])
+        elif action == "equip_choose":
+            if data.get("uid") is not None:
+                self._confirm("装备 " + item["label"], "equip", now, uid=data["uid"], item=data["item"])
+            else:
+                self._go("targets", now, kind="equip", item=data["item"], name=item["label"])
+        elif action == "craft_confirm":
+            self._confirm("合成 " + item["label"], "craft", now, item=data["item"])
+        elif action == "technique_choose":
+            if data.get("uid") is not None:
+                self._learn_confirm(data["uid"], data["technique"], data["name"], now)
+            else:
+                self._go("targets", now, kind="learn", technique=data["technique"], name=data["name"])
+        elif action == "target":
+            if data["kind"] == "learn":
+                self._learn_confirm(data["uid"], data["technique"], data["name"], now)
+            else:
+                self._confirm("为 " + item["label"] + " 装备 " + data["name"], "equip", now, uid=data["uid"], item=data["item"])
+        elif action == "battle_confirm":
+            empty = not any(True for _ in owned_rows({"board": self.state.get("board", [])}))
+            self._confirm("空场出战将直接判负" if empty else "准备完成，开始战斗", "end_prep", now)
+        elif action == "finish_confirm":
+            self._confirm("观战至终局", "finish", now)
+        elif action == "confirm":
+            if self.context.get("expected_sequence") != self.sequence:
+                self.message = "存档已更新，请重新确认"
+                self._go(self._base(), now, replace=True)
+            else:
+                self._commit(self.context["command"], now, **self.context["params"])
+        elif action == "show_detail":
+            if item.get("detail"):
+                self._go("detail", now, title=item["label"], text=item["detail"])
+        elif action == "result":
+            self._go("result", now, replace=True)
+        elif action == "speed":
+            elapsed = max(0., now - self.play_started) * self.play_speed
+            self.play_speed = {1: 2, 2: 4, 4: 1}[self.play_speed]
+            self.play_started = now - elapsed / self.play_speed
+        elif action == "report":
+            lines = self.state.get("log", [])[-12:]
+            headline = (self.state.get("last_battle") or {}).get("headline", "本轮暂无战报")
+            self._go("detail", now, title="战斗记录", text="\n".join([headline, *lines]))
+
+    def handle(self, event, now):
+        kind, key = event
+        if kind == "sleep":
+            self.sleep_started = now
+            return
+        if kind == "wake":
+            if self.sleep_started is not None:
+                self.play_started += max(0., now - self.sleep_started)
+            self.sleep_started = None
+            self.message = "屏幕已唤醒，请松开后再按一次"
+            return
+        if kind == "back":
+            self.back(now)
+            return
+        entries = self.rows()
+        self.selected = min(self.selected, max(0, len(entries) - 1)) if self.page != "detail" else self.selected
+        if kind == "detail":
+            if entries and entries[self.selected].get("detail"):
+                self._go("detail", now, title=entries[self.selected]["label"], text=entries[self.selected]["detail"])
+            return
+        if kind != "click":
+            return
+        if self.page == "detail":
+            if key == "C":
+                self.back(now)
+            else:
+                self.selected = max(0, min(self.selected + (-1 if key == "A" else 1), len(self._detail_pages()) - 1))
+        elif key in ("A", "B"):
+            self.selected = max(0, min(self.selected + (-1 if key == "A" else 1), len(entries) - 1))
+        elif entries:
+            self.activate(entries[self.selected], now)
+
+    def _detail_pages(self):
+        text = self.context.get("text", "")
+        lines = [line[i:i+16] for line in text.splitlines() for i in range(0, max(1, len(line)), 16)]
+        return [lines[i:i+8] for i in range(0, len(lines), 8)] or [["暂无详情"]]
+
+    def view(self, now):
+        titles = {"home": "POKÉ TACTICS", "expedition": "远征行囊", "collection": "训练家档案",
+                  "prep": "准备出发", "shop": "林间商店", "board_rows": "棋盘 · 选行", "board_columns": "棋盘 · 选列",
+                  "move_rows": "移动 · 选行", "move_columns": "移动 · 选列", "piece": "棋子操作",
+                  "inventory": "随身仓库", "finished": "使用装备", "craft": "组件与合成", "techniques": "招式教学",
+                  "learn_items": "选择机器", "targets": "选择棋子", "equip_items": "选择装备", "synergies": "队伍羁绊",
+                  "scout": "对手情报", "standings": "训练家排名", "over": "旅程完结", "result": "战后结算",
+                  "spectate": "观战席", "battle": "战斗回放", "system": "旅途菜单", "drops": "已收取物资",
+                  "challenges": "挑战记录", "dex": "宝可梦图鉴", "loadout": "选择行囊", "confirm": "请确认"}
+        entries = self.rows()
+        if self.page != "detail":
+            self.selected = min(self.selected, max(0, len(entries)-1))
+        offset = max(0, self.selected-4)
+        public = [{k: v for k, v in entry.items() if k not in ("action", "data")} | {"index": i}
+                  for i, entry in enumerate(entries) if offset <= i < offset+5]
+        footer = ["A 上一项  B 下一项  C 确认", "B 按住返回 · C 按住详情 / 关屏"]
+        screen = {"page": self.page, "title": titles.get(self.page, self.context.get("title", self.page)),
+                  "rows": public, "selected": self.selected, "offset": offset, "total": len(entries),
+                  "footer": footer, "message": self.message, "hud": self.state.get("you"),
+                  "round": self.state.get("round"), "board": self.state.get("board", []),
+                  "bench": self.state.get("bench", []), "row": self.context.get("row")}
+        if self.page == "confirm":
+            screen["prompt"] = self.context["label"]
+        if self.page == "detail":
+            pages = self._detail_pages()
+            self.selected = min(self.selected, len(pages)-1)
+            screen.update(title=self.context.get("title", "详情"), detail=pages[self.selected],
+                          detail_page=self.selected+1, detail_total=len(pages), footer=["A 上一页  B 下一页  C 返回", "B 按住返回 · C 1.5 秒关屏"])
+        if self.page == "battle":
+            meta = self.state.get("last_battle") or {}
+            end = self.sleep_started if self.sleep_started is not None else now
+            frame = min(max(0, meta.get("n", 0)-1), int(max(0., end-self.play_started)*self.play_speed/max(.01, meta.get("dt", .05))))
+            screen["battle"] = {"frame": frame, "n": meta.get("n", 0), "speed": self.play_speed,
+                                "url": f"/demo/frame/{self.sid}/r{meta.get('round', self.state.get('round'))}/{frame}.png"}
+        return {"ok": True, "device_id": self.device_id, "sid": self.sid, "screen": screen,
+                "sleeping": self.input.sleeping, "busy": self.busy, "sequence": self.sequence}
+
+
+def api_input(params, *, now=None):
+    """HTTP-safe API. now is a Python-only clock injection for deterministic tests."""
+    received = time.monotonic() if now is None else now
+    with _LOCK, demo._LOCK:
+        try:
+            device_id = params.get("device_id", "")
+            device = DEVICES.get(device_id)
+            if device is None:
+                if device_id:
+                    return {"ok": False, "error": "设备会话已过期，请重新打开设备页"}
+                if params.get("phase", "state") != "state":
+                    return {"ok": False, "error": "请先读取设备状态"}
+                if len(DEVICES) >= MAX_DEVICES:
+                    DEVICES.pop(min(DEVICES, key=lambda key: DEVICES[key].touched))
+                device_id = secrets.token_hex(8)
+                clock = time.monotonic if now is None else lambda: received
+                device = Device(device_id, GestureInput(clock=clock), touched=received)
+                DEVICES[device_id] = device
+                sid = params.get("sid", "")
+                if sid:
+                    device.sid = sid
+                    device._commit("resume", received)
+                else:
+                    # A remembered browser slot enables Continue without loading it.
+                    remembered = params.get("remembered_sid", "")
+                    if isinstance(remembered, str) and re.fullmatch(r"[a-f0-9]{12}", remembered):
+                        device.sid = remembered
+            elif now is not None:
+                device.input.clock = lambda: received
+            device.touched = received
+            stale = device._refresh(received)
+            events = device.input.feed(params.get("phase", "state"), params.get("key"), now=received, busy=device.busy)
+            if not stale:
+                for event in events:
+                    device.handle(event, received)
+            if device.page == "battle" and not device.input.sleeping:
+                meta = device.state.get("last_battle") or {}
+                if received - device.play_started >= meta.get("n", 0) * meta.get("dt", .05) / device.play_speed:
+                    device._go("result", received, replace=True)
+                    device.input.feed("cancel", now=received)
+            return device.view(received)
+        except (ValueError, TypeError, KeyError) as exc:
+            return {"ok": False, "device_id": params.get("device_id", ""), "error": str(exc)}

@@ -155,6 +155,7 @@ def main():
         ("art_export", args.presentation, [python, "tools/mockups/art_manifest.py", "--output", ".build/animation-b/art-manifest.json"]),
         ("art_verify", args.presentation, [python, "tools/mockups/art_manifest.py", "--verify", ".build/animation-b/art-manifest.json"]),
         ("demo", args.demo, [python, "tools/acceptance/demo_selftest.py", "--seeds", "7,42"]),
+        ("device_controls", args.demo, [python, "tools/acceptance/device_selftest.py"]),
         ("balance", args.balance, [python, "sim/experiment_match.py", "--games",
                                    str(args.balance_games), "--seed", str(args.balance_seed)])]
     checks.extend((name, command) for name, selected, command in optional if selected)

@@ -58,6 +58,8 @@ def deploy_starter(session):
     session.pool.take(sid)
     owned = demo.shop_mod.OwnedPiece(template, template.tier)
     owned.item = session.expedition['item']
+    owned.technique = session.expedition['technique']
+    session.expedition['technique'] = None  # 教学属于这只棋子，不再复制给后来买到的搭档。
     session.player.gold -= template.tier
     session.player.grid[(0, 2)] = owned
     session._say(f"主搭档：{template.name}（-{template.tier} 金）；进化后保留搭档特性")
@@ -81,7 +83,7 @@ def status(session):
     deployed = next((o for o in session.player.board
                      if o.piece.species_id in info['family_ids']), None)
     technique = next((t for t in partners.techniques_catalog()
-                      if t['id'] == session.expedition['technique']), None)
+                      if deployed and t['id'] == deployed.technique), None)
     return {'partner': info['name'], 'trait': info['trait_name'],
             'description': info['trait_description'],
             'active': deployed.piece.name if deployed else None,
