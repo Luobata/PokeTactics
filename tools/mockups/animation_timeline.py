@@ -98,7 +98,33 @@ class AnimationTimeline:
         self._scheduled = []
         cast_groups = {}
         effects, cast_participants = _effect_packets(self.source_events)
+        guarded_actions, guard_owners = {}, {}
+        for index, event in enumerate(self.source_events):
+            if len(event) != 6 or event[1] != 'tactical_effect' or event[4] != 'guard':
+                continue
+            payload = event[5]
+            owner = payload.get('result_event_index') if isinstance(payload, dict) else None
+            if type(owner) is not int or not index < owner < len(self.source_events):
+                continue
+            result = self.source_events[owner]
+            if result[1] not in ('cast', 'miss') or result[2] != payload.get('attacker_idx'):
+                continue
+            guarded_actions.setdefault(owner, []).append(event)
+            guard_owners[index] = owner
+            if result[1] == 'cast':
+                affected = cast_participants.setdefault(owner, {result[2], result[3]})
+                affected.add(event[3])
+                count = payload.get('result_event_count', 0)
+                if type(count) is int and 0 <= count < len(self.source_events)-owner:
+                    for child_index in range(owner+1, owner+count+1):
+                        child = self.source_events[child_index]
+                        effects[child_index] = owner
+                        if child[1] in ('attack', 'cast'):
+                            affected.update(child[2:4])
+                        elif child[1] in ('move', 'unit_state', 'status', 'regen', 'sash', 'die'):
+                            affected.add(child[2])
         actions_by_source = {}
+        weather_ready = 0.
         packet = None
         previous_t = None
         self.last_impact = 0.
@@ -111,7 +137,11 @@ class AnimationTimeline:
 
         def emit(ev, at, timing=None):
             nonlocal sequence
-            transformed = (grid(at), *ev[1:])
+            if len(ev) == 6 and ev[1] == 'tactical_effect':
+                # Preserve the original clock without mutating the simulation.
+                transformed = (grid(at), *ev[1:5], {**ev[5], 'simulation_time': ev[0]})
+            else:
+                transformed = (grid(at), *ev[1:])
             self._scheduled.append((transformed[0], sequence, transformed))
             self.source_times[sequence] = (ev[0], transformed[0])
             if timing is not None:
@@ -125,6 +155,10 @@ class AnimationTimeline:
             if previous_t is None or abs(t - previous_t) > 1e-8:
                 packet = None
             previous_t = t
+            if index in guard_owners:
+                # The simulator gives exact ownership, including a dodge outcome.
+                # Schedule the transfer with that hit, not the raw pre-cast time.
+                continue
             if kind == 'deploy':
                 positions[ev[2]] = ev[3]
                 emit(ev, 0.)
@@ -160,7 +194,7 @@ class AnimationTimeline:
                     delay = base_prep + travel
                     affected = cast_participants.get(index, {attacker, target})
                     state_fence = max(state_ready[idx] for idx in affected)
-                    start = grid(max(.4, t, action_ready[attacker], state_ready[attacker],
+                    start = grid(max(.4, t, weather_ready, action_ready[attacker], state_ready[attacker],
                                      state_fence - delay))
                     release = grid(start + base_prep)
                     impact = grid(release + travel)
@@ -177,6 +211,8 @@ class AnimationTimeline:
                 if not timing.secondary:
                     self.action_by_onset[(attacker, timing.start)] = timing
                 emit(ev, timing.start, timing)
+                for guard_event in guarded_actions.get(index, ()):
+                    emit(guard_event, timing.impact)
                 if attacker in pending_blinks and kind == 'cast':
                     movement, origin = pending_blinks.pop(attacker)
                     departure = grid(timing.start+.10)
@@ -206,7 +242,7 @@ class AnimationTimeline:
                 # Forced displacement belongs to the incoming hit, even while
                 # the victim is recovering from its own earlier action.
                 at = (effect_action.impact if effect_action is not None else
-                      grid(max(t, state_ready[idx], action_ready[idx])))
+                      grid(max(t, weather_ready, state_ready[idx], action_ready[idx])))
                 positions[idx] = ev[3]
                 emit(ev, at)
                 state_ready[idx] = max(state_ready[idx], at + MOVE_DURATION)
@@ -225,13 +261,30 @@ class AnimationTimeline:
                 state_ready[idx] = max(state_ready[idx], at)
             elif kind == 'skill_effect' and effect_action is not None:
                 emit(ev, effect_action.impact)
+            elif kind == 'tactical_effect' and len(ev) == 6:
+                payload, effect = ev[5], ev[4]
+                if effect in ('weather_start', 'weather_end', 'weather_conflict'):
+                    # Weather is shared state. Finish older damage before changing
+                    # the scene, and start subsequent attacks after this boundary.
+                    at = max(t, weather_ready, max(state_ready.values(), default=0.))
+                    weather_ready = grid(at)
+                    emit(ev, at)
+                elif effect == 'weather_request':
+                    owner = actions_by_source.get(payload.get('cast_index'))
+                    emit(ev, owner.impact if owner is not None else max(t, weather_ready))
+                else:
+                    emit(ev, max(t, weather_ready, state_ready.get(ev[2], 0.),
+                                 state_ready.get(ev[3], 0.)))
             elif kind == 'end':
-                at = max(t, max(action_ready.values(), default=0.),
+                at = max(t, weather_ready, max(action_ready.values(), default=0.),
                          max(state_ready.values(), default=0.))
                 self.result_time = grid(at)
                 emit(ev, at)
             else:
-                emit(ev, max(t, self.last_impact if kind == 'miss' else t))
+                at = max(t, weather_ready, self.last_impact if kind == 'miss' else t)
+                for guard_event in guarded_actions.get(index, ()):
+                    emit(guard_event, at)
+                emit(ev, at)
         self.events = [entry[2] for entry in sorted(self._scheduled)]
         # Public logs describe landed damage. The internal rendering stream starts
         # attack choreography earlier, without displaying health changes early.

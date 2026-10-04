@@ -1,0 +1,68 @@
+Completed 4/32
+Completed 8/32
+Completed 12/32
+Completed 16/32
+Completed 20/32
+Completed 24/32
+Completed 28/32
+Completed 32/32
+{
+  "games": 32,
+  "independent_seeds": 32,
+  "complete": 32,
+  "errors": 0,
+  "personalities": {
+    "balanced": 8,
+    "copycat": 8,
+    "roller": 8,
+    "saver": 8
+  },
+  "battles": 4055,
+  "player_battles": 834,
+  "tactical_events": {
+    "guard": 45,
+    "weather_request": 2193,
+    "weather_start": 2126,
+    "weather_end": 961,
+    "weather_conflict": 3
+  },
+  "player_battle_tactical_events": {
+    "weather_request": 528,
+    "weather_start": 509,
+    "weather_end": 224,
+    "weather_conflict": 3,
+    "guard": 12
+  },
+  "player_claimed_techniques": {
+    "guard": 95,
+    "sunny_day": 31,
+    "rain_dance": 28
+  },
+  "roundtrip_checkpoints": 43,
+  "checkpoint_rounds": {
+    "6": 24,
+    "11": 19
+  },
+  "checkpoint_stages": {
+    "before_player_rewards": 23,
+    "after_player_rewards": 20
+  },
+  "restored_pending_rewards": 23,
+  "blocked_actions": 0,
+  "invalidated_configurations": 206,
+  "natural_terminal": 4,
+  "forced_ranking": 28,
+  "final_pending": 0,
+  "table_rounds_mean": 30.9375,
+  "player_rank_counts": {
+    "2": 6,
+    "8": 5,
+    "3": 6,
+    "7": 6,
+    "1": 1,
+    "6": 4,
+    "4": 1,
+    "5": 3
+  }
+}
+Written: /Users/bytedance/luobata/PokeTactics/reports/evidence/tactics-2026-10-05/full-run-probe.json

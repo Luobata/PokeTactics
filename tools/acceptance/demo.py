@@ -55,6 +55,7 @@ for _p in (str(ROOT), str(ROOT / "sim"), str(ROOT / "tools" / "mockups")):
 import economy  # noqa: E402
 import items as items_mod  # noqa: E402
 import techniques as techniques_mod  # noqa: E402
+import tactics as tactics_mod  # noqa: E402
 import rng as rng_mod  # noqa: E402
 import shop as shop_mod  # noqa: E402
 import synergy as syn_mod  # noqa: E402
@@ -233,6 +234,20 @@ def _fmt_event(anim, e: tuple) -> str:
                   f"能量 +{info['energy']}" if "energy" in info else
                   f"减伤 {info.get('reduction', 0):.0%}，持续 {info.get('duration', 0):g} 秒")
         return f"<b>{name(e[2])} · {label}</b> → {name(e[3])}（{effect}）"
+    if kind == 'tactical_effect':
+        effect, info = e[4], e[5]
+        weather_label = lambda value: weather_mod.WEATHERS[value]['label'] if value else '平静天气'
+        if effect == 'guard':
+            return f"<b>{name(e[2])} · 护卫</b> 替 {name(e[3])} 承受本次突进主命中（本场次数已用完）"
+        if effect == 'weather_request':
+            return f"{name(e[2])} 申请 {weather_label(info['new_weather'])}（下一战斗步统一裁定）"
+        if effect == 'weather_start':
+            return f"<b>全场天气：{weather_label(info['old_weather'])} → {weather_label(info['new_weather'])}</b>（双方共享）"
+        if effect == 'weather_conflict':
+            return f"<b>晴雨同时发动，相互抵消</b>；恢复 {weather_label(info['base_weather'])}（双方次数消耗）"
+        if effect == 'weather_end':
+            return f"天气效果结束，恢复本轮基础天气：{weather_label(info['base_weather'])}"
+        return '战术效果：' + effect
     if kind == "status":
         zh = {"burn": "灼伤", "poison": "中毒", "para": "麻痹", "paralysis": "麻痹",
               "freeze": "冰冻", "sleep": "睡眠", "flinch": "畏缩",
@@ -303,7 +318,8 @@ class PlayerSeat:
 
 # ---------------------------------------------------------------- 会话
 class Session:
-    def __init__(self, seed: int) -> None:
+    def __init__(self, seed: int, ruleset=tactics_mod.BASE_RULESET) -> None:
+        self.ruleset = tactics_mod.validate_ruleset(ruleset)
         self.sid = uuid.uuid4().hex[:12]
         self.seed = seed
         self.templates = build_templates()
@@ -322,6 +338,9 @@ class Session:
         self.opp_view = None
         self.opponent_comp = None
         self.opponent_learned = None
+        self.opponent_tactics = None
+        self.tactical = [{'guard': None, 'weather': None} for _ in range(8)]
+        self.rewards = []
         self.next_unit_id = 1
         self.player_frames_total = 0
         self.player_battles = 0
@@ -330,11 +349,16 @@ class Session:
         self.run_id = uuid.uuid4().hex
         self.expedition = None
         self.discoveries = {"seen": [], "fielded": [], "won": []}
+        for seat in self.seats:
+            seat.inventory.techniques = dict.fromkeys(techniques_mod.ids_for(self.ruleset), 0)
 
     def battle_options(self, a=None, b=None):
         learned = {key: [o.technique for o in seat.board]
                    for key, seat in (("learned_a", a), ("learned_b", b)) if seat is not None}
         learned = {k: v for k, v in learned.items() if any(v)}
+        if tactics_mod.enabled(self.ruleset):
+            learned.update(ruleset=self.ruleset,
+                           tactics_a=self.battle_tactics(a), tactics_b=self.battle_tactics(b))
         if self.expedition is None:
             return learned
         # Every fight in this run, including bot/ghost/PVE, uses the same budget.
@@ -361,7 +385,9 @@ class Session:
 
     def teach_bots(self):
         for seat in self.bots:
-            for technique in techniques_mod.TECHNIQUE_IDS:
+            if tactics_mod.enabled(self.ruleset):
+                self._claim_bot_rewards(seat)
+            for technique in techniques_mod.ids_for(self.ruleset):
                 for owned in seat.board:
                     if seat.inventory.techniques[technique] <= 0:
                         break
@@ -369,6 +395,130 @@ class Session:
                             owned.piece.species_id, technique):
                         owned.technique = technique
                         seat.inventory.techniques[technique] -= 1
+            if tactics_mod.enabled(self.ruleset):
+                self._configure_bot_tactics(seat)
+
+    def _positions(self, seat):
+        if seat is self.player:
+            return seat.battle_positions()
+        return [(i % GRID_COLS, 3 - i // GRID_COLS) for i in range(len(seat.board))]
+
+    def validate_tactical(self, seat, config):
+        if not isinstance(config, dict) or set(config) != {'guard', 'weather'}:
+            raise DemoError('战术配置字段无效')
+        if not tactics_mod.enabled(self.ruleset) and any(config.values()):
+            raise DemoError('当前规则不支持战术配置')
+        board = {o.uid: (i, o) for i, o in enumerate(seat.board)}
+        positions = self._positions(seat)
+        for kind, keys in (('guard', {'uid', 'target_uid'}), ('weather', {'uid'})):
+            entry = config[kind]
+            if entry is None:
+                continue
+            if not isinstance(entry, dict) or set(entry) != keys or any(
+                    not isinstance(value, str) or value not in board for value in entry.values()):
+                raise DemoError('战术棋子必须仍在场上，请重新选择')
+            index, unit = board[entry['uid']]
+            if kind == 'weather':
+                if unit.technique not in ('sunny_day', 'rain_dance'):
+                    raise DemoError('天气手需要先学习晴天或求雨')
+            else:
+                if unit.technique != 'guard':
+                    raise DemoError('护卫需要先学习护卫技能机')
+                target_index = board[entry['target_uid']][0]
+                a, b = positions[index], positions[target_index]
+                if abs(a[0] - b[0]) + abs(a[1] - b[1]) != 1:
+                    raise DemoError('护卫与受保护队友需要四向相邻，请调整站位后重选')
+        return config
+
+    def refresh_tactics(self):
+        """Disable stale selections; never silently choose another player target."""
+        if not tactics_mod.enabled(self.ruleset):
+            return []
+        self.ensure_unit_ids()
+        messages = []
+        for seat in self.seats:
+            config = self.tactical[seat.seat]
+            for kind in ('guard', 'weather'):
+                if config[kind] is None:
+                    continue
+                probe = {'guard': None, 'weather': None, kind: config[kind]}
+                try:
+                    self.validate_tactical(seat, probe)
+                except DemoError:
+                    config[kind] = None
+                    if seat is self.player:
+                        note = ('护卫' if kind == 'guard' else '天气手') + '配置已失效并关闭，请重新选择'
+                        self._say(note)
+                        messages.append(note)
+        return messages
+
+    def battle_tactics(self, seat):
+        if seat is None:
+            return None
+        config = self.validate_tactical(seat, self.tactical[seat.seat])
+        lookup = {o.uid: i for i, o in enumerate(seat.board)}
+        return {'guard': ({'source': lookup[config['guard']['uid']],
+                           'target': lookup[config['guard']['target_uid']]}
+                          if config['guard'] else None),
+                'weather': ({'source': lookup[config['weather']['uid']]}
+                            if config['weather'] else None)}
+
+    def _configure_bot_tactics(self, seat):
+        self.ensure_unit_ids()
+        config = {'guard': None, 'weather': None}
+        positions = self._positions(seat)
+        for i, owned in enumerate(seat.board):
+            if owned.technique == 'guard' and config['guard'] is None:
+                adjacent = [o for j, o in enumerate(seat.board) if i != j and
+                            abs(positions[i][0] - positions[j][0]) +
+                            abs(positions[i][1] - positions[j][1]) == 1]
+                if adjacent:
+                    target = max(adjacent, key=lambda o: (o.piece.tier, o.piece.species_id))
+                    config['guard'] = {'uid': owned.uid, 'target_uid': target.uid}
+            if owned.technique in ('sunny_day', 'rain_dance') and config['weather'] is None:
+                config['weather'] = {'uid': owned.uid}
+        self.tactical[seat.seat] = config
+
+    def _grant_technique_choice(self, seat, round_no):
+        reward_id = f'{self.run_id}:r{round_no}:s{seat.seat}:technique'
+        if any(row['id'] == reward_id for row in self.rewards):
+            return
+        rng = rng_mod.derive(self.seed, round_no, 'pve', 4096 + seat.seat)
+        candidates = list(techniques_mod.ids_for(self.ruleset))
+        # A universal guard is a real choice, consuming the same one-machine
+        # grant as the original expedition; no free extra demonstration item.
+        options = ['guard']
+        compatible = [key for key in candidates if key != 'guard' and any(
+            techniques_mod.compatible_species(o.piece.species_id, key) for o in seat.all_pieces())]
+        options.append(rng.choice(compatible or ['rest']))
+        options.append(rng.choice([key for key in candidates if key not in options]))
+        self.rewards.append({'id': reward_id, 'seat': seat.seat, 'round': round_no,
+                             'kind': 'technique', 'status': 'pending',
+                             'options': options, 'choice': None, 'closed_reason': None})
+
+    def _claim_bot_rewards(self, seat):
+        if not seat.alive:
+            return
+        for row in self.rewards:
+            if row['seat'] != seat.seat or row['status'] != 'pending':
+                continue
+            def score(key):
+                eligible = [o for o in seat.board if o.technique is None and
+                            techniques_mod.compatible_species(o.piece.species_id, key)]
+                if not eligible:
+                    return (0, 0)
+                if key in ('sunny_day', 'rain_dance'):
+                    types = {'FIRE', 'GRASS'} if key == 'sunny_day' else {'WATER'}
+                    return (1, 2 * sum(bool(types.intersection(o.piece.types)) for o in seat.board))
+                return (1, 3 if key == 'guard' and len(seat.board) > 1 else 1)
+            choice = max(row['options'], key=score)
+            seat.inventory.techniques[choice] += 1
+            row.update(status='claimed', choice=choice)
+
+    def _close_terminal_rewards(self):
+        for row in self.rewards:
+            if row['status'] == 'pending' and (self.phase == 'over' or not self.seats[row['seat']].alive):
+                row.update(status='closed', closed_reason='terminal' if self.phase == 'over' else 'eliminated')
 
     def observe(self, fielded=(), won=()):
         seen = {o.piece.species_id for o in self.player.all_pieces()}
@@ -438,6 +588,7 @@ class Session:
         self.last_battle = None
         self.opponent_comp = None
         self.opponent_learned = None
+        self.opponent_tactics = None
         for e in self._alive():
             e.gold += economy.round_income(e.gold, e.streak)
             e.gold += items_mod.lucky_egg_income(e)
@@ -502,8 +653,12 @@ class Session:
         # 侦察快照即本轮承诺的对手布阵；玩家准备时不会再暗中换位。
         if isinstance(src, Bot):
             src.counter_vs(p.board)
+            if tactics_mod.enabled(self.ruleset):
+                self._configure_bot_tactics(src)
         self.opponent_comp = list(src.battle_comp())
         self.opponent_learned = [o.technique for o in src.board]
+        if tactics_mod.enabled(self.ruleset):
+            self.opponent_tactics = copy.deepcopy(self.battle_tactics(src))
         return {"name": name, "hp": src.hp, "level": src.level,
                 "rows": [[_piece_view(o.piece, o.item) if o else None for o in row]
                          for row in self._enemy_rows(src.board)],
@@ -523,6 +678,9 @@ class Session:
     def end_prep(self) -> None:
         if self.phase != "prep":
             raise DemoError("当前不是准备阶段（先看完战斗再进下一轮）")
+        if self.player.alive and any(row['seat'] == 0 and row['status'] == 'pending' for row in self.rewards):
+            raise DemoError('还有待领取技能机，请先领取或明确放弃本次奖励')
+        self.refresh_tactics()
         r = self.round_no
         self.observe(fielded=[o.piece.species_id for o in self.player.board])
         weather = weather_for_round(r)
@@ -542,9 +700,14 @@ class Session:
         self.phase = "battle"
         if len(self._alive()) <= 1 or r >= MAX_ROUNDS:
             self._finalize()
+        self._close_terminal_rewards()
 
     def _fight(self, r, battle_i, a, b, weather):
         """bot 对 bot：秒算，只留结果（与 match._pvp_round 同轨）。"""
+        if tactics_mod.enabled(self.ruleset):
+            for seat in (a, b):
+                if isinstance(seat, Bot):
+                    self._configure_bot_tactics(seat)
         return Battle(a.battle_comp(), b.battle_comp(),
                       rng_mod.derive(self.seed, r, "battle", battle_i),
                       layout="back", weather_name=weather,
@@ -629,6 +792,10 @@ class Session:
                                             weather, ghost=True)
                 res = {"winner": meta["winner"], "survivors": meta["survivors"]}
             elif odd.battle_comp():
+                if tactics_mod.enabled(self.ruleset):
+                    for seat in (odd, self.ghost_src):
+                        if isinstance(seat, Bot):
+                            self._configure_bot_tactics(seat)
                 ghost_positions = ([(GRID_COLS - 1 - c, 3 - row)
                                     for c, row in p.battle_positions()]
                                    if self.ghost_src is p else None)
@@ -696,11 +863,16 @@ class Session:
             e.inventory.add_component(rng_d.choice(comps))
             e.item_drops += 1
             if self.expedition is not None:
-                machine = rng_mod.derive(self.seed, r, "pve", 4096 + e.seat).choice(
-                    techniques_mod.TECHNIQUE_IDS)
-                e.inventory.techniques[machine] += 1
-                if e is p:
-                    self._say(f"技能机入仓：{techniques_mod.view(machine)['name']}；准备阶段可选择兼容棋子学习")
+                if tactics_mod.enabled(self.ruleset):
+                    self._grant_technique_choice(e, r)
+                    if e is p:
+                        self._say('获得一台待选技能机：下一准备阶段从三个固定选项中领取')
+                else:
+                    machine = rng_mod.derive(self.seed, r, "pve", 4096 + e.seat).choice(
+                        techniques_mod.TECHNIQUE_IDS)
+                    e.inventory.techniques[machine] += 1
+                    if e is p:
+                        self._say(f"技能机入仓：{techniques_mod.view(machine)['name']}；准备阶段可选择兼容棋子学习")
         weights = items_mod.drop_weights(alive)
         for j in range(items_mod.PVE_BONUS_DROPS):
             rng_d = rng_mod.derive(self.seed, r, "pve",
@@ -733,6 +905,8 @@ class Session:
             battle_options.pop("learned_b", None)
             if any(self.opponent_learned):
                 battle_options["learned_b"] = list(self.opponent_learned)
+        if opp is not None and tactics_mod.enabled(self.ruleset) and self.opponent_tactics is not None:
+            battle_options['tactics_b'] = copy.deepcopy(self.opponent_tactics)
         meta = _render_battle_frames(
             comp_a, comp_b, rng, weather, out_dir,
             positions_a=me.battle_positions(),
@@ -776,10 +950,14 @@ class Session:
         else:
             seat.board, seat.bench = [], []
         seat.shop.return_all()
+        if tactics_mod.enabled(self.ruleset):
+            self.tactical[seat.seat] = {'guard': None, 'weather': None}
+        self._close_terminal_rewards()
         self._say(f"{seat.name} 被淘汰（第 {seat.rank} 名）")
 
     def _finalize(self) -> None:
         self.phase = "over"
+        self._close_terminal_rewards()
         alive = self._alive()
         if len(alive) == 1:
             alive[0].rank = 1
@@ -966,7 +1144,7 @@ def state_json(sess) -> dict:
                           "effect": _item_effect(key, stat_mode), "recipe": recipe})
     xp_next = economy.xp_to_next(p.level)
     st = {
-        "sid": sess.sid, "seed": sess.seed, "round": sess.round_no,
+        "sid": sess.sid, "seed": sess.seed, "round": sess.round_no, "ruleset": sess.ruleset,
         "phase": sess.phase, "max_rounds": MAX_ROUNDS,
         "you": {"hp": max(0, p.hp), "gold": p.gold, "level": p.level,
                 "xp": p.xp, "xp_next": xp_next, "pop": p.pop(),
@@ -986,8 +1164,12 @@ def state_json(sess) -> dict:
         "items": {"components": comps, "finished": finished,
                   "craftable": craftable},
         "techniques": {"inventory": [{**t, "count": p.inventory.techniques[t['id']]}
-                                      for t in techniques_mod.catalog()
+                                      for t in techniques_mod.catalog(sess.ruleset)
                                       if p.inventory.techniques[t['id']] > 0]},
+        "rewards": [{**{key: row[key] for key in ('id', 'round', 'kind', 'status', 'choice', 'closed_reason')},
+                     'options': [techniques_mod.view(key) for key in row['options']]}
+                    for row in sess.rewards if row['seat'] == 0],
+        "tactical": copy.deepcopy(sess.tactical[0]),
         "opponent": sess.opp_view,
         "standings": [{"name": e.name, "is_you": e is p,
                        "hp": max(0, e.hp), "level": e.level,
@@ -1216,10 +1398,10 @@ def act_learn(sess, uid: str, technique: str, replace=False):
     _guard_prep(sess)
     owned, _ = sess.locate_uid(uid)
     try:
-        techniques_mod.validate_learning(owned.piece.species_id, technique)
+        techniques_mod.validate_learning(owned.piece.species_id, technique, ruleset=sess.ruleset)
     except ValueError as exc:
         raise DemoError(str(exc))
-    if technique not in techniques_mod.TECHNIQUE_IDS:
+    if technique not in techniques_mod.ids_for(sess.ruleset):
         raise DemoError("请选择有效的技能机")
     if owned.technique == technique:
         raise DemoError("该棋子已经学会这个招式")
@@ -1232,13 +1414,52 @@ def act_learn(sess, uid: str, technique: str, replace=False):
     if owned.technique:
         inv[owned.technique] += 1
     owned.technique = technique
+    sess.refresh_tactics()
     return f"{owned.piece.name} 学会了 {techniques_mod.view(technique)['name']}"
+
+
+def act_claim_reward(sess, reward_id, choice):
+    _guard_prep(sess)
+    if not tactics_mod.enabled(sess.ruleset):
+        raise DemoError('当前规则没有待选战术奖励')
+    reward = next((row for row in sess.rewards if row['seat'] == 0 and row['id'] == reward_id), None)
+    if reward is None:
+        raise DemoError('奖励不存在，请重新选择')
+    if not isinstance(choice, str) or choice not in (*reward['options'], 'skip'):
+        raise DemoError('请选择本次奖励的有效选项')
+    if reward['status'] != 'pending':
+        if reward['choice'] == choice:
+            return '该奖励已处理，不会重复入仓'
+        raise DemoError('该奖励已处理，不能更换领取结果')
+    if choice == 'skip':
+        reward.update(status='closed', choice='skip', closed_reason='skipped')
+        return '已放弃本次技能机奖励'
+    sess.player.inventory.techniques[choice] += 1
+    reward.update(status='claimed', choice=choice)
+    return f"已领取 {techniques_mod.view(choice)['name']}，可在仓库选择棋子学习"
+
+
+def act_set_tactical(sess, kind, uid, target_uid=None):
+    _guard_prep(sess)
+    if not tactics_mod.enabled(sess.ruleset):
+        raise DemoError('当前规则不支持战术配置')
+    if not isinstance(uid, str):
+        raise DemoError('请选择有效棋子')
+    sess.ensure_unit_ids()
+    config = copy.deepcopy(sess.tactical[0])
+    config[kind] = ({'uid': uid, 'target_uid': target_uid} if kind == 'guard' else {'uid': uid}) if uid else None
+    sess.validate_tactical(sess.player, config)
+    sess.tactical[0] = config
+    label = '护卫' if kind == 'guard' else '天气手'
+    return label + ('已设置' if uid else '已关闭')
 
 
 def _new_session(seed: int, params=None) -> Session:
     from expedition import configure, deploy_starter
-    sess = Session(seed)
-    configure(sess, params or {})
+    params = params or {}
+    tactical = params.get('mode') == 'tactics'
+    sess = Session(seed, tactics_mod.TACTICS_RULESET if tactical else tactics_mod.BASE_RULESET)
+    configure(sess, {**params, 'mode': 'expedition'} if tactical else params)
     sess.begin_round(1)
     deploy_starter(sess)
     sess.observe()
@@ -1308,6 +1529,12 @@ def _apply_action(params: dict):
             elif cmd == "learn":
                 msg = act_learn(sess, params.get("uid", ""), params.get("technique", ""),
                                 replace=params.get("replace") == "1")
+            elif cmd == 'claim_reward':
+                msg = act_claim_reward(sess, params.get('reward_id', ''), params.get('choice', ''))
+            elif cmd == 'set_guard':
+                msg = act_set_tactical(sess, 'guard', params.get('uid', ''), params.get('target_uid', ''))
+            elif cmd == 'set_weather':
+                msg = act_set_tactical(sess, 'weather', params.get('uid', ''))
             elif cmd == "end_prep":
                 sess.end_prep()
                 msg = "战斗结算完成"
@@ -1324,6 +1551,10 @@ def _apply_action(params: dict):
                     msg = "对局已结束"
             else:
                 return {"ok": False, "error": f"未知动作 {cmd!r}"}
+            if cmd != 'state':
+                invalidated = sess.refresh_tactics()
+                if invalidated:
+                    msg = '；'.join(([msg] if msg else []) + invalidated)
             out = {"ok": True, "state": state_json(sess)}
             if msg:
                 out["msg"] = msg

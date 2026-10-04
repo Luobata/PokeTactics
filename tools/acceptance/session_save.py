@@ -11,6 +11,7 @@ import math
 import re
 from collections import Counter
 from pathlib import Path
+from esp32_runtime import UnsupportedVersionError
 
 ROOT = Path(__file__).resolve().parents[2]
 COMMON = ("gold", "hp", "level", "xp", "streak", "alive", "rank", "last_damage",
@@ -18,6 +19,11 @@ COMMON = ("gold", "hp", "level", "xp", "streak", "alive", "rank", "last_damage",
 BOT_STATS = ("gold_curve", "pop_curve", "synergy_curve", "synergy_formed_round",
              "synergy_formed_type", "refreshes", "item_crafts", "item_equips",
              "stone_triggers", "craft_stats")
+LEGACY_BASE_FINGERPRINT = '2f9426505cad1addbab7b5db1e9f5a673a72ec0937a1ed4cf916926c04d015ad'
+
+
+class UnknownRulesError(UnsupportedVersionError, ValueError):
+    """A verified incompatible rule version must not trigger old-bank recovery."""
 
 
 def rules_fingerprint():
@@ -53,7 +59,7 @@ def comp_record(comp):
 
 class SessionCodec:
     game_id = "poketactics"
-    schema_version = 3
+    schema_version = 4
 
     def encode(self, state):
         state.ensure_unit_ids()
@@ -81,6 +87,8 @@ class SessionCodec:
                     ("winner", "survivors", "duration", "round", "pve", "ghost") if key in meta}
                    if meta else None)
         payload = {"rules": rules_fingerprint(), "seed": state.seed, "round": state.round_no,
+                "ruleset": state.ruleset, "tactical": copy.deepcopy(state.tactical),
+                "rewards": copy.deepcopy(state.rewards),
                 "next_unit_id": state.next_unit_id,
                 "expedition_state": {"run_id": state.run_id, "loadout": state.expedition,
                                      "discoveries": state.discoveries},
@@ -91,6 +99,7 @@ class SessionCodec:
                 "ghost_source": getattr(state.ghost_src, "seat", None),
                 "opponent_comp": comp_record(state.opponent_comp) if state.opponent_comp is not None else None,
                 "opponent_learned": state.opponent_learned,
+                "opponent_tactics": copy.deepcopy(state.opponent_tactics),
                 "log": list(state.log), "last_battle": summary,
                 "player_battles": state.player_battles, "player_frames_total": state.player_frames_total,
                 "eliminated_round": state.eliminated_round,
@@ -102,7 +111,7 @@ class SessionCodec:
         return json.loads(json.dumps(payload, ensure_ascii=False, allow_nan=False))
 
     def decode(self, payload, schema_version):
-        if type(schema_version) is not int or schema_version not in (1, 2, 3):
+        if type(schema_version) is not int or schema_version not in (1, 2, 3, 4):
             raise ValueError("不支持的 PokeTactics 存档版本")
         if schema_version >= 2 and "expedition_state" not in payload:
             raise ValueError("远征存档缺少永久对局编号")
@@ -114,8 +123,21 @@ class SessionCodec:
     def _decode(self, data, schema_version):
         import demo
         import techniques
+        import tactics
         from bots import PERSONALITIES
-        state = demo.Session(integer(data["seed"], -(2 ** 63), 2 ** 63 - 1, "seed"))
+        try:
+            ruleset = tactics.validate_ruleset(data['ruleset']) if schema_version >= 4 else tactics.BASE_RULESET
+        except ValueError as exc:
+            raise UnknownRulesError('无法识别此存档的规则版本；需要对应版本继续，原存档未修改') from exc
+        if schema_version < 4 and data.get('ruleset', tactics.BASE_RULESET) != tactics.BASE_RULESET:
+            raise UnknownRulesError('旧存档版本不能包含新战术规则')
+        fingerprint = data.get('rules')
+        supported = {rules_fingerprint()}
+        if ruleset == tactics.BASE_RULESET:
+            supported.add(LEGACY_BASE_FINGERPRINT)
+        if fingerprint not in supported:
+            raise UnknownRulesError('无法识别此存档的规则指纹；需要对应版本继续，原存档未修改')
+        state = demo.Session(integer(data["seed"], -(2 ** 63), 2 ** 63 - 1, "seed"), ruleset=ruleset)
         state.round_no = integer(data["round"], 1, demo.MAX_ROUNDS, "round")
         if data["phase"] not in ("prep", "battle", "over"):
             raise ValueError("无效的对局阶段")
@@ -150,7 +172,7 @@ class SessionCodec:
                 result.uid = uid
             if schema_version >= 3 and 'technique' not in record:
                 raise ValueError('棋子缺少教学记录')
-            result.technique = techniques.validate_learning(sid, record.get('technique'))
+            result.technique = techniques.validate_learning(sid, record.get('technique'), ruleset=ruleset)
             held.update(sources)
             return result
 
@@ -251,10 +273,10 @@ class SessionCodec:
             if any(key not in demo.items_mod.FINISHED for key in finished):
                 raise ValueError("仓库含未知装备")
             seat.inventory.finished = list(finished)
-            machines = record.get('techniques', dict.fromkeys(techniques.TECHNIQUE_IDS, 0))
+            machines = record.get('techniques', dict.fromkeys(techniques.ids_for(ruleset), 0))
             if schema_version >= 3 and 'techniques' not in record:
                 raise ValueError('缺少技能机仓库')
-            if not isinstance(machines, dict) or set(machines) != set(techniques.TECHNIQUE_IDS):
+            if not isinstance(machines, dict) or set(machines) != set(techniques.ids_for(ruleset)):
                 raise ValueError('技能机仓库字段无效')
             seat.inventory.techniques = {k: integer(v, 0, 1000, 'techniques') for k, v in machines.items()}
         if len(ranks) != len(set(ranks)) or (state.phase == "over" and len(ranks) != 8):
@@ -298,7 +320,7 @@ class SessionCodec:
             if state.opponent_comp is None or len(opponent_learned) != len(state.opponent_comp):
                 raise ValueError('对手教学快照长度无效')
             state.opponent_learned = [techniques.validate_learning(
-                (p[0] if isinstance(p, tuple) else p).species_id, t)
+                (p[0] if isinstance(p, tuple) else p).species_id, t, ruleset=ruleset)
                 for p, t in zip(state.opponent_comp, opponent_learned)]
         if state.round_no % 5 == 0:
             state.opp_view = state._pve_view(state.round_no)
@@ -324,7 +346,7 @@ class SessionCodec:
                             if data["final_team"] is not None else None)
         for record, view in zip(data['final_team'] or [], state.final_team or []):
             view['technique'] = techniques.view(techniques.validate_learning(
-                record['species'], record.get('technique')))
+                record['species'], record.get('technique'), ruleset=ruleset))
         summary = data["last_battle"]
         if summary is not None:
             if not isinstance(summary, dict) or set(summary) - {
@@ -351,8 +373,8 @@ class SessionCodec:
             state.last_battle = {**copy.deepcopy(summary), "n": 0, "winner": winner, "round": state.round_no, "restored": True,
                                  "headline": "已恢复战后结算，结果不会重复发放",
                                  "opp_name": (state.opp_view or {}).get("name", "对手"), "events": []}
-        state.save_warning = ("规则已更新，后续回合使用当前规则；历史回放不可重演"
-                              if data["rules"] != rules_fingerprint() else None)
+        state.save_warning = ('已识别旧版存档，继续使用 base_v1 规则'
+                              if fingerprint == LEGACY_BASE_FINGERPRINT else None)
         from expedition import decode_extension
         decode_extension(state, data)
         # Schema 1/2 attached teaching to the partner loadout. Migrate it once to
@@ -376,4 +398,82 @@ class SessionCodec:
             raise ValueError('缺少棋子编号计数器')
         state.next_unit_id = integer(data.get('next_unit_id', minimum), minimum, 99999999, 'next_unit_id')
         state.ensure_unit_ids()
+        if schema_version >= 4:
+            self._decode_tactics(state, data)
         return state
+
+    def _decode_tactics(self, state, data):
+        import demo
+        import techniques
+        import tactics
+        if tactics.enabled(state.ruleset) and state.expedition is None:
+            raise ValueError('战术远征缺少主搭档配置')
+        configurations = sequence(data['tactical'], 8, 'tactical')
+        if len(configurations) != 8:
+            raise ValueError('战术配置需要完整八个席位')
+        for seat, config in zip(state.seats, configurations):
+            try:
+                state.validate_tactical(seat, config)
+            except demo.DemoError as exc:
+                raise ValueError(str(exc)) from exc
+        state.tactical = copy.deepcopy(configurations)
+        rewards = sequence(data['rewards'], 48, 'rewards')
+        if not tactics.enabled(state.ruleset) and rewards:
+            raise ValueError('旧规则不能包含战术待领奖励')
+        reward_ids = set()
+        for row in rewards:
+            if not isinstance(row, dict) or set(row) != {
+                    'id', 'seat', 'round', 'kind', 'status', 'options', 'choice', 'closed_reason'}:
+                raise ValueError('待领奖励字段无效')
+            seat_id = integer(row['seat'], 0, 7, 'reward seat')
+            round_no = integer(row['round'], 5, state.round_no, 'reward round')
+            expected_id = f'{state.run_id}:r{round_no}:s{seat_id}:technique'
+            if round_no % 5 or row['id'] != expected_id or row['id'] in reward_ids or row['kind'] != 'technique':
+                raise ValueError('待领奖励编号无效或重复')
+            reward_ids.add(row['id'])
+            options = sequence(row['options'], 3, 'reward options')
+            if (len(options) != 3 or any(type(option) is not str for option in options)
+                    or len(set(options)) != 3 or set(options) - set(techniques.ids_for(state.ruleset))):
+                raise ValueError('奖励候选无效')
+            status, choice, reason = row['status'], row['choice'], row['closed_reason']
+            if status == 'pending':
+                if (choice is not None or reason is not None or not state.seats[seat_id].alive
+                        or state.phase == 'over' or round_no < state.round_no - 1
+                        or round_no < state.round_no and state.phase != 'prep'):
+                    raise ValueError('待领奖励生命周期无效')
+            elif status == 'claimed':
+                if choice not in options or reason is not None:
+                    raise ValueError('奖励领取记录无效')
+            elif status == 'closed':
+                if not (choice == 'skip' and reason == 'skipped' or choice is None and reason in ('terminal', 'eliminated')):
+                    raise ValueError('奖励关闭记录无效')
+            else:
+                raise ValueError('奖励状态无效')
+        state.rewards = copy.deepcopy(rewards)
+        config = data['opponent_tactics']
+        if config is None:
+            if tactics.enabled(state.ruleset) and state.opponent_comp is not None:
+                raise ValueError('缺少对手战术快照')
+            return
+        if not tactics.enabled(state.ruleset) or state.opponent_comp is None:
+            raise ValueError('对手战术快照不适用')
+        if not isinstance(config, dict) or set(config) != {'guard', 'weather'}:
+            raise ValueError('对手战术快照字段无效')
+        count = len(state.opponent_comp)
+        learned = state.opponent_learned or [None] * count
+        for kind, fields in (('guard', {'source', 'target'}), ('weather', {'source'})):
+            entry = config[kind]
+            if entry is None:
+                continue
+            if not isinstance(entry, dict) or set(entry) != fields:
+                raise ValueError('对手战术快照内容无效')
+            for index in entry.values():
+                integer(index, 0, count - 1, 'opponent tactic index')
+            technique = learned[entry['source']]
+            if kind == 'weather' and technique not in ('sunny_day', 'rain_dance'):
+                raise ValueError('对手天气手教学不符')
+            if kind == 'guard':
+                a, b = entry['source'], entry['target']
+                if technique != 'guard' or abs(a % 6 - b % 6) + abs(a // 6 - b // 6) != 1:
+                    raise ValueError('对手护卫教学或相邻关系无效')
+        state.opponent_tactics = copy.deepcopy(config)

@@ -1,0 +1,288 @@
+{
+  "schema_version": "independent-reviewer.v1",
+  "review_status": "pass",
+  "scope": "Design proposal review only; no game behavior or balance approval.",
+  "repo": {
+    "path": "/Users/bytedance/luobata/PokeTactics",
+    "execution_location": "local",
+    "branch": "main",
+    "base_ref": "7c1262a01cc9a6f11bdd90e90cf9ac46cdf46401",
+    "head_ref": "7c1262a01cc9a6f11bdd90e90cf9ac46cdf46401",
+    "commit_range": "dirty documentation only; excludes previous commits",
+    "dirty_state": {
+      "staged": 0,
+      "unstaged": 2,
+      "untracked": 2
+    }
+  },
+  "review": {
+    "session_id": "gameplay-design-20261005",
+    "run_id": "design-v3",
+    "bundle_path": "/Users/bytedance/luobata/PokeTactics/.build/system-design-review",
+    "dashboard_url": "",
+    "input_fingerprint": "c63d014d9c49df68ed4e857fc84867d4644ba41e5871fa4ada9b9c8279bfb071",
+    "created_at": "2026-10-04T21:54:42.374608+00:00",
+    "updated_at": "2026-10-04T22:06:37.147362+00:00"
+  },
+  "input_manifest": [
+    {
+      "path": "docs/13-core-gameplay.md",
+      "sha256": "f2832142f070ad4a023ceab0c20a15933e092dba7b040c6cf55ad297b46aee0a"
+    },
+    {
+      "path": "docs/14-system-optimization-acceptance.md",
+      "sha256": "7343c9642830f28d9796c3e79cdefdb8643a53cae1483023f20ff4a835b1c468"
+    },
+    {
+      "path": "docs/22-system-interactions-and-playstyles.md",
+      "sha256": "9b4f1eb0b5dc177afca452fa1e4c81fd48292e239e492c2746adb52ac4abdd6b"
+    },
+    {
+      "path": "reports/evidence/gameplay-audit-2026-10-05/pacing-summary.json",
+      "sha256": "78d1199a174ea33bf565550a1b5518e560c0c21ff1bbb13e83bb0dd1d1846e28"
+    }
+  ],
+  "fingerprint_scope": "SHA256 of canonical JSON manifest of the four reviewed inputs; this generated review record is excluded.",
+  "reviewer_agents": [
+    {
+      "agent_id": "/root/design_combat_review",
+      "role": "general-reviewer",
+      "lifecycle": "reused",
+      "verdict": "pass",
+      "bound_scope": "D03 geometry; D15 protection; partner/knockback provenance; v3 coordinate example."
+    },
+    {
+      "agent_id": "/root/design_economy_review",
+      "role": "risk-reviewer",
+      "lifecycle": "reused",
+      "verdict": "pass",
+      "bound_scope": "D05/D09 training principal, stone carrier cost, egg interaction, equipment recipes."
+    },
+    {
+      "agent_id": "/root/design_ui_review",
+      "role": "ux-reviewer",
+      "lifecycle": "reused",
+      "verdict": "pass",
+      "bound_scope": "D14 operation/claim lifecycle; D15 old rules routing; batch coverage."
+    }
+  ],
+  "findings": [
+    {
+      "id": "C01",
+      "severity": "blocker",
+      "title": "近战护卫原几何条件不可达",
+      "reviewer": "design_combat_review",
+      "file": "docs/22-system-interactions-and-playstyles.md",
+      "line": 141,
+      "evidence_refs": [
+        "docs/22-system-interactions-and-playstyles.md:141"
+      ],
+      "required_action": "明确一次两格例外、原目标合法性与后续射程边界；定向正反例和旋转对照。",
+      "re_review_condition": "只读复验对应条款及直接依赖，确认原问题闭合。",
+      "resolution": "closed_v2"
+    },
+    {
+      "id": "C02",
+      "severity": "evidence_gap",
+      "title": "多来源保护缺少共同叠加语义",
+      "reviewer": "design_combat_review",
+      "file": "docs/22-system-interactions-and-playstyles.md",
+      "line": 501,
+      "evidence_refs": [
+        "docs/22-system-interactions-and-playstyles.md:501"
+      ],
+      "required_action": "共用临时减伤最大值通道；独立到期，不追溯、不加第二乘区。",
+      "re_review_condition": "只读复验对应条款及直接依赖，确认原问题闭合。",
+      "resolution": "closed_v2"
+    },
+    {
+      "id": "C03",
+      "severity": "suggestion",
+      "title": "雷丘接力和幽影击退样板来源不准确",
+      "reviewer": "design_combat_review",
+      "file": "docs/22-system-interactions-and-playstyles.md",
+      "line": 305,
+      "evidence_refs": [
+        "docs/22-system-interactions-and-playstyles.md:305"
+      ],
+      "required_action": "限定搭档、两次和距离；幽影必须另配真实击退来源。",
+      "re_review_condition": "只读复验对应条款及直接依赖，确认原问题闭合。",
+      "resolution": "closed_v2"
+    },
+    {
+      "id": "C04",
+      "severity": "suggestion",
+      "title": "护卫示例未遵循当前冲锋最远目标选择",
+      "reviewer": "design_combat_review",
+      "file": "docs/22-system-interactions-and-playstyles.md",
+      "line": 144,
+      "evidence_refs": [
+        "docs/22-system-interactions-and-playstyles.md:144"
+      ],
+      "required_action": "替换为评审者用现有 _strike 复核的起点、起手锁敌和两步路径。",
+      "re_review_condition": "只读复验对应条款及直接依赖，确认原问题闭合。",
+      "resolution": "closed_v3"
+    },
+    {
+      "id": "E01",
+      "severity": "suggestion",
+      "title": "低费训练继承可绕过跨费档价格",
+      "reviewer": "design_economy_review",
+      "file": "docs/22-system-interactions-and-playstyles.md",
+      "line": 330,
+      "evidence_refs": [
+        "docs/22-system-interactions-and-playstyles.md:330"
+      ],
+      "required_action": "基于未退真实本金补差价；材料、转训、卖出和退款同一账本，失败不扣。",
+      "re_review_condition": "只读复验对应条款及直接依赖，确认原问题闭合。",
+      "resolution": "closed_v2"
+    },
+    {
+      "id": "E02",
+      "severity": "suggestion",
+      "title": "忽略通信进化石永久占用单装备槽",
+      "reviewer": "design_economy_review",
+      "file": "docs/22-system-interactions-and-playstyles.md",
+      "line": 348,
+      "evidence_refs": [
+        "docs/22-system-interactions-and-playstyles.md:348"
+      ],
+      "required_action": "直购与带石路线分开计价和实验；不构造石头与功能装同时持有的非法样板。",
+      "re_review_condition": "只读复验对应条款及直接依赖，确认原问题闭合。",
+      "resolution": "closed_v2"
+    },
+    {
+      "id": "E03",
+      "severity": "suggestion",
+      "title": "组件前置会提前幸运蛋产金和利息",
+      "reviewer": "design_economy_review",
+      "file": "docs/22-system-interactions-and-playstyles.md",
+      "line": 225,
+      "evidence_refs": [
+        "docs/22-system-interactions-and-playstyles.md:225"
+      ],
+      "required_action": "供给时间表×幸运蛋交叉归因，完整启用规则复验。",
+      "re_review_condition": "只读复验对应条款及直接依赖，确认原问题闭合。",
+      "resolution": "closed_v2"
+    },
+    {
+      "id": "E04",
+      "severity": "evidence_gap",
+      "title": "功能装备没有获取配方与实施批次",
+      "reviewer": "design_economy_review",
+      "file": "docs/22-system-interactions-and-playstyles.md",
+      "line": 218,
+      "evidence_refs": [
+        "docs/22-system-interactions-and-playstyles.md:218"
+      ],
+      "required_action": "明确两组件配方和机会成本，保留主动合石，纳入第二批单独实验。",
+      "re_review_condition": "只读复验对应条款及直接依赖，确认原问题闭合。",
+      "resolution": "closed_v2"
+    },
+    {
+      "id": "U01",
+      "severity": "blocker",
+      "title": "多个新决策没有完整三键操作路径",
+      "reviewer": "design_ui_review",
+      "file": "docs/22-system-interactions-and-playstyles.md",
+      "line": 456,
+      "evidence_refs": [
+        "docs/22-system-interactions-and-playstyles.md:456"
+      ],
+      "required_action": "所有新动作入口、目标、预览、提交、取消、资源不足和过期目标逐行验收。",
+      "re_review_condition": "只读复验对应条款及直接依赖，确认原问题闭合。",
+      "resolution": "closed_v2"
+    },
+    {
+      "id": "U02",
+      "severity": "blocker",
+      "title": "待领奖励在开战、淘汰、终局和备份恢复时未定义",
+      "reviewer": "design_ui_review",
+      "file": "docs/22-system-interactions-and-playstyles.md",
+      "line": 476,
+      "evidence_refs": [
+        "docs/22-system-interactions-and-playstyles.md:476"
+      ],
+      "required_action": "稳定决策 ID、原子库存、领取或明确放弃门禁、终局关闭和整笔回退六条旅程。",
+      "re_review_condition": "只读复验对应条款及直接依赖，确认原问题闭合。",
+      "resolution": "closed_v2"
+    },
+    {
+      "id": "U03",
+      "severity": "evidence_gap",
+      "title": "旧规则续局承诺超出当前指纹告警能力",
+      "reviewer": "design_ui_review",
+      "file": "docs/22-system-interactions-and-playstyles.md",
+      "line": 529,
+      "evidence_refs": [
+        "docs/22-system-interactions-and-playstyles.md:529"
+      ],
+      "required_action": "规则路由、旧版处理器、固定旧档后续动作序列对账，未知版本只读。",
+      "re_review_condition": "只读复验对应条款及直接依赖，确认原问题闭合。",
+      "resolution": "closed_v2"
+    },
+    {
+      "id": "U04",
+      "severity": "suggestion",
+      "title": "分批交付遗漏角色岗位与功能装备",
+      "reviewer": "design_ui_review",
+      "file": "docs/22-system-interactions-and-playstyles.md",
+      "line": 576,
+      "evidence_refs": [
+        "docs/22-system-interactions-and-playstyles.md:576"
+      ],
+      "required_action": "第一批角色岗位与过渡，第二批功能装备，D01–15 全部归属明确。",
+      "re_review_condition": "只读复验对应条款及直接依赖，确认原问题闭合。",
+      "resolution": "closed_v2"
+    }
+  ],
+  "checks": [
+    {
+      "name": "D01–D15 顺序、范围及本轮链接",
+      "status": "passed",
+      "command": "Python Markdown section/link assertions",
+      "evidence_ref": "docs/22-system-interactions-and-playstyles.md"
+    },
+    {
+      "name": "Markdown 围栏与行尾空白",
+      "status": "passed",
+      "command": "Python assertions and git diff --check",
+      "evidence_ref": "docs/22-system-interactions-and-playstyles.md"
+    },
+    {
+      "name": "护卫几何条件枚举（仅方案数学检查）",
+      "status": "passed",
+      "command": "Enumerate three distinct cells in 6x4 Manhattan grid; A-P=1, P-G=1",
+      "evidence_ref": "176 valid two-cell interception layouts; 0 old one-cell layouts; rotation invariant"
+    },
+    {
+      "name": "原冲锋规则的示例前置状态",
+      "status": "passed",
+      "command": "Reviewer read-only _strike probe; no proposed interception implementation",
+      "evidence_ref": "design_combat_review v3 final message"
+    },
+    {
+      "name": "三路独立窄范围复验",
+      "status": "passed",
+      "command": "Reuse design_combat_review / design_economy_review / design_ui_review",
+      "evidence_ref": "All three final verdicts pass for bound design scope"
+    },
+    {
+      "name": "新规则胜率、完整对局、三键与真机测试",
+      "status": "skipped",
+      "command": "Not applicable to design-only changes; required by future implementation gates",
+      "evidence_ref": "docs/22-system-interactions-and-playstyles.md"
+    }
+  ],
+  "next_actions": [
+    "第一批：护卫与突进对抗、角色岗位与过渡表，伴随三键和规则版本路由。",
+    "第二批：训练、招募、供给和功能装备分别实验，再验证组合。",
+    "第三批：天赋、机制羁绊、晴雨教学按依赖引入。",
+    "第四批：局长与横向挑战。"
+  ],
+  "residual_risks": [
+    "方案尚未实现，强度、成本和窗口长度未标定。",
+    "当前 84 池旧基线仍有突进优势及高强制终局率。",
+    "Python/Web 不能替代 ESP32 性能或真人三键可用性证据。"
+  ]
+}

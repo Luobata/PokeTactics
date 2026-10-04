@@ -22,6 +22,10 @@ payload.cast_index/event_count 指向主 cast 与紧随标记的原事件包；�
 和伤害/治疗/能量数值仅供演出，不改变解算，旧事件字段保持原样。
 可选搭档事件为 (t, "partner_effect", caster, target, partner_id, effect, payload)；
 其治疗、回能仍同时输出 unit_state，attack/cast 索引不变。
+显式 tactics_v1 另发 (t, "tactical_effect", source, target, kind, payload)：
+护卫 result_event_index 指向最终命中/闪避事件，天气请求 cast_index 指向原生
+施法。天气在下一 tick 统一裁决，开始/冲突/结束事件是全场天气的唯一来源。
+base_v1 不生成此类事件，也不接受新教学或有效战术配置。
 
 随机契约 v2：仍只消费传入的 rng，但按队伍内容/本地部署顺序绑定抽样，
 同刻按开战抽取的 initiative 排序；完全相同的两队先公平掷币绑定随机序列。
@@ -48,6 +52,8 @@ import partners as partners_mod
 import stat_budget
 import build_rules
 import techniques as techniques_mod
+import tactics as tactics_mod
+from weather_control import WeatherController, WEATHER_WINDOW_SECONDS
 
 TICK = 0.1  # 解算步长（秒）
 # ---- C-sym 棋盘（docs/10 §1.3/§1.5，2026-09-14 sim 联动落地）----
@@ -175,11 +181,23 @@ class Battle:
     def __init__(self, comp_a: list, comp_b: list, rng: random.Random,
                  layout: str = "random", weather_name=None,
                  positions_a=None, positions_b=None, team_options=None,
-                 stat_mode: str = "legacy", learned_a=None, learned_b=None) -> None:
+                 stat_mode: str = "legacy", learned_a=None, learned_b=None,
+                 ruleset=tactics_mod.BASE_RULESET, tactics_a=None, tactics_b=None) -> None:
         # S11 天气按 Battle 实例持有（2026-09-14 修订：原 set_active 全局写
         # 在验收后台多线程下会交叉污染——/anim 与 /demo 并行时互改对方天气；
         # damage_mult 由 _final_damage 显式传 self.weather_name）
         self.weather_name = weather_name
+        self.base_weather_name = weather_name
+        self.ruleset = tactics_mod.validate_ruleset(ruleset)
+        self._tactics_on = tactics_mod.enabled(self.ruleset)
+        if self._tactics_on and weather_name not in weather_mod.WEATHERS:
+            raise ValueError("unknown base weather")
+        self._weather_control = (WeatherController(weather_name, TICK)
+                                 if self._tactics_on else None)
+        self._guard_links = {}
+        self._guard_used = set()
+        self._weather_sources = {}
+        self._weather_used = set()
         if stat_mode not in ("legacy", "budget_v1"):
             raise ValueError("unknown stat mode")
         self.stat_mode = stat_mode
@@ -200,6 +218,8 @@ class Battle:
         comps = (comp_a, comp_b)
         self.learned = tuple(self._validate_learning(comp, learned)
                              for comp, learned in zip(comps, (learned_a, learned_b)))
+        self.tactics = tuple(tactics_mod.validate_team(selection, len(comp), self.ruleset)
+                             for comp, selection in zip(comps, (tactics_a, tactics_b)))
         positions = (positions_a, positions_b)
         for team in (0, 1):
             self._validate_positions(comps[team], positions[team], team)
@@ -233,6 +253,7 @@ class Battle:
                     partner.partner_id = option["partner"]
                     if partner.technique is None:
                         partner.technique = option["technique"]
+        self._bind_tactics()
         # S5 协议：comp 元素可能带 (Piece, item) 二元组——羁绊/齐射只看裸 Piece
         plain_a = [e[0] if isinstance(e, tuple) else e for e in comp_a]
         plain_b = [e[0] if isinstance(e, tuple) else e for e in comp_b]
@@ -246,15 +267,34 @@ class Battle:
             self._emit_state(unit, 0.0)
         self._opening_partner_traits()
 
-    @staticmethod
-    def _validate_learning(comp, learned):
+    def _validate_learning(self, comp, learned):
         if learned is None:
             return (None,) * len(comp)
         if not isinstance(learned, list) or len(learned) != len(comp):
             raise ValueError("learned techniques must be a list matching the team's unit count")
         return tuple(techniques_mod.validate_learning(
-            (entry[0] if isinstance(entry, tuple) else entry).species_id, technique)
+            (entry[0] if isinstance(entry, tuple) else entry).species_id, technique,
+            ruleset=self.ruleset)
             for entry, technique in zip(comp, learned))
+
+    def _bind_tactics(self):
+        """Bind explicit local indices once; dead/invalid sources never relay."""
+        for team, selection in enumerate(self.tactics):
+            units = [unit for unit in self.units if unit.team == team]
+            guard = selection["guard"]
+            if guard is not None:
+                source, target = units[guard["source"]], units[guard["target"]]
+                if source.technique != "guard":
+                    raise ValueError("selected guard must have learned guard")
+                if _manhattan(source.pos, target.pos) != 1:
+                    raise ValueError("guard and protected ally must deploy adjacent")
+                self._guard_links[team] = (source, target)
+            weather = selection["weather"]
+            if weather is not None:
+                source = units[weather["source"]]
+                if source.technique not in ("sunny_day", "rain_dance"):
+                    raise ValueError("selected weather source must know weather teaching")
+                self._weather_sources[team] = source
 
     @staticmethod
     def _local_pos(pos, team):
@@ -299,6 +339,12 @@ class Battle:
         # Keep the original random ordering for every unlearned legacy team.
         # A learned skill becomes part of identity only when actually present.
         learning = tuple(technique or "" for technique in self.learned[team])
+        if self._tactics_on:
+            selection = self.tactics[team]
+            guard, weather = selection["guard"], selection["weather"]
+            chosen = ((guard["source"], guard["target"]) if guard else (),
+                      (weather["source"],) if weather else ())
+            return tuple(entries), local, loadout, learning, chosen
         if any(learning):
             return tuple(entries), local, loadout, learning
         return tuple(entries), local, loadout
@@ -334,6 +380,7 @@ class Battle:
             alive_teams = {u.team for u in self.units if u.alive}
             if len(alive_teams) <= 1:
                 break
+            self.flush_tactics(t)
             for u in sorted(self.units, key=lambda x: (x.next_act, x.initiative)):
                 if u.alive and t + 1e-9 >= u.next_act:
                     self._act(u, t)
@@ -461,6 +508,11 @@ class Battle:
         return self._final_damage(unit, target, move, int(raw * fraction))
 
     def _strike(self, u: Unit, target: Unit, t: float) -> None:
+        if self._tactics_on:
+            self.flush_tactics(t)
+            if not u.alive:
+                return
+        start_pos = u.pos
         move = build_rules.resolve_cast(u.piece, self.stat_mode) if u.energy >= ENERGY_MAX else None
         if move and build_rules.energy_targeting(u.piece, self.stat_mode):
             # Retarget only the cast. Basic attacks retain their normal lock;
@@ -503,7 +555,13 @@ class Battle:
                     u.pos = start  # Unreachable within budget: ordinary in-range cast.
         if not target.alive or _manhattan(u.pos, target.pos) > u.range:
             return
+        guard_payload = None
+        if (self._tactics_on and move and u.pos != start_pos
+                and u.ult_arch in ("charge", profiles_mod.ARCH_BLINK)):
+            target, guard_payload = self._intercept(u, target, t, start_pos)
         if target.item_dodge > 0 and self.rng.random() < target.item_dodge:
+            if guard_payload is not None:
+                guard_payload["result_event_index"] = len(self.events)
             self.events.append((t, "miss", u.idx, target.idx))
             return
         if move:
@@ -516,6 +574,8 @@ class Battle:
             u.casts += 1
             hp_before = target.hp
             cast_index = len(self.events)
+            if guard_payload is not None:
+                guard_payload["result_event_index"] = cast_index
             self._land_hit(u, target, dmg, t, move=move, primary=True, cast=True)
             lost_hp = max(0, hp_before - target.hp)
             # Side hits are independent damage calculations. The primary hit is
@@ -619,6 +679,9 @@ class Battle:
             if u.ult_arch == "mend" and u.alive:
                 self._heal(u, int(u.max_hp * 0.20), t)
             self._partner_after_cast(u, target, t, cast_target_pos, dmg > 0)
+            self._request_weather(u, t, cast_index)
+            if guard_payload is not None:
+                guard_payload["result_event_count"] = len(self.events) - cast_index - 1
         else:
             special = u.sp_attack > u.attack
             if basic_takes_eff():
@@ -635,6 +698,75 @@ class Battle:
             self._land_hit(u, target, dmg, t, primary=True)
             if dmg > 0:
                 self._partner_after_basic(u, target, t)
+
+    def _intercept(self, attacker, target, t, start_pos):
+        """Redirect one legal displaced cast, before any accuracy/dodge roll.
+
+        This sole hit may reach a guard two cells away. The attacker's target
+        lock, normal range, position, and future attacks are not changed.
+        """
+        link = self._guard_links.get(target.team)
+        if (link is None or target.team in self._guard_used
+                or attacker.team == target.team):
+            return target, None
+        source, protected = link
+        if (target is not protected or not source.alive
+                or _manhattan(source.pos, protected.pos) != 1
+                or _manhattan(attacker.pos, source.pos) > 2):
+            return target, None
+        self._guard_used.add(source.team)
+        source.technique_used = True
+        payload = {"reason": "intercept", "remaining": 0,
+                   "attacker_idx": attacker.idx, "recipient_idx": source.idx,
+                   "source_pos": source.pos, "target_pos": protected.pos,
+                   "attacker_pos": attacker.pos, "attacker_origin": start_pos,
+                   "result_event_index": None, "result_event_count": 0}
+        self.events.append((t, "tactical_effect", source.idx, protected.idx, "guard", payload))
+        return source, payload
+
+    def _request_weather(self, unit, t, cast_index):
+        if (not self._tactics_on or self._weather_sources.get(unit.team) is not unit
+                or unit.team in self._weather_used or unit.casts != 1):
+            return
+        self._weather_used.add(unit.team)
+        unit.technique_used = True
+        weather = {"sunny_day": "sun", "rain_dance": "rain"}[unit.technique]
+        request = self._weather_control.request(t, unit.team, unit.idx, unit.pos,
+                                                weather, cast_index)
+        payload = {"reason": "queued", "requests": [request], "remaining": 0,
+                   "source_pos": unit.pos, "target_pos": unit.pos,
+                   "cast_index": cast_index, "weather": weather,
+                   "old_weather": self.weather_name, "new_weather": weather,
+                   "base_weather": self.base_weather_name,
+                   "effective_at": request["effective_at"],
+                   "expires_at": round(request["effective_at"] + WEATHER_WINDOW_SECONDS, 9)}
+        self.events.append((t, "tactical_effect", unit.idx, unit.idx,
+                            "weather_request", payload))
+
+    def flush_tactics(self, t):
+        """Advance weather before tick actions; direct-strike callers may use it.
+
+        Requests made during the current tick remain pending, so this is safe
+        to call more than once or between strikes at the same timestamp. New
+        weather never changes damage from the cast that requested it.
+        """
+        if self._weather_control is None:
+            return []
+        emitted = []
+        for transition in self._weather_control.advance(t):
+            requests = sorted(transition["requests"], key=lambda row: (
+                self._team_order.index(row["team"]), self.units[row["source"]].local_idx))
+            source = requests[0]
+            payload = {key: value for key, value in transition.items()
+                       if key not in ("kind", "time", "requests")}
+            payload.update(requests=requests, source_pos=source["source_pos"],
+                           target_pos=source["source_pos"])
+            event = (transition["time"], "tactical_effect", source["source"],
+                     source["source"], transition["kind"], payload)
+            self.events.append(event)
+            emitted.append(event)
+        self.weather_name = self._weather_control.weather_name
+        return emitted
 
     def _land_hit(self, attacker, target, damage, t, move=None, primary=False, cast=False):
         """Resolve a damage packet and emit its authoritative post-hit state.

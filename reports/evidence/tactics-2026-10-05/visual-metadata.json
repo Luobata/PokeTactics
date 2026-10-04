@@ -1,0 +1,1253 @@
+{
+  "schema": "tactical-visual-probe-v1",
+  "seed": 42,
+  "renderer": "BattleAnimation.playback_frame",
+  "label_font": "/System/Library/Fonts/Hiragino Sans GB.ttc",
+  "sources_sha256": {
+    "sim/combat.py": "a37cfba5945315c97fed6665213d3cf6925f017a89bcd11b8f23a75e93d3473e",
+    "sim/tactics.py": "3ef0585011e721780292ced9f7479116c51828bfd64705543b82aedbbfbaac20",
+    "sim/weather_control.py": "2b5c9bc333c0b8dceb2b17a1aea0d4ad5425c6cc7c816982b820f900b8cef7ff",
+    "tools/mockups/animation_timeline.py": "8cc4fb8a91b8b24a1b267fe06e045b3f6ef209fa768d8429fbe2f3dac4267656",
+    "tools/mockups/render_battle_gif.py": "ab8a39c0cafaf3583b88ba29c219388414ca0aaa7eba61d4ddfbe5bec3e35968",
+    "tools/mockups/render_mockups.py": "8d5cdeb5ba8222976332373bde3c0237363709fec6226349bb6fadc40357f1e8",
+    "tests/test_tactical_presentation.py": "3346a403a5dbb19ed0f30e72a69d2434edb083eb734c95adedc988b68c6522b1",
+    "tools/acceptance/tactical_visual_probe.py": "09f242263850688c1e8dfb2ac9594dc4b30fdfa25c0f11b4a1b38729873ab320"
+  },
+  "scenes": {
+    "guard": {
+      "authoritative_event_sha256": "710ad9cb7e14831af313ed4ab2c3da7dd4faf6b85faa6421ea85a4c5ca2792bb",
+      "authoritative_events": [
+        [
+          0.0,
+          "deploy",
+          0,
+          [
+            3,
+            0
+          ]
+        ],
+        [
+          0.0,
+          "deploy",
+          1,
+          [
+            2,
+            2
+          ]
+        ],
+        [
+          0.0,
+          "deploy",
+          2,
+          [
+            3,
+            2
+          ]
+        ],
+        [
+          0.0,
+          "deploy",
+          3,
+          [
+            4,
+            0
+          ]
+        ],
+        [
+          0.0,
+          "unit_state",
+          0,
+          10000,
+          80
+        ],
+        [
+          0.0,
+          "unit_state",
+          1,
+          10000,
+          0
+        ],
+        [
+          0.0,
+          "unit_state",
+          2,
+          10000,
+          0
+        ],
+        [
+          0.0,
+          "unit_state",
+          3,
+          10000,
+          0
+        ],
+        [
+          0.1,
+          "move",
+          0,
+          [
+            3,
+            1
+          ]
+        ],
+        [
+          0.1,
+          "move",
+          0,
+          [
+            2,
+            1
+          ]
+        ],
+        [
+          0.1,
+          "tactical_effect",
+          2,
+          1,
+          "guard",
+          {
+            "reason": "intercept",
+            "remaining": 0,
+            "attacker_idx": 0,
+            "recipient_idx": 2,
+            "source_pos": [
+              3,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "attacker_pos": [
+              2,
+              1
+            ],
+            "attacker_origin": [
+              3,
+              0
+            ],
+            "result_event_index": 11,
+            "result_event_count": 3
+          }
+        ],
+        [
+          0.1,
+          "cast",
+          0,
+          2,
+          "hydro_pump",
+          4.0,
+          252,
+          0,
+          10
+        ],
+        [
+          0.1,
+          "unit_state",
+          0,
+          10000,
+          0
+        ],
+        [
+          0.1,
+          "unit_state",
+          2,
+          9748,
+          10
+        ],
+        [
+          0.1,
+          "status",
+          2,
+          "flinch",
+          "apply",
+          0
+        ],
+        [
+          2.0,
+          "end",
+          null
+        ]
+      ],
+      "presentation_tactical_events": [
+        [
+          1.05,
+          "tactical_effect",
+          2,
+          1,
+          "guard",
+          {
+            "reason": "intercept",
+            "remaining": 0,
+            "attacker_idx": 0,
+            "recipient_idx": 2,
+            "source_pos": [
+              3,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "attacker_pos": [
+              2,
+              1
+            ],
+            "attacker_origin": [
+              3,
+              0
+            ],
+            "result_event_index": 11,
+            "result_event_count": 3,
+            "simulation_time": 0.1
+          }
+        ]
+      ],
+      "presentation_duration": 2.8
+    },
+    "weather": {
+      "authoritative_event_sha256": "c1d2f99cb6e75b9b0e84692afd5584fa76e2b25a1cea7efa035f543c27c904ef",
+      "authoritative_events": [
+        [
+          0.0,
+          "deploy",
+          0,
+          [
+            2,
+            2
+          ]
+        ],
+        [
+          0.0,
+          "deploy",
+          1,
+          [
+            2,
+            1
+          ]
+        ],
+        [
+          0.0,
+          "unit_state",
+          0,
+          125,
+          0
+        ],
+        [
+          0.0,
+          "unit_state",
+          1,
+          126,
+          0
+        ],
+        [
+          0.0,
+          "unit_state",
+          0,
+          10000,
+          80
+        ],
+        [
+          0.0,
+          "unit_state",
+          1,
+          10000,
+          80
+        ],
+        [
+          0.1,
+          "cast",
+          0,
+          1,
+          "flamethrower",
+          0.5,
+          29,
+          0,
+          80
+        ],
+        [
+          0.1,
+          "unit_state",
+          0,
+          10000,
+          0
+        ],
+        [
+          0.1,
+          "unit_state",
+          1,
+          9971,
+          80
+        ],
+        [
+          0.1,
+          "tactical_effect",
+          0,
+          0,
+          "weather_request",
+          {
+            "reason": "queued",
+            "requests": [
+              {
+                "team": 0,
+                "source": 0,
+                "source_pos": [
+                  2,
+                  2
+                ],
+                "weather": "sun",
+                "requested_at": 0.1,
+                "cast_index": 6,
+                "effective_at": 0.2
+              }
+            ],
+            "remaining": 0,
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "cast_index": 6,
+            "weather": "sun",
+            "old_weather": null,
+            "new_weather": "sun",
+            "base_weather": null,
+            "effective_at": 0.2,
+            "expires_at": 8.2
+          }
+        ],
+        [
+          0.2,
+          "tactical_effect",
+          0,
+          0,
+          "weather_start",
+          {
+            "old_weather": null,
+            "new_weather": "sun",
+            "base_weather": null,
+            "expires_at": 8.2,
+            "previous_expires_at": null,
+            "reason": "requested",
+            "requests": [
+              {
+                "team": 0,
+                "source": 0,
+                "source_pos": [
+                  2,
+                  2
+                ],
+                "weather": "sun",
+                "requested_at": 0.1,
+                "cast_index": 6,
+                "effective_at": 0.2
+              }
+            ],
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ]
+          }
+        ],
+        [
+          2.1,
+          "cast",
+          1,
+          0,
+          "hydro_pump",
+          2.0,
+          103,
+          0,
+          10
+        ],
+        [
+          2.1,
+          "unit_state",
+          1,
+          9971,
+          0
+        ],
+        [
+          2.1,
+          "unit_state",
+          0,
+          9897,
+          10
+        ],
+        [
+          2.1,
+          "skill_effect",
+          1,
+          0,
+          "line_push",
+          "knockback",
+          {
+            "cast_index": 11,
+            "event_count": 1,
+            "origin_idx": 1,
+            "origin_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "caster_pos": [
+              2,
+              1
+            ],
+            "origin": [
+              2,
+              2
+            ],
+            "destination": [
+              2,
+              3
+            ]
+          }
+        ],
+        [
+          2.1,
+          "move",
+          0,
+          [
+            2,
+            3
+          ]
+        ],
+        [
+          2.1,
+          "tactical_effect",
+          1,
+          1,
+          "weather_request",
+          {
+            "reason": "queued",
+            "requests": [
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 2.1,
+                "cast_index": 11,
+                "effective_at": 2.2
+              }
+            ],
+            "remaining": 0,
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "cast_index": 11,
+            "weather": "rain",
+            "old_weather": "sun",
+            "new_weather": "rain",
+            "base_weather": null,
+            "effective_at": 2.2,
+            "expires_at": 10.2
+          }
+        ],
+        [
+          2.2,
+          "tactical_effect",
+          1,
+          1,
+          "weather_start",
+          {
+            "old_weather": "sun",
+            "new_weather": "rain",
+            "base_weather": null,
+            "expires_at": 10.2,
+            "previous_expires_at": 8.2,
+            "reason": "overridden",
+            "requests": [
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 2.1,
+                "cast_index": 11,
+                "effective_at": 2.2
+              }
+            ],
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              1
+            ]
+          }
+        ],
+        [
+          10.2,
+          "tactical_effect",
+          1,
+          1,
+          "weather_end",
+          {
+            "old_weather": "rain",
+            "new_weather": null,
+            "base_weather": null,
+            "expires_at": null,
+            "previous_expires_at": 10.2,
+            "reason": "expired",
+            "requests": [
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 2.1,
+                "cast_index": 11,
+                "effective_at": 2.2
+              }
+            ],
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              1
+            ]
+          }
+        ],
+        [
+          10.3,
+          "end",
+          null
+        ]
+      ],
+      "presentation_tactical_events": [
+        [
+          1.1,
+          "tactical_effect",
+          0,
+          0,
+          "weather_request",
+          {
+            "reason": "queued",
+            "requests": [
+              {
+                "team": 0,
+                "source": 0,
+                "source_pos": [
+                  2,
+                  2
+                ],
+                "weather": "sun",
+                "requested_at": 0.1,
+                "cast_index": 6,
+                "effective_at": 0.2
+              }
+            ],
+            "remaining": 0,
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "cast_index": 6,
+            "weather": "sun",
+            "old_weather": null,
+            "new_weather": "sun",
+            "base_weather": null,
+            "effective_at": 0.2,
+            "expires_at": 8.2,
+            "simulation_time": 0.1
+          }
+        ],
+        [
+          1.1,
+          "tactical_effect",
+          0,
+          0,
+          "weather_start",
+          {
+            "old_weather": null,
+            "new_weather": "sun",
+            "base_weather": null,
+            "expires_at": 8.2,
+            "previous_expires_at": null,
+            "reason": "requested",
+            "requests": [
+              {
+                "team": 0,
+                "source": 0,
+                "source_pos": [
+                  2,
+                  2
+                ],
+                "weather": "sun",
+                "requested_at": 0.1,
+                "cast_index": 6,
+                "effective_at": 0.2
+              }
+            ],
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "simulation_time": 0.2
+          }
+        ],
+        [
+          2.7,
+          "tactical_effect",
+          1,
+          1,
+          "weather_request",
+          {
+            "reason": "queued",
+            "requests": [
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 2.1,
+                "cast_index": 11,
+                "effective_at": 2.2
+              }
+            ],
+            "remaining": 0,
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "cast_index": 11,
+            "weather": "rain",
+            "old_weather": "sun",
+            "new_weather": "rain",
+            "base_weather": null,
+            "effective_at": 2.2,
+            "expires_at": 10.2,
+            "simulation_time": 2.1
+          }
+        ],
+        [
+          2.95,
+          "tactical_effect",
+          1,
+          1,
+          "weather_start",
+          {
+            "old_weather": "sun",
+            "new_weather": "rain",
+            "base_weather": null,
+            "expires_at": 10.2,
+            "previous_expires_at": 8.2,
+            "reason": "overridden",
+            "requests": [
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 2.1,
+                "cast_index": 11,
+                "effective_at": 2.2
+              }
+            ],
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "simulation_time": 2.2
+          }
+        ],
+        [
+          10.2,
+          "tactical_effect",
+          1,
+          1,
+          "weather_end",
+          {
+            "old_weather": "rain",
+            "new_weather": null,
+            "base_weather": null,
+            "expires_at": null,
+            "previous_expires_at": 10.2,
+            "reason": "expired",
+            "requests": [
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 2.1,
+                "cast_index": 11,
+                "effective_at": 2.2
+              }
+            ],
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "simulation_time": 10.2
+          }
+        ]
+      ],
+      "presentation_duration": 11.1
+    },
+    "conflict": {
+      "authoritative_event_sha256": "719b215f82f57399edae8da69a216b94da6efa2cadcc7bb6757dcfbd576f82db",
+      "authoritative_events": [
+        [
+          0.0,
+          "deploy",
+          0,
+          [
+            2,
+            2
+          ]
+        ],
+        [
+          0.0,
+          "deploy",
+          1,
+          [
+            2,
+            1
+          ]
+        ],
+        [
+          0.0,
+          "unit_state",
+          0,
+          125,
+          0
+        ],
+        [
+          0.0,
+          "unit_state",
+          1,
+          126,
+          0
+        ],
+        [
+          0.0,
+          "unit_state",
+          0,
+          10000,
+          80
+        ],
+        [
+          0.0,
+          "unit_state",
+          1,
+          10000,
+          80
+        ],
+        [
+          0.1,
+          "cast",
+          0,
+          1,
+          "flamethrower",
+          0.5,
+          29,
+          0,
+          80
+        ],
+        [
+          0.1,
+          "unit_state",
+          0,
+          10000,
+          0
+        ],
+        [
+          0.1,
+          "unit_state",
+          1,
+          9971,
+          80
+        ],
+        [
+          0.1,
+          "tactical_effect",
+          0,
+          0,
+          "weather_request",
+          {
+            "reason": "queued",
+            "requests": [
+              {
+                "team": 0,
+                "source": 0,
+                "source_pos": [
+                  2,
+                  2
+                ],
+                "weather": "sun",
+                "requested_at": 0.1,
+                "cast_index": 6,
+                "effective_at": 0.2
+              }
+            ],
+            "remaining": 0,
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "cast_index": 6,
+            "weather": "sun",
+            "old_weather": null,
+            "new_weather": "sun",
+            "base_weather": null,
+            "effective_at": 0.2,
+            "expires_at": 8.2
+          }
+        ],
+        [
+          0.1,
+          "cast",
+          1,
+          0,
+          "hydro_pump",
+          2.0,
+          129,
+          0,
+          10
+        ],
+        [
+          0.1,
+          "unit_state",
+          1,
+          9971,
+          0
+        ],
+        [
+          0.1,
+          "unit_state",
+          0,
+          9871,
+          10
+        ],
+        [
+          0.1,
+          "skill_effect",
+          1,
+          0,
+          "line_push",
+          "knockback",
+          {
+            "cast_index": 10,
+            "event_count": 1,
+            "origin_idx": 1,
+            "origin_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "caster_pos": [
+              2,
+              1
+            ],
+            "origin": [
+              2,
+              2
+            ],
+            "destination": [
+              2,
+              3
+            ]
+          }
+        ],
+        [
+          0.1,
+          "move",
+          0,
+          [
+            2,
+            3
+          ]
+        ],
+        [
+          0.1,
+          "tactical_effect",
+          1,
+          1,
+          "weather_request",
+          {
+            "reason": "queued",
+            "requests": [
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 0.1,
+                "cast_index": 10,
+                "effective_at": 0.2
+              }
+            ],
+            "remaining": 0,
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "cast_index": 10,
+            "weather": "rain",
+            "old_weather": null,
+            "new_weather": "rain",
+            "base_weather": null,
+            "effective_at": 0.2,
+            "expires_at": 8.2
+          }
+        ],
+        [
+          0.2,
+          "tactical_effect",
+          0,
+          0,
+          "weather_conflict",
+          {
+            "old_weather": null,
+            "new_weather": null,
+            "base_weather": null,
+            "expires_at": null,
+            "previous_expires_at": null,
+            "reason": "conflict",
+            "requests": [
+              {
+                "team": 0,
+                "source": 0,
+                "source_pos": [
+                  2,
+                  2
+                ],
+                "weather": "sun",
+                "requested_at": 0.1,
+                "cast_index": 6,
+                "effective_at": 0.2
+              },
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 0.1,
+                "cast_index": 10,
+                "effective_at": 0.2
+              }
+            ],
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ]
+          }
+        ],
+        [
+          10.3,
+          "end",
+          null
+        ]
+      ],
+      "presentation_tactical_events": [
+        [
+          1.1,
+          "tactical_effect",
+          0,
+          0,
+          "weather_request",
+          {
+            "reason": "queued",
+            "requests": [
+              {
+                "team": 0,
+                "source": 0,
+                "source_pos": [
+                  2,
+                  2
+                ],
+                "weather": "sun",
+                "requested_at": 0.1,
+                "cast_index": 6,
+                "effective_at": 0.2
+              }
+            ],
+            "remaining": 0,
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "cast_index": 6,
+            "weather": "sun",
+            "old_weather": null,
+            "new_weather": "sun",
+            "base_weather": null,
+            "effective_at": 0.2,
+            "expires_at": 8.2,
+            "simulation_time": 0.1
+          }
+        ],
+        [
+          1.7,
+          "tactical_effect",
+          1,
+          1,
+          "weather_request",
+          {
+            "reason": "queued",
+            "requests": [
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 0.1,
+                "cast_index": 10,
+                "effective_at": 0.2
+              }
+            ],
+            "remaining": 0,
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "cast_index": 10,
+            "weather": "rain",
+            "old_weather": null,
+            "new_weather": "rain",
+            "base_weather": null,
+            "effective_at": 0.2,
+            "expires_at": 8.2,
+            "simulation_time": 0.1
+          }
+        ],
+        [
+          1.95,
+          "tactical_effect",
+          0,
+          0,
+          "weather_conflict",
+          {
+            "old_weather": null,
+            "new_weather": null,
+            "base_weather": null,
+            "expires_at": null,
+            "previous_expires_at": null,
+            "reason": "conflict",
+            "requests": [
+              {
+                "team": 0,
+                "source": 0,
+                "source_pos": [
+                  2,
+                  2
+                ],
+                "weather": "sun",
+                "requested_at": 0.1,
+                "cast_index": 6,
+                "effective_at": 0.2
+              },
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 0.1,
+                "cast_index": 10,
+                "effective_at": 0.2
+              }
+            ],
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "simulation_time": 0.2
+          }
+        ]
+      ],
+      "presentation_duration": 11.1
+    }
+  },
+  "outputs": [
+    {
+      "file": "visual-guard.png",
+      "kind": "keyframe",
+      "scene": "guard",
+      "presentation_seconds": 1.3,
+      "native_frame_sha256": "6c6b6261c2421c947e262c05663add6850f94f686f33c67d9c1f7b2cb562068b",
+      "bytes": 35858,
+      "sha256": "1b5a805754e4eff302c4897e1d5af066fcb8322fab5afb35d6c2b5f7e1190e22"
+    },
+    {
+      "file": "visual-sun.png",
+      "kind": "keyframe",
+      "scene": "weather",
+      "presentation_seconds": 1.4,
+      "native_frame_sha256": "731651bf17f3ab4b9dc2f853bebe63aa1ab28c527a6c0808fccf3359d3429350",
+      "bytes": 34007,
+      "sha256": "025d6fd1e7f60d7053e56f592dbbc7ecca47aead312d73649906e5da9df7357b"
+    },
+    {
+      "file": "visual-rain-override.png",
+      "kind": "keyframe",
+      "scene": "weather",
+      "presentation_seconds": 3.25,
+      "native_frame_sha256": "10ba80dd43fa8ffce90146eb000a5db14f5569a0e429ca7f42b8375d94480f1c",
+      "bytes": 34435,
+      "sha256": "71758a1f6693ce5f1d47b11c8281e729cea002d4a4dc6db1e36abd265523ecfb"
+    },
+    {
+      "file": "visual-weather-conflict.png",
+      "kind": "keyframe",
+      "scene": "conflict",
+      "presentation_seconds": 2.25,
+      "native_frame_sha256": "e08c773b1fa574d59e6103db0ba66ff8e0dfdb87d6b82c353ec2a73e9f286d77",
+      "bytes": 34843,
+      "sha256": "9771688f151004a8fadc46fa73c4c6479589f5f26bd3903957b2e3959fe1966a"
+    },
+    {
+      "file": "visual-overview.png",
+      "kind": "overview",
+      "bytes": 106225,
+      "sha256": "6f8084d0feeb22f024fec6c84c10a96ed4c5fbdc8887e1cf5a0740ac972146b8"
+    },
+    {
+      "file": "visual-guard.gif",
+      "kind": "continuous_clip",
+      "scene": "guard",
+      "fps": 10,
+      "frame_count": 22,
+      "presentation_range": [
+        0.0,
+        2.1
+      ],
+      "playback_speed": 1.0,
+      "bytes": 660004,
+      "sha256": "2ace9ec574bda30ef94f6f54fa37a6fda61c137037de94d2c082b70f6fadeb8e"
+    },
+    {
+      "file": "visual-weather.gif",
+      "kind": "continuous_clip",
+      "scene": "weather",
+      "fps": 10,
+      "frame_count": 41,
+      "presentation_range": [
+        0.0,
+        4.0
+      ],
+      "playback_speed": 1.0,
+      "bytes": 1145734,
+      "sha256": "376e1410bbd35f1a1e0a5aa85eb577b7c84f35260ccad63c629ebc68734aa74a"
+    },
+    {
+      "file": "visual-conflict.gif",
+      "kind": "continuous_clip",
+      "scene": "conflict",
+      "fps": 10,
+      "frame_count": 31,
+      "presentation_range": [
+        0.0,
+        3.0
+      ],
+      "playback_speed": 1.0,
+      "bytes": 871426,
+      "sha256": "899858f4a2135f99f648a0342bd1c3569c4df8392e778736189562b144b4caf2"
+    }
+  ],
+  "limits": [
+    "Real renderer frames from high-HP, manually staged combat fixtures; not a full expedition.",
+    "Fixture positions and energy are staged by the existing presentation regression tests.",
+    "The renderer HUD is its default sample data, not this fixture's economic game state.",
+    "Captions are outside the intact native frame; GIFs use a fixed 256-color palette.",
+    "Weather clip ends after rain starts; expiry is tested elsewhere and not shown in this short clip.",
+    "No balance, hardware performance, complete mode or asset-quality acceptance claim."
+  ]
+}

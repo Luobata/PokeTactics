@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "seed": 7,
+  "frames": 83,
+  "checks": [
+    "real_frame_png",
+    "automatic_playback_completion",
+    "next_without_resume",
+    "single_sequence_increment",
+    "duplicate_release_no_commit"
+  ],
+  "round": 2,
+  "player_battles": 1,
+  "storage": "temporary_directory"
+}

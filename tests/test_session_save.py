@@ -151,12 +151,11 @@ class SessionSaveContracts(unittest.TestCase):
         self.act("restore_checkpoint")
         self.assertEqual(self.codec.encode(self.state), changed)
 
-    def test_rule_fingerprint_is_not_a_build_lock(self):
+    def test_unknown_rule_fingerprint_is_rejected_without_silent_rule_change(self):
         data = self.codec.encode(self.state)
         data["rules"] = "previous-build"
-        restored = self.codec.decode(data, 1)
-        self.assertEqual(restored.player.gold, self.state.player.gold)
-        self.assertIn("规则已更新", restored.save_warning)
+        with self.assertRaisesRegex(ValueError, '规则指纹'):
+            self.codec.decode(data, 1)
 
     def test_semantically_invalid_snapshots_are_rejected(self):
         changes = [lambda p: p["pool"].__setitem__("1", p["pool"]["1"] - 1),

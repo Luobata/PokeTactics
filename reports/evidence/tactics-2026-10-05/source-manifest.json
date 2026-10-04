@@ -1,0 +1,53 @@
+{
+  "schema": "tactical-delivery-sources-v1",
+  "created_at": "2026-10-04T22:49:00.854823+00:00",
+  "head": "7c1262a01cc9a6f11bdd90e90cf9ac46cdf46401",
+  "rules_fingerprint": "f05ad20bf84e27917c269487469914f042cc03bde53176a2c4b845b092bb343c",
+  "source_files_sha256": {
+    "docs/13-core-gameplay.md": "be4ea3c7e3d79181d9ac10b4ce1ecb6c959b72a827cd7276d69e4135afe4fe5b",
+    "docs/14-system-optimization-acceptance.md": "dd1c55448e8157b040503b479da9e0e4a9f35c769971dd34e0ff4166b069626f",
+    "docs/22-system-interactions-and-playstyles.md": "4f351bc4340b3fb4ec3ae86a4fa14c7ff50cbcc713a1aed9f5d3faf463bc9ff0",
+    "docs/23-tactical-expedition.md": "4edcd56643c1a3cd179714b3dc287e18d2d29bd2512823005896263e2eb96f4a",
+    "sim/combat.py": "a37cfba5945315c97fed6665213d3cf6925f017a89bcd11b8f23a75e93d3473e",
+    "sim/experiment_tactics.py": "7a8f0c719c04b04c46698d7e3cf7f5e4a69ff3d1fe283735573f16e6a241dd13",
+    "sim/tactics.py": "3ef0585011e721780292ced9f7479116c51828bfd64705543b82aedbbfbaac20",
+    "sim/techniques.py": "6878ab4ff8b6a94821ee5a133105c0b360700d258f92265beb1088d1cd01f2fe",
+    "sim/weather_control.py": "2b5c9bc333c0b8dceb2b17a1aea0d4ad5425c6cc7c816982b820f900b8cef7ff",
+    "tests/fixtures/base-v1-schema3-session.json": "f1b7f4be2672acaa602d4cce65a32208f2a76c4f10e316c30b32da7afdb46f8c",
+    "tests/test_session_save.py": "22a9e47b4f8a9deabcb5dc7eee1ccfaba62cfa7d13d939b3a0ebe1869aeee300",
+    "tests/test_tactical_combat.py": "8d5b51edfe9d45bf3f3252fc6f962eb05f0a71a008ff4d80a39c875543775427",
+    "tests/test_tactical_device.py": "bdad6b9d6916cce1d329bde1a4d1e5a7098c090e326536588cf22bcd32999ca2",
+    "tests/test_tactical_presentation.py": "3346a403a5dbb19ed0f30e72a69d2434edb083eb734c95adedc988b68c6522b1",
+    "tests/test_tactical_session.py": "0e10bf5df7ba83d112ee675bf823897c22c135d56ae95f57b072436cb4ad3ef4",
+    "tools/acceptance/demo.py": "6dadc723cf22f4a3b962f9c4d9fcf10c1a6dad4304d564dca4ffcf838076c728",
+    "tools/acceptance/device_controls.py": "41ae9193698bcb236813df4c210a638cc967848032f0e602de1394eb0056c566",
+    "tools/acceptance/device_renderer.js": "35f6c0a2a6e50ded07f8fc63848a1efbccbeb07ce9307326a74e179bc80252f7",
+    "tools/acceptance/session_save.py": "7a3a9bb941497aae92b823072a96a9e4c9f5ab4fa085655ac5b8edbd8f146e12",
+    "tools/acceptance/tactical_run_probe.py": "7c455c9c61ffe0580e283a040166897b890b2eddfc520cfe1a21f00f06e21f5f",
+    "tools/acceptance/tactical_visual_probe.py": "09f242263850688c1e8dfb2ac9594dc4b30fdfa25c0f11b4a1b38729873ab320",
+    "tools/mockups/animation_timeline.py": "8cc4fb8a91b8b24a1b267fe06e045b3f6ef209fa768d8429fbe2f3dac4267656",
+    "tools/mockups/render_battle_gif.py": "ab8a39c0cafaf3583b88ba29c219388414ca0aaa7eba61d4ddfbe5bec3e35968",
+    "tools/mockups/render_mockups.py": "8d5cdeb5ba8222976332373bde3c0237363709fec6226349bb6fadc40357f1e8"
+  },
+  "selected_acceptance": {
+    "started_at": "2026-10-04T22:46:30+00:00",
+    "status": "passed",
+    "summary": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 6
+    }
+  },
+  "validation_scope": "Opt-in tactical prototype: functionality and compatibility only. Balance, natural termination, human three-key usability and ESP32 hardware remain unaccepted.",
+  "full_run_probe": "full-run-probe.json",
+  "combat_experiment": "combat-experiment.json",
+  "visual_sources": "visual-metadata.json",
+  "independent_review": "independent-review.json",
+  "preview": {
+    "url": "http://127.0.0.1:8807/device",
+    "home_entry": "战术远征 · 护卫与天气",
+    "http_entry_checked": true,
+    "opened_ui": "queued"
+  },
+  "save_safety": "Read-only inspected active slot 5e9a2d878d07: schema3 known baseline; preview restart made no game save. Tests/probes used temporary storage or codec-only snapshots."
+}

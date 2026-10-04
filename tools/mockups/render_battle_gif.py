@@ -37,7 +37,7 @@ sys.path.insert(0, str(ROOT / "sim"))
 from decoders import AssetError, Front, Font16, Palettes  # noqa: E402
 from render_mockups import (  # noqa: E402
     H, W, CELL, BOARD_X, BOARD_Y, BOARD_FOOT, INK, PAPER, FRAME, NIGHT, ENERGY, HP_RED, HP_LOW,
-    TYPE_COLORS, TIER_COLORS, GRASS_A, GRASS_B, SAND_A, SAND_B,
+    TYPE_COLORS, TIER_COLORS, UI_GLYPHS, GRASS_A, GRASS_B, SAND_A, SAND_B,
     GRASS_LINE, SAND_LINE, SPOT,
     arena_dot, draw_hud, draw_small_number, draw_text, draw_pixel_text,
     draw_floor_tile, draw_divider, draw_base, draw_meter, draw_spark,
@@ -147,7 +147,7 @@ def draw_weather_text(img, xy, text, font):
     draw = ImageDraw.Draw(img)
     offset = 0
     for ch in text:
-        if ch in WEATHER_GLYPHS and not font.text(ch).getbbox():
+        if ch in WEATHER_GLYPHS and ch not in UI_GLYPHS and not font.text(ch).getbbox():
             for y, row in enumerate(WEATHER_GLYPHS[ch]):
                 for x in range(16):
                     if row & (1 << (15 - x)):
@@ -521,6 +521,10 @@ class BattleAnimation:
                              weather_name=weather_name)
         if battle is None:
             b.run()
+        self._initial_weather_name = getattr(b, 'base_weather_name', weather_name)
+        self.weather_name = self._initial_weather_name
+        self.weather_until = None
+        self.tactical_effects = []
         self.units = {u.idx: AnimUnit(u) for u in b.units}
         self.by_idx = {u.idx: u for u in b.units}
         self.events = b.events
@@ -587,6 +591,9 @@ class BattleAnimation:
                 and (kind != "flinch" or 0 <= effect_frame(T - au.statuses[kind]) < 3)]
 
     def _reset(self) -> None:
+        self.weather_name = self._initial_weather_name
+        self.weather_until = None
+        self.tactical_effects = []
         # The training/compatibility tools replace the event list on a copied
         # animation before resetting; detect its contract from the new stream.
         self.authoritative_states = any(ev[1] == "unit_state" for ev in self.events)
@@ -707,6 +714,23 @@ class BattleAnimation:
                     au.set_hp(t, au.hp - ev[5])
                 self.floats.append((t, *au.render_px(t), f"-{ev[5]}",
                                     DOT_COLORS.get(status, STATUS_PURPLE)))
+        elif kind == "tactical_effect" and len(ev) == 6:
+            source, target, effect, payload = ev[2:]
+            self.tactical_effects.append(ev)
+            self.tactical_effects = self.tactical_effects[-12:]
+            if effect == 'guard':
+                self.msg = (t, f"{self.by_idx[source].piece.name}替{self.by_idx[target].piece.name}承受攻击！")
+            elif effect in ('weather_start', 'weather_end', 'weather_conflict'):
+                self.weather_name = payload['new_weather']
+                # Display this already announced window. Reading the next weather
+                # event would reveal an opponent's future cast before it happens.
+                expires = payload.get('expires_at')
+                self.weather_until = (t+max(0., expires-payload.get('simulation_time', t))
+                                      if expires is not None else None)
+                label = {None: '无天气', 'sun': '晴天', 'rain': '雨天', 'sand': '沙暴', 'hail': '冰雹'}[self.weather_name]
+                reason = ('晴雨冲突，恢复' if effect == 'weather_conflict' else
+                          '天气结束，恢复' if effect == 'weather_end' else '全场天气变为')
+                self.msg = (t, reason + label)
         elif kind == "end":
             self.result = ev[2]
 
@@ -939,6 +963,30 @@ class BattleAnimation:
             draw_skill_effect(img, sid, effect, source, target, T-ev[0], budget,
                               self.visual_config(sid), payload, arch=ev[4])
 
+    def _draw_tactical_outcomes(self, img, T, budget):
+        """A bounded transfer link marks the authoritative interception recipient."""
+        draw = ImageDraw.Draw(img)
+        for event in self.tactical_effects[-4:]:
+            age = T-event[0]
+            if event[4] != 'guard' or not 0 <= age <= .5:
+                continue
+            if not budget.take(1, minimum=1):
+                continue
+            payload = event[5]
+            def point(idx, key):
+                xy = self.units[idx].cell_px(payload[key])
+                return xy[0]+20, xy[1]+18
+            guardian, protected = point(event[2], 'source_pos'), point(event[3], 'target_pos')
+            draw.line((protected, guardian), fill=(45, 63, 58, 240), width=5)
+            draw.line((protected, guardian), fill=(232, 203, 115, 255), width=2)
+            k = min(1., age/.3)
+            x = round(protected[0]+(guardian[0]-protected[0])*k)
+            y = round(protected[1]+(guardian[1]-protected[1])*k)
+            draw.rectangle((x-2, y-2, x+2, y+2), fill=(255, 247, 207, 255))
+            gx, gy = guardian
+            draw.arc((gx-16, gy-15, gx+16, gy+17), 15, 165,
+                     fill=(232, 203, 115, 255), width=2)
+
     def _draw_board(self, img: Image, T: float) -> None:
         # All sprite poses, flashes and FX share this frame's hit selection.
         # Scoped to this draw only: isolated probes and rewind cannot reuse it.
@@ -971,6 +1019,7 @@ class BattleAnimation:
         fx = Image.new("RGBA", (W, H))
         # 先分配命中/消散/蓄力，再把剩余预算给尘土与旧星闪。
         self._draw_board_fx(fx, T, budget, poses)
+        self._draw_tactical_outcomes(fx, T, budget)
         for t, x, y in self.dusts:
             age = T - t
             if 0 <= effect_frame(age) < 4 and age < DUST_LIFE:
@@ -1025,6 +1074,8 @@ class BattleAnimation:
         if self.weather_name in WEATHER_ICONS:
             rows, color = WEATHER_ICONS[self.weather_name]
             draw_pixel_icon(img, (228, 11), rows, color)
+            if self.weather_until is not None:
+                draw_pixel_text(img, (217, 19), str(max(0, math.ceil(self.weather_until-T-1e-9))), INK)
 
     def _casting_phase(self, au, T):
         """只从已回放信息推导抬手；即时 cast 之前以满能量阈值为起点。"""
@@ -1637,7 +1688,7 @@ class BattleAnimation:
 
     def _draw_message(self, img: Image, T: float) -> None:
         t0, text = self.msg
-        if self.weather_name in WEATHER_MESSAGES and 0 <= T <= 1.8:
+        if self.weather_name in WEATHER_MESSAGES and not self.tactical_effects and 0 <= T <= 1.8:
             t0, text = 0.0, WEATHER_MESSAGES[self.weather_name]
         y0 = BY + BROWS * BCELL + 4
         # 固定日志外框填满原有底部留白；消息出现/消退条件完全不变。
@@ -1652,7 +1703,7 @@ class BattleAnimation:
         # 40px 棋盘后日志只有 48px：按原消息寿命分页，一次完整显示一行。
         lines = wrap_text(text, W - 36)
         line = lines[min(len(lines) - 1, max(0, int((T - t0) / 0.6)))]
-        if self.weather_name in WEATHER_MESSAGES and 0 <= T <= 1.8:
+        if self.weather_name in WEATHER_MESSAGES and not self.tactical_effects and 0 <= T <= 1.8:
             draw_weather_text(img, (10, y0 + 24), line, self.font)
         else:
             draw_text(img, (10, y0 + 24), line, self.font, HP_RED if "拔群" in line else INK)

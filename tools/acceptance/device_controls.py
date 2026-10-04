@@ -100,6 +100,23 @@ class Device:
     def _find_uid(self, uid):
         return next(((loc, p) for loc, p in owned_rows(self.state) if p.get("uid") == uid), None)
 
+    def _pending_rewards(self):
+        return [r for r in self.state.get("rewards", []) if r.get("status") == "pending"]
+
+    def _is_tactical(self):
+        return self.state.get("ruleset") == "tactics_v1"
+
+    def _validate_learning(self, species, technique):
+        from techniques import validate_learning
+        return validate_learning(species, technique, ruleset=self.state.get("ruleset", "base_v1"))
+
+    @staticmethod
+    def _adjacent(first, second):
+        if not first.startswith("g") or not second.startswith("g"):
+            return False
+        a, b = [tuple(map(int, loc[1:].split(","))) for loc in (first, second)]
+        return sum(abs(x-y) for x, y in zip(a, b)) == 1
+
     def _catalog(self):
         result = expedition.api_profile()
         if result.get("ok"):
@@ -121,15 +138,20 @@ class Device:
             params["expected_sequence"] = self.sequence
             uid = params.pop("uid", None)
             if uid is not None:
-                found = self._find_uid(uid)
-                if found is None:
-                    self._go(self._base(), now, replace=True)
-                    self.message = "目标棋子已变化，请重新选择"
-                    return
-                if command == "learn":
-                    params["uid"] = uid
+                # Tactical configuration is identity based, including explicit
+                # clearing. Never turn its stable UID into an equipment loc.
+                if command in ("set_guard", "set_weather") and uid == "":
+                    params["uid"] = ""
                 else:
-                    params["from" if command == "move" else "loc"] = found[0]
+                    found = self._find_uid(uid)
+                    if found is None:
+                        self._go(self._base(), now, replace=True)
+                        self.message = "目标棋子已变化，请重新选择"
+                        return
+                    if command in ("learn", "set_guard", "set_weather"):
+                        params["uid"] = uid
+                    else:
+                        params["from" if command == "move" else "loc"] = found[0]
         self.busy = True
         try:
             result = demo.api_action({"cmd": command, "sid": self.sid, **params})
@@ -141,6 +163,11 @@ class Device:
             self.message = result.get("error", "操作未完成")
             if result.get("recovery_sid"):
                 self.sid = result["recovery_sid"]
+            if command in ("claim_reward", "set_guard", "set_weather", "learn"):
+                # A rejected command must not leave an apparently valid target
+                # in a confirmation dialog. The next attempt starts from truth.
+                self._refresh(now)
+                self._go(self._base(), now, replace=True)
             return
         self.state = result.get("state", self.state)
         self.sid = result.get("sid", self.state.get("sid", self.sid))
@@ -165,6 +192,7 @@ class Device:
         you = state.get("you", {})
         if page == "home":
             return [row("启程 · 远征", "expedition", detail="选择主搭档、招式机器与开局装备。"),
+                    row("战术远征 · 护卫与天气", "tactics", detail="沿用远征行囊。在野怪轮获取护卫、晴天与求雨教学，选择队友分工。"),
                     row("继续存档", "resume", subtitle="继续已保存的这一局" if self.sid else "尚无存档编号", disabled=not self.sid),
                     row("经典对局", "classic", detail="从商店组建队伍，八位训练家同场竞技。"),
                     row("挑战与图鉴", "collection")]
@@ -204,7 +232,7 @@ class Device:
                         if p.get("seen") else "在商店或战斗中遇见后收录。") for p in self.profile.get("dex", [])]
         if page == "prep":
             return [row("商店", "open", page="shop"), row("棋盘与备战", "open", page="board_rows"),
-                    row("仓库与教学", "open", page="inventory"), row("羁绊", "open", page="synergies"),
+                    row("仓库与教学" + (f" · {len(self._pending_rewards())} 待领" if self._pending_rewards() else ""), "open", page="inventory"), row("羁绊", "open", page="synergies"),
                     row("侦察与排名", "open", page="scout"), row("开战", "battle_confirm"),
                     row("保存 / 返回主页", "open", page="system")]
         if page == "shop":
@@ -235,10 +263,72 @@ class Device:
                     row("卸下装备", "command", command="unequip", uid=ctx["uid"], disabled=not piece.get("item")),
                     row("学习招式", "learn_piece", uid=ctx["uid"]),
                     row(f"卖出 · +{piece.get('sell', 1)} 金", "sell_confirm", uid=ctx["uid"], name=piece["name"]),
-                    row("查看详情", "show_detail", detail=piece_detail(piece))]
+                    row("战术配置" if self._is_tactical() else "查看详情",
+                        "piece_tactics" if self._is_tactical() else "show_detail", uid=ctx["uid"], detail=piece_detail(piece))]
+        if page == "piece_tactics":
+            found = self._find_uid(ctx.get("uid"))
+            if not found:
+                return [row("棋子已变化，请返回", "back")]
+            loc, piece = found
+            learned = (piece.get("technique") or {}).get("id")
+            deployed = loc.startswith("g")
+            tactical = state.get("tactical") or {}
+            guard, weather = tactical.get("guard") or {}, tactical.get("weather") or {}
+            return [
+                row("选择护卫对象", "guard_choose", uid=piece["uid"], icon="guard",
+                    disabled=not deployed or learned != "guard",
+                    subtitle="仅相邻上场队友 · 每场一次" if deployed and learned == "guard" else "需上场并学习护卫",
+                    detail="选择相邻队友，拦截一次真实突进后的主命中；启用后原护卫停用，不会自动接力。"),
+                row("设为本队天气手", "weather_confirm", uid=piece["uid"], icon="weather",
+                    disabled=not deployed or learned not in ("sunny_day", "rain_dance"),
+                    subtitle="首次大招后改变全场天气" if deployed and learned in ("sunny_day", "rain_dance") else "需上场并学习晴天或求雨",
+                    detail="天气全场共享，双方都受影响。后触发覆盖先触发，同刻不同天气抵消，同天气不叠加时长。窗口结束恢复基础天气。每队一次；原天气手停用，不会自动接力。"),
+                row("关闭本队护卫", "guard_clear", disabled=not guard, icon="guard", subtitle="不会返还教学，也不改变站位"),
+                row("关闭本队天气手", "weather_clear", disabled=not weather, icon="weather", subtitle="本队本场仅使用基础或对方天气"),
+                row("查看伙伴详情", "show_detail", detail=piece_detail(piece), icon="dex")]
+        if page == "guard_targets":
+            source = self._find_uid(ctx.get("uid"))
+            if not source:
+                return [row("护卫已变化，请返回", "back")]
+            entries = []
+            for loc, piece in owned_rows(state):
+                if piece.get("uid") == ctx["uid"] or not loc.startswith("g"):
+                    continue
+                entry = self._uid_row(loc, piece, "guard_target", source_uid=ctx["uid"])
+                entry["disabled"] = not self._adjacent(source[0], loc)
+                entry["subtitle"] = "相邻队友 · C 预览确认" if not entry["disabled"] else "必须与护卫四向相邻"
+                entries.append(entry)
+            return entries or [row("先部署一名相邻队友", "back", detail="护卫只能保护四向相邻的上场队友。")]
         if page == "inventory":
-            return [row("成品装备 · 使用", "open", page="finished"), row("组件 · 合成", "open", page="craft"),
+            pending = self._pending_rewards()
+            rewards = [row(f"待领补给 · {len(pending)}", "open", page="rewards", icon="flag",
+                           subtitle="选择后入仓 · 开战前处理", detail="候选已固定；返回不会放弃，也不会重新抽取。")] if pending else []
+            return rewards + [row("成品装备 · 使用", "open", page="finished", icon="item"), row("组件 · 合成", "open", page="craft", icon="craft"),
                     row("招式机器 · 教学", "open", page="techniques"), row("已收取物资", "open", page="drops")]
+        if page == "rewards":
+            return [row(f"第 {r['round']} 轮 · 教学补给", "reward_open", reward_id=r["id"], icon="technique",
+                        subtitle=f"{len(r.get('options', []))} 选 1 · 领取后选择学习对象",
+                        detail="本轮候选已保存。返回仍待领；开战前选择领取，或明确放弃本次。")
+                    for r in self._pending_rewards()]
+        if page == "reward_options":
+            reward = next((r for r in self._pending_rewards() if r["id"] == ctx.get("reward_id")), None)
+            if not reward:
+                return [row("补给已处理，请返回", "back")]
+            choices = []
+            for option in reward.get("options", []):
+                compatible = []
+                for _, piece in owned_rows(state):
+                    try:
+                        self._validate_learning(piece["sid"], option["id"])
+                        compatible.append(piece["name"])
+                    except ValueError:
+                        pass
+                choices.append(row(option["name"], "reward_claim", reward_id=reward["id"], choice=option["id"],
+                                   icon="guard" if option["id"] == "guard" else "weather" if option["id"] in ("sunny_day", "rain_dance") else "technique",
+                                   subtitle="可学：" + "、".join(compatible) if compatible else "暂时无兼容伙伴 · 可留待转型",
+                                   detail=option.get("description", "") + "\n" + option.get("compatibility", "")))
+            return choices + [row("放弃本次补给", "reward_claim", reward_id=reward["id"], choice="skip",
+                                  subtitle="确认后本轮不可再领取", icon="back")]
         if page in ("finished", "equip_items"):
             return [row(i["name"], "equip_choose", detail=i.get("effect", ""), icon="item", item=i["key"], uid=ctx.get("uid"))
                     for i in state.get("items", {}).get("finished", [])]
@@ -260,9 +350,8 @@ class Device:
             for loc, piece in owned_rows(state):
                 entry = self._uid_row(loc, piece, "target", **ctx)
                 if ctx.get("kind") == "learn":
-                    from techniques import validate_learning
                     try:
-                        validate_learning(piece["sid"], ctx["technique"])
+                        self._validate_learning(piece["sid"], ctx["technique"])
                     except ValueError as exc:
                         entry.update(disabled=True, subtitle=str(exc), detail=piece_detail(piece) + "\n" + str(exc))
                 entries.append(entry)
@@ -303,9 +392,8 @@ class Device:
         if not found:
             self.message = "目标棋子已变化，请重新选择"
             return
-        from techniques import validate_learning
         try:
-            validate_learning(found[1]["sid"], technique)
+            self._validate_learning(found[1]["sid"], technique)
         except ValueError as exc:
             self.message = str(exc)
             return
@@ -341,9 +429,10 @@ class Device:
             self._commit("resume", now)
         elif action == "classic":
             self._confirm("开始新的经典对局", "new", now, mode="classic")
-        elif action in ("expedition", "collection"):
+        elif action in ("expedition", "tactics", "collection"):
             if self._catalog():
-                self._go(action, now)
+                self._go("expedition" if action == "tactics" else action, now,
+                         **({"mode": action} if action != "collection" else {}))
         elif action == "loadout":
             self._go("loadout", now, **data)
         elif action == "choose_loadout":
@@ -352,7 +441,8 @@ class Device:
                 self.loadout["technique"] = "none"
             self.back(now)
         elif action == "depart":
-            self._confirm("远征出发", "new", now, mode="expedition", **self.loadout)
+            mode = self.context.get("mode", "expedition")
+            self._confirm("战术远征出发" if mode == "tactics" else "远征出发", "new", now, mode=mode, **self.loadout)
         elif action == "buy":
             self._commit("buy", now, **data)
         elif action == "command":
@@ -371,6 +461,28 @@ class Device:
                 self.message = "这是空位"
         elif action == "piece":
             self._go("piece", now, **data)
+        elif action == "piece_tactics":
+            self._go("piece_tactics", now, uid=data["uid"])
+        elif action == "guard_choose":
+            self._go("guard_targets", now, uid=data["uid"])
+        elif action == "guard_target":
+            source = self._find_uid(data["source_uid"])
+            if source:
+                self._confirm(f"{source[1]['name']} 护卫 {item['label']}；每场一次，原护卫停用", "set_guard", now,
+                              uid=data["source_uid"], target_uid=data["uid"])
+        elif action == "weather_confirm":
+            source = self._find_uid(data["uid"])
+            if source:
+                self._confirm(f"{source[1]['name']} 首次大招后发动 {source[1]['technique']['name']}；全场共享，原天气手停用", "set_weather", now, uid=data["uid"])
+        elif action == "guard_clear":
+            self._confirm("关闭本队护卫；保留已学教学", "set_guard", now, uid="", target_uid="")
+        elif action == "weather_clear":
+            self._confirm("关闭本队天气手；保留已学教学", "set_weather", now, uid="")
+        elif action == "reward_open":
+            self._go("reward_options", now, reward_id=data["reward_id"])
+        elif action == "reward_claim":
+            self._confirm("放弃本次补给；本轮不可再领取" if data["choice"] == "skip" else "领取 " + item["label"] + " 招式机器；进入仓库后选择学习对象",
+                          "claim_reward", now, **data)
         elif action in ("move_piece", "equip_piece", "learn_piece"):
             self._go({"move_piece": "move_rows", "equip_piece": "equip_items", "learn_piece": "learn_items"}[action], now, uid=data["uid"])
         elif action == "sell_confirm":
@@ -393,6 +505,10 @@ class Device:
             else:
                 self._confirm("为 " + item["label"] + " 装备 " + data["name"], "equip", now, uid=data["uid"], item=data["item"])
         elif action == "battle_confirm":
+            if self._pending_rewards():
+                self._go("rewards", now)
+                self.message = "还有待领补给，请领取或明确放弃后开战"
+                return
             empty = not any(True for _ in owned_rows({"board": self.state.get("board", [])}))
             self._confirm("空场出战将直接判负" if empty else "准备完成，开始战斗", "end_prep", now)
         elif action == "finish_confirm":
@@ -465,6 +581,9 @@ class Device:
                   "scout": "对手情报", "standings": "训练家排名", "over": "旅程完结", "result": "战后结算",
                   "spectate": "观战席", "battle": "战斗回放", "system": "旅途菜单", "drops": "已收取物资",
                   "challenges": "挑战记录", "dex": "宝可梦图鉴", "loadout": "选择行囊", "confirm": "请确认"}
+        titles.update(piece_tactics="棋盘 · 战术分工", guard_targets="护卫 · 选择队友", rewards="待领补给", reward_options="教学补给 · 三选一")
+        if self.page == "expedition" and self.context.get("mode") == "tactics":
+            titles["expedition"] = "战术远征行囊"
         entries = self.rows()
         if self.page != "detail":
             self.selected = min(self.selected, max(0, len(entries)-1))
@@ -476,10 +595,11 @@ class Device:
                   "rows": public, "selected": self.selected, "offset": offset, "total": len(entries),
                   "footer": footer, "message": self.message, "hud": self.state.get("you"),
                   "round": self.state.get("round"), "board": self.state.get("board", []),
-                  "bench": self.state.get("bench", []), "row": self.context.get("row")}
+                  "bench": self.state.get("bench", []), "row": self.context.get("row"),
+                  "ruleset": self.state.get("ruleset", "base_v1")}
         # Presentation data only. The client draws the saved formation, but every
         # action, target UID and confirmation remains owned by this controller.
-        if self.page in ("prep", "shop", "board_rows", "board_columns", "move_rows", "move_columns", "piece"):
+        if self.page in ("prep", "shop", "board_rows", "board_columns", "move_rows", "move_columns", "piece", "piece_tactics", "guard_targets", "reward_options"):
             screen["choices"] = [{k: v for k, v in entry.items() if k not in ("action", "data")} | {"index": i}
                                  for i, entry in enumerate(entries)]
         opponent = self.state.get("opponent") or {}
@@ -488,6 +608,9 @@ class Device:
             "weather": self.state.get("weather", {}),
             "synergies": self.state.get("synergies", []),
             "loadout_partner": self.loadout.get("partner"),
+            "loadout_mode": self.context.get("mode", "expedition"),
+            "tactical": self.state.get("tactical") or {},
+            "pending_rewards": len(self._pending_rewards()),
             "inventory": {
                 "items": len(self.state.get("items", {}).get("finished", [])),
                 "components": sum(i["n"] for i in self.state.get("items", {}).get("components", [])),
@@ -499,6 +622,17 @@ class Device:
         focused = self._find_uid(focus_uid) if focus_uid else None
         if focused:
             screen["focus"] = {"loc": focused[0], "piece": focused[1]}
+        if self.page == "guard_targets" and entries:
+            candidate = entries[self.selected]
+            if candidate.get("portrait"):
+                screen["tactical_preview"] = {"guard": {"uid": focus_uid, "target_uid": candidate["portrait"]["uid"]},
+                                              "valid": not candidate.get("disabled", False), "draft": True}
+        if self.page == "confirm":
+            params = self.context["params"]
+            if self.context["command"] == "set_guard" and params.get("uid"):
+                screen["tactical_preview"] = {"guard": {"uid": params["uid"], "target_uid": params["target_uid"]}, "valid": True, "draft": True}
+            elif self.context["command"] == "set_weather" and params.get("uid"):
+                screen["tactical_preview"] = {"weather": {"uid": params["uid"]}, "valid": True, "draft": True}
         if entries and self.page != "detail":
             screen["active"] = {k: v for k, v in entries[self.selected].items() if k not in ("action", "data")}
         screen["can_back"] = bool(self.stack) or self.page != "home"

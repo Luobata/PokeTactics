@@ -1,0 +1,310 @@
+{
+  "schema_version": "independent-reviewer.v1",
+  "review_status": "pass",
+  "repo": {
+    "path": "/Users/bytedance/luobata/PokeTactics",
+    "execution_location": "local",
+    "branch": "main",
+    "base_ref": "7c1262a01cc9a6f11bdd90e90cf9ac46cdf46401",
+    "head_ref": "7c1262a01cc9a6f11bdd90e90cf9ac46cdf46401",
+    "target": "dirty worktree; implementation changes remain uncommitted"
+  },
+  "review": {
+    "session_id": "tactics-h-20261005",
+    "run_id": "implementation-1-recheck",
+    "bundle_path": ".build/tactics-h/review",
+    "dashboard_url": null,
+    "input_fingerprint": "8bfaec3e1bf6b4d89e3a76b3cd198d0fa284ad4615ddfb4efa70d4380e43e5c4",
+    "previous_input_fingerprint": "d86eaacecf1d8019412ebc6d42bda4839059b0e5e70dfc1617c03177f3461b97",
+    "created_at": "2026-10-04T22:39:53.325931+00:00",
+    "updated_at": "2026-10-04T22:49:49.699206+00:00",
+    "recheck_scope": "H-R1/H-R2 narrow closure, followed by the supplemental native-log glyph and legacy-weather fallback recheck recorded below. This pass does not approve numerical balance, hardware, human usability or final full-system acceptance.",
+    "scope_exclusions": [
+      "Training, talents, Gen2",
+      "Numerical balance and full-roster build viability",
+      "ESP32 hardware and human usability",
+      "sim/experiment_tactics.py additions made concurrently by the root agent"
+    ],
+    "input_note": "The original five recheck_inputs retain their historical hashes for H-R1/H-R2. The subsequent font-only changes and fresh visual evidence are separately bound in supplemental_reviews. The renderer change since the prior closure is the shared UI_GLYPHS import and duplicate-fallback guard; all seven tactical presentation tests were rerun successfully.",
+    "recheck_inputs": [
+      {
+        "path": "sim/combat.py",
+        "sha256": "a37cfba5945315c97fed6665213d3cf6925f017a89bcd11b8f23a75e93d3473e"
+      },
+      {
+        "path": "tools/mockups/animation_timeline.py",
+        "sha256": "8cc4fb8a91b8b24a1b267fe06e045b3f6ef209fa768d8429fbe2f3dac4267656"
+      },
+      {
+        "path": "tools/mockups/render_battle_gif.py",
+        "sha256": "5a63b30335a5733e0045a4b5b39267e1d8960a67103b4119e1a1c311e34fb062"
+      },
+      {
+        "path": "tests/test_tactical_presentation.py",
+        "sha256": "3346a403a5dbb19ed0f30e72a69d2434edb083eb734c95adedc988b68c6522b1"
+      },
+      {
+        "path": "tests/test_tactical_combat.py",
+        "sha256": "8d5b51edfe9d45bf3f3252fc6f962eb05f0a71a008ff4d80a39c875543775427"
+      }
+    ],
+    "supplemental_reviews": [
+      {
+        "run_id": "implementation-1-glyph-recheck",
+        "status": "pass",
+        "reviewer_lifecycle": "reused",
+        "reviewed_at": "2026-10-04T22:49:16.973143+00:00",
+        "scope": "Only fixed 16px glyphs for the new native battle log, plus the legacy weather helper regression introduced when Regular fallback glyphs replaced the initial heavier bitmaps. No game, reward, weather timing or action rules changed.",
+        "inputs": [
+          {
+            "path": "tools/mockups/render_mockups.py",
+            "sha256": "8d5cdeb5ba8222976332373bde3c0237363709fec6226349bb6fadc40357f1e8"
+          },
+          {
+            "path": "tools/mockups/render_battle_gif.py",
+            "sha256": "ab8a39c0cafaf3583b88ba29c219388414ca0aaa7eba61d4ddfbe5bec3e35968"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "reports/evidence/tactics-2026-10-05/visual-overview.png",
+            "sha256": "6f8084d0feeb22f024fec6c84c10a96ed4c5fbdc8887e1cf5a0740ac972146b8"
+          },
+          {
+            "path": "reports/evidence/tactics-2026-10-05/visual-metadata.json",
+            "sha256": "ff46c35524b744cf2ebfd225396b41a2a3722205f2313fd8ed5f04e228341e97"
+          }
+        ],
+        "character_scope": "31 distinct native-log characters: 29 CJK characters plus two punctuation marks. External overview captions are excluded from this runtime glyph contract.",
+        "visual_observation": "Viewed the final four-scene overview: the native guard text contains 承受, the sun/rain lines contain 晴/雨, and the conflict/restoration line is readable. Regular glyph strokes are consistent with the surrounding pixel text; no missing letters or overlapping dual glyph shapes observed.",
+        "font_dependency_scope": "The runtime draw paths use fixed 16px monochrome rows and the bundled FNT1 asset. Font-loading functions were blocked during the probe. The overview generator separately uses a system font only for captions outside the intact native frame; that is not a runtime font dependency.",
+        "input_fingerprint": "331fd0d24abee8cc575cf917b3c1775e9bdc3556aeb4cdb0c7dd7f917985d547"
+      }
+    ]
+  },
+  "reviewer_agents": [
+    {
+      "agent_id": "/root/tactics_independent_review",
+      "role": "general-reviewer",
+      "lifecycle": "reused",
+      "verdict": "pass",
+      "bound_scope": "Initial read-only implementation review, H-R1/H-R2 narrow recheck, and font-only H-R3/H-R4 follow-up. Only the durable review report was written by the reviewer."
+    }
+  ],
+  "findings": [
+    {
+      "id": "H-R1",
+      "severity": "blocker",
+      "priority": "P2",
+      "status": "closed",
+      "title": "Weather countdown read future override and revealed an uncast opponent weather change",
+      "file": "tools/mockups/render_battle_gif.py",
+      "line": 725,
+      "original_scenario": "The initial fixture started sun at presentation 1.1 s but used the future rain event at 2.95 s as its expiry, showing only 1.85 s. A battle ending before the next weather event omitted the countdown.",
+      "required_action": "Use only the announced weather event expiry and an explicit clock mapping; switch when the actual override event arrives.",
+      "resolution": "Timeline copies original simulation_time into presented tactical payloads without mutating raw events. Renderer computes the announced remaining window from that event; it no longer scans future transitions.",
+      "evidence_refs": [
+        "tools/mockups/animation_timeline.py:138",
+        "tools/mockups/render_battle_gif.py:723",
+        "tests/test_tactical_presentation.py:154",
+        "checks:focused-unittests",
+        "checks:independent-prefix-and-packet-probes"
+      ],
+      "re_review_condition": "Same past prefix must yield the same countdown despite future override versus early end; override occurs only at its event, with rewind and speed stable.",
+      "verification_result": "Passed. Full versus truncated future have equal 8.0, 7.8 and 7.5 s countdowns and byte-identical frames at 1.1, 1.3 and 1.6 presentation seconds. Existing override, rewind, speed and skip checks pass."
+    },
+    {
+      "id": "H-R2",
+      "severity": "blocker",
+      "priority": "P2",
+      "status": "closed",
+      "title": "Guard participant tracking caused the surf side packet to animate as another basic attack",
+      "file": "tools/mockups/animation_timeline.py",
+      "line": 115,
+      "original_scenario": "Guard plus surf produced primary impact 1.05 s and a separate secondary=False attack at 1.55 s. Removing the guard marker from the same raw stream restored a secondary hit at 1.05 s.",
+      "required_action": "Provide bounded cast ownership for guard-related packets without absorbing subsequent independent same-tick actions.",
+      "resolution": "Combat closes result_event_count immediately after the intercepted cast packet. Timeline binds only those following records to the cast, preserving participation fences while leaving later actions independent.",
+      "evidence_refs": [
+        "sim/combat.py:683",
+        "tools/mockups/animation_timeline.py:114",
+        "tests/test_tactical_presentation.py:103",
+        "tests/test_tactical_combat.py:272",
+        "checks:focused-unittests",
+        "checks:independent-prefix-and-packet-probes"
+      ],
+      "re_review_condition": "Guard plus surf primary and side damage share impact; subsequent same-tick basics and later weather transitions remain outside ownership; JSON replay and base_v1 compatibility remain valid.",
+      "verification_result": "Passed. Surf side packet shares primary impact; two subsequent same-tick basics, including another unit, are independent. JSON roundtrip preserves the boundary. A cast-owned rain request is inside the packet and its next-tick weather start is outside. Base event/RNG golden tests pass."
+    },
+    {
+      "id": "H-R3",
+      "severity": "blocker",
+      "priority": "P2",
+      "status": "closed",
+      "detected_by": "Root agent visual inspection; independently verified closure",
+      "title": "New native battle-log text omitted glyphs missing from the bundled font",
+      "file": "tools/mockups/render_mockups.py",
+      "line": 88,
+      "original_scenario": "The native log could omit 晴/承 and could not reuse the special weather-only 雨/雹 fallback through the generic draw_text path.",
+      "required_action": "Supply fixed 16px monochrome fallback glyphs on the shared drawing path and verify actual native-log characters without runtime system fonts.",
+      "resolution": "UI_GLYPHS now includes Regular fixed bitmaps for 晴/承/雨/雹. Generic text rendering uses the shared bitmaps.",
+      "evidence_refs": [
+        "tools/mockups/render_mockups.py:86",
+        "checks:fixed-glyph-and-opening-weather-probe",
+        "checks:final-visual-inspection",
+        "reports/evidence/tactics-2026-10-05/visual-overview.png"
+      ],
+      "re_review_condition": "All 31 native-log characters are nonblank, retain 16px boundaries and requested colors, and draw with system font loading disabled; inspect the final native scene render.",
+      "verification_result": "Passed: 31 characters (29 CJK plus 2 punctuation), 62 per-character color cases; fixed 16x16 glyph and fallback bypass checks; final four-scene overview inspected at the recorded hash."
+    },
+    {
+      "id": "H-R4",
+      "severity": "blocker",
+      "priority": "P2",
+      "status": "closed",
+      "detected_by": "Independent reviewer during the Regular-glyph follow-up",
+      "title": "Legacy opening weather helper overlaid its older glyph on the new Regular fallback",
+      "file": "tools/mockups/render_battle_gif.py",
+      "line": 150,
+      "original_scenario": "After Regular bitmaps were added, draw_weather_text first drew the generic Regular 雨/雹 and then drew the older WEATHER_GLYPHS bitmap because Font16 still lacked the character. 雨 expanded from 70 Regular pixels to 142 overlaid pixels; 雹 expanded from 78 to 146.",
+      "required_action": "Do not overlay a weather-only fallback when UI_GLYPHS already provides that character; retain fallback for genuinely uncovered weather characters.",
+      "resolution": "The weather helper now applies its old fallback only when the character is absent from UI_GLYPHS and missing from Font16.",
+      "evidence_refs": [
+        "tools/mockups/render_battle_gif.py:150",
+        "checks:fixed-glyph-and-opening-weather-probe",
+        "checks:post-glyph-presentation-tests"
+      ],
+      "re_review_condition": "Generic and opening-weather drawing must be byte-identical for the four fixed glyphs and rain/hail opening lines; preserve the old 肆/虐 fallback.",
+      "verification_result": "Passed: 雨70/雹78 opaque pixels on both paths, all four fixed glyphs and both opening lines byte-identical, 肆/虐 nonblank, seven tactical presentation regressions passed."
+    }
+  ],
+  "checks": [
+    {
+      "name": "focused-unittests",
+      "status": "passed",
+      "command": "PYTHONPATH=tests python3 -m unittest test_tactical_presentation test_tactical_combat test_animation_timeline -v",
+      "exit_code": 0,
+      "test_count": 38,
+      "result": "38 tests passed: 7 tactical presentation, 21 tactical combat, 10 animation timeline. Pre-existing Pillow getdata deprecation warnings only."
+    },
+    {
+      "name": "independent-prefix-and-packet-probes",
+      "status": "passed",
+      "command": "python3 - <<'PY'\nimport copy,json,sys\nsys.path[:0]=['tests','sim','tools/mockups']\nfrom unittest.mock import patch\nfrom test_tactical_presentation import TacticalPresentation\nfrom test_tactical_combat import guarded_battle,strike\nfrom animation_timeline import AnimationTimeline\nTacticalPresentation.setUpClass(); test=TacticalPresentation()\nfull_battle=test.weather(); raw_before=copy.deepcopy(full_battle.events)\nidx=next(i for i,e in enumerate(full_battle.events) if e[1]=='tactical_effect' and e[4]=='weather_start')\ntruncated=copy.deepcopy(full_battle); truncated.events=copy.deepcopy(full_battle.events[:idx+1])+[(2.,'end',None)]\nfull=test.animation(full_battle); short=test.animation(truncated)\nstart=next(e[0] for e in full.timeline.events if e[1]=='tactical_effect' and e[4]=='weather_start')\nwindows=[]\nfor delta in (0.,.2,.5):\n moment=start+delta\n for anim in (full,short):\n  anim._presentation_view()._ensure(moment)\n vals=[a._presentation_view().weather_until-moment for a in (full,short)]\n assert vals[0]==vals[1] and abs(vals[0]-(8.-delta))<1e-8,vals\n assert full.playback_frame(moment).tobytes()==short.playback_frame(moment).tobytes()\n windows.append({'time':moment,'remaining_full':vals[0],'remaining_truncated':vals[1]})\nassert full_battle.events==raw_before\n\nb,a,protected,guard,bait=guarded_battle(attacker_teaching='surf')\nstrike(b,a,bait)\nmarker=next(e for e in b.events if e[1]=='tactical_effect' and e[4]=='guard')\nowner=marker[5]['result_event_index']; boundary=owner+marker[5]['result_event_count']\na.energy=0;b._strike(a,protected,.1)\n# Another unit's legal same-tick basic also lies beyond the closed packet.\nprotected.energy=0;b._strike(protected,a,.1)\nfor events in (b.events,json.loads(json.dumps(b.events))):\n tl=AnimationTimeline(events,b.units); main=next(a for a in tl.actions if a.source_index==owner)\n derived=[a for a in tl.actions if owner<a.source_index<=boundary]\n following=[a for a in tl.actions if a.source_index>boundary]\n assert derived and all(a.secondary and a.impact==main.impact for a in derived)\n assert len(following)==2 and all(not a.secondary for a in following)\n assert all(a.impact>main.impact for a in following)\n\nweather_b,a,p,g,bait=guarded_battle(attacker_teaching='rain_dance')\nweather_b._weather_sources[a.team]=a\nstrike(weather_b,a,bait)\nm=next(e for e in weather_b.events if e[1]=='tactical_effect' and e[4]=='guard')\nowner2=m[5]['result_event_index']; boundary2=owner2+m[5]['result_event_count']\nrequest_i=next(i for i,e in enumerate(weather_b.events) if e[1]=='tactical_effect' and e[4]=='weather_request')\nassert owner2<request_i<=boundary2\nweather_b.flush_tactics(.2)\nstart_i=next(i for i,e in enumerate(weather_b.events) if e[1]=='tactical_effect' and e[4]=='weather_start')\nassert start_i>boundary2\nweather_b.events.append((1.,'end',None))\ntl=AnimationTimeline(weather_b.events,weather_b.units)\nmain=next(a for a in tl.actions if a.source_index==owner2)\nrequest=next(e for e in tl.events if e[1]=='tactical_effect' and e[4]=='weather_request')\ntransition=next(e for e in tl.events if e[1]=='tactical_effect' and e[4]=='weather_start')\nassert request[0]==main.impact and transition[0]>=main.impact\nprint(json.dumps({'weather_prefix_samples':windows,'prefix_pixels_equal':True,'raw_events_unchanged':True,'guard_surf_boundary':boundary,'following_same_tick_basics':len(following),'serialized_packet_preserved':True,'weather_request_inside_guard_packet':True,'weather_start_outside_guard_packet':True},ensure_ascii=False))\nPY",
+      "exit_code": 0,
+      "result": {
+        "weather_prefix_samples": [
+          {
+            "time": 1.1,
+            "remaining_full": 8.0,
+            "remaining_truncated": 8.0
+          },
+          {
+            "time": 1.3,
+            "remaining_full": 7.8,
+            "remaining_truncated": 7.8
+          },
+          {
+            "time": 1.6,
+            "remaining_full": 7.5,
+            "remaining_truncated": 7.5
+          }
+        ],
+        "prefix_pixels_equal": true,
+        "raw_events_unchanged": true,
+        "guard_surf_boundary": 17,
+        "following_same_tick_basics": 2,
+        "serialized_packet_preserved": true,
+        "weather_request_inside_guard_packet": true,
+        "weather_start_outside_guard_packet": true
+      }
+    },
+    {
+      "name": "recheck-input-integrity",
+      "status": "passed",
+      "command": "SHA256 all five recheck_inputs and compare with .build/tactics-h/review/session.json before writing this report",
+      "result": "All five reviewed file hashes match."
+    },
+    {
+      "name": "fixed-glyph-and-opening-weather-probe",
+      "status": "passed",
+      "command": "python3 - <<'PY'\nimport hashlib,json,sys\nfrom pathlib import Path\nfrom unittest.mock import patch\nsys.path[:0]=['tools/mockups','sim']\nfrom PIL import Image,ImageFont\nfrom render_mockups import UI_GLYPHS,draw_text,text_width\nfrom render_battle_gif import draw_weather_text,WEATHER_GLYPHS\nfrom decoders import Font16\ncorpus='隆隆岩替卡比兽承受攻击！全场天气变为晴天雨天沙暴冰雹无天气晴雨冲突，恢复天气结束，恢复'\nchars=sorted(set(corpus)); cjk=[c for c in chars if '\\u4e00'<=c<='\\u9fff']\nassert len(chars)==31 and len(cjk)==29\nwith patch.object(ImageFont,'truetype',side_effect=AssertionError('system font must not load')),patch.object(ImageFont,'load_default',side_effect=AssertionError('system font must not load')):\n font=Font16()\n for char in chars:\n  assert text_width(char)==16\n  for color in ((41,44,53),(19,71,143)):\n   image=Image.new('RGBA',(20,20));draw_text(image,(2,2),char,font,color)\n   bbox=image.getbbox()\n   assert bbox is not None and 2<=bbox[0]<bbox[2]<=18 and 2<=bbox[1]<bbox[3]<=18,(char,bbox)\n   opaque=[image.getpixel((x,y)) for x in range(20) for y in range(20) if image.getpixel((x,y))[3]]\n   assert set(opaque)=={(*color,255)},(char,set(opaque))\n counts={}\n for char in '晴承雨雹':\n  rows=UI_GLYPHS[char]\n  assert len(rows)==16 and all(len(row)==16 and set(row)<=set('01') for row in rows)\n  with patch.object(font,'text',side_effect=AssertionError('fixed glyph fallback requested')):\n   a=Image.new('RGBA',(16,16));draw_text(a,(0,0),char,font)\n   b=Image.new('RGBA',(16,16));draw_weather_text(b,(0,0),char,font)\n   assert a.getbbox() is not None and a.tobytes()==b.tobytes()\n  counts[char]=sum(a.getpixel((x,y))[3]>0 for x in range(16) for y in range(16))\n for text in ('下雨了！','开始下冰雹了！'):\n  a=Image.new('RGBA',(16*len(text),16));draw_text(a,(0,0),text,font)\n  b=Image.new('RGBA',(16*len(text),16));draw_weather_text(b,(0,0),text,font)\n  assert a.tobytes()==b.tobytes(),text\n for char in '肆虐':\n  a=Image.new('RGBA',(16,16));draw_weather_text(a,(0,0),char,font)\n  assert a.getbbox() is not None\nprint(json.dumps({'character_count':31,'cjk_count':29,'punctuation_count':2,'characters':''.join(chars),'nonblank_and_color_cases':62,'fixed_glyph_size':[16,16],'opaque_pixel_counts':counts,'weather_and_generic_fixed_glyphs_identical':True,'rain_and_hail_opening_lines_identical':True,'legacy_sand_fallback_preserved':True,'host_font_loading_blocked':True,'fixed_glyph_fallback_blocked':True,'source_sha256':{p:hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in ('tools/mockups/render_mockups.py','tools/mockups/render_battle_gif.py')}},ensure_ascii=False))\nPY",
+      "exit_code": 0,
+      "result": {
+        "character_count": 31,
+        "cjk_count": 29,
+        "punctuation_count": 2,
+        "characters": "为全兽冰冲击卡受变场复天岩恢承攻无晴暴替束比气沙突结隆雨雹！，",
+        "nonblank_and_color_cases": 62,
+        "fixed_glyph_size": [
+          16,
+          16
+        ],
+        "opaque_pixel_counts": {
+          "晴": 90,
+          "承": 71,
+          "雨": 70,
+          "雹": 78
+        },
+        "weather_and_generic_fixed_glyphs_identical": true,
+        "rain_and_hail_opening_lines_identical": true,
+        "legacy_sand_fallback_preserved": true,
+        "host_font_loading_blocked": true,
+        "fixed_glyph_fallback_blocked": true,
+        "source_sha256": {
+          "tools/mockups/render_mockups.py": "8d5cdeb5ba8222976332373bde3c0237363709fec6226349bb6fadc40357f1e8",
+          "tools/mockups/render_battle_gif.py": "ab8a39c0cafaf3583b88ba29c219388414ca0aaa7eba61d4ddfbe5bec3e35968"
+        }
+      }
+    },
+    {
+      "name": "post-glyph-presentation-tests",
+      "status": "passed",
+      "command": "PYTHONPATH=tests python3 -m unittest test_tactical_presentation -v",
+      "exit_code": 0,
+      "test_count": 7,
+      "result": "All seven tactical presentation tests pass after the shared glyph/fallback helper change. H-R1/H-R2 remain closed."
+    },
+    {
+      "name": "final-visual-inspection",
+      "status": "passed",
+      "command": "tools.view_image({path:\"/Users/bytedance/luobata/PokeTactics/reports/evidence/tactics-2026-10-05/visual-overview.png\"}); independently compare all visual-metadata sources_sha256 and outputs hashes with current files",
+      "result": {
+        "inspected_overview_sha256": "6f8084d0feeb22f024fec6c84c10a96ed4c5fbdc8887e1cf5a0740ac972146b8",
+        "visual_metadata_sha256": "ff46c35524b744cf2ebfd225396b41a2a3722205f2313fd8ed5f04e228341e97",
+        "verified_source_count": 8,
+        "verified_output_count": 8,
+        "observation": "Viewed the final four-scene overview: the native guard text contains 承受, the sun/rain lines contain 晴/雨, and the conflict/restoration line is readable. Regular glyph strokes are consistent with the surrounding pixel text; no missing letters or overlapping dual glyph shapes observed."
+      }
+    },
+    {
+      "name": "root-final-acceptance-evidence",
+      "status": "passed",
+      "execution_owner": "root",
+      "reviewer_action": "Read and validate stored result and final source hashes; did not independently rerun the full suite",
+      "evidence_ref": "reports/evidence/tactics-2026-10-05/acceptance.json",
+      "evidence_sha256": "654de1e011f6a628c6f8f42de0826374dbd0f3e1855dc3ae730d295d8b45e54e",
+      "started_at": "2026-10-04T22:46:30+00:00",
+      "test_count": 350,
+      "result": {
+        "selected_checks": [
+          "unit_tests",
+          "compile",
+          "diff_check",
+          "persistence_restart"
+        ],
+        "summary": {
+          "passed": 4,
+          "failed": 0,
+          "skipped": 6
+        },
+        "source_files_sha256_match": true
+      }
+    }
+  ],
+  "blockers": [],
+  "next_actions": [],
+  "residual_risks": [
+    "This review does not establish game balance, ESP32 device performance, or human play experience. Those remain separate acceptance scopes.",
+    "The final full-system automated result was executed by the root agent. The reviewer inspected its passing evidence and source hashes, while independently rerunning only the targeted checks recorded above."
+  ]
+}
