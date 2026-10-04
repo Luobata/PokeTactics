@@ -344,6 +344,9 @@ def detail_atlases(output):
             ImageDraw.Draw(fx_sheet).text((phase*240+4,row*264+5),f'{sid} move={AUTHORED_SKILLS[sid][0]} #{phase}',fill=r.PAPER)
     fx_sheet.save(output/'skill-geometry-atlas.png')
     motion_sheet.save(output/'motion-4x-atlas.png')
+    # Keep the compact preview in sync with the atlas, rather than leaving
+    # the old cut seams visible in the report's three-species preview.
+    motion_sheet.crop((0, 0, 1280, 3*7*180)).save(output/'motion-preview.png')
 
 
 def hard_checks(output):

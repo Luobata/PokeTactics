@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "cases": 447,
+  "baseline_internal_gap_pixels": 6211,
+  "fixed_internal_gap_pixels": 0,
+  "dissolve_masks_preserved": 79,
+  "empty_authored_cels": 0,
+  "off_palette_pixels": 0,
+  "failures": []
+}

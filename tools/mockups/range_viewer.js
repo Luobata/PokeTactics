@@ -1,0 +1,199 @@
+/* A decoded, bounded canvas atlas per clip: playback and seek never decode PNGs.
+   A selection owns its load; stale work is aborted and cannot repaint the stage. */
+const $ = id => document.getElementById(id);
+const stage = $('frame'), ctx = stage.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+const cache = new Map(), CACHE_BYTES = 32 * 1024 * 1024;
+let clips = [], selected = 0, index = 0, running = true;
+let active = null, pending = null, generation = 0, cacheBytes = 0, displayed = null;
+const MAX_ATTEMPTS = 2, TIMEOUT_MS = 12000, WORKERS = 4;
+
+function controls() {
+  const c = clips[selected];
+  if (!c) return;
+  $('seek').max = c.frames - 1;
+  $('seek').value = index;
+  $('play').textContent = running ? '暂停' : '播放';
+  $('info').textContent = JSON.stringify(c, null, 2);
+}
+function draw(atlas, frame) {
+  // All frames have validated identical dimensions. Never clear the live canvas.
+  ctx.drawImage(atlas.canvas, (frame % atlas.cols) * stage.width,
+    Math.floor(frame / atlas.cols) * stage.height, stage.width, stage.height,
+    0, 0, stage.width, stage.height);
+  displayed = {path: atlas.path, frame};
+  stage.dataset.path = atlas.path;
+  stage.dataset.frame = frame;
+}
+function present() {
+  controls();
+  if (!active) return;
+  draw(active, index);
+  $('label').textContent = `${index + 1} / ${clips[selected].frames}`;
+}
+function cachePut(atlas) {
+  // active is also a strong reference; eviction only removes reusable clips.
+  if (atlas.bytes > CACHE_BYTES) return;
+  while (cacheBytes + atlas.bytes > CACHE_BYTES && cache.size) {
+    const key = cache.keys().next().value;
+    cacheBytes -= cache.get(key).bytes;
+    cache.delete(key);
+  }
+  cache.set(atlas.path, atlas);
+  cacheBytes += atlas.bytes;
+}
+async function frameBitmap(url, signal) {
+  let error;
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    if (signal.aborted) throw new DOMException('Superseded', 'AbortError');
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    signal.addEventListener('abort', abort, {once: true});
+    // Include decode in the deadline, not just the network transfer.
+    let timer, abandoned = false;
+    const work = (async () => {
+      const response = await fetch(url, {signal: controller.signal});
+      if (!response.ok) throw new Error(`HTTP ${response.status}: ${url}`);
+      const bitmap = await createImageBitmap(await response.blob());
+      if (abandoned || signal.aborted) {
+        bitmap.close();
+        throw new DOMException('Superseded', 'AbortError');
+      }
+      if (bitmap.width !== stage.width || bitmap.height !== stage.height) {
+        bitmap.close();
+        throw new Error(`帧尺寸错误: ${url}`);
+      }
+      return bitmap;
+    })();
+    try {
+      return await Promise.race([work, new Promise((_, reject) => {
+        timer = setTimeout(() => {
+          abandoned = true;
+          controller.abort();
+          reject(new Error(`载入超时: ${url}`));
+        }, TIMEOUT_MS);
+      })]);
+    } catch (e) {
+      abandoned = true;
+      error = e;
+      if (signal.aborted) throw e;
+    } finally {
+      clearTimeout(timer);
+      signal.removeEventListener('abort', abort);
+    }
+  }
+  throw error;
+}
+async function loadClip(c, token, controller) {
+  const cols = Math.min(4, c.frames), canvas = document.createElement('canvas');
+  canvas.width = cols * stage.width;
+  canvas.height = Math.ceil(c.frames / cols) * stage.height;
+  const atlas = {path: c.path, canvas, cols, bytes: canvas.width * canvas.height * 4};
+  const ac = canvas.getContext('2d');
+  let next = 0, complete = 0;
+  const worker = async () => {
+    while (next < c.frames) {
+      const n = next++;
+      const version = c.sha256 ? `?v=${encodeURIComponent(c.sha256)}` : '';
+      const bitmap = await frameBitmap(`${c.path}/frame-${String(n).padStart(3, '0')}.png${version}`, controller.signal);
+      if (generation !== token || controller.signal.aborted) { bitmap.close(); return; }
+      ac.drawImage(bitmap, (n % cols) * stage.width, Math.floor(n / cols) * stage.height);
+      bitmap.close();
+      complete++;
+      // Cold start gets a real first frame as soon as possible; switches hold
+      // the previous scene until the entire new clip is ready.
+      if (!displayed && n === 0) draw(atlas, 0);
+      $('label').textContent = `载入中 ${complete}/${c.frames}（保留当前画面）`;
+    }
+  };
+  try {
+    await Promise.all(Array.from({length: Math.min(WORKERS, c.frames)}, worker));
+  } catch (e) {
+    controller.abort();
+    throw e;
+  }
+  return atlas;
+}
+async function selectClip(n) {
+  selected = n;
+  index = 0;
+  active = null;
+  const token = ++generation;
+  if (pending) pending.abort();
+  pending = null;
+  $('retry').hidden = true;
+  controls();
+  const c = clips[n];
+  stage.dataset.status = 'loading';
+  if (cache.has(c.path)) {
+    active = cache.get(c.path);
+    cache.delete(c.path);
+    cache.set(c.path, active);
+  } else {
+    $('label').textContent = '载入中…（保留当前画面）';
+    const controller = new AbortController();
+    pending = controller;
+    try {
+      const atlas = await loadClip(c, token, controller);
+      if (token !== generation) return;
+      active = atlas;
+      cachePut(atlas);
+    } catch (e) {
+      if (token !== generation) return;
+      stage.dataset.status = 'error';
+      $('label').textContent = `载入失败，已保留画面。${e.message}`;
+      $('retry').hidden = false;
+      return;
+    } finally {
+      if (token === generation) pending = null;
+    }
+  }
+  stage.dataset.status = 'ready';
+  present();
+}
+function seek(n) {
+  const c = clips[selected];
+  if (!c) return;
+  running = false;
+  index = ((n % c.frames) + c.frames) % c.frames;
+  controls();
+  if (active) present();
+}
+function tick() {
+  if (running && active) {
+    index = (index + 1) % clips[selected].frames;
+    present();
+  }
+}
+$('clip').onchange = () => selectClip(Number($('clip').value));
+$('play').onclick = () => { running = !running; controls(); };
+$('prev').onclick = () => seek(index - 1);
+$('next').onclick = () => seek(index + 1);
+$('seek').oninput = e => seek(Number(e.target.value));
+$('retry').onclick = () => selectClip(selected);
+ctx.fillStyle = '#eee6ce';
+ctx.fillRect(0, 0, stage.width, stage.height);
+ctx.fillStyle = '#292b24';
+ctx.fillText('载入中…', 80, 160);
+stage.dataset.status = 'loading';
+fetch('manifest.json', {cache: 'no-store'}).then(response => {
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.json();
+}).then(m => {
+  clips = m.clips;
+  if (!clips.length || clips.some(c => !Number.isInteger(c.frames) || c.frames < 1)) {
+    throw new Error('片段清单无效');
+  }
+  clips.forEach((c, i) => {
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = `${c.species} / ${c.scene} / ${c.action}`;
+    $('clip').appendChild(o);
+  });
+  return selectClip(0);
+}).catch(e => {
+  stage.dataset.status = 'error';
+  $('label').textContent = '清单载入失败';
+  $('info').textContent = '请在仓库目录运行 python3 -m http.server 后打开本页。 ' + e.message;
+});
+setInterval(tick, 100);

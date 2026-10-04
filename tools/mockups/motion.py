@@ -144,7 +144,9 @@ species_motion = {
 
 # Region cuts in percent of the occupied sprite, with a separate phase track.
 # Each tuple = (left, top, right, bottom, dx_track, dy_track). Crops are made
-# from the original cel, cleared, then pasted; movement does not leave clones.
+# from the original cel. Internal attachments extend the nearest edge pixel;
+# all cuts are cleared before compositing, so transparent tiles cannot erase
+# neighbours and a translated cut cannot leave a rectangular hole in the body.
 RIGS = {
  6: ((0,12,30,70,(0,-1,0,1),(0,-2,0,1)),(70,12,100,70,(0,1,0,-1),(0,-2,0,1))),
  65: ((0,28,26,73,(0,-1,-1,0),(0,-1,-2,-1)),(74,28,100,73,(0,1,1,0),(0,-1,-2,-1))),
@@ -253,6 +255,39 @@ def offsets(pose):
             f[1]+f[0]*pose.direction[1]+h[1]+h[0]*pose.hit_direction[1])
 
 
+def rig_cel(cel, sid, index):
+    """Translate parts with edge extrusion only at their internal attachments.
+
+    The silhouette-facing edge is free to move. A vacated internal edge uses
+    its original boundary row/column (including alpha), never a solid fill or
+    a copy of the entire old part. Clear all source cuts before drawing any
+    part, especially the adjacent rock/snake segments.
+    """
+    w, h = cel.size
+    out = cel.copy()
+    parts = []
+    for left, top, right, bottom, xs, ys in RIGS[sid]:
+        box = (left*w//100, top*h//100, right*w//100, bottom*h//100)
+        tile = cel.crop(box)
+        dx, dy = xs[index % len(xs)], ys[index % len(ys)]
+        out.paste((0, 0, 0, 0), box)
+        # Extend only the strip exposed by translation at an internal cut.
+        l = dx if dx > 0 and box[0] > 0 else 0
+        rr = -dx if dx < 0 and box[2] < w else 0
+        t = dy if dy > 0 and box[1] > 0 else 0
+        b = -dy if dy < 0 and box[3] < h else 0
+        expanded = Image.new('RGBA', (tile.width+l+rr, tile.height+t+b))
+        src, dst = tile.load(), expanded.load()
+        for y in range(expanded.height):
+            for x in range(expanded.width):
+                dst[x, y] = src[min(tile.width-1, max(0, x-l)),
+                                min(tile.height-1, max(0, y-t))]
+        parts.append((expanded, (box[0]+dx-l, box[1]+dy-t)))
+    for tile, position in parts:
+        out.alpha_composite(tile, position)
+    return out
+
+
 def transform(sprite, sid, pose):
     """Pure cel synthesis; cache this at the renderer boundary, never modify input."""
     frame = pose.frame
@@ -261,15 +296,7 @@ def transform(sprite, sid, pose):
         return sprite
     cel = sprite.crop(bounds)
     w,h = cel.size
-    rigged = cel.copy()
-    for left,top,right,bottom,xs,ys in RIGS[sid]:
-        box = (left*w//100,top*h//100,right*w//100,bottom*h//100)
-        tile = cel.crop(box)
-        rigged.paste((0,0,0,0),box)
-        phase = pose.index % len(xs)
-        # Slow belly inhalation, spoon lift, wing folding and snake segmentation
-        # remain visible at idle, without borrowing a generic whole-body wobble.
-        rigged.paste(tile,(box[0]+xs[phase],box[1]+ys[phase]))
+    rigged = rig_cel(cel, sid, pose.index)
     if sid == 65 and pose.state in ('idle', 'windup') and pose.index % 4 in (1, 3):
         # Highlight the existing spoon pixels; do not add an external white blob.
         bright = max((c for c in cel.getdata() if c[3]), key=lambda c: sum(c[:3]))

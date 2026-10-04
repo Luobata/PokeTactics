@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "pages": [
+    "reports/evidence/range-refined-2026-10-04/index.html",
+    "reports/evidence/range-2026-10-04/index.html",
+    "reports/evidence/range-attack-presence-2026-10-04/index.html",
+    "reports/evidence/range-separation-2026-10-04/index.html",
+    "reports/evidence/per-unit-2026-10-04/index.html"
+  ],
+  "viewer_sha256": "0f4041fd3ff03b8ffa787fbb77a1050353feaca9eb3f7f447830cfe374def52e"
+}

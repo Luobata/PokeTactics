@@ -36,37 +36,10 @@ main{display:flex;gap:24px;flex-wrap:wrap}p{max-width:560px}</style>
 平A：渐细尾迹、属性弹体、紧邻双描边环与弹跳数字。技能：脚底蓄力、多重外环、微震与大跳字。木桩受击段启用轻触反击。</p>
 <select id="clip"></select><button id="play">暂停</button>
 <button id="prev">上一帧</button><button id="next">下一帧</button>
+<button id="retry" hidden>重试载入</button>
 <input id="seek" type="range" min="0" value="0"><span id="label"></span>
 <main><canvas id="frame" width="240" height="320"></canvas><pre id="info"></pre></main>
-<script>
-let clips=[],index=0,running=true,cache={};const $=id=>document.getElementById(id);
-const fctx=(()=>{const cv=$('frame');const c=cv.getContext('2d');c.imageSmoothingEnabled=false;return c;})();
-/* 帧间空白修复：整段预载后 canvas 逐帧绘制——播放期零网络请求，
-   未预载完成不推进（首播显示"载入中"） */
-function preload(c,cb){if(cache[c.path])return cb();
-  const imgs=new Array(c.frames);let left=c.frames;
-  for(let i=0;i<c.frames;i++){const im=new Image();
-    im.onload=im.onerror=()=>{if(--left===0){cache[c.path]=imgs;cb();}};
-    im.src=c.path+'/frame-'+String(i).padStart(3,'0')+'.png';imgs[i]=im;}}
-function draw(c){const im=cache[c.path]&&cache[c.path][index];
-  if(im&&im.width)fctx.drawImage(im,0,0);}
-function upd(c){$('seek').max=c.frames-1;$('seek').value=index;
-  $('label').textContent=(index+1)+' / '+c.frames;
-  $('info').textContent=JSON.stringify(c,null,2)}
-function show(){let c=clips[$('clip').value||0];if(!c)return;
-  index=(index+c.frames)%c.frames;
-  if(!cache[c.path]){$('label').textContent='载入中…';
-    preload(c,()=>{if(clips[$('clip').value||0]===c){draw(c);upd(c);}});return;}
-  draw(c);upd(c);}
-fetch('manifest.json').then(r=>r.json()).then(m=>{clips=m.clips;clips.forEach((c,i)=>{
-let o=document.createElement('option');o.value=i;o.textContent=c.species+' / '+c.scene+' / '+c.action;
-$('clip').appendChild(o)});show()}).catch(e=>{$('info').textContent='请在此目录运行 python3 -m http.server 后打开本页。 '+e});
-$('clip').onchange=()=>{index=0;show()};$('play').onclick=()=>{running=!running;$('play').textContent=running?'暂停':'播放'};
-$('prev').onclick=()=>{running=false;index--;show()};$('next').onclick=()=>{running=false;index++;show()};
-$('seek').oninput=e=>{running=false;index=Number(e.target.value);show()};
-setInterval(()=>{if(running){let c=clips[$('clip').value||0];
-  if(c&&cache[c.path]){index=(index+1)%c.frames;draw(c);upd(c)}}},100);
-</script></html>"""
+<script>""" + Path(__file__).with_name("range_viewer.js").read_text() + "</script></html>"
 
 
 @lru_cache(maxsize=1)
