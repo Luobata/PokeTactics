@@ -19,7 +19,6 @@ import hashlib
 import json
 import re
 import sys
-import threading
 import time
 import urllib.parse
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -32,9 +31,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))   # Web 可玩 Demo（d
 
 import demo as demo_mod  # noqa: E402  /demo 页 + /api/demo/* 动作（只加挂接）
 
-FPS_DT = 0.1
-META_REV = "r3"  # r3: 事件格式器汉化（combo 属性）  # meta 生成逻辑版本：变更高级此号使缓存整体失效
-_LOCK = threading.Lock()
+FPS_DT = 0.05
+META_REV = "r5-presentation-20fps"  # 统一演出时钟；改轴后禁止沿用旧帧缓存
+_LOCK = demo_mod._LOCK  # One rule-state lock shared by /anim and /demo.
 _CACHE = {}  # seed -> (key, meta)
 
 INDEX_HTML = """<!doctype html><html lang="zh-CN">
@@ -60,8 +59,9 @@ ul{margin:6px 0;padding-left:20px}li{margin:3px 0}
 <header><h1>PokeTactics · 验收后台</h1>
 <a href="/anim?seed=7">动画验收台 →</a><p>双端同源验收入口：帧由本地渲染器产出（现为 Python 参考实现，M4 换 C 内核），浏览器只回放。动画即事件流（宪法 2.6）。</p></header>
 
-<h2>待验收 · 战斗动画 v3<span class="badge todo">等你验收</span></h2>
+<h2>动画与美术<span class="badge todo">可目视验收</span></h2>
 <div class="launch">
+<a href="/animation-lab"><button class="primary">三角色动作样片与资源验收</button></a>
 <a href="/anim?seed=7"><button class="primary">打开动画验收台（seed=7）</button></a>
 <a href="/anim?seed=11"><button>seed=11 · 12.7s 长战</button></a>
 </div>
@@ -138,7 +138,7 @@ details{margin-top:16px}.kbd{background:#e6e0cf;border:1px solid #b9b3a0;border-
 <aside class="settings">
 <label for="seed">战斗种子</label><input id="seedin" type="number" value="__SEED__" min="1" max="99999">
 <button id="reload" class="primary">载入场景</button>
-<label for="speed">播放倍速</label><select id="speed"><option value="0.5">0.5x</option><option value="1" selected>1x（10fps）</option><option value="2">2x</option><option value="4">4x</option></select>
+<label for="speed">播放倍速</label><select id="speed"><option value="0.5">0.5x</option><option value="1" selected>1x（20fps）</option><option value="2">2x</option><option value="4">4x</option></select>
 <label for="zoom">像素缩放</label><select id="zoom"><option value="480" selected>2 倍 · 480×640</option><option value="240">1 倍 · 240×320</option></select>
 <p class="small"><span class="kbd">空格</span> 播放/暂停，<span class="kbd">←</span> <span class="kbd">→</span> 单步。标签页隐藏自动停钟（PokeWalk 预览纪律）。</p>
 <details open><summary>验收点</summary><ul class="small" style="padding-left:16px">
@@ -153,7 +153,7 @@ details{margin-top:16px}.kbd{background:#e6e0cf;border:1px solid #b9b3a0;border-
 <div class="keys"><button id="prev">|◀ 退</button><button id="play">⏯ 播放</button><button id="next">进 ▶|</button></div>
 <input type="range" id="scrub" min="0" max="0" value="0" style="max-width:480px">
 <div class="controls" id="fxjumps" style="max-width:480px"></div>
-<div class="controls"><button id="step">单步 0.1s</button><button id="save">保存 PNG</button></div>
+<div class="controls"><button id="step">单步 0.05s</button><button id="save">保存 PNG</button></div>
 <p class="small" id="clock-state" role="status">正在载入场景…</p>
 <p class="status" id="meta" role="status">帧生成中…（首次约数秒）</p>
 </section>
@@ -162,6 +162,9 @@ details{margin-top:16px}.kbd{background:#e6e0cf;border:1px solid #b9b3a0;border-
 </main>
 <script>
 const seed=__SEED__, DT=__DT__, syn=__SYN__;
+const scen=document.getElementById('scenlabel');
+const scenS=scen.dataset.s;
+if(scen.dataset.l)scen.textContent=' · '+scen.dataset.l;
 const TAB_SEEDS=[3,7,11,42,100,777];
 (function(){const el=document.getElementById('tabs');
 el.innerHTML=TAB_SEEDS.map(n=>'<a href="/anim?seed='+n+'&synergy='+syn+(scenS?'&scenario='+scenS:'')+'" class="'+(n===seed?'on':'')+'">seed '+n+'</a>').join('')
@@ -170,30 +173,33 @@ let frames=[], n=0, cur=0, playing=false, timer=null, events=[];
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
 const scrub=document.getElementById('scrub');
 function clock(text){document.getElementById('clock-state').textContent=text;}
-const scen=document.getElementById('scenlabel');
-const scenS=scen.dataset.s;
-if(scenS){fetch('/api/prepare?seed='+seed+'&synergy='+syn+'&scenario='+scenS).then}else{fetch('/api/prepare?seed='+seed+'&synergy='+syn).then}(r=>r.json()).then(m=>{
+const prepareQuery=new URLSearchParams({seed:String(seed),synergy:String(syn)});
+if(scenS)prepareQuery.set('scenario',scenS);
+fetch('/api/prepare?'+prepareQuery).then(r=>{
+  if(!r.ok)throw new Error('场景载入失败（HTTP '+r.status+'）');
+  return r.json();
+}).then(m=>{
   n=m.n; events=m.events;
   document.getElementById('meta').textContent=
-    m.na+' vs '+m.nb+' · '+m.n+' 帧 @10fps · '+(m.n*DT).toFixed(1)+'s · 胜者='+(m.result===null?'平':('AB'[m.result]??m.result))+' · '+m.casts+' 次大招 · 构建 '+m.key;
+    m.na+' vs '+m.nb+' · '+m.n+' 帧 @20fps · '+(m.n*DT).toFixed(1)+'s · 胜者='+(m.result===null?'平':('AB'[m.result]??m.result))+' · '+m.casts+' 次大招 · 构建 '+m.key;
   scrub.max=n-1;
   let loaded=0;
   for(let i=0;i<n;i++){const im=new Image();im.onload=()=>{frames[i]=im;
-    if(loaded===0&&i===0)show(0);  // 首帧到达立即上屏
+    if(i===0)show(0);  // 首帧到达立即上屏
     if(++loaded===n){clock('就绪 · '+n+' 帧已加载');show(cur);}};im.src='/frame/'+m.key+'/'+i+'.png';}
-  document.getElementById('ev').innerHTML=events.map((e,i)=>'<div class="ev" id="ev'+i+'">['+e.t.toFixed(1)+'] '+e.text+'</div>').join('');
+  document.getElementById('ev').innerHTML=events.map((e,i)=>'<div class="ev" id="ev'+i+'">['+e.t.toFixed(2)+'] '+e.text+'</div>').join('');
   const jf=document.getElementById('fxjumps');
   jf.innerHTML=(m.fx||[]).map(f=>'<button data-t="'+f[0]+'">'+f[1]+' · '+f[0]+'s</button>').join('');
   jf.querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();show(Math.round(parseFloat(b.dataset.t)/DT));});
 
 }).catch(e=>{clock('载入失败：'+e);});
 function show(i){cur=Math.max(0,Math.min(n-1,i));if(frames[cur])ctx.drawImage(frames[cur],0,0);
-scrub.value=cur;clock('第 '+cur+' / '+(n-1)+' 帧 · '+(cur*DT).toFixed(1)+'s');
+scrub.value=cur;clock('第 '+cur+' / '+(n-1)+' 帧 · '+(cur*DT).toFixed(2)+'s');
 let last=-1;for(let j=0;j<events.length;j++){const el=document.getElementById('ev'+j);
 if(el){el.className=(events[j].t<=cur*DT+1e-9)?'ev past':'ev';if(events[j].t<=cur*DT+1e-9)last=j;}}
 if(last>=0){const el=document.getElementById('ev'+last);el.className='ev now';el.scrollIntoView({block:'nearest'});}}
 function tick(){show(cur+1);if(cur>=n-1)stop();}
-function play(){if(playing)return stop();if(cur>=n-1)show(0);playing=true;clock('播放中 '+(cur*DT).toFixed(1)+'s');
+function play(){if(playing)return stop();if(cur>=n-1)show(0);playing=true;clock('播放中 '+(cur*DT).toFixed(2)+'s');
 timer=setInterval(tick, DT*1000/parseFloat(document.getElementById('speed').value));}
 function stop(){playing=false;clearInterval(timer);}
 document.getElementById('play').onclick=play;
@@ -205,7 +211,7 @@ document.getElementById('zoom').onchange=e=>{document.querySelector('.screen').s
 document.getElementById('scrub').oninput=()=>{stop();show(+scrub.value);};
 document.getElementById('save').onclick=()=>{const a=document.createElement('a');
 a.download='poketactics_seed'+seed+'_f'+cur+'.png';a.href=cv.toDataURL();a.click();};
-document.getElementById('reload').onclick=()=>{location.href='/anim?seed='+document.getElementById('seedin').value;};
+document.getElementById('reload').onclick=()=>{const q=new URLSearchParams(prepareQuery);q.set('seed',document.getElementById('seedin').value);location.href='/anim?'+q;};
 if(window.innerHeight<760){document.querySelector('.screen').style.width='240px';
   document.getElementById('zoom').value='240';}  // 低视口自动 1x
 document.addEventListener('keydown',e=>{
@@ -227,10 +233,13 @@ def render_battle(seed: int, synergy: bool = False, scenario: str = None) -> dic
     from roster import build_roster
 
     sim_files = ["sim/combat.py", "sim/synergy.py", "sim/roster.py",
-                 "sim/status.py", "sim/weather.py", "data/moves.json",
+                 "sim/status.py", "sim/weather.py", "sim/data.py", "sim/combo.py",
+                 "sim/items.py", "sim/profiles.py", "sim/skills.py", "data/moves.json",
                  "data/pokemon.json", "data/typechart.json"]
-    h = hashlib.sha256()
-    h.update((ROOT / "tools/mockups/render_battle_gif.py").read_bytes())
+    h = hashlib.sha256(str(FPS_DT).encode())
+    for renderer in sorted((ROOT / "tools/mockups").glob("*.py")):
+        h.update(renderer.name.encode())
+        h.update(renderer.read_bytes())
     for rel in sim_files:  # sim 状态也进缓存键：否则 sim 改动会静默吃旧帧
         h.update(rel.encode())
         h.update((ROOT / rel).read_bytes())
@@ -246,68 +255,74 @@ def render_battle(seed: int, synergy: bool = False, scenario: str = None) -> dic
                 prev_syn = syn.SYNERGIES_ON
                 prev_status = status_mod.STATUS_ON
                 prev_combo = combo_mod.COMBOS_ON
-                syn.SYNERGIES_ON = synergy  # 仅在锁内翻转，渲染完还原
-                front, pal, font = Front(), Palettes(), Font16()
-                roster = build_roster()
+                try:
+                    syn.SYNERGIES_ON = synergy  # 仅在锁内翻转，渲染完还原
+                    front, pal, font = Front(), Palettes(), Font16()
+                    roster = build_roster()
 
-                def find(name):
-                    return next(p for ps in roster.values() for p in ps if p.name == name)
+                    def find(name):
+                        return next(p for ps in roster.values() for p in ps if p.name == name)
 
-                sc = SCENARIOS.get(scenario) if scenario else None
-                if sc:
-                    comp_a = [find(n) for n in sc["a"]]
-                    comp_b = [find(n) for n in sc["b"]]
-                    weather = sc.get("weather")
-                    status_mod.STATUS_ON = bool(sc.get("status"))
-                    combo_mod.COMBOS_ON = bool(sc.get("combo"))
-                else:
-                    comp_a = [find(n) for n in ("雷丘", "妙蛙花", "隆隆岩", "怪力", "水伊布")]
-                    comp_b = [find(n) for n in ("暴鲤龙", "喷火龙", "胡地", "大比鸟", "霸王花")]
-                    weather = None
-                    combo_mod.COMBOS_ON = False
-                anim = BattleAnimation(comp_a, comp_b, seed, front, pal, font,
-                                       weather_name=weather)
-                t_end = max(e[0] for e in anim.events)
-                result = next((e[2] for e in reversed(anim.events)
-                               if e[1] == "end"), None)
-                n_casts = sum(1 for e in anim.events if e[1] == "cast")
-                duration = t_end + 1.2 + (1.5 if result is not None else 0)
-                out_dir.mkdir(parents=True, exist_ok=True)
-                frames_meta = []
-                T, i = 0.0, 0
-                while T <= duration:
-                    anim.frame(T).convert("RGB").save(out_dir / f"{i}.png")
-                    frames_meta.append(round(T, 2))
-                    T += FPS_DT
-                    i += 1
-                events = []
-                for e in anim.events:
-                    events.append({"t": round(e[0], 2),
-                                   "text": _fmt_event(anim, e)})
-                syn.SYNERGIES_ON = prev_syn
-                status_mod.STATUS_ON = prev_status
-                combo_mod.COMBOS_ON = prev_combo
-                fx_moments = [("0.2", "开战演出")]
-                first_atk = next((e[0] for e in anim.events
-                                  if e[1] == "attack"), None)
-                if first_atk:
-                    fx_moments.append((round(first_atk + 0.1, 2), "普攻火花"))
-                fx_moments += [(round(c[1] + 0.1, 2), f"大招落点{ j + 1}")
-                               for j, c in enumerate(
-                                   sorted(anim.cutins, key=lambda x: x[0]))]
-                first_die = next((e[0] for e in anim.events
-                                  if e[1] == "die"), None)
-                if first_die:
-                    fx_moments.append((round(first_die + 0.1, 2), "濒死演出"))
-                meta = {"key": key, "n": i, "times": frames_meta,
-                        "events": events, "result": result, "casts": n_casts,
-                        "synergy": synergy, "fx": fx_moments,
-                        "scenario": scenario,
-                        "scenario_label": (SCENARIOS.get(scenario) or {}).get("label", ""),
-                        "weather": weather,
-                        "na": " ".join(p.name for p in comp_a),
-                        "nb": " ".join(p.name for p in comp_b)}
-                meta_path.write_text(json.dumps(meta, ensure_ascii=False))
+                    sc = SCENARIOS.get(scenario) if scenario else None
+                    if sc:
+                        comp_a = [find(n) for n in sc["a"]]
+                        comp_b = [find(n) for n in sc["b"]]
+                        weather = sc.get("weather")
+                        status_mod.STATUS_ON = bool(sc.get("status"))
+                        combo_mod.COMBOS_ON = bool(sc.get("combo"))
+                    else:
+                        comp_a = [find(n) for n in ("雷丘", "妙蛙花", "隆隆岩", "怪力", "水伊布")]
+                        comp_b = [find(n) for n in ("暴鲤龙", "喷火龙", "胡地", "大比鸟", "霸王花")]
+                        weather = None
+                        combo_mod.COMBOS_ON = False
+                    anim = BattleAnimation(comp_a, comp_b, seed, front, pal, font,
+                                           weather_name=weather)
+                    t_end = max(e[0] for e in anim.events)
+                    result = next((e[2] for e in reversed(anim.events)
+                                   if e[1] == "end"), None)
+                    n_casts = sum(1 for e in anim.events if e[1] == "cast")
+                    duration = anim.presentation_duration
+                    out_dir.mkdir(parents=True, exist_ok=True)
+                    frames_meta = []
+                    for i in range(round(duration / FPS_DT) + 1):
+                        T = round(i * FPS_DT, 8)
+                        anim.playback_frame(T).convert("RGB").save(out_dir / f"{i}.png")
+                        frames_meta.append(round(T, 2))
+                    events = []
+                    for e in anim.presentation_events:
+                        if e[1] == "unit_state":
+                            continue
+                        events.append({"t": round(e[0], 2),
+                                       "text": _fmt_event(anim, e)})
+                    fx_moments = [("0.2", "开战演出")]
+                    first_atk = next((e[0] for e in anim.presentation_events
+                                      if e[1] == "attack"), None)
+                    if first_atk is not None:
+                        fx_moments.append((round(first_atk, 2), "普攻命中"))
+                    fx_moments += [(round(e[0], 2), f"大招落点{j + 1}")
+                                   for j, e in enumerate(e for e in anim.presentation_events
+                                                         if e[1] == "cast")]
+                    first_die = next((e[0] for e in anim.presentation_events
+                                      if e[1] == "die"), None)
+                    if first_die is not None:
+                        fx_moments.append((round(first_die + 0.1, 2), "濒死演出"))
+                    meta = {"key": key, "n": len(frames_meta), "times": frames_meta,
+                            "clock": "presentation-v1", "fps": 20, "dt": FPS_DT,
+                            "presentation_duration": duration, "simulation_duration": t_end,
+                            "events": events, "result": result, "casts": n_casts,
+                            "synergy": synergy, "fx": fx_moments,
+                            "scenario": scenario,
+                            "scenario_label": (SCENARIOS.get(scenario) or {}).get("label", ""),
+                            "weather": weather,
+                            "na": " ".join(p.name for p in comp_a),
+                            "nb": " ".join(p.name for p in comp_b)}
+                    pending_meta = meta_path.with_suffix(".tmp")
+                    pending_meta.write_text(json.dumps(meta, ensure_ascii=False))
+                    pending_meta.replace(meta_path)  # Cache readers only see complete JSON.
+                finally:
+                    syn.SYNERGIES_ON = prev_syn
+                    status_mod.STATUS_ON = prev_status
+                    combo_mod.COMBOS_ON = prev_combo
     return json.loads(meta_path.read_text())
 
 
@@ -582,9 +597,34 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def do_POST(self) -> None:
+        parsed = urllib.parse.urlparse(self.path)
+        if parsed.path not in ("/api/demo/import", "/api/demo/import/inspect"):
+            return self.send_error(404)
+        if self.headers.get("Origin") not in (None, f"http://{self.headers.get('Host')}"):
+            return self._json({"ok": False, "error": "只允许本地页面导入"}, 403)
+        if self.headers.get("X-PokeTactics-Import") != "1":
+            return self._json({"ok": False, "error": "缺少导入标记"}, 400)
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            return self._json({"ok": False, "error": "无效文件长度"}, 400)
+        if not 0 < length <= 512 * 1024:
+            return self._json({"ok": False, "error": "备份必须小于512KB且非空"}, 413)
+        self.connection.settimeout(15)
+        raw = self.rfile.read(length)
+        if len(raw) != length:
+            return self._json({"ok": False, "error": "备份传输不完整"}, 400)
+        params = urllib.parse.parse_qs(parsed.query)
+        self._json(demo_mod.import_backup(raw, params.get("sid", [None])[0],
+                                         inspect_only=parsed.path.endswith("/inspect")))
+
     def do_GET(self) -> None:
         parsed = urllib.parse.urlparse(self.path)
         qs = urllib.parse.parse_qs(parsed.query)
+        requested = (ROOT / urllib.parse.unquote(parsed.path).lstrip("/")).resolve()
+        if requested == demo_mod.SAVE_ROOT.resolve() or demo_mod.SAVE_ROOT.resolve() in requested.parents:
+            return self.send_error(403, "Use the backup export endpoint")
         if parsed.path == "/":
             body = INDEX_HTML.encode()
             self.send_response(200)
@@ -592,6 +632,9 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+        elif parsed.path == "/animation-lab":
+            self.path = "/tools/acceptance/animation_lab.html"
+            return super().do_GET()
         elif parsed.path == "/anim":
             seed = int(qs.get("seed", ["7"])[0])
             syn_on = qs.get("synergy", ["1"])[0] == "1"  # 2026-09-14 起 S3 默认开
@@ -796,6 +839,19 @@ class Handler(SimpleHTTPRequestHandler):
         elif parsed.path == "/api/demo/action":
             params = {k: v[0] for k, v in qs.items()}
             self._json(demo_mod.api_action(params))
+        elif parsed.path == "/api/demo/backup":
+            try:
+                sid = qs.get("sid", [""])[0]
+                raw = demo_mod.backup_bytes(sid, checkpoint=qs.get("checkpoint", ["0"])[0] == "1")
+            except Exception as exc:
+                return self._json({"ok": False, "error": str(exc)}, 400)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Disposition", f'attachment; filename="PokeTactics-{sid}.ptsave"')
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
         elif parsed.path.startswith("/demo/sprite/"):
             m = re.match(r"^/demo/sprite/(\d+)\.png$", parsed.path)
             data = demo_mod.sprite_png(int(m.group(1))) if m else None

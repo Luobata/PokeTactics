@@ -188,6 +188,7 @@ def try_combine(board: List[OwnedPiece], bench: List[OwnedPiece],
     3 合 1——唯一通道是进化石（bots 持石单人进化），凑 3 只保持原状。
     装备继承（S2 §1.2）对普通族照旧：三只中首个持装备者的装备随棋子
     进入新形态，其余持装备者卸回 inventory（每单位 1 格）。
+    未提供 inventory 且有多件装备时暂不合成，避免丢失无处存放的装备。
     返回日志（无进化则空表）。
     """
     dex = pokedex()
@@ -211,6 +212,8 @@ def try_combine(board: List[OwnedPiece], bench: List[OwnedPiece],
             three = group[:3]                  # board 在前、bench 在后，确定性
             if pool.remaining.get(nxt, 0) <= 0:
                 continue                       # 池中无该形态，等待
+            if inventory is None and sum(o.item is not None for o in three) > 1:
+                continue                       # 无仓库接收多余装备，保持原状
             pool.take(nxt)
             new_piece = make_piece(nxt, templates)
             merged_owned = OwnedPiece(new_piece,

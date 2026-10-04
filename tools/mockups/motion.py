@@ -247,10 +247,10 @@ class MotionSystem:
         if au.dying(t):
             state, age = 'death', t - au.die_t
         else:
-            candidates = [(c[0], c[1]-c[0], c[3]) for c in reversed(anim.cutins)
-                          if c[2] == au.u.idx and c[0] <= t < c[1]+release_length]
+            candidates = [(c[0], anim._cast_release(c)-c[0], c[3]) for c in reversed(anim.cutins)
+                          if c[2] == au.u.idx and c[0] <= t < anim._cast_release(c)+release_length]
             attack = next((a for a in reversed(au.attacks)
-                           if 0 <= t-a[0] < windup(sid)+release_length), None)
+                           if 0 <= t-a[0] < anim._attack_preparation(au.u.idx, a[0])+release_length), None)
             if candidates and (attack is None or candidates[0][0] >= attack[0]):
                 onset, prep, target = candidates[0]
                 a, b = anim._event_position(au.u.idx,onset), anim._event_position(target,onset)
@@ -259,7 +259,7 @@ class MotionSystem:
                 direction = dx/norm,dy/norm
             elif attack:
                 onset, dx, dy = attack
-                prep, direction = windup(sid), (dx,dy)
+                prep, direction = anim._attack_preparation(au.u.idx, onset), (dx,dy)
             else:
                 onset = None
             if onset is not None:
@@ -286,7 +286,41 @@ class MotionSystem:
                 dx,dy = a[0]-b[0],a[1]-b[1]
                 norm = math.hypot(dx,dy) or 1
                 hit_dir = dx/norm,dy/norm
-        return Pose(state,index,frame,direction,hit,hit_dir)
+        pose = Pose(state,index,frame,direction,hit,hit_dir)
+        return presentation_pose(sid, pose) if getattr(anim, '_is_presentation', False) else pose
+
+
+def presentation_pose(sid, pose):
+    """Readable native-pixel anticipation/overshoot, then an authored recovery.
+
+    This affects the visual pose only. Identity comes from distinct body mechanics:
+    Charizard leans into its breath, Alakazam levitates steadily, Snorlax compresses
+    before the heavy release. Integer source slices and NEAREST stay unchanged.
+    """
+    forward, down, sx, sy, angle, dissolve = pose.frame
+    if pose.state in ('windup', 'strike', 'recover'):
+        factor = {6: 1.8, 65: 1.35, 143: 2.0}.get(sid, 1.25)
+        factor *= .65 if pose.state == 'recover' else 1.
+        forward = round(forward * factor)
+        if sid == 143:
+            if pose.state == 'windup':
+                progress = pose.index/max(1,len(species_motion[sid]['windup'])-1)
+                if progress < .65:
+                    down, sx, sy = 3, 108, 84  # planted crouch: load the body weight
+                else:
+                    down, sx, sy = -5, 96, 106  # lift before the heavy contact
+            elif pose.state == 'strike':
+                down, sx, sy = 5, 110, 84
+            elif pose.state == 'recover':
+                down = min(2, down)
+        elif sid == 65:
+            down -= 1 if pose.state == 'windup' else 0
+        elif sid == 6:
+            angle = round(angle * 1.35)
+    h = pose.hit
+    hit = (round(h[0]*2), round(h[1]*1.5), h[2], h[3], h[4], h[5])
+    return Pose(pose.state, pose.index, (forward,down,sx,sy,angle,dissolve),
+                pose.direction, hit, pose.hit_direction)
 
 
 def offsets(pose):

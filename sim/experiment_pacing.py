@@ -1,25 +1,17 @@
 #!/usr/bin/env python3
-"""节奏消融实验（docs/13 §6 v2：全局减速不是美术调速，先消融再组合）。
+"""节奏消融与当前参数对照（docs/13 §6）。
 
-背景：评审指出「普攻×1.5、移动×1.3、能量−15%」同时改会重排整套
-平衡（近战接敌挨打数、首招时间、治疗/DOT 相对收益、控制覆盖率、
-平局率），且近战移动倍率 0.60→0.61 有 61%→43% 时序悬崖前科。
+A0/A1/A2 的普攻间隔分别为 1.0/1.5/2.0，均固定历史回能 15/10；
+M0 只改移动，E0 只改两口回能，历史臂关闭档案/通用技能以隔离全局节奏。
+CURRENT_NO_PROFILES 使用当前节奏（2.2、21/10）但同样关档案，供受控对照；
+CURRENT 使用当前节奏和源码的档案开关，量实际玩法。两者不能混作同一消融臂。
 
-四臂消融（随机 6v6 + 两个定向锚点，档案关——量的是全局节奏不是角色）：
-- A0 基线（现状）；
-- A1 只改攻速：RANGED/普攻出手间隔 ×1.5（SPEED→interval 映射整体放慢；
-  通过临时改 SPEED_TO_ATTACK_INTERVAL 的换算实现，臂内还原）；
-- A2 只改移动：MOVE_TICK ×1.3；
-- A3 只改能量：回能 ×0.85（攻/受击两口同缩）；
-- A4 组合（A1+A2+A3）。
-
-读数：时长中位/p90、首次 cast 中位、45s 超时率、怪力vs胡地锚点、
-水vs火锚点、齐射后首杀时间。输出给 R2 定参（本文不拍数值）。
-
-用法：python3 sim/experiment_pacing.py [--games 400]
+逐臂输出完整控制参数；切臂无顺序依赖，CLI 结束/异常时恢复进入前状态。
+用法：python3 sim/experiment_pacing.py [--games 400] [--pairs 300]
 """
 
 import argparse
+import json
 import random
 import statistics
 import sys
@@ -31,29 +23,43 @@ import data  # noqa: E402
 import profiles  # noqa: E402
 from roster import build_roster, random_comp  # noqa: E402
 
-profiles.PROFILES_ON = False   # 量全局节奏，不量角色
+
+_HISTORICAL = {"atk_mult": 1.0, "move_tick": data.MOVE_TICK,
+               "energy_attack": 15, "energy_hit": 10, "profiles_on": False}
+_CURRENT = {"atk_mult": data.ATTACK_INTERVAL_MULT, "move_tick": data.MOVE_TICK,
+            "energy_attack": data.ENERGY_PER_ATTACK,
+            "energy_hit": data.ENERGY_PER_HIT_TAKEN,
+            "profiles_on": profiles.PROFILES_ON}
+ARM_CONFIGS = {
+    "A0": dict(_HISTORICAL),
+    "A1": dict(_HISTORICAL, atk_mult=1.5),
+    "A2": dict(_HISTORICAL, atk_mult=2.0),
+    "M0": dict(_HISTORICAL, move_tick=data.MOVE_TICK * 1.3),
+    "E0": dict(_HISTORICAL, energy_attack=int(15 * 0.85),
+               energy_hit=int(10 * 0.85)),
+    "CURRENT_NO_PROFILES": dict(_CURRENT, profiles_on=False),
+    "CURRENT": dict(_CURRENT),
+}
+
+
+def runtime_snapshot():
+    return {"atk_mult": combat.ATTACK_INTERVAL_MULT, "move_tick": combat.MOVE_TICK,
+            "energy_attack": combat.ENERGY_PER_ATTACK,
+            "energy_hit": combat.ENERGY_PER_HIT_TAKEN,
+            "profiles_on": profiles.PROFILES_ON}
+
+
+def restore_runtime(cfg):
+    combat.ATTACK_INTERVAL_MULT = cfg["atk_mult"]
+    combat.MOVE_TICK = cfg["move_tick"]
+    combat.ENERGY_PER_ATTACK = cfg["energy_attack"]
+    combat.ENERGY_PER_HIT_TAKEN = cfg["energy_hit"]
+    profiles.PROFILES_ON = cfg["profiles_on"]
 
 
 def set_arm(arm):
-    """臂内改 combat 命名空间的换算常量（Unit 初始化运行期读取）。
-    2026-10-04 更新：攻速 ×1.5 已转正为默认（data.ATTACK_INTERVAL_MULT），
-    本实验改为直接切该乘数——A0=旧节奏、A1=现默认、A2=远期 ×2.0；
-    移动/能量消融臂固定攻速旧值以保持单一变量。"""
-    combat.ATTACK_INTERVAL_MULT = {"A0": 1.0, "A1": 1.5, "A2": 2.0,
-                                   "M0": 1.0, "E0": 1.0}[arm]
-    combat.MOVE_TICK = _ORIG_MOVE * (1.3 if arm == "M0" else 1.0)
-    combat.ENERGY_PER_ATTACK = int(_ORIG_EPA * (0.85 if arm == "E0" else 1.0))
-    combat.ENERGY_PER_HIT_TAKEN = int(_ORIG_EPHT * (0.85 if arm == "E0" else 1.0))
-
-
-_orig_interval = combat.SPEED_TO_ATTACK_INTERVAL
-_ORIG_MOVE = combat.MOVE_TICK
-_ORIG_EPA = combat.ENERGY_PER_ATTACK
-_ORIG_EPHT = combat.ENERGY_PER_HIT_TAKEN
-
-
-def _slow_interval(speed):
-    return _orig_interval(speed) * 1.5
+    """显式写入整套臂参数，历史回能不从当前默认或上一臂推导。"""
+    restore_runtime(ARM_CONFIGS[arm])
 
 
 def metrics(games, seed, pair_games):
@@ -96,24 +102,28 @@ def main():
     ap.add_argument("--pairs", type=int, default=300)
     ap.add_argument("--seed", type=int, default=13)
     args = ap.parse_args()
-    print(f"节奏消融：随机 6v6 × {args.games}（种子 {args.seed}）+ 锚点 × {args.pairs}，档案关")
-    print(f"{'臂':<6}{'时长中位':>8}{'p90':>7}{'超时率':>7}{'首招中位':>9}"
-          f"{'怪力vs胡地':>10}{'水vs火':>8}")
+    if args.games < 1 or args.pairs < 1:
+        ap.error("--games 与 --pairs 必须大于 0")
+    print(f"节奏消融：随机 6v6 × {args.games}（种子 {args.seed}）+ 锚点 × {args.pairs}")
+    before = runtime_snapshot()
     rows = {}
-    for arm in ("A0", "A1", "A2", "M0", "E0"):
-        set_arm(arm)
-        m = metrics(args.games, args.seed, args.pairs)
-        rows[arm] = m
-        fc = f"{m['fc_med']:.1f}s" if m["fc_med"] is not None else "—"
-        print(f"{arm:<6}{m['med']:>7.1f}s{m['p90']:>6.1f}s{m['timeout']:>7.0%}"
-              f"{fc:>9}{m['mk_anchor']:>10.0%}{m['wf_anchor']:>8.0%}")
-    set_arm("A0")
-    b, a4 = rows["A0"], rows["A1"]
-    print(f"\n判读：默认节奏（A1，攻速×1.5 已转正）vs 旧节奏 A0"
-          f"（目标带 14-20s 的中后期候选，见 docs/13 §6）；"
-          f"怪力vs胡地锚 {b['mk_anchor']:.0%} → {a4['mk_anchor']:.0%}；"
-          f"超时率 {b['timeout']:.0%} → {a4['timeout']:.0%}。"
-          f"数值组合留给 R2 配平（本文只出消融读数）。")
+    try:
+        for arm in ARM_CONFIGS:
+            set_arm(arm)
+            print(f"\n[{arm}] 配置 " + json.dumps(runtime_snapshot(), sort_keys=True))
+            m = metrics(args.games, args.seed, args.pairs)
+            rows[arm] = m
+            fc = f"{m['fc_med']:.1f}s" if m["fc_med"] is not None else "—"
+            print(f"  时长中位 {m['med']:.1f}s / p90 {m['p90']:.1f}s / "
+                  f"超时率 {m['timeout']:.0%} / 首招 {fc} / "
+                  f"怪力vs胡地 {m['mk_anchor']:.0%} / 水vs火 {m['wf_anchor']:.0%}")
+    finally:
+        restore_runtime(before)
+    old, controlled, current = rows["A0"], rows["CURRENT_NO_PROFILES"], rows["CURRENT"]
+    print(f"\n判读：相同档案关闭条件下，旧节奏→当前节奏的时长中位 "
+          f"{old['med']:.1f}s → {controlled['med']:.1f}s；"
+          f"CURRENT（源码档案开关）的实际玩法中位 {current['med']:.1f}s。"
+          "14-20s 是中后期候选带，随机 6v6 读数不能代替整局与分阶段验收。")
 
 
 if __name__ == "__main__":

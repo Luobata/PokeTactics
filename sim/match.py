@@ -250,7 +250,8 @@ class Match:
             ghost_src = pair_rng.choice([b for b in alive if b is not odd])
             res = Battle(odd.battle_comp(), ghost_src.battle_comp(),
                          self._battle_rng(round_no, battle_i),
-                         layout="back").run()
+                         layout="back",
+                         weather_name=weather_for_round(round_no)).run()
             self.battles += 1
             if items_mod.items_on():
                 self._log_item_battle(res)
@@ -302,7 +303,8 @@ class Match:
         for i, b in enumerate(alive):
             res = Battle(b.battle_comp(), list(wave),
                          self._battle_rng(round_no, battle_i),
-                         layout="back").run()
+                         layout="back",
+                         weather_name=weather_for_round(round_no)).run()
             battle_i += 1
             self.battles += 1
             if items_mod.items_on():

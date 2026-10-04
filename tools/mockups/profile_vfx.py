@@ -5,7 +5,7 @@ import math
 from PIL import Image, ImageDraw
 
 from render_mockups import PAPER, FRAME, INK, TYPE_COLORS
-from pixel_vfx import debris
+from pixel_vfx import debris, projectile, trajectory_point, exposure_age
 
 
 @dataclass(frozen=True)
@@ -164,3 +164,53 @@ def signature_cast(img, sid, source, target, age, windup, budget, emblem=None, c
             points = [(x, y), (x + 5, y), (x, y + 5), (x + 5, y + 5)]
             draw.line(points, fill=PAPER, width=3)
             draw.line(points, fill=INK, width=1)
+
+
+def cast_projectile(img, sid, source, target, age, duration, mtype, color, budget):
+    """Short-lived, opaque native-pixel skill packets; distinct from basic bolts.
+
+    Four extra primitives maximum. All samples depend only on event age, with
+    historical tail points; no random particles, blur, or lingering screen layer.
+    """
+    signature = SIGNATURES.get(sid)
+    path = signature.trajectory if signature else 'line'
+    point = lambda p: trajectory_point(source, target, p, path)
+    sample_age = exposure_age(age, duration)
+    projectile(img, point, sample_age, duration, mtype, color, budget)
+    allowed = len(budget.take(4, minimum=4))
+    if not allowed:
+        return
+    progress = sample_age / duration
+    x, y = point(progress)
+    ahead, behind = point(progress+.03), point(progress-.08)
+    angle = math.atan2(ahead[1]-behind[1], ahead[0]-behind[0])
+    ux, uy = math.cos(angle), math.sin(angle)
+    def local(forward, side=0):
+        return round(x+ux*forward-uy*side), round(y+uy*forward+ux*side)
+    draw = ImageDraw.Draw(img)
+    phase = math.floor((age+1e-9)*20) % 2
+    if sid == 6:
+        # Compressed flame front and two torn tongues; bright core stays tiny.
+        draw.polygon([local(4),local(-2,4),local(-12,3+phase),
+                      local(-7,0),local(-14,-4),local(-2,-4)],fill=color)
+        draw.line([local(-5),local(2)],fill=PAPER,width=2)
+        for back,side in ((-.10,5),(-.18,-4)):
+            px,py=point(max(0.,progress+back))
+            draw.line((px,py+side,px-2,py+side),fill=color,width=2)
+    elif sid == 65:
+        # Spoon-like paired rails frame a hollow psychic diamond, never a blob.
+        radius = 6+phase
+        draw.polygon([(x,y-radius),(x+radius,y),(x,y+radius),(x-radius,y)],outline=color,width=2)
+        for side in (-8,8):
+            draw.line([local(-13,side),local(-5,side//2),local(0,side)],fill=color,width=1)
+        draw.point((x,y),fill=PAPER)
+    elif sid == 143:
+        # Heavy capacitor discharge: a broad, brief gold/white beam segment.
+        tail=point(max(0.,progress-.45))
+        draw.line([tail,(x,y)],fill=color,width=7)
+        draw.line([tail,(x,y)],fill=PAPER,width=3)
+        draw.line([local(-1,-6),local(3,-2),local(3,2),local(-1,6)],fill=color,width=2)
+        draw.line([local(-10,-5),local(-5,-5)],fill=PAPER,width=1)
+    else:
+        draw.line([local(-8,-3),local(-3,-3)],fill=color,width=1)
+        draw.line([local(-8,3),local(-3,3)],fill=color,width=1)

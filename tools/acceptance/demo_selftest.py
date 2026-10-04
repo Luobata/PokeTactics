@@ -19,9 +19,11 @@
 
 import argparse
 import json
+import os
 import random
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.parse
@@ -225,6 +227,7 @@ def main() -> None:
     seeds = [int(x) for x in args.seeds.split(",") if x.strip()]
 
     proc = None
+    save_dir = None
     base = args.base_url
     if not base:
         import socket
@@ -232,10 +235,12 @@ def main() -> None:
             s.bind(("127.0.0.1", 0))
             port = s.getsockname()[1]
         base = f"http://127.0.0.1:{port}"
+        save_dir = tempfile.TemporaryDirectory(prefix="poketactics-demo-test-")
         proc = subprocess.Popen(
             [sys.executable, str(ROOT / "tools/acceptance/server.py"),
              "--port", str(port)],
-            cwd=str(ROOT), stdout=subprocess.DEVNULL,
+            cwd=str(ROOT), env={**os.environ, "POKETACTICS_SAVE_DIR": save_dir.name},
+            stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL)
         print(f"自起临时验收后台：{base}（pid {proc.pid}）")
     cli = Client(base)
@@ -251,6 +256,8 @@ def main() -> None:
         if proc is not None:
             proc.terminate()
             proc.wait(timeout=10)
+        if save_dir is not None:
+            save_dir.cleanup()
 
 
 if __name__ == "__main__":

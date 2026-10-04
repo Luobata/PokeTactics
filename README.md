@@ -4,7 +4,7 @@
 三只同种**进化**成高阶形态，用 17 系属性克制与羁绊在棋盘上自动对战。
 单机模式：训练家（你）vs 7 名机器人对手打满整轮。
 
-**双端同源**：同一份 C 内核编译为 ESP32 设备固件与 Web 同源预览，
+**双端同源目标（C 内核尚未移植）**：同一份 C 内核编译为 ESP32 设备固件与 Web 同源预览，
 渲染一致性以像素对账验收（继承 [../ESP32-PokemonGo（PokeWalk）](../ESP32-PokemonGo)
 的固件同源预览架构与 ABC 三键操作体系）。
 数据同样继承 PokeWalk：种族值、招式表、属性克制表、进化链均从其固定提交数据提取；
@@ -26,12 +26,15 @@
       [reports/matchbalance-2026-09-14.md](reports/matchbalance-2026-09-14.md)
 - [x] 设计稿 v1：240×320 像素真稿（准备/战斗/大招特写）+ 高清版 + 动画节拍表，
       真实素材渲染（docs/02 §4、docs/design/mockups/）
+- [x] PC 通用存档运行时：双槽、损坏回退、备份预检、导入检查点；Demo 自动保存与重启续玩
+- [x] 动画演出轴：20fps、命中后扣血/死亡，喷火龙/胡地/卡比兽专属动作；资源清单与动作表可导出
 - [ ] M4 双端 C 内核 + ESP-IDF 固件 + Web 同源预览（暂缓，玩法平衡优先）
 
 ## 目录
 
 | 目录 | 内容 |
 |---|---|
+| `esp32_runtime/` | 游戏无关的存档/备份参考实现；当前后端为 PC 文件，NVS 待移植 |
 | `sim/` | 零依赖 Python 玩法仿真，核心迭代杠杆；同时是 C 内核的参考实现 |
 | `data/` | 从 PokeWalk 提取的结构化数据（生成物，可由 tools 重建） |
 | `tools/` | 数据提取与后续管线（双端构建、预览服务） |
@@ -47,6 +50,11 @@ python3 tools/acceptance/server.py --port 8799
 # Web 可玩 Demo（1 玩家 + 7 bot 整局：买棋/摆位/装备/羁绊/天气/战斗动画）
 #   http://127.0.0.1:8799/demo ｜ 整局自测 python3 tools/acceptance/demo_selftest.py
 
+# 系统验收（含真实服务重启、整局回归、动画样片和资源校验）
+python3 tools/acceptance/system_acceptance.py --demo --balance --presentation
+# 动画样片生成后打开 http://127.0.0.1:8799/animation-lab
+# Demo 默认存档 .build/saves，可用 POKETACTICS_SAVE_DIR 指定另一目录。
+
 # 从 ../ESP32-PokemonGo 提取数据（data/ 已随仓库提供，可跳过）
 python3 tools/extract_from_pokewalk.py
 
@@ -54,7 +62,10 @@ python3 tools/extract_from_pokewalk.py
 python3 sim/prototype.py --games 300
 ```
 
-系统 python3 即可（已在 3.9+ 验证），无第三方依赖。
+玩法仿真与存档运行时使用 Python 标准库。画面渲染还需要 Pillow 和兄弟项目
+`../ESP32-PokemonGo/assets/` 的现有像素资源；不会自动下载或改写兄弟项目。
+当前变更与验收边界见 [本轮交付报告](reports/system-optimization-batch-b-2026-10-04.md)、
+[运行时设计](docs/15-esp32-runtime-design.md) 和 [动画/美术合同](docs/16-animation-art-contract.md)。
 
 ## 来源与边界
 

@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "shared_lock": true,
+  "failure_restores_flags": true,
+  "seed": 82391,
+  "frames": 242,
+  "fps": 20,
+  "casts": 8,
+  "duration": 12.05,
+  "last_frame": 12.05,
+  "output": "/Users/bytedance/luobata/PokeTactics/.build/acceptance/s82391sy_r5-presentation-20fps_98d4b9544a",
+  "render_seconds": 2.628
+}

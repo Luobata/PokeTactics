@@ -137,9 +137,15 @@ class Pokedex:
         return len(self.species[species_id]["lineage"]) - depth + 1
 
     def next_evolution(self, species_id: int) -> Optional[int]:
-        fam = self.family_of(species_id)
-        i = fam.index(species_id)
-        return fam[i + 1] if i + 1 < len(fam) else None
+        """直接子形态；分支暂按图鉴号取最小者，保持伊布→水伊布兼容。
+
+        lineage 从自身回溯到祖先；同族的相邻条目可能是兄弟形态，
+        不能当作进化关系（水/雷/火伊布都是叶节点）。
+        """
+        lineage = self.species[species_id]["lineage"]
+        children = (sid for sid, species in self.species.items()
+                    if species["lineage"][1:] == lineage)
+        return min(children, default=None)
 
     def signature_move(self, species_id: int) -> Optional[dict]:
         """选招式：升级学会的本系招中威力最高且命>=80 的；否则任意威力招。"""

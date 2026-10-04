@@ -5,9 +5,8 @@
 - **只读复用 sim**：economy / shop / items / bots / combo / synergy / status /
   weather / rng / combat.Battle / roster / match 的常量与规则
   （PVE_WAVES、weather_for_round、Match._pair_up 无重复对手配对）。
-  sim/ 与 tools/mockups/ 不做任何修改；渲染需参数扩展的地方
-  （BattleAnimation 固定 layout="random"、自带 rng）用 DemoBattleAnimation
-  子类包装：layout="back" + 外部 battle 子流 —— 玩家摆位因此真实生效。
+  Battle 显式接收玩家格点，BattleAnimation 接收权威 battle 和 HUD 快照；
+  子类只负责接入外部 battle 子流与逐帧输出。
 - 会话 = 内存 dict（uuid 键）+ 全局锁；玩家席位（seat 0）+ 7 bot
   （人格混合 L1×3 + L2×3 + L3×1，LINEUP[7]，开局一次 pers 子流发牌）。
 - 回合循环：准备阶段（玩家操作，不限时）→ end_prep 服务端结算 →
@@ -20,12 +19,12 @@
     已消除，见 reports/matchbalance-2026-09-14.md）；
   · 玩家战斗的解算与渲染同源（DemoBattleAnimation 内部那次 Battle 就是
     权威结果），帧 = 战报；bot 战斗与 match 完全同轨；
-  · 幽灵战/野怪战也吃当轮天气（match 只给 PVP 主对战上天气）；
-  · 渲染器 HUD（帧内左上读数）是渲染层固定占位值，真实读数在 Web HUD。
+  · 幽灵战/野怪战与 match 一样使用当轮天气；
+  · 渲染器 HUD 使用开战时快照，Web HUD 使用战后结算状态。
 
 动作 API（GET /api/demo/action?cmd=...&sid=...）：new(seed) / state / buy(i) /
 sell(loc) / refresh / levelup / move(from,to)（棋盘↔备战互移，含交换）/
-craft(item) / equip(item,loc) / unequip(loc) / end_prep / next。
+craft(item) / equip(item,loc) / unequip(loc) / lock / end_prep / next / finish。
 金币/人口/容量校验全部服务端，错误返回中文原因（ok=false，HTTP 恒 200）。
 
 自动试玩（2026-09-15）：「▶ 自动试玩」按钮——客户端按决策优先级
@@ -35,8 +34,12 @@ craft(item) / equip(item,loc) / unequip(loc) / end_prep / next。
 对局可事后复盘（与 E2E 同轨）。
 """
 
+import copy
 import io
 import json
+import os
+import re
+import secrets
 import shutil
 import sys
 import threading
@@ -45,7 +48,7 @@ import uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-for _p in (str(ROOT / "sim"), str(ROOT / "tools" / "mockups")):
+for _p in (str(ROOT), str(ROOT / "sim"), str(ROOT / "tools" / "mockups")):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
@@ -66,7 +69,7 @@ MAX_ROUNDS = 31          # 与 sim/match 相同的轮数上限（超限按 HP �
 BENCH_CAP = 6            # 我方备战行 6 格（docs/10 §1.1 C-sym）
 SHOP_SLOTS_UI = 4        # 商店 4 格（docs/10 §1.2 裁定）
 GRID_COLS = 6            # C-sym 6 列
-FPS_DT = 0.1             # 战斗帧步长（10fps，与验收台一致）
+FPS_DT = 0.05            # 战斗帧步长（20fps，与演出时间轴一致）
 
 # 我方战场 2 行的填充序（combat layout="back" 对 team0 自 combat 行 3 起密排）：
 # 列表头 = 后排（grid 行 1）→ 列表尾 = 前排（grid 行 0，贴中线）
@@ -131,7 +134,8 @@ def sprite_png(species_id: int):
 
 
 # ---------------------------------------------------------------- 渲染包装
-def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path):
+def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
+                          positions_a=None, hud_snapshot=None):
     """玩家战斗：DemoBattleAnimation（layout=back + 外部子流）解算并出全帧。
 
     解算与渲染同源：内部那次 Battle 就是本场的权威结果（胜者/存活数），
@@ -146,29 +150,33 @@ def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path):
 
         def __init__(self, a, b, battle_rng, front, pal, font):
             battle = Battle(a, b, battle_rng, layout="back",
-                            weather_name=weather_name)
+                            weather_name=weather_name, positions_a=positions_a)
             self.sim_result = battle.run()
             super().__init__(a, b, 0, front, pal, font,
-                             weather_name=weather_name, battle=battle)
+                             weather_name=weather_name, battle=battle,
+                             hud_snapshot=hud_snapshot)
 
     front, pal, font = _assets()
     anim = _Anim(comp_a, comp_b, rng, front, pal, font)
     res = anim.sim_result
     t_end = max(e[0] for e in anim.events)
     winner = res["winner"]
-    duration = t_end + 1.2 + (1.5 if winner is not None else 0)
+    duration = anim.presentation_duration
     if out_dir.exists():
         shutil.rmtree(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     n, T = 0, 0.0
     while T <= duration + 1e-9:
-        anim.frame(T).convert("RGB").save(out_dir / f"{n}.png")
+        anim.playback_frame(T).convert("RGB").save(out_dir / f"{n}.png")
         n += 1
         T += FPS_DT
-    meta = {"n": n, "winner": winner,
-            "survivors": res["survivors"], "duration": round(t_end, 1),
+    meta = {"n": n, "dt": FPS_DT, "winner": winner, "event_version": 2,
+            "hud": hud_snapshot,
+            "deployments": [list(e) for e in anim.events if e[1] == "deploy"],
+            "survivors": res["survivors"], "duration": round(duration, 1),
+            "simulation_duration": round(t_end, 1), "clock": "presentation-v1",
             "events": [{"t": round(e[0], 2), "text": _fmt_event(anim, e)}
-                       for e in anim.events]}
+                       for e in anim.presentation_events if e[1] != "unit_state"]}
     (out_dir / "meta.json").write_text(json.dumps(meta, ensure_ascii=False))
     return meta
 
@@ -249,6 +257,7 @@ class PlayerSeat:
         self.last_damage = 0
         self.combines = 0
         self.refresh_j = 0                  # 当轮手动刷新序（shop 子流 j≥1）
+        self.shop_locked = False
 
     @property
     def board(self) -> list:
@@ -268,6 +277,10 @@ class PlayerSeat:
     def battle_comp(self) -> list:
         return [o.piece if o.item is None else (o.piece, o.item)
                 for o in self.board]
+
+    def battle_positions(self) -> list:
+        """与 battle_comp 同序；UI (row, col) → 战斗 (col, row)。"""
+        return [(c, r + 2) for r, c in _GRID_ORDER if (r, c) in self.grid]
 
     def counter_vs(self, opp_board) -> None:  # 人类无自动对位（占位，配对代码统一调用）
         return None
@@ -292,8 +305,11 @@ class Session:
         self.ghost_seat = None
         self.ghost_src = None
         self.opp_view = None
+        self.opponent_comp = None
         self.player_frames_total = 0
         self.player_battles = 0
+        self.final_team = None
+        self.eliminated_round = None
 
     # ---- 工具 ----
     @property
@@ -344,13 +360,14 @@ class Session:
         self.round_no = r
         self.phase = "prep"
         self.last_battle = None
+        self.opponent_comp = None
         for e in self._alive():
             e.gold += economy.round_income(e.gold, e.streak)
             e.gold += items_mod.lucky_egg_income(e)
             e.level, e.xp = economy.gain_round_xp(e.level, e.xp)
         p = self.player
         p.refresh_j = 0
-        if p.alive:
+        if p.alive and not p.shop_locked:
             self._roll_player_shop(rng_mod.derive(
                 self.seed, r, "shop", rng_mod.shop_counter(p.seat, 0)))
         for b in self.bots:
@@ -385,10 +402,11 @@ class Session:
         self.player.shop.roll(rng, self.player.level)
 
     def _enemy_rows(self, board: list):
-        """bot 上场列表 -> 战场 2 行（combat 行 1=贴中线行在前、行 0 在后）。"""
-        front = board[:GRID_COLS]
-        back = board[GRID_COLS:2 * GRID_COLS]
-        return [list(back), list(front)]
+        """与 team1 的 back 部署一致：team0 坐标旋转 180°。"""
+        rows = [[None] * GRID_COLS for _ in range(2)]
+        for i, owned in enumerate(board[:2 * GRID_COLS]):
+            rows[i // GRID_COLS][GRID_COLS - 1 - i % GRID_COLS] = owned
+        return rows
 
     def _opponent_view(self):
         p = self.player
@@ -403,8 +421,12 @@ class Session:
                     src, name = a, a.name
         if src is None:
             return None
+        # 侦察快照即本轮承诺的对手布阵；玩家准备时不会再暗中换位。
+        if isinstance(src, Bot):
+            src.counter_vs(p.board)
+        self.opponent_comp = list(src.battle_comp())
         return {"name": name, "hp": src.hp, "level": src.level,
-                "rows": [[_piece_view(o.piece, o.item) for o in row]
+                "rows": [[_piece_view(o.piece, o.item) if o else None for o in row]
                          for row in self._enemy_rows(src.board)],
                 "bench": [_piece_view(o.piece, o.item)
                           for o in src.bench[:GRID_COLS]]}
@@ -414,7 +436,7 @@ class Session:
         label = PVE_LABELS[min(r // 5 - 1, len(PVE_LABELS) - 1)]
         row = [_piece_view(make_piece(sid, self.templates))
                for sid in wave_ids]
-        rows = [row, [None] * len(row)]
+        rows = self._enemy_rows(row)
         return {"name": f"野怪轮 · {label}", "hp": None, "level": None,
                 "rows": rows, "bench": [], "pve": True}
 
@@ -455,9 +477,9 @@ class Session:
             dmg = {id(a): 0, id(b): 0}
             note = ""
             if a.battle_comp() and b.battle_comp():
-                if isinstance(a, Bot):
+                if p not in (a, b) and isinstance(a, Bot):
                     a.counter_vs(b.board)
-                if isinstance(b, Bot):
+                if p not in (a, b) and isinstance(b, Bot):
                     b.counter_vs(a.board)
                 if p in (a, b):
                     # 玩家战斗：_fight_rendered 恒以玩家为 team0 —— 胜者
@@ -522,9 +544,13 @@ class Session:
                                             weather, ghost=True)
                 res = {"winner": meta["winner"], "survivors": meta["survivors"]}
             elif odd.battle_comp():
+                ghost_positions = ([(GRID_COLS - 1 - c, 3 - row)
+                                    for c, row in p.battle_positions()]
+                                   if self.ghost_src is p else None)
                 res = Battle(odd.battle_comp(), self.ghost_src.battle_comp(),
                              rng_mod.derive(self.seed, r, "battle", battle_i),
-                             layout="back", weather_name=weather).run()
+                             layout="back", weather_name=weather,
+                             positions_b=ghost_positions).run()
             else:   # 空场打幽灵：不战而败（保底掉血，Battle 空队会崩所以不走解算）
                 res = {"winner": 1,
                        "survivors": {0: 0, 1: len(self.ghost_src.battle_comp())}}
@@ -603,14 +629,17 @@ class Session:
                         wave=None, pve=False):
         """玩家参与的战斗：渲染帧（=权威解算）。opp=None 时用野怪波次。"""
         comp_a = me.battle_comp()
-        comp_b = ([o.piece if o.item is None else (o.piece, o.item)
-                   for o in opp.board] if opp is not None else list(wave))
-        if isinstance(opp, Bot):
-            opp.counter_vs(self.player.board)
+        # 幽灵来源仍可能参加自己的另一场战斗，使用准备阶段已展示的拷贝。
+        comp_b = (list(self.opponent_comp) if self.opponent_comp is not None else
+                  opp.battle_comp()) if opp is not None else list(wave)
         rng = rng_mod.derive(self.seed, r, "battle", battle_i)
         out_dir = ROOT / ".build" / "demo" / self.sid / f"r{r}"
         t0 = time.time()
-        meta = _render_battle_frames(comp_a, comp_b, rng, weather, out_dir)
+        meta = _render_battle_frames(
+            comp_a, comp_b, rng, weather, out_dir,
+            positions_a=me.battle_positions(),
+            hud_snapshot={"hp": max(0, me.hp), "gold": me.gold,
+                          "level": me.level, "round": r})
         meta["round"] = r
         meta["render_s"] = round(time.time() - t0, 1)
         meta["pve"] = pve
@@ -633,6 +662,9 @@ class Session:
             seat.streak = seat.streak - 1 if seat.streak < 0 else -1
 
     def _eliminate(self, seat) -> None:
+        if isinstance(seat, PlayerSeat):
+            self.final_team = [_piece_view(o.piece, o.item) for o in seat.board]
+            self.eliminated_round = self.round_no
         seat.alive = False
         seat.rank = len(self._alive()) + 1
         for owned in seat.all_pieces():
@@ -663,6 +695,18 @@ class Session:
             raise DemoError("当前不在结算阶段")
         self.begin_round(self.round_no + 1)
 
+    def finish_spectating(self) -> None:
+        if self.player.alive and self.phase != "over":
+            raise DemoError("仍在对局中，请先完成本轮战斗")
+        for _ in range(MAX_ROUNDS + 1):
+            if self.phase == "over":
+                return
+            if self.phase == "battle":
+                self.next_round()
+            if self.phase == "prep":
+                self.end_prep()
+        raise DemoError("观战轮数异常，请重新开局")
+
 
 # ---------------------------------------------------------------- 状态 JSON
 def _hex(rgb) -> str:
@@ -674,12 +718,30 @@ def _piece_view(piece, item=None):
     from render_mockups import TYPE_COLORS
     dex = pokedex()
     mv = dex.moves.get(piece.move_id) if piece.move_id else None
+    from profiles import get as profile_of
+    from skills import skill_of
+    profile = profile_of(piece.species_id)
+    skill = skill_of(piece.species_id)
+    descriptions = {
+        "double_strike": "命中后追加一次45%伤害；每次命中分别结算防御",
+        "charge": "向敌人突进最多2格；无法进入射程时对原目标施法",
+        "heavy_blow": "命中后击退目标1格；无空格时不击退",
+        "volley_shot": "额外攻击目标附近最多2名敌人，各40%伤害",
+        "bulwark": "施法后自身获得3秒35%减伤",
+        "mend": "施法时回复20%最大生命",
+    }
+    distance = profile.get("range", piece.distance) if profile else piece.distance
     return {
         "sid": piece.species_id, "name": piece.name, "tier": piece.tier,
         "types": [TYPE_ZH.get(t, t) for t in piece.types],
         "colors": [_hex(TYPE_COLORS.get(t, (120, 120, 120)))
                    for t in piece.types],
-        "ranged": piece.distance > 1,
+        "ranged": distance > 1, "range": distance,
+        "role": profile["role"] if profile else ("远程输出" if distance > 1 else "近战"),
+        "skill_name": (skill["name"] if skill else "属性招式") if mv else "普通攻击",
+        "skill_description": (profile["ult"]["note"] if profile else
+                              descriptions.get(skill["arch"], "") if skill else "能量满时释放属性招式")
+                              if mv else "当前形态没有可释放的属性招式，仅进行普通攻击",
         "move": (mv.get("name_zh") or mv["name"]) if mv else "—",
         "item": item,
         "item_name": items_mod.FINISHED[item]["name"] if item else None,
@@ -789,6 +851,7 @@ def state_json(sess) -> dict:
                 "alive": p.alive, "rank": p.rank, "combines": p.combines,
                 "stone_used": p.stone_used, "bench_cap": BENCH_CAP,
                 "refresh_cost": economy.REFRESH_COST,
+                "shop_locked": p.shop_locked,
                 "xp_cost": economy.XP_BUY_COST},
         "weather": {"key": wkey,
                     "zh": weather_mod.WEATHERS[weather]["label"] if weather else "无",
@@ -806,6 +869,12 @@ def state_json(sess) -> dict:
                       for e in sess.seats],
         "log": sess.log[-24:],
         "last_battle": sess.last_battle,
+        "save": {"sequence": getattr(sess, "save_sequence", None),
+                 "warning": getattr(sess, "save_warning", None)},
+        "player_result": ({"rank": p.rank, "round": sess.eliminated_round or sess.round_no,
+                           "team": sess.final_team if sess.final_team is not None else
+                           [_piece_view(o.piece, o.item) for o in p.board]}
+                          if not p.alive or sess.phase == "over" else None),
         "stats": {"battles": sess.player_battles,
                   "frames": sess.player_frames_total},
         "type_colors": {t: _hex(c) for t, c in TYPE_COLORS.items()},
@@ -835,8 +904,14 @@ def act_buy(sess, i: int):
     price = p.shop.price(i)
     if p.gold < price:
         raise DemoError(f"金币不足（需要 {price} 金，你有 {p.gold} 金）")
-    if len(p.bench) >= BENCH_CAP:
-        raise DemoError(f"备战席已满（{BENCH_CAP} 格）：先把棋子上场或卖出")
+    # 池恢复可能使其他待合成的场上棋子落入备战席，每次购买都检查最终容量。
+    # 失败购买不改变金币、卡池、棋子或装备。
+    board, bench, pool, inventory = copy.deepcopy(
+        (p.board, p.bench, sess.pool, p.inventory))
+    bench.append(shop_mod.OwnedPiece(p.templates[p.shop.slots[i]], price))
+    try_combine(board, bench, pool, sess.templates, inventory)
+    if len(bench) > BENCH_CAP:
+        raise DemoError(f"备战席已满（{BENCH_CAP} 格）：先上场、卖出或购买可立即合成的第三只")
     owned = p.shop.buy(i)
     p.gold -= price
     p.bench.append(owned)
@@ -868,6 +943,7 @@ def act_refresh(sess):
     if p.gold < economy.REFRESH_COST:
         raise DemoError(f"金币不足（刷新需 {economy.REFRESH_COST} 金）")
     p.gold -= economy.REFRESH_COST
+    p.shop_locked = False
     p.refresh_j += 1
     sess._roll_player_shop(rng_mod.derive(
         sess.seed, sess.round_no, "shop",
@@ -967,6 +1043,8 @@ def act_equip(sess, key: str, loc: str):
     if key not in p.inventory.finished:
         raise DemoError("仓库里没有这件装备（先合成）")
     owned, _where, _key = sess.locate(loc)
+    if owned.item is not None:
+        raise DemoError("该棋子已有装备（每单位 1 格），先卸下再换")
     if key == "evo_stone":
         if p.stone_used:
             raise DemoError("进化石每局只能触发一次通信进化")
@@ -984,8 +1062,6 @@ def act_equip(sess, key: str, loc: str):
         owned.sources.append(nxt)
         p.stone_used = True
         return f"通信进化！{old} → {owned.piece.name}（进化石不消耗）"
-    if owned.item is not None:
-        raise DemoError("该棋子已有装备（每单位 1 格），先卸下再换")
     p.inventory.finished.remove(key)
     owned.item = key
     return f"{owned.piece.name} 装备了 {items_mod.FINISHED[key]['name']}"
@@ -1021,14 +1097,14 @@ def _drop_session(sid: str) -> None:
         shutil.rmtree(ROOT / ".build" / "demo" / sess.sid, ignore_errors=True)
 
 
-def api_action(params: dict):
+def _apply_action(params: dict):
     """/api/demo/action 的总入口。返回 (dict, status)；异常全部转 ok=false。"""
     cmd = params.get("cmd", "")
     try:
         with _LOCK:
             if cmd == "new":
                 try:
-                    seed = int(params.get("seed") or 7)
+                    seed = int(params["seed"]) if params.get("seed") else secrets.randbits(32)
                 except ValueError:
                     raise DemoError("种子必须是整数")
                 sess = _new_session(seed)
@@ -1042,12 +1118,18 @@ def api_action(params: dict):
             msg = None
             if cmd == "state":
                 pass
+            elif cmd == "save":
+                msg = "进度已保存"
             elif cmd == "buy":
                 msg = act_buy(sess, int(params.get("i", -1)))
             elif cmd == "sell":
                 msg = act_sell(sess, params.get("loc", ""))
             elif cmd == "refresh":
                 msg = act_refresh(sess)
+            elif cmd == "lock":
+                _guard_prep(sess)
+                sess.player.shop_locked = not sess.player.shop_locked
+                msg = "商店已锁定：下轮保留，手动刷新解除锁定" if sess.player.shop_locked else "已解除商店锁定"
             elif cmd == "levelup":
                 msg = act_levelup(sess)
             elif cmd == "move":
@@ -1068,6 +1150,9 @@ def api_action(params: dict):
             elif cmd == "end_prep":
                 sess.end_prep()
                 msg = "战斗结算完成"
+            elif cmd == "finish":
+                sess.finish_spectating()
+                msg = "观战结束，最终排名已生成"
             elif cmd == "next":
                 if sess.phase == "prep" and not sess.player.alive:
                     sess.end_prep()   # 淘汰后观战快进：跳过准备直接结算本轮
@@ -1086,6 +1171,105 @@ def api_action(params: dict):
         return {"ok": False, "error": str(exc)}
     except Exception as exc:  # noqa: BLE001 —— Demo 的 500 屏蔽层
         return {"ok": False, "error": f"内部错误：{exc!r}"}
+
+
+SAVE_ROOT = Path(os.environ.get("POKETACTICS_SAVE_DIR", str(ROOT / ".build" / "saves")))
+
+
+def _save_store(sid):
+    if not re.fullmatch(r"[a-f0-9]{12}", sid or ""):
+        raise ValueError("无效的存档编号")
+    from esp32_runtime import SaveStore, FileBackend
+    from session_save import SessionCodec
+    return SaveStore(FileBackend(SAVE_ROOT), SessionCodec(), namespace="poketactics",
+                     slot=sid, max_bytes=512 * 1024)
+
+
+def _publish_loaded(loaded, sid):
+    session = loaded.state
+    session.sid, session.save_sequence = sid, loaded.sequence
+    if loaded.recovered:
+        session.save_warning = "最新存档损坏，已恢复上一份有效进度"
+    if len(SESSIONS) >= MAX_SESSIONS and sid not in SESSIONS:
+        _drop_session(next(iter(SESSIONS)))
+    SESSIONS[sid] = session
+    return {"ok": True, "sid": sid, "state": state_json(session),
+            "msg": "进度已恢复，不会重复结算收入或奖励"}
+
+
+def api_action(params: dict):
+    """Persist before publishing successful actions; failed writes roll back memory."""
+    with _LOCK:
+        sid, cmd = params.get("sid", ""), params.get("cmd", "")
+        before = copy.deepcopy(SESSIONS.get(sid)) if cmd not in ("state", "resume") else None
+        try:
+            if getattr(SESSIONS.get(sid), "save_blocked", False) and cmd not in ("state", "resume", "new"):
+                return {"ok": False, "error": "上次保存结果尚未确认，请先点继续存档重新读取"}
+            if cmd == "resume":
+                return _publish_loaded(_save_store(sid).load(), sid)
+            if cmd == "restore_checkpoint":
+                store = _save_store(sid)
+                raw = store.export_checkpoint()
+                checkpoint = {"checkpoint_state": SESSIONS[sid]} if sid in SESSIONS else {}
+                loaded = store.import_backup(raw, **checkpoint)
+                return _publish_loaded(loaded, sid)
+            result = _apply_action(params)
+            if not result.get("ok"):
+                if before is not None:
+                    SESSIONS[sid] = before
+                return result
+            if cmd != "state":
+                sid = result.get("sid", sid)
+                session = SESSIONS[sid]
+                info = _save_store(sid).save(session)
+                session.save_sequence = info.sequence
+                result["state"] = state_json(session)
+            return result
+        except Exception as exc:
+            if getattr(exc, "commit_uncertain", False):
+                # Rename succeeded but durable commit could not be confirmed. Do not
+                # promise rollback or allow a stale in-memory state to overwrite disk.
+                if sid in SESSIONS:
+                    SESSIONS[sid].save_blocked = True
+                return {"ok": False, "recovery_sid": sid,
+                        "error": "保存提交状态未确认，请点继续存档核对磁盘进度；当前已暂停操作"}
+            if cmd == "new":
+                if sid in SESSIONS:
+                    _drop_session(sid)
+            elif before is not None:
+                SESSIONS[sid] = before
+            return {"ok": False, "error": f"存档操作未完成，进度未覆盖：{exc}"}
+
+
+def backup_bytes(sid, checkpoint=False):
+    with _LOCK:
+        store = _save_store(sid)
+        return store.export_checkpoint() if checkpoint else store.export_backup()
+
+
+def import_backup(raw, sid=None, inspect_only=False):
+    """Untrusted file bytes go through the same runtime and game codec as boot."""
+    with _LOCK:
+        try:
+            target = sid or uuid.uuid4().hex[:12]
+            store = _save_store(target)
+            if inspect_only:
+                loaded = store.inspect_backup(raw)
+                session = loaded.state
+                return {"ok": True, "preview": {"round": session.round_no,
+                        "phase": session.phase, "hp": max(0, session.player.hp),
+                        "gold": session.player.gold, "seed": session.seed,
+                        "warning": getattr(session, "save_warning", None)}}
+            checkpoint = {"checkpoint_state": SESSIONS[target]} if target in SESSIONS else {}
+            loaded = store.import_backup(raw, **checkpoint)
+            return _publish_loaded(loaded, target)
+        except Exception as exc:
+            if getattr(exc, "commit_uncertain", False):
+                if target in SESSIONS:
+                    SESSIONS[target].save_blocked = True
+                return {"ok": False, "recovery_sid": target,
+                        "error": "导入提交状态未确认，请点继续存档核对；导入前检查点仍可恢复"}
+            return {"ok": False, "error": f"备份未导入，当前进度保持不变：{exc}"}
 
 
 # ---------------------------------------------------------------- /demo 页面
@@ -1187,10 +1371,19 @@ canvas{display:block;width:480px;max-width:92vw;image-rendering:pixelated;backgr
 <h1>宝可梦自走棋 · Web 可玩 Demo</h1>
 <span class="muted">1 玩家 + 7 bot · 全系统开启（羁绊/装备/齐射/天气/状态）</span>
 <span style="flex:1"></span>
-<input id="seedin" type="number" value="7" min="1" max="99999" style="width:90px" title="种子">
+<input id="seedin" type="number" placeholder="随机种子" style="width:110px" title="留空随机；填整数可复现对局">
 <button class="primary" onclick="newGame()">开新对局</button>
 <a href="/" class="muted">← 验收后台</a>
 </header>
+<div class="panel" style="margin-bottom:12px">
+  <button onclick="api('save')">保存进度</button>
+  <button onclick="resumeGame()">继续存档</button>
+  <button onclick="downloadBackup()">下载备份</button>
+  <label>导入备份 <input id="backup-file" type="file" accept=".ptsave,application/json" onchange="inspectBackup(this.files[0])" style="max-width:230px"></label>
+  <button onclick="api('restore_checkpoint')">恢复导入前进度</button>
+  <p id="save-status" class="muted">每次操作成功后自动保存到本机服务；下载备份可另行保管。</p>
+  <div id="import-preview" hidden><p id="import-info"></p><button class="primary" onclick="confirmImport()">确认导入并保留当前进度备份</button><button onclick="cancelImport()">取消导入</button></div>
+</div>
 <div id="hud" class="muted">加载中…</div>
 <div class="cols">
 <section>
@@ -1199,11 +1392,26 @@ canvas{display:block;width:480px;max-width:92vw;image-rendering:pixelated;backgr
   <div id="shop"></div>
   <div id="actions">
     <button id="btn-refresh" onclick="api('refresh')">刷新（2 金）</button>
+    <button id="btn-lock" onclick="api('lock')">锁定商店</button>
     <button id="btn-xp" onclick="api('levelup')">买经验（4 金 +4XP）</button>
     <button id="btn-fill" onclick="fillBoard()">一键上场</button>
     <button id="btn-auto" onclick="toggleAuto()">▶ 自动试玩</button>
     <button id="btn-fight" class="primary" onclick="endPrep()">开战 ▶</button>
     <span id="warnfight">⚠ 上场为空</span>
+  </div>
+  <div id="confirm-empty" class="panel" hidden>
+    <p>上场为空，开战会直接判负掉血。可以先买棋上场，也可以继续空场战斗。</p>
+    <button onclick="endPrep(true)">确认空场开战</button>
+    <button onclick="document.getElementById('confirm-empty').hidden=true">返回布阵</button>
+  </div>
+  <div id="result-panel" class="panel" hidden aria-live="polite"></div>
+  <div id="spectate-actions" hidden>
+    <button onclick="nextRound()">观战下一轮</button>
+    <button class="primary" onclick="api('finish')">快进至最终排名</button>
+  </div>
+  <div id="round-actions" hidden>
+    <button onclick="openBattle()">查看本轮结算</button>
+    <button id="btn-resume-next" class="primary" onclick="nextRound()">进入下一轮</button>
   </div>
   <p class="muted" id="tips">准备阶段不限时；开战后自动战斗。败方掉血 = 2 + 对方存活棋子 × 阶段系数；每 5 轮野怪轮掉装备组件。HP 归零淘汰，活到最后就是冠军。</p>
 </section>
@@ -1237,17 +1445,37 @@ canvas{display:block;width:480px;max-width:92vw;image-rendering:pixelated;backgr
 <script>
 let S=null, sid="", selLoc=null, equipKey=null;
 const $=id=>document.getElementById(id);
+const escapeText=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function rememberSlot(){try{localStorage.setItem('poketactics.slot',sid);}catch(e){$('save-status').textContent='浏览器无法记住存档编号，请下载备份';}}
+function savedSlot(){try{return localStorage.getItem('poketactics.slot')||'';}catch(e){return '';}}
+function receiveState(j){if(j.ok&&j.state){sid=j.sid||j.state.sid;rememberSlot();S=j.state;render();}}
+function rememberRecovery(j){if(j.recovery_sid){sid=j.recovery_sid;rememberSlot();$('save-status').textContent=j.error;}}
 function toast(t,err){const el=$('toast');el.textContent=t;el.className='show'+(err?' err':'');clearTimeout(el._t);el._t=setTimeout(()=>el.className='',2600);}
 async function api(cmd,params={}){
   const q=new URLSearchParams({cmd,sid,...params});
   const r=await fetch('/api/demo/action?'+q.toString());
   const j=await r.json();
+  rememberRecovery(j);
   if(!j.ok&&j.error){toast(j.error,true);if(j.dead){sid='';}}
-  if(j.state){S=j.state;render();}
+  receiveState(j);
   if(j.msg)toast(j.msg);
   return j;
 }
-function newGame(){api('new',{seed:$('seedin').value||'7'}).then(j=>{if(j.ok){sid=j.sid;selLoc=equipKey=null;toast('对局开始：先买几只棋子上场吧');}});}
+function newGame(){autoStop();closeBattle();selLoc=equipKey=null;api('new',{seed:$('seedin').value}).then(j=>{if(j.ok)toast('对局开始 · 种子 '+S.seed+'：先买几只棋子上场吧');});}
+async function resumeGame(){autoStop();closeBattle();selLoc=equipKey=null;const slot=sid||savedSlot();if(!slot){toast('没有记录到存档编号，可导入备份或开新局',true);return;}const j=await api('resume',{sid:slot});if(!j.ok)$('save-status').textContent=j.error;}
+function downloadBackup(){if(!sid){toast('请先继续存档或开新局',true);return;}const link=document.createElement('a');link.href='/api/demo/backup?sid='+encodeURIComponent(sid);link.download='PokeTactics.ptsave';link.click();}
+let pendingBackup=null;
+function cancelImport(){pendingBackup=null;$('import-preview').hidden=true;$('backup-file').value='';}
+async function backupRequest(path,raw){const response=await fetch(path+'?sid='+encodeURIComponent(sid),{method:'POST',headers:{'Content-Type':'application/json','X-PokeTactics-Import':'1'},body:raw});return response.json();}
+async function inspectBackup(file){
+  if(!file)return;autoStop();closeBattle();
+  if(file.size>512*1024){toast('备份文件超过512KB',true);cancelImport();return;}
+  try{const raw=await file.text();const j=await backupRequest('/api/demo/import/inspect',raw);if(!j.ok){toast(j.error,true);cancelImport();return;}
+    pendingBackup=raw;$('import-preview').hidden=false;const p=j.preview;
+    $('import-info').textContent=`备份为第 ${p.round} 轮，${p.hp} HP / ${p.gold} 金。导入前会保留当前进度，可通过“恢复导入前进度”找回。${p.warning||''}`;
+  }catch(e){toast('备份读取失败：'+e.message,true);cancelImport();}
+}
+async function confirmImport(){if(!pendingBackup)return;try{const j=await backupRequest('/api/demo/import',pendingBackup);rememberRecovery(j);if(j.ok){selLoc=equipKey=null;receiveState(j);cancelImport();toast(j.msg);}else toast(j.error,true);}catch(e){toast('导入失败：'+e.message,true);}}
 /* ---------- 渲染 ---------- */
 function pieceCell(v,loc,cls){
   /* 空格子也带 data-loc（仅我方格）——2026-09-14 E2E 发现的 UI 级根因：
@@ -1259,13 +1487,14 @@ function pieceCell(v,loc,cls){
   return `<div class="cell ${cls}${sel}${pick}${v.item?' has-item':''}" data-loc="${loc}" title="${v.name} ${v.tier}费 ${v.types.join('/')} ${v.ranged?'远程':'近战'} 招式:${v.move}${v.item?' 装备:'+v.item_name:''}">
     <img loading="lazy" src="/demo/sprite/${v.sid}.png" draggable="false">
     <i class="ring" style="border-color:${v.colors[0]}"></i>
-    <i class="rng ${v.ranged?'far':'near'}" title="${v.ranged?'远程（射程3）':'近战（射程1·突进）'}">${v.ranged?'远':'近'}</i>
+    <i class="rng ${v.ranged?'far':'near'}" title="射程 ${v.range} 格">${v.ranged?'远':'近'}</i>
     ${v.copies>=2?`<b class="cnt">×${Math.min(v.copies,3)}</b>`:''}
     ${v.item?'<i class="eq">装</i>':''}</div>`;
 }
 function render(){
   if(!S)return;
   const y=S.you;
+  $('save-status').textContent=(S.save?.sequence?'已保存 · 第 '+S.save.sequence+' 次提交。':'')+(S.save?.warning||'每次操作自动保存；服务重启后可继续。');
   /* HUD */
   const w=S.weather;
   $('hud').innerHTML=[
@@ -1295,11 +1524,18 @@ function render(){
   renderInfo();
   /* 商店 */
   const canBuy=S.phase==='prep'&&y.alive;
+  $('confirm-empty').hidden=true;
   $('shop').innerHTML=S.shop.map((v,i)=>v?`<div class="shopcell ${canBuy?'':'off'}" data-shop="${i}" title="${v.types.join('/')} ${v.ranged?'远程':'近战'} · ${v.move}">
-    <img loading="lazy" src="/demo/sprite/${v.sid}.png"><div class="nm">${v.name}</div><div class="pr">🪙${v.price} · ${v.tier}费 · <b style="color:${v.ranged?'#2f5a8a':'#8a4a2f'}">${v.ranged?'远程':'近战'}</b></div></div>`:
+    <img loading="lazy" src="/demo/sprite/${v.sid}.png"><div class="nm">${v.name}</div><div class="pr">🪙${v.price} · ${v.tier}费 · <b style="color:${v.ranged?'#2f5a8a':'#8a4a2f'}">${v.ranged?'远程':'近战'}</b></div><div class="muted">${v.skill_name} · 射程${v.range}</div></div>`:
     `<div class="shopcell off"><div class="nm muted">空</div></div>`).join('');
-  $('btn-refresh').disabled=$('btn-xp').disabled=$('btn-fight').disabled=!canBuy;
+  $('btn-refresh').disabled=$('btn-xp').disabled=$('btn-fight').disabled=$('btn-lock').disabled=!canBuy;
+  $('btn-lock').textContent=y.shop_locked?'🔒 已锁定（点击解锁）':'锁定商店';
   $('btn-fight').style.display=(S.phase==='prep')?'':'none';
+  $('spectate-actions').hidden=y.alive||S.phase==='over';
+  $('round-actions').hidden=S.phase!=='battle';
+  const result=S.player_result;
+  $('result-panel').hidden=!result;
+  $('result-panel').innerHTML=result?`<b>${S.phase==='over'?'对局结束':'你已淘汰'} · 第 ${result.rank} 名</b><p>第 ${result.round} 轮阵容：${result.team.map(v=>v.name).join('、')||'空场'}</p>`+(S.over?'<b>最终排名</b><ol>'+S.over.ranking.map(r=>`<li>${r.is_you?'★ ':''}${r.name} · ${r.hp} HP</li>`).join('')+'</ol>':'<p>可继续逐轮观战，或快进查看最终排名。</p>'):'';
   /* 空场防呆：按当前状态给下一步指引（2026-09-14 用户反馈——棋子买了/
      选中了但还在备战时，「上场为空」读起来像矛盾，改为指引文案） */
   const wf=$('warnfight');
@@ -1328,7 +1564,7 @@ function render(){
     <span class="hpbar"><i style="width:${Math.max(0,e.hp)}%"></i></span>
     <span class="muted">${e.hp}HP L${e.level}${e.rank?' 第'+e.rank+'名':''}</span></div>`).join('');
   /* 战报 */
-  $('log').innerHTML=S.log.length?S.log.map(l=>`<div>${l}</div>`).join(''):'<span class="muted">尚无战报</span>';
+  $('log').innerHTML=S.log.length?S.log.map(l=>`<div>${escapeText(l)}</div>`).join(''):'<span class="muted">尚无战报</span>';
 }
 function findPiece(loc){
   if(loc.startsWith('b'))return S.bench[+loc.slice(1)];
@@ -1341,7 +1577,7 @@ function renderInfo(){
   const v=findPiece(selLoc);
   if(!v){selLoc=null;return renderInfo();}
   el.className='';
-  el.innerHTML=`<b>${v.name}</b> · ${v.tier} 费 · ${v.types.join('/')} · ${v.ranged?'远程':'近战'} · 招式「${v.move}」${v.copies>=2?` · 同种已有 ${v.copies} 只（3 只自动进化）`:''}${v.item?` · 装备「${v.item_name}」`:''}
+  el.innerHTML=`<b>${v.name}</b> · ${v.tier} 费 · ${v.types.join('/')} · ${v.role} · 射程 ${v.range} · 招式「${v.move}」${v.copies>=2?` · 同种已有 ${v.copies} 只（3 只自动进化）`:''}${v.item?` · 装备「${v.item_name}」`:''}<p><b>${v.skill_name}</b>：${v.skill_description}</p>
   <div class="btns"><button onclick="api('sell',{loc:selLoc}).then(()=>{selLoc=null})">卖出（+${v.sell} 金）</button>
   ${v.item?`<button onclick="api('unequip',{loc:selLoc})">卸下装备</button>`:''}</div>`;
 }
@@ -1492,9 +1728,9 @@ async function autoLoop(gen){
     await autoSleep(S&&S.phase==='prep'?560:650);
   }
 }
-async function endPrep(){
-  if(!autoOn&&S.board[0].every(c=>!c)&&S.board[1].every(c=>!c)&&S.you.alive){
-    if(!confirm('上场为空：开战将不战而败（掉血且没有战斗画面）。\n\n建议先从商店买几只棋子并点击上场（或点「一键上场」）。\n确定仍然开战？'))return;
+async function endPrep(allowEmpty=false){
+  if(!allowEmpty&&!autoOn&&S.board[0].every(c=>!c)&&S.board[1].every(c=>!c)&&S.you.alive){
+    $('confirm-empty').hidden=false;return;
   }
   const j=await api('end_prep');
   if(j.ok)openBattle();
@@ -1506,13 +1742,13 @@ async function nextRound(){
   if(j.ok&&S.phase==='over')toast('对局结束');
 }
 /* ---------- 战斗回放 ---------- */
-let frames=[],bcur=0,bn=0,btimer=null,bspeedv=1,playing=false,bevs=[],bmeta=null;
+let frames=[],bcur=0,bn=0,btimer=null,bspeedv=1,playing=false,bevs=[],bmeta=null,loadToken=0,bdt=0.05;
 function openBattle(){
-  bmeta=S.last_battle;frames=[];bcur=0;playing=false;btimer&&clearInterval(btimer);btimer=null;
+  ++loadToken;bmeta=S.last_battle;bdt=bmeta?.dt||0.05;frames=[];bcur=0;bn=0;bevs=[];playing=false;btimer&&clearInterval(btimer);btimer=null;
   $('overlay').classList.add('show');
   const rep=[];
   rep.push(`<b>${bmeta?bmeta.headline:''}</b>`);
-  rep.push(...S.log.slice(-6).map(l=>`<div>${l}</div>`));
+  rep.push(...S.log.slice(-6).map(l=>`<div>${escapeText(l)}</div>`));
   if(S.phase==='over'&&S.over){rep.push('<hr><b>最终排名</b><ol style="margin:6px 0;padding-left:22px">'+S.over.ranking.map(r=>`<li class="${r.rank===1?'rank1':''}">${r.is_you?'★ ':''}${r.name}</li>`).join('')+'</ol>');}
   $('battle-report').innerHTML=rep.join('');
   $('btn-next').textContent=S.phase==='over'?'查看终局 ▶':'下一轮 ▶';
@@ -1522,13 +1758,14 @@ function openBattle(){
     ctx.clearRect(0,0,240,320);
     /* 空场等原因没有帧：画布上直接给出大字说明，不再留黑屏 */
     ctx.fillStyle='#e8e2cf';ctx.textAlign='center';
-    ctx.font='bold 18px monospace';ctx.fillText('本场无战斗画面',120,132);
+    const restored=!!bmeta?.restored;
+    ctx.font='bold 18px monospace';ctx.fillText(restored?'本轮结算已恢复':'本场无战斗画面',120,132);
     ctx.font='13px monospace';ctx.fillStyle='#b9b3a0';
-    const why=S.you&&!S.you.alive?'你已被淘汰（观战快进）':
+    const why=restored?'历史回放帧未存入备份':S.you&&!S.you.alive?'你已被淘汰（观战快进）':
       (S.you&&S.you.on_board===0?'我方空场 · 不战而败掉血':'空场判负 / 野怪轮空');
     ctx.fillText(why,120,158);
-    ctx.fillText('下一轮记得买棋上场',120,178);
-    $('bstatus').textContent='本场无战斗画面（'+(S.you&&S.you.on_board===0?'我方空场':'空场判负/轮空')+'）';
+    ctx.fillText(restored?'可直接进入下一轮':'下一轮记得买棋上场',120,178);
+    $('bstatus').textContent=restored?'战果已保存，恢复不会重复发奖励；历史帧未保存':'本场无战斗画面（'+(S.you&&S.you.on_board===0?'我方空场':'空场判负/轮空')+'）';
     $('evlist').innerHTML='<div class="muted">本场景没有战斗事件流</div>';return;}
   $('bhead').textContent=`第 ${bmeta.round} 轮战斗 vs ${bmeta.opp_name}`;
   bevs=bmeta.events||[];
@@ -1537,31 +1774,33 @@ function openBattle(){
   loadAndPlay();
 }
 async function loadAndPlay(){
+  const token=loadToken;
   $('bstatus').textContent='战斗帧载入中…（'+bn+' 帧）';
   const jobs=[];
   for(let i=0;i<bn;i++)jobs.push(new Promise(res=>{const im=new Image();im.onload=im.onerror=()=>res();im.src=`/demo/frame/${sid}/r${bmeta.round}/${i}.png`;frames[i]=im;}));
   await Promise.all(jobs);
-  $('bstatus').textContent=bn+' 帧就绪 @10fps';
+  if(token!==loadToken)return;
+  $('bstatus').textContent=bn+' 帧就绪 @'+Math.round(1/bdt)+'fps';
   play();
 }
 function bshow(i){
   bcur=Math.max(0,Math.min(bn-1,i));
   const im=frames[bcur];
   if(im&&im.width){const ctx=$('cv').getContext('2d');ctx.clearRect(0,0,240,320);ctx.drawImage(im,0,0);}
-  $('bstatus').textContent=`第 ${bcur+1} / ${bn} 帧 · ${(bcur*0.1).toFixed(1)}s`;
+  $('bstatus').textContent=`第 ${bcur+1} / ${bn} 帧 · ${(bcur*bdt).toFixed(2)}s`;
   let last=-1;
-  for(let j=0;j<bevs.length;j++){const el=$('ev'+j);if(!el)continue;const past=bevs[j].t<=bcur*0.1+1e-9;el.className=past?'past':'';if(past)last=j;}
+  for(let j=0;j<bevs.length;j++){const el=$('ev'+j);if(!el)continue;const past=bevs[j].t<=bcur*bdt+1e-9;el.className=past?'past':'';if(past)last=j;}
   if(last>=0){const el=$('ev'+last);el.className='now';el.scrollIntoView({block:'nearest'});}
 }
 function btick(){bshow(bcur+1);if(bcur>=bn-1)stopPlay();}
-function play(){if(playing)return;playing=true;$('bplay').textContent='⏸ 暂停';btimer=setInterval(btick,100/bspeedv);}
+function play(){if(playing||!bn)return;playing=true;$('bplay').textContent='⏸ 暂停';btimer=setInterval(btick,bdt*1000/bspeedv);}
 function stopPlay(){playing=false;clearInterval(btimer);btimer=null;$('bplay').textContent='▶ 播放';}
 function btoggle(){playing?stopPlay():(bcur>=bn-1&&bshow(0),play());}
 function breplay(){stopPlay();bshow(0);play();}
 function bskip(){stopPlay();bshow(bn-1);}
 function bspeed(){bspeedv=+$('bspeed').value;if(playing){stopPlay();play();}}
-function closeBattle(){stopPlay();$('overlay').classList.remove('show');}
+function closeBattle(){++loadToken;stopPlay();$('overlay').classList.remove('show');}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopPlay();});
 /* ---------- 启动 ---------- */
-(async()=>{newGame();})();
+(async()=>{if(savedSlot())await resumeGame();else newGame();})();
 </script></body></html>"""

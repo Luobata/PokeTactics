@@ -26,6 +26,7 @@ import sys
 from collections import Counter
 from functools import lru_cache
 from pathlib import Path
+from bisect import bisect_right
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
@@ -44,11 +45,12 @@ from render_mockups import (  # noqa: E402
     draw_nameplate, draw_effect_badge, text_width, wrap_text,
     board_sprite_size, scale_sprite, scale_compare_image,
 )
-from profile_vfx import SIGNATURES, PlaybackClock, gait_profile, pose_sprite
+from profile_vfx import SIGNATURES, PlaybackClock, gait_profile, pose_sprite, cast_projectile
 from skill_vfx import skill_profile, cast_windup, draw_skill
 from motion import MotionSystem, Pose, species_motion, windup as motion_windup, duration as motion_duration, offsets, transform
 from pixel_vfx import (trajectory_point, projectile, impact_star, impact_rim,
                        light, debris, hit_sprite, feather_flash, number_rise, exposure_age)
+from animation_timeline import AnimationTimeline, MAX_ACTIVE_SIGNATURES
 from combat import Battle  # noqa: E402
 from data import pokedex  # noqa: E402
 from roster import build_roster  # noqa: E402
@@ -502,9 +504,11 @@ class BattleAnimation:
 
     def __init__(self, comp_a, comp_b, seed: int,
                  front: Front, pal: Palettes, font: Font16,
-                 weather_name=None, battle=None) -> None:
+                 weather_name=None, battle=None, hud_snapshot=None) -> None:
         self.front, self.pal, self.font = front, pal, font
         self.weather_name = weather_name  # 场景动画：透传给 Battle（S11）
+        self.hud_snapshot = {"hp": 34, "gold": 13, "level": 5, "round": 13,
+                             **(hud_snapshot or {})}
         self.move_type = {m["name"]: m["type"] for m in pokedex().moves.values()}
         # 显示层汉化：事件流契约不变（cast 事件仍存英文名），渲染/面板翻译
         self.move_zh = {m["name"]: (m.get("name_zh") or m["name"])
@@ -516,6 +520,12 @@ class BattleAnimation:
         self.units = {u.idx: AnimUnit(u) for u in b.units}
         self.by_idx = {u.idx: u for u in b.units}
         self.events = b.events
+        self.authoritative_states = any(ev[1] == "unit_state" for ev in self.events)
+        self.timeline = AnimationTimeline(self.events, b.units)
+        self.presentation_events = self.timeline.public_events
+        self.presentation_duration = self.timeline.duration
+        self._presentation_renderer = None
+        self._is_presentation = False
         self.playback_clock = PlaybackClock(self.events)
         self._cursor = 0
         self._cur_t = -1.0
@@ -526,12 +536,53 @@ class BattleAnimation:
         self.cutins = []
         self.result = None
 
+    def _presentation_view(self):
+        if self._presentation_renderer is None:
+            view = copy.copy(self)
+            view.units = {idx: AnimUnit(unit) for idx, unit in self.by_idx.items()}
+            view.events = self.timeline.events
+            view._is_presentation = True
+            view.playback_clock = PlaybackClock(view.events)
+            view._reset()
+            self._presentation_renderer = view
+        return self._presentation_renderer
+
+    def presentation_state(self, seconds, speed=1., skip=False):
+        """Inspectable visual HP/energy/death state; raw simulation remains untouched."""
+        view = self._presentation_view()
+        view._ensure(self.timeline.time(seconds, speed, skip))
+        return {idx: {"hp": unit.hp, "energy": unit.energy, "die_t": unit.die_t}
+                for idx, unit in view.units.items()}
+
+    def _timing(self, event):
+        return self.timeline.action_by_event.get(id(event)) if self._is_presentation else None
+
+    def _attack_preparation(self, idx, onset):
+        timing = self.timeline.action_by_onset.get((idx, onset)) if self._is_presentation else None
+        if timing is not None:
+            return timing.release-timing.start
+        sid = self.units[idx].u.piece.species_id
+        return motion_windup(sid) if sid in species_motion else HIT_DELAY
+
+    @staticmethod
+    def _cast_release(c):
+        return c[8] if len(c) > 8 else c[1]
+
+    def _active_casts(self, t):
+        # Dense boards retain all state/HP effects; only the three most relevant
+        # authored FX tracks draw at once. No global cut-in queue can accumulate.
+        active = [c for c in self.cutins[-24:] if c[0] <= t < c[1] + .6]
+        return sorted(active, key=lambda c: (abs(t-c[1]), c[0], c[2]))[:MAX_ACTIVE_SIGNATURES]
+
     def _active_statuses(self, au, T):
         # sim 的 flinch 只发 apply；这个短促反馈按其 0.3s 视觉寿命自行隐去。
         return [kind for kind in STATUS_ICONS if kind in au.statuses
                 and (kind != "flinch" or 0 <= effect_frame(T - au.statuses[kind]) < 3)]
 
     def _reset(self) -> None:
+        # The training/compatibility tools replace the event list on a copied
+        # animation before resetting; detect its contract from the new stream.
+        self.authoritative_states = any(ev[1] == "unit_state" for ev in self.events)
         for au in self.units.values():
             au.reset()
         self.dusts, self.floats, self.cutins = [], [], []
@@ -551,10 +602,19 @@ class BattleAnimation:
         t, kind = ev[0], ev[1]
         if kind == "deploy":
             self.units[ev[2]].deploy(ev[3])
+        elif kind == "unit_state":
+            # Event contract v2: energy rules, sash, side hits, and overheal are
+            # resolved by sim. Replaying a damage event never invents resources.
+            au = self.units[ev[2]]
+            if au.hp != ev[3]:
+                au.set_hp(t, ev[3])
+            au.energy = ev[4]
         elif kind == "move":
             au = self.units[ev[2]]
-            blink = au.u.piece.species_id == 65 and any(
+            blink = (self._is_presentation and id(ev) in self.timeline.blink_by_event) or (
+                au.u.piece.species_id == 65 and any(
                 e[1] == "cast" and e[2] == ev[2] and abs(e[0] - t) < 1e-9 for e in self.events)
+            )
             if blink:
                 au.blink = (t, au.render_px(t))
                 au.deploy(ev[3])
@@ -564,42 +624,55 @@ class BattleAnimation:
         elif kind == "attack":
             atk, tgt = self.units[ev[2]], self.units[ev[3]]
             dmg = ev[4]
-            atk.energy = ev[5] if len(ev) > 5 else min(80, atk.energy + 15)
-            tgt.set_hp(t, tgt.hp - dmg)
-            tgt.energy = min(80, tgt.energy + 10)
+            if not self.authoritative_states:
+                atk.energy = ev[5] if len(ev) > 5 else min(80, atk.energy + 15)
+                tgt.set_hp(t, tgt.hp - dmg)
+                tgt.energy = ev[6] if len(ev) > 6 else min(80, tgt.energy + 10)
             ax, ay = atk.render_px(t)
             bx, by = tgt.render_px(t)
             dx, dy = bx - ax, by - ay
             norm = math.hypot(dx, dy) or 1.0
-            atk.attacks.append((t, dx / norm, dy / norm))
-            tgt.knockbacks.append((t, dx / norm, dy / norm))
-            tgt.jitter_t = t  # GSC 受击左右颤
-            self.floats.append((t + self._attack_delay(ev), bx, by, f"-{dmg}", (255, 255, 255)))
+            timing = self._timing(ev)
+            impact = timing.impact if timing else t + self._attack_delay(ev)
+            if not timing or not timing.secondary:
+                atk.attacks.append((t, dx / norm, dy / norm))
+            tgt.knockbacks.append((impact, dx / norm, dy / norm))
+            tgt.jitter_t = impact
+            self.floats.append((impact, bx, by, f"-{dmg}", (255, 255, 255)))
         elif kind == "cast":
             ci, ti, move, eff, dmg = ev[2], ev[3], ev[4], ev[5], ev[6]
             au = self.units[ci]
-            au.energy = ev[7] if len(ev) > 7 else 0
+            if not self.authoritative_states:
+                au.energy = ev[7] if len(ev) > 7 else 0
+                if len(ev) > 8:
+                    self.units[ti].energy = ev[8]
             skill = skill_profile(au.u.piece.species_id)
             start = t
             length = cast_windup(au.u.piece.species_id)
-            self.cutins.append((start, start + length, ci, ti,
-                                move, eff, dmg, au.u.piece.types[0]))
-            au.recoil_t = start + length
+            timing = self._timing(ev)
+            impact = timing.impact if timing else start + length
+            release = timing.release if timing else impact
+            self.cutins.append((start, impact, ci, ti,
+                                move, eff, dmg, au.u.piece.types[0], release))
+            au.recoil_t = release
             tgt = self.units[ti]
             if dmg:
-                self.floats.append((start + length, *tgt.render_px(t),
+                self.floats.append((impact, *tgt.render_px(t),
                                     f"-{dmg}",
                                     (255, 90, 70) if eff > 1 else (255, 220, 60)))
-                tgt.set_hp(t, tgt.hp - dmg)
+                if not self.authoritative_states:
+                    tgt.set_hp(t, tgt.hp - dmg)
             extra = "效果拔群！" if eff >= 2 else ("效果不佳" if 0 < eff < 1 else "")
             label = skill["name"]
-            self.msg = (start + length, f"{self.by_idx[ci].piece.name}的{label}！ {extra}")
+            self.msg = (impact, f"{self.by_idx[ci].piece.name}的{label}！ {extra}")
         elif kind == "regen":
             au = self.units[ev[2]]
-            au.set_hp(t, min(au.u.max_hp, au.hp + ev[3]))
+            if not self.authoritative_states:
+                au.set_hp(t, min(au.u.max_hp, au.hp + ev[3]))
             self.floats.append((t, *au.render_px(t), f"+{ev[3]}", STATUS_GREEN))
         elif kind == "sash":
-            self.units[ev[2]].set_hp(t, 1)
+            if not self.authoritative_states:
+                self.units[ev[2]].set_hp(t, 1)
         elif kind == "die":
             au = self.units[ev[2]]
             au.die_t = t
@@ -623,7 +696,8 @@ class BattleAnimation:
                     au.frozen_pose = None
                 au.statuses.pop(status, None)
             elif action == "tick" and len(ev) > 5 and ev[5] > 0:
-                au.set_hp(t, au.hp - ev[5])
+                if not self.authoritative_states:
+                    au.set_hp(t, au.hp - ev[5])
                 self.floats.append((t, *au.render_px(t), f"-{ev[5]}",
                                     DOT_COLORS.get(status, STATUS_PURPLE)))
         elif kind == "end":
@@ -639,14 +713,28 @@ class BattleAnimation:
         signature_active = any(c[0] <= T < c[1] + .6 and
                                skill_profile(self.units[c[2]].u.piece.species_id)["tier"] == "signature"
                                for c in self.cutins)
-        if show_cutins and release and not signature_active:
+        if self._is_presentation:
+            # At most two 200ms closeups over the whole battle; they do not
+            # pause the clock or hide an impact. Board choreography remains primary.
+            window = next((w for w in self.timeline.cutin_windows if w[0] <= T < w[1]), None)
+            selected = None if window is None else next((c for c in self.cutins
+                if abs(self._cast_release(c)-window[0]) < 1e-8), None)
+            if show_cutins and selected:
+                # A narrow portrait banner preserves the board and target meters.
+                self._draw_cast_portrait(img, selected, T)
+        elif show_cutins and release and not signature_active:
             content = self._cutin_frame(release, T)
             img.alpha_composite(content, (0, self._board_shake(T)))
         return img
 
     def playback_frame(self, seconds, speed=1., skip=False, show_cutins=True):
-        """Public presentation clock; frame(T) remains the sim-time compatibility API."""
-        return self.frame(self.playback_clock.simulation_time(seconds, speed, skip), show_cutins)
+        """One presentation clock: no hidden second slow-motion mapping.
+
+        ``skip=True`` returns the settled final frame; speed scales wall time.
+        ``frame(T)`` and ``_ensure(T)`` retain their raw-event compatibility ABI.
+        """
+        return self._presentation_view().frame(
+            self.timeline.time(seconds, speed, skip), show_cutins)
 
     def _gait(self, au):
         sid = au.u.piece.species_id
@@ -654,6 +742,9 @@ class BattleAnimation:
                             pokedex().species[sid]["base"]["speed"])
 
     def _attack_delay(self, ev):
+        timing = self._timing(ev)
+        if timing is not None:
+            return timing.impact - timing.start
         au = self.units[ev[2]]
         prep = motion_windup(au.u.piece.species_id) if au.u.piece.species_id in species_motion else HIT_DELAY
         if au.u.range <= 1:
@@ -666,21 +757,42 @@ class BattleAnimation:
 
     def _event_position(self, idx, t):
         """Historical event positions, unaffected by later movement or a rewind."""
-        pos = next((e[3] for e in reversed(self.events)
-                    if e[0] <= t + 1e-9 and e[1] in ("deploy", "move") and e[2] == idx), None)
+        key = (id(self.events), len(self.events))
+        if getattr(self, '_position_index_key', None) != key:
+            tracks = {i: ([], []) for i in self.units}
+            for event in self.events:
+                if event[1] in ('deploy', 'move'):
+                    tracks[event[2]][0].append(event[0])
+                    tracks[event[2]][1].append(event[3])
+            self._position_index_key, self._position_tracks = key, tracks
+        times, positions = self._position_tracks[idx]
+        index = bisect_right(times, t + 1e-9) - 1
+        pos = positions[index] if index >= 0 else None
         return self.units[idx].cell_px(pos) if pos is not None else self.units[idx].render_px(t)
 
     def _projectile_cancelled(self, ev):
         dead = self.units[ev[3]].die_t
-        return dead is not None and dead < ev[0] + self._attack_delay(ev) - 1e-9
+        # Legacy streams record a lethal attack and die at the SAME sim instant.
+        # That death was caused by this shot, so it cannot cancel its own flight.
+        return (dead is not None and abs(dead-ev[0]) > 1e-8
+                and dead < ev[0] + self._attack_delay(ev) - 1e-9)
 
     def _draw_projectiles(self, img, T, budget):
         draw = ImageDraw.Draw(img)
-        for ev in self.events[:self._cursor]:
-            if ev[1] != "attack" or self.units[ev[2]].u.range <= 1:
+        events = self.timeline.recent_events(T) if self._is_presentation else self.events[:self._cursor]
+        for ev in events:
+            timing = self._timing(ev)
+            ranged_cast = timing and timing.kind == 'cast' and timing.release < timing.impact
+            if ev[1] not in ("attack", "cast") or (ev[1] == 'cast' and not ranged_cast):
+                continue
+            if timing and timing.secondary:
+                continue
+            if self.units[ev[2]].u.range <= 1 and not ranged_cast:
                 continue
             sid = self.units[ev[2]].u.piece.species_id
             prep = motion_windup(sid) if sid in species_motion else FPS_DT
+            if timing:
+                prep = timing.release-timing.start
             age, duration = T - ev[0] - prep, self._attack_delay(ev) - prep
             # 1.4 - 1.0 - .4 can be slightly negative at the authored launch.
             if sid in species_motion and -1e-8 < age < 0:
@@ -690,12 +802,17 @@ class BattleAnimation:
             source = self.units[ev[2]]
             a, b, trajectory = self._projectile_path(ev)
             color = TYPE_COLORS[source.u.piece.types[0]]
-            projectile(img, lambda p: trajectory_point(a, b, p, trajectory),
-                       exposure_age(age,duration), duration, source.u.piece.types[0], color, budget)
+            if ranged_cast:
+                cast_projectile(img, sid, a, b, age, duration,
+                                source.u.piece.types[0], color, budget)
+            else:
+                projectile(img, lambda p: trajectory_point(a, b, p, trajectory),
+                           exposure_age(age,duration), duration, source.u.piece.types[0], color, budget)
 
     def _projectile_path(self, ev):
-        a = self._event_position(ev[2], ev[0])
-        b = self._event_position(ev[3], ev[0])
+        timing = self._timing(ev)
+        a = self.units[ev[2]].cell_px(timing.source_pos) if timing else self._event_position(ev[2], ev[0])
+        b = self.units[ev[3]].cell_px(timing.target_pos) if timing else self._event_position(ev[3], ev[0])
         signature = SIGNATURES.get(self.units[ev[2]].u.piece.species_id)
         return ((a[0] + BCELL // 2, a[1] + 14),
                 (b[0] + BCELL // 2, b[1] + 14),
@@ -730,11 +847,12 @@ class BattleAnimation:
                     draw.point((round(x+BCELL//2+dx*19),round(y+14+dy*19)), fill=PAPER)
 
     def _draw_signatures(self, img, T, budget):
-        for c in self.cutins:
+        for c in self._active_casts(T):
             sid = self.units[c[2]].u.piece.species_id
             if not c[0] <= T < c[1] + .6:
                 continue
-            a, b = self._event_position(c[2], c[0]), self._event_position(c[3], c[0])
+            a = self._event_position(c[2], min(T,self._cast_release(c))) if self._is_presentation else self._event_position(c[2], c[0])
+            b = self._event_position(c[3], c[0])
             # Put the small fire emblem on the least crowded rim, keeping its
             # impact anchor on the target. No new full-screen or solid overlay.
             candidates = [(b[0] + 20 + dx, b[1] + 16 + dy)
@@ -752,8 +870,12 @@ class BattleAnimation:
             profile = skill_profile(sid)
             profile = {**profile, "type": profile.get("type", c[7]),
                        "target_size": board_sprite_size(self.units[c[3]].u.piece.tier)}
+            release = self._cast_release(c)
+            if self._is_presentation and release <= T < c[1]:
+                continue  # Flight is drawn by the projectile track, not a second impact.
+            age = T-c[0] if T < release else release-c[0] + T-c[1]
             draw_skill(img, profile, (a[0] + 20, a[1] + 16),
-                       (b[0] + 20, b[1] + 16), T - c[0], c[1] - c[0],
+                       (b[0] + 20, b[1] + 16), age, release - c[0],
                        budget, variant=c[2] % 2, emblem=emblem)
 
     def _draw_board(self, img: Image, T: float) -> None:
@@ -824,6 +946,9 @@ class BattleAnimation:
             pose = poses[au.u.idx]
             if pose is not None:
                 self._draw_unit_meters(img, au, T, pose)
+        self.last_frame_metrics = {"particles": budget.used, "particle_limit": budget.limit,
+                                   "signature_tracks": len(self._active_casts(T)),
+                                   "visible_units": len(shown)}
         shake = self._board_shake(T)
         if shake:
             board = img.crop((BX, BY, BX + BCOLS * BCELL, BY + BROWS * BCELL))
@@ -833,7 +958,9 @@ class BattleAnimation:
                       (BX, BY + max(0, shake)))
         self._draw_message(img, T)
         # HUD 最后绘制，原尺寸大精灵入场时不会遮住顶部读数。
-        draw_hud(img, self.font, hp=34, gold=13, level=5, rnd=13, right="▶")
+        draw_hud(img, self.font, hp=self.hud_snapshot["hp"],
+                 gold=self.hud_snapshot["gold"], level=self.hud_snapshot["level"],
+                 rnd=self.hud_snapshot["round"], right="▶")
         if self.weather_name in WEATHER_ICONS:
             rows, color = WEATHER_ICONS[self.weather_name]
             draw_pixel_icon(img, (228, 11), rows, color)
@@ -842,9 +969,10 @@ class BattleAnimation:
         """只从已回放信息推导抬手；即时 cast 之前以满能量阈值为起点。"""
         if au.dying(T):
             return None
-        active = next((c for c in self.cutins if c[2] == au.u.idx and c[0] <= T < c[1]), None)
+        active = next((c for c in self.cutins if c[2] == au.u.idx
+                       and c[0] <= T < self._cast_release(c)), None)
         if active:
-            return ((T - active[0]) / (active[1] - active[0]), active[7])
+            return ((T - active[0]) / (self._cast_release(active) - active[0]), active[7])
         return None
 
     def _board_shake(self, T):
@@ -889,7 +1017,8 @@ class BattleAnimation:
         context = getattr(self, '_frame_hit_context', None)
         if context is not None and context[:2] == (id(self), T):
             return context[2]
-        return [ev for ev in self.events[:self._cursor]
+        events = self.timeline.recent_events(T) if self._is_presentation else self.events[:self._cursor]
+        return [ev for ev in events
                 if ev[1] == "attack" and ev[4] > 0
                 and not self._projectile_cancelled(ev)
                 and 0 <= effect_frame(T - ev[0] - self._attack_delay(ev)) <
@@ -897,6 +1026,9 @@ class BattleAnimation:
 
     def _unit_pose(self, au, T):
         """绘制坐标供精灵、特效和最后一层状态条共用，不写回单位。"""
+        if self._is_presentation and any(b['unit']==au.u.idx and
+                b['departure']+.05 <= T < b['landing'] for b in self.timeline.blinks):
+            return None  # Disappear between the origin echo and destination landing.
         if "freeze" in au.statuses and au.frozen_pose is not None and not au.dying(T):
             return au.frozen_pose
         u = au.u
@@ -913,7 +1045,7 @@ class BattleAnimation:
         casting = self._casting_phase(au, T)
 
         if u.piece.species_id in species_motion:
-            if dying and effect_frame(age) >= 6:
+            if dying and age >= motion_duration(u.piece.species_id, 'death'):
                 return None
             motion = self._authored_motion(au, T)
             ox, oy = offsets(motion)
@@ -922,8 +1054,9 @@ class BattleAnimation:
             body = self._board_sprite(u.piece.species_id,u.piece.tier)
             bounds = body.getbbox()
             rise_limit = BOARD_FOOT-(bounds[3]-bounds[1])+4
-            return (round(x+max(-3,min(3,ox))),
-                    round(y+max(-rise_limit,oy if dying else min(3,oy))),casting)
+            reach = 6 if self._is_presentation else 3
+            return (round(x+max(-reach,min(reach,ox))),
+                    round(y+max(-rise_limit,oy if dying else min(reach,oy))),casting)
         idle, _, sensitive, tempo, amplitude, walk_hz = self._motion_profile(u.piece.species_id)
         ox, oy, _ = self._attack_motion(au, T)
         for kt, kdx, kdy in au.knockbacks[-1:]:
@@ -1129,6 +1262,8 @@ class BattleAnimation:
         dying = au.dying(T)
         age = T - au.die_t if dying else 0
         foot = py_ + BOARD_FOOT
+        if self._is_presentation and u.piece.species_id == 143 and not dying:
+            foot = round(au.render_px(T)[1]) + BOARD_FOOT
         if self._gait(au).floating and not dying:
             foot = round(au.render_px(T)[1]) + BOARD_FOOT + 1
             draw.ellipse((px_ + 10, foot - 2, px_ + 30, foot + 1), outline=FRAME)
@@ -1175,7 +1310,7 @@ class BattleAnimation:
             img.alpha_composite(halo, (px_ - 3, foot - 8))
         if dying and 0 <= age < FPS_DT and budget.take(1):
             draw_spark(img, px_ + BCELL // 2, foot + 3)
-        prep = motion_windup(u.piece.species_id) if u.piece.species_id in species_motion else HIT_DELAY
+        prep = self._attack_preparation(u.idx, au.attacks[-1][0]) if au.attacks else HIT_DELAY
         strike = [a for a in au.attacks if not frozen and u.range <= 1
                   and prep <= T - a[0] < (prep+.2 if u.piece.species_id in species_motion else ATTACK_ANIM)
                   and (u.piece.species_id != 143 or effect_frame(T - a[0] - prep) == 0)]
@@ -1250,6 +1385,21 @@ class BattleAnimation:
         self._draw_impact_preview(img, T)
         self._draw_projectiles(img, T, budget)
         self._draw_signatures(img, T, budget)
+        if self._is_presentation:
+            for blink in self.timeline.blinks:
+                if blink['departure'] <= T < blink['landing'] + .15:
+                    au = self.units[blink['unit']]
+                    origin = T < blink['landing']
+                    cell = blink['origin'] if origin else blink['target']
+                    x,y = au.cell_px(cell)
+                    phase = T-(blink['departure'] if origin else blink['landing'])
+                    radius = (18-round(phase*30)) if origin else (10+round(phase*50))
+                    draw.ellipse((x+20-radius,y+15-radius,x+20+radius,y+15+radius),
+                                 outline=STATUS_PURPLE,width=2)
+                    if origin and phase < .10 and budget.take(1):
+                        sprite = self._board_sprite(65, au.u.piece.tier)
+                        self._draw_echo(img,sprite,x+(BCELL-sprite.width)//2,
+                                        y+BOARD_FOOT-sprite.getbbox()[3],STATUS_PURPLE,112)
         for ev in self._recent_hits(T):
             phase = effect_frame(T - ev[0] - self._attack_delay(ev))
             attacker, target = self.units[ev[2]], self.units[ev[3]]
@@ -1281,7 +1431,11 @@ class BattleAnimation:
             radius = min(cap - (2 - strength),
                          (9, 11, 12)[strength] + phase * 2 + (2 if variant else 0))
             ring = 29 + phase * 3
-            impact_rim(img, (cx,cy), ring, color, phase, budget, direction)
+            secondary = self._timing(ev) and self._timing(ev).secondary
+            if secondary:
+                ring, radius = 18 + phase * 2, min(radius, 7)
+            impact_rim(img, (cx,cy), ring, color, phase, budget, direction,
+                       rays=3 if secondary else 6)
             contact = board_sprite_size(target.u.piece.tier) * .4
             impact_star(draw, round(cx-contact*math.cos(direction)),
                         round(cy-contact*math.sin(direction)), radius, direction, color,
@@ -1408,8 +1562,24 @@ class BattleAnimation:
             draw.polygon(((cx - 3, cy - 3), (cx + 3, cy - 3), (cx, cy)), fill=INK)
 
 
+    def _draw_cast_portrait(self, img, c, T):
+        """A 200ms release accent in the log strip; board HP remains readable."""
+        sid = self.by_idx[c[2]].piece.species_id
+        color = TYPE_COLORS[c[7]]
+        panel = Image.new('RGBA', (232, 48), NIGHT + (255,))
+        draw = ImageDraw.Draw(panel)
+        draw.rectangle((0, 0, 231, 47), outline=color, width=2)
+        body = self.front.image(sid, self.pal)
+        body = body.crop(body.getbbox())
+        scale = min(42/body.width, 42/body.height)
+        body = body.resize((round(body.width*scale), round(body.height*scale)), Image.Resampling.NEAREST)
+        panel.alpha_composite(body, (4+(44-body.width)//2, 3+(42-body.height)//2))
+        draw_text(panel, (54, 6), self.by_idx[c[2]].piece.name, self.font, PAPER)
+        draw_text(panel, (54, 25), skill_profile(sid)['name'][:10], self.font, color)
+        img.alpha_composite(panel, (4, H-51))
+
     def _cutin_frame(self, c: tuple, T: float) -> Image.Image:
-        _, _, ci, ti, move, eff, dmg, mtype = c
+        _, _, ci, ti, move, eff, dmg, mtype = c[:8]
         caster, target = self.by_idx[ci], self.by_idx[ti]
         img = Image.new("RGBA", (W, H), NIGHT + (255,))
         draw_cutin_stage(img, self.font, mtype)

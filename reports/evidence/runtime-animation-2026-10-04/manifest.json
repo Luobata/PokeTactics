@@ -1,0 +1,295 @@
+{
+  "seed": 7,
+  "frame_size": [
+    240,
+    320
+  ],
+  "clips": [
+    {
+      "species": 6,
+      "kind": "attack",
+      "gif": "6-attack.gif",
+      "contact": "6-attack-contact.png",
+      "action": {
+        "source_index": 7,
+        "kind": "attack",
+        "attacker": 0,
+        "target": 3,
+        "start": 1.6,
+        "release": 1.9,
+        "impact": 2.15,
+        "recover_end": 2.4,
+        "secondary": false,
+        "source_pos": [
+          1,
+          1
+        ],
+        "target_pos": [
+          4,
+          1
+        ]
+      },
+      "clip_start": 1.35,
+      "clip_end": 3.0999999999999996,
+      "frames": 36,
+      "fps": 20,
+      "frame_sha256": "e1133934bfec652ef85f215d083cae702087684b8ce0f06d2ae7bd7193de3b83",
+      "target_before_impact": {
+        "hp": 1524,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1504,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 6,
+      "signature_track_peak": 0,
+      "frame_ms_p95": 4.007,
+      "frame_ms_max": 8.107,
+      "simulation_duration": 44.90000000000037,
+      "presentation_duration": 46.4
+    },
+    {
+      "species": 6,
+      "kind": "cast",
+      "gif": "6-cast.gif",
+      "contact": "6-cast-contact.png",
+      "action": {
+        "source_index": 19,
+        "kind": "cast",
+        "attacker": 0,
+        "target": 3,
+        "start": 8.0,
+        "release": 8.5,
+        "impact": 8.75,
+        "recover_end": 9.0,
+        "secondary": false,
+        "source_pos": [
+          1,
+          1
+        ],
+        "target_pos": [
+          4,
+          1
+        ]
+      },
+      "clip_start": 7.75,
+      "clip_end": 9.7,
+      "frames": 40,
+      "fps": 20,
+      "frame_sha256": "f4941e8671bbfef69052d9e4f8efc3f0564e1a1b2cd59ad81f8cb58c1311ab94",
+      "target_before_impact": {
+        "hp": 1443,
+        "energy": 40,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1405,
+        "energy": 50,
+        "die_t": null
+      },
+      "particle_peak": 15,
+      "signature_track_peak": 1,
+      "frame_ms_p95": 4.64,
+      "frame_ms_max": 4.775,
+      "simulation_duration": 44.90000000000037,
+      "presentation_duration": 46.4
+    },
+    {
+      "species": 65,
+      "kind": "attack",
+      "gif": "65-attack.gif",
+      "contact": "65-attack-contact.png",
+      "action": {
+        "source_index": 7,
+        "kind": "attack",
+        "attacker": 0,
+        "target": 3,
+        "start": 1.6,
+        "release": 1.85,
+        "impact": 2.1,
+        "recover_end": 2.3,
+        "secondary": false,
+        "source_pos": [
+          1,
+          1
+        ],
+        "target_pos": [
+          4,
+          1
+        ]
+      },
+      "clip_start": 1.35,
+      "clip_end": 3.05,
+      "frames": 35,
+      "fps": 20,
+      "frame_sha256": "d6abb7dab7fa9532da2d4d411e886e5b30c504302a365b75b7d79c73cc449ce4",
+      "target_before_impact": {
+        "hp": 1524,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1500,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 6,
+      "signature_track_peak": 0,
+      "frame_ms_p95": 4.887,
+      "frame_ms_max": 6.922,
+      "simulation_duration": 44.90000000000037,
+      "presentation_duration": 45.7
+    },
+    {
+      "species": 65,
+      "kind": "cast",
+      "gif": "65-cast.gif",
+      "contact": "65-cast-contact.png",
+      "action": {
+        "source_index": 20,
+        "kind": "cast",
+        "attacker": 0,
+        "target": 3,
+        "start": 7.2,
+        "release": 7.65,
+        "impact": 7.8,
+        "recover_end": 8.0,
+        "secondary": false,
+        "source_pos": [
+          4,
+          2
+        ],
+        "target_pos": [
+          4,
+          1
+        ]
+      },
+      "clip_start": 6.95,
+      "clip_end": 8.75,
+      "frames": 37,
+      "fps": 20,
+      "frame_sha256": "8211f4e69d7037a44a440a361c2c6f4d519d1c91cd29027c2c0d59f97290c7a9",
+      "target_before_impact": {
+        "hp": 1427,
+        "energy": 40,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1339,
+        "energy": 50,
+        "die_t": null
+      },
+      "particle_peak": 11,
+      "signature_track_peak": 1,
+      "frame_ms_p95": 4.968,
+      "frame_ms_max": 5.743,
+      "simulation_duration": 44.90000000000037,
+      "presentation_duration": 45.7
+    },
+    {
+      "species": 143,
+      "kind": "attack",
+      "gif": "143-attack.gif",
+      "contact": "143-attack-contact.png",
+      "action": {
+        "source_index": 9,
+        "kind": "attack",
+        "attacker": 0,
+        "target": 3,
+        "start": 1.6,
+        "release": 2.05,
+        "impact": 2.1,
+        "recover_end": 2.45,
+        "secondary": false,
+        "source_pos": [
+          3,
+          1
+        ],
+        "target_pos": [
+          4,
+          1
+        ]
+      },
+      "clip_start": 1.35,
+      "clip_end": 3.05,
+      "frames": 35,
+      "fps": 20,
+      "frame_sha256": "7636bb42e678b282d694798c66cf4baf16177a675ff142ddfdfb0a3973abd263",
+      "target_before_impact": {
+        "hp": 1524,
+        "energy": 0,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1513,
+        "energy": 10,
+        "die_t": null
+      },
+      "particle_peak": 6,
+      "signature_track_peak": 0,
+      "frame_ms_p95": 3.92,
+      "frame_ms_max": 6.814,
+      "simulation_duration": 44.90000000000037,
+      "presentation_duration": 45.7
+    },
+    {
+      "species": 143,
+      "kind": "cast",
+      "gif": "143-cast.gif",
+      "contact": "143-cast-contact.png",
+      "action": {
+        "source_index": 21,
+        "kind": "cast",
+        "attacker": 0,
+        "target": 3,
+        "start": 14.0,
+        "release": 14.6,
+        "impact": 14.75,
+        "recover_end": 15.1,
+        "secondary": false,
+        "source_pos": [
+          3,
+          1
+        ],
+        "target_pos": [
+          4,
+          1
+        ]
+      },
+      "clip_start": 13.75,
+      "clip_end": 15.7,
+      "frames": 40,
+      "fps": 20,
+      "frame_sha256": "a129e3456bfca49083b2bcfd14817fb3e4b38786f3c36c6844de482aba0938e0",
+      "target_before_impact": {
+        "hp": 1478,
+        "energy": 40,
+        "die_t": null
+      },
+      "target_at_impact": {
+        "hp": 1443,
+        "energy": 50,
+        "die_t": null
+      },
+      "particle_peak": 9,
+      "signature_track_peak": 1,
+      "frame_ms_p95": 4.454,
+      "frame_ms_max": 4.737,
+      "simulation_duration": 44.90000000000037,
+      "presentation_duration": 45.7
+    }
+  ],
+  "clock": "presentation seconds, no additional PlaybackClock mapping",
+  "limits": {
+    "particles_per_frame": 192,
+    "signature_tracks": 3,
+    "portrait_windows_per_battle": 2,
+    "portrait_seconds_each": 0.2
+  },
+  "host_frame_ms_p50": 3.628,
+  "host_frame_ms_p95": 4.707,
+  "device_claim": "Desktop Pillow evidence only; ESP32 performance is not measured."
+}

@@ -12,6 +12,15 @@
 伤害 = 金银世代公式（无个体值/努力值）：
     base = ((2*Lv/5+2) * Power * A/D) / 50 + 2
     final = base * STAB * 克制 * 随机(0.85~1.0)
+
+事件契约 version=2：attack/cast 的既有字段索引不变；attack 追加攻方、
+受方能量，cast 在攻方能量后追加受方能量。每次命中、治疗、DOT、开战后
+输出 (t, "unit_state", idx, hp, energy)，这是回放的权威状态。伤害事件仅
+描述伤害与演出，不能由其种类推断回能。齐射和侧命中都不回能。
+
+随机契约 v2：仍只消费传入的 rng，但按队伍内容/本地部署顺序绑定抽样，
+同刻按开战抽取的 initiative 排序；完全相同的两队先公平掷币绑定随机序列。
+交换阵营并旋转棋盘 180° 保持非同构阵容的相同随机试验，旧种子数值会改变。
 """
 
 import random
@@ -38,8 +47,8 @@ TICK = 0.1  # 解算步长（秒）
 # 无需部署过滤；若把备战行画进网格，要么整行不可通行切断两军通路、
 # 要么可通行变成行军走廊，都与「不参战」矛盾。
 COLS, ROWS = 6, 4
-ROWS_ENEMY = (0, 1)   # 敌方战场行；"back" 布阵自 rows[-1]（贴中线的前排）起填
-ROWS_ALLY = (2, 3)    # 己方战场行；"back" 布阵自 rows[-1]（贴己方边缘的后排）起填
+ROWS_ENEMY = (0, 1)   # 敌方战场行；"back" 从 r=0 后排起填，与己方旋转对称
+ROWS_ALLY = (2, 3)    # 己方战场行；"back" 从 r=3 后排起填
 
 
 class Unit:
@@ -130,11 +139,12 @@ class Battle:
 
     events 是双端渲染同步的契约（宪法 2.6）：解算器输出离散事件流，
     Web 预览与设备固件只是同一种子下同一事件流的两种回放端。
-    每条事件为 (t, kind, ...)，kind ∈ deploy/move/attack/cast/die/end。
+    每条事件为 (t, kind, ...)，具体字段与 v2 unit_state 见模块文档。
     """
 
     def __init__(self, comp_a: list, comp_b: list, rng: random.Random,
-                 layout: str = "random", weather_name=None) -> None:
+                 layout: str = "random", weather_name=None,
+                 positions_a=None, positions_b=None) -> None:
         # S11 天气按 Battle 实例持有（2026-09-14 修订：原 set_active 全局写
         # 在验收后台多线程下会交叉污染——/anim 与 /demo 并行时互改对方天气；
         # damage_mult 由 _final_damage 显式传 self.weather_name）
@@ -143,8 +153,33 @@ class Battle:
         self.dex = pokedex()
         self.units: list = []
         self.events: list = []
-        self._deploy(comp_a, team=0, rows=ROWS_ALLY, layout=layout)
-        self._deploy(comp_b, team=1, rows=ROWS_ENEMY, layout=layout)
+        self.event_version = 2
+        self._dead = set()
+        comps = (comp_a, comp_b)
+        positions = (positions_a, positions_b)
+        for team in (0, 1):
+            self._validate_positions(comps[team], positions[team], team)
+        keys = [self._deployment_key(comps[team], positions[team], team)
+                for team in (0, 1)]
+        if keys[0] == keys[1]:
+            first = self.rng.randrange(2)
+            team_order = (first, 1 - first)
+        else:
+            team_order = tuple(sorted((0, 1), key=lambda team: keys[team]))
+        self._team_order = team_order
+        plans = {}
+        for team in team_order:
+            cells = [(c, r) for r in ROWS_ALLY for c in range(COLS)]
+            if positions[team] is not None:
+                spots = [self._local_pos(p, team) for p in positions[team]]
+            elif layout == "random":
+                spots = self.rng.sample(cells, len(comps[team]))
+            else:
+                spots = sorted(cells, key=lambda p: (-p[1], p[0]))[:len(comps[team])]
+            plans[team] = [(self._local_pos(p, team), self.rng.uniform(0, 0.3),
+                            self.rng.random()) for p in spots]
+        self._deploy(comp_a, team=0, plan=plans[0])
+        self._deploy(comp_b, team=1, plan=plans[1])
         # S5 协议：comp 元素可能带 (Piece, item) 二元组——羁绊/齐射只看裸 Piece
         plain_a = [e[0] if isinstance(e, tuple) else e for e in comp_a]
         plain_b = [e[0] if isinstance(e, tuple) else e for e in comp_b]
@@ -154,23 +189,52 @@ class Battle:
             synergy.apply([u for u in self.units if u.team == 1], plain_b)
         status_mod.init_battle(self)  # S12：状态容器（默认无操作）
         self.duration = 0.0
+        for unit in self.units:
+            self._emit_state(unit, 0.0)
 
-    def _deploy(self, comp: list, team: int, rows: tuple, layout: str) -> None:
-        cells = [(c, r) for r in rows for c in range(COLS)]
-        if layout == "random":
-            spots = self.rng.sample(cells, len(comp))
-        else:  # "back": 自 rows[-1] 行起密排（我方=后排起填、敌方=前排起填，
-               # 与旧 3+3 布阵的填充方向逐行对应，列表头=远程）
-            order = sorted(cells, key=lambda p: abs(p[1] - rows[-1]))
-            spots = order[:len(comp)]
-        for entry, pos in zip(comp, spots):
+    @staticmethod
+    def _local_pos(pos, team):
+        return tuple(pos) if team == 0 else (COLS - 1 - pos[0], ROWS - 1 - pos[1])
+
+    @staticmethod
+    def _validate_positions(comp, positions, team):
+        if len(comp) > COLS * 2:
+            raise ValueError("a team cannot deploy more than 12 units")
+        if positions is None:
+            return
+        if len(positions) != len(comp):
+            raise ValueError("positions must match the team's unit count")
+        rows = ROWS_ALLY if team == 0 else ROWS_ENEMY
+        cells = []
+        for pos in positions:
+            if (not isinstance(pos, (tuple, list)) or len(pos) != 2
+                    or any(type(n) is not int for n in pos)
+                    or not 0 <= pos[0] < COLS or pos[1] not in rows):
+                raise ValueError("positions must be integer cells in the team's own rows")
+            cells.append(tuple(pos))
+        if len(set(cells)) != len(cells):
+            raise ValueError("positions must be unique within a team")
+
+    def _deployment_key(self, comp, positions, team):
+        entries = []
+        for entry in comp:
+            piece, item = entry if isinstance(entry, tuple) else (entry, None)
+            entries.append((piece.species_id, piece.tier, piece.level,
+                            piece.move_id or 0, piece.distance, str(item)))
+        local = tuple(self._local_pos(p, team) for p in positions) if positions is not None else ()
+        return tuple(entries), local
+
+    def _deploy(self, comp: list, team: int, plan: list) -> None:
+        for local_idx, (entry, (pos, next_act, initiative)) in enumerate(zip(comp, plan)):
             # S5 装备协议：comp 元素可为 (Piece, item_key) 二元组（带装备）或
             # 裸 Piece（无装备——prototype/野怪波次走此路径，行为不变）
             piece, item_key = entry if isinstance(entry, tuple) else (entry, None)
             unit = Unit(piece, team, pos)
             if item_key is not None:   # S5 施加点（S3 synergy.apply 同模式）
                 items_mod.apply_to_unit(unit, item_key)
-            unit.next_act = self.rng.uniform(0, 0.3)  # 起手抖动，消除先手偏差
+            unit.next_act = next_act
+            unit.initiative = initiative
+            unit.local_idx = local_idx
             unit.idx = len(self.units)
             self.units.append(unit)
             self.events.append((0.0, "deploy", unit.idx, pos))
@@ -189,7 +253,7 @@ class Battle:
             alive_teams = {u.team for u in self.units if u.alive}
             if len(alive_teams) <= 1:
                 break
-            for u in sorted(self.units, key=lambda x: x.next_act):
+            for u in sorted(self.units, key=lambda x: (x.next_act, x.initiative)):
                 if u.alive and t + 1e-9 >= u.next_act:
                     self._act(u, t)
             if regen_units and t + 1e-9 >= next_regen:
@@ -200,6 +264,7 @@ class Battle:
                         u.hp += healed
                         if healed:
                             self.events.append((t, "regen", u.idx, healed))
+                            self._emit_state(u, t)
                 next_regen += 1.0
             status_mod.tick(self, t)  # S12：DOT/到期（默认无操作）
             t += TICK
@@ -236,57 +301,37 @@ class Battle:
         if not enemies:
             u.target_idx = None
             return None
-        near = min(enemies, key=lambda e: (_manhattan(u.pos, e.pos), e.idx))
+        near = min(enemies, key=lambda e: self._target_key(u, e))
         u.target_idx = near.idx
         return near
 
-    def _opening_volley(self) -> None:
-        """S10 齐射（sim/combo.py 定义触发与数值骨架）：t=0 的开场组合招。
+    def _target_key(self, u, target):
+        return (_manhattan(u.pos, target.pos), self._local_pos(target.pos, u.team),
+                target.local_idx)
 
-        每队按「计数 ≥ 各系最高档」放**至多一轮**（双最高档只触发计数
-        最高的一系，见 combo.volley_pick）：一条 (0.0, "combo", team,
-        属性, 名称) 横幅事件 + 每发一条既有 attack 事件，伤害走
-        _final_damage 全链（克制/天气/羁绊乘区/承伤上限/减伤/装备）。
-        必中、不回能、不触发状态施加；计入 damage_dealt（战报统计同
-        口径）。齐射伤害骰走本场 battle 子流，确定性不变。
+    def _opening_volley(self) -> None:
+        """Both teams launch from the same pre-volley state; casualties cannot cancel shots.
+
+        Resolve the precomputed shots in canonical team order. Each target is selected
+        before damage, so a first team's kills cannot steal the other team's opening.
+        Combo attacks deliberately grant neither attacker nor defender energy.
         """
-        for team in (0, 1):
+        pending = []
+        for team in self._team_order:
             mates = [u for u in self.units if u.team == team]
-            volleys = combo_mod.opening_volley(
-                mates, self._plain_comps[team], self.dex)
-            for v in volleys:
-                self.events.append((0.0, "combo", team, v["type"], v["name"]))
-                volley_move = {"type": v["type"], "name": v["name"]}
-                special = self.dex.move_is_special(volley_move)
-                for u, power in v["shots"]:
-                    if not u.alive:
-                        continue  # 对方齐射在先（双齐射互射），本发不再离手
-                    enemies = [e for e in self.units
-                               if e.alive and e.team != team]
-                    if not enemies:
-                        return
-                    target = min(enemies, key=lambda e: (
-                        _manhattan(u.pos, e.pos), e.idx))
-                    u.target_idx = target.idx  # 与 _target 同键，锁定最近敌人
-                    stab = STAB_BONUS if v["type"] in u.piece.types else 1.0
-                    eff = eff_mult(self.dex.multiplier(
-                        v["type"], target.piece.types))
-                    dmg = _damage(self.rng, u.piece.level, power,
-                                  u.attack_stat(special),
-                                  target.defense_stat(special), stab, eff)
-                    dmg = self._final_damage(u, target, volley_move, dmg)
-                    self.events.append((0.0, "attack", u.idx, target.idx, dmg))
-                    target.hp -= dmg
-                    u.damage_dealt += dmg
-                    # S5 气势披带（施加点，与 _strike 同语义）：致命伤保留 1 HP
-                    if (target.hp <= 0 and target.item_sash
-                            and not target.item_sash_used):
-                        target.item_sash_used = True
-                        target.hp = 1
-                        self.events.append((0.0, "sash", target.idx))
-                    if target.hp <= 0:
-                        target.hp = 0
-                        self.events.append((0.0, "die", target.idx))
+            for volley in combo_mod.opening_volley(mates, self._plain_comps[team], self.dex):
+                self.events.append((0.0, "combo", team, volley["type"], volley["name"]))
+                move = {"type": volley["type"], "name": volley["name"]}
+                for unit, power in volley["shots"]:
+                    enemies = [e for e in self.units if e.alive and e.team != team]
+                    if not unit.alive or not enemies:
+                        continue
+                    target = min(enemies, key=lambda e: self._target_key(unit, e))
+                    unit.target_idx = target.idx
+                    damage = self._move_damage(unit, target, {**move, "power": power})
+                    pending.append((unit, target, damage))
+        for unit, target, damage in pending:
+            self._land_hit(unit, target, damage, 0.0)
 
     def _step_toward(self, u: Unit, goal: tuple) -> None:
         """BFS 最短路走第一步（绕开占用格；终点视为可通行）。
@@ -304,7 +349,7 @@ class Battle:
                     u.pos = first
                 return
             c, r = pos
-            for dc, dr in ((0, -1), (0, 1), (-1, 0), (1, 0)):
+            for dc, dr in self._directions(u.team):
                 nxt = (c + dc, r + dr)
                 if not (0 <= nxt[0] < COLS and 0 <= nxt[1] < ROWS):
                     continue
@@ -313,164 +358,162 @@ class Battle:
                 seen.add(nxt)
                 queue.append((nxt, first or nxt))
 
+    @staticmethod
+    def _directions(team):
+        directions = ((0, -1), (0, 1), (-1, 0), (1, 0))
+        return directions if team == 0 else tuple((-dc, -dr) for dc, dr in directions)
+
+    def _move_damage(self, unit, target, move, fraction=1.0):
+        """Each hit owns its target's defense/type calculation and one modifier chain."""
+        special = self.dex.move_is_special(move)
+        stab = STAB_BONUS if move["type"] in unit.piece.types else 1.0
+        eff = eff_mult(self.dex.multiplier(move["type"], target.piece.types))
+        raw = _damage(self.rng, unit.piece.level, move["power"],
+                      unit.attack_stat(special), target.defense_stat(special), stab, eff)
+        return self._final_damage(unit, target, move, int(raw * fraction))
+
     def _strike(self, u: Unit, target: Unit, t: float) -> None:
-        # S5 亮粉闪避（施加点）：出手即判定，命中失败 = 整次挥空——伤害/回能/
-        # 耗能都不发生，事件流只补一条 miss（渲染契约：attack/cast 数字与
-        # 掉血一致）。骰走本场 battle 子流，确定性不受影响
+        move = self.dex.moves[u.piece.move_id] if (
+            u.energy >= ENERGY_MAX and u.piece.move_id) else None
+        if move and u.ult_arch == profiles_mod.ARCH_BLINK:
+            weakest = min((e for e in self.units if e.alive and e.team != u.team),
+                          key=lambda e: (e.hp, self._target_key(u, e)), default=None)
+            if weakest is not None:
+                cell = self._free_cell_near(weakest.pos, avoid=u.pos, team=u.team)
+                if cell is not None:
+                    u.pos = cell
+                    self.events.append((t, "move", u.idx, u.pos))
+                    target = weakest
+                    u.target_idx = weakest.idx
+                # No landing cell: retain the original in-range target.
+        if move and u.ult_arch == "charge":
+            enemies = [e for e in self.units if e.alive and e.team != u.team]
+            farthest = min(enemies, key=lambda e: (-_manhattan(u.pos, e.pos),
+                           self._target_key(u, e)[1:]), default=None)
+            if farthest is not None and farthest is not target:
+                start, path = u.pos, []
+                for _ in range(2):
+                    if _manhattan(u.pos, farthest.pos) <= 1:
+                        break
+                    old = u.pos
+                    self._step_toward(u, farthest.pos)
+                    if u.pos == old:
+                        break
+                    path.append(u.pos)
+                if _manhattan(u.pos, farthest.pos) <= 1:
+                    for pos in path:
+                        self.events.append((t, "move", u.idx, pos))
+                    target = farthest
+                    u.target_idx = farthest.idx
+                else:
+                    u.pos = start  # Unreachable within budget: ordinary in-range cast.
+        if not target.alive or _manhattan(u.pos, target.pos) > u.range:
+            return
         if target.item_dodge > 0 and self.rng.random() < target.item_dodge:
             self.events.append((t, "miss", u.idx, target.idx))
             return
-        move = None
-        if u.energy >= ENERGY_MAX and u.piece.move_id:
-            move = self.dex.moves[u.piece.move_id]
-        if move:  # 放大招
-            # R1 档案原语（docs/13 §5）：blink_strike 出手前闪现到最弱
-            # 敌人邻格（找不到空格则退化普通施法）；闪现是一条 move 事件
-            if u.ult_arch == profiles_mod.ARCH_BLINK:
-                weakest = min((e for e in self.units
-                               if e.alive and e.team != u.team),
-                              key=lambda e: (e.hp, e.idx), default=None)
-                if weakest is not None:
-                    cell = self._free_cell_near(weakest.pos, avoid=u.pos)
-                    if cell is not None:
-                        u.pos = cell
-                        self.events.append((t, "move", u.idx, u.pos))
-                    target = weakest
-                    u.target_idx = weakest.idx
-            # 通用原语 charge 冲锋·切后排：近战攒能时多已贴脸，向当前
-            # 目标突进永不触发——重定义为冲向最远敌人（BFS ≤2 步换目标，
-            # 刺客语义；必须在伤害计算前完成换靶，与 blink 同位）
-            if u.ult_arch == "charge":
-                farthest = max((e for e in self.units
-                                if e.alive and e.team != u.team),
-                               key=lambda e: (_manhattan(u.pos, e.pos), -e.idx),
-                               default=None)
-                if farthest is not None and farthest is not target:
-                    for _ in range(2):
-                        if _manhattan(u.pos, farthest.pos) <= 1:
-                            break
-                        old = u.pos
-                        self._step_toward(u, farthest.pos)
-                        if u.pos == old:
-                            break
-                        self.events.append((t, "move", u.idx, u.pos))
-                    target = farthest
-                    u.target_idx = farthest.idx
-            special = self.dex.move_is_special(move)
-            stab = STAB_BONUS if move["type"] in u.piece.types else 1.0
-            eff = eff_mult(self.dex.multiplier(move["type"], target.piece.types))
-            if self.rng.randrange(100) >= (move.get("accuracy") or 100):
-                dmg = 0  # 未命中
-            else:
-                dmg = _damage(self.rng, u.piece.level, move["power"],
-                              u.attack_stat(special), target.defense_stat(special),
-                              stab, eff)
-                target.energy = min(ENERGY_MAX, target.energy + int(
-                    ENERGY_PER_HIT_TAKEN * (1.0 + target.synergy_energy
-                                            + target.item_energy)))
+        if move:
+            hit = self.rng.randrange(100) < (move.get("accuracy") or 100)
+            dmg = self._move_damage(u, target, move) if hit else 0
             u.energy = 0
             u.casts += 1
-            dmg = self._final_damage(u, target, move, dmg)
-            self.events.append((t, "cast", u.idx, target.idx,
-                                move["name"], round(eff, 2), dmg, u.energy))
-            # R1 档案原语：splash（目标邻格 50%）/ slam（自身邻格 50% +
-            # 自愈 15%）。侧命中：必然命中、不回能、不吃状态施加，
-            # 伤害走 _final_damage 全链（乘区一致性），事件用 attack 种类
-            if dmg > 0 and u.ult_arch in (profiles_mod.ARCH_SPLASH,
-                                          profiles_mod.ARCH_SLAM):
-                anchor = target.pos if u.ult_arch == profiles_mod.ARCH_SPLASH \
-                    else u.pos
-                for v in self.units:
-                    if (v.alive and v.team != u.team and v is not target
-                            and _manhattan(v.pos, anchor) <= 1):
-                        sdmg = self._final_damage(u, v, move,
-                                                  int(dmg *
-                                                      profiles_mod.SIDE_HIT_FRAC))
-                        self.events.append((t, "attack", u.idx, v.idx, sdmg,
-                                            u.energy))
-                        v.hp -= sdmg
-                        u.damage_dealt += sdmg
-                        self._death_check(v, t)
+            self._land_hit(u, target, dmg, t, move=move, primary=True, cast=True)
+            # Side hits are independent damage calculations. The primary hit is
+            # already resolved, so a lethal first hit never emits a second death.
+            if dmg > 0 and u.ult_arch in (profiles_mod.ARCH_SPLASH, profiles_mod.ARCH_SLAM):
+                anchor = target.pos if u.ult_arch == profiles_mod.ARCH_SPLASH else u.pos
+                victims = sorted((v for v in self.units if v.alive and v.team != u.team
+                                  and v is not target and _manhattan(v.pos, anchor) <= 1),
+                                 key=lambda v: self._target_key(u, v))
+                for victim in victims:
+                    self._land_hit(u, victim, self._move_damage(
+                        u, victim, move, profiles_mod.SIDE_HIT_FRAC), t)
             if dmg > 0 and u.ult_arch == profiles_mod.ARCH_SLAM and u.alive:
-                healed = min(u.max_hp, u.hp + int(
-                    u.max_hp * profiles_mod.SLAM_SELF_HEAL)) - u.hp
-                if healed:
-                    u.hp += healed
-                    self.events.append((t, "regen", u.idx, healed))
-            # ---- 通用技能原语（skills.GENERIC_ARCHS，2026-10-04；
-            #      charge 冲锋在伤害计算前的 blink 同位块执行）----
-            # heavy_blow 重击：命中后击退 1 格（有空格才退；贴边不退）
+                self._heal(u, int(u.max_hp * profiles_mod.SLAM_SELF_HEAL), t)
             if dmg > 0 and u.ult_arch == "heavy_blow" and target.alive:
                 away = self._knock_cell(target, u.pos)
                 if away is not None:
                     target.pos = away
                     self.events.append((t, "move", target.idx, target.pos))
-            # double_strike 连击：同拍第二击 45%
             if dmg > 0 and u.ult_arch == "double_strike" and target.alive:
-                d2 = self._final_damage(u, target, move, int(dmg * 0.45))
-                self.events.append((t, "attack", u.idx, target.idx, d2,
-                                    u.energy))
-                target.hp -= d2
-                u.damage_dealt += d2
-                self._death_check(target, t)
-            # volley_shot 散射：距目标最近的另 2 名敌人各 40%
+                self._land_hit(u, target, self._move_damage(u, target, move, 0.45), t)
             if dmg > 0 and u.ult_arch == "volley_shot":
-                others = sorted((v for v in self.units
-                                 if v.alive and v.team != u.team
-                                 and v is not target),
-                                key=lambda v: (_manhattan(v.pos, target.pos), v.idx))
-                for v in others[:2]:
-                    sdmg = self._final_damage(u, v, move, int(dmg * 0.40))
-                    self.events.append((t, "attack", u.idx, v.idx, sdmg,
-                                        u.energy))
-                    v.hp -= sdmg
-                    u.damage_dealt += sdmg
-                    self._death_check(v, t)
-            # bulwark 铁壁：自身 3s 减伤 35%
+                others = sorted((v for v in self.units if v.alive and v.team != u.team
+                                 and v is not target), key=lambda v: (
+                                     _manhattan(v.pos, target.pos), self._target_key(u, v)))
+                for victim in others[:2]:
+                    self._land_hit(u, victim, self._move_damage(u, victim, move, 0.40), t)
             if u.ult_arch == "bulwark" and u.alive:
                 u.temp_dr = 0.35
                 u.temp_dr_until = t + 3.0
-            # mend 自愈：施法自愈 20%
             if u.ult_arch == "mend" and u.alive:
-                healed = min(u.max_hp, u.hp + int(u.max_hp * 0.20)) - u.hp
-                if healed:
-                    u.hp += healed
-                    self.events.append((t, "regen", u.idx, healed))
-        else:  # 普攻：默认无属性；实验开关下带攻方主属性（本系+克制）
+                self._heal(u, int(u.max_hp * 0.20), t)
+        else:
             special = u.sp_attack > u.attack
             if basic_takes_eff():
                 stab, eff = STAB_BONUS, eff_mult(
                     self.dex.multiplier(u.piece.types[0], target.piece.types))
             else:
                 stab, eff = 1.0, 1.0
-            dmg = _damage(self.rng, u.piece.level, BASIC_POWER,
-                          u.attack_stat(special), target.defense_stat(special),
-                          stab, eff)
-            u.energy = min(ENERGY_MAX, u.energy + int(
-                ENERGY_PER_ATTACK * (1.0 + u.synergy_energy + u.item_energy)))
-            dmg = self._final_damage(u, target, None, dmg)
-            self.events.append((t, "attack", u.idx, target.idx, dmg,
-                                u.energy))
-        target.hp -= dmg
-        u.damage_dealt += dmg
-        status_mod.on_hit(self, u, target, move, t)  # S12：几率施加（默认无操作）
+            raw = _damage(self.rng, u.piece.level, BASIC_POWER,
+                          u.attack_stat(special), target.defense_stat(special), stab, eff)
+            dmg = self._final_damage(u, target, None, raw)
+            if dmg > 0:
+                u.energy = min(ENERGY_MAX, u.energy + int(
+                    ENERGY_PER_ATTACK * (1.0 + u.synergy_energy + u.item_energy)))
+            self._land_hit(u, target, dmg, t, primary=True)
+
+    def _land_hit(self, attacker, target, damage, t, move=None, primary=False, cast=False):
+        """Resolve a damage packet and emit its authoritative post-hit state.
+
+        Only primary attacks/casts grant defender energy and apply statuses. A
+        prelaunched combo may arrive after its sender/target died; no resurrection
+        or repeat death is possible, and the attack still records that launched shot.
+        """
+        if primary and damage > 0 and target.alive:
+            target.energy = min(ENERGY_MAX, target.energy + int(
+                ENERGY_PER_HIT_TAKEN * (1.0 + target.synergy_energy + target.item_energy)))
+        if cast:
+            eff = eff_mult(self.dex.multiplier(move["type"], target.piece.types))
+            self.events.append((t, "cast", attacker.idx, target.idx, move["name"],
+                                round(eff, 2), damage, attacker.energy, target.energy))
+        else:
+            self.events.append((t, "attack", attacker.idx, target.idx, damage,
+                                attacker.energy, target.energy))
+        target.hp -= damage
+        attacker.damage_dealt += damage
         self._death_check(target, t)
+        self._emit_state(attacker, t)
+        self._emit_state(target, t)
+        if primary:
+            status_mod.on_hit(self, attacker, target, move, t, damage=damage)
+
+    def _emit_state(self, unit, t):
+        self.events.append((t, "unit_state", unit.idx, unit.hp, unit.energy))
+
+    def _heal(self, unit, amount, t):
+        healed = min(unit.max_hp, unit.hp + amount) - unit.hp
+        if healed > 0:
+            unit.hp += healed
+            self.events.append((t, "regen", unit.idx, healed))
+            self._emit_state(unit, t)
 
     def _death_check(self, target: Unit, t: float) -> None:
-        """致命伤结算（披带保留 1 HP / 死亡事件）。_strike 主命中与
-        原语侧命中共用同一条裁决链（docs/13 §5 边界规则入档）。"""
+        if target.idx in self._dead:
+            target.hp = 0
+            return
         if target.hp <= 0 and target.item_sash and not target.item_sash_used:
             target.item_sash_used = True
             target.hp = 1
             self.events.append((t, "sash", target.idx))
         if target.hp <= 0:
             target.hp = 0
+            self._dead.add(target.idx)
             self.events.append((t, "die", target.idx))
 
-    def _free_cell_near(self, pos: tuple, avoid: tuple):
-        """pos 的曼哈顿距离 1 空格（确定性顺序扫描；无则 None）。"""
+    def _free_cell_near(self, pos: tuple, avoid: tuple, team=0):
         occupied = {o.pos for o in self.units if o.alive}
-        for dc, dr in ((0, -1), (0, 1), (-1, 0), (1, 0)):
+        for dc, dr in self._directions(team):
             nxt = (pos[0] + dc, pos[1] + dr)
             if (0 <= nxt[0] < COLS and 0 <= nxt[1] < ROWS
                     and nxt not in occupied and nxt != avoid):
@@ -535,4 +578,3 @@ class Battle:
                           for tm in (0, 1)},
             "units": self.units,
         }
-

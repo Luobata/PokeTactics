@@ -16,10 +16,12 @@
   （滞后后 saver 决赛圈 40% 冠军，30 压回 33%）；
 - v4 局长校准：STAGE_FACTOR (1,1)(9,2)(17,3) → (1,1)(10,2)(18,3)。
 
-臂（同种子配对，Match(seed+i) 逐局可比；v1 冻结修订前状态）：
+臂（同种子配对，Match(seed+i) 逐局可比；冻结的是列出的控制参数，
+其余战斗/技能规则使用当前源码，不宣称完整复刻历史版本）：
 - v1 基线（冻结）：5 格 / 9 格 / follow 无滞后 / saver 晚期帽 20 /
   STAGE (1,1)(9,2)(17,3)——锚定 2026-09-14 早间演进态；
-- v2 = v1 + 规则对齐；v3 = v2 + 人格修订；v4 = v3 + 局长校准（当前态）。
+- v2 = v1 + 规则对齐；v3 = v2 + 人格修订；v4 读取当前源码参数
+  （现为 stage 11/20、攻速间隔 2.2、回能 21、saver 晚期帽 32）。
 
 读数：局长分布（均值入带判 PASS）、人格平均名次（剔除 L0 教学席——
 L0 恒定垫底会给所投人格带入 +0.4 名的席别噪声）、冠军人格分布、
@@ -29,6 +31,7 @@ L0 恒定垫底会给所投人格带入 +0.4 名的席别噪声）、冠军人�
 """
 
 import argparse
+import json
 import statistics
 import sys
 import time
@@ -39,6 +42,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import bots as bots_mod        # noqa: E402
 import economy as economy_mod  # noqa: E402
 import shop as shop_mod        # noqa: E402
+import combat as combat_mod    # noqa: E402
+import data as data_mod        # noqa: E402
+import profiles as profiles_mod  # noqa: E402
 from match import Match        # noqa: E402
 
 LEN_BAND = (28, 34)     # 与 experiment_match 同一条验收线
@@ -52,12 +58,19 @@ VAR_LIMIT = 7 * 0.40    # 人格平均名次方差（既有线）
 
 # v1 冻结基线（修订前快照；其余臂的 diff 就近叠加）
 V1 = {"shop_slots": 5, "bench": 9, "follow_lag": 0, "saver_late_cap": 20,
-      "stage": ((1, 1), (9, 2), (17, 3)), "atk_mult": 1.0}
-# v4 修订态 = 当前源码（所见即所得，防表演进漂移）
-V4 = {"shop_slots": 4, "bench": 6, "follow_lag": 1, "saver_late_cap": 30,
-      # 2026-10-04 R2 节奏二调后当前态：STAGE (11,20) + 攻速 ×2.2 +
-      # 回能 21 默认；saver late_cap 32
-      "stage": ((1, 1), (11, 2), (20, 3)), "atk_mult": None}  # None=当前默认
+      "stage": ((1, 1), (9, 2), (17, 3)), "atk_mult": 1.0,
+      "energy_attack": 15, "energy_hit": 10, "move_tick": data_mod.MOVE_TICK,
+      "profiles_on": profiles_mod.PROFILES_ON}
+# 当前臂从源码默认值取完整控制参数快照；数值禁止沿用上一臂的隐式状态。
+# follow_lag=None 表示恢复源码的原始决策函数，不重写一份当前 AI。
+V4 = {"shop_slots": shop_mod.SHOP_SLOTS, "bench": bots_mod.BENCH_SIZE,
+      "follow_lag": None,
+      "saver_late_cap": bots_mod.PERSONALITIES["saver"]["late_cap"],
+      "stage": economy_mod.STAGE_FACTOR,
+      "atk_mult": data_mod.ATTACK_INTERVAL_MULT,
+      "energy_attack": data_mod.ENERGY_PER_ATTACK,
+      "energy_hit": data_mod.ENERGY_PER_HIT_TAKEN,
+      "move_tick": data_mod.MOVE_TICK, "profiles_on": profiles_mod.PROFILES_ON}
 
 ORIG_LEVEL_TARGET = bots_mod.Bot._level_target
 
@@ -79,20 +92,36 @@ def make_level_target(follow_lag: int):
 
 
 def set_arm(cfg: dict) -> None:
-    """切臂：全部为模块级量/人格表项，Match 构造/调用期读取，改即生效。"""
-    import combat as _cb
-    import data as _data
-    # R2 节奏定参（2026-10-04）：v1-v3 是历史快照钉旧攻速；v4=None 用当前默认
-    _cb.ATTACK_INTERVAL_MULT = _data.ATTACK_INTERVAL_MULT \
-        if cfg.get("atk_mult") is None else cfg["atk_mult"]
-    # 历史快照（atk_mult=1.0）同时钉回旧回能 15；当前态用默认 21
-    if cfg.get("atk_mult") == 1.0:
-        _cb.ENERGY_PER_ATTACK = 15
+    """全量切臂；每个被实验修改的参数都显式赋值，不依赖前一臂。"""
+    combat_mod.ATTACK_INTERVAL_MULT = cfg["atk_mult"]
+    combat_mod.ENERGY_PER_ATTACK = cfg["energy_attack"]
+    combat_mod.ENERGY_PER_HIT_TAKEN = cfg["energy_hit"]
+    combat_mod.MOVE_TICK = cfg["move_tick"]
+    profiles_mod.PROFILES_ON = cfg["profiles_on"]
     shop_mod.SHOP_SLOTS = cfg["shop_slots"]
     bots_mod.BENCH_SIZE = cfg["bench"]
-    bots_mod.Bot._level_target = make_level_target(cfg["follow_lag"])
+    bots_mod.Bot._level_target = (ORIG_LEVEL_TARGET if cfg["follow_lag"] is None
+                                 else make_level_target(cfg["follow_lag"]))
     bots_mod.PERSONALITIES["saver"]["late_cap"] = cfg["saver_late_cap"]
     economy_mod.STAGE_FACTOR = cfg["stage"]
+
+
+def runtime_snapshot() -> dict:
+    """可恢复的进程状态；决策函数保留身份，避免实验污染导入方。"""
+    return {"shop_slots": shop_mod.SHOP_SLOTS, "bench": bots_mod.BENCH_SIZE,
+            "level_target": bots_mod.Bot._level_target,
+            "saver_late_cap": bots_mod.PERSONALITIES["saver"]["late_cap"],
+            "stage": economy_mod.STAGE_FACTOR,
+            "atk_mult": combat_mod.ATTACK_INTERVAL_MULT,
+            "energy_attack": combat_mod.ENERGY_PER_ATTACK,
+            "energy_hit": combat_mod.ENERGY_PER_HIT_TAKEN,
+            "move_tick": combat_mod.MOVE_TICK,
+            "profiles_on": profiles_mod.PROFILES_ON}
+
+
+def restore_runtime(snapshot: dict) -> None:
+    set_arm(dict(snapshot, follow_lag=None))
+    bots_mod.Bot._level_target = snapshot["level_target"]
 
 
 def run_arm(games: int, seed: int, rounds: int = 31) -> dict:
@@ -160,6 +189,18 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=100)
     ap.add_argument("--rounds", type=int, default=31)
     args = ap.parse_args()
+    if args.games < 1 or args.rounds < 1:
+        ap.error("--games 与 --rounds 必须大于 0")
+    before = runtime_snapshot()
+    try:
+        failures = run_experiment(args)
+    finally:
+        restore_runtime(before)
+    if failures:
+        raise SystemExit(1)
+
+
+def run_experiment(args) -> int:
 
     def cfg(base: dict, **over) -> dict:
         c = dict(base)
@@ -171,13 +212,14 @@ def main() -> None:
         ("v2 +规则对齐(4格/6格)", cfg(V1, shop_slots=4, bench=6)),
         ("v3 +人格修订(follow滞后1/saver帽30)",
          cfg(V1, shop_slots=4, bench=6, follow_lag=1, saver_late_cap=30)),
-        ("v4 +局长校准(stage 10/18) = 当前态", V4),
+        ("v4 当前源码完整参数", V4),
     ]
     print(f"对局层平衡实验：{args.games} 局 × {len(arms)} 臂（种子 {args.seed}+，"
           f"同种子跨臂配对）")
     results = {}
     for name, c in arms:
         set_arm(c)
+        print(f"\n[{name}] 配置 " + json.dumps(c, sort_keys=True))
         t0 = time.perf_counter()
         results[name] = run_arm(args.games, args.seed, args.rounds)
         results[name]["secs"] = time.perf_counter() - t0
@@ -206,12 +248,13 @@ def main() -> None:
     set_arm(V4)
     pooled = defaultdict(int)
     for pool_seed in (args.seed, args.seed + 600, args.seed + 800):
-        r4 = run_arm(args.games, pool_seed)
+        r4 = run_arm(args.games, pool_seed, args.rounds)
         for k, n4 in r4["champions"].items():
             pooled[k] += n4
     total = sum(pooled.values())
     top_pooled = max(pooled.values()) / total
-    check("冠军份额无碾压（≤36%，三种子合池主判）", top_pooled <= CHAMP_LIMIT,
+    check(f"冠军份额无碾压（≤{CHAMP_LIMIT:.0%}，三种子合池主判）",
+          top_pooled <= CHAMP_LIMIT,
           f"v1 单种子最高 {max(v1['champions'].values()) / args.games:.0%}"
           f"（copycat {cc_v1:.0%}）→ v4 单种子 {top_share:.0%}"
           f"（copycat {cc_v4:.0%}）；合池 " +
@@ -223,8 +266,9 @@ def main() -> None:
           f"p99 {v4['decide_p99']:.2f}ms，死锁局 {v4['no_damage_games']}")
     n_fail = sum(1 for _, ok in checks if not ok)
     print(f"\n结论：{len(checks) - n_fail}/{len(checks)} 项通过"
-          + ("；修订态已落盘（shop/bots/economy）" if n_fail == 0
+          + ("；当前参数通过本批样本健康线（实验未修改源码）" if n_fail == 0
              else f"；{n_fail} 项未达标，调整后重跑"))
+    return n_fail
 
 
 if __name__ == "__main__":

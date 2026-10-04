@@ -1,0 +1,43 @@
+{
+  "scope": "Agent-operated real in-app browser on an isolated temporary save root; not human usability or ESP32 testing",
+  "url": "http://127.0.0.1:8807",
+  "seed": 7,
+  "journeys": [
+    {
+      "case": "Preparation reload",
+      "steps": "Buy Magnemite, deploy bottom-right, lock shop, reload",
+      "actual": "R1 / HP100 / 6 gold / 1 board piece / locked shop preserved; no duplicate income",
+      "passed": true
+    },
+    {
+      "case": "Postbattle reload",
+      "steps": "Fight R1, reload, show settlement, next round",
+      "actual": "R1 HP94 gold6 restored; settlement explicitly says historical PNG frames are not saved; Next enters R2 HP94 gold12",
+      "passed": true
+    },
+    {
+      "case": "Import and undo",
+      "steps": "Export R2 gold12 Lv2; buy XP; choose file; inspect; confirm import; restore preimport",
+      "actual": "Before import gold8 Lv3; preview shows R2 HP94 gold12; import restores gold12 Lv2; undo restores gold8 Lv3",
+      "passed": true
+    },
+    {
+      "case": "Real process restart",
+      "steps": "Stop owned 8807 server, restart using same temporary save root, reload Demo",
+      "actual": "R2 HP94 gold8 Lv3 and board restored from disk; subsequent combat rendered 72 frames at .05s/frame",
+      "passed": true
+    },
+    {
+      "case": "Animation inspector",
+      "steps": "Load seed82391 synergy=1; jump to Alakazam cast; single step",
+      "actual": "242 frames at20fps; jump5.25s then5.30s; no JS error logs",
+      "passed": true
+    },
+    {
+      "case": "Animation lab",
+      "steps": "Read evidence, switch all3 character tabs, enable static mode, inspect layout and GIFs",
+      "actual": "6 clips, actual metrics/coverage, valid images, static mode hides GIFs, no JS error logs",
+      "passed": true
+    }
+  ]
+}

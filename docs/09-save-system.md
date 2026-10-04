@@ -1,6 +1,14 @@
 # 09 · 存档系统（概念定稿稿，2026-09-13）
 
-状态：**概念定稿稿**。兑现宪法「一局可熄屏中断、续打」的承诺（docs/03 §1）。
+状态：**早期概念草案，布局未实现；2026-10-04 已由 [15 · 通用运行时设计](15-esp32-runtime-design.md) 的 PC 实装修订。**
+
+当前可运行版本使用 `esp32_runtime` 的 JSON 双槽封装 + 游戏 `SessionCodec`，
+完整保存显式摆位、商店 4 格、备战 6 格、共享池、sources、invested 和回合阶段。
+下文 1536 B 定长结构及 NVS/localStorage 共字节流是历史目标，不能当作已实现格式或实测结果。
+PokemonGo 固件当前使用 NVS 单 blob；其仿真双 buffer 的细节见文档 15，不能混为同一布局。
+恢复不重新发收入/奖励，规则源码指纹仅诊断；严格拒绝的是不兼容的 schema。
+
+原始设计背景：兑现宪法「一局可熄屏中断、续打」的承诺（docs/03 §1）。
 单局 20~30 分钟、用户「一天摸五次」的形态决定了：**熄屏和掉电是常态路径，
 不是异常路径**。设计继承 PokeWalk 三条先例——S6 双 buffer + CRC32、
 S18 分级存档时机与磨损算术、存档版本 V5→V15 十五代迁移纪律。
@@ -23,7 +31,7 @@ RNG 靠分层种子派生链免游标；局外档（图鉴/成就/设置）独�
 （Shop.slots / OwnedPiece / SharedPool）、`sim/economy.py`（数值域）。
 
 ```
-单局档（每槽定长 1536 B，实测内容 ~0.55 KB）
+单局档（每槽定长 1536 B，草案估算内容 ~0.55 KB；非实装或实测）
    off  size  field           说明
    0    4     magic "PTSV"
    4    2     version         V1 起步（§4）
@@ -80,9 +88,9 @@ RNG 靠分层种子派生链免游标；局外档（图鉴/成就/设置）独�
 
 | 派生量 | 重算方式 | 不存的理由 |
 |---|---|---|
-| SharedPool.remaining | 全场 owned.sources + 8 家商店格 → 初值减占用 | sources 本身可由 species_id 沿进化链重推（3 合 1 的链占用是确定性的）；恢复后重算并与 pool_checksum 对账，错则拒载（防静默撕裂） |
-| OwnedPiece.invested | 沿进化链买入价求和（买入价 = 档位） | 纯函数；卖价口径不变 |
-| OwnedPiece.sources | 进化树链展开 | 同上 |
+| SharedPool.remaining | 当前直接存储，恢复时用显式 sources 和商店预留对账 | 不能只由物种推导；守恒不符拒载 |
+| OwnedPiece.invested | 当前显式存储 | 进化石路径与普通合成成本不同，不能按物种反推 |
+| OwnedPiece.sources | 当前显式存储并做池守恒校验 | 进化石不额外消耗共享池；同物种可有不同来源组成 |
 | 天气 | (round_no, master_seed) 纯函数（docs/05：1-25 固定表，26+ 种子轮换） | 零状态，续打与回放天然一致 |
 | 人格/能力发牌 | `Random(master_seed ^ K_PERS)` 开局消费一次（`match.__init__` 现状） | 只在开局用，不跨轮 |
 | 人口/利息/掉血公式 | economy 纯函数 | 常量表派生（宪法 2.3） |

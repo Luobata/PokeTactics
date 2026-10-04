@@ -148,8 +148,14 @@ def tick(battle, t: float) -> None:
                 u.hp = 0
                 stats["dot_kills"] += 1
                 _reset_unit(u, st)
-                battle.events.append((t, "die", u.idx))
+                # DOT intentionally bypasses the direct-hit sash; still share
+                # the death ledger so later prelaunched hits cannot duplicate die.
+                if u.idx not in battle._dead:
+                    battle._dead.add(u.idx)
+                    battle.events.append((t, "die", u.idx))
+                battle._emit_state(u, t)
                 continue
+            battle._emit_state(u, t)
         # 2) 减益到期（回退面板修正）
         if st.debuff is not None and t + _EPS >= st.expire:
             kind = st.debuff
@@ -177,17 +183,19 @@ def speed_mult(unit) -> float:
     return 1.0 / DEBUFFS["para"]["speed"]
 
 
-def on_hit(battle, attacker, target, move, t: float) -> None:
+def on_hit(battle, attacker, target, move, t: float, damage=None) -> None:
     """_strike 落伤后：几率施加减益（随机只走 battle.rng，固定顺序保证确定性）。"""
     if not STATUS_ON:
         return
     st = getattr(target, "_st", None)
     if st is None or target.hp <= 0:
         return  # 已被本击打死：不给死人挂状态
-    # combat 在调用本钩子前恰好追加了本击的 attack/cast 事件，末位即本击伤害，
-    # 0 = 招式未命中（无接触，不施加任何状态）
+    # v2 passes damage explicitly; legacy callers retain the fixed event indices.
+    # Appended energy/state fields must never be mistaken for damage.
     ev = battle.events[-1] if battle.events else None
-    dmg = ev[-1] if ev is not None and ev[1] in ("attack", "cast") else 0
+    dmg = damage if damage is not None else (
+        ev[4] if ev is not None and ev[1] == "attack" else
+        ev[6] if ev is not None and ev[1] == "cast" else 0)
     if dmg <= 0:
         return
     stats = battle.status_stats
