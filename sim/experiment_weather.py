@@ -127,6 +127,8 @@ _syn.SYNERGIES_ON = False  # 本报告基线建立于羁绊关（2026-09-14 起�
 # 水vs火锚 62%→100%），本表口径为纯天气乘区，钉住三系统
 import combo as _cb, items as _it, status as _st
 _cb.COMBOS_ON = False; _it.ITEMS_ON = False; _st.STATUS_ON = False
+import profiles as _pf
+_pf.PROFILES_ON = False  # R1 单体档案（2026-09-15）：钉关保基线（胡地建档影响近远锚点）
 
 
 def main() -> None:

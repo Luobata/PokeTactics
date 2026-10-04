@@ -761,6 +761,24 @@ class Handler(SimpleHTTPRequestHandler):
         elif parsed.path.startswith("/reports/"):
             self.path = "/reports" + parsed.path[len("/reports"):]
             super().do_GET()
+        elif parsed.path == "/range":
+            # R1 单体档案靶场页：profile_range.py 生成的静态查看器
+            # （manifest.json + frame-NNN.png 相对路径），经 /reports 路由服务
+            idx = ROOT / "reports/evidence/range-2026-10-04/index.html"
+            if idx.exists():
+                self.send_response(302)
+                self.send_header("Location",
+                                 "/reports/evidence/range-2026-10-04/index.html")
+                self.end_headers()
+            else:
+                self.send_response(404)
+                self.send_header("Content-Type", "text/plain; charset=utf-8")
+                msg = ("靶场页未生成：先运行 "
+                       "python3 tools/mockups/profile_range.py --species 6,65,143")
+                body = msg.encode()
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
         elif parsed.path == "/demo":
             # Web 可玩 Demo（tools/acceptance/demo.py 提供页面与会话引擎）
             body = demo_mod.DEMO_HTML.encode()

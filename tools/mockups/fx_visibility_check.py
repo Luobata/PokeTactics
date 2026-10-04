@@ -77,7 +77,9 @@ def opening_reference(anim):
 def isolated_pair(anim, kind, event):
     """独立绘制夹具，只改浅拷贝；真实回放状态与事件列表保持原样。"""
     probe = copy.copy(anim)
-    t = event[0] + r.HIT_DELAY if kind == "attack" else event[1]
+    # Freeze geometry without changing the original flight duration.
+    probe._attack_delay = anim._attack_delay
+    t = event[0] + anim._attack_delay(event) if kind == "attack" else event[1]
     probe.units = {idx: copy.copy(au) for idx, au in anim.units.items()}
     for au in probe.units.values():
         au.from_px = au.to_px = au.render_px(t)
@@ -109,7 +111,7 @@ def frame_cues(anim, t):
         cues.append(f"opening:{r.effect_frame(t)}")
         required.add("opening")
     for ev in anim._recent_hits(t):
-        phase = r.effect_frame(t - ev[0] - r.HIT_DELAY)
+        phase = r.effect_frame(t - ev[0] - anim._attack_delay(ev))
         cues.append(f"attack:{ev[2]}>{ev[3]}:{phase}")
         required.add("attack")
     for c in anim.cutins:
@@ -193,6 +195,7 @@ def style_contract_checks(anim, output):
         au.reset()
         au.from_px = au.to_px = (r.BX + (1 + i * 2) * r.BCELL, r.BY + 2 * r.BCELL)
         au.u.max_hp = 100
+        au.u.range = 1
     probe.units[3] = probe.units[0]  # 奇数 idx，同一施法者位置/材质，隔离变体差异。
     failures, coverage = [], []
     atlas = Image.new("RGB", (r.W * 2, r.H * len(r.FX_VARIANTS)), r.NIGHT)
@@ -626,7 +629,7 @@ def check_seed(seed, output=None):
                   f"{'[cutin-covered] ' if covered else ''}{','.join(cues)}")
 
         candidates = [("attack", ev) for ev in anim._recent_hits(t)
-                      if r.effect_frame(t - ev[0] - r.HIT_DELAY) == 0]
+                      if r.effect_frame(t - ev[0] - anim._attack_delay(ev)) == 0]
         candidates += [("land", c) for c in anim.cutins
                        if 0 <= t - c[1] < r.FPS_DT + 1e-9]
         if t == 0:
@@ -650,6 +653,15 @@ def check_seed(seed, output=None):
         previous, previous_display = board, display
         t += r.FPS_DT
 
+    for event in anim.events:
+        if event[1] != "attack" or event[4] <= 0 or ("attack", event) in checked:
+            continue
+        before, after = isolated_pair(anim, "attack", event)
+        count = diff_pixels(before, after)
+        isolated.append({"kind": "attack", "t": event[0], "diff_1x": count,
+                         "source": event[2], "target": event[3],
+                         "death_cancelled": anim._projectile_cancelled(event)})
+        save_pair(output, f"seed-{seed}-isolated-attack-{event[0]:.1f}-{event[2]}-{event[3]}", before, after)
     for row in isolated:
         if row["diff_1x"] < LIMITS[row["kind"]]:
             failures.append(row)
@@ -705,7 +717,13 @@ def main():
     parser.add_argument("--seed", type=int, action="append", help="可重复；默认 7 和 11")
     parser.add_argument("--output", type=Path, help="可选：保存 PNG 前后帧、diff 和 JSON 报告")
     args = parser.parse_args()
+    from r1_contract_check import checks as r1_checks
+    contracts = r1_checks()
+    print("R1 CONTRACTS " + json.dumps(contracts, ensure_ascii=False))
     reports = [check_seed(seed, args.output) for seed in (args.seed or [7, 11])]
+    for report in reports:
+        report["r1_contracts"] = contracts
+        report["failures"].extend(contracts["failures"])
     if args.output:
         (args.output / "visibility.json").write_text(json.dumps(reports, ensure_ascii=False, indent=2) + "\n")
     raise SystemExit(1 if any(report["failures"] for report in reports) else 0)

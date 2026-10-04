@@ -141,26 +141,15 @@ def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path):
     from data import pokedex
 
     class _Anim(BattleAnimation):
-        """适配包装（sim/渲染器只读）：换 Battle 构造参数，其余逐行复用。"""
+        """适配包装：layout=back + 外部 battle 子流；渲染器 R1 新接口
+        （battle= 注入 + playback_clock 等回放态）由父类构造统一初始化。"""
 
         def __init__(self, a, b, battle_rng, front, pal, font):
-            self.front, self.pal, self.font = front, pal, font
-            self.weather_name = weather_name
-            dex = pokedex()
-            self.move_type = {m["name"]: m["type"] for m in dex.moves.values()}
-            self.move_zh = {m["name"]: (m.get("name_zh") or m["name"])
-                            for m in dex.moves.values()}
             battle = Battle(a, b, battle_rng, layout="back",
                             weather_name=weather_name)
             self.sim_result = battle.run()
-            self.units = {u.idx: AnimUnit(u) for u in battle.units}
-            self.by_idx = {u.idx: u for u in battle.units}
-            self.events = battle.events
-            self._cursor, self._cur_t, self._busy_until = 0, -1.0, 0.0
-            self.dusts, self.floats = [], []
-            self.msg = (0.0, "")
-            self.cutins = []
-            self.result = None
+            super().__init__(a, b, 0, front, pal, font,
+                             weather_name=weather_name, battle=battle)
 
     front, pal, font = _assets()
     anim = _Anim(comp_a, comp_b, rng, front, pal, font)

@@ -85,8 +85,12 @@ def power(owned: OwnedPiece, target_types=()) -> int:
     目标羁绊不直接加价：首版读数 L2 给目标棋 +150~+250 上场偏置，
     会用 380 BST 的羁绊棋挤掉 500+ 的散件，名次反而倒挂——
     羁绊的价值由 L2 的买入定向 + 上场时的成堆奖励（_board_score）兑现。
+    R1 单体档案（docs/13 §5）：建档棋子按档案价值乘数加价——
+    溅射/斩杀/坦度原语是 BST 表达不了的强度，不加价 bot 会贱卖主角。
     """
-    return pokedex().bst(owned.piece.species_id)
+    import profiles as profiles_mod
+    return int(pokedex().bst(owned.piece.species_id)
+               * profiles_mod.bot_value_mult(owned.piece.species_id))
 
 
 class Bot:

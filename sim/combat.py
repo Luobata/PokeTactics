@@ -26,6 +26,7 @@ import synergy  # S3 羁绊：默认 SYNERGIES_ON=False，零随机、零事件�
 import status as status_mod   # S12 状态/Buff：默认 STATUS_ON=False（docs/06）
 import weather as weather_mod  # S11 天气：默认无天气（docs/05）
 import items as items_mod     # S5 装备：comp 元素可带 (Piece, item) 二元组（docs/07）
+import profiles as profiles_mod  # R1 单体档案（docs/13 §5）：有理由的覆盖项
 
 TICK = 0.1  # 解算步长（秒）
 # ---- C-sym 棋盘（docs/10 §1.3/§1.5，2026-09-14 sim 联动落地）----
@@ -51,7 +52,6 @@ class Unit:
         self.pos = pos
         # 金银种族值 -> 等级属性（DV15/经验0 的整数化简化）
         self.max_hp = int(2 * base["hp"] * lv / 100) + lv + 10
-        self.hp = self.max_hp
         self.attack = int(2 * base["attack"] * lv / 100) + 5
         self.defense = int(2 * base["defense"] * lv / 100) + 5
         self.sp_attack = int(2 * base["special_attack"] * lv / 100) + 5
@@ -59,8 +59,19 @@ class Unit:
         interval = SPEED_TO_ATTACK_INTERVAL(base["speed"])
         if piece.distance > 1:  # 远程：均衡实验的出手惩罚
             interval *= ranged_interval_mult()
-        self.attack_interval = interval
         self.range = piece.distance
+        self.move_mult = 1.0
+        self.ult_arch = None
+        # ---- UnitProfile（docs/13 R1）：有理由的覆盖项，其余回落推导 ----
+        prof = profiles_mod.get(piece.species_id)
+        if prof is not None:
+            self.max_hp = int(self.max_hp * prof["hp_mult"])
+            interval *= prof["atk_interval_mult"]
+            self.range = prof["range"]
+            self.move_mult = prof["move_mult"]
+            self.ult_arch = prof["ult"]["arch"]
+        self.hp = self.max_hp
+        self.attack_interval = interval
         self.energy = 0
         self.next_act = 0.0  # 起手抖动由 Battle._deploy 注入，抵消部署先手差
         self.target_idx = None  # 目标滞回：锁定到死亡为止，防最近目标切换震荡
@@ -199,7 +210,8 @@ class Battle:
         else:
             self._step_toward(u, target.pos)
             self.events.append((t, "move", u.idx, u.pos))
-            step = MOVE_TICK * (melee_move_mult() if u.range == 1 else 1.0)
+            step = MOVE_TICK * (melee_move_mult() if u.range == 1 else 1.0) \
+                * u.move_mult                      # R1 档案移速（卡比兽 0.85）
             u.next_act = t + step
 
     def _target(self, u: Unit):
@@ -303,6 +315,19 @@ class Battle:
         if u.energy >= ENERGY_MAX and u.piece.move_id:
             move = self.dex.moves[u.piece.move_id]
         if move:  # 放大招
+            # R1 档案原语（docs/13 §5）：blink_strike 出手前闪现到最弱
+            # 敌人邻格（找不到空格则退化普通施法）；闪现是一条 move 事件
+            if u.ult_arch == profiles_mod.ARCH_BLINK:
+                weakest = min((e for e in self.units
+                               if e.alive and e.team != u.team),
+                              key=lambda e: (e.hp, e.idx), default=None)
+                if weakest is not None:
+                    cell = self._free_cell_near(weakest.pos, avoid=u.pos)
+                    if cell is not None:
+                        u.pos = cell
+                        self.events.append((t, "move", u.idx, u.pos))
+                    target = weakest
+                    u.target_idx = weakest.idx
             special = self.dex.move_is_special(move)
             stab = STAB_BONUS if move["type"] in u.piece.types else 1.0
             eff = eff_mult(self.dex.multiplier(move["type"], target.piece.types))
@@ -319,7 +344,31 @@ class Battle:
             u.casts += 1
             dmg = self._final_damage(u, target, move, dmg)
             self.events.append((t, "cast", u.idx, target.idx,
-                                move["name"], round(eff, 2), dmg))
+                                move["name"], round(eff, 2), dmg, u.energy))
+            # R1 档案原语：splash（目标邻格 50%）/ slam（自身邻格 50% +
+            # 自愈 15%）。侧命中：必然命中、不回能、不吃状态施加，
+            # 伤害走 _final_damage 全链（乘区一致性），事件用 attack 种类
+            if dmg > 0 and u.ult_arch in (profiles_mod.ARCH_SPLASH,
+                                          profiles_mod.ARCH_SLAM):
+                anchor = target.pos if u.ult_arch == profiles_mod.ARCH_SPLASH \
+                    else u.pos
+                for v in self.units:
+                    if (v.alive and v.team != u.team and v is not target
+                            and _manhattan(v.pos, anchor) <= 1):
+                        sdmg = self._final_damage(u, v, move,
+                                                  int(dmg *
+                                                      profiles_mod.SIDE_HIT_FRAC))
+                        self.events.append((t, "attack", u.idx, v.idx, sdmg,
+                                            u.energy))
+                        v.hp -= sdmg
+                        u.damage_dealt += sdmg
+                        self._death_check(v, t)
+            if dmg > 0 and u.ult_arch == profiles_mod.ARCH_SLAM and u.alive:
+                healed = min(u.max_hp, u.hp + int(
+                    u.max_hp * profiles_mod.SLAM_SELF_HEAL)) - u.hp
+                if healed:
+                    u.hp += healed
+                    self.events.append((t, "regen", u.idx, healed))
         else:  # 普攻：默认无属性；实验开关下带攻方主属性（本系+克制）
             special = u.sp_attack > u.attack
             if basic_takes_eff():
@@ -333,11 +382,16 @@ class Battle:
             u.energy = min(ENERGY_MAX, u.energy + int(
                 ENERGY_PER_ATTACK * (1.0 + u.synergy_energy + u.item_energy)))
             dmg = self._final_damage(u, target, None, dmg)
-            self.events.append((t, "attack", u.idx, target.idx, dmg))
+            self.events.append((t, "attack", u.idx, target.idx, dmg,
+                                u.energy))
         target.hp -= dmg
         u.damage_dealt += dmg
         status_mod.on_hit(self, u, target, move, t)  # S12：几率施加（默认无操作）
-        # S5 气势披带（施加点）：致命伤保留 1 HP，一次/场
+        self._death_check(target, t)
+
+    def _death_check(self, target: Unit, t: float) -> None:
+        """致命伤结算（披带保留 1 HP / 死亡事件）。_strike 主命中与
+        档案原语侧命中共用同一条裁决链（docs/13 §5 边界规则入档）。"""
         if target.hp <= 0 and target.item_sash and not target.item_sash_used:
             target.item_sash_used = True
             target.hp = 1
@@ -345,6 +399,16 @@ class Battle:
         if target.hp <= 0:
             target.hp = 0
             self.events.append((t, "die", target.idx))
+
+    def _free_cell_near(self, pos: tuple, avoid: tuple):
+        """pos 的曼哈顿距离 1 空格（确定性顺序扫描；无则 None）。"""
+        occupied = {o.pos for o in self.units if o.alive}
+        for dc, dr in ((0, -1), (0, 1), (-1, 0), (1, 0)):
+            nxt = (pos[0] + dc, pos[1] + dr)
+            if (0 <= nxt[0] < COLS and 0 <= nxt[1] < ROWS
+                    and nxt not in occupied and nxt != avoid):
+                return nxt
+        return None
 
     def _final_damage(self, u: Unit, target: Unit, move, dmg: int) -> int:
         """结算尾段：近战减免（均衡实验）→ 羁绊乘区 → 大招承伤上限 → 减伤。

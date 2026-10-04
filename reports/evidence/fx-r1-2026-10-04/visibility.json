@@ -1,0 +1,5463 @@
+[
+  {
+    "seed": 7,
+    "summary": {
+      "opening": {
+        "frames": 4,
+        "min_1x": 18698,
+        "max_1x": 53929,
+        "isolated_min_1x": 53929
+      },
+      "attack": {
+        "frames": 65,
+        "min_1x": 6188,
+        "max_1x": 57439,
+        "isolated_min_1x": 679
+      },
+      "land": {
+        "frames": 28,
+        "min_1x": 1609,
+        "max_1x": 57556,
+        "isolated_min_1x": 57600
+      },
+      "board_crowding": {
+        "max_overlap_px": 0,
+        "limit_px": 4,
+        "checked_pairs": 424
+      },
+      "meter_occlusion": {
+        "checked_units": 594,
+        "obscured_frames": 0,
+        "max_consecutive_frames": 0,
+        "limit_frames": 2
+      },
+      "palette_purity": {
+        "species_checked": 84,
+        "sprites_checked": 588,
+        "squash_phases": 7,
+        "visible_pixels": 279865,
+        "off_palette_pixels": 0,
+        "partial_alpha_pixels": 0,
+        "unquantized_box_off_palette_pixels": 233
+      },
+      "scale_compare": {
+        "species": 6,
+        "source_px": 56,
+        "samples": [
+          {
+            "size_px": 28,
+            "zoom": 1,
+            "diff_pixels": 0
+          },
+          {
+            "size_px": 28,
+            "zoom": 4,
+            "diff_pixels": 0
+          },
+          {
+            "size_px": 34,
+            "zoom": 1,
+            "diff_pixels": 0
+          },
+          {
+            "size_px": 34,
+            "zoom": 4,
+            "diff_pixels": 0
+          },
+          {
+            "size_px": 56,
+            "zoom": 1,
+            "diff_pixels": 0
+          },
+          {
+            "size_px": 56,
+            "zoom": 4,
+            "diff_pixels": 0
+          }
+        ]
+      },
+      "weather": {
+        "samples": [
+          {
+            "weather": "rain",
+            "frames": 51,
+            "min_1x": 23159,
+            "visual_only_min_1x": 21678,
+            "threshold_1x": 1200,
+            "off_palette_pixels": 0,
+            "particles_per_frame": 8,
+            "max_overlap_px": 0,
+            "meter_checks": 437,
+            "max_meter_occlusion_frames": 0
+          },
+          {
+            "weather": "sun",
+            "frames": 80,
+            "min_1x": 25266,
+            "visual_only_min_1x": 21878,
+            "threshold_1x": 1200,
+            "off_palette_pixels": 0,
+            "particles_per_frame": 8,
+            "max_overlap_px": 0,
+            "meter_checks": 602,
+            "max_meter_occlusion_frames": 0
+          },
+          {
+            "weather": "sand",
+            "frames": 104,
+            "min_1x": 24488,
+            "visual_only_min_1x": 23661,
+            "threshold_1x": 1200,
+            "off_palette_pixels": 0,
+            "particles_per_frame": 8,
+            "max_overlap_px": 0,
+            "meter_checks": 780,
+            "max_meter_occlusion_frames": 0
+          },
+          {
+            "weather": "hail",
+            "frames": 53,
+            "min_1x": 21769,
+            "visual_only_min_1x": 21769,
+            "threshold_1x": 1200,
+            "off_palette_pixels": 0,
+            "particles_per_frame": 8,
+            "max_overlap_px": 0,
+            "meter_checks": 459,
+            "max_meter_occlusion_frames": 0
+          }
+        ]
+      },
+      "status": {
+        "apply_events": 4,
+        "checked_unit_frames": 12,
+        "samples": [
+          {
+            "t": 0.1,
+            "unit": 7,
+            "kinds": [
+              "flinch"
+            ],
+            "icon_pixels": 7,
+            "bounds": [
+              217,
+              131,
+              223,
+              137
+            ]
+          },
+          {
+            "t": 2.4,
+            "unit": 5,
+            "kinds": [
+              "flinch"
+            ],
+            "icon_pixels": 7,
+            "bounds": [
+              177,
+              211,
+              183,
+              217
+            ]
+          },
+          {
+            "t": 3.1,
+            "unit": 9,
+            "kinds": [
+              "flinch"
+            ],
+            "icon_pixels": 7,
+            "bounds": [
+              177,
+              171,
+              183,
+              177
+            ]
+          },
+          {
+            "t": 3.6,
+            "unit": 4,
+            "kinds": [
+              "flinch"
+            ],
+            "icon_pixels": 7,
+            "bounds": [
+              217,
+              171,
+              223,
+              177
+            ]
+          }
+        ],
+        "max_overlap_px": 0,
+        "max_meter_occlusion_frames": 0
+      },
+      "status_contracts": {
+        "kinds": [
+          "burn",
+          "poison",
+          "paralysis",
+          "freeze",
+          "sleep",
+          "flinch"
+        ],
+        "frozen_frames": 4,
+        "dot_numbers": 2,
+        "palette_variants": 14
+      }
+    },
+    "frames": [
+      {
+        "t": 0.0,
+        "cues": [
+          "opening:0"
+        ],
+        "board_diff_1x": 53929,
+        "board_diff_2x": 215716,
+        "display_diff_1x": 53929,
+        "cutin_covered": false,
+        "threshold_1x": 2500,
+        "passed": true
+      },
+      {
+        "t": 0.1,
+        "cues": [
+          "opening:1",
+          "damage-number"
+        ],
+        "board_diff_1x": 43811,
+        "board_diff_2x": 175244,
+        "display_diff_1x": 43830,
+        "cutin_covered": false,
+        "threshold_1x": 2500,
+        "passed": true
+      },
+      {
+        "t": 0.2,
+        "cues": [
+          "opening:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 43885,
+        "board_diff_2x": 175540,
+        "display_diff_1x": 43899,
+        "cutin_covered": false,
+        "threshold_1x": 2500,
+        "passed": true
+      },
+      {
+        "t": 0.3,
+        "cues": [
+          "opening:3",
+          "attack:8>0:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 18698,
+        "board_diff_2x": 74792,
+        "display_diff_1x": 18707,
+        "cutin_covered": false,
+        "threshold_1x": 2500,
+        "passed": true
+      },
+      {
+        "t": 0.4,
+        "cues": [
+          "attack:1>5:0",
+          "attack:8>0:1",
+          "attack:9>3:0",
+          "attack:0>5:0",
+          "attack:3>9:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 21070,
+        "board_diff_2x": 84280,
+        "display_diff_1x": 21091,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 0.5,
+        "cues": [
+          "attack:1>5:1",
+          "attack:4>5:0",
+          "attack:8>0:2",
+          "attack:9>3:1",
+          "attack:6>2:0",
+          "attack:0>5:1",
+          "attack:3>9:1",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 30977,
+        "board_diff_2x": 123908,
+        "display_diff_1x": 30998,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 0.6,
+        "cues": [
+          "attack:1>5:2",
+          "attack:4>5:1",
+          "attack:9>3:2",
+          "attack:6>2:1",
+          "attack:0>5:2",
+          "attack:7>2:0",
+          "attack:3>9:2",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 30017,
+        "board_diff_2x": 120068,
+        "display_diff_1x": 30031,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 0.7,
+        "cues": [
+          "attack:4>5:2",
+          "attack:6>2:2",
+          "attack:7>2:1",
+          "attack:5>0:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 13405,
+        "board_diff_2x": 53620,
+        "display_diff_1x": 13423,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 0.8,
+        "cues": [
+          "attack:7>2:2",
+          "attack:5>0:1",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 28907,
+        "board_diff_2x": 115628,
+        "display_diff_1x": 28923,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 0.9,
+        "cues": [
+          "attack:5>0:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 25524,
+        "board_diff_2x": 102096,
+        "display_diff_1x": 25530,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.0,
+        "cues": [
+          "attack:2>6:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 22909,
+        "board_diff_2x": 91636,
+        "display_diff_1x": 22938,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.1,
+        "cues": [
+          "attack:2>6:1",
+          "attack:6>2:0",
+          "attack:7>2:0",
+          "attack:8>0:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 15293,
+        "board_diff_2x": 61172,
+        "display_diff_1x": 15312,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.2,
+        "cues": [
+          "attack:2>6:2",
+          "attack:6>2:1",
+          "attack:7>2:1",
+          "attack:8>0:1",
+          "attack:1>5:0",
+          "attack:0>5:0",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 18867,
+        "board_diff_2x": 75468,
+        "display_diff_1x": 18881,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.3,
+        "cues": [
+          "attack:6>2:2",
+          "attack:7>2:2",
+          "attack:8>0:2",
+          "attack:1>5:1",
+          "attack:0>5:1",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 25448,
+        "board_diff_2x": 101792,
+        "display_diff_1x": 25457,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.4,
+        "cues": [
+          "attack:1>5:2",
+          "attack:4>5:0",
+          "attack:0>5:2",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 23638,
+        "board_diff_2x": 94552,
+        "display_diff_1x": 23659,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.5,
+        "cues": [
+          "attack:4>5:1",
+          "attack:9>3:0",
+          "attack:3>9:0",
+          "death:0:0",
+          "death:2:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 56253,
+        "board_diff_2x": 225012,
+        "display_diff_1x": 56274,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.6,
+        "cues": [
+          "attack:4>5:2",
+          "attack:9>3:1",
+          "attack:3>9:1",
+          "death:0:1",
+          "death:2:1",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 57191,
+        "board_diff_2x": 228764,
+        "display_diff_1x": 57205,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.7,
+        "cues": [
+          "attack:9>3:2",
+          "attack:3>9:2",
+          "death:0:2",
+          "death:2:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 19976,
+        "board_diff_2x": 79904,
+        "display_diff_1x": 19994,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.8,
+        "cues": [
+          "death:0:3",
+          "death:2:3",
+          "damage-number"
+        ],
+        "board_diff_1x": 13171,
+        "board_diff_2x": 52684,
+        "display_diff_1x": 13187,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 1.9,
+        "cues": [
+          "damage-number"
+        ],
+        "board_diff_1x": 6723,
+        "board_diff_2x": 26892,
+        "display_diff_1x": 6729,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 2.0,
+        "cues": [
+          "damage-number"
+        ],
+        "board_diff_1x": 7288,
+        "board_diff_2x": 29152,
+        "display_diff_1x": 7312,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 2.1,
+        "cues": [
+          "attack:1>5:0",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 18347,
+        "board_diff_2x": 73388,
+        "display_diff_1x": 18366,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.2,
+        "cues": [
+          "attack:1>5:1",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 22768,
+        "board_diff_2x": 91072,
+        "display_diff_1x": 22782,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.3,
+        "cues": [
+          "attack:1>5:2",
+          "attack:8>3:0",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 18813,
+        "board_diff_2x": 75252,
+        "display_diff_1x": 18822,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.4,
+        "cues": [
+          "attack:4>5:0",
+          "attack:7>3:0",
+          "attack:8>3:1",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 21993,
+        "board_diff_2x": 87972,
+        "display_diff_1x": 22014,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.5,
+        "cues": [
+          "attack:4>5:1",
+          "attack:7>3:1",
+          "attack:6>3:0",
+          "attack:8>3:2",
+          "attack:5>1:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 22199,
+        "board_diff_2x": 88796,
+        "display_diff_1x": 22220,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.6,
+        "cues": [
+          "attack:4>5:2",
+          "attack:7>3:2",
+          "attack:6>3:1",
+          "attack:9>3:0",
+          "attack:5>1:1",
+          "attack:3>9:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 12374,
+        "board_diff_2x": 49496,
+        "display_diff_1x": 12388,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.7,
+        "cues": [
+          "attack:6>3:2",
+          "attack:9>3:1",
+          "attack:5>1:2",
+          "attack:3>9:1",
+          "death:3:0",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 57348,
+        "board_diff_2x": 229392,
+        "display_diff_1x": 57366,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.8,
+        "cues": [
+          "attack:9>3:2",
+          "attack:3>9:2",
+          "death:3:1",
+          "death:5:0",
+          "damage-number"
+        ],
+        "board_diff_1x": 56857,
+        "board_diff_2x": 227428,
+        "display_diff_1x": 56873,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.9,
+        "cues": [
+          "death:3:2",
+          "death:5:1",
+          "damage-number"
+        ],
+        "board_diff_1x": 12227,
+        "board_diff_2x": 48908,
+        "display_diff_1x": 12233,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 3.0,
+        "cues": [
+          "death:3:3",
+          "death:5:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 8945,
+        "board_diff_2x": 35780,
+        "display_diff_1x": 8964,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 3.1,
+        "cues": [
+          "death:5:3",
+          "damage-number"
+        ],
+        "board_diff_1x": 9077,
+        "board_diff_2x": 36308,
+        "display_diff_1x": 9096,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 3.2,
+        "cues": [
+          "damage-number"
+        ],
+        "board_diff_1x": 7931,
+        "board_diff_2x": 31724,
+        "display_diff_1x": 7945,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 3.3,
+        "cues": [
+          "damage-number"
+        ],
+        "board_diff_1x": 4375,
+        "board_diff_2x": 17500,
+        "display_diff_1x": 4384,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 3.4,
+        "cues": [
+          "attack:4>8:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 17643,
+        "board_diff_2x": 70572,
+        "display_diff_1x": 17664,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 3.5,
+        "cues": [
+          "attack:4>8:1",
+          "attack:8>1:0",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 14926,
+        "board_diff_2x": 59704,
+        "display_diff_1x": 14947,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 3.6,
+        "cues": [
+          "attack:4>8:2",
+          "attack:8>1:1",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 19715,
+        "board_diff_2x": 78860,
+        "display_diff_1x": 19729,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 3.7,
+        "cues": [
+          "attack:8>1:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 14294,
+        "board_diff_2x": 57176,
+        "display_diff_1x": 14312,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 3.8,
+        "cues": [
+          "damage-number"
+        ],
+        "board_diff_1x": 5811,
+        "board_diff_2x": 23244,
+        "display_diff_1x": 5827,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 3.9,
+        "cues": [
+          "attack:1>8:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 15667,
+        "board_diff_2x": 62668,
+        "display_diff_1x": 15673,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.0,
+        "cues": [
+          "attack:1>8:1",
+          "charge:1",
+          "full:1",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 22712,
+        "board_diff_2x": 90848,
+        "display_diff_1x": 22743,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.1,
+        "cues": [
+          "attack:1>8:2",
+          "charge:1",
+          "full:1",
+          "charge:8",
+          "full:8",
+          "damage-number"
+        ],
+        "board_diff_1x": 17104,
+        "board_diff_2x": 68416,
+        "display_diff_1x": 17123,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.2,
+        "cues": [
+          "charge:1",
+          "full:1",
+          "damage-number"
+        ],
+        "board_diff_1x": 6636,
+        "board_diff_2x": 26544,
+        "display_diff_1x": 6650,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 4.3,
+        "cues": [
+          "attack:8>1:0",
+          "charge:1",
+          "full:1",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 12547,
+        "board_diff_2x": 50188,
+        "display_diff_1x": 12556,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.4,
+        "cues": [
+          "attack:9>1:0",
+          "attack:4>8:0",
+          "attack:8>1:1",
+          "full:1",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 20938,
+        "board_diff_2x": 83752,
+        "display_diff_1x": 20959,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.5,
+        "cues": [
+          "attack:9>1:1",
+          "attack:4>8:1",
+          "attack:8>1:2",
+          "full:1",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 13620,
+        "board_diff_2x": 54480,
+        "display_diff_1x": 13641,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.6,
+        "cues": [
+          "attack:9>1:2",
+          "attack:4>8:2",
+          "full:1",
+          "charge:8",
+          "full:8",
+          "damage-number"
+        ],
+        "board_diff_1x": 15293,
+        "board_diff_2x": 61172,
+        "display_diff_1x": 15307,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.7,
+        "cues": [
+          "full:1",
+          "charge:8",
+          "full:8",
+          "damage-number"
+        ],
+        "board_diff_1x": 4526,
+        "board_diff_2x": 18104,
+        "display_diff_1x": 4544,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 4.8,
+        "cues": [
+          "attack:1>8:0",
+          "full:1",
+          "charge:8",
+          "full:8",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 16657,
+        "board_diff_2x": 66628,
+        "display_diff_1x": 16673,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.9,
+        "cues": [
+          "attack:1>8:1",
+          "full:1",
+          "charge:8",
+          "full:8",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 22485,
+        "board_diff_2x": 89940,
+        "display_diff_1x": 22491,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 5.0,
+        "cues": [
+          "attack:1>8:2",
+          "full:1",
+          "full:8",
+          "damage-number"
+        ],
+        "board_diff_1x": 16469,
+        "board_diff_2x": 65876,
+        "display_diff_1x": 16500,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 5.1,
+        "cues": [
+          "attack:8>1:0",
+          "full:1",
+          "charge:4",
+          "full:4",
+          "full:8",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 13545,
+        "board_diff_2x": 54180,
+        "display_diff_1x": 13564,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 5.2,
+        "cues": [
+          "attack:8>1:1",
+          "full:1",
+          "charge:4",
+          "full:4",
+          "full:8",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 19688,
+        "board_diff_2x": 78752,
+        "display_diff_1x": 19702,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 5.3,
+        "cues": [
+          "attack:8>1:2",
+          "full:1",
+          "charge:4",
+          "full:4",
+          "charge:7",
+          "full:7",
+          "full:8",
+          "damage-number"
+        ],
+        "board_diff_1x": 13391,
+        "board_diff_2x": 53564,
+        "display_diff_1x": 13400,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 5.4,
+        "cues": [
+          "attack:4>8:0",
+          "full:1",
+          "charge:4",
+          "full:4",
+          "charge:7",
+          "full:7",
+          "full:8",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 16614,
+        "board_diff_2x": 66456,
+        "display_diff_1x": 16635,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 5.5,
+        "cues": [
+          "attack:9>1:0",
+          "attack:4>8:1",
+          "full:4",
+          "charge:7",
+          "full:7",
+          "death:8:0",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 23088,
+        "board_diff_2x": 92352,
+        "display_diff_1x": 23109,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 5.6,
+        "cues": [
+          "attack:9>1:1",
+          "attack:4>8:2",
+          "full:4",
+          "charge:7",
+          "full:7",
+          "death:8:1",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 10355,
+        "board_diff_2x": 41420,
+        "display_diff_1x": 52367,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 5.7,
+        "cues": [
+          "attack:9>1:2",
+          "attack:7>1:0",
+          "full:4",
+          "full:7",
+          "death:8:2",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 20954,
+        "board_diff_2x": 83816,
+        "display_diff_1x": 38398,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 5.8,
+        "cues": [
+          "attack:7>1:1",
+          "full:4",
+          "full:7",
+          "death:8:3",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 21332,
+        "board_diff_2x": 85328,
+        "display_diff_1x": 0,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 5.9,
+        "cues": [
+          "attack:7>1:2",
+          "death:1:0",
+          "full:4",
+          "damage-number"
+        ],
+        "board_diff_1x": 17058,
+        "board_diff_2x": 68232,
+        "display_diff_1x": 62736,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 6.0,
+        "cues": [
+          "death:1:1",
+          "full:4",
+          "damage-number"
+        ],
+        "board_diff_1x": 4043,
+        "board_diff_2x": 16172,
+        "display_diff_1x": 4067,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 6.1,
+        "cues": [
+          "land:7>1:0",
+          "death:1:2",
+          "death:7:0",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 57274,
+        "board_diff_2x": 229096,
+        "display_diff_1x": 58304,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 6.2,
+        "cues": [
+          "land:7>1:1",
+          "death:1:3",
+          "charge:4",
+          "death:7:1",
+          "shake:-4",
+          "damage-number"
+        ],
+        "board_diff_1x": 57443,
+        "board_diff_2x": 229772,
+        "display_diff_1x": 57457,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 6.3,
+        "cues": [
+          "land:7>1:2",
+          "charge:4",
+          "death:7:2",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 22396,
+        "board_diff_2x": 89584,
+        "display_diff_1x": 22405,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 6.4,
+        "cues": [
+          "land:7>1:3",
+          "charge:4",
+          "death:7:3",
+          "damage-number"
+        ],
+        "board_diff_1x": 17529,
+        "board_diff_2x": 70116,
+        "display_diff_1x": 17550,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 6.5,
+        "cues": [
+          "land:1>8:0",
+          "land:7>1:4",
+          "charge:4",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 57430,
+        "board_diff_2x": 229720,
+        "display_diff_1x": 57451,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 6.6,
+        "cues": [
+          "land:1>8:1",
+          "land:7>1:5",
+          "shake:-4",
+          "damage-number"
+        ],
+        "board_diff_1x": 57445,
+        "board_diff_2x": 229780,
+        "display_diff_1x": 57459,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 6.7,
+        "cues": [
+          "land:1>8:2",
+          "charge:9",
+          "full:9",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 24330,
+        "board_diff_2x": 97320,
+        "display_diff_1x": 24348,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 6.8,
+        "cues": [
+          "land:1>8:3",
+          "charge:9",
+          "full:9",
+          "damage-number"
+        ],
+        "board_diff_1x": 19895,
+        "board_diff_2x": 79580,
+        "display_diff_1x": 62345,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 6.9,
+        "cues": [
+          "land:1>8:4",
+          "charge:9",
+          "full:9",
+          "damage-number"
+        ],
+        "board_diff_1x": 12070,
+        "board_diff_2x": 48280,
+        "display_diff_1x": 336,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 7.0,
+        "cues": [
+          "land:1>8:5",
+          "charge:9",
+          "full:9",
+          "damage-number"
+        ],
+        "board_diff_1x": 6060,
+        "board_diff_2x": 24240,
+        "display_diff_1x": 433,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 7.1,
+        "cues": [
+          "attack:9>4:0",
+          "full:9",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 12361,
+        "board_diff_2x": 49444,
+        "display_diff_1x": 553,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 7.2,
+        "cues": [
+          "attack:9>4:1",
+          "full:9",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 16857,
+        "board_diff_2x": 67428,
+        "display_diff_1x": 588,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 7.3,
+        "cues": [
+          "attack:9>4:2",
+          "full:9",
+          "damage-number"
+        ],
+        "board_diff_1x": 12919,
+        "board_diff_2x": 51676,
+        "display_diff_1x": 962,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 7.4,
+        "cues": [
+          "full:9",
+          "damage-number"
+        ],
+        "board_diff_1x": 4457,
+        "board_diff_2x": 17828,
+        "display_diff_1x": 37816,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 7.5,
+        "cues": [
+          "land:4>7:0",
+          "full:9",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 57466,
+        "board_diff_2x": 229864,
+        "display_diff_1x": 64536,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 7.6,
+        "cues": [
+          "attack:4>6:0",
+          "land:4>7:1",
+          "full:9",
+          "shake:-4",
+          "damage-number"
+        ],
+        "board_diff_1x": 57439,
+        "board_diff_2x": 229756,
+        "display_diff_1x": 57537,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 7.7,
+        "cues": [
+          "attack:4>6:1",
+          "land:4>7:2",
+          "full:9",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 23319,
+        "board_diff_2x": 93276,
+        "display_diff_1x": 23337,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 7.8,
+        "cues": [
+          "attack:4>6:2",
+          "attack:6>4:0",
+          "land:4>7:3",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 13363,
+        "board_diff_2x": 53452,
+        "display_diff_1x": 13920,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 7.9,
+        "cues": [
+          "attack:6>4:1",
+          "land:4>7:4",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 17413,
+        "board_diff_2x": 69652,
+        "display_diff_1x": 54888,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 8.0,
+        "cues": [
+          "attack:6>4:2",
+          "land:4>7:5",
+          "damage-number"
+        ],
+        "board_diff_1x": 12116,
+        "board_diff_2x": 48464,
+        "display_diff_1x": 38750,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 8.1,
+        "cues": [
+          "charge:6",
+          "full:6",
+          "damage-number"
+        ],
+        "board_diff_1x": 4992,
+        "board_diff_2x": 19968,
+        "display_diff_1x": 0,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 8.2,
+        "cues": [
+          "charge:6",
+          "full:6",
+          "damage-number"
+        ],
+        "board_diff_1x": 3998,
+        "board_diff_2x": 15992,
+        "display_diff_1x": 2258,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 8.3,
+        "cues": [
+          "charge:6",
+          "full:6",
+          "damage-number"
+        ],
+        "board_diff_1x": 5764,
+        "board_diff_2x": 23056,
+        "display_diff_1x": 359,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 8.4,
+        "cues": [
+          "charge:6",
+          "full:6",
+          "damage-number"
+        ],
+        "board_diff_1x": 3531,
+        "board_diff_2x": 14124,
+        "display_diff_1x": 541,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 8.5,
+        "cues": [
+          "attack:6>4:0",
+          "full:6",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 12144,
+        "board_diff_2x": 48576,
+        "display_diff_1x": 589,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 8.6,
+        "cues": [
+          "attack:6>4:1",
+          "attack:4>6:0",
+          "full:6",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 8226,
+        "board_diff_2x": 32904,
+        "display_diff_1x": 1045,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 8.7,
+        "cues": [
+          "attack:6>4:2",
+          "attack:4>6:1",
+          "full:6",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 19884,
+        "board_diff_2x": 79536,
+        "display_diff_1x": 38426,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 8.8,
+        "cues": [
+          "attack:4>6:2",
+          "land:9>4:0",
+          "full:6",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 57424,
+        "board_diff_2x": 229696,
+        "display_diff_1x": 65231,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 8.9,
+        "cues": [
+          "land:9>4:1",
+          "full:6",
+          "shake:-4",
+          "damage-number"
+        ],
+        "board_diff_1x": 57420,
+        "board_diff_2x": 229680,
+        "display_diff_1x": 57494,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 9.0,
+        "cues": [
+          "land:9>4:2",
+          "full:6",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 22708,
+        "board_diff_2x": 90832,
+        "display_diff_1x": 22724,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 9.1,
+        "cues": [
+          "land:9>4:3",
+          "full:6",
+          "damage-number"
+        ],
+        "board_diff_1x": 18294,
+        "board_diff_2x": 73176,
+        "display_diff_1x": 18329,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 9.2,
+        "cues": [
+          "attack:6>4:0",
+          "land:9>4:4",
+          "full:6",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 9963,
+        "board_diff_2x": 39852,
+        "display_diff_1x": 9977,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 9.3,
+        "cues": [
+          "attack:6>4:1",
+          "attack:9>4:0",
+          "land:9>4:5",
+          "full:6",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 6188,
+        "board_diff_2x": 24752,
+        "display_diff_1x": 6213,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 9.4,
+        "cues": [
+          "attack:6>4:2",
+          "attack:9>4:1",
+          "death:4:0",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 18680,
+        "board_diff_2x": 74720,
+        "display_diff_1x": 19784,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 9.5,
+        "cues": [
+          "attack:9>4:2",
+          "death:4:1",
+          "damage-number"
+        ],
+        "board_diff_1x": 13607,
+        "board_diff_2x": 54428,
+        "display_diff_1x": 13628,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 9.6,
+        "cues": [
+          "attack:4>6:0",
+          "death:4:2",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 15790,
+        "board_diff_2x": 63160,
+        "display_diff_1x": 15804,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 9.7,
+        "cues": [
+          "attack:4>6:1",
+          "death:4:3",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 18379,
+        "board_diff_2x": 73516,
+        "display_diff_1x": 18397,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 9.8,
+        "cues": [
+          "attack:4>6:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 11306,
+        "board_diff_2x": 45224,
+        "display_diff_1x": 12191,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 9.9,
+        "cues": [
+          "land:6>4:0",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 57556,
+        "board_diff_2x": 230224,
+        "display_diff_1x": 57562,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 10.0,
+        "cues": [
+          "land:6>4:1",
+          "shake:-4",
+          "damage-number"
+        ],
+        "board_diff_1x": 57479,
+        "board_diff_2x": 229916,
+        "display_diff_1x": 57518,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 10.1,
+        "cues": [
+          "land:6>4:2",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 19483,
+        "board_diff_2x": 77932,
+        "display_diff_1x": 19518,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 10.2,
+        "cues": [
+          "land:6>4:3",
+          "damage-number"
+        ],
+        "board_diff_1x": 13919,
+        "board_diff_2x": 55676,
+        "display_diff_1x": 13933,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 10.3,
+        "cues": [
+          "land:6>4:4",
+          "damage-number"
+        ],
+        "board_diff_1x": 1609,
+        "board_diff_2x": 6436,
+        "display_diff_1x": 1634,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 10.4,
+        "cues": [
+          "land:6>4:5",
+          "damage-number"
+        ],
+        "board_diff_1x": 2010,
+        "board_diff_2x": 8040,
+        "display_diff_1x": 2031,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 10.5,
+        "cues": [
+          "damage-number"
+        ],
+        "board_diff_1x": 950,
+        "board_diff_2x": 3800,
+        "display_diff_1x": 971,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 10.6,
+        "cues": [
+          "damage-number"
+        ],
+        "board_diff_1x": 782,
+        "board_diff_2x": 3128,
+        "display_diff_1x": 1559,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 10.7,
+        "cues": [
+          "damage-number"
+        ],
+        "board_diff_1x": 2099,
+        "board_diff_2x": 8396,
+        "display_diff_1x": 2117,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      }
+    ],
+    "isolated": [
+      {
+        "kind": "opening",
+        "t": 0,
+        "diff_1x": 53929
+      },
+      {
+        "kind": "attack",
+        "t": 0.3,
+        "diff_1x": 971,
+        "diff_2x": 3884,
+        "source": 8,
+        "target": 0
+      },
+      {
+        "kind": "attack",
+        "t": 0.4,
+        "diff_1x": 800,
+        "diff_2x": 3200,
+        "source": 1,
+        "target": 5
+      },
+      {
+        "kind": "attack",
+        "t": 0.4,
+        "diff_1x": 787,
+        "diff_2x": 3148,
+        "source": 9,
+        "target": 3
+      },
+      {
+        "kind": "attack",
+        "t": 0.4,
+        "diff_1x": 942,
+        "diff_2x": 3768,
+        "source": 0,
+        "target": 5
+      },
+      {
+        "kind": "attack",
+        "t": 0.4,
+        "diff_1x": 971,
+        "diff_2x": 3884,
+        "source": 3,
+        "target": 9
+      },
+      {
+        "kind": "attack",
+        "t": 0.5,
+        "diff_1x": 791,
+        "diff_2x": 3164,
+        "source": 4,
+        "target": 5
+      },
+      {
+        "kind": "attack",
+        "t": 0.5,
+        "diff_1x": 816,
+        "diff_2x": 3264,
+        "source": 6,
+        "target": 2
+      },
+      {
+        "kind": "attack",
+        "t": 0.6,
+        "diff_1x": 764,
+        "diff_2x": 3056,
+        "source": 7,
+        "target": 2
+      },
+      {
+        "kind": "attack",
+        "t": 0.7,
+        "diff_1x": 1060,
+        "diff_2x": 4240,
+        "source": 5,
+        "target": 0
+      },
+      {
+        "kind": "attack",
+        "t": 1.0,
+        "diff_1x": 945,
+        "diff_2x": 3780,
+        "source": 2,
+        "target": 6
+      },
+      {
+        "kind": "attack",
+        "t": 1.1,
+        "diff_1x": 794,
+        "diff_2x": 3176,
+        "source": 6,
+        "target": 2
+      },
+      {
+        "kind": "attack",
+        "t": 1.1,
+        "diff_1x": 870,
+        "diff_2x": 3480,
+        "source": 7,
+        "target": 2
+      },
+      {
+        "kind": "attack",
+        "t": 1.1,
+        "diff_1x": 971,
+        "diff_2x": 3884,
+        "source": 8,
+        "target": 0
+      },
+      {
+        "kind": "attack",
+        "t": 1.2,
+        "diff_1x": 776,
+        "diff_2x": 3104,
+        "source": 1,
+        "target": 5
+      },
+      {
+        "kind": "attack",
+        "t": 1.2,
+        "diff_1x": 941,
+        "diff_2x": 3764,
+        "source": 0,
+        "target": 5
+      },
+      {
+        "kind": "attack",
+        "t": 1.4,
+        "diff_1x": 847,
+        "diff_2x": 3388,
+        "source": 4,
+        "target": 5
+      },
+      {
+        "kind": "attack",
+        "t": 1.5,
+        "diff_1x": 871,
+        "diff_2x": 3484,
+        "source": 9,
+        "target": 3
+      },
+      {
+        "kind": "attack",
+        "t": 1.5,
+        "diff_1x": 1060,
+        "diff_2x": 4240,
+        "source": 3,
+        "target": 9
+      },
+      {
+        "kind": "attack",
+        "t": 2.1,
+        "diff_1x": 860,
+        "diff_2x": 3440,
+        "source": 1,
+        "target": 5
+      },
+      {
+        "kind": "attack",
+        "t": 2.3,
+        "diff_1x": 875,
+        "diff_2x": 3500,
+        "source": 8,
+        "target": 3
+      },
+      {
+        "kind": "attack",
+        "t": 2.4,
+        "diff_1x": 853,
+        "diff_2x": 3412,
+        "source": 4,
+        "target": 5
+      },
+      {
+        "kind": "attack",
+        "t": 2.4,
+        "diff_1x": 934,
+        "diff_2x": 3736,
+        "source": 7,
+        "target": 3
+      },
+      {
+        "kind": "attack",
+        "t": 2.5,
+        "diff_1x": 918,
+        "diff_2x": 3672,
+        "source": 6,
+        "target": 3
+      },
+      {
+        "kind": "attack",
+        "t": 2.5,
+        "diff_1x": 928,
+        "diff_2x": 3712,
+        "source": 5,
+        "target": 1
+      },
+      {
+        "kind": "attack",
+        "t": 2.6,
+        "diff_1x": 787,
+        "diff_2x": 3148,
+        "source": 9,
+        "target": 3
+      },
+      {
+        "kind": "attack",
+        "t": 2.6,
+        "diff_1x": 971,
+        "diff_2x": 3884,
+        "source": 3,
+        "target": 9
+      },
+      {
+        "kind": "attack",
+        "t": 3.4,
+        "diff_1x": 1007,
+        "diff_2x": 4028,
+        "source": 4,
+        "target": 8
+      },
+      {
+        "kind": "attack",
+        "t": 3.5,
+        "diff_1x": 793,
+        "diff_2x": 3172,
+        "source": 8,
+        "target": 1
+      },
+      {
+        "kind": "attack",
+        "t": 3.9,
+        "diff_1x": 1002,
+        "diff_2x": 4008,
+        "source": 1,
+        "target": 8
+      },
+      {
+        "kind": "attack",
+        "t": 4.3,
+        "diff_1x": 793,
+        "diff_2x": 3172,
+        "source": 8,
+        "target": 1
+      },
+      {
+        "kind": "attack",
+        "t": 4.4,
+        "diff_1x": 679,
+        "diff_2x": 2716,
+        "source": 9,
+        "target": 1
+      },
+      {
+        "kind": "attack",
+        "t": 4.4,
+        "diff_1x": 1007,
+        "diff_2x": 4028,
+        "source": 4,
+        "target": 8
+      },
+      {
+        "kind": "attack",
+        "t": 4.8,
+        "diff_1x": 912,
+        "diff_2x": 3648,
+        "source": 1,
+        "target": 8
+      },
+      {
+        "kind": "attack",
+        "t": 5.1,
+        "diff_1x": 793,
+        "diff_2x": 3172,
+        "source": 8,
+        "target": 1
+      },
+      {
+        "kind": "attack",
+        "t": 5.4,
+        "diff_1x": 1007,
+        "diff_2x": 4028,
+        "source": 4,
+        "target": 8
+      },
+      {
+        "kind": "attack",
+        "t": 5.5,
+        "diff_1x": 731,
+        "diff_2x": 2924,
+        "source": 9,
+        "target": 1
+      },
+      {
+        "kind": "attack",
+        "t": 5.7,
+        "diff_1x": 882,
+        "diff_2x": 3528,
+        "source": 7,
+        "target": 1
+      },
+      {
+        "kind": "land",
+        "t": 6.2,
+        "diff_1x": 57600,
+        "diff_2x": 230400,
+        "source": 7,
+        "target": 1
+      },
+      {
+        "kind": "land",
+        "t": 6.6,
+        "diff_1x": 57600,
+        "diff_2x": 230400,
+        "source": 1,
+        "target": 8
+      },
+      {
+        "kind": "attack",
+        "t": 7.1,
+        "diff_1x": 731,
+        "diff_2x": 2924,
+        "source": 9,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 7.6,
+        "diff_1x": 1010,
+        "diff_2x": 4040,
+        "source": 4,
+        "target": 6
+      },
+      {
+        "kind": "land",
+        "t": 7.6,
+        "diff_1x": 57600,
+        "diff_2x": 230400,
+        "source": 4,
+        "target": 7
+      },
+      {
+        "kind": "attack",
+        "t": 7.8,
+        "diff_1x": 780,
+        "diff_2x": 3120,
+        "source": 6,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 8.5,
+        "diff_1x": 696,
+        "diff_2x": 2784,
+        "source": 6,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 8.6,
+        "diff_1x": 1010,
+        "diff_2x": 4040,
+        "source": 4,
+        "target": 6
+      },
+      {
+        "kind": "land",
+        "t": 8.9,
+        "diff_1x": 57600,
+        "diff_2x": 230400,
+        "source": 9,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 9.2,
+        "diff_1x": 780,
+        "diff_2x": 3120,
+        "source": 6,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 9.3,
+        "diff_1x": 731,
+        "diff_2x": 2924,
+        "source": 9,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 9.6,
+        "diff_1x": 1010,
+        "diff_2x": 4040,
+        "source": 4,
+        "target": 6
+      },
+      {
+        "kind": "land",
+        "t": 10.0,
+        "diff_1x": 57600,
+        "diff_2x": 230400,
+        "source": 6,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 1.5000000000000002,
+        "diff_1x": 1001,
+        "source": 5,
+        "target": 0,
+        "death_cancelled": true
+      },
+      {
+        "kind": "attack",
+        "t": 1.5000000000000002,
+        "diff_1x": 887,
+        "source": 7,
+        "target": 2,
+        "death_cancelled": true
+      },
+      {
+        "kind": "attack",
+        "t": 2.700000000000001,
+        "diff_1x": 931,
+        "source": 7,
+        "target": 3,
+        "death_cancelled": true
+      },
+      {
+        "kind": "attack",
+        "t": 2.800000000000001,
+        "diff_1x": 776,
+        "source": 1,
+        "target": 5,
+        "death_cancelled": true
+      }
+    ],
+    "styles": {
+      "type_count": 17,
+      "variants_per_type": 2,
+      "coverage": [
+        {
+          "type": "ELECTRIC",
+          "variant_phase_diffs": [
+            223,
+            197,
+            187,
+            354,
+            405,
+            443
+          ]
+        },
+        {
+          "type": "FIRE",
+          "variant_phase_diffs": [
+            172,
+            166,
+            202,
+            402,
+            460,
+            516
+          ]
+        },
+        {
+          "type": "WATER",
+          "variant_phase_diffs": [
+            180,
+            130,
+            142,
+            452,
+            498,
+            576
+          ]
+        },
+        {
+          "type": "GRASS",
+          "variant_phase_diffs": [
+            158,
+            131,
+            197,
+            416,
+            564,
+            692
+          ]
+        },
+        {
+          "type": "BUG",
+          "variant_phase_diffs": [
+            204,
+            173,
+            185,
+            545,
+            713,
+            869
+          ]
+        },
+        {
+          "type": "PSYCHIC",
+          "variant_phase_diffs": [
+            136,
+            116,
+            136,
+            332,
+            372,
+            432
+          ]
+        },
+        {
+          "type": "GHOST",
+          "variant_phase_diffs": [
+            176,
+            120,
+            135,
+            351,
+            362,
+            396
+          ]
+        },
+        {
+          "type": "POISON",
+          "variant_phase_diffs": [
+            180,
+            153,
+            130,
+            259,
+            244,
+            273
+          ]
+        },
+        {
+          "type": "DARK",
+          "variant_phase_diffs": [
+            204,
+            208,
+            171,
+            456,
+            492,
+            609
+          ]
+        },
+        {
+          "type": "ICE",
+          "variant_phase_diffs": [
+            166,
+            161,
+            181,
+            422,
+            502,
+            550
+          ]
+        },
+        {
+          "type": "FIGHTING",
+          "variant_phase_diffs": [
+            152,
+            136,
+            176,
+            364,
+            408,
+            472
+          ]
+        },
+        {
+          "type": "ROCK",
+          "variant_phase_diffs": [
+            158,
+            131,
+            197,
+            416,
+            564,
+            692
+          ]
+        },
+        {
+          "type": "GROUND",
+          "variant_phase_diffs": [
+            86,
+            72,
+            84,
+            225,
+            262,
+            291
+          ]
+        },
+        {
+          "type": "STEEL",
+          "variant_phase_diffs": [
+            183,
+            184,
+            273,
+            508,
+            688,
+            828
+          ]
+        },
+        {
+          "type": "NORMAL",
+          "variant_phase_diffs": [
+            148,
+            114,
+            136,
+            329,
+            389,
+            437
+          ]
+        },
+        {
+          "type": "DRAGON",
+          "variant_phase_diffs": [
+            135,
+            135,
+            168,
+            288,
+            313,
+            334
+          ]
+        },
+        {
+          "type": "FLYING",
+          "variant_phase_diffs": [
+            204,
+            208,
+            171,
+            456,
+            492,
+            609
+          ]
+        }
+      ],
+      "damage_styles": [
+        {
+          "damage_percent": 5,
+          "variant": 0,
+          "diff_1x": 890
+        },
+        {
+          "damage_percent": 5,
+          "variant": 1,
+          "diff_1x": 880
+        },
+        {
+          "damage_percent": 6,
+          "variant": 0,
+          "diff_1x": 1101
+        },
+        {
+          "damage_percent": 6,
+          "variant": 1,
+          "diff_1x": 989
+        },
+        {
+          "damage_percent": 14,
+          "variant": 0,
+          "diff_1x": 1101
+        },
+        {
+          "damage_percent": 14,
+          "variant": 1,
+          "diff_1x": 989
+        },
+        {
+          "damage_percent": 15,
+          "variant": 0,
+          "diff_1x": 1232
+        },
+        {
+          "damage_percent": 15,
+          "variant": 1,
+          "diff_1x": 1123
+        }
+      ],
+      "scar_frames": 8,
+      "failures": []
+    },
+    "motions": {
+      "species_checked": 84,
+      "idle_types": 3,
+      "attack_types": 3,
+      "hit_types": 2,
+      "walk_rates": [
+        2.5,
+        3.5,
+        4.5
+      ],
+      "scales": [
+        [
+          40,
+          32,
+          0.8
+        ],
+        [
+          48,
+          32,
+          0.666667
+        ],
+        [
+          48,
+          34,
+          0.708333
+        ],
+        [
+          56,
+          32,
+          0.571429
+        ],
+        [
+          56,
+          34,
+          0.607143
+        ]
+      ],
+      "failures": []
+    },
+    "failures": [],
+    "elapsed_seconds": 27.27,
+    "r1_contracts": {
+      "samples": {
+        "energy": "new attack/cast + legacy fallback + rewind",
+        "clock": {
+          "windows": [
+            1.0,
+            2.0
+          ],
+          "speeds": [
+            1,
+            2,
+            4
+          ],
+          "duration": 0.35,
+          "rate": 0.3
+        },
+        "projectile": "launch / inverse speed / death cancellation",
+        "solid_star_bounds": [
+          {
+            "sprite_px": 32,
+            "solid_px": 23,
+            "limit_px": 24
+          },
+          {
+            "sprite_px": 34,
+            "solid_px": 25,
+            "limit_px": 25
+          }
+        ],
+        "particle_budgets": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            8,
+            8
+          ],
+          [
+            192,
+            192
+          ]
+        ],
+        "opaque_body_fx_overlap_pixels": 0,
+        "peak_sampled_fx_particles": 12,
+        "gait": [
+          {
+            "species": 6,
+            "two_pose_diff_pixels": 257,
+            "floating": true,
+            "period": 0.24
+          },
+          {
+            "species": 65,
+            "two_pose_diff_pixels": 179,
+            "floating": true,
+            "period": 0.24
+          },
+          {
+            "species": 143,
+            "two_pose_diff_pixels": 339,
+            "floating": false,
+            "period": 0.8
+          }
+        ]
+      },
+      "failures": [],
+      "passed": true
+    }
+  },
+  {
+    "seed": 11,
+    "summary": {
+      "opening": {
+        "frames": 4,
+        "min_1x": 10650,
+        "max_1x": 54187,
+        "isolated_min_1x": 54187
+      },
+      "attack": {
+        "frames": 71,
+        "min_1x": 8629,
+        "max_1x": 57581,
+        "isolated_min_1x": 759
+      },
+      "land": {
+        "frames": 24,
+        "min_1x": 1927,
+        "max_1x": 57581,
+        "isolated_min_1x": 57600
+      },
+      "board_crowding": {
+        "max_overlap_px": 0,
+        "limit_px": 4,
+        "checked_pairs": 570
+      },
+      "meter_occlusion": {
+        "checked_units": 687,
+        "obscured_frames": 0,
+        "max_consecutive_frames": 0,
+        "limit_frames": 2
+      },
+      "palette_purity": {
+        "species_checked": 84,
+        "sprites_checked": 588,
+        "squash_phases": 7,
+        "visible_pixels": 279865,
+        "off_palette_pixels": 0,
+        "partial_alpha_pixels": 0,
+        "unquantized_box_off_palette_pixels": 233
+      },
+      "scale_compare": {
+        "species": 6,
+        "source_px": 56,
+        "samples": [
+          {
+            "size_px": 28,
+            "zoom": 1,
+            "diff_pixels": 0
+          },
+          {
+            "size_px": 28,
+            "zoom": 4,
+            "diff_pixels": 0
+          },
+          {
+            "size_px": 34,
+            "zoom": 1,
+            "diff_pixels": 0
+          },
+          {
+            "size_px": 34,
+            "zoom": 4,
+            "diff_pixels": 0
+          },
+          {
+            "size_px": 56,
+            "zoom": 1,
+            "diff_pixels": 0
+          },
+          {
+            "size_px": 56,
+            "zoom": 4,
+            "diff_pixels": 0
+          }
+        ]
+      },
+      "weather": {
+        "samples": [
+          {
+            "weather": "rain",
+            "frames": 62,
+            "min_1x": 25593,
+            "visual_only_min_1x": 22539,
+            "threshold_1x": 1200,
+            "off_palette_pixels": 0,
+            "particles_per_frame": 8,
+            "max_overlap_px": 0,
+            "meter_checks": 501,
+            "max_meter_occlusion_frames": 0
+          },
+          {
+            "weather": "sun",
+            "frames": 63,
+            "min_1x": 27643,
+            "visual_only_min_1x": 22094,
+            "threshold_1x": 1200,
+            "off_palette_pixels": 0,
+            "particles_per_frame": 8,
+            "max_overlap_px": 0,
+            "meter_checks": 541,
+            "max_meter_occlusion_frames": 1
+          },
+          {
+            "weather": "sand",
+            "frames": 69,
+            "min_1x": 23524,
+            "visual_only_min_1x": 23328,
+            "threshold_1x": 1200,
+            "off_palette_pixels": 0,
+            "particles_per_frame": 8,
+            "max_overlap_px": 0,
+            "meter_checks": 573,
+            "max_meter_occlusion_frames": 0
+          },
+          {
+            "weather": "hail",
+            "frames": 71,
+            "min_1x": 21917,
+            "visual_only_min_1x": 21917,
+            "threshold_1x": 1200,
+            "off_palette_pixels": 0,
+            "particles_per_frame": 8,
+            "max_overlap_px": 0,
+            "meter_checks": 557,
+            "max_meter_occlusion_frames": 0
+          }
+        ]
+      },
+      "status": {
+        "apply_events": 6,
+        "checked_unit_frames": 16,
+        "samples": [
+          {
+            "t": 0.1,
+            "unit": 4,
+            "kinds": [
+              "flinch"
+            ],
+            "icon_pixels": 7,
+            "bounds": [
+              97,
+              171,
+              103,
+              177
+            ]
+          },
+          {
+            "t": 1.2,
+            "unit": 6,
+            "kinds": [
+              "flinch"
+            ],
+            "icon_pixels": 7,
+            "bounds": [
+              97,
+              131,
+              103,
+              137
+            ]
+          },
+          {
+            "t": 2.2,
+            "unit": 9,
+            "kinds": [
+              "flinch"
+            ],
+            "icon_pixels": 7,
+            "bounds": [
+              97,
+              171,
+              103,
+              177
+            ]
+          },
+          {
+            "t": 2.7,
+            "unit": 2,
+            "kinds": [
+              "flinch"
+            ],
+            "icon_pixels": 7,
+            "bounds": [
+              97,
+              211,
+              103,
+              217
+            ]
+          },
+          {
+            "t": 3.5,
+            "unit": 2,
+            "kinds": [
+              "flinch"
+            ],
+            "icon_pixels": 7,
+            "bounds": [
+              97,
+              211,
+              103,
+              217
+            ]
+          },
+          {
+            "t": 4.0,
+            "unit": 9,
+            "kinds": [
+              "flinch"
+            ],
+            "icon_pixels": 7,
+            "bounds": [
+              97,
+              171,
+              103,
+              177
+            ]
+          }
+        ],
+        "max_overlap_px": 0,
+        "max_meter_occlusion_frames": 0
+      },
+      "status_contracts": {
+        "kinds": [
+          "burn",
+          "poison",
+          "paralysis",
+          "freeze",
+          "sleep",
+          "flinch"
+        ],
+        "frozen_frames": 4,
+        "dot_numbers": 2,
+        "palette_variants": 14
+      }
+    },
+    "frames": [
+      {
+        "t": 0.0,
+        "cues": [
+          "opening:0"
+        ],
+        "board_diff_1x": 54187,
+        "board_diff_2x": 216748,
+        "display_diff_1x": 54187,
+        "cutin_covered": false,
+        "threshold_1x": 2500,
+        "passed": true
+      },
+      {
+        "t": 0.1,
+        "cues": [
+          "opening:1"
+        ],
+        "board_diff_1x": 43347,
+        "board_diff_2x": 173388,
+        "display_diff_1x": 43366,
+        "cutin_covered": false,
+        "threshold_1x": 2500,
+        "passed": true
+      },
+      {
+        "t": 0.2,
+        "cues": [
+          "opening:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 43447,
+        "board_diff_2x": 173788,
+        "display_diff_1x": 43461,
+        "cutin_covered": false,
+        "threshold_1x": 2500,
+        "passed": true
+      },
+      {
+        "t": 0.3,
+        "cues": [
+          "opening:3",
+          "damage-number"
+        ],
+        "board_diff_1x": 10650,
+        "board_diff_2x": 42600,
+        "display_diff_1x": 10659,
+        "cutin_covered": false,
+        "threshold_1x": 2500,
+        "passed": true
+      },
+      {
+        "t": 0.4,
+        "cues": [
+          "attack:7>4:0",
+          "attack:4>7:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 24997,
+        "board_diff_2x": 99988,
+        "display_diff_1x": 25018,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 0.5,
+        "cues": [
+          "attack:7>4:1",
+          "attack:4>7:1",
+          "attack:9>4:0",
+          "attack:1>5:0",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 17730,
+        "board_diff_2x": 70920,
+        "display_diff_1x": 17751,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 0.6,
+        "cues": [
+          "attack:7>4:2",
+          "attack:6>1:0",
+          "attack:4>7:2",
+          "attack:9>4:1",
+          "attack:1>5:1",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 24994,
+        "board_diff_2x": 99976,
+        "display_diff_1x": 25008,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 0.7,
+        "cues": [
+          "attack:6>1:1",
+          "attack:9>4:2",
+          "attack:1>5:2",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 11899,
+        "board_diff_2x": 47596,
+        "display_diff_1x": 11917,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 0.8,
+        "cues": [
+          "attack:6>1:2",
+          "attack:5>1:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 25564,
+        "board_diff_2x": 102256,
+        "display_diff_1x": 25580,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 0.9,
+        "cues": [
+          "attack:5>1:1",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 26476,
+        "board_diff_2x": 105904,
+        "display_diff_1x": 26482,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.0,
+        "cues": [
+          "attack:5>1:2",
+          "attack:7>4:0",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 24727,
+        "board_diff_2x": 98908,
+        "display_diff_1x": 24756,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.1,
+        "cues": [
+          "attack:7>4:1",
+          "attack:0>7:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 18589,
+        "board_diff_2x": 74356,
+        "display_diff_1x": 18608,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.2,
+        "cues": [
+          "attack:7>4:2",
+          "attack:0>7:1",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 27349,
+        "board_diff_2x": 109396,
+        "display_diff_1x": 27363,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.3,
+        "cues": [
+          "attack:6>1:0",
+          "attack:0>7:2",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 24590,
+        "board_diff_2x": 98360,
+        "display_diff_1x": 24599,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.4,
+        "cues": [
+          "attack:6>1:1",
+          "attack:4>7:0",
+          "attack:1>5:0",
+          "attack:8>0:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 18431,
+        "board_diff_2x": 73724,
+        "display_diff_1x": 18452,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.5,
+        "cues": [
+          "attack:6>1:2",
+          "attack:4>7:1",
+          "attack:1>5:1",
+          "attack:8>0:1",
+          "attack:3>5:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 14945,
+        "board_diff_2x": 59780,
+        "display_diff_1x": 14966,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.6,
+        "cues": [
+          "attack:4>7:2",
+          "attack:1>5:2",
+          "attack:8>0:2",
+          "attack:9>4:0",
+          "attack:3>5:1",
+          "attack:7>4:0",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 17809,
+        "board_diff_2x": 71236,
+        "display_diff_1x": 17823,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.7,
+        "cues": [
+          "attack:9>4:1",
+          "attack:3>5:2",
+          "attack:7>4:1",
+          "attack:5>1:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 17233,
+        "board_diff_2x": 68932,
+        "display_diff_1x": 17251,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.8,
+        "cues": [
+          "attack:9>4:2",
+          "attack:7>4:2",
+          "attack:5>1:1",
+          "death:7:0",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 57061,
+        "board_diff_2x": 228244,
+        "display_diff_1x": 57077,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 1.9,
+        "cues": [
+          "attack:5>1:2",
+          "death:7:1",
+          "damage-number"
+        ],
+        "board_diff_1x": 56514,
+        "board_diff_2x": 226056,
+        "display_diff_1x": 56520,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.0,
+        "cues": [
+          "attack:6>1:0",
+          "death:7:2",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 18900,
+        "board_diff_2x": 75600,
+        "display_diff_1x": 18924,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.1,
+        "cues": [
+          "attack:6>1:1",
+          "death:7:3",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 23865,
+        "board_diff_2x": 95460,
+        "display_diff_1x": 23884,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.2,
+        "cues": [
+          "attack:6>1:2",
+          "attack:8>0:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 23241,
+        "board_diff_2x": 92964,
+        "display_diff_1x": 23255,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.3,
+        "cues": [
+          "attack:8>0:1",
+          "attack:1>5:0",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 19118,
+        "board_diff_2x": 76472,
+        "display_diff_1x": 19127,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.4,
+        "cues": [
+          "attack:8>0:2",
+          "attack:1>5:1",
+          "attack:4>5:0",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 10002,
+        "board_diff_2x": 40008,
+        "display_diff_1x": 10023,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.5,
+        "cues": [
+          "attack:1>5:2",
+          "attack:4>5:1",
+          "death:1:0",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 57155,
+        "board_diff_2x": 228620,
+        "display_diff_1x": 57176,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.6,
+        "cues": [
+          "attack:4>5:2",
+          "attack:3>5:0",
+          "death:1:1",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 57085,
+        "board_diff_2x": 228340,
+        "display_diff_1x": 57099,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.7,
+        "cues": [
+          "attack:9>4:0",
+          "attack:3>5:1",
+          "attack:2>5:0",
+          "attack:0>8:0",
+          "death:1:2",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 18233,
+        "board_diff_2x": 72932,
+        "display_diff_1x": 18251,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.8,
+        "cues": [
+          "attack:9>4:1",
+          "attack:3>5:2",
+          "attack:2>5:1",
+          "attack:0>8:1",
+          "death:1:3",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 26014,
+        "board_diff_2x": 104056,
+        "display_diff_1x": 26030,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 2.9,
+        "cues": [
+          "attack:9>4:2",
+          "attack:2>5:2",
+          "attack:0>8:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 19478,
+        "board_diff_2x": 77912,
+        "display_diff_1x": 19484,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 3.0,
+        "cues": [
+          "attack:8>0:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 21838,
+        "board_diff_2x": 87352,
+        "display_diff_1x": 21857,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 3.1,
+        "cues": [
+          "attack:8>0:1",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 25975,
+        "board_diff_2x": 103900,
+        "display_diff_1x": 25994,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 3.2,
+        "cues": [
+          "attack:8>0:2",
+          "attack:6>3:0",
+          "death:5:0",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 24043,
+        "board_diff_2x": 96172,
+        "display_diff_1x": 24057,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 3.3,
+        "cues": [
+          "attack:6>3:1",
+          "death:5:1",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 21727,
+        "board_diff_2x": 86908,
+        "display_diff_1x": 21736,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 3.4,
+        "cues": [
+          "attack:6>3:2",
+          "death:5:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 14061,
+        "board_diff_2x": 56244,
+        "display_diff_1x": 14082,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 3.5,
+        "cues": [
+          "attack:0>8:0",
+          "death:5:3",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 15005,
+        "board_diff_2x": 60020,
+        "display_diff_1x": 15026,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 3.6,
+        "cues": [
+          "attack:0>8:1",
+          "charge:6",
+          "full:6",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 22072,
+        "board_diff_2x": 88288,
+        "display_diff_1x": 22086,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 3.7,
+        "cues": [
+          "attack:0>8:2",
+          "attack:3>6:0",
+          "charge:6",
+          "full:6",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 24170,
+        "board_diff_2x": 96680,
+        "display_diff_1x": 24188,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 3.8,
+        "cues": [
+          "attack:9>4:0",
+          "attack:3>6:1",
+          "attack:8>0:0",
+          "charge:6",
+          "full:6",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 10645,
+        "board_diff_2x": 42580,
+        "display_diff_1x": 10661,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 3.9,
+        "cues": [
+          "attack:9>4:1",
+          "attack:3>6:2",
+          "attack:6>3:0",
+          "attack:8>0:1",
+          "charge:6",
+          "full:6",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 26842,
+        "board_diff_2x": 107368,
+        "display_diff_1x": 26848,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.0,
+        "cues": [
+          "attack:9>4:2",
+          "attack:6>3:1",
+          "attack:8>0:2",
+          "full:6",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 13593,
+        "board_diff_2x": 54372,
+        "display_diff_1x": 13624,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.1,
+        "cues": [
+          "attack:6>3:2",
+          "full:6",
+          "damage-number"
+        ],
+        "board_diff_1x": 14325,
+        "board_diff_2x": 57300,
+        "display_diff_1x": 14344,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.2,
+        "cues": [
+          "full:6",
+          "damage-number"
+        ],
+        "board_diff_1x": 6791,
+        "board_diff_2x": 27164,
+        "display_diff_1x": 6805,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 4.3,
+        "cues": [
+          "attack:0>8:0",
+          "full:6",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 16917,
+        "board_diff_2x": 67668,
+        "display_diff_1x": 16926,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.4,
+        "cues": [
+          "attack:0>8:1",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 22658,
+        "board_diff_2x": 90632,
+        "display_diff_1x": 22679,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.5,
+        "cues": [
+          "attack:4>9:0",
+          "attack:0>8:2",
+          "charge:0",
+          "full:0",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 23411,
+        "board_diff_2x": 93644,
+        "display_diff_1x": 23432,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.6,
+        "cues": [
+          "attack:4>9:1",
+          "attack:8>0:0",
+          "charge:0",
+          "full:0",
+          "charge:4",
+          "full:4",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 8629,
+        "board_diff_2x": 34516,
+        "display_diff_1x": 8643,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.7,
+        "cues": [
+          "attack:4>9:2",
+          "attack:8>0:1",
+          "charge:0",
+          "full:0",
+          "charge:4",
+          "full:4",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 25791,
+        "board_diff_2x": 103164,
+        "display_diff_1x": 25809,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.8,
+        "cues": [
+          "attack:8>0:2",
+          "attack:3>6:0",
+          "charge:0",
+          "full:0",
+          "charge:4",
+          "full:4",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 23715,
+        "board_diff_2x": 94860,
+        "display_diff_1x": 24399,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 4.9,
+        "cues": [
+          "attack:9>4:0",
+          "attack:3>6:1",
+          "land:6>3:0",
+          "full:0",
+          "charge:4",
+          "full:4",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 56763,
+        "board_diff_2x": 227052,
+        "display_diff_1x": 56769,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 5.0,
+        "cues": [
+          "attack:9>4:1",
+          "attack:3>6:2",
+          "land:6>3:1",
+          "full:0",
+          "full:4",
+          "charge:8",
+          "full:8",
+          "shake:-4",
+          "damage-number"
+        ],
+        "board_diff_1x": 57387,
+        "board_diff_2x": 229548,
+        "display_diff_1x": 57418,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 5.1,
+        "cues": [
+          "attack:9>4:2",
+          "attack:0>8:0",
+          "land:6>3:2",
+          "full:0",
+          "charge:3",
+          "full:3",
+          "full:4",
+          "charge:8",
+          "full:8",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 28615,
+        "board_diff_2x": 114460,
+        "display_diff_1x": 28650,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 5.2,
+        "cues": [
+          "attack:0>8:1",
+          "land:6>3:3",
+          "full:0",
+          "charge:3",
+          "full:3",
+          "full:4",
+          "charge:8",
+          "full:8",
+          "charge:9",
+          "full:9",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 26774,
+        "board_diff_2x": 107096,
+        "display_diff_1x": 26788,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 5.3,
+        "cues": [
+          "attack:0>8:2",
+          "attack:6>3:0",
+          "land:6>3:4",
+          "death:0:0",
+          "charge:3",
+          "full:3",
+          "full:4",
+          "charge:8",
+          "full:8",
+          "charge:9",
+          "full:9",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 24475,
+        "board_diff_2x": 97900,
+        "display_diff_1x": 24500,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 5.4,
+        "cues": [
+          "attack:6>3:1",
+          "land:6>3:5",
+          "death:0:1",
+          "charge:3",
+          "full:3",
+          "full:4",
+          "full:8",
+          "charge:9",
+          "full:9",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 27827,
+        "board_diff_2x": 111308,
+        "display_diff_1x": 27848,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 5.5,
+        "cues": [
+          "attack:6>3:2",
+          "attack:4>9:0",
+          "attack:2>6:0",
+          "death:0:2",
+          "full:3",
+          "full:4",
+          "full:8",
+          "charge:9",
+          "full:9",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 27627,
+        "board_diff_2x": 110508,
+        "display_diff_1x": 27648,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 5.6,
+        "cues": [
+          "attack:4>9:1",
+          "attack:2>6:1",
+          "death:0:3",
+          "full:3",
+          "full:4",
+          "full:8",
+          "full:9",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 25901,
+        "board_diff_2x": 103604,
+        "display_diff_1x": 25931,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 5.7,
+        "cues": [
+          "attack:4>9:2",
+          "attack:2>6:2",
+          "full:3",
+          "full:4",
+          "full:8",
+          "full:9",
+          "damage-number"
+        ],
+        "board_diff_1x": 20358,
+        "board_diff_2x": 81432,
+        "display_diff_1x": 20376,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 5.8,
+        "cues": [
+          "death:3:0",
+          "full:4",
+          "full:8",
+          "full:9",
+          "damage-number"
+        ],
+        "board_diff_1x": 9939,
+        "board_diff_2x": 39756,
+        "display_diff_1x": 9971,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 5.9,
+        "cues": [
+          "attack:3>6:0",
+          "death:3:1",
+          "full:4",
+          "full:8",
+          "full:9",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 17954,
+        "board_diff_2x": 71816,
+        "display_diff_1x": 17960,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 6.0,
+        "cues": [
+          "attack:9>4:0",
+          "attack:3>6:1",
+          "death:3:2",
+          "full:4",
+          "full:8",
+          "full:9",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 25020,
+        "board_diff_2x": 100080,
+        "display_diff_1x": 25044,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 6.1,
+        "cues": [
+          "attack:9>4:1",
+          "attack:3>6:2",
+          "death:3:3",
+          "full:4",
+          "full:8",
+          "full:9",
+          "shake:-2",
+          "damage-number"
+        ],
+        "board_diff_1x": 16048,
+        "board_diff_2x": 64192,
+        "display_diff_1x": 16083,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 6.2,
+        "cues": [
+          "attack:9>4:2",
+          "full:8",
+          "full:9",
+          "damage-number"
+        ],
+        "board_diff_1x": 17331,
+        "board_diff_2x": 69324,
+        "display_diff_1x": 18029,
+        "cutin_covered": false,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 6.3,
+        "cues": [
+          "full:8",
+          "full:9",
+          "damage-number"
+        ],
+        "board_diff_1x": 4248,
+        "board_diff_2x": 16992,
+        "display_diff_1x": 54097,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 6.4,
+        "cues": [
+          "full:8",
+          "full:9",
+          "damage-number"
+        ],
+        "board_diff_1x": 1488,
+        "board_diff_2x": 5952,
+        "display_diff_1x": 38156,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 6.5,
+        "cues": [
+          "full:8",
+          "full:9",
+          "damage-number"
+        ],
+        "board_diff_1x": 6456,
+        "board_diff_2x": 25824,
+        "display_diff_1x": 0,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 6.6,
+        "cues": [
+          "full:8",
+          "full:9",
+          "damage-number"
+        ],
+        "board_diff_1x": 7240,
+        "board_diff_2x": 28960,
+        "display_diff_1x": 97,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 6.7,
+        "cues": [
+          "attack:6>2:0",
+          "attack:2>6:0",
+          "full:8",
+          "full:9",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 17641,
+        "board_diff_2x": 70564,
+        "display_diff_1x": 489,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 6.8,
+        "cues": [
+          "attack:6>2:1",
+          "attack:2>6:1",
+          "death:4:0",
+          "full:8",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 21405,
+        "board_diff_2x": 85620,
+        "display_diff_1x": 495,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 6.9,
+        "cues": [
+          "attack:6>2:2",
+          "attack:2>6:2",
+          "death:4:1",
+          "full:8",
+          "charge:9",
+          "damage-number"
+        ],
+        "board_diff_1x": 16015,
+        "board_diff_2x": 64060,
+        "display_diff_1x": 611,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 7.0,
+        "cues": [
+          "death:4:2",
+          "full:8",
+          "charge:9",
+          "damage-number"
+        ],
+        "board_diff_1x": 5226,
+        "board_diff_2x": 20904,
+        "display_diff_1x": 854,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 7.1,
+        "cues": [
+          "death:4:3",
+          "full:8",
+          "charge:9",
+          "damage-number"
+        ],
+        "board_diff_1x": 3723,
+        "board_diff_2x": 14892,
+        "display_diff_1x": 38030,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 7.2,
+        "cues": [
+          "land:4>9:0",
+          "full:8",
+          "charge:9",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 57567,
+        "board_diff_2x": 230268,
+        "display_diff_1x": 64334,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 7.3,
+        "cues": [
+          "land:4>9:1",
+          "full:8",
+          "shake:-4",
+          "damage-number"
+        ],
+        "board_diff_1x": 57507,
+        "board_diff_2x": 230028,
+        "display_diff_1x": 64582,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 7.4,
+        "cues": [
+          "attack:6>2:0",
+          "land:4>9:2",
+          "full:8",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 23970,
+        "board_diff_2x": 95880,
+        "display_diff_1x": 38602,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 7.5,
+        "cues": [
+          "attack:6>2:1",
+          "land:4>9:3",
+          "full:8",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 21852,
+        "board_diff_2x": 87408,
+        "display_diff_1x": 0,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 7.6,
+        "cues": [
+          "attack:6>2:2",
+          "land:4>9:4",
+          "full:8",
+          "damage-number"
+        ],
+        "board_diff_1x": 14952,
+        "board_diff_2x": 59808,
+        "display_diff_1x": 2258,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 7.7,
+        "cues": [
+          "land:4>9:5",
+          "full:8",
+          "damage-number"
+        ],
+        "board_diff_1x": 2295,
+        "board_diff_2x": 9180,
+        "display_diff_1x": 359,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 7.8,
+        "cues": [
+          "death:6:0",
+          "full:8",
+          "damage-number"
+        ],
+        "board_diff_1x": 4735,
+        "board_diff_2x": 18940,
+        "display_diff_1x": 541,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 7.9,
+        "cues": [
+          "death:6:1",
+          "full:8",
+          "damage-number"
+        ],
+        "board_diff_1x": 4688,
+        "board_diff_2x": 18752,
+        "display_diff_1x": 589,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 8.0,
+        "cues": [
+          "death:6:2",
+          "full:8",
+          "damage-number"
+        ],
+        "board_diff_1x": 7739,
+        "board_diff_2x": 30956,
+        "display_diff_1x": 1041,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 8.1,
+        "cues": [
+          "death:6:3",
+          "full:8",
+          "damage-number"
+        ],
+        "board_diff_1x": 4630,
+        "board_diff_2x": 18520,
+        "display_diff_1x": 38618,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 8.2,
+        "cues": [
+          "attack:9>2:0",
+          "land:9>4:0",
+          "full:8",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 57581,
+        "board_diff_2x": 230324,
+        "display_diff_1x": 65043,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 8.3,
+        "cues": [
+          "attack:9>2:1",
+          "land:9>4:1",
+          "full:8",
+          "shake:-4",
+          "damage-number"
+        ],
+        "board_diff_1x": 57500,
+        "board_diff_2x": 230000,
+        "display_diff_1x": 57593,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 8.4,
+        "cues": [
+          "attack:9>2:2",
+          "land:9>4:2",
+          "full:8",
+          "shake:+4",
+          "damage-number"
+        ],
+        "board_diff_1x": 23981,
+        "board_diff_2x": 95924,
+        "display_diff_1x": 24002,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 8.5,
+        "cues": [
+          "land:9>4:3",
+          "damage-number"
+        ],
+        "board_diff_1x": 18496,
+        "board_diff_2x": 73984,
+        "display_diff_1x": 19600,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 8.6,
+        "cues": [
+          "land:9>4:4",
+          "damage-number"
+        ],
+        "board_diff_1x": 5186,
+        "board_diff_2x": 20744,
+        "display_diff_1x": 52706,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 8.7,
+        "cues": [
+          "land:9>4:5",
+          "damage-number"
+        ],
+        "board_diff_1x": 4654,
+        "board_diff_2x": 18616,
+        "display_diff_1x": 38532,
+        "cutin_covered": true,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 8.8,
+        "cues": [
+          "damage-number"
+        ],
+        "board_diff_1x": 2857,
+        "board_diff_2x": 11428,
+        "display_diff_1x": 0,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 8.9,
+        "cues": [
+          "damage-number"
+        ],
+        "board_diff_1x": 1743,
+        "board_diff_2x": 6972,
+        "display_diff_1x": 432,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 9.0,
+        "cues": [
+          "charge:2",
+          "full:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 4549,
+        "board_diff_2x": 18196,
+        "display_diff_1x": 577,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 9.1,
+        "cues": [
+          "charge:2",
+          "full:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 1604,
+        "board_diff_2x": 6416,
+        "display_diff_1x": 622,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 9.2,
+        "cues": [
+          "charge:2",
+          "full:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 2032,
+        "board_diff_2x": 8128,
+        "display_diff_1x": 603,
+        "cutin_covered": true,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 9.3,
+        "cues": [
+          "attack:9>2:0",
+          "charge:2",
+          "full:2",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 13558,
+        "board_diff_2x": 54232,
+        "display_diff_1x": 969,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 9.4,
+        "cues": [
+          "attack:9>2:1",
+          "attack:8>2:0",
+          "full:2",
+          "shake:+2",
+          "damage-number"
+        ],
+        "board_diff_1x": 9346,
+        "board_diff_2x": 37384,
+        "display_diff_1x": 37905,
+        "cutin_covered": true,
+        "threshold_1x": 600,
+        "passed": true
+      },
+      {
+        "t": 9.5,
+        "cues": [
+          "attack:9>2:2",
+          "attack:8>2:1",
+          "attack:2>8:0",
+          "land:8>2:0",
+          "full:2",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 57193,
+        "board_diff_2x": 228772,
+        "display_diff_1x": 64853,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 9.6,
+        "cues": [
+          "attack:8>2:2",
+          "attack:2>8:1",
+          "land:8>2:1",
+          "full:2",
+          "shake:-3",
+          "damage-number"
+        ],
+        "board_diff_1x": 57497,
+        "board_diff_2x": 229988,
+        "display_diff_1x": 57596,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 9.7,
+        "cues": [
+          "attack:2>8:2",
+          "land:8>2:2",
+          "full:2",
+          "shake:+3",
+          "damage-number"
+        ],
+        "board_diff_1x": 21626,
+        "board_diff_2x": 86504,
+        "display_diff_1x": 21644,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 9.8,
+        "cues": [
+          "land:8>2:3",
+          "full:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 14609,
+        "board_diff_2x": 58436,
+        "display_diff_1x": 14641,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 9.9,
+        "cues": [
+          "land:8>2:4",
+          "full:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 2043,
+        "board_diff_2x": 8172,
+        "display_diff_1x": 2049,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 10.0,
+        "cues": [
+          "land:8>2:5",
+          "full:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 1927,
+        "board_diff_2x": 7708,
+        "display_diff_1x": 1966,
+        "cutin_covered": false,
+        "threshold_1x": 1500,
+        "passed": true
+      },
+      {
+        "t": 10.1,
+        "cues": [
+          "death:2:0",
+          "damage-number"
+        ],
+        "board_diff_1x": 4356,
+        "board_diff_2x": 17424,
+        "display_diff_1x": 4391,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 10.2,
+        "cues": [
+          "death:2:1",
+          "damage-number"
+        ],
+        "board_diff_1x": 3772,
+        "board_diff_2x": 15088,
+        "display_diff_1x": 4579,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 10.3,
+        "cues": [
+          "death:2:2",
+          "damage-number"
+        ],
+        "board_diff_1x": 4790,
+        "board_diff_2x": 19160,
+        "display_diff_1x": 4815,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 10.4,
+        "cues": [
+          "death:2:3",
+          "damage-number"
+        ],
+        "board_diff_1x": 1483,
+        "board_diff_2x": 5932,
+        "display_diff_1x": 1504,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 10.5,
+        "cues": [
+          "damage-number"
+        ],
+        "board_diff_1x": 1196,
+        "board_diff_2x": 4784,
+        "display_diff_1x": 1217,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 10.6,
+        "cues": [
+          "damage-number"
+        ],
+        "board_diff_1x": 363,
+        "board_diff_2x": 1452,
+        "display_diff_1x": 393,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 10.7,
+        "cues": [
+          "damage-number"
+        ],
+        "board_diff_1x": 392,
+        "board_diff_2x": 1568,
+        "display_diff_1x": 410,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 10.8,
+        "cues": [
+          "damage-number"
+        ],
+        "board_diff_1x": 365,
+        "board_diff_2x": 1460,
+        "display_diff_1x": 397,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      },
+      {
+        "t": 10.9,
+        "cues": [
+          "damage-number"
+        ],
+        "board_diff_1x": 1722,
+        "board_diff_2x": 6888,
+        "display_diff_1x": 1728,
+        "cutin_covered": false,
+        "threshold_1x": 0,
+        "passed": true
+      }
+    ],
+    "isolated": [
+      {
+        "kind": "opening",
+        "t": 0,
+        "diff_1x": 54187
+      },
+      {
+        "kind": "attack",
+        "t": 0.4,
+        "diff_1x": 787,
+        "diff_2x": 3148,
+        "source": 7,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 0.4,
+        "diff_1x": 989,
+        "diff_2x": 3956,
+        "source": 4,
+        "target": 7
+      },
+      {
+        "kind": "attack",
+        "t": 0.5,
+        "diff_1x": 843,
+        "diff_2x": 3372,
+        "source": 9,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 0.5,
+        "diff_1x": 861,
+        "diff_2x": 3444,
+        "source": 1,
+        "target": 5
+      },
+      {
+        "kind": "attack",
+        "t": 0.6,
+        "diff_1x": 847,
+        "diff_2x": 3388,
+        "source": 6,
+        "target": 1
+      },
+      {
+        "kind": "attack",
+        "t": 0.8,
+        "diff_1x": 1005,
+        "diff_2x": 4020,
+        "source": 5,
+        "target": 1
+      },
+      {
+        "kind": "attack",
+        "t": 1.0,
+        "diff_1x": 787,
+        "diff_2x": 3148,
+        "source": 7,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 1.1,
+        "diff_1x": 999,
+        "diff_2x": 3996,
+        "source": 0,
+        "target": 7
+      },
+      {
+        "kind": "attack",
+        "t": 1.3,
+        "diff_1x": 807,
+        "diff_2x": 3228,
+        "source": 6,
+        "target": 1
+      },
+      {
+        "kind": "attack",
+        "t": 1.4,
+        "diff_1x": 990,
+        "diff_2x": 3960,
+        "source": 4,
+        "target": 7
+      },
+      {
+        "kind": "attack",
+        "t": 1.4,
+        "diff_1x": 783,
+        "diff_2x": 3132,
+        "source": 1,
+        "target": 5
+      },
+      {
+        "kind": "attack",
+        "t": 1.4,
+        "diff_1x": 1060,
+        "diff_2x": 4240,
+        "source": 8,
+        "target": 0
+      },
+      {
+        "kind": "attack",
+        "t": 1.5,
+        "diff_1x": 1070,
+        "diff_2x": 4280,
+        "source": 3,
+        "target": 5
+      },
+      {
+        "kind": "attack",
+        "t": 1.6,
+        "diff_1x": 759,
+        "diff_2x": 3036,
+        "source": 9,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 1.6,
+        "diff_1x": 787,
+        "diff_2x": 3148,
+        "source": 7,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 1.7,
+        "diff_1x": 1072,
+        "diff_2x": 4288,
+        "source": 5,
+        "target": 1
+      },
+      {
+        "kind": "attack",
+        "t": 2.0,
+        "diff_1x": 847,
+        "diff_2x": 3388,
+        "source": 6,
+        "target": 1
+      },
+      {
+        "kind": "attack",
+        "t": 2.2,
+        "diff_1x": 1060,
+        "diff_2x": 4240,
+        "source": 8,
+        "target": 0
+      },
+      {
+        "kind": "attack",
+        "t": 2.3,
+        "diff_1x": 860,
+        "diff_2x": 3440,
+        "source": 1,
+        "target": 5
+      },
+      {
+        "kind": "attack",
+        "t": 2.4,
+        "diff_1x": 859,
+        "diff_2x": 3436,
+        "source": 4,
+        "target": 5
+      },
+      {
+        "kind": "attack",
+        "t": 2.6,
+        "diff_1x": 978,
+        "diff_2x": 3912,
+        "source": 3,
+        "target": 5
+      },
+      {
+        "kind": "attack",
+        "t": 2.7,
+        "diff_1x": 843,
+        "diff_2x": 3372,
+        "source": 9,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 2.7,
+        "diff_1x": 859,
+        "diff_2x": 3436,
+        "source": 2,
+        "target": 5
+      },
+      {
+        "kind": "attack",
+        "t": 2.7,
+        "diff_1x": 803,
+        "diff_2x": 3212,
+        "source": 0,
+        "target": 8
+      },
+      {
+        "kind": "attack",
+        "t": 3.0,
+        "diff_1x": 1060,
+        "diff_2x": 4240,
+        "source": 8,
+        "target": 0
+      },
+      {
+        "kind": "attack",
+        "t": 3.2,
+        "diff_1x": 883,
+        "diff_2x": 3532,
+        "source": 6,
+        "target": 3
+      },
+      {
+        "kind": "attack",
+        "t": 3.5,
+        "diff_1x": 803,
+        "diff_2x": 3212,
+        "source": 0,
+        "target": 8
+      },
+      {
+        "kind": "attack",
+        "t": 3.7,
+        "diff_1x": 1070,
+        "diff_2x": 4280,
+        "source": 3,
+        "target": 6
+      },
+      {
+        "kind": "attack",
+        "t": 3.8,
+        "diff_1x": 763,
+        "diff_2x": 3052,
+        "source": 9,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 3.8,
+        "diff_1x": 1060,
+        "diff_2x": 4240,
+        "source": 8,
+        "target": 0
+      },
+      {
+        "kind": "attack",
+        "t": 3.9,
+        "diff_1x": 799,
+        "diff_2x": 3196,
+        "source": 6,
+        "target": 3
+      },
+      {
+        "kind": "attack",
+        "t": 4.3,
+        "diff_1x": 803,
+        "diff_2x": 3212,
+        "source": 0,
+        "target": 8
+      },
+      {
+        "kind": "attack",
+        "t": 4.5,
+        "diff_1x": 902,
+        "diff_2x": 3608,
+        "source": 4,
+        "target": 9
+      },
+      {
+        "kind": "attack",
+        "t": 4.6,
+        "diff_1x": 1060,
+        "diff_2x": 4240,
+        "source": 8,
+        "target": 0
+      },
+      {
+        "kind": "attack",
+        "t": 4.8,
+        "diff_1x": 978,
+        "diff_2x": 3912,
+        "source": 3,
+        "target": 6
+      },
+      {
+        "kind": "attack",
+        "t": 4.9,
+        "diff_1x": 843,
+        "diff_2x": 3372,
+        "source": 9,
+        "target": 4
+      },
+      {
+        "kind": "land",
+        "t": 5.0,
+        "diff_1x": 57600,
+        "diff_2x": 230400,
+        "source": 6,
+        "target": 3
+      },
+      {
+        "kind": "attack",
+        "t": 5.1,
+        "diff_1x": 803,
+        "diff_2x": 3212,
+        "source": 0,
+        "target": 8
+      },
+      {
+        "kind": "attack",
+        "t": 5.3,
+        "diff_1x": 918,
+        "diff_2x": 3672,
+        "source": 6,
+        "target": 3
+      },
+      {
+        "kind": "attack",
+        "t": 5.5,
+        "diff_1x": 902,
+        "diff_2x": 3608,
+        "source": 4,
+        "target": 9
+      },
+      {
+        "kind": "attack",
+        "t": 5.5,
+        "diff_1x": 1007,
+        "diff_2x": 4028,
+        "source": 2,
+        "target": 6
+      },
+      {
+        "kind": "attack",
+        "t": 5.9,
+        "diff_1x": 1070,
+        "diff_2x": 4280,
+        "source": 3,
+        "target": 6
+      },
+      {
+        "kind": "attack",
+        "t": 6.0,
+        "diff_1x": 763,
+        "diff_2x": 3052,
+        "source": 9,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 6.7,
+        "diff_1x": 926,
+        "diff_2x": 3704,
+        "source": 6,
+        "target": 2
+      },
+      {
+        "kind": "attack",
+        "t": 6.7,
+        "diff_1x": 1007,
+        "diff_2x": 4028,
+        "source": 2,
+        "target": 6
+      },
+      {
+        "kind": "land",
+        "t": 7.3,
+        "diff_1x": 57600,
+        "diff_2x": 230400,
+        "source": 4,
+        "target": 9
+      },
+      {
+        "kind": "attack",
+        "t": 7.4,
+        "diff_1x": 1016,
+        "diff_2x": 4064,
+        "source": 6,
+        "target": 2
+      },
+      {
+        "kind": "attack",
+        "t": 8.2,
+        "diff_1x": 887,
+        "diff_2x": 3548,
+        "source": 9,
+        "target": 2
+      },
+      {
+        "kind": "land",
+        "t": 8.3,
+        "diff_1x": 57600,
+        "diff_2x": 230400,
+        "source": 9,
+        "target": 4
+      },
+      {
+        "kind": "attack",
+        "t": 9.3,
+        "diff_1x": 977,
+        "diff_2x": 3908,
+        "source": 9,
+        "target": 2
+      },
+      {
+        "kind": "attack",
+        "t": 9.4,
+        "diff_1x": 941,
+        "diff_2x": 3764,
+        "source": 8,
+        "target": 2
+      },
+      {
+        "kind": "attack",
+        "t": 9.5,
+        "diff_1x": 1001,
+        "diff_2x": 4004,
+        "source": 2,
+        "target": 8
+      },
+      {
+        "kind": "land",
+        "t": 9.6,
+        "diff_1x": 57600,
+        "diff_2x": 230400,
+        "source": 8,
+        "target": 2
+      },
+      {
+        "kind": "attack",
+        "t": 1.8000000000000005,
+        "diff_1x": 999,
+        "source": 0,
+        "target": 7,
+        "death_cancelled": true
+      },
+      {
+        "kind": "attack",
+        "t": 2.3000000000000007,
+        "diff_1x": 807,
+        "source": 6,
+        "target": 1,
+        "death_cancelled": true
+      },
+      {
+        "kind": "attack",
+        "t": 2.500000000000001,
+        "diff_1x": 1005,
+        "source": 5,
+        "target": 1,
+        "death_cancelled": true
+      },
+      {
+        "kind": "attack",
+        "t": 3.2000000000000015,
+        "diff_1x": 859,
+        "source": 4,
+        "target": 5,
+        "death_cancelled": true
+      },
+      {
+        "kind": "attack",
+        "t": 5.299999999999997,
+        "diff_1x": 1220,
+        "source": 8,
+        "target": 0,
+        "death_cancelled": true
+      },
+      {
+        "kind": "attack",
+        "t": 5.799999999999995,
+        "diff_1x": 883,
+        "source": 6,
+        "target": 3,
+        "death_cancelled": true
+      },
+      {
+        "kind": "attack",
+        "t": 7.799999999999988,
+        "diff_1x": 1007,
+        "source": 2,
+        "target": 6,
+        "death_cancelled": true
+      },
+      {
+        "kind": "attack",
+        "t": 10.09999999999998,
+        "diff_1x": 887,
+        "source": 9,
+        "target": 2,
+        "death_cancelled": true
+      }
+    ],
+    "styles": {
+      "type_count": 17,
+      "variants_per_type": 2,
+      "coverage": [
+        {
+          "type": "ELECTRIC",
+          "variant_phase_diffs": [
+            223,
+            197,
+            187,
+            354,
+            405,
+            443
+          ]
+        },
+        {
+          "type": "FIRE",
+          "variant_phase_diffs": [
+            172,
+            166,
+            202,
+            402,
+            460,
+            516
+          ]
+        },
+        {
+          "type": "WATER",
+          "variant_phase_diffs": [
+            180,
+            130,
+            142,
+            452,
+            498,
+            576
+          ]
+        },
+        {
+          "type": "GRASS",
+          "variant_phase_diffs": [
+            158,
+            131,
+            197,
+            416,
+            564,
+            692
+          ]
+        },
+        {
+          "type": "BUG",
+          "variant_phase_diffs": [
+            204,
+            173,
+            185,
+            545,
+            713,
+            869
+          ]
+        },
+        {
+          "type": "PSYCHIC",
+          "variant_phase_diffs": [
+            136,
+            116,
+            136,
+            332,
+            372,
+            432
+          ]
+        },
+        {
+          "type": "GHOST",
+          "variant_phase_diffs": [
+            176,
+            120,
+            135,
+            351,
+            362,
+            396
+          ]
+        },
+        {
+          "type": "POISON",
+          "variant_phase_diffs": [
+            180,
+            153,
+            130,
+            259,
+            244,
+            273
+          ]
+        },
+        {
+          "type": "DARK",
+          "variant_phase_diffs": [
+            204,
+            208,
+            171,
+            456,
+            492,
+            609
+          ]
+        },
+        {
+          "type": "ICE",
+          "variant_phase_diffs": [
+            166,
+            161,
+            181,
+            422,
+            502,
+            550
+          ]
+        },
+        {
+          "type": "FIGHTING",
+          "variant_phase_diffs": [
+            152,
+            136,
+            176,
+            364,
+            408,
+            472
+          ]
+        },
+        {
+          "type": "ROCK",
+          "variant_phase_diffs": [
+            158,
+            131,
+            197,
+            416,
+            564,
+            692
+          ]
+        },
+        {
+          "type": "GROUND",
+          "variant_phase_diffs": [
+            86,
+            72,
+            84,
+            225,
+            262,
+            291
+          ]
+        },
+        {
+          "type": "STEEL",
+          "variant_phase_diffs": [
+            183,
+            184,
+            273,
+            508,
+            688,
+            828
+          ]
+        },
+        {
+          "type": "NORMAL",
+          "variant_phase_diffs": [
+            148,
+            114,
+            136,
+            329,
+            389,
+            437
+          ]
+        },
+        {
+          "type": "DRAGON",
+          "variant_phase_diffs": [
+            135,
+            135,
+            168,
+            288,
+            313,
+            334
+          ]
+        },
+        {
+          "type": "FLYING",
+          "variant_phase_diffs": [
+            204,
+            208,
+            171,
+            456,
+            492,
+            609
+          ]
+        }
+      ],
+      "damage_styles": [
+        {
+          "damage_percent": 5,
+          "variant": 0,
+          "diff_1x": 890
+        },
+        {
+          "damage_percent": 5,
+          "variant": 1,
+          "diff_1x": 880
+        },
+        {
+          "damage_percent": 6,
+          "variant": 0,
+          "diff_1x": 1101
+        },
+        {
+          "damage_percent": 6,
+          "variant": 1,
+          "diff_1x": 989
+        },
+        {
+          "damage_percent": 14,
+          "variant": 0,
+          "diff_1x": 1101
+        },
+        {
+          "damage_percent": 14,
+          "variant": 1,
+          "diff_1x": 989
+        },
+        {
+          "damage_percent": 15,
+          "variant": 0,
+          "diff_1x": 1232
+        },
+        {
+          "damage_percent": 15,
+          "variant": 1,
+          "diff_1x": 1123
+        }
+      ],
+      "scar_frames": 8,
+      "failures": []
+    },
+    "motions": {
+      "species_checked": 84,
+      "idle_types": 3,
+      "attack_types": 3,
+      "hit_types": 2,
+      "walk_rates": [
+        2.5,
+        3.5,
+        4.5
+      ],
+      "scales": [
+        [
+          40,
+          32,
+          0.8
+        ],
+        [
+          48,
+          32,
+          0.666667
+        ],
+        [
+          48,
+          34,
+          0.708333
+        ],
+        [
+          56,
+          32,
+          0.571429
+        ],
+        [
+          56,
+          34,
+          0.607143
+        ]
+      ],
+      "failures": []
+    },
+    "failures": [],
+    "elapsed_seconds": 27.18,
+    "r1_contracts": {
+      "samples": {
+        "energy": "new attack/cast + legacy fallback + rewind",
+        "clock": {
+          "windows": [
+            1.0,
+            2.0
+          ],
+          "speeds": [
+            1,
+            2,
+            4
+          ],
+          "duration": 0.35,
+          "rate": 0.3
+        },
+        "projectile": "launch / inverse speed / death cancellation",
+        "solid_star_bounds": [
+          {
+            "sprite_px": 32,
+            "solid_px": 23,
+            "limit_px": 24
+          },
+          {
+            "sprite_px": 34,
+            "solid_px": 25,
+            "limit_px": 25
+          }
+        ],
+        "particle_budgets": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            8,
+            8
+          ],
+          [
+            192,
+            192
+          ]
+        ],
+        "opaque_body_fx_overlap_pixels": 0,
+        "peak_sampled_fx_particles": 12,
+        "gait": [
+          {
+            "species": 6,
+            "two_pose_diff_pixels": 257,
+            "floating": true,
+            "period": 0.24
+          },
+          {
+            "species": 65,
+            "two_pose_diff_pixels": 179,
+            "floating": true,
+            "period": 0.24
+          },
+          {
+            "species": 143,
+            "two_pose_diff_pixels": 339,
+            "floating": false,
+            "period": 0.8
+          }
+        ]
+      },
+      "failures": [],
+      "passed": true
+    }
+  }
+]

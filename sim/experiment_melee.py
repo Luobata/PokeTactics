@@ -90,6 +90,8 @@ _syn.SYNERGIES_ON = False  # 本报告基线建立于羁绊关（2026-09-14 起�
 # 水vs火锚 51%→100%），本实验口径为近远程时序，钉住三系统
 import combo as _cb, items as _it, status as _st
 _cb.COMBOS_ON = False; _it.ITEMS_ON = False; _st.STATUS_ON = False
+import profiles as _pf
+_pf.PROFILES_ON = False  # R1 单体档案（2026-09-15）：钉关保基线（胡地建档影响近远锚点）
 
 
 import combo as _cb, items as _it, status as _st
