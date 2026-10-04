@@ -47,13 +47,16 @@ def _assets():
     return r.Front(), r.Palettes(), r.Font16()
 
 
-def make_scene(species_id, scene, seed, action="attack"):
+def make_scene(species_id, scene, seed, action="attack", visual_overrides=None):
     if scene not in SCENES:
         raise ValueError(f"unknown scene {scene!r}; expected {tuple(SCENES)}")
     pieces = {p.species_id: p for ps in r.build_roster().values() for p in ps}
     if species_id not in pieces:
         raise ValueError(f"species {species_id} is not in the roster")
-    battle = r.Battle([pieces[species_id]], [pieces[s] for s in SCENES[scene]],
+    # A ground-type post is immune to Raichu's actual electric move. Use neutral
+    # normal-type posts for its visual fixture; immunity remains a combat rule.
+    targets = (143, 143, 143) if scene == "dummy" and species_id == 26 else SCENES[scene]
+    battle = r.Battle([pieces[species_id]], [pieces[s] for s in targets],
                       random.Random(seed), layout="back")
     positions = [(0, 3), (4, 0), (5, 0), (4, 1), (5, 1)]
     for unit, pos in zip(battle.units, positions):
@@ -76,7 +79,8 @@ def make_scene(species_id, scene, seed, action="attack"):
     # Initial deployment is fixture input; all subsequent events come from Battle.
     battle.events = [(0., "deploy", u.idx, u.pos) for u in battle.units]
     battle.run()
-    return r.BattleAnimation([], [], seed, *_assets(), battle=battle)
+    return r.BattleAnimation([], [], seed, *_assets(), battle=battle,
+                             visual_overrides=visual_overrides)
 
 
 def _clip(species_id, scene, seed, action):

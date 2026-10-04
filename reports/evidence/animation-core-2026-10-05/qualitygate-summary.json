@@ -1,0 +1,21 @@
+{
+  "gate": "pass",
+  "raw_gate": "pass",
+  "block_merge": false,
+  "execution_complete": true,
+  "mutation_status": "not_applicable",
+  "quality_confidence": "full",
+  "incomplete_engines": [],
+  "effective_rules_snapshot": {},
+  "actionable_block_findings": 0,
+  "deferred_block_findings": 0,
+  "effective_coverage": false,
+  "reason": "CLI returned pass with empty effective_rules_snapshot; not counted as source coverage. MCP rule context unavailable. No QualityGate repair applied.",
+  "fix_count": 0,
+  "repair_rounds": 0,
+  "shadow": 0,
+  "advisory": 0,
+  "waived": 0,
+  "semantic_review": "not_started",
+  "guard_stop_reasons": []
+}

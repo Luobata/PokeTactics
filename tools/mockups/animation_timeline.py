@@ -18,6 +18,8 @@ MAX_TRAVEL = .45
 MAX_ACTIVE_SIGNATURES = 3
 MAX_CUTINS = 2
 CUTIN_DURATION = .20
+CORE_CAST_SPECIES = (6, 9, 3, 26, 65, 94, 76, 143)
+CORE_CAST_TRAVEL = .20
 
 
 def grid(value):
@@ -108,8 +110,12 @@ class AnimationTimeline:
                                  if kind == 'attack' else
                                  {6: .50, 65: .45, 143: .60}.get(sid, .40))
                     distance = math.dist(positions[attacker], positions[target]) * 40
-                    ranged = unit.range > 1 or (kind == 'cast' and sid in (6, 65, 143))
+                    ranged = unit.range > 1 or (kind == 'cast' and sid in CORE_CAST_SPECIES)
                     travel = grid(min(MAX_TRAVEL, max(.15, distance / 520))) if ranged else .05
+                    if kind == 'cast' and sid in CORE_CAST_SPECIES:
+                        # At least four native 20 Hz frames expose the material
+                        # track even when two bodies occupy adjacent cells.
+                        travel = max(CORE_CAST_TRAVEL, travel)
                     delay = base_prep + travel
                     start = grid(max(.4, t, action_ready[attacker], state_ready[attacker],
                                      state_ready[target] - delay))

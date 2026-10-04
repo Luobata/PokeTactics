@@ -599,6 +599,31 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parsed = urllib.parse.urlparse(self.path)
+        if parsed.path in ("/api/animation/preview", "/api/animation/preset/validate"):
+            from animation_preview import MAX_REQUEST_BYTES, parse_request, normalize_preset, preview
+            if self.headers.get("Origin") not in (None, f"http://{self.headers.get('Host')}"):
+                return self._json({"ok": False, "error": "只允许本地页面预览"}, 403)
+            if self.headers.get("X-PokeTactics-Preview") != "1":
+                return self._json({"ok": False, "error": "缺少动画预览标记"}, 400)
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                if not 0 < length <= MAX_REQUEST_BYTES:
+                    return self._json({"ok": False, "error": "动画配置必须非空且不超过 8KB"}, 413)
+                self.connection.settimeout(15)
+                raw = self.rfile.read(length)
+                if len(raw) != length:
+                    raise ValueError("动画配置传输不完整")
+                value = parse_request(raw)
+                if parsed.path.endswith("/validate"):
+                    result = {"ok": True, "preset": normalize_preset(value)}
+                else:
+                    with demo_mod._LOCK:
+                        result = preview(value)
+                return self._json(result)
+            except (ValueError, TypeError) as exc:
+                return self._json({"ok": False, "error": str(exc)}, 400)
+            except (OSError, RuntimeError) as exc:
+                return self._json({"ok": False, "error": "预览生成失败：" + str(exc)}, 500)
         if parsed.path not in ("/api/demo/import", "/api/demo/import/inspect"):
             return self.send_error(404)
         if self.headers.get("Origin") not in (None, f"http://{self.headers.get('Host')}"):
@@ -634,6 +659,9 @@ class Handler(SimpleHTTPRequestHandler):
             self.wfile.write(body)
         elif parsed.path == "/animation-lab":
             self.path = "/tools/acceptance/animation_lab.html"
+            return super().do_GET()
+        elif parsed.path == "/animation-editor":
+            self.path = "/tools/acceptance/animation_editor.html"
             return super().do_GET()
         elif parsed.path == "/anim":
             seed = int(qs.get("seed", ["7"])[0])

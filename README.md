@@ -27,7 +27,8 @@
 - [x] 设计稿 v1：240×320 像素真稿（准备/战斗/大招特写）+ 高清版 + 动画节拍表，
       真实素材渲染（docs/02 §4、docs/design/mockups/）
 - [x] PC 通用存档运行时：双槽、损坏回退、备份预检、导入检查点；Demo 自动保存与重启续玩
-- [x] 动画演出轴：20fps、命中后扣血/死亡，喷火龙/胡地/卡比兽专属动作；资源清单与动作表可导出
+- [x] 动画演出轴：20fps、命中后扣血/死亡；核心 8 角色独立演出、16 段普攻/技能样片，资源与动作表可导出
+- [x] 动作编辑器：四项表现参数、原样/调整后同步对照、逐帧与阶段跳转、严格 JSON 预设导入导出
 - [ ] M4 双端 C 内核 + ESP-IDF 固件 + Web 同源预览（暂缓，玩法平衡优先）
 
 ## 目录
@@ -52,7 +53,8 @@ python3 tools/acceptance/server.py --port 8799
 
 # 系统验收（含真实服务重启、整局回归、动画样片和资源校验）
 python3 tools/acceptance/system_acceptance.py --demo --balance --presentation
-# 动画样片生成后打开 http://127.0.0.1:8799/animation-lab
+# 16 段动画样片：http://127.0.0.1:8799/animation-lab
+# 动作编辑器：http://127.0.0.1:8799/animation-editor
 # Demo 默认存档 .build/saves，可用 POKETACTICS_SAVE_DIR 指定另一目录。
 
 # 从 ../ESP32-PokemonGo 提取数据（data/ 已随仓库提供，可跳过）
@@ -64,8 +66,11 @@ python3 sim/prototype.py --games 300
 
 玩法仿真与存档运行时使用 Python 标准库。画面渲染还需要 Pillow 和兄弟项目
 `../ESP32-PokemonGo/assets/` 的现有像素资源；不会自动下载或改写兄弟项目。
-当前变更与验收边界见 [本轮交付报告](reports/system-optimization-batch-b-2026-10-04.md)、
-[运行时设计](docs/15-esp32-runtime-design.md) 和 [动画/美术合同](docs/16-animation-art-contract.md)。
+本批验收：128 项测试、8 项检查通过；1 项平衡检查跳过。PC 样片帧耗时 p95 为
+4.743ms，不代表 ESP32 性能。8 种视觉演出不改变现有 3 种玩法签名。
+当前变更与验收边界见 [本轮交付报告](reports/system-optimization-batch-c-2026-10-05.md)、
+[运行时设计](docs/15-esp32-runtime-design.md)、[动画/美术合同](docs/16-animation-art-contract.md)
+与 [G1–G3 编排参考](docs/17-gen123-animation-reference.md)。
 
 ## 来源与边界
 

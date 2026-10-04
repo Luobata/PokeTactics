@@ -61,6 +61,29 @@ class ArtManifestContracts(unittest.TestCase):
         with self.assertRaises(art.ManifestError):
             art.build_manifest(asset_root=self.assets)
 
+    def test_core_pixel_cels_are_exported_and_tampering_cannot_fake_provenance(self):
+        cels = self.manifest["animation_data"]["effect_cels"]
+        self.assertEqual(len(cels), 8)
+        for family, entry in cels.items():
+            self.assertEqual(len(entry["pixels"]), 3, family)
+            self.assertEqual(len(entry["palettes_rgb888"]["classic"]), 4)
+        self.assertEqual(self.manifest["actors"]["species.9"]["skill"]["animation_key"], "vfx.core.9")
+        from PIL import Image
+        import move_effects
+        from render_battle_gif import ParticleBudget
+        for sid in move_effects.SUPPORTED_SPECIES:
+            clip = self.manifest["animation_data"]["clips"][f"vfx.core.{sid}"]
+            for phase in clip["phases"]:
+                frame = Image.new("RGBA", (240, 200))
+                move_effects.draw_move_effect(frame, sid, (50, 80), (180, 100),
+                                             phase, .5, ParticleBudget())
+                self.assertIsNotNone(frame.getbbox(), (sid, phase))
+        bad = copy.deepcopy(self.manifest)
+        bad["animation_data"]["effect_cels"]["water"]["pixels"][0][0] = "444444444"
+        bad["revision"] = art.content_revision(bad)
+        with self.assertRaisesRegex(art.ManifestError, "effect cels"):
+            self.validate(bad)
+
     def test_modified_asset_and_forged_hash_are_rejected(self):
         bad = copy.deepcopy(self.manifest)
         bad["assets"]["front"]["sha256"] = "0" * 64

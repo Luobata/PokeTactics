@@ -27,6 +27,7 @@ SOURCE_FILES = (
     "tools/mockups/animation_timeline.py", "tools/mockups/render_battle_gif.py",
     "tools/mockups/render_mockups.py", "tools/mockups/skill_vfx.py",
     "tools/mockups/profile_vfx.py", "tools/mockups/pixel_vfx.py",
+    "tools/mockups/move_effects.py",
     "sim/data.py", "sim/roster.py", "sim/profiles.py", "sim/skills.py",
     "sim/combat.py", "data/pokemon.json", "data/moves.json", "data/typechart.json",
 )
@@ -140,7 +141,7 @@ def _modules():
             sys.path.insert(0, path)
     return {name: importlib.import_module(name) for name in (
         "decoders", "motion", "animation_timeline", "render_battle_gif",
-        "render_mockups", "skill_vfx", "profiles", "skills", "roster", "data")}
+        "render_mockups", "skill_vfx", "move_effects", "profiles", "skills", "roster", "data")}
 
 
 def _motion_clips(motion):
@@ -204,6 +205,18 @@ def build_manifest(*, asset_root=None, pc_metrics=None):
         clips[f"vfx.{sid}.{move_id}"] = {"kind": "procedural_python", "frames_exported": False,
                                         "source": "tools/mockups/skill_vfx.py", "design": design,
                                         "label": label, "species_id": sid, "move_id": move_id}
+    core_effects = modules["move_effects"].SUPPORTED_SPECIES
+    effect_module = modules["move_effects"]
+    effect_cels = {family: {"pixels": [list(rows) for rows in frames],
+                             "transparent_index": 0,
+                             "palettes_rgb888": {
+                                 "classic": [list(rgb) for rgb in effect_module.PALETTES[family][0]],
+                                 "vivid": [list(rgb) for rgb in effect_module.PALETTES[family][1]]}}
+                   for family, frames in effect_module.CELS.items()}
+    for sid in core_effects:
+        clips[f"vfx.core.{sid}"] = {"kind": "procedural_python", "frames_exported": False,
+                                    "source": "tools/mockups/move_effects.py", "species_id": sid,
+                                    "phases": ["charge", "flight", "impact", "aftermath"]}
     roster = {p.species_id: p for group in modules["roster"].build_roster().values() for p in group}
     actors = {}
     for sid, piece in sorted(roster.items()):
@@ -213,7 +226,8 @@ def build_manifest(*, asset_root=None, pc_metrics=None):
                 {name: f"fallback.{name}" for name in ("gait", "attack", "hit", "death")})
         has_move = piece.move_id is not None
         special = visual.AUTHORED_SKILLS.get(sid)
-        vfx_key = (f"vfx.{sid}.{piece.move_id}" if special and special[0] == piece.move_id
+        vfx_key = (f"vfx.core.{sid}" if sid in core_effects and has_move else
+                   f"vfx.{sid}.{piece.move_id}" if special and special[0] == piece.move_id
                    else f"vfx.{skill['arch']}" if skill and has_move else None)
         actors[f"species.{sid}"] = {
             "species_id": sid, "name": piece.name,
@@ -250,10 +264,12 @@ def build_manifest(*, asset_root=None, pc_metrics=None):
                        "motion": "PokeTactics authored pose tables and procedural effects around referenced source sprites"},
         "inputs": inputs, "assets": assets, "atlas": atlas,
         "animation_data": {"frame_fields": ["forward_px", "down_px", "scale_x_percent", "scale_y_percent", "clockwise_degrees", "dissolve_quarters"],
-                           "clips": clips, "rigs": rigs,
-                           "portable_status": "integer pose/rig data exported; procedural VFX and raster transform remain Python"},
+                           "clips": clips, "rigs": rigs, "effect_cels": effect_cels,
+                           "visual_defaults": dict(effect_module.DEFAULT_VISUAL),
+                           "portable_status": "integer pose/rig data and indexed effect cels exported; effect choreography and raster transform remain Python"},
         "actors": actors,
         "coverage": {"roster_species": len(actors), "atlas_species": len(atlas),
+                     "layered_core_visual_species": sorted(core_effects),
                      "authored_motion_species": sum(a["authored_motion"] for a in actors.values()),
                      "authored_skill_visual_species": sum(a["skill"]["authored_visual"] for a in actors.values()),
                      "gameplay_signature_species": sum(a["skill"]["tier"] == "signature" for a in actors.values()),
@@ -334,10 +350,22 @@ def validate_manifest(manifest, *, asset_root=None):
             raise ManifestError(f"invalid atlas record: {key}")
     clips = manifest["animation_data"]["clips"]
     modules = _modules()
+    expected_cels = modules["move_effects"].CELS
+    actual_cels = manifest["animation_data"].get("effect_cels", {})
+    if set(actual_cels) != set(expected_cels):
+        raise ManifestError("effect cel families do not match implementation")
+    for family, frames in expected_cels.items():
+        entry = actual_cels[family]
+        palettes = modules["move_effects"].PALETTES[family]
+        if (entry["pixels"] != [list(rows) for rows in frames] or entry["transparent_index"] != 0
+                or entry["palettes_rgb888"] != {"classic": [list(rgb) for rgb in palettes[0]],
+                                                "vivid": [list(rgb) for rgb in palettes[1]]}):
+            raise ManifestError("effect cels or palette do not match implementation")
     expected_keys = {f"motion.{sid}.{name}" for sid in modules["motion"].species_motion for name in STATES}
     expected_keys.update(f"fallback.{name}" for name in ("gait", "attack", "hit", "death"))
     expected_keys.update(f"vfx.{arch}" for arch in modules["skill_vfx"].ARCHS)
     expected_keys.update(f"vfx.{sid}.{value[0]}" for sid, value in modules["skill_vfx"].AUTHORED_SKILLS.items())
+    expected_keys.update(f"vfx.core.{sid}" for sid in modules["move_effects"].SUPPORTED_SPECIES)
     if set(clips) != expected_keys:
         raise ManifestError("animation catalog does not match implemented keys")
     source_paths = {ref["path"] for ref in manifest["inputs"] if ref["root"] == "project"}

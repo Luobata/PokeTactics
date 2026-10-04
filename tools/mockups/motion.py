@@ -287,10 +287,10 @@ class MotionSystem:
                 norm = math.hypot(dx,dy) or 1
                 hit_dir = dx/norm,dy/norm
         pose = Pose(state,index,frame,direction,hit,hit_dir)
-        return presentation_pose(sid, pose) if getattr(anim, '_is_presentation', False) else pose
+        return presentation_pose(sid, pose, anim.visual_config(sid)['motion_scale']) if getattr(anim, '_is_presentation', False) else pose
 
 
-def presentation_pose(sid, pose):
+def presentation_pose(sid, pose, motion_scale=1.):
     """Readable native-pixel anticipation/overshoot, then an authored recovery.
 
     This affects the visual pose only. Identity comes from distinct body mechanics:
@@ -299,7 +299,7 @@ def presentation_pose(sid, pose):
     """
     forward, down, sx, sy, angle, dissolve = pose.frame
     if pose.state in ('windup', 'strike', 'recover'):
-        factor = {6: 1.8, 65: 1.35, 143: 2.0}.get(sid, 1.25)
+        factor = {6: 1.8, 9: 1.4, 3: 1.2, 26: 1.8, 65: 1.35, 94: 1.7, 76: 1.6, 143: 2.0}.get(sid, 1.25)
         factor *= .65 if pose.state == 'recover' else 1.
         forward = round(forward * factor)
         if sid == 143:
@@ -317,10 +317,41 @@ def presentation_pose(sid, pose):
             down -= 1 if pose.state == 'windup' else 0
         elif sid == 6:
             angle = round(angle * 1.35)
+        elif sid == 9:  # brace the shell, then push back under cannon recoil
+            if pose.state == 'windup':
+                down, sx, sy = 2, 105, 93
+                forward -= 2
+            elif pose.state == 'strike':
+                forward, down, angle = -4, 2, -3
+        elif sid == 3:  # flower lifts above a low, firmly planted body
+            if pose.state == 'windup':
+                down, sx, sy = -2, 97, 104
+            elif pose.state == 'strike':
+                down, sx, sy = 2, 105, 94
+        elif sid == 26:  # crouched charge, quick whole-body extension
+            if pose.state == 'windup':
+                down, sx, sy = 2, 108, 90
+            elif pose.state == 'strike':
+                down, sx, sy, angle = -3, 94, 108, 4
+        elif sid == 94:  # low floating curl opens into a lateral lunge
+            if pose.state == 'windup':
+                down, sx, sy, angle = -2, 91, 108, -4
+            elif pose.state == 'strike':
+                forward, sx, sy = 5, 113, 91
+        elif sid == 76:  # squat rock mass drops into the ground wave
+            if pose.state == 'windup':
+                down, sx, sy = -3, 98, 103
+            elif pose.state == 'strike':
+                down, sx, sy = 5, 112, 87
     h = pose.hit
     hit = (round(h[0]*2), round(h[1]*1.5), h[2], h[3], h[4], h[5])
-    return Pose(pose.state, pose.index, (forward,down,sx,sy,angle,dissolve),
-                pose.direction, hit, pose.hit_direction)
+    frame = (round(forward*motion_scale), round(down*motion_scale),
+             round(100+(sx-100)*motion_scale), round(100+(sy-100)*motion_scale),
+             round(angle*motion_scale), dissolve)
+    hit = (round(hit[0]*motion_scale), round(hit[1]*motion_scale),
+           round(100+(hit[2]-100)*motion_scale), round(100+(hit[3]-100)*motion_scale),
+           round(hit[4]*motion_scale), hit[5])
+    return Pose(pose.state, pose.index, frame, pose.direction, hit, pose.hit_direction)
 
 
 def offsets(pose):

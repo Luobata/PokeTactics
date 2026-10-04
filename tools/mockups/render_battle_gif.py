@@ -51,6 +51,8 @@ from motion import MotionSystem, Pose, species_motion, windup as motion_windup, 
 from pixel_vfx import (trajectory_point, projectile, impact_star, impact_rim,
                        light, debris, hit_sprite, feather_flash, number_rise, exposure_age)
 from animation_timeline import AnimationTimeline, MAX_ACTIVE_SIGNATURES
+from move_effects import (SUPPORTED_SPECIES, normalize_overrides, effect_profile,
+                          draw_move_effect, draw_blink_fragments)
 from combat import Battle  # noqa: E402
 from data import pokedex  # noqa: E402
 from roster import build_roster  # noqa: E402
@@ -504,8 +506,10 @@ class BattleAnimation:
 
     def __init__(self, comp_a, comp_b, seed: int,
                  front: Front, pal: Palettes, font: Font16,
-                 weather_name=None, battle=None, hud_snapshot=None) -> None:
+                 weather_name=None, battle=None, hud_snapshot=None,
+                 visual_overrides=None) -> None:
         self.front, self.pal, self.font = front, pal, font
+        self.visual_overrides = normalize_overrides(visual_overrides)
         self.weather_name = weather_name  # 场景动画：透传给 Battle（S11）
         self.hud_snapshot = {"hp": 34, "gold": 13, "level": 5, "round": 13,
                              **(hud_snapshot or {})}
@@ -535,6 +539,9 @@ class BattleAnimation:
         self.msg = (0.0, "")
         self.cutins = []
         self.result = None
+
+    def visual_config(self, sid):
+        return effect_profile(sid, self.visual_overrides)
 
     def _presentation_view(self):
         if self._presentation_renderer is None:
@@ -790,6 +797,8 @@ class BattleAnimation:
             if self.units[ev[2]].u.range <= 1 and not ranged_cast:
                 continue
             sid = self.units[ev[2]].u.piece.species_id
+            if self._is_presentation and ev[1] == 'cast' and sid in SUPPORTED_SPECIES:
+                continue  # The material track owns all four phases of core skills.
             prep = motion_windup(sid) if sid in species_motion else FPS_DT
             if timing:
                 prep = timing.release-timing.start
@@ -802,7 +811,10 @@ class BattleAnimation:
             source = self.units[ev[2]]
             a, b, trajectory = self._projectile_path(ev)
             color = TYPE_COLORS[source.u.piece.types[0]]
-            if ranged_cast:
+            if self._is_presentation and sid in SUPPORTED_SPECIES:
+                draw_move_effect(img, sid, a, b, 'flight', age/duration, budget,
+                                 self.visual_config(sid), basic=True)
+            elif ranged_cast:
                 cast_projectile(img, sid, a, b, age, duration,
                                 source.u.piece.types[0], color, budget)
             else:
@@ -853,6 +865,21 @@ class BattleAnimation:
                 continue
             a = self._event_position(c[2], min(T,self._cast_release(c))) if self._is_presentation else self._event_position(c[2], c[0])
             b = self._event_position(c[3], c[0])
+            if self._is_presentation and sid in SUPPORTED_SPECIES:
+                release = self._cast_release(c)
+                if T < release:
+                    phase, progress = 'charge', (T-c[0])/max(.001,release-c[0])
+                elif T < c[1]:
+                    phase, progress = 'flight', (T-release)/max(.001,c[1]-release)
+                elif T < c[1]+.2:
+                    phase, progress = 'impact', (T-c[1])/.2
+                else:
+                    phase, progress = 'aftermath', (T-c[1]-.2)/.4
+                # Freeze the flight origin at release, including blink landing.
+                draw_move_effect(img, sid, (a[0]+20,a[1]+16), (b[0]+20,b[1]+16),
+                                 phase, min(1.,max(0.,progress)), budget,
+                                 self.visual_config(sid))
+                continue
             # Put the small fire emblem on the least crowded rim, keeping its
             # impact anchor on the target. No new full-screen or solid overlay.
             candidates = [(b[0] + 20 + dx, b[1] + 16 + dy)
@@ -1393,9 +1420,8 @@ class BattleAnimation:
                     cell = blink['origin'] if origin else blink['target']
                     x,y = au.cell_px(cell)
                     phase = T-(blink['departure'] if origin else blink['landing'])
-                    radius = (18-round(phase*30)) if origin else (10+round(phase*50))
-                    draw.ellipse((x+20-radius,y+15-radius,x+20+radius,y+15+radius),
-                                 outline=STATUS_PURPLE,width=2)
+                    draw_blink_fragments(img,(x+20,y+15),min(1.,phase/.20),
+                                         budget,self.visual_config(65),arriving=not origin)
                     if origin and phase < .10 and budget.take(1):
                         sprite = self._board_sprite(65, au.u.piece.tier)
                         self._draw_echo(img,sprite,x+(BCELL-sprite.width)//2,
@@ -1411,6 +1437,14 @@ class BattleAnimation:
             direction = math.atan2(ty - ay, tx - ax)
             cx = max(18, min(W - 19, round(tx) + BCELL // 2))
             cy = round(ty) + BCELL - 30
+            sid = attacker.u.piece.species_id
+            if self._is_presentation and sid in SUPPORTED_SPECIES:
+                age = T - ev[0] - self._attack_delay(ev)
+                draw_move_effect(img, sid, (ax+20,ay+14), (cx,cy),
+                                 'impact' if age<.2 else 'aftermath',
+                                 min(1.,max(0.,age/.2 if age<.2 else (age-.2)/.2)),
+                                 budget, self.visual_config(sid), basic=True)
+                continue
             color = TYPE_COLORS[attacker.u.piece.types[0]]
             strength = impact_tier(ev[4], target.u.max_hp)
             variant = fx_variant(T, ev[2])

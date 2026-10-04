@@ -19,9 +19,14 @@ class Signature:
 
 
 SIGNATURES = {
-    6: Signature("吐火弹", "大字爆炎", "arc", .5, True, "wings"),
+    6: Signature("吐火弹", "喷射火焰", "arc", .5, True, "wings"),
+    9: Signature("水弹", "水炮", "line", .4, False, "body"),
+    3: Signature("藤鞭", "日光束", "line", .4, False, "body"),
+    26: Signature("电火花", "十万伏特", "line", .4, False, "body"),
+    94: Signature("幽灵触击", "舌舔", "arc", .4, True, "arms"),
+    76: Signature("岩击", "地震", "line", .4, False, "heavy"),
     65: Signature("念力弹", "精神强念", "jitter", .4, True, "arms"),
-    143: Signature("重拳", "泰山压顶", "melee", .4, False, "heavy"),
+    143: Signature("重拳", "破坏光线", "melee", .4, False, "heavy"),
 }
 
 

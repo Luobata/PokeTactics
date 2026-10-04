@@ -1,0 +1,22 @@
+{
+  "base_commit": "68eeb71b51d99236472291907b132ee9205dc38e",
+  "method": "git archive into isolated temporary PokeTactics checkout with read-only access to existing sibling assets; old renderer/motion/VFX unchanged",
+  "sampling_adjustments": [
+    "Raichu neutral target species 143, matching current training fixture",
+    "Select first positive primary damage event for each action kind, matching current sample selection"
+  ],
+  "seed": 7,
+  "species": [
+    6,
+    9,
+    3,
+    26,
+    65,
+    94,
+    76,
+    143
+  ],
+  "clips": 16,
+  "comparison": "Each GIF plays its own original timing. This gallery is not event-synchronized. Editor default/edited comparison is synchronized within the current renderer.",
+  "manifest_sha256": "0bcca76fd904a296cdd44e7cd2a05fe16a91fc991e1ebffe0b2efab2947d1131"
+}

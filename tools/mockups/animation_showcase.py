@@ -17,7 +17,7 @@ from PIL import Image, ImageDraw
 from profile_range import make_scene
 from render_battle_gif import quantize_frames
 
-HEROES = (6,65,143)
+HEROES = (6,9,3,26,65,94,76,143)
 STEP = .05
 
 
@@ -25,16 +25,22 @@ def digest(frames):
     return hashlib.sha256(b''.join(f.tobytes() for f in frames)).hexdigest()
 
 
-def export(out, seed=7):
+def export(out, seed=7, species=None):
     out = Path(out)
     out.mkdir(parents=True,exist_ok=True)
     records=[]
     rows={'attack':[], 'cast':[]}
     all_ms=[]
-    for sid in HEROES:
+    heroes = HEROES if species is None else tuple(species)
+    if not heroes or len(set(heroes)) != len(heroes) or set(heroes)-set(HEROES):
+        raise ValueError("species must be a nonempty unique subset of core hero ids")
+    for sid in heroes:
         anim=make_scene(sid,'dummy',seed)
         for kind in ('attack','cast'):
-            action=next(a for a in anim.timeline.actions if a.attacker==0 and a.kind==kind and not a.secondary)
+            candidates=[a for a in anim.timeline.actions
+                        if a.attacker==0 and a.kind==kind and not a.secondary]
+            damage_index=6 if kind=='cast' else 4
+            action=next((a for a in candidates if anim.events[a.source_index][damage_index]>0),candidates[0])
             start=max(0., action.start-.25)
             end=action.impact+.95
             times=[round(start+i*STEP,6) for i in range(round((end-start)/STEP)+1)]
@@ -64,7 +70,7 @@ def export(out, seed=7):
                         ('IMPACT',action.impact)]
             elif sid==143 and kind=='cast':
                 phases=[('CROUCH',action.start+.15),('LIFT',action.release-.075),
-                        ('RELEASE',action.release+.05),('IMPACT',action.impact),
+                        ('BEAM',action.impact-.05),('IMPACT',action.impact),
                         ('RECOVER',action.impact+.40)]
             row=Image.new('RGB',(5*240,344),(238,230,206))
             for index,(label,t) in enumerate(phases):
@@ -76,6 +82,7 @@ def export(out, seed=7):
             after=anim.presentation_state(action.impact)[action.target]
             records.append({'species':sid,'kind':kind,'gif':f'{name}.gif',
                             'contact':f'{name}-contact.png','action':asdict(action),
+                            'landed_damage':anim.events[action.source_index][damage_index],
                             'clip_start':start,'clip_end':end,'frames':len(frames),'fps':20,
                             'frame_sha256':digest(frames),'target_before_impact':before,
                             'target_at_impact':after,'particle_peak':particle_peak,
@@ -106,5 +113,7 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out',type=Path,default=Path('.build/animation-b'))
     parser.add_argument('--seed',type=int,default=7)
+    parser.add_argument('--species',type=lambda text: tuple(int(s) for s in text.split(',')),
+                        default=None,help='comma separated subset, e.g. 6,9,3')
     args=parser.parse_args()
-    export(args.out,args.seed)
+    export(args.out,args.seed,args.species)

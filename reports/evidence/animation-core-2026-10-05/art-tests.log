@@ -1,0 +1,17 @@
+test_atlas_metadata_cannot_point_at_different_species_pixels (test_art_manifest.ArtManifestContracts.test_atlas_metadata_cannot_point_at_different_species_pixels) ... ok
+test_core_pixel_cels_are_exported_and_tampering_cannot_fake_provenance (test_art_manifest.ArtManifestContracts.test_core_pixel_cels_are_exported_and_tampering_cannot_fake_provenance) ... ok
+test_export_is_stable_across_fresh_processes_and_has_no_host_path (test_art_manifest.ArtManifestContracts.test_export_is_stable_across_fresh_processes_and_has_no_host_path) ... ok
+test_integer_export_matches_python_samples_at_clip_boundaries (test_art_manifest.ArtManifestContracts.test_integer_export_matches_python_samples_at_clip_boundaries) ... ok
+test_inventing_an_animation_catalog_entry_cannot_fake_coverage (test_art_manifest.ArtManifestContracts.test_inventing_an_animation_catalog_entry_cannot_fake_coverage) ... ok
+test_malformed_binary_layout_and_palette_index_are_rejected (test_art_manifest.ArtManifestContracts.test_malformed_binary_layout_and_palette_index_are_rejected) ... ok
+test_missing_animation_reference_is_not_hidden_by_revision (test_art_manifest.ArtManifestContracts.test_missing_animation_reference_is_not_hidden_by_revision) ... ok
+test_missing_asset_is_a_hard_failure (test_art_manifest.ArtManifestContracts.test_missing_asset_is_a_hard_failure) ... ok
+test_modified_asset_and_forged_hash_are_rejected (test_art_manifest.ArtManifestContracts.test_modified_asset_and_forged_hash_are_rejected) ... ok
+test_pc_evidence_is_separate_from_configuration_and_esp32_claims (test_art_manifest.ArtManifestContracts.test_pc_evidence_is_separate_from_configuration_and_esp32_claims) ... ok
+test_real_byte_ranges_hashes_and_declared_coverage_match_inputs (test_art_manifest.ArtManifestContracts.test_real_byte_ranges_hashes_and_declared_coverage_match_inputs) ... ok
+test_traversal_in_resource_reference_is_rejected (test_art_manifest.ArtManifestContracts.test_traversal_in_resource_reference_is_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.851s
+
+OK

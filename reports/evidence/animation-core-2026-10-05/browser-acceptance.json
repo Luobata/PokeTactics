@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-05",
+  "tool": "Codex in-app browser via cua_repl",
+  "scope": "Agent-operated desktop UI journeys, not human usability research or ESP32 verification",
+  "origin": "http://127.0.0.1:8807",
+  "checks": [
+    {
+      "name": "no_automatic_render",
+      "result": "pass",
+      "observed": "Editor starts with no frames and export/play disabled until explicit generation."
+    },
+    {
+      "name": "water_default_and_vivid",
+      "result": "pass",
+      "observed": "Species 9, seed 7, cast generated 38 frames; release 20.0, impact 20.25; target HP 1393 to 1109."
+    },
+    {
+      "name": "four_parameter_apply_and_steps",
+      "result": "pass",
+      "observed": "vivid, effect_scale 1.3, particle_density 0.5, motion_scale 0.5; dirty state disables export; generated result reflects all settings; release then two next-frame steps shows 20.10 seconds with visibly different water effects."
+    },
+    {
+      "name": "export_and_reimport",
+      "result": "pass",
+      "observed": "Downloaded animation-9-preset.json read and checked against applied values, then selected via native file chooser and imported successfully."
+    },
+    {
+      "name": "duplicate_json_fields",
+      "result": "pass",
+      "observed": "Top-level duplicate schema_version and nested duplicate setting each show JSON 字段不能重复; existing successful preview and applied values retained."
+    },
+    {
+      "name": "switch_role_via_preset",
+      "result": "pass",
+      "observed": "Valid species 26 preset (vivid, 1.1, 0.75, 1.25) applied to form, preserving previous water preview until generated. Result 37 frames; impact 9.9; target HP 2814 to 2748."
+    },
+    {
+      "name": "gallery_and_baseline",
+      "result": "pass",
+      "observed": "Eight tabs and 16 clips visible; current manifest revision displayed; expanded Charizard cast comparison loads committed baseline GIF (naturalWidth > 0); Water tab updates title, timing, HP and editor link."
+    },
+    {
+      "name": "console",
+      "result": "pass",
+      "observed": "No captured JS error entries for lab or editor."
+    }
+  ]
+}
