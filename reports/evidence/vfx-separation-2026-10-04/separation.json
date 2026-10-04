@@ -1,0 +1,381 @@
+{
+  "thresholds": {
+    "area_ratio_min": 1.5,
+    "charge_seconds_min": 0.3,
+    "attack_charge_seconds": 0,
+    "outer_rings": [
+      1,
+      2
+    ],
+    "shake_px": [
+      0,
+      2
+    ],
+    "digit_height_px": [
+      7,
+      8
+    ]
+  },
+  "pairs": [
+    {
+      "species": 6,
+      "skill": {
+        "name": "大字爆炎",
+        "arch": "splash",
+        "tier": "signature"
+      },
+      "events": [
+        [
+          1.6000000000000003,
+          "attack",
+          0,
+          3,
+          22,
+          15
+        ],
+        [
+          6.399999999999993,
+          "cast",
+          0,
+          3,
+          "flamethrower",
+          0.5,
+          38,
+          0
+        ]
+      ],
+      "frame_times": [
+        2.3000000000000007,
+        7.399999999999993
+      ],
+      "visible_fx_pixels": [
+        695,
+        2262
+      ],
+      "cast_attack_area_ratio": 3.255,
+      "charge_seconds": [
+        0,
+        0.5
+      ],
+      "feedback": [
+        {
+          "outer_rings": 1,
+          "shake_px": 0,
+          "digit_height_px": 7
+        },
+        {
+          "outer_rings": 2,
+          "shake_px": 2,
+          "digit_height_px": 8
+        }
+      ],
+      "frame_sha256": [
+        "39d00f9c8650751b5707dfba2e65a9281a4e0300cb27b2a95826940f12cd7ff4",
+        "f8c498a94a83827f7572702f5e86945d2abc1853537a97dea5e09cba845b8353"
+      ]
+    },
+    {
+      "species": 65,
+      "skill": {
+        "name": "精神强念",
+        "arch": "blink_strike",
+        "tier": "signature"
+      },
+      "events": [
+        [
+          1.6000000000000003,
+          "attack",
+          0,
+          3,
+          25,
+          15
+        ],
+        [
+          5.799999999999995,
+          "cast",
+          0,
+          3,
+          "psychic_m",
+          1.0,
+          88,
+          0
+        ]
+      ],
+      "frame_times": [
+        2.3000000000000007,
+        6.699999999999996
+      ],
+      "visible_fx_pixels": [
+        695,
+        2310
+      ],
+      "cast_attack_area_ratio": 3.324,
+      "charge_seconds": [
+        0,
+        0.4
+      ],
+      "feedback": [
+        {
+          "outer_rings": 1,
+          "shake_px": 0,
+          "digit_height_px": 7
+        },
+        {
+          "outer_rings": 4,
+          "shake_px": 2,
+          "digit_height_px": 8
+        }
+      ],
+      "frame_sha256": [
+        "f2defe639a710511510915051fc13714f677d8cd3d29dafbd192beea5f966ca6",
+        "b07f44d02bfa99c2a285e3d849d21167f3e8a7c55b975d666f4361cf214c5d2f"
+      ]
+    },
+    {
+      "species": 143,
+      "skill": {
+        "name": "泰山压顶",
+        "arch": "slam_heal",
+        "tier": "signature"
+      },
+      "events": [
+        [
+          1.6000000000000003,
+          "attack",
+          0,
+          3,
+          12,
+          15
+        ],
+        [
+          9.99999999999998,
+          "cast",
+          0,
+          3,
+          "hyper_beam",
+          0.5,
+          35,
+          0
+        ]
+      ],
+      "frame_times": [
+        1.9000000000000004,
+        10.89999999999998
+      ],
+      "visible_fx_pixels": [
+        597,
+        1913
+      ],
+      "cast_attack_area_ratio": 3.204,
+      "charge_seconds": [
+        0,
+        0.4
+      ],
+      "feedback": [
+        {
+          "outer_rings": 1,
+          "shake_px": 0,
+          "digit_height_px": 7
+        },
+        {
+          "outer_rings": 2,
+          "shake_px": 2,
+          "digit_height_px": 8
+        }
+      ],
+      "frame_sha256": [
+        "e70b9d427e8de78d3ec4f799187295795cb74316237f46690cac9388cb97a979",
+        "5adc5c76c0a16d61b0a3c7cc0db9240cdcc2152f6eb5bd4033add909895b2bed"
+      ]
+    },
+    {
+      "species": 76,
+      "skill": {
+        "name": "自愈",
+        "arch": "mend",
+        "tier": "generic"
+      },
+      "events": [
+        [
+          2.1000000000000005,
+          "attack",
+          0,
+          3,
+          12,
+          15
+        ],
+        [
+          9.299999999999983,
+          "cast",
+          0,
+          3,
+          "earthquake",
+          2.0,
+          96,
+          0
+        ]
+      ],
+      "frame_times": [
+        2.400000000000001,
+        10.199999999999983
+      ],
+      "visible_fx_pixels": [
+        612,
+        1457
+      ],
+      "cast_attack_area_ratio": 2.381,
+      "charge_seconds": [
+        0,
+        0.4
+      ],
+      "feedback": [
+        {
+          "outer_rings": 1,
+          "shake_px": 0,
+          "digit_height_px": 7
+        },
+        {
+          "outer_rings": 2,
+          "shake_px": 2,
+          "digit_height_px": 8
+        }
+      ],
+      "frame_sha256": [
+        "be6be886f878cc88d54378177eef45b74467ba2d5175f5f26073b4bb7b7c482b",
+        "ae256d533d1b08aaa038bfffa38c770ac1efedc5bf6080b16717dadb61d46159"
+      ]
+    }
+  ],
+  "motion": {
+    "idle_species": 84,
+    "attack_preparation_seconds": 0.1,
+    "reverse_offset_px": 1,
+    "death_extension_samples": [
+      {
+        "t": 1.4,
+        "pose_y": 129,
+        "alpha_sum": 160395
+      },
+      {
+        "t": 1.5,
+        "pose_y": 130,
+        "alpha_sum": 79883
+      }
+    ],
+    "step_dust_particles": 2
+  },
+  "templates": [
+    {
+      "tier": "generic",
+      "arch": "double_strike",
+      "unique_frames": 10,
+      "max_pixels": 1882
+    },
+    {
+      "tier": "generic",
+      "arch": "charge",
+      "unique_frames": 10,
+      "max_pixels": 2002
+    },
+    {
+      "tier": "generic",
+      "arch": "bulwark",
+      "unique_frames": 10,
+      "max_pixels": 2180
+    },
+    {
+      "tier": "generic",
+      "arch": "mend",
+      "unique_frames": 10,
+      "max_pixels": 1926
+    },
+    {
+      "tier": "generic",
+      "arch": "volley_shot",
+      "unique_frames": 10,
+      "max_pixels": 1918
+    },
+    {
+      "tier": "generic",
+      "arch": "heavy_blow",
+      "unique_frames": 10,
+      "max_pixels": 1975
+    },
+    {
+      "tier": "generic",
+      "arch": "splash",
+      "unique_frames": 10,
+      "max_pixels": 2586
+    },
+    {
+      "tier": "generic",
+      "arch": "blink_strike",
+      "unique_frames": 10,
+      "max_pixels": 2834
+    },
+    {
+      "tier": "generic",
+      "arch": "slam_heal",
+      "unique_frames": 10,
+      "max_pixels": 2393
+    },
+    {
+      "tier": "signature",
+      "arch": "double_strike",
+      "unique_frames": 10,
+      "max_pixels": 1882
+    },
+    {
+      "tier": "signature",
+      "arch": "charge",
+      "unique_frames": 10,
+      "max_pixels": 2002
+    },
+    {
+      "tier": "signature",
+      "arch": "bulwark",
+      "unique_frames": 10,
+      "max_pixels": 2180
+    },
+    {
+      "tier": "signature",
+      "arch": "mend",
+      "unique_frames": 10,
+      "max_pixels": 1926
+    },
+    {
+      "tier": "signature",
+      "arch": "volley_shot",
+      "unique_frames": 10,
+      "max_pixels": 1918
+    },
+    {
+      "tier": "signature",
+      "arch": "heavy_blow",
+      "unique_frames": 10,
+      "max_pixels": 1975
+    },
+    {
+      "tier": "signature",
+      "arch": "splash",
+      "unique_frames": 10,
+      "max_pixels": 2586
+    },
+    {
+      "tier": "signature",
+      "arch": "blink_strike",
+      "unique_frames": 10,
+      "max_pixels": 2834
+    },
+    {
+      "tier": "signature",
+      "arch": "slam_heal",
+      "unique_frames": 10,
+      "max_pixels": 2393
+    }
+  ],
+  "peak_render_particles": 39,
+  "hard_cap_stress": 192,
+  "failures": [],
+  "passed": true
+}

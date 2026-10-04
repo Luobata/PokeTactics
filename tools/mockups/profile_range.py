@@ -27,13 +27,13 @@ DEFAULT_OUT = r.ROOT / "reports/evidence/range-2026-10-04"
 # Static artifact viewer. Host routes can call render_species_scene directly;
 # the standalone CLI supplies the same relative PNG paths and manifest.
 PROFILE_RANGE_HTML = """<!doctype html><html lang="zh"><meta charset="utf-8">
-<title>R1 单体靶场</title><style>
+<title>单体靶场 · 平A / 技能</title><style>
 body{background:#eee6ce;color:#292b24;font:16px monospace;margin:24px}
 button,select{font:inherit;background:#faf1d4;color:#292b24;padding:8px;border:2px solid #756e53}
 img{image-rendering:pixelated;width:480px;height:640px;border:4px solid #756e53}
 main{display:flex;gap:24px;flex-wrap:wrap}p{max-width:560px}</style>
-<h1>R1 单体靶场</h1><p>真实 Battle 事件 · 四色精灵 · 10 FPS · 训练用生命值加厚。
-选择序列或逐帧查看，木桩受击段启用轻触反击。</p>
+<h1>单体靶场 · 平A / 技能</h1><p>真实 Battle 事件 · 四色精灵 · 10 FPS · 训练用生命值加厚。
+平A：细弹道、单环、小跳字。技能：脚底蓄力、双外环、重反馈。木桩受击段启用轻触反击。</p>
 <select id="clip"></select><button id="play">暂停</button>
 <button id="prev">上一帧</button><button id="next">下一帧</button>
 <input id="seek" type="range" min="0" value="0"><span id="label"></span>
@@ -112,6 +112,8 @@ def _clip(species_id, scene, seed, action):
     frames = [anim.playback_frame(t, show_cutins=False) for t in times]
     return frames, {"event": event, "sim_start": start, "sim_end": end,
                     "real_events": len(anim.events), "seed": seed,
+                    "skill": r.skill_profile(species_id),
+                    "cast_windup_seconds": r.cast_windup(species_id),
                     "frame_times": [anim.playback_clock.simulation_time(t) for t in times]}
 
 

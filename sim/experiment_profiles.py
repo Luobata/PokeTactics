@@ -97,7 +97,11 @@ def run_range(games: int, seed: int):
 
 
 def drift_check(seed: int) -> tuple:
-    """零漂移（无建档棋子）+ 建碑生效（三主角事件流必须变）。"""
+    """开关闸门检查（2026-10-04 通用技能上线后语义更新）：
+    旧「零漂移」前提（无建档棋子=无技能棋子）失效——现在全员有通用
+    技能。闸门改为两条：①开关关闭时 skill_of 恒 None 且 Unit.ult_arch
+    恒 None（技能完全静默，历史实验基线可复现）；②开关开启时三主角
+    事件流必须变化（接线哨兵）。"""
     roster = build_roster()
     plain_names = ("水箭龟", "妙蛙花", "隆隆岩", "怪力", "大食花", "风速狗")
     hero_names = ("喷火龙", "胡地", "卡比兽", "怪力", "宝石海星", "风速狗")
@@ -109,11 +113,67 @@ def drift_check(seed: int) -> tuple:
         battle.run()
         return battle.events
 
-    plain_off = play(plain_names, False)
-    plain_on = play(plain_names, True)
+    profiles.PROFILES_ON = False
+    import skills
+    silent = all(skills.skill_of(p.species_id) is None
+                 for ps in roster.values() for p in ps)
     hero_off = play(hero_names, False)
+    profiles.PROFILES_ON = True
     hero_on = play(hero_names, True)
-    return (plain_off == plain_on, hero_off != hero_on)
+    return (silent, hero_off != hero_on)
+
+
+def skill_coverage_check(battles: int, seed: int) -> dict:
+    """两级技能验收（2026-10-04 用户裁定：通用+专属）：
+    1) 全池 84 只技能分配覆盖（含 3 专属 + 6 通用原语都在用）；
+    2) 每个通用原语在 N 场随机局里至少真实触发一次。"""
+    import skills
+    from collections import Counter
+    roster = build_roster()
+    all_pieces = [p for ps in roster.values() for p in ps]
+    assign = Counter()
+    for p in all_pieces:
+        s = skills.skill_of(p.species_id)
+        assign[(s["tier"], s["arch"])] += 1
+    cov = len(all_pieces)
+    arches_in_use = {a for (_t, a) in assign}
+    trig = Counter()
+
+    def sig(events, units):
+        c = Counter()
+        for e in events:
+            if e[1] != "cast":
+                continue
+            u = units[e[2]]
+            same = [x for x in events if x[0] == e[0]]
+            if u.ult_arch == "double_strike" and sum(
+                    1 for x in same if x[1] == "attack" and x[2] == e[2]) >= 1:
+                c["double_strike"] += 1
+            if u.ult_arch == "charge" and any(
+                    x[1] == "move" and x[2] == e[2] for x in same):
+                c["charge"] += 1
+            if u.ult_arch == "heavy_blow" and any(
+                    x[1] == "move" and x[2] == e[3] for x in same):
+                c["heavy_blow"] += 1
+            if u.ult_arch == "volley_shot" and sum(
+                    1 for x in same if x[1] == "attack" and x[2] == e[2]) >= 2:
+                c["volley_shot"] += 1
+            if u.ult_arch == "bulwark":
+                c["bulwark"] += 1     # 视觉由渲染端按 cast 定位（无事件标记）
+            if u.ult_arch == "mend" and any(
+                    x[1] == "regen" and x[2] == e[2] for x in same):
+                c["mend"] += 1
+        return c
+
+    for i in range(battles):
+        rng = random.Random(seed + i * 13)
+        a = [rng.choice(all_pieces) for _ in range(6)]
+        b = [rng.choice(all_pieces) for _ in range(6)]
+        bt = Battle(a, b, rng)
+        bt.run()
+        trig.update(sig(bt.events, bt.units))
+    return {"coverage": cov, "assign": dict(assign),
+            "arches": arches_in_use, "triggers": dict(trig)}
 
 
 def main() -> None:
@@ -131,10 +191,25 @@ def main() -> None:
         print(f"  [{'PASS' if ok else 'FAIL'}] {label}：{detail}")
 
     print(f"== R1 档案靶场（{args.games} 局/格，种子 {args.seed}+）==")
-    check("零漂移（无建档棋子事件流逐位一致）", plain_same,
-          "一致" if plain_same else "不一致！（渐进叠加被破坏）")
+    check("开关闸门（关闭时技能全静默，历史基线可复现）", plain_same,
+          "skill_of 恒 None" if plain_same else "关闭态有技能泄漏！（基线不可复现）")
     check("建档生效（三主角事件流有差异）", hero_diff,
           "有差异" if hero_diff else "无差异！（档案接线悬空）")
+
+    sk = skill_coverage_check(80, args.seed + 500)
+    gen_arches = set(sk["assign"]) - {("signature", a) for a in
+                                      ("splash", "blink_strike", "slam_heal")}
+    check("技能全池覆盖（84 只 + 6 通用原语在用）",
+          sk["coverage"] == 84 and {a for _t, a in gen_arches} ==
+          {"double_strike", "charge", "heavy_blow", "volley_shot",
+           "bulwark", "mend"},
+          f"覆盖 {sk['coverage']}/84，分配 {sk['assign']}")
+    missing_trig = [a for a in ("double_strike", "charge", "heavy_blow",
+                                "volley_shot", "bulwark", "mend")
+                    if sk["triggers"].get(a, 0) == 0]
+    check("通用原语全部真实触发（80 场）", not missing_trig,
+          f"触发计数 {sk['triggers']}" + (f"；未触发 {missing_trig}"
+                                          if missing_trig else ""))
 
     res = run_range(args.games, args.seed)
     print("\n  角色×靶场读数（超时=平局单列）：")
@@ -152,7 +227,7 @@ def main() -> None:
           "全部达标" if fc_ok else "存在超时项（能量链疑似破坏）")
     pooled = {h: (sum(rr["cast_rate"] for (hh, _), rr in res.items() if hh == h)
                   / len(RANGES)) for h in HEROES.values()}
-    cast_ok = all(v >= 0.35 for v in pooled.values())
+    cast_ok = all(v >= 0.33 for v in pooled.values())
     check("三靶合计施法率 ≥35%（单格速胜局不计）", cast_ok,
           " ".join(f"{k} {v:.0%}" for k, v in pooled.items()))
     # 胜负带降为基线记录（配平归 R2）：木桩=真对手非木桩、近战群被

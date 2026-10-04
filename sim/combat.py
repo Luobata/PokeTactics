@@ -27,6 +27,7 @@ import status as status_mod   # S12 状态/Buff：默认 STATUS_ON=False（docs/
 import weather as weather_mod  # S11 天气：默认无天气（docs/05）
 import items as items_mod     # S5 装备：comp 元素可带 (Piece, item) 二元组（docs/07）
 import profiles as profiles_mod  # R1 单体档案（docs/13 §5）：有理由的覆盖项
+import skills as skills_mod      # 通用/专属两级技能（2026-10-04 用户裁定）
 
 TICK = 0.1  # 解算步长（秒）
 # ---- C-sym 棋盘（docs/10 §1.3/§1.5，2026-09-14 sim 联动落地）----
@@ -62,6 +63,8 @@ class Unit:
         self.range = piece.distance
         self.move_mult = 1.0
         self.ult_arch = None
+        self.temp_dr = 0.0          # 通用技能「铁壁」：临时受伤减免
+        self.temp_dr_until = -1.0
         # ---- UnitProfile（docs/13 R1）：有理由的覆盖项，其余回落推导 ----
         prof = profiles_mod.get(piece.species_id)
         if prof is not None:
@@ -70,6 +73,10 @@ class Unit:
             self.range = prof["range"]
             self.move_mult = prof["move_mult"]
             self.ult_arch = prof["ult"]["arch"]
+        # ---- 两级技能（skills.skill_of）：专属主角团沿用档案原语，
+        #      其余单位按定位分配通用原语；开关关闭时 None（旧行为）----
+        if self.ult_arch is None:
+            self.ult_arch = skills_mod.arch_of(piece.species_id)
         self.hp = self.max_hp
         self.attack_interval = interval
         self.energy = 0
@@ -328,6 +335,25 @@ class Battle:
                         self.events.append((t, "move", u.idx, u.pos))
                     target = weakest
                     u.target_idx = weakest.idx
+            # 通用原语 charge 冲锋·切后排：近战攒能时多已贴脸，向当前
+            # 目标突进永不触发——重定义为冲向最远敌人（BFS ≤2 步换目标，
+            # 刺客语义；必须在伤害计算前完成换靶，与 blink 同位）
+            if u.ult_arch == "charge":
+                farthest = max((e for e in self.units
+                                if e.alive and e.team != u.team),
+                               key=lambda e: (_manhattan(u.pos, e.pos), -e.idx),
+                               default=None)
+                if farthest is not None and farthest is not target:
+                    for _ in range(2):
+                        if _manhattan(u.pos, farthest.pos) <= 1:
+                            break
+                        old = u.pos
+                        self._step_toward(u, farthest.pos)
+                        if u.pos == old:
+                            break
+                        self.events.append((t, "move", u.idx, u.pos))
+                    target = farthest
+                    u.target_idx = farthest.idx
             special = self.dex.move_is_special(move)
             stab = STAB_BONUS if move["type"] in u.piece.types else 1.0
             eff = eff_mult(self.dex.multiplier(move["type"], target.piece.types))
@@ -369,6 +395,45 @@ class Battle:
                 if healed:
                     u.hp += healed
                     self.events.append((t, "regen", u.idx, healed))
+            # ---- 通用技能原语（skills.GENERIC_ARCHS，2026-10-04；
+            #      charge 冲锋在伤害计算前的 blink 同位块执行）----
+            # heavy_blow 重击：命中后击退 1 格（有空格才退；贴边不退）
+            if dmg > 0 and u.ult_arch == "heavy_blow" and target.alive:
+                away = self._knock_cell(target, u.pos)
+                if away is not None:
+                    target.pos = away
+                    self.events.append((t, "move", target.idx, target.pos))
+            # double_strike 连击：同拍第二击 45%
+            if dmg > 0 and u.ult_arch == "double_strike" and target.alive:
+                d2 = self._final_damage(u, target, move, int(dmg * 0.45))
+                self.events.append((t, "attack", u.idx, target.idx, d2,
+                                    u.energy))
+                target.hp -= d2
+                u.damage_dealt += d2
+                self._death_check(target, t)
+            # volley_shot 散射：距目标最近的另 2 名敌人各 40%
+            if dmg > 0 and u.ult_arch == "volley_shot":
+                others = sorted((v for v in self.units
+                                 if v.alive and v.team != u.team
+                                 and v is not target),
+                                key=lambda v: (_manhattan(v.pos, target.pos), v.idx))
+                for v in others[:2]:
+                    sdmg = self._final_damage(u, v, move, int(dmg * 0.40))
+                    self.events.append((t, "attack", u.idx, v.idx, sdmg,
+                                        u.energy))
+                    v.hp -= sdmg
+                    u.damage_dealt += sdmg
+                    self._death_check(v, t)
+            # bulwark 铁壁：自身 3s 减伤 35%
+            if u.ult_arch == "bulwark" and u.alive:
+                u.temp_dr = 0.35
+                u.temp_dr_until = t + 3.0
+            # mend 自愈：施法自愈 20%
+            if u.ult_arch == "mend" and u.alive:
+                healed = min(u.max_hp, u.hp + int(u.max_hp * 0.20)) - u.hp
+                if healed:
+                    u.hp += healed
+                    self.events.append((t, "regen", u.idx, healed))
         else:  # 普攻：默认无属性；实验开关下带攻方主属性（本系+克制）
             special = u.sp_attack > u.attack
             if basic_takes_eff():
@@ -391,7 +456,7 @@ class Battle:
 
     def _death_check(self, target: Unit, t: float) -> None:
         """致命伤结算（披带保留 1 HP / 死亡事件）。_strike 主命中与
-        档案原语侧命中共用同一条裁决链（docs/13 §5 边界规则入档）。"""
+        原语侧命中共用同一条裁决链（docs/13 §5 边界规则入档）。"""
         if target.hp <= 0 and target.item_sash and not target.item_sash_used:
             target.item_sash_used = True
             target.hp = 1
@@ -410,6 +475,21 @@ class Battle:
                 return nxt
         return None
 
+    def _knock_cell(self, target: Unit, from_pos: tuple):
+        """重击击退：目标沿远离 from_pos 方向退 1 格的空格（无则 None）。
+        方向取主轴（行差优先），贴边/被挡不退——不产生连锁位移。"""
+        dc = target.pos[0] - from_pos[0]
+        dr = target.pos[1] - from_pos[1]
+        step = (0, (1 if dr > 0 else -1)) if abs(dr) >= abs(dc) \
+            else ((1 if dc > 0 else -1), 0)
+        if step == (0, 0):
+            return None
+        nxt = (target.pos[0] + step[0], target.pos[1] + step[1])
+        occupied = {o.pos for o in self.units if o.alive and o is not target}
+        if (0 <= nxt[0] < COLS and 0 <= nxt[1] < ROWS and nxt not in occupied):
+            return nxt
+        return None
+
     def _final_damage(self, u: Unit, target: Unit, move, dmg: int) -> int:
         """结算尾段：近战减免（均衡实验）→ 羁绊乘区 → 大招承伤上限 → 减伤。
 
@@ -418,6 +498,10 @@ class Battle:
         """
         dmg = int(dmg * weather_mod.damage_mult(
             move, self.weather_name))  # S11 天气乘区（实例级，默认 1.0）
+        # 通用技能「铁壁」：临时受伤减免（bulwark 施法后 3s；
+        # 到期判定用本 tick 的 self.duration，_strike 同拍一致）
+        if target.temp_dr > 0 and target.temp_dr_until >= self.duration:
+            dmg = int(dmg * (1.0 - target.temp_dr))
         if target.range == 1:  # 近战受伤减免（均衡实验）
             dmg = int(dmg * (1.0 - melee_resist()))
         # ---- S3 羁绊结算钩子 ----

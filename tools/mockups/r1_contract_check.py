@@ -50,6 +50,8 @@ def checks():
     probe._ensure(1.)
     layer = Image.new("RGBA", (r.W, r.H))
     probe._draw_projectiles(layer, 1., r.ParticleBudget())
+    require(layer.getbbox() is None, "one-frame preparation before projectile")
+    probe._draw_projectiles(layer, 1. + r.FPS_DT, r.ParticleBudget())
     require(layer.getbbox() is not None, "projectile launch")
     first_delay = probe._attack_delay(probe.events[2])
     probe.units[0].u.range *= 2
@@ -91,8 +93,8 @@ def checks():
                         star._draw_board_fx(Image.new("RGBA", (r.W, r.H)),
                                             onset + .1 + phase * .1, r.ParticleBudget(), {})
             diameter = max(polygons)
-            limit = math.floor(r.board_sprite_size(tier) * .75)
-            require(diameter <= limit, f"solid star 75% tier {tier}")
+            limit = math.floor(r.board_sprite_size(tier) * .60)
+            require(diameter <= limit, f"solid star 60% tier {tier}")
             solid_sizes.append({"sprite_px": r.board_sprite_size(tier), "solid_px": diameter, "limit_px": limit})
     finally:
         ImageDraw.ImageDraw.polygon = original_polygon

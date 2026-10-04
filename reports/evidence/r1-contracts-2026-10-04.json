@@ -18,13 +18,13 @@
     "solid_star_bounds": [
       {
         "sprite_px": 32,
-        "solid_px": 23,
-        "limit_px": 24
+        "solid_px": 19,
+        "limit_px": 19
       },
       {
         "sprite_px": 34,
-        "solid_px": 25,
-        "limit_px": 25
+        "solid_px": 19,
+        "limit_px": 20
       }
     ],
     "particle_budgets": [
@@ -46,7 +46,7 @@
       ]
     ],
     "opaque_body_fx_overlap_pixels": 0,
-    "peak_sampled_fx_particles": 12,
+    "peak_sampled_fx_particles": 11,
     "gait": [
       {
         "species": 6,

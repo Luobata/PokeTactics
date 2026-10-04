@@ -19,7 +19,7 @@ class Signature:
 
 SIGNATURES = {
     6: Signature("吐火弹", "大字爆炎", "arc", .5, True, "wings"),
-    65: Signature("念力弹", "精神强念", "jitter", .2, True, "arms"),
+    65: Signature("念力弹", "精神强念", "jitter", .4, True, "arms"),
     143: Signature("重拳", "泰山压顶", "melee", .4, False, "heavy"),
 }
 
@@ -108,12 +108,12 @@ class PlaybackClock:
         return (simulation + extra) / speed
 
 
-def signature_cast(img, sid, source, target, age, windup, budget, emblem=None):
+def signature_cast(img, sid, source, target, age, windup, budget, emblem=None, color=None):
     """共享蓄力/环/放射模板；实体只用 2px 笔画，外圈提供体积。"""
     draw = ImageDraw.Draw(img)
     sx, sy = source
     tx, ty = target
-    color = TYPE_COLORS[{6: "FIRE", 65: "PSYCHIC", 143: "NORMAL"}[sid]]
+    color = color or TYPE_COLORS[{6: "FIRE", 65: "PSYCHIC", 143: "NORMAL"}[sid]]
     phase = math.floor((age + 1e-9) / .1)
     if age < windup:
         if sid == 6:
