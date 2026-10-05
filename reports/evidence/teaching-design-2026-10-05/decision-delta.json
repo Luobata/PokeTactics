@@ -1,0 +1,23 @@
+{
+  "context": "Extend teaching-machine design before isolated prototypes; formal tactics_v5 and old save banks remain the authority for live games.",
+  "conclusion": "Freeze eight independently derived learning qualifications and implement only guardian_riposte and tempo_break in an unregistered Battle subclass.",
+  "rationale": "Defensive positional counterplay and deterministic energy denial reuse finite primitives while allowing true effect-off comparisons without changing production rules.",
+  "alternatives": [
+    "Immediate production catalog expansion",
+    "Start with breach_lunge or persistent energy-gain suppression"
+  ],
+  "consequences": [
+    "84 forms have a primary qualification; evolution incompatibilities require future preview/refund transactions",
+    "Prototype outcomes do not establish whole-pool balance or acquisition fairness",
+    "Retain unsuccessful tempo outcomes and do not register either candidate from this screen"
+  ],
+  "scope": [
+    "docs/design/teaching-skills-v1.json",
+    "tools/acceptance/teaching_skill_prototype.py"
+  ],
+  "confidence": 0.86,
+  "evidence_refs": [
+    "reports/teaching-prototype-2026-10-05.md",
+    "reports/evidence/teaching-design-2026-10-05/league.json.gz"
+  ]
+}

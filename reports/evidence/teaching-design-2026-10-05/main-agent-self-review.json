@@ -1,0 +1,235 @@
+{
+  "schema": "teaching-main-agent-self-review-v1",
+  "reviewer_role": "main_agent",
+  "independent": false,
+  "manifest_input_fingerprint_reviewed": "afb65a7474de1d55be9374122cc8eef9d54f8c39d59197475861459c7d704876",
+  "raw_event_replay_checks": [
+    {
+      "machine": "guardian_riposte",
+      "opponent": "dive",
+      "arm": "off",
+      "seed": 2026100590000,
+      "event_sha256": "9f35d0ff16c524199762efbd098d6f90516fe8a773397b35a8929dc30960ef6f",
+      "matches": true
+    },
+    {
+      "machine": "guardian_riposte",
+      "opponent": "dive",
+      "arm": "on",
+      "seed": 2026100590000,
+      "event_sha256": "1a350d04448dadf04700c28077337ccbb68fff475cff220707c4454fab602855",
+      "matches": true
+    },
+    {
+      "machine": "guardian_riposte",
+      "opponent": "dive",
+      "arm": "alternative",
+      "seed": 2026100590000,
+      "event_sha256": "cbec7dda8ba55de1b4618c71b11dd12ab0fac5ce893ed08fea04be354c62d0a1",
+      "matches": true
+    },
+    {
+      "machine": "guardian_riposte",
+      "opponent": "dive_horizontal_mirror",
+      "arm": "off",
+      "seed": 2026100590000,
+      "event_sha256": "00d3ad54cff097186bc89bba63ac5a400b76229b74a7c0c3b0a84e9d19f22cb3",
+      "matches": true
+    },
+    {
+      "machine": "guardian_riposte",
+      "opponent": "dive_horizontal_mirror",
+      "arm": "on",
+      "seed": 2026100590000,
+      "event_sha256": "995330c5298304b11f1b6b7899a447297c2bda7339184e4a6ba27b469c5c9647",
+      "matches": true
+    },
+    {
+      "machine": "guardian_riposte",
+      "opponent": "dive_horizontal_mirror",
+      "arm": "alternative",
+      "seed": 2026100590000,
+      "event_sha256": "00d3ad54cff097186bc89bba63ac5a400b76229b74a7c0c3b0a84e9d19f22cb3",
+      "matches": true
+    },
+    {
+      "machine": "guardian_riposte",
+      "opponent": "garden",
+      "arm": "off",
+      "seed": 2026100590000,
+      "event_sha256": "9c3f69fbdb7a39102ab0c5c9e103f2a95d53c24b93e487b122a0727a5d9a162b",
+      "matches": true
+    },
+    {
+      "machine": "guardian_riposte",
+      "opponent": "garden",
+      "arm": "on",
+      "seed": 2026100590000,
+      "event_sha256": "8c78557b6be0b1879476196d50b3efcaf1904c1bdcf4864383f3c8bd8e3cb114",
+      "matches": true
+    },
+    {
+      "machine": "guardian_riposte",
+      "opponent": "garden",
+      "arm": "alternative",
+      "seed": 2026100590000,
+      "event_sha256": "1209fab2f23bf872cd49281729e6be1b8543e76b0ac0b84687873717c6a50945",
+      "matches": true
+    },
+    {
+      "machine": "guardian_riposte",
+      "opponent": "battery",
+      "arm": "off",
+      "seed": 2026100590000,
+      "event_sha256": "06380f93b32841bde9090be89dc134a1aec8bde6891a6b48418e7c9c2d69b9ea",
+      "matches": true
+    },
+    {
+      "machine": "guardian_riposte",
+      "opponent": "battery",
+      "arm": "on",
+      "seed": 2026100590000,
+      "event_sha256": "ffc4932d816d657df79efd23a33fd160a3ca3f5cb3b453ce187e5a986bdf819a",
+      "matches": true
+    },
+    {
+      "machine": "guardian_riposte",
+      "opponent": "battery",
+      "arm": "alternative",
+      "seed": 2026100590000,
+      "event_sha256": "06380f93b32841bde9090be89dc134a1aec8bde6891a6b48418e7c9c2d69b9ea",
+      "matches": true
+    },
+    {
+      "machine": "tempo_break",
+      "opponent": "dive",
+      "arm": "off",
+      "seed": 2026100590000,
+      "event_sha256": "7c51002ae0517de5a57af7b656b56cdee05153e47c2ba66930890696547e0b44",
+      "matches": true
+    },
+    {
+      "machine": "tempo_break",
+      "opponent": "dive",
+      "arm": "on",
+      "seed": 2026100590000,
+      "event_sha256": "7c51002ae0517de5a57af7b656b56cdee05153e47c2ba66930890696547e0b44",
+      "matches": true
+    },
+    {
+      "machine": "tempo_break",
+      "opponent": "dive",
+      "arm": "alternative",
+      "seed": 2026100590000,
+      "event_sha256": "5417006eae4fe253cb4ee0f5b3c56ab6c0f2a04f4f07a68400f72a59c30e2c33",
+      "matches": true
+    },
+    {
+      "machine": "tempo_break",
+      "opponent": "dive_horizontal_mirror",
+      "arm": "off",
+      "seed": 2026100590000,
+      "event_sha256": "adf569c7bc4d40ae87df4707efa537da7f215563a4d8d001602a325e8b57ed39",
+      "matches": true
+    },
+    {
+      "machine": "tempo_break",
+      "opponent": "dive_horizontal_mirror",
+      "arm": "on",
+      "seed": 2026100590000,
+      "event_sha256": "22e5b4b32c8ee07ef8125616298992d4c4b4a4db79826ae3482dcd79b5a609a6",
+      "matches": true
+    },
+    {
+      "machine": "tempo_break",
+      "opponent": "dive_horizontal_mirror",
+      "arm": "alternative",
+      "seed": 2026100590000,
+      "event_sha256": "bebc690e06d01c8ae0a82493f31e4a7024521d1ea244934a1f5cc4915a5c8d60",
+      "matches": true
+    },
+    {
+      "machine": "tempo_break",
+      "opponent": "garden",
+      "arm": "off",
+      "seed": 2026100590000,
+      "event_sha256": "6f8040f9e301b8b26be2d59c3dcf6d961fecd302f4f29a441cbd86d6e3f74704",
+      "matches": true
+    },
+    {
+      "machine": "tempo_break",
+      "opponent": "garden",
+      "arm": "on",
+      "seed": 2026100590000,
+      "event_sha256": "18912148dab1c4c56831d9a451ca4d82c26e6100cbdbc7a18204f8512bcac8ba",
+      "matches": true
+    },
+    {
+      "machine": "tempo_break",
+      "opponent": "garden",
+      "arm": "alternative",
+      "seed": 2026100590000,
+      "event_sha256": "d6f67d8bae38415a2bd74200b1485d9d253398b5c4d9227bf94768c349622a6a",
+      "matches": true
+    },
+    {
+      "machine": "tempo_break",
+      "opponent": "battery",
+      "arm": "off",
+      "seed": 2026100590000,
+      "event_sha256": "f5f8b2c8bf3e77241127eb8812f447cb22c2327e73b7bee92efd954b3517fe8c",
+      "matches": true
+    },
+    {
+      "machine": "tempo_break",
+      "opponent": "battery",
+      "arm": "on",
+      "seed": 2026100590000,
+      "event_sha256": "f5f8b2c8bf3e77241127eb8812f447cb22c2327e73b7bee92efd954b3517fe8c",
+      "matches": true
+    },
+    {
+      "machine": "tempo_break",
+      "opponent": "battery",
+      "arm": "alternative",
+      "seed": 2026100590000,
+      "event_sha256": "d49abaa00cdb4af53b5919c76fdfc2082726c3465d8353c436909397da442ae6",
+      "matches": true
+    }
+  ],
+  "paired_statistics_recomputed": 8,
+  "directed_valid_invalid_lethal_zero_blocked_cases": 8,
+  "all_manifest_and_gzip_hashes_match": true,
+  "original_banks_unchanged": true,
+  "code_checks": [
+    "Prototype overlay assignments are validated even with effects disabled; native teaching remains separate and mutually exclusive",
+    "Primary hit eligibility is collected by real _land_hit; reactions wait until native _strike packet completes",
+    "Counter delay is appended after native _act scheduling; rejected/derived/zero/lethal hits do not spend it",
+    "Teaching adds no RNG draws and off arms preserve the same slot opportunity",
+    "Animation adapter only remaps owned move/state in a presentation copy; binding/raw-state/negative-path tests cover both machines",
+    "Teaching estimate budget is explicitly separate from unverified shared native/weather budget",
+    "McNemar applies to recorded binary winners with no draws; seeds reused across matchups and multiple comparisons uncorrected",
+    "Future six-machine and evolution refund contracts are design only, not claimed as production integration"
+  ],
+  "blockers_found_in_experimental_scope": [],
+  "review_status": "pass_with_risk",
+  "limitations": [
+    "Final independent code/release reviewer service returned 429 three times; no independent final verdict",
+    "Existing independent review closes the six design gaps only",
+    "Production learning/UI/save/AI/renderer, whole-pool acquisition/fairness and ESP32 shared budgets remain future gates"
+  ],
+  "final_source_sha256_reviewed": {
+    "docs/next-session-handoff.md": "44570933c125d3861107cda64c31f35cff3acd30e4cb709203b5e509ea48db3d",
+    "docs/30-skill-machines-and-learning.md": "8ebe59ad35f772e08bc2ca7f8a58220d99bf109c8392d9a70d56a357c7ff46c1",
+    "docs/31-prebattle-preparation-flow.md": "b9b0d2ffe4a5f5c4cefcc6829772eb0ac7dedb40fa2359f96e6f36687cfd6630",
+    "docs/32-teaching-skill-animation-contract.md": "1f908de638d18a9d8af11dcc04d069d7c34bb6e1d629ffb34ea04f7d0ab7a6bc",
+    "docs/design/teaching-skills-v1.json": "a01c737d53e5f5e9e5f0bb85496778f51be98517d1be6c571a341800185c2cf2",
+    "reports/teaching-design-2026-10-05.md": "aa82c904c993720fd871dbf29e9719d61725bef94c69e6bd4ec23b9782fa06d1",
+    "reports/teaching-prototype-2026-10-05.md": "51a7185c92f1a278ee32eea84a36dc8c99f39f1a61a53fea0cfa6925263562ef",
+    "tools/acceptance/teaching_design_probe.py": "2fbf193b9931cb5b93d97375aba9e40c188b73b1db115300050d43be4051f4a8",
+    "tools/acceptance/teaching_skill_prototype.py": "4309e398eed733a32141b27e0e49ba07619a98c2cc507a2d020829188bc8d22c",
+    "tools/acceptance/teaching_visual_probe.py": "2874d56ddbc25f1cff1527ea1c760bf5b91346828f01a8d80e0a743270115e34",
+    "tests/test_teaching_prototype.py": "893f3b13e6752d14e18c4fc28bfcaa4f5b398391837b43ec3d653e378670229e"
+  },
+  "final_records_excluded_to_avoid_circular_hash": true
+}

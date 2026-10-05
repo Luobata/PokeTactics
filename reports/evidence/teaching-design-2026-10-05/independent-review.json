@@ -1,0 +1,35 @@
+{
+  "schema": "teaching-independent-review-status-v1",
+  "review_status": "insufficient_evidence",
+  "reviewer_agent_status": "unavailable",
+  "review_scope": "Final independent code and release review",
+  "review_run_id": "20261005-112744-b10f7d3fa4b6",
+  "input_fingerprint": "afb65a7474de1d55be9374122cc8eef9d54f8c39d59197475861459c7d704876",
+  "independent_final_verdict_received": false,
+  "failures": [
+    {
+      "reviewer_agent": "/root/teaching_release_review",
+      "attempt": 1,
+      "result": "Agent errored: exceeded retry limit, last status: 429 Too Many Requests"
+    },
+    {
+      "reviewer_agent": "/root/teaching_release_review",
+      "attempt": 2,
+      "result": "Agent errored: exceeded retry limit, last status: 429 Too Many Requests"
+    },
+    {
+      "reviewer_agent": "/root/teaching_release_retry",
+      "attempt": 3,
+      "result": "Agent errored: exceeded retry limit, last status: 429 Too Many Requests",
+      "run": "20261005-112337-3a01d6375ee2"
+    }
+  ],
+  "fallback_review": "main-agent-self-review.json",
+  "fallback_is_independent": false,
+  "design_specialist_review": "design-review-final.json",
+  "design_review_is_release_authorization": false,
+  "required_before_production": [
+    "Fresh independent code/release review of actual production integration",
+    "Learning/reward/UI/save/AI transactions, full-run acquisition and shared animation budget gates"
+  ]
+}

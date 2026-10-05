@@ -1,0 +1,81 @@
+PokeTactics preparation-flow existing专项测试证据
+generated_at=2026-10-05T18:25:23.854536
+root=/Users/bytedance/luobata/PokeTactics
+branch=main
+head=93de08edc40b8da8b9ee590ce496e5ae0df9c4ee
+scope=existing unittest discover only; no new mirror tests; no product/runtime edits
+boundary=automated PC host tests only; not human three-key timing or device hardware acceptance
+
+USER BANKS BEFORE
+379620cbd720cbbe44d053df2ca3a6f70ef4112b00f5c238175d048f39b6ddbb  .build/saves/poketactics/5e9a2d878d07.0
+b822125fc97f2025dbc468e50cfa3ebb74ed0303fbcac19db90b76e70d062247  .build/saves/poketactics/5e9a2d878d07.1
+
+TEST RUNS
+
+$ python3 -m unittest discover -s tests -p test_device_controls.py
+purpose=existing assertions in tests/test_device_controls.py
+exit_code=0
+tests_ran=19
+ok=true
+...................
+----------------------------------------------------------------------
+Ran 19 tests in 1.390s
+
+OK
+
+$ python3 -m unittest discover -s tests -p test_technique_inventory.py
+purpose=existing assertions in tests/test_technique_inventory.py
+exit_code=0
+tests_ran=9
+ok=true
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 0.669s
+
+OK
+
+$ python3 -m unittest discover -s tests -p test_tactical_device.py
+purpose=existing assertions in tests/test_tactical_device.py
+exit_code=0
+tests_ran=8
+ok=true
+........
+----------------------------------------------------------------------
+Ran 8 tests in 5.462s
+
+OK
+
+$ python3 -m unittest discover -s tests -p test_evolution_device.py
+purpose=existing assertions in tests/test_evolution_device.py
+exit_code=0
+tests_ran=6
+ok=true
+......
+----------------------------------------------------------------------
+Ran 6 tests in 2.598s
+
+OK
+
+DEPENDENCY INVARIANTS
+dependency_files=54
+dependencies_unchanged=true
+user_banks_unchanged=true
+
+USER BANKS AFTER
+379620cbd720cbbe44d053df2ca3a6f70ef4112b00f5c238175d048f39b6ddbb  .build/saves/poketactics/5e9a2d878d07.0
+b822125fc97f2025dbc468e50cfa3ebb74ed0303fbcac19db90b76e70d062247  .build/saves/poketactics/5e9a2d878d07.1
+
+DESIGN CLAIM AUDIT
+docs31:138: proposal_only: 当前开战入口已显示入场天气摘要和终局压力说明，空场时确认文案明确风险。为控制三键负担，建议后续最小改善为扩展「开战」行的长按详情，形成只读清单，不新增页面：
+docs31:148: proposal_only: 清单只提示，不自动替玩家买、合、装、学或移动。唯一硬门继续是当前待领教学；未来海克斯待选也应是硬门。这样普通轮保持“最少 1 个开战决策”，信息丰富度靠长按详情补足，不强迫每次遍历全部系统。
+docs31:150: proposal_only: 另一个低成本教学入口改善是：领取奖励成功后提供「立即学习」与「稍后」二选一。立即学习进入现有机器 → 兼容目标 → 确认流程；稍后回准备页。候选实现时不自动消耗机器，也不默认选中第一个兼容棋子。
+
+BOUNDARIES
+- These are automated Python host/PC unittest results only.
+- They do not measure human three-key operation time, fatigue, or physical-device latency.
+- No runtime/source file was modified to make tests pass; this run created only the two evidence files.
+- “奖励后立即学习” and “开战行长按详情” are design proposals, not implemented features.
+
+EVIDENCE COUNT CORRECTION 2026-10-05T18:25:57.899454
+tests_ran_total=42
+Test counts are derived from each stored unittest output using the pattern "Ran N tests in ..."; initial in-memory parser omitted the timing suffix.

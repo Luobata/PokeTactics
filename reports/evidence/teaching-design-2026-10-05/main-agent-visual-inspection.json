@@ -1,0 +1,20 @@
+{
+  "schema": "teaching-main-agent-visual-inspection-v1",
+  "reviewer_role": "main_agent",
+  "independent_art_review": false,
+  "files_sha256": {
+    "reports/evidence/teaching-visual-2026-10-05/teaching-overview.png": "f560dd0b9d17d65a8c387ad49388356ac81bce2d36eca952cf76aa472370f691",
+    "reports/evidence/teaching-visual-2026-10-05/counter_valid-after.png": "9ed4cd91f20bce8e28773ab30c904e195554392491d66c7f4ea5a9ad16b9e12d",
+    "reports/evidence/teaching-visual-2026-10-05/tempo_valid-impact.png": "0c64ed4ab2cd9f0a06f0aee9df1b096fd503d1f24bf89d9b34a896e37683befc"
+  },
+  "observed": [
+    "Counter shell ring and attacker push/stall marker are distinguishable from the tempo broken-pulse energy-loss marker",
+    "Counter after keyframe shows one-cell push and 0.3s label; tempo impact shows actual -20 without return to source",
+    "Evidence wrapper footer is outside the device frame after correction; native battle log remains readable"
+  ],
+  "limits": [
+    "Keyframe visual inspection, not frame-time or real-device measurement",
+    "No new Pokemon body parts; native body animation plus teaching event overlay",
+    "Event/state/playback validation is separately bound in visual.json"
+  ]
+}

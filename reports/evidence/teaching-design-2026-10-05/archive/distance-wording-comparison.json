@@ -1,0 +1,13 @@
+{
+  "design_description_and_future_resolution_contracts_changed": true,
+  "unchanged_result_fields": [
+    "results",
+    "candidates",
+    "opponents",
+    "seed_range"
+  ],
+  "prototype_source_unchanged": true,
+  "before_design_sha256": "835987f6406fbbb5b23faf1bb821698b934323fff35ab45d49f9b3334d425511",
+  "after_design_sha256": "a01c737d53e5f5e9e5f0bb85496778f51be98517d1be6c571a341800185c2cf2",
+  "first_batch_parameters_and_all_eligibility_unchanged": true
+}

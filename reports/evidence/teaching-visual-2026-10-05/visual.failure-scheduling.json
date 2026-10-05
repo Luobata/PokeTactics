@@ -1,0 +1,144 @@
+{
+  "schema": "teaching-visual-probe-v2-failure",
+  "seed": 7,
+  "scenes": {
+    "counter_valid": {
+      "factory_kind": "counter",
+      "scenario": "valid",
+      "authoritative_event_sha256": "26c59eba23f802615838be047309fe7026292a776dce5acc8f2b249072d81c59",
+      "authoritative_events": [
+        [
+          0.0,
+          "deploy",
+          0,
+          [
+            2,
+            1
+          ]
+        ],
+        [
+          0.0,
+          "deploy",
+          1,
+          [
+            2,
+            2
+          ]
+        ],
+        [
+          0.0,
+          "unit_state",
+          0,
+          10000,
+          0
+        ],
+        [
+          0.0,
+          "unit_state",
+          1,
+          10000,
+          0
+        ],
+        [
+          0.1,
+          "attack",
+          0,
+          1,
+          33,
+          21,
+          10
+        ],
+        [
+          0.1,
+          "unit_state",
+          0,
+          10000,
+          21
+        ],
+        [
+          0.1,
+          "unit_state",
+          1,
+          9967,
+          10
+        ],
+        [
+          0.1,
+          "teaching_effect",
+          1,
+          0,
+          "guardian_riposte",
+          {
+            "cause_index": 4,
+            "source_idx": 1,
+            "target_idx": 0,
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "uses_per_battle": 1,
+            "pushed": true,
+            "from_pos": [
+              2,
+              1
+            ],
+            "to_pos": [
+              2,
+              0
+            ],
+            "delay_seconds": 0.3,
+            "cause_event_count": 3,
+            "event_count": 3,
+            "next_act_before": 2.3147651006711416,
+            "next_act_after": 2.6147651006711414
+          }
+        ],
+        [
+          0.1,
+          "move",
+          0,
+          [
+            2,
+            0
+          ]
+        ],
+        [
+          0.1,
+          "unit_state",
+          0,
+          10000,
+          21
+        ],
+        [
+          0.1,
+          "unit_state",
+          1,
+          9967,
+          10
+        ],
+        [
+          2.0,
+          "end",
+          null
+        ]
+      ]
+    }
+  },
+  "outputs": [],
+  "checks": {
+    "cause_ownership": true,
+    "state_reconciliation": true,
+    "negative_paths": true,
+    "event_hash_unchanged": true,
+    "rewind_speed_pixels": true,
+    "particle_budget": true
+  },
+  "error": {
+    "type": "AssertionError",
+    "message": "counter_valid: presentation position disagrees with authoritative replay for 0"
+  }
+}

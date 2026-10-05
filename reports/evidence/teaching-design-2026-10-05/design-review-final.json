@@ -1,0 +1,101 @@
+{
+  "record_kind": "teaching_design_review_final",
+  "recorded_at": "2026-10-05T11:07:42.476150+00:00",
+  "review_status": "pass",
+  "verdict_scope": "Narrow recheck that the original six second-batch blockers are closed by docs 30 sections 4.1/4.2 and the JSON resolution contracts.",
+  "release_status": "not_authorized_by_this_review",
+  "implementation_status": "not_assessed; contracts explicitly describe future prototypes, not production implementation",
+  "inputs": {
+    "docs_30": {
+      "path": "docs/30-skill-machines-and-learning.md",
+      "sha256": "8ebe59ad35f772e08bc2ca7f8a58220d99bf109c8392d9a70d56a357c7ff46c1",
+      "sections": [
+        "4.1",
+        "4.2"
+      ]
+    },
+    "design_json": {
+      "path": "docs/design/teaching-skills-v1.json",
+      "sha256": "a01c737d53e5f5e9e5f0bb85496778f51be98517d1be6c571a341800185c2cf2",
+      "contracts": [
+        "shared_resolution_contract",
+        "resolution_contract"
+      ]
+    }
+  },
+  "original_blockers": [
+    {
+      "id": "breach_lunge_deterministic_displacement",
+      "status": "closed",
+      "evidence": [
+        "docs/30-skill-machines-and-learning.md:95",
+        "docs/design/teaching-skills-v1.json:84-90"
+      ],
+      "resolution": "Target push uses _knock_cell row-axis semantics; blocked push uses BFS to a free four-adjacent target cell, shortest path then learner-relative cell order, first legal step only. Already adjacent means stay. Valid trigger consumes even without movement and never enters the occupied enemy cell."
+    },
+    {
+      "id": "arc_lock_energy_order_and_rounding",
+      "status": "closed",
+      "evidence": [
+        "docs/30-skill-machines-and-learning.md:96",
+        "docs/design/teaching-skills-v1.json:114-123"
+      ],
+      "resolution": "One helper handles all later positive grants: source-specific synergy/item bonuses first, then strongest-lock remainder, floor, and capacity clamp. Deploy energy, costs/losses, and stolen-energy transfer/drain recovery are excluded. Expiry/replacement/death events and suppression consumption are explicit."
+    },
+    {
+      "id": "rally_signal_target_and_failed_resource",
+      "status": "closed",
+      "evidence": [
+        "docs/30-skill-machines-and-learning.md:97",
+        "docs/design/teaching-skills-v1.json:185-191"
+      ],
+      "resolution": "Non-self living in-range below-cap allies use learner-relative stable order, max two. Grants pass the lock helper and cap. No actual ally gain means no consume or delay; otherwise delay is appended after native next_act scheduling."
+    },
+    {
+      "id": "expose_weakness_next_final_damage",
+      "status": "closed",
+      "evidence": [
+        "docs/30-skill-machines-and-learning.md:98",
+        "docs/design/teaching-skills-v1.json:215-222"
+      ],
+      "resolution": "Mark begins after the native packet. A later positive direct _final_damage packet consumes it; DOT does not. The 1.2 multiplier is after attacker weather/synergy/item and before ult cap and final defender DR. Cap remains binding; zero/immune/dodge preserves the mark; death/replacement/expiry are explicit."
+    },
+    {
+      "id": "standburst_trigger_dr_and_push_determinism",
+      "status": "closed",
+      "evidence": [
+        "docs/30-skill-machines-and-learning.md:99",
+        "docs/design/teaching-skills-v1.json:247-254"
+      ],
+      "resolution": "Eligibility is recorded on surviving threshold loss including sash/DOT, but effect activates only after the complete native/DOT packet if still alive and below threshold. DR joins the temporary/partner max bucket with independent expiry and affects direct damage only; DOT bypass remains. Pushes use a pre-push living-position snapshot, canonical order, and destination reservation."
+    },
+    {
+      "id": "field_triage_patient_and_failed_precondition",
+      "status": "closed",
+      "evidence": [
+        "docs/30-skill-machines-and-learning.md:100",
+        "docs/design/teaching-skills-v1.json:278-286"
+      ],
+      "resolution": "Checks occur after authoritative HP loss, movement, or positive energy gain. Patient selection is lowest HP ratio then learner-relative key, excluding self. Raw missing-HP share floors before healing block. No patient/raw-zero/dead-source/low-energy leaves the machine and energy untouched; a legal positive raw heal atomically pays and consumes even if blocked to zero."
+    }
+  ],
+  "adjudicated_exceptions_confirmed": [
+    "Breach Lunge intentionally does not BFS into the enemy-occupied target cell; it seeks a free four-adjacent target cell and stays if already adjacent.",
+    "Standburst intentionally activates after the complete native/DOT packet; DOT may trigger but does not receive the direct-damage DR benefit."
+  ],
+  "checks": [
+    "docs/design/teaching-skills-v1.json parsed successfully as JSON.",
+    "Exactly six second-batch machines carry nonempty resolution_contract fields.",
+    "shared_resolution_contract covers distance, stable target order, packet boundary, resolution order, finite-state stacking, and future passive causes.",
+    "Docs 4.1 and JSON contracts agree on the six adjudicated semantics.",
+    "No images were opened and no source files were modified by this review."
+  ],
+  "residual_implementation_risks": [
+    "Passive standburst/field-triage events still require a future cause_kind animation/event adapter; the current adapter only covers the first two native causes.",
+    "No prototype or production code was run or released by this narrow design review."
+  ],
+  "files_changed_by_review": [
+    ".build/teaching-prototype/design-review-initial.json",
+    ".build/teaching-prototype/design-review-final.json"
+  ]
+}

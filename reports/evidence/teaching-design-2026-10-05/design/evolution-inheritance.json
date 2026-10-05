@@ -1,0 +1,487 @@
+[
+  {
+    "from_species_id": 1,
+    "from_name": "妙蛙种子",
+    "to_species_id": 2,
+    "to_name": "妙蛙草",
+    "inheritable_machines": [
+      "rally_signal"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 2,
+    "from_name": "妙蛙草",
+    "to_species_id": 3,
+    "to_name": "妙蛙花",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "rally_signal"
+    ]
+  },
+  {
+    "from_species_id": 4,
+    "from_name": "小火龙",
+    "to_species_id": 5,
+    "to_name": "火恐龙",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "rally_signal"
+    ]
+  },
+  {
+    "from_species_id": 5,
+    "from_name": "火恐龙",
+    "to_species_id": 6,
+    "to_name": "喷火龙",
+    "inheritable_machines": [
+      "arc_lock"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 7,
+    "from_name": "杰尼龟",
+    "to_species_id": 8,
+    "to_name": "卡咪龟",
+    "inheritable_machines": [
+      "rally_signal"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 8,
+    "from_name": "卡咪龟",
+    "to_species_id": 9,
+    "to_name": "水箭龟",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "rally_signal",
+      "field_triage"
+    ]
+  },
+  {
+    "from_species_id": 10,
+    "from_name": "绿毛虫",
+    "to_species_id": 11,
+    "to_name": "铁甲蛹",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "breach_lunge"
+    ]
+  },
+  {
+    "from_species_id": 11,
+    "from_name": "铁甲蛹",
+    "to_species_id": 12,
+    "to_name": "巴大蝶",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "rally_signal"
+    ]
+  },
+  {
+    "from_species_id": 13,
+    "from_name": "独角虫",
+    "to_species_id": 14,
+    "to_name": "铁壳蛹",
+    "inheritable_machines": [
+      "breach_lunge"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 14,
+    "from_name": "铁壳蛹",
+    "to_species_id": 15,
+    "to_name": "大针蜂",
+    "inheritable_machines": [
+      "breach_lunge"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 16,
+    "from_name": "波波",
+    "to_species_id": 17,
+    "to_name": "比比鸟",
+    "inheritable_machines": [
+      "breach_lunge"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 17,
+    "from_name": "比比鸟",
+    "to_species_id": 18,
+    "to_name": "大比鸟",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "breach_lunge"
+    ]
+  },
+  {
+    "from_species_id": 19,
+    "from_name": "小拉达",
+    "to_species_id": 20,
+    "to_name": "拉达",
+    "inheritable_machines": [
+      "breach_lunge"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 21,
+    "from_name": "烈雀",
+    "to_species_id": 22,
+    "to_name": "大嘴雀",
+    "inheritable_machines": [
+      "breach_lunge"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 25,
+    "from_name": "皮卡丘",
+    "to_species_id": 26,
+    "to_name": "雷丘",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "breach_lunge"
+    ]
+  },
+  {
+    "from_species_id": 29,
+    "from_name": "尼多兰",
+    "to_species_id": 30,
+    "to_name": "尼多娜",
+    "inheritable_machines": [
+      "breach_lunge"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 30,
+    "from_name": "尼多娜",
+    "to_species_id": 31,
+    "to_name": "尼多后",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "breach_lunge",
+      "field_triage"
+    ]
+  },
+  {
+    "from_species_id": 32,
+    "from_name": "尼多朗",
+    "to_species_id": 33,
+    "to_name": "尼多力诺",
+    "inheritable_machines": [
+      "breach_lunge"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 33,
+    "from_name": "尼多力诺",
+    "to_species_id": 34,
+    "to_name": "尼多王",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "breach_lunge"
+    ]
+  },
+  {
+    "from_species_id": 37,
+    "from_name": "六尾",
+    "to_species_id": 38,
+    "to_name": "九尾",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "rally_signal"
+    ]
+  },
+  {
+    "from_species_id": 41,
+    "from_name": "超音蝠",
+    "to_species_id": 42,
+    "to_name": "大嘴蝠",
+    "inheritable_machines": [
+      "breach_lunge"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 43,
+    "from_name": "走路草",
+    "to_species_id": 44,
+    "to_name": "臭臭花",
+    "inheritable_machines": [
+      "rally_signal"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 44,
+    "from_name": "臭臭花",
+    "to_species_id": 45,
+    "to_name": "霸王花",
+    "inheritable_machines": [
+      "rally_signal",
+      "field_triage"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 54,
+    "from_name": "可达鸭",
+    "to_species_id": 55,
+    "to_name": "哥达鸭",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "rally_signal"
+    ]
+  },
+  {
+    "from_species_id": 56,
+    "from_name": "猴怪",
+    "to_species_id": 57,
+    "to_name": "火暴猴",
+    "inheritable_machines": [
+      "breach_lunge"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 58,
+    "from_name": "卡蒂狗",
+    "to_species_id": 59,
+    "to_name": "风速狗",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "breach_lunge"
+    ]
+  },
+  {
+    "from_species_id": 60,
+    "from_name": "蚊香蝌蚪",
+    "to_species_id": 61,
+    "to_name": "蚊香君",
+    "inheritable_machines": [
+      "breach_lunge"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 61,
+    "from_name": "蚊香君",
+    "to_species_id": 62,
+    "to_name": "蚊香泳士",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "breach_lunge"
+    ]
+  },
+  {
+    "from_species_id": 63,
+    "from_name": "凯西",
+    "to_species_id": 64,
+    "to_name": "勇基拉",
+    "inheritable_machines": [
+      "arc_lock",
+      "expose_weakness"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 64,
+    "from_name": "勇基拉",
+    "to_species_id": 65,
+    "to_name": "胡地",
+    "inheritable_machines": [
+      "arc_lock",
+      "expose_weakness",
+      "tempo_break"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 66,
+    "from_name": "腕力",
+    "to_species_id": 67,
+    "to_name": "豪力",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "breach_lunge"
+    ]
+  },
+  {
+    "from_species_id": 67,
+    "from_name": "豪力",
+    "to_species_id": 68,
+    "to_name": "怪力",
+    "inheritable_machines": [
+      "guardian_riposte",
+      "expose_weakness",
+      "field_triage"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 69,
+    "from_name": "喇叭芽",
+    "to_species_id": 70,
+    "to_name": "口呆花",
+    "inheritable_machines": [
+      "breach_lunge"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 70,
+    "from_name": "口呆花",
+    "to_species_id": 71,
+    "to_name": "大食花",
+    "inheritable_machines": [
+      "breach_lunge"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 74,
+    "from_name": "小拳石",
+    "to_species_id": 75,
+    "to_name": "隆隆石",
+    "inheritable_machines": [
+      "guardian_riposte"
+    ],
+    "returned_machines": [
+      "field_triage"
+    ]
+  },
+  {
+    "from_species_id": 75,
+    "from_name": "隆隆石",
+    "to_species_id": 76,
+    "to_name": "隆隆岩",
+    "inheritable_machines": [
+      "guardian_riposte",
+      "standburst"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 79,
+    "from_name": "呆呆兽",
+    "to_species_id": 80,
+    "to_name": "呆壳兽",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "guardian_riposte",
+      "field_triage"
+    ]
+  },
+  {
+    "from_species_id": 81,
+    "from_name": "小磁怪",
+    "to_species_id": 82,
+    "to_name": "三合一磁怪",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "rally_signal"
+    ]
+  },
+  {
+    "from_species_id": 92,
+    "from_name": "鬼斯",
+    "to_species_id": 93,
+    "to_name": "鬼斯通",
+    "inheritable_machines": [
+      "arc_lock",
+      "expose_weakness"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 93,
+    "from_name": "鬼斯通",
+    "to_species_id": 94,
+    "to_name": "耿鬼",
+    "inheritable_machines": [
+      "arc_lock",
+      "expose_weakness"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 111,
+    "from_name": "独角犀牛",
+    "to_species_id": 112,
+    "to_name": "钻角犀兽",
+    "inheritable_machines": [
+      "guardian_riposte",
+      "standburst"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 116,
+    "from_name": "墨海马",
+    "to_species_id": 117,
+    "to_name": "海刺龙",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "rally_signal"
+    ]
+  },
+  {
+    "from_species_id": 120,
+    "from_name": "海星星",
+    "to_species_id": 121,
+    "to_name": "宝石海星",
+    "inheritable_machines": [
+      "arc_lock"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 129,
+    "from_name": "鲤鱼王",
+    "to_species_id": 130,
+    "to_name": "暴鲤龙",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "arc_lock"
+    ]
+  },
+  {
+    "from_species_id": 133,
+    "from_name": "伊布",
+    "to_species_id": 134,
+    "to_name": "水伊布",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "breach_lunge"
+    ]
+  },
+  {
+    "from_species_id": 147,
+    "from_name": "迷你龙",
+    "to_species_id": 148,
+    "to_name": "哈克龙",
+    "inheritable_machines": [
+      "breach_lunge"
+    ],
+    "returned_machines": []
+  },
+  {
+    "from_species_id": 148,
+    "from_name": "哈克龙",
+    "to_species_id": 149,
+    "to_name": "快龙",
+    "inheritable_machines": [],
+    "returned_machines": [
+      "breach_lunge"
+    ]
+  }
+]

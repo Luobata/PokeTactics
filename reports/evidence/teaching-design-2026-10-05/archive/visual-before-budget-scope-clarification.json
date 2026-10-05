@@ -1,0 +1,1952 @@
+{
+  "schema": "teaching-visual-probe-v2",
+  "seed": 7,
+  "renderer": "BattleAnimation.playback_frame + isolated teaching overlay",
+  "adapter": {
+    "scope": "acceptance-only teaching_effect parser and parent ActionTiming binder",
+    "actual_abi": [
+      "flat",
+      "nested"
+    ],
+    "tempo_zero": "scene name only; zero is actual_loss == 0",
+    "production_renderer_consumes_teaching_effect": false
+  },
+  "prototype_module_sha256": "4309e398eed733a32141b27e0e49ba07619a98c2cc507a2d020829188bc8d22c",
+  "design_truth": {
+    "version": "teaching-skills-v1",
+    "status": "proposal_not_gameplay",
+    "first_batch_parameters": {
+      "guardian_riposte": {
+        "uses_per_battle": 1,
+        "delay_seconds": 0.3,
+        "push_cells": 1
+      },
+      "tempo_break": {
+        "uses_per_battle": 1,
+        "energy_loss": 20
+      }
+    },
+    "note": "Eligibility is read from the design truth; this visual probe does not recompute thresholds."
+  },
+  "sources_sha256": {
+    "docs/32-teaching-skill-animation-contract.md": "c12af6fec7f4b488fd4a8c4298bcb1f03d1a2c303eabab4f0f9ae527a01734d1",
+    "docs/design/teaching-skills-v1.json": "a01c737d53e5f5e9e5f0bb85496778f51be98517d1be6c571a341800185c2cf2",
+    "tools/acceptance/teaching_skill_prototype.py": "4309e398eed733a32141b27e0e49ba07619a98c2cc507a2d020829188bc8d22c",
+    "tools/acceptance/teaching_visual_probe.py": "9d0ab947033a62b75c7d3db8a11716c5c7552af38ff536863249a8fd9c969df1",
+    "tools/mockups/animation_timeline.py": "8423516a158eaa028ebbddcfa2f26cea1da0c004f435a3dd3870bb7bda694b3b",
+    "tools/mockups/render_battle_gif.py": "e668ef2ee79690ab273c49564911bfa4af907123805c4e7194827c391a34ce78"
+  },
+  "scenes": {
+    "counter_valid": {
+      "factory_kind": "counter",
+      "scenario": "valid",
+      "unit_count": 2,
+      "event_count": 12,
+      "authoritative_event_sha256": "26c59eba23f802615838be047309fe7026292a776dce5acc8f2b249072d81c59",
+      "after_render_event_sha256": "26c59eba23f802615838be047309fe7026292a776dce5acc8f2b249072d81c59",
+      "teaching_events": [
+        {
+          "raw_index": 7,
+          "machine_id": "guardian_riposte",
+          "source_idx": 1,
+          "target_idx": 0,
+          "cause_index": 4,
+          "cause_parent_kind": "attack",
+          "cause_event_count": 3,
+          "payload": {
+            "cause_index": 4,
+            "source_idx": 1,
+            "target_idx": 0,
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "uses_per_battle": 1,
+            "pushed": true,
+            "from_pos": [
+              2,
+              1
+            ],
+            "to_pos": [
+              2,
+              0
+            ],
+            "delay_seconds": 0.3,
+            "cause_event_count": 3,
+            "event_count": 3,
+            "next_act_before": 2.3147651006711416,
+            "next_act_after": 2.6147651006711414
+          },
+          "actual_shape": "flat",
+          "owned_raw_indices": [
+            8,
+            9,
+            10
+          ],
+          "actual_abi_self_test": {
+            "flat": true,
+            "nested": true,
+            "fields": [
+              "pushed",
+              "from_pos",
+              "to_pos",
+              "delay_seconds",
+              "next_act_before",
+              "next_act_after"
+            ]
+          },
+          "schedule_adapter": [
+            {
+              "kind": "move",
+              "raw_simulation_seconds": 0.1,
+              "scheduled_before": 0.9,
+              "scheduled_after": 0.7
+            },
+            {
+              "kind": "unit_state",
+              "raw_simulation_seconds": 0.1,
+              "scheduled_before": 1.15,
+              "scheduled_after": 0.7
+            },
+            {
+              "kind": "unit_state",
+              "raw_simulation_seconds": 0.1,
+              "scheduled_before": 0.7,
+              "scheduled_after": 0.7
+            }
+          ],
+          "owned_events": [
+            [
+              0.1,
+              "move",
+              0,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              0.1,
+              "unit_state",
+              0,
+              10000,
+              21
+            ],
+            [
+              0.1,
+              "unit_state",
+              1,
+              9967,
+              10
+            ]
+          ],
+          "parent_timing": {
+            "start": 0.4,
+            "release": 0.65,
+            "impact": 0.7,
+            "recover_end": 0.9
+          }
+        }
+      ],
+      "parent_state_reconciliation": {
+        "parent_raw_index": 4,
+        "parent_kind": "attack",
+        "impact": 0.7,
+        "native_before": {
+          "0": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          }
+        },
+        "native_after": {
+          "0": {
+            "hp": 10000,
+            "energy": 21,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 9967,
+            "energy": 10,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          }
+        },
+        "teaching_after": {
+          "0": {
+            "hp": 10000,
+            "energy": 21,
+            "pos": [
+              2,
+              0
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 9967,
+            "energy": 10,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          }
+        },
+        "presentation_before": {
+          "0": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          }
+        },
+        "presentation_after": {
+          "0": {
+            "hp": 10000,
+            "energy": 21,
+            "pos": [
+              2,
+              0
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 9967,
+            "energy": 10,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          }
+        },
+        "actual_shape": "flat",
+        "actual": {},
+        "semantic": {
+          "parent_hp_loss": 33,
+          "pushed": true,
+          "from_pos": [
+            2,
+            1
+          ],
+          "to_pos": [
+            2,
+            0
+          ],
+          "delay_seconds": 0.3,
+          "next_act_before": 2.3147651006711416,
+          "next_act_after": 2.6147651006711414,
+          "hp_unchanged_by_teaching": true,
+          "energy_unchanged_by_teaching": true
+        }
+      },
+      "playback": {
+        "presentation_seconds": 0.7799999999999999,
+        "pixel_sha256": "eaac9f04b95adab808936323d5a88078822efc206ea2ecbb89c61f9f117d4526",
+        "rewind_pixel_sha256": "eaac9f04b95adab808936323d5a88078822efc206ea2ecbb89c61f9f117d4526",
+        "playback_0_5x_pixel_sha256": "eaac9f04b95adab808936323d5a88078822efc206ea2ecbb89c61f9f117d4526",
+        "playback_1x_pixel_sha256": "eaac9f04b95adab808936323d5a88078822efc206ea2ecbb89c61f9f117d4526",
+        "playback_2x_pixel_sha256": "eaac9f04b95adab808936323d5a88078822efc206ea2ecbb89c61f9f117d4526",
+        "skip_pixel_sha256": "37d550c83526e075f0e345987853d080f59d979c45353f3db81624609fc648bc",
+        "skip_direct_final_pixel_sha256": "37d550c83526e075f0e345987853d080f59d979c45353f3db81624609fc648bc"
+      },
+      "peak_teaching_particles": 42
+    },
+    "counter_blocked": {
+      "factory_kind": "counter",
+      "scenario": "blocked",
+      "unit_count": 2,
+      "event_count": 11,
+      "authoritative_event_sha256": "5ce742d7e9476d8df31e698a9df89136ada7c392bdd5f5b9ec145b990c005595",
+      "after_render_event_sha256": "5ce742d7e9476d8df31e698a9df89136ada7c392bdd5f5b9ec145b990c005595",
+      "teaching_events": [
+        {
+          "raw_index": 7,
+          "machine_id": "guardian_riposte",
+          "source_idx": 1,
+          "target_idx": 0,
+          "cause_index": 4,
+          "cause_parent_kind": "attack",
+          "cause_event_count": 2,
+          "payload": {
+            "cause_index": 4,
+            "source_idx": 1,
+            "target_idx": 0,
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              0
+            ],
+            "uses_per_battle": 1,
+            "pushed": false,
+            "from_pos": [
+              2,
+              0
+            ],
+            "to_pos": [
+              2,
+              0
+            ],
+            "delay_seconds": 0.3,
+            "cause_event_count": 2,
+            "event_count": 2,
+            "next_act_before": 2.3147651006711416,
+            "next_act_after": 2.6147651006711414
+          },
+          "actual_shape": "flat",
+          "owned_raw_indices": [
+            8,
+            9
+          ],
+          "actual_abi_self_test": {
+            "flat": true,
+            "nested": true,
+            "fields": [
+              "pushed",
+              "from_pos",
+              "to_pos",
+              "delay_seconds",
+              "next_act_before",
+              "next_act_after"
+            ]
+          },
+          "schedule_adapter": [
+            {
+              "kind": "unit_state",
+              "raw_simulation_seconds": 0.1,
+              "scheduled_before": 0.7,
+              "scheduled_after": 0.7
+            },
+            {
+              "kind": "unit_state",
+              "raw_simulation_seconds": 0.1,
+              "scheduled_before": 0.7,
+              "scheduled_after": 0.7
+            }
+          ],
+          "owned_events": [
+            [
+              0.1,
+              "unit_state",
+              0,
+              10000,
+              21
+            ],
+            [
+              0.1,
+              "unit_state",
+              1,
+              9967,
+              10
+            ]
+          ],
+          "parent_timing": {
+            "start": 0.4,
+            "release": 0.65,
+            "impact": 0.7,
+            "recover_end": 0.9
+          }
+        }
+      ],
+      "parent_state_reconciliation": {
+        "parent_raw_index": 4,
+        "parent_kind": "attack",
+        "impact": 0.7,
+        "native_before": {
+          "0": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              0
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "native_after": {
+          "0": {
+            "hp": 10000,
+            "energy": 21,
+            "pos": [
+              2,
+              0
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 9967,
+            "energy": 10,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "teaching_after": {
+          "0": {
+            "hp": 10000,
+            "energy": 21,
+            "pos": [
+              2,
+              0
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 9967,
+            "energy": 10,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "presentation_before": {
+          "0": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              0
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "presentation_after": {
+          "0": {
+            "hp": 10000,
+            "energy": 21,
+            "pos": [
+              2,
+              0
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 9967,
+            "energy": 10,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "actual_shape": "flat",
+        "actual": {},
+        "semantic": {
+          "parent_hp_loss": 33,
+          "pushed": false,
+          "from_pos": [
+            2,
+            0
+          ],
+          "to_pos": [
+            2,
+            0
+          ],
+          "delay_seconds": 0.3,
+          "next_act_before": 2.3147651006711416,
+          "next_act_after": 2.6147651006711414,
+          "hp_unchanged_by_teaching": true,
+          "energy_unchanged_by_teaching": true
+        }
+      },
+      "playback": {
+        "presentation_seconds": 0.7799999999999999,
+        "pixel_sha256": "d2c1e859da3c1e6415e2c34ae2880300f8a4882fe257748be3e31a6edec7a1f3",
+        "rewind_pixel_sha256": "d2c1e859da3c1e6415e2c34ae2880300f8a4882fe257748be3e31a6edec7a1f3",
+        "playback_0_5x_pixel_sha256": "d2c1e859da3c1e6415e2c34ae2880300f8a4882fe257748be3e31a6edec7a1f3",
+        "playback_1x_pixel_sha256": "d2c1e859da3c1e6415e2c34ae2880300f8a4882fe257748be3e31a6edec7a1f3",
+        "playback_2x_pixel_sha256": "d2c1e859da3c1e6415e2c34ae2880300f8a4882fe257748be3e31a6edec7a1f3",
+        "skip_pixel_sha256": "b49c148e25c58570769a5345b63a5b4a18afc9a5955b71203050f309692fbe8a",
+        "skip_direct_final_pixel_sha256": "b49c148e25c58570769a5345b63a5b4a18afc9a5955b71203050f309692fbe8a"
+      },
+      "peak_teaching_particles": 42
+    },
+    "counter_invalid": {
+      "factory_kind": "counter",
+      "scenario": "invalid",
+      "unit_count": 2,
+      "event_count": 8,
+      "teaching_event_count": 0,
+      "negative_reason": "ranged_primary",
+      "native_outcome": {
+        "raw_index": 4,
+        "kind": "attack",
+        "scheduled_seconds": 0.85
+      },
+      "authoritative_event_sha256": "9805f9cc9bbf674409ffbd4824e720fde413533144501e9a88e6d3a6030464ad",
+      "after_render_event_sha256": "9805f9cc9bbf674409ffbd4824e720fde413533144501e9a88e6d3a6030464ad",
+      "playback": {
+        "presentation_seconds": 0.9299999999999999,
+        "pixel_sha256": "505de8daef50fcd7a3797cb3a553f9a23c177caddfdeb38c0ddaa56adc52ec6c",
+        "rewind_pixel_sha256": "505de8daef50fcd7a3797cb3a553f9a23c177caddfdeb38c0ddaa56adc52ec6c",
+        "playback_0_5x_pixel_sha256": "505de8daef50fcd7a3797cb3a553f9a23c177caddfdeb38c0ddaa56adc52ec6c",
+        "playback_1x_pixel_sha256": "505de8daef50fcd7a3797cb3a553f9a23c177caddfdeb38c0ddaa56adc52ec6c",
+        "playback_2x_pixel_sha256": "505de8daef50fcd7a3797cb3a553f9a23c177caddfdeb38c0ddaa56adc52ec6c",
+        "skip_pixel_sha256": "ff1af937cb1478e033efdabc90a35d15cf4441477b067d080d89f88041cfb87d",
+        "skip_direct_final_pixel_sha256": "ff1af937cb1478e033efdabc90a35d15cf4441477b067d080d89f88041cfb87d"
+      },
+      "peak_teaching_particles": 0,
+      "success_overlay_present": false
+    },
+    "counter_lethal": {
+      "factory_kind": "counter",
+      "scenario": "lethal",
+      "unit_count": 2,
+      "event_count": 9,
+      "teaching_event_count": 0,
+      "negative_reason": "defender_death_at_snapshot",
+      "native_outcome": {
+        "raw_index": 4,
+        "kind": "attack",
+        "scheduled_seconds": 0.7
+      },
+      "authoritative_event_sha256": "bf1fe7fc68d2ed6999e0630d6003898346cbbbc37b75c456a1c2bef425dfd36f",
+      "after_render_event_sha256": "bf1fe7fc68d2ed6999e0630d6003898346cbbbc37b75c456a1c2bef425dfd36f",
+      "playback": {
+        "presentation_seconds": 0.7799999999999999,
+        "pixel_sha256": "75c7b1024d6f973e23a11779ab4c5eff86fef17dfd3bf604a616f348459238f8",
+        "rewind_pixel_sha256": "75c7b1024d6f973e23a11779ab4c5eff86fef17dfd3bf604a616f348459238f8",
+        "playback_0_5x_pixel_sha256": "75c7b1024d6f973e23a11779ab4c5eff86fef17dfd3bf604a616f348459238f8",
+        "playback_1x_pixel_sha256": "75c7b1024d6f973e23a11779ab4c5eff86fef17dfd3bf604a616f348459238f8",
+        "playback_2x_pixel_sha256": "75c7b1024d6f973e23a11779ab4c5eff86fef17dfd3bf604a616f348459238f8",
+        "skip_pixel_sha256": "a306c27455f29bd15392713992753cf3cca5d808dac449558928c98009373331",
+        "skip_direct_final_pixel_sha256": "a306c27455f29bd15392713992753cf3cca5d808dac449558928c98009373331"
+      },
+      "peak_teaching_particles": 0,
+      "success_overlay_present": false
+    },
+    "tempo_valid": {
+      "factory_kind": "tempo",
+      "scenario": "valid",
+      "unit_count": 2,
+      "event_count": 10,
+      "authoritative_event_sha256": "7a99d69577cb2107a0bb379f66f1b44e9a25766ced12946ef85daed6a6f9a414",
+      "after_render_event_sha256": "7a99d69577cb2107a0bb379f66f1b44e9a25766ced12946ef85daed6a6f9a414",
+      "teaching_events": [
+        {
+          "raw_index": 7,
+          "machine_id": "tempo_break",
+          "source_idx": 0,
+          "target_idx": 1,
+          "cause_index": 4,
+          "cause_parent_kind": "cast",
+          "cause_event_count": 1,
+          "payload": {
+            "cause_index": 4,
+            "source_idx": 0,
+            "target_idx": 1,
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "uses_per_battle": 1,
+            "actual_loss": 20,
+            "energy_before": 50,
+            "energy_after": 30,
+            "returned_energy": 0,
+            "cause_event_count": 1,
+            "event_count": 1
+          },
+          "actual_shape": "flat",
+          "owned_raw_indices": [
+            8
+          ],
+          "actual_abi_self_test": {
+            "flat": true,
+            "nested": true,
+            "fields": [
+              "actual_loss",
+              "energy_before",
+              "energy_after",
+              "returned_energy"
+            ]
+          },
+          "schedule_adapter": [
+            {
+              "kind": "unit_state",
+              "raw_simulation_seconds": 0.1,
+              "scheduled_before": 1.0,
+              "scheduled_after": 1.0
+            }
+          ],
+          "owned_events": [
+            [
+              0.1,
+              "unit_state",
+              1,
+              9962,
+              30
+            ]
+          ],
+          "parent_timing": {
+            "start": 0.4,
+            "release": 0.8,
+            "impact": 1.0,
+            "recover_end": 1.2
+          }
+        }
+      ],
+      "parent_state_reconciliation": {
+        "parent_raw_index": 4,
+        "parent_kind": "cast",
+        "impact": 1.0,
+        "native_before": {
+          "0": {
+            "hp": 10000,
+            "energy": 80,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 10000,
+            "energy": 40,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "native_after": {
+          "0": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 9962,
+            "energy": 50,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "teaching_after": {
+          "0": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 9962,
+            "energy": 30,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "presentation_before": {
+          "0": {
+            "hp": 10000,
+            "energy": 80,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 10000,
+            "energy": 40,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "presentation_after": {
+          "0": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 9962,
+            "energy": 30,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "actual_shape": "flat",
+        "actual": {},
+        "semantic": {
+          "parent_hp_loss": 38,
+          "actual_loss": 20,
+          "energy_before": 50,
+          "energy_after": 30,
+          "returned_energy": 0,
+          "zero_identified_by": "actual_loss == 0",
+          "zero": false,
+          "hp_unchanged_by_teaching": true
+        }
+      },
+      "playback": {
+        "presentation_seconds": 1.08,
+        "pixel_sha256": "7d9fe56d4cc156ad59565d428785726936847227dde472326b9bac9e51451d04",
+        "rewind_pixel_sha256": "7d9fe56d4cc156ad59565d428785726936847227dde472326b9bac9e51451d04",
+        "playback_0_5x_pixel_sha256": "7d9fe56d4cc156ad59565d428785726936847227dde472326b9bac9e51451d04",
+        "playback_1x_pixel_sha256": "7d9fe56d4cc156ad59565d428785726936847227dde472326b9bac9e51451d04",
+        "playback_2x_pixel_sha256": "7d9fe56d4cc156ad59565d428785726936847227dde472326b9bac9e51451d04",
+        "skip_pixel_sha256": "6d89d97d9a6a56e7c67718703016ab3a38c565a29d9e92fd5556f1c8005172ff",
+        "skip_direct_final_pixel_sha256": "6d89d97d9a6a56e7c67718703016ab3a38c565a29d9e92fd5556f1c8005172ff"
+      },
+      "peak_teaching_particles": 36
+    },
+    "tempo_zero": {
+      "factory_kind": "tempo",
+      "scenario": "zero",
+      "unit_count": 2,
+      "event_count": 10,
+      "authoritative_event_sha256": "d43d8fd394b618c42a30c6ae0ec9dd25213d6470df6f72a4a72e56dab451bef8",
+      "after_render_event_sha256": "d43d8fd394b618c42a30c6ae0ec9dd25213d6470df6f72a4a72e56dab451bef8",
+      "teaching_events": [
+        {
+          "raw_index": 7,
+          "machine_id": "tempo_break",
+          "source_idx": 0,
+          "target_idx": 1,
+          "cause_index": 4,
+          "cause_parent_kind": "cast",
+          "cause_event_count": 1,
+          "payload": {
+            "cause_index": 4,
+            "source_idx": 0,
+            "target_idx": 1,
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "uses_per_battle": 1,
+            "actual_loss": 0,
+            "energy_before": 0,
+            "energy_after": 0,
+            "returned_energy": 0,
+            "cause_event_count": 1,
+            "event_count": 1
+          },
+          "actual_shape": "flat",
+          "owned_raw_indices": [
+            8
+          ],
+          "actual_abi_self_test": {
+            "flat": true,
+            "nested": true,
+            "fields": [
+              "actual_loss",
+              "energy_before",
+              "energy_after",
+              "returned_energy"
+            ]
+          },
+          "schedule_adapter": [
+            {
+              "kind": "unit_state",
+              "raw_simulation_seconds": 0.1,
+              "scheduled_before": 1.0,
+              "scheduled_after": 1.0
+            }
+          ],
+          "owned_events": [
+            [
+              0.1,
+              "unit_state",
+              1,
+              9962,
+              0
+            ]
+          ],
+          "parent_timing": {
+            "start": 0.4,
+            "release": 0.8,
+            "impact": 1.0,
+            "recover_end": 1.2
+          }
+        }
+      ],
+      "parent_state_reconciliation": {
+        "parent_raw_index": 4,
+        "parent_kind": "cast",
+        "impact": 1.0,
+        "native_before": {
+          "0": {
+            "hp": 10000,
+            "energy": 80,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "native_after": {
+          "0": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 9962,
+            "energy": 0,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "teaching_after": {
+          "0": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 9962,
+            "energy": 0,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "presentation_before": {
+          "0": {
+            "hp": 10000,
+            "energy": 80,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "presentation_after": {
+          "0": {
+            "hp": 10000,
+            "energy": 0,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          },
+          "1": {
+            "hp": 9962,
+            "energy": 0,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "actual_shape": "flat",
+        "actual": {},
+        "semantic": {
+          "parent_hp_loss": 38,
+          "actual_loss": 0,
+          "energy_before": 0,
+          "energy_after": 0,
+          "returned_energy": 0,
+          "zero_identified_by": "actual_loss == 0",
+          "zero": true,
+          "hp_unchanged_by_teaching": true
+        }
+      },
+      "playback": {
+        "presentation_seconds": 1.08,
+        "pixel_sha256": "cdf08e3a1d83803fe98da331bd6ffea8fa42cdd068ca2ba63ea997b618e89fde",
+        "rewind_pixel_sha256": "cdf08e3a1d83803fe98da331bd6ffea8fa42cdd068ca2ba63ea997b618e89fde",
+        "playback_0_5x_pixel_sha256": "cdf08e3a1d83803fe98da331bd6ffea8fa42cdd068ca2ba63ea997b618e89fde",
+        "playback_1x_pixel_sha256": "cdf08e3a1d83803fe98da331bd6ffea8fa42cdd068ca2ba63ea997b618e89fde",
+        "playback_2x_pixel_sha256": "cdf08e3a1d83803fe98da331bd6ffea8fa42cdd068ca2ba63ea997b618e89fde",
+        "skip_pixel_sha256": "849888f8290df1f1cc70a2ff536246a86193397938a9ec6ae0e90808a0341283",
+        "skip_direct_final_pixel_sha256": "849888f8290df1f1cc70a2ff536246a86193397938a9ec6ae0e90808a0341283"
+      },
+      "peak_teaching_particles": 36
+    },
+    "tempo_invalid": {
+      "factory_kind": "tempo",
+      "scenario": "invalid",
+      "unit_count": 2,
+      "event_count": 6,
+      "teaching_event_count": 0,
+      "negative_reason": "real_accuracy_miss",
+      "native_outcome": {
+        "raw_index": 4,
+        "kind": "miss",
+        "scheduled_seconds": 0.1
+      },
+      "authoritative_event_sha256": "ba37b940fa333217a61ff64464be8fef0e1bf3cbf34fb6cb059e62363ce8df0a",
+      "after_render_event_sha256": "ba37b940fa333217a61ff64464be8fef0e1bf3cbf34fb6cb059e62363ce8df0a",
+      "playback": {
+        "presentation_seconds": 0.18,
+        "pixel_sha256": "1946a47f97b8f98ce075630866541780ea949bba7f18e9dd6cdba6dbb2f9be66",
+        "rewind_pixel_sha256": "1946a47f97b8f98ce075630866541780ea949bba7f18e9dd6cdba6dbb2f9be66",
+        "playback_0_5x_pixel_sha256": "1946a47f97b8f98ce075630866541780ea949bba7f18e9dd6cdba6dbb2f9be66",
+        "playback_1x_pixel_sha256": "1946a47f97b8f98ce075630866541780ea949bba7f18e9dd6cdba6dbb2f9be66",
+        "playback_2x_pixel_sha256": "1946a47f97b8f98ce075630866541780ea949bba7f18e9dd6cdba6dbb2f9be66",
+        "skip_pixel_sha256": "056d6e5e991df6bdc056b7bda8a028f9f4ea76a1622ecef77f37006b90c10d4f",
+        "skip_direct_final_pixel_sha256": "056d6e5e991df6bdc056b7bda8a028f9f4ea76a1622ecef77f37006b90c10d4f"
+      },
+      "peak_teaching_particles": 0,
+      "success_overlay_present": false
+    },
+    "tempo_lethal": {
+      "factory_kind": "tempo",
+      "scenario": "lethal",
+      "unit_count": 2,
+      "event_count": 9,
+      "teaching_event_count": 0,
+      "negative_reason": "target_death_at_snapshot",
+      "native_outcome": {
+        "raw_index": 4,
+        "kind": "cast",
+        "scheduled_seconds": 1.0
+      },
+      "authoritative_event_sha256": "d83ee27b775aa410f886e06dfe69d2a035e6092293f229e4fad2bf8db2ded06f",
+      "after_render_event_sha256": "d83ee27b775aa410f886e06dfe69d2a035e6092293f229e4fad2bf8db2ded06f",
+      "playback": {
+        "presentation_seconds": 1.08,
+        "pixel_sha256": "707ac55f4090170a91f2b7bc0f3913c0be1e62143ac0e252bd51ca8b048250d3",
+        "rewind_pixel_sha256": "707ac55f4090170a91f2b7bc0f3913c0be1e62143ac0e252bd51ca8b048250d3",
+        "playback_0_5x_pixel_sha256": "707ac55f4090170a91f2b7bc0f3913c0be1e62143ac0e252bd51ca8b048250d3",
+        "playback_1x_pixel_sha256": "707ac55f4090170a91f2b7bc0f3913c0be1e62143ac0e252bd51ca8b048250d3",
+        "playback_2x_pixel_sha256": "707ac55f4090170a91f2b7bc0f3913c0be1e62143ac0e252bd51ca8b048250d3",
+        "skip_pixel_sha256": "e913c1ce5a8e7f592e18160b4ab2ec3bfd58592f464c801f0bac9a59364ccefc",
+        "skip_direct_final_pixel_sha256": "e913c1ce5a8e7f592e18160b4ab2ec3bfd58592f464c801f0bac9a59364ccefc"
+      },
+      "peak_teaching_particles": 0,
+      "success_overlay_present": false
+    },
+    "full_natural": {
+      "factory_kind": "counter",
+      "scenario": "full",
+      "unit_count": 12,
+      "event_count": 445,
+      "authoritative_event_sha256": "3de6833d1289b5f5944f8fbe8bc6e2d152bb69d31e0156a0464bd41da52a080c",
+      "after_render_event_sha256": "3de6833d1289b5f5944f8fbe8bc6e2d152bb69d31e0156a0464bd41da52a080c",
+      "teaching_events": [
+        {
+          "raw_index": 42,
+          "machine_id": "guardian_riposte",
+          "source_idx": 0,
+          "target_idx": 8,
+          "cause_index": 38,
+          "cause_parent_kind": "attack",
+          "cause_event_count": 3,
+          "payload": {
+            "cause_index": 38,
+            "source_idx": 0,
+            "target_idx": 8,
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "uses_per_battle": 1,
+            "pushed": true,
+            "from_pos": [
+              2,
+              1
+            ],
+            "to_pos": [
+              2,
+              0
+            ],
+            "delay_seconds": 0.3,
+            "cause_event_count": 3,
+            "event_count": 3,
+            "next_act_before": 2.3619496855345914,
+            "next_act_after": 2.661949685534591
+          },
+          "actual_shape": "flat",
+          "owned_raw_indices": [
+            43,
+            44,
+            45
+          ],
+          "actual_abi_self_test": {
+            "flat": true,
+            "nested": true,
+            "fields": [
+              "pushed",
+              "from_pos",
+              "to_pos",
+              "delay_seconds",
+              "next_act_before",
+              "next_act_after"
+            ]
+          },
+          "schedule_adapter": [
+            {
+              "kind": "move",
+              "raw_simulation_seconds": 0.2,
+              "scheduled_before": 1.75,
+              "scheduled_after": 1.4
+            },
+            {
+              "kind": "unit_state",
+              "raw_simulation_seconds": 0.2,
+              "scheduled_before": 2.0,
+              "scheduled_after": 1.4
+            },
+            {
+              "kind": "unit_state",
+              "raw_simulation_seconds": 0.2,
+              "scheduled_before": 1.4,
+              "scheduled_after": 1.4
+            }
+          ],
+          "owned_events": [
+            [
+              0.2,
+              "move",
+              8,
+              [
+                2,
+                0
+              ]
+            ],
+            [
+              0.2,
+              "unit_state",
+              8,
+              278,
+              31
+            ],
+            [
+              0.2,
+              "unit_state",
+              0,
+              263,
+              31
+            ]
+          ],
+          "parent_timing": {
+            "start": 0.9,
+            "release": 1.35,
+            "impact": 1.4,
+            "recover_end": 1.75
+          }
+        }
+      ],
+      "parent_state_reconciliation": {
+        "parent_raw_index": 38,
+        "parent_kind": "attack",
+        "impact": 1.4,
+        "native_before": {
+          "0": {
+            "hp": 288,
+            "energy": 21,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          },
+          "8": {
+            "hp": 278,
+            "energy": 10,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "native_after": {
+          "0": {
+            "hp": 263,
+            "energy": 31,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          },
+          "8": {
+            "hp": 278,
+            "energy": 31,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "teaching_after": {
+          "0": {
+            "hp": 263,
+            "energy": 31,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          },
+          "8": {
+            "hp": 278,
+            "energy": 31,
+            "pos": [
+              2,
+              0
+            ],
+            "alive": true
+          }
+        },
+        "presentation_before": {
+          "0": {
+            "hp": 288,
+            "energy": 21,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          },
+          "8": {
+            "hp": 278,
+            "energy": 10,
+            "pos": [
+              2,
+              1
+            ],
+            "alive": true
+          }
+        },
+        "presentation_after": {
+          "0": {
+            "hp": 263,
+            "energy": 31,
+            "pos": [
+              2,
+              2
+            ],
+            "alive": true
+          },
+          "8": {
+            "hp": 278,
+            "energy": 31,
+            "pos": [
+              2,
+              0
+            ],
+            "alive": true
+          }
+        },
+        "actual_shape": "flat",
+        "actual": {},
+        "semantic": {
+          "parent_hp_loss": 25,
+          "pushed": true,
+          "from_pos": [
+            2,
+            1
+          ],
+          "to_pos": [
+            2,
+            0
+          ],
+          "delay_seconds": 0.3,
+          "next_act_before": 2.3619496855345914,
+          "next_act_after": 2.661949685534591,
+          "hp_unchanged_by_teaching": true,
+          "energy_unchanged_by_teaching": true
+        }
+      },
+      "playback": {
+        "presentation_seconds": 1.48,
+        "pixel_sha256": "81e055c1e6ab4669b2ebfc335e5f81351bca79c11d1f3ad690803e5ef13887fa",
+        "rewind_pixel_sha256": "81e055c1e6ab4669b2ebfc335e5f81351bca79c11d1f3ad690803e5ef13887fa",
+        "playback_0_5x_pixel_sha256": "81e055c1e6ab4669b2ebfc335e5f81351bca79c11d1f3ad690803e5ef13887fa",
+        "playback_1x_pixel_sha256": "81e055c1e6ab4669b2ebfc335e5f81351bca79c11d1f3ad690803e5ef13887fa",
+        "playback_2x_pixel_sha256": "81e055c1e6ab4669b2ebfc335e5f81351bca79c11d1f3ad690803e5ef13887fa",
+        "skip_pixel_sha256": "1cdd200d0b353257d3c68cab8b96d36183d71848b2fde4ca3c0a8b834437b65f",
+        "skip_direct_final_pixel_sha256": "1cdd200d0b353257d3c68cab8b96d36183d71848b2fde4ca3c0a8b834437b65f"
+      },
+      "peak_teaching_particles": 42
+    },
+    "tempo_full_natural": {
+      "factory_kind": "tempo",
+      "scenario": "full",
+      "unit_count": 12,
+      "event_count": 299,
+      "authoritative_event_sha256": "06319f6098f546f2a070e87969e77a94812635c7914f23088b12442df4c62b65",
+      "after_render_event_sha256": "06319f6098f546f2a070e87969e77a94812635c7914f23088b12442df4c62b65",
+      "teaching_events": [
+        {
+          "raw_index": 272,
+          "machine_id": "tempo_break",
+          "source_idx": 3,
+          "target_idx": 11,
+          "cause_index": 260,
+          "cause_parent_kind": "cast",
+          "cause_event_count": 1,
+          "payload": {
+            "cause_index": 260,
+            "source_idx": 3,
+            "target_idx": 11,
+            "source_pos": [
+              4,
+              1
+            ],
+            "target_pos": [
+              5,
+              3
+            ],
+            "uses_per_battle": 1,
+            "actual_loss": 20,
+            "energy_before": 52,
+            "energy_after": 32,
+            "returned_energy": 0,
+            "cause_event_count": 1,
+            "event_count": 1
+          },
+          "actual_shape": "flat",
+          "owned_raw_indices": [
+            273
+          ],
+          "actual_abi_self_test": {
+            "flat": true,
+            "nested": true,
+            "fields": [
+              "actual_loss",
+              "energy_before",
+              "energy_after",
+              "returned_energy"
+            ]
+          },
+          "schedule_adapter": [
+            {
+              "kind": "unit_state",
+              "raw_simulation_seconds": 11.199999999999976,
+              "scheduled_before": 11.8,
+              "scheduled_after": 11.8
+            }
+          ],
+          "owned_events": [
+            [
+              11.199999999999976,
+              "unit_state",
+              11,
+              7,
+              32
+            ]
+          ],
+          "parent_timing": {
+            "start": 11.2,
+            "release": 11.6,
+            "impact": 11.8,
+            "recover_end": 12.0
+          }
+        }
+      ],
+      "parent_state_reconciliation": {
+        "parent_raw_index": 260,
+        "parent_kind": "cast",
+        "impact": 11.8,
+        "native_before": {
+          "3": {
+            "hp": 81,
+            "energy": 80,
+            "pos": [
+              4,
+              1
+            ],
+            "alive": true
+          },
+          "11": {
+            "hp": 67,
+            "energy": 42,
+            "pos": [
+              5,
+              3
+            ],
+            "alive": true
+          }
+        },
+        "native_after": {
+          "3": {
+            "hp": 81,
+            "energy": 0,
+            "pos": [
+              4,
+              1
+            ],
+            "alive": true
+          },
+          "11": {
+            "hp": 7,
+            "energy": 52,
+            "pos": [
+              5,
+              3
+            ],
+            "alive": true
+          }
+        },
+        "teaching_after": {
+          "3": {
+            "hp": 81,
+            "energy": 0,
+            "pos": [
+              4,
+              1
+            ],
+            "alive": true
+          },
+          "11": {
+            "hp": 7,
+            "energy": 32,
+            "pos": [
+              5,
+              3
+            ],
+            "alive": true
+          }
+        },
+        "presentation_before": {
+          "3": {
+            "hp": 81,
+            "energy": 80,
+            "pos": [
+              4,
+              1
+            ],
+            "alive": true
+          },
+          "11": {
+            "hp": 67,
+            "energy": 42,
+            "pos": [
+              5,
+              3
+            ],
+            "alive": true
+          }
+        },
+        "presentation_after": {
+          "3": {
+            "hp": 81,
+            "energy": 0,
+            "pos": [
+              4,
+              1
+            ],
+            "alive": true
+          },
+          "11": {
+            "hp": 7,
+            "energy": 32,
+            "pos": [
+              5,
+              3
+            ],
+            "alive": true
+          }
+        },
+        "actual_shape": "flat",
+        "actual": {},
+        "semantic": {
+          "parent_hp_loss": 60,
+          "actual_loss": 20,
+          "energy_before": 52,
+          "energy_after": 32,
+          "returned_energy": 0,
+          "zero_identified_by": "actual_loss == 0",
+          "zero": false,
+          "hp_unchanged_by_teaching": true
+        }
+      },
+      "playback": {
+        "presentation_seconds": 11.88,
+        "pixel_sha256": "8ed646765c3591b5ab3f2cb9632de1b10ed45c1581a6d70ac2451b8136a2d0b1",
+        "rewind_pixel_sha256": "8ed646765c3591b5ab3f2cb9632de1b10ed45c1581a6d70ac2451b8136a2d0b1",
+        "playback_0_5x_pixel_sha256": "8ed646765c3591b5ab3f2cb9632de1b10ed45c1581a6d70ac2451b8136a2d0b1",
+        "playback_1x_pixel_sha256": "8ed646765c3591b5ab3f2cb9632de1b10ed45c1581a6d70ac2451b8136a2d0b1",
+        "playback_2x_pixel_sha256": "8ed646765c3591b5ab3f2cb9632de1b10ed45c1581a6d70ac2451b8136a2d0b1",
+        "skip_pixel_sha256": "3eb0ff3f285ee681cae49440160db3a7744ef1c707ccd588d24bc823910d9849",
+        "skip_direct_final_pixel_sha256": "3eb0ff3f285ee681cae49440160db3a7744ef1c707ccd588d24bc823910d9849"
+      },
+      "peak_teaching_particles": 36
+    }
+  },
+  "outputs": [
+    {
+      "file": "counter_valid-pre.png",
+      "scene": "counter_valid",
+      "kind": "keyframe",
+      "bytes": 31462,
+      "sha256": "0f8b4715477312c3638ad31c2c8669108e863eb56206878e27b47f29f9617c22",
+      "presentation_seconds": 0.6,
+      "phase": "父动作前 / 只预亮不结算",
+      "teaching_particles": 28,
+      "pixels_sha256": "54f0c653f3c3b5c6ee6a52f718d7a8e4cb24afcd184787702453368fede03b52"
+    },
+    {
+      "file": "counter_valid-impact.png",
+      "scene": "counter_valid",
+      "kind": "keyframe",
+      "bytes": 33717,
+      "sha256": "2101234c5b1fc37544da0824ea792fd886efa69b82699398f5e18c3d02abc322",
+      "presentation_seconds": 0.7,
+      "phase": "父命中同拍 / 教学生效",
+      "teaching_particles": 42,
+      "pixels_sha256": "6f3a3098f7d073f07a2c4639f1313325fe6f414417b04891a973a823d0fc876c"
+    },
+    {
+      "file": "counter_valid-after.png",
+      "scene": "counter_valid",
+      "kind": "keyframe",
+      "bytes": 34883,
+      "sha256": "9ed4cd91f20bce8e28773ab30c904e195554392491d66c7f4ea5a9ad16b9e12d",
+      "presentation_seconds": 1.0,
+      "phase": "恢复余波 / 权威状态不回写",
+      "teaching_particles": 42,
+      "pixels_sha256": "7fd5121755d9f79564ae5347ddca065d19ef5585fcbf58c49194fabcaeb58a7a"
+    },
+    {
+      "file": "counter_valid.gif",
+      "scene": "counter_valid",
+      "kind": "continuous_clip",
+      "bytes": 223021,
+      "sha256": "2dec77fd7c2a66ea04686636bf189e419aa1234cfda945c83543cef4c592f06f",
+      "frames": 8,
+      "fps": 10,
+      "peak_teaching_particles": 42,
+      "range": [
+        0.49999999999999994,
+        1.2
+      ]
+    },
+    {
+      "file": "counter_blocked-pre.png",
+      "scene": "counter_blocked",
+      "kind": "keyframe",
+      "bytes": 32785,
+      "sha256": "2b8e5e90bace4af028316ef3da04dd4110f4ad00940dc4ebe6d3dccbbad0b7a4",
+      "presentation_seconds": 0.6,
+      "phase": "父动作前 / 只预亮不结算",
+      "teaching_particles": 28,
+      "pixels_sha256": "d0159d430e9d982725f57c890dcd15ae19a9098d3d5bcefcb95fb4d7f95c5eb9"
+    },
+    {
+      "file": "counter_blocked-impact.png",
+      "scene": "counter_blocked",
+      "kind": "keyframe",
+      "bytes": 35894,
+      "sha256": "d629ccbc5d263217413d6542133b02826b9523007b6d182709463fbf673f9561",
+      "presentation_seconds": 0.7,
+      "phase": "父命中同拍 / 教学生效",
+      "teaching_particles": 42,
+      "pixels_sha256": "3e687fb95616d74b7967df4540afd0a75319d280ecbae596786c56a0a64fbeef"
+    },
+    {
+      "file": "counter_blocked-after.png",
+      "scene": "counter_blocked",
+      "kind": "keyframe",
+      "bytes": 36805,
+      "sha256": "87401ad65aae48ecee98ed9d5cf863e0b07846a290a913d76c8e0fd2e275ada6",
+      "presentation_seconds": 1.0,
+      "phase": "恢复余波 / 权威状态不回写",
+      "teaching_particles": 42,
+      "pixels_sha256": "6c814d5fd91c7d692872ca4f2406cc5948f9c92eafa165e08a6d8d452e7c9a14"
+    },
+    {
+      "file": "counter_blocked.gif",
+      "scene": "counter_blocked",
+      "kind": "continuous_clip",
+      "bytes": 226895,
+      "sha256": "4ea913da3faa103d07a8d62e5df56cfc1fe4a91c9a4aed52497306e72d94b09d",
+      "frames": 8,
+      "fps": 10,
+      "peak_teaching_particles": 42,
+      "range": [
+        0.49999999999999994,
+        1.2
+      ]
+    },
+    {
+      "file": "counter_invalid-pre.png",
+      "scene": "counter_invalid",
+      "kind": "keyframe",
+      "bytes": 32809,
+      "sha256": "a27efc3f833fb31f741b80e2946d3d4504ff23a16df29ced33175ad0b8b0700b",
+      "presentation_seconds": 0.75,
+      "phase": "原生动作前 / 无成功反馈",
+      "teaching_particles": 0,
+      "pixels_sha256": "7920b998fa3dbecac6089a46a3325399f617f15b786ca60a97f4160feb0bb09e"
+    },
+    {
+      "file": "counter_invalid-outcome.png",
+      "scene": "counter_invalid",
+      "kind": "keyframe",
+      "bytes": 33921,
+      "sha256": "445ce193f48877ffc6c8dfe23fd79a913b1605b8695552a420b7bcb70d57a9e0",
+      "presentation_seconds": 1.1,
+      "phase": "真实负向结果 / 无教学成功轨",
+      "teaching_particles": 0,
+      "pixels_sha256": "565ea2436b6988ebb45aa4277728b9fc8942b5564e298c2f881d0184ce36ac14"
+    },
+    {
+      "file": "counter_invalid.gif",
+      "scene": "counter_invalid",
+      "kind": "continuous_clip",
+      "bytes": 249852,
+      "sha256": "8ee2c6376d1648eb315141d1c063cb8b1f00eb16a2254565056a9561f09e9b1a",
+      "frames": 9,
+      "fps": 10,
+      "peak_teaching_particles": 0,
+      "range": [
+        0.6499999999999999,
+        1.35
+      ]
+    },
+    {
+      "file": "counter_lethal-pre.png",
+      "scene": "counter_lethal",
+      "kind": "keyframe",
+      "bytes": 30934,
+      "sha256": "8c73fb17b0d4713a545126b9de0d0305ee30a500550c7817f7de81f8291468da",
+      "presentation_seconds": 0.6,
+      "phase": "原生动作前 / 无成功反馈",
+      "teaching_particles": 0,
+      "pixels_sha256": "baee93e60d7d9292f2cf44a18fe0b244c1f4f0dd91f9d279cc5c231307cf98c9"
+    },
+    {
+      "file": "counter_lethal-outcome.png",
+      "scene": "counter_lethal",
+      "kind": "keyframe",
+      "bytes": 32340,
+      "sha256": "dd9d0a2ca7f6a1b6587bd976d80aa0c69d3b34b56f1d18bfc4f4998624ffd5c4",
+      "presentation_seconds": 0.95,
+      "phase": "真实负向结果 / 无教学成功轨",
+      "teaching_particles": 0,
+      "pixels_sha256": "1e90649a6242993232667dba0234bac80c8a4b08b7cb3feb06ba3792e7292f76"
+    },
+    {
+      "file": "counter_lethal.gif",
+      "scene": "counter_lethal",
+      "kind": "continuous_clip",
+      "bytes": 215228,
+      "sha256": "ed3f8352cd254ef0f6343af3606ddf4d1ea34e9f42a975be611bed96a1e7ed3c",
+      "frames": 8,
+      "fps": 10,
+      "peak_teaching_particles": 0,
+      "range": [
+        0.49999999999999994,
+        1.2
+      ]
+    },
+    {
+      "file": "tempo_valid-pre.png",
+      "scene": "tempo_valid",
+      "kind": "keyframe",
+      "bytes": 32435,
+      "sha256": "8f3eb64fd876cb6ba09da47295e715e5a8d0ca297ce16c7c633877264735c4ac",
+      "presentation_seconds": 0.9,
+      "phase": "父动作前 / 只预亮不结算",
+      "teaching_particles": 24,
+      "pixels_sha256": "c7c8b86a62cc6a5ab0ebab9c8eb134a0ada905a8e381b8617a30480ba047eed9"
+    },
+    {
+      "file": "tempo_valid-impact.png",
+      "scene": "tempo_valid",
+      "kind": "keyframe",
+      "bytes": 34003,
+      "sha256": "0c64ed4ab2cd9f0a06f0aee9df1b096fd503d1f24bf89d9b34a896e37683befc",
+      "presentation_seconds": 1.0,
+      "phase": "父命中同拍 / 教学生效",
+      "teaching_particles": 36,
+      "pixels_sha256": "db9ac74118072ee44661a0bc82d71bfd57c1fa072b263fe116ee043fe603fd91"
+    },
+    {
+      "file": "tempo_valid-after.png",
+      "scene": "tempo_valid",
+      "kind": "keyframe",
+      "bytes": 33594,
+      "sha256": "acd1a2144dd9e66ac43376fcf1dfc278ff219702646d24f491216d1aa86c8a18",
+      "presentation_seconds": 1.3,
+      "phase": "恢复余波 / 权威状态不回写",
+      "teaching_particles": 36,
+      "pixels_sha256": "f8a97870779cc0f1fb842200e205d403dd9661c379bfe3ede1da5706f32bad9b"
+    },
+    {
+      "file": "tempo_valid.gif",
+      "scene": "tempo_valid",
+      "kind": "continuous_clip",
+      "bytes": 217787,
+      "sha256": "bbc111c3902757cc3354b94d6c6b69b6da519999337cb41c819a46a2c10b79ec",
+      "frames": 8,
+      "fps": 10,
+      "peak_teaching_particles": 36,
+      "range": [
+        0.8,
+        1.5
+      ]
+    },
+    {
+      "file": "tempo_zero-pre.png",
+      "scene": "tempo_zero",
+      "kind": "keyframe",
+      "bytes": 32278,
+      "sha256": "d8b9b8f19edfa4a5c76c8cc2305d53f90bc9f7f6dd8348935458905949ddbdc3",
+      "presentation_seconds": 0.9,
+      "phase": "父动作前 / 只预亮不结算",
+      "teaching_particles": 24,
+      "pixels_sha256": "2da545accc74eec99d958be286c12a789541827e32d75919d06357e27080e9f1"
+    },
+    {
+      "file": "tempo_zero-impact.png",
+      "scene": "tempo_zero",
+      "kind": "keyframe",
+      "bytes": 33771,
+      "sha256": "d41b68a5151276933bc0785ee9c07d8244c4195e30634b6bd30767fdfbbff27b",
+      "presentation_seconds": 1.0,
+      "phase": "父命中同拍 / 教学生效",
+      "teaching_particles": 36,
+      "pixels_sha256": "1fb32200d88dcaa0967e7d7016d5529f9ebce58fdf1ecb5c8bed9016d46a2de9"
+    },
+    {
+      "file": "tempo_zero-after.png",
+      "scene": "tempo_zero",
+      "kind": "keyframe",
+      "bytes": 33464,
+      "sha256": "031e2a7621ca808b13bdf2e81d90b2464f3b26b345376ecc57ac9d453617839d",
+      "presentation_seconds": 1.3,
+      "phase": "恢复余波 / 权威状态不回写",
+      "teaching_particles": 36,
+      "pixels_sha256": "7233a623906e0074eaff7b66488ac36dac2fa968db3496eee96623287db26a68"
+    },
+    {
+      "file": "tempo_zero.gif",
+      "scene": "tempo_zero",
+      "kind": "continuous_clip",
+      "bytes": 216900,
+      "sha256": "510c18c3fcb1fe8b15ab8d0081e915c48c4576f21d0eb5fd9a8ccfb7cc5cb48a",
+      "frames": 8,
+      "fps": 10,
+      "peak_teaching_particles": 36,
+      "range": [
+        0.8,
+        1.5
+      ]
+    },
+    {
+      "file": "tempo_invalid-pre.png",
+      "scene": "tempo_invalid",
+      "kind": "keyframe",
+      "bytes": 30516,
+      "sha256": "5623c835ebc0ad8ec04f1c1b33775e33326731375a73bbcc3f6107a917575e85",
+      "presentation_seconds": 0.0,
+      "phase": "原生动作前 / 无成功反馈",
+      "teaching_particles": 0,
+      "pixels_sha256": "82f33bd8541127f756c23f9e81e03dcf3791d1e6a657048e728f6d7358aeac3b"
+    },
+    {
+      "file": "tempo_invalid-outcome.png",
+      "scene": "tempo_invalid",
+      "kind": "keyframe",
+      "bytes": 30618,
+      "sha256": "9629ee638c444fed5c753377f03987ebb679fa6c857176beb31aa9751ba74778",
+      "presentation_seconds": 0.35,
+      "phase": "真实负向结果 / 无教学成功轨",
+      "teaching_particles": 0,
+      "pixels_sha256": "91c222ba884c6f5611247338d1f736a3f99d1dfa4bbd0a1fd3ac3f508fd128f9"
+    },
+    {
+      "file": "tempo_invalid.gif",
+      "scene": "tempo_invalid",
+      "kind": "continuous_clip",
+      "bytes": 179694,
+      "sha256": "15217732135c1b901c8a089cc0c1bf5a7f55ec6f607eef94d42cceda5231753e",
+      "frames": 8,
+      "fps": 10,
+      "peak_teaching_particles": 0,
+      "range": [
+        -0.1,
+        0.6
+      ]
+    },
+    {
+      "file": "tempo_lethal-pre.png",
+      "scene": "tempo_lethal",
+      "kind": "keyframe",
+      "bytes": 32281,
+      "sha256": "ad81635ebd93f1e35d0d6d645918146b98edf67dc10925051b4fdaf2c8e3d170",
+      "presentation_seconds": 0.9,
+      "phase": "原生动作前 / 无成功反馈",
+      "teaching_particles": 0,
+      "pixels_sha256": "543a43fbed2ffc717b18c0ce4a7ac646d507eab33bbf07d59d7d122d8cf3a926"
+    },
+    {
+      "file": "tempo_lethal-outcome.png",
+      "scene": "tempo_lethal",
+      "kind": "keyframe",
+      "bytes": 31046,
+      "sha256": "2ad52ff7180ecd5631a9ac6742d50d5759a89433ba2d3b1811ffbd7622b2eb23",
+      "presentation_seconds": 1.25,
+      "phase": "真实负向结果 / 无教学成功轨",
+      "teaching_particles": 0,
+      "pixels_sha256": "c8aa242753f8254d35ac7444e8e5d01e11146fe29ea15cd347496ea39d3809a0"
+    },
+    {
+      "file": "tempo_lethal.gif",
+      "scene": "tempo_lethal",
+      "kind": "continuous_clip",
+      "bytes": 215220,
+      "sha256": "690063f2c5322e43ccf93973fa51597f9061dbe917f0c7f6309c8ff9d23f0489",
+      "frames": 8,
+      "fps": 10,
+      "peak_teaching_particles": 0,
+      "range": [
+        0.8,
+        1.5
+      ]
+    },
+    {
+      "file": "full_natural-pre.png",
+      "scene": "full_natural",
+      "kind": "keyframe",
+      "bytes": 45525,
+      "sha256": "41aee8823a8316f1c9080456ff65b07b7834eedc21b96b3c821a156a394b5d7a",
+      "presentation_seconds": 1.3,
+      "phase": "父动作前 / 只预亮不结算",
+      "teaching_particles": 28,
+      "pixels_sha256": "80b969ee6a960f8b130c5d6de30c2eb5414da89ab9c1d9ff9e021c716adeca2f"
+    },
+    {
+      "file": "full_natural-impact.png",
+      "scene": "full_natural",
+      "kind": "keyframe",
+      "bytes": 45775,
+      "sha256": "47123b6c8632a7f01e03be7b774e956f6c1ac67425b430d10f1849cec5d85995",
+      "presentation_seconds": 1.4,
+      "phase": "父命中同拍 / 教学生效",
+      "teaching_particles": 42,
+      "pixels_sha256": "bfa460f5fada0059c89d30ff164a06f6721345c6ed7e9919b57b3b5d5a9755d1"
+    },
+    {
+      "file": "full_natural-after.png",
+      "scene": "full_natural",
+      "kind": "keyframe",
+      "bytes": 45254,
+      "sha256": "2760fea30a722d3e1c0d7d65fa1cd8bb486f8bdfb95bcec15f4ddad171d6c8fc",
+      "presentation_seconds": 1.7,
+      "phase": "恢复余波 / 权威状态不回写",
+      "teaching_particles": 42,
+      "pixels_sha256": "0005e635ed0458a2f521040e9a56620ce05ab27f20bdb90afeabf211dde0cd3a"
+    },
+    {
+      "file": "full_natural.gif",
+      "scene": "full_natural",
+      "kind": "continuous_clip",
+      "bytes": 305467,
+      "sha256": "916c5f00cea48943937873d0b900ab2f8da72c7e77616519d952b4359f0564bc",
+      "frames": 8,
+      "fps": 10,
+      "peak_teaching_particles": 42,
+      "range": [
+        1.2,
+        1.9
+      ]
+    },
+    {
+      "file": "tempo_full_natural-pre.png",
+      "scene": "tempo_full_natural",
+      "kind": "keyframe",
+      "bytes": 39626,
+      "sha256": "63f28290dd5c26c1b730b7184eafa6e26f8dd4360e6c41f6285db1f17408f40f",
+      "presentation_seconds": 11.7,
+      "phase": "父动作前 / 只预亮不结算",
+      "teaching_particles": 24,
+      "pixels_sha256": "aeb049b4c76f8dcb175225a6e2537ebb4fa12c95403a5506597eacae6a3fe07d"
+    },
+    {
+      "file": "tempo_full_natural-impact.png",
+      "scene": "tempo_full_natural",
+      "kind": "keyframe",
+      "bytes": 41366,
+      "sha256": "596d92e43545b89fcafc4fbff789f8a16eb6b591cc21152562c6526dd6eb2046",
+      "presentation_seconds": 11.8,
+      "phase": "父命中同拍 / 教学生效",
+      "teaching_particles": 36,
+      "pixels_sha256": "0e702f93c30e50fc24dcaa2199eb30714caa634ddb7ba2ff0419ebeea5f04ac9"
+    },
+    {
+      "file": "tempo_full_natural-after.png",
+      "scene": "tempo_full_natural",
+      "kind": "keyframe",
+      "bytes": 41335,
+      "sha256": "074e8eee0aecb604913c0a2f5ff2c4fec68f7ab3bf4a5a1ad68fecf0e4a0865d",
+      "presentation_seconds": 12.1,
+      "phase": "恢复余波 / 权威状态不回写",
+      "teaching_particles": 36,
+      "pixels_sha256": "57ee5aa4a60b36a2bbf52fe0a781299f69a0cfbcba4d263bdbf8a62c257a4f2e"
+    },
+    {
+      "file": "tempo_full_natural.gif",
+      "scene": "tempo_full_natural",
+      "kind": "continuous_clip",
+      "bytes": 277039,
+      "sha256": "4a753c369824966f3640d8612c505d58bd2c8506963a34020511e13ce46be263",
+      "frames": 8,
+      "fps": 10,
+      "peak_teaching_particles": 36,
+      "range": [
+        11.600000000000001,
+        12.3
+      ]
+    },
+    {
+      "file": "teaching-overview.png",
+      "scene": null,
+      "kind": "overview",
+      "bytes": 342562,
+      "sha256": "f560dd0b9d17d65a8c387ad49388356ac81bce2d36eca952cf76aa472370f691"
+    }
+  ],
+  "checks": {
+    "cause_ownership": true,
+    "state_reconciliation": true,
+    "negative_paths": true,
+    "actual_abi_compatibility": true,
+    "event_hash_unchanged": true,
+    "rewind_speed_pixels": true,
+    "particle_budget": true
+  },
+  "limits": [
+    "All overlays derive from authoritative teaching_effect records and real parent ActionTiming.",
+    "The production renderer and tools/mockups are imported read-only; no default behavior was patched.",
+    "State reconciliation replays authoritative unit_state/move/die records and cross-checks presentation HP, energy and position at the parent impact.",
+    "Negative invalid and lethal scenes render native outcomes only; no teaching success overlay is allowed.",
+    "Full scenes are one six-unit natural prototype battle each and are not balance claims.",
+    "PC PNG/GIF evidence does not measure ESP32 memory, cache, C sampling, or frame time.",
+    "The overlay and adapter are isolated acceptance tracks, not production animation integration.",
+    "Old cut/surf/rest defects are audited by the contract but are not fixed by this probe."
+  ]
+}

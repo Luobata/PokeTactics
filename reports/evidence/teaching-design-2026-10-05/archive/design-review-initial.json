@@ -1,0 +1,65 @@
+{
+  "record_kind": "teaching_design_review_initial",
+  "recorded_at": "2026-10-05T11:07:42.476150+00:00",
+  "review_status": "blocked",
+  "scope": "Second-batch six-machine design implementation readiness; pre-adjudication snapshot.",
+  "reviewer": "independent design reviewer agent",
+  "source_note": "Line references in this record describe the pre-adjudication design snapshot; preserve this record unchanged as the original blocked audit.",
+  "blockers": [
+    {
+      "id": "breach_lunge_deterministic_displacement",
+      "status": "open",
+      "evidence": [
+        "docs/design/teaching-skills-v1.json:64-83 allowed target push and caster advance but did not define direction priority or multi-cell tie-breaks.",
+        "sim/combat.py:_knock_cell and _free_cell_near/_step_toward already provide deterministic candidate primitives."
+      ],
+      "required_fix": "Define target push direction, caster-advance path selection, occupied-cell behavior, and movement failure consumption."
+    },
+    {
+      "id": "arc_lock_energy_order_and_rounding",
+      "status": "open",
+      "evidence": [
+        "docs/design/teaching-skills-v1.json:86-107 only said 50% reduction and equal-strength non-stacking.",
+        "sim/combat.py:698-705 and 803-805 integerize attack/hit-taken energy after synergy/item modifiers; partner grants use another path."
+      ],
+      "required_fix": "Define one positive-energy helper, modifier order, floor/round behavior, clamp, stacking/replacement, expiry, and excluded transfers."
+    },
+    {
+      "id": "rally_signal_target_and_failed_resource",
+      "status": "open",
+      "evidence": [
+        "docs/design/teaching-skills-v1.json:145-166 said up to two allies but had no self-exclusion, stable sort, or no-eligible-target consumption/delay rule."
+      ],
+      "required_fix": "Define candidate filter, deterministic order, actual-gain clamp, no-valid-target behavior, and source delay scheduling."
+    },
+    {
+      "id": "expose_weakness_next_final_damage",
+      "status": "open",
+      "evidence": [
+        "docs/design/teaching-skills-v1.json:169-190 did not define the multiplier insertion point in sim/combat.py:_final_damage.",
+        "Zero damage, DOT, side hits, opening combos, death, and mark consumption/expiry were not fully classified."
+      ],
+      "required_fix": "Specify exact damage-chain insertion point, integer behavior, eligible packet types, zero-damage behavior, and consumption/death/expiry events."
+    },
+    {
+      "id": "standburst_trigger_dr_and_push_determinism",
+      "status": "open",
+      "evidence": [
+        "docs/design/teaching-skills-v1.json:193-216 did not say whether activation occurs between packets or after a native chain.",
+        "sim/combat.py:_final_damage uses max(temporary DR, partner DR) followed by independent layers.",
+        "Multiple adjacent pushes had no order or occupancy snapshot rule."
+      ],
+      "required_fix": "Define activation timing, DOT/sash/death behavior, DR stacking and independent expiry, push order, destination conflicts, and occupancy snapshot."
+    },
+    {
+      "id": "field_triage_patient_and_failed_precondition",
+      "status": "open",
+      "evidence": [
+        "docs/design/teaching-skills-v1.json:219-241 did not define simultaneous patient selection, self exclusion, monitoring points, or insufficient-energy retry/consumption semantics."
+      ],
+      "required_fix": "Define monitoring events, patient sort/tie-break, self exclusion, death recheck, healing-block outcome, and failed-precondition resource behavior."
+    }
+  ],
+  "first_batch_note": "First batch remained pass_with_risk for isolated prototypes; this blocked record applies to the six second-batch machines only.",
+  "files_changed_by_review": []
+}

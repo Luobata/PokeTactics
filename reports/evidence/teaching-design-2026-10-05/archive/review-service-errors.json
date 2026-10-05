@@ -1,0 +1,24 @@
+{
+  "schema": "teaching-review-service-errors-v1",
+  "run": "20261005-111334-a3447e384232",
+  "attempts": [
+    {
+      "reviewer_agent": "/root/teaching_release_review",
+      "attempt": 1,
+      "result": "Agent errored: exceeded retry limit, last status: 429 Too Many Requests"
+    },
+    {
+      "reviewer_agent": "/root/teaching_release_review",
+      "attempt": 2,
+      "result": "Agent errored: exceeded retry limit, last status: 429 Too Many Requests"
+    },
+    {
+      "reviewer_agent": "/root/teaching_release_retry",
+      "attempt": 3,
+      "result": "Agent errored: exceeded retry limit, last status: 429 Too Many Requests",
+      "run": "20261005-112337-3a01d6375ee2"
+    }
+  ],
+  "review_verdict_received": false,
+  "not_a_pass": true
+}

@@ -1,0 +1,8 @@
+garden_riposte dive {'off': 0.16, 'on': 0.39, 'alternative': 0.25}
+garden_riposte dive_horizontal_mirror {'off': 0.12, 'on': 0.15, 'alternative': 0.13}
+garden_riposte garden {'off': 0.48, 'on': 0.49, 'alternative': 0.55}
+garden_riposte battery {'off': 1, 'on': 1, 'alternative': 1}
+disrupt_tempo dive {'off': 0.29, 'on': 0.26, 'alternative': 0.28}
+disrupt_tempo dive_horizontal_mirror {'off': 0.14, 'on': 0.14, 'alternative': 0.18}
+disrupt_tempo garden {'off': 0.04, 'on': 0.06, 'alternative': 0.11}
+disrupt_tempo battery {'off': 0.02, 'on': 0.02, 'alternative': 0.04}

@@ -1,0 +1,2835 @@
+{
+  "version": "teaching-skills-v1",
+  "status": "proposal_not_gameplay",
+  "generated_from": "tactics_v5 roster/profile shape; no canonical learnsets",
+  "invariants": {
+    "one_slot_per_instance": true,
+    "native_skills_preserved": true,
+    "eligibility_binding": "current species form",
+    "canonical_learnsets_used": false,
+    "existing_six_teachings_unchanged": true,
+    "new_rules_require_new_version": true,
+    "incompatible_evolution_policy": "preview then return machine to inventory on successful commit"
+  },
+  "thresholds": {
+    "frontline_bulk": 220,
+    "heavy_bulk": 260,
+    "tempo_speed": 70,
+    "rare_tempo_speed": 100,
+    "finisher_offense": 100,
+    "triage": {
+      "bulk_min": 200,
+      "bulk_max": 259,
+      "speed_max": 70
+    }
+  },
+  "primary_licenses": [
+    {
+      "id": "breakthrough",
+      "rule": "melee and bulk < 220"
+    },
+    {
+      "id": "counter",
+      "rule": "melee and bulk >= 220"
+    },
+    {
+      "id": "suppression",
+      "rule": "ranged and speed >= 70"
+    },
+    {
+      "id": "rally",
+      "rule": "ranged and speed < 70"
+    }
+  ],
+  "rare_licenses": [
+    {
+      "id": "finisher",
+      "rule": "max attack/special attack >= 100"
+    },
+    {
+      "id": "standburst",
+      "rule": "bulk >= 260"
+    },
+    {
+      "id": "triage",
+      "rule": "200 <= bulk < 260 and speed <= 70"
+    },
+    {
+      "id": "tempo",
+      "rule": "speed >= 100"
+    }
+  ],
+  "machines": [
+    {
+      "id": "breach_lunge",
+      "name": "破阵突进",
+      "license": "breakthrough",
+      "role": "输出 / 阵型突破",
+      "trigger": "first_native_primary_damage",
+      "effect": "Push the primary target one legal cell away, then enter the vacated cell; if the target cannot move, advance one legal cell toward an adjacent cell of it. No damage and no energy.",
+      "invalid": "Miss, dodge, immunity, zero damage, or caster death before resolution do not consume it. No legal caster displacement still consumes it.",
+      "counter": "Guard redirect, dodge, edge/crowded formation, kill the low-bulk source, or bait an immune target.",
+      "animation": {
+        "channel": "teaching_effect",
+        "motif": "ground_double_chevron",
+        "duration": 0.45,
+        "authority": "Bind all move records to cause_index/cause_event_count; draw a blocked impact when no movement happened."
+      },
+      "status": "second_batch",
+      "balanced": false,
+      "candidate_parameters": {
+        "uses_per_battle": 1,
+        "push_cells": 1
+      },
+      "resolution_contract": {
+        "eligibility": "Native cast final primary hit loses real HP and both remain living at resolution.",
+        "resolution": "After native packet use _knock_cell(target, source.pos), row-axis tie priority. If pushed, source enters vacated target cell. If blocked, BFS toward free four-adjacent target cells, select shortest reachable path then learner-relative local position; if already adjacent stay. Take at most first free step, never enter occupied target cell.",
+        "resource": "Consume on valid resolution even if neither can move; no damage/energy/healing or retarget.",
+        "interaction": "Guard supplies final primary target; no chain pushing or rerunning native area hits. Edge and occupied destinations can negate movement."
+      }
+    },
+    {
+      "id": "arc_lock",
+      "name": "弧光锁能",
+      "license": "suppression",
+      "role": "干扰 / 反启动",
+      "trigger": "first_basic_primary_damage",
+      "effect": "The primary target gains 50% less energy from attack, hit-taken, partner, and synergy sources for 4 seconds. Current energy is not reduced; equal-strength locks do not stack.",
+      "invalid": "Miss, dodge, immunity, zero damage, or target death do not consume it. Full energy or no later gain makes the state present but valueless; expiry is authoritative.",
+      "counter": "Kill or displace the ranged source, let a nearly charged target cast first, split energy dependencies, or use relay to other units. Healing block does not affect it.",
+      "animation": {
+        "channel": "teaching_effect",
+        "motif": "arc_lock_countdown",
+        "duration": 0.45,
+        "status_duration": 4.0,
+        "authority": "Countdown steps must derive from lock/expiry events, not playback clock inference."
+      },
+      "status": "second_batch",
+      "balanced": false,
+      "candidate_parameters": {
+        "uses_per_battle": 1,
+        "duration_seconds": 4.0,
+        "energy_gain_reduction": 0.5
+      },
+      "resolution_contract": {
+        "eligibility": "Basic attack final primary hit loses real HP, source/target live. Apply after complete basic/partner packet; do not retroactively reduce triggering hit-gain.",
+        "resolution": "For later positive gains, floor(base_amount * (1 + source_specific_synergy_bonus + source_specific_item_bonus) * (1 - strongest_lock)), clamp to nonnegative remaining ENERGY_MAX capacity. Fixed grants use bonuses zero.",
+        "resource": "Apply once even to full-energy target. Equal/weaker lock is suppressed without consuming the machine; stronger lock replaces, emits replaced end, consumes and starts its own duration.",
+        "interaction": "Cover attack, hit-taken, partner, explicit synergy and future teaching grants through one helper. Exclude deployment start energy, energy costs/losses and stolen-energy transfer (both drain and transfer gain). Apply/expired/dead/replaced are explicit; source death does not clear lock."
+      }
+    },
+    {
+      "id": "guardian_riposte",
+      "name": "守备反击",
+      "license": "counter",
+      "role": "防守 / 反突进",
+      "trigger": "first_adjacent_primary_damage_snapshot_survive_then_post_native_chain",
+      "effect": "Snapshot eligibility at the final primary hit: both units four-adjacent, actual HP lost, and both alive. Resolve after the native skill chain finishes. If native displacement breaks adjacency, eligibility remains; the push direction uses current true positions. Attempt a one-cell push and delay the attacker next action 0.3 seconds once. No retarget, damage, energy, or healing.",
+      "invalid": "Hit-snapshot distance greater than one, zero damage, an avoided attack, or either unit dead does not trigger it. A ranged unit hitting from an adjacent cell can trigger it. Both units must remain alive at resolution. Edge-blocking still leaves the 0.3-second delay.",
+      "counter": "Ranged focus, kill the defender, bait the once-per-battle trigger, or edge positioning to cancel displacement.",
+      "animation": {
+        "channel": "teaching_effect",
+        "motif": "shell_riposte_push",
+        "duration": 0.45,
+        "authority": "Bind the forced move or stalled-action marker to the owning attack/cast event.",
+        "payload_contract": {
+          "source_idx": "受击防守者（学习单位）",
+          "target_idx": "敌方攻击者（被推离或原地迟滞）",
+          "cause_index": "owning authoritative native attack/cast event index",
+          "cause_event_count": "bounded count of authoritative records owned by this teaching effect"
+        },
+        "event_abi": "(t, \"teaching_effect\", source_idx, target_idx, machine_id, payload)"
+      },
+      "status": "first_batch",
+      "balanced": false,
+      "candidate_parameters": {
+        "uses_per_battle": 1,
+        "delay_seconds": 0.3,
+        "push_cells": 1
+      },
+      "result_semantics": {
+        "trigger_snapshot": "final primary hit",
+        "resolution": "after native damage/displacement/partner/weather chain",
+        "push_basis": "current positions after native chain"
+      },
+      "resolution_contract": {
+        "eligibility": "Final primary hit loses real HP, hit-snapshot distance one and both living. Adjacent ranged attackers qualify.",
+        "resolution": "After native packet, both must still live. Use current positions for _knock_cell; no retarget.",
+        "resource": "Consume once on valid resolution even if push is blocked; add delay_seconds after native next_act scheduling.",
+        "interaction": "Guard changes the final primary victim. Only that victim may react. No damage/heal/energy or added RNG."
+      }
+    },
+    {
+      "id": "rally_signal",
+      "name": "集结信号",
+      "license": "rally",
+      "role": "辅助 / 启动",
+      "trigger": "first_native_primary_damage",
+      "effect": "Up to two living allies within two cells and below full energy each gain 15 energy; the learner's next action is delayed 0.3 seconds.",
+      "invalid": "A miss, dodge, immunity, zero damage, no eligible ally, or learner death produces no ally gain.",
+      "counter": "Kill or displace the source, deny the native cast, spread allies, or drain their energy.",
+      "animation": {
+        "channel": "teaching_effect",
+        "motif": "signal_arc_to_two",
+        "duration": 0.45,
+        "authority": "Energy gains must be authoritative unit_state changes in event_count."
+      },
+      "status": "second_batch",
+      "balanced": false,
+      "candidate_parameters": {
+        "uses_per_battle": 1,
+        "ally_energy": 15,
+        "max_allies": 2,
+        "source_delay_seconds": 0.3
+      },
+      "resolution_contract": {
+        "eligibility": "Native cast final primary hit loses real HP; source must survive complete native packet.",
+        "resolution": "After packet choose living non-self allies within range two and energy below ENERGY_MAX; order by _target_key(source, ally), take at most max_allies. Each fixed ally_energy grant passes the positive-gain helper and cap.",
+        "resource": "If no ally gains energy, no consume or source delay. Otherwise consume once and append source_delay_seconds after native next_act scheduling.",
+        "interaction": "Existing attack/partner gains settle before selection. Arc lock reduces the actual grant; full/dead/out-of-range allies are excluded. No stun state or new RNG."
+      }
+    },
+    {
+      "id": "expose_weakness",
+      "name": "暴露弱点",
+      "license": "finisher",
+      "role": "输出窗口 / 协同击杀",
+      "trigger": "first_native_primary_damage",
+      "effect": "Mark the primary target for 4 seconds. Its next final damage taken is increased by 20%, then the mark disappears. Equal-strength marks do not stack.",
+      "invalid": "No immediate damage; miss, dodge, immunity, zero damage, or target death does not consume it.",
+      "counter": "Guard, dodge, immunity, tank switching, or killing the source before mark application. Source death after application does not clear the mark.",
+      "animation": {
+        "channel": "teaching_effect",
+        "motif": "opening_crosshair",
+        "duration": 0.45,
+        "status_duration": 4.0,
+        "authority": "Show one mark and one consumed/dead/expired outcome."
+      },
+      "status": "second_batch",
+      "balanced": false,
+      "candidate_parameters": {
+        "uses_per_battle": 1,
+        "duration_seconds": 4.0,
+        "next_damage_taken_multiplier": 1.2
+      },
+      "resolution_contract": {
+        "eligibility": "Native cast final primary hit loses real HP and source/target survive complete packet. Mark begins after that packet; its side hits cannot consume it.",
+        "resolution": "Next later direct _final_damage packet (basic/cast primary, side hit or opening volley) multiplies by next_damage_taken_multiplier after attacker weather/synergy/item multipliers but before synergy ult cap and final defender synergy/item DR. Cap stays binding. DOT bypasses this multiplier.",
+        "resource": "Apply consumes once. Equal/weaker mark is suppressed without consuming; stronger replaces and consumes. Only a positive final landed direct damage packet consumes the mark. Dodge/immunity/zero damage preserves it until expiry.",
+        "interaction": "Consumed/dead/expired/replaced events are explicit. Source death leaves mark. Ult cap or later defenses may erase the benefit while a positive hit still consumes it; that is an observable failed window."
+      }
+    },
+    {
+      "id": "standburst",
+      "name": "坚壁爆发",
+      "license": "standburst",
+      "role": "防守 / 阵型操控",
+      "trigger": "first_time_hp_at_or_below_60_percent",
+      "effect": "Gain 20% damage reduction for 3 seconds and attempt to push each four-adjacent enemy one legal cell away.",
+      "invalid": "Death from the triggering blow prevents it; no adjacent free cell removes displacement but keeps damage reduction.",
+      "counter": "Ranged damage, sustained damage, healing block, kill through the threshold, or edge positioning.",
+      "animation": {
+        "channel": "teaching_effect",
+        "motif": "fortress_ring_wave",
+        "duration": 0.45,
+        "status_duration": 3.0,
+        "authority": "Each push must be an authoritative move record; countdown consumes expiry events."
+      },
+      "status": "second_batch",
+      "balanced": false,
+      "candidate_parameters": {
+        "uses_per_battle": 1,
+        "duration_seconds": 3.0,
+        "damage_reduction": 0.2,
+        "hp_threshold": 0.6,
+        "push_cells": 1
+      },
+      "resolution_contract": {
+        "eligibility": "Record first surviving HP loss at or below hp_threshold, including sash survival and DOT. If dead by end of the owning native/DOT packet, no consume.",
+        "resolution": "After complete packet, if source lives and is still at/below threshold, apply own independent duration DR and push enemies currently four-adjacent. Capture all living positions before pushes, calculate _knock_cell axis against snapshot, canonical _target_key order; invalid/occupied cells fail, earlier destination reservation wins conflicts.",
+        "resource": "Consume once even with no adjacent enemy or all pushes blocked. Never retroactively reduce the triggering packet.",
+        "interaction": "DR joins max(temporary_DR, partner_DR, teaching_DR) with independent expiry, followed by existing melee/synergy/item layers. No additive DR. It affects direct _final_damage only; existing DOT bypasses DR. No chain displacement or rerun of native range hits."
+      }
+    },
+    {
+      "id": "field_triage",
+      "name": "战地急救",
+      "license": "triage",
+      "role": "辅助 / 续航",
+      "trigger": "first_ally_in_two_cells_at_or_below_40_percent",
+      "effect": "Heal that ally for 15% of its actual missing HP and reduce the learner's energy by 15. Actual healing-block modifiers apply before healing.",
+      "invalid": "No wounded in-range ally, full HP after clamp, learner death, or insufficient learner energy produces no heal.",
+      "counter": "Healing needle, burst through the threshold, kill healer or patient, or displace them beyond two cells.",
+      "animation": {
+        "channel": "teaching_effect",
+        "motif": "triage_return_arc",
+        "duration": 0.45,
+        "authority": "Consume regen and healing_prevented records; never draw invented healing."
+      },
+      "status": "second_batch",
+      "balanced": false,
+      "candidate_parameters": {
+        "uses_per_battle": 1,
+        "missing_hp_heal_fraction": 0.15,
+        "range_cells": 2,
+        "hp_threshold": 0.4,
+        "caster_energy_cost": 15
+      },
+      "resolution_contract": {
+        "eligibility": "At packet end after authoritative HP loss, movement or positive energy gain, source lives/has caster_energy_cost and a living non-self ally within range_cells is at/below hp_threshold. HP gain alone does not trigger; an already-wounded ally entering range can.",
+        "resolution": "Choose lowest hp/max_hp then _target_key(source, ally). floor(actual_missing_hp * missing_hp_heal_fraction), then _healing_amount applies the strongest active healing block. No overheal.",
+        "resource": "No patient, raw heal zero, dead source or insufficient energy leaves machine/cost untouched. Once raw heal positive and legal, atomically pay caster_energy_cost and consume, even if healing block reduces actual heal to zero. No recursive teaching trigger from its own result.",
+        "interaction": "Emit actual regen/unit_state and healing_prevented; healing needle applies, partner healing settles first. Exclude self; recheck patient before atomic application and select next legal patient if necessary."
+      }
+    },
+    {
+      "id": "tempo_break",
+      "name": "心律截断",
+      "license": "tempo",
+      "role": "干扰 / 反启动",
+      "trigger": "first_native_primary_damage_snapshot_then_post_native_chain",
+      "effect": "Snapshot eligibility at the final primary hit with actual HP loss and living target. Resolve after the native skill chain. Remove 20 energy from the target current energy, clamped to 0; no energy is returned or relayed. A zero-energy target consumes the use and emits actual_loss=0.",
+      "invalid": "Miss, dodge, immunity, zero damage, or death at the hit snapshot does not consume it.",
+      "counter": "Kill or displace the source, have the target cast first or take the hit at zero energy, redirect with guard, or kill the tempo source before its native cast.",
+      "animation": {
+        "channel": "teaching_effect",
+        "motif": "broken_pulse_drain",
+        "duration": 0.45,
+        "authority": "One target unit_state snapshot owns the deterministic loss; do not replay proportional future gains.",
+        "payload_contract": {
+          "source_idx": "原生施法者（学习单位）",
+          "target_idx": "原生大招主目标",
+          "cause_index": "owning authoritative native attack/cast event index",
+          "cause_event_count": "bounded count of authoritative records owned by this teaching effect"
+        },
+        "event_abi": "(t, \"teaching_effect\", source_idx, target_idx, machine_id, payload)"
+      },
+      "status": "first_batch",
+      "balanced": false,
+      "candidate_parameters": {
+        "uses_per_battle": 1,
+        "energy_loss": 20
+      },
+      "result_semantics": {
+        "trigger_snapshot": "final primary hit",
+        "resolution": "after native chain using current energy",
+        "zero_energy": "consumed with actual_loss=0"
+      },
+      "resolution_contract": {
+        "eligibility": "Native cast final primary hit loses real HP and both remain living at resolution.",
+        "resolution": "After native packet including defender hit/partner gain, remove min(current_energy, energy_loss). ENERGY_MAX is 80.",
+        "resource": "Consume once even if actual_loss is zero; no returned energy.",
+        "interaction": "Read current authoritative energy; native steal/gain and ally packets finish first. Guard redirects to the final primary victim."
+      }
+    }
+  ],
+  "families": [
+    {
+      "family_head": 1,
+      "name": "妙蛙种子族",
+      "species_ids": [
+        1,
+        2,
+        3
+      ],
+      "capability_tags": [
+        "finisher",
+        "rally",
+        "suppression"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 4,
+      "name": "小火龙族",
+      "species_ids": [
+        4,
+        5,
+        6
+      ],
+      "capability_tags": [
+        "finisher",
+        "rally",
+        "suppression",
+        "tempo"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 7,
+      "name": "杰尼龟族",
+      "species_ids": [
+        7,
+        8,
+        9
+      ],
+      "capability_tags": [
+        "rally",
+        "standburst",
+        "suppression",
+        "triage"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 10,
+      "name": "绿毛虫族",
+      "species_ids": [
+        10,
+        11,
+        12
+      ],
+      "capability_tags": [
+        "breakthrough",
+        "rally",
+        "suppression"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 13,
+      "name": "独角虫族",
+      "species_ids": [
+        13,
+        14,
+        15
+      ],
+      "capability_tags": [
+        "breakthrough"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 16,
+      "name": "波波族",
+      "species_ids": [
+        16,
+        17,
+        18
+      ],
+      "capability_tags": [
+        "breakthrough",
+        "counter"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 19,
+      "name": "小拉达族",
+      "species_ids": [
+        19,
+        20
+      ],
+      "capability_tags": [
+        "breakthrough"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 21,
+      "name": "烈雀族",
+      "species_ids": [
+        21,
+        22
+      ],
+      "capability_tags": [
+        "breakthrough",
+        "tempo"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 25,
+      "name": "皮卡丘族",
+      "species_ids": [
+        25,
+        26
+      ],
+      "capability_tags": [
+        "breakthrough",
+        "suppression",
+        "tempo"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 29,
+      "name": "尼多兰族",
+      "species_ids": [
+        29,
+        30,
+        31
+      ],
+      "capability_tags": [
+        "breakthrough",
+        "counter",
+        "standburst",
+        "triage"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 32,
+      "name": "尼多朗族",
+      "species_ids": [
+        32,
+        33,
+        34
+      ],
+      "capability_tags": [
+        "breakthrough",
+        "counter"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 37,
+      "name": "六尾族",
+      "species_ids": [
+        37,
+        38
+      ],
+      "capability_tags": [
+        "rally",
+        "suppression",
+        "tempo"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 41,
+      "name": "超音蝠族",
+      "species_ids": [
+        41,
+        42
+      ],
+      "capability_tags": [
+        "breakthrough"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 43,
+      "name": "走路草族",
+      "species_ids": [
+        43,
+        44,
+        45
+      ],
+      "capability_tags": [
+        "finisher",
+        "rally",
+        "triage"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 54,
+      "name": "可达鸭族",
+      "species_ids": [
+        54,
+        55
+      ],
+      "capability_tags": [
+        "rally",
+        "suppression"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 56,
+      "name": "猴怪族",
+      "species_ids": [
+        56,
+        57
+      ],
+      "capability_tags": [
+        "breakthrough",
+        "finisher"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 58,
+      "name": "卡蒂狗族",
+      "species_ids": [
+        58,
+        59
+      ],
+      "capability_tags": [
+        "breakthrough",
+        "counter",
+        "finisher"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 60,
+      "name": "蚊香蝌蚪族",
+      "species_ids": [
+        60,
+        61,
+        62
+      ],
+      "capability_tags": [
+        "breakthrough",
+        "counter",
+        "standburst"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 63,
+      "name": "凯西族",
+      "species_ids": [
+        63,
+        64,
+        65
+      ],
+      "capability_tags": [
+        "finisher",
+        "suppression",
+        "tempo"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 66,
+      "name": "腕力族",
+      "species_ids": [
+        66,
+        67,
+        68
+      ],
+      "capability_tags": [
+        "breakthrough",
+        "counter",
+        "finisher",
+        "triage"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 69,
+      "name": "喇叭芽族",
+      "species_ids": [
+        69,
+        70,
+        71
+      ],
+      "capability_tags": [
+        "breakthrough",
+        "finisher",
+        "triage"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 74,
+      "name": "小拳石族",
+      "species_ids": [
+        74,
+        75,
+        76
+      ],
+      "capability_tags": [
+        "counter",
+        "finisher",
+        "standburst",
+        "triage"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 79,
+      "name": "呆呆兽族",
+      "species_ids": [
+        79,
+        80
+      ],
+      "capability_tags": [
+        "counter",
+        "finisher",
+        "rally",
+        "standburst",
+        "triage"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 81,
+      "name": "小磁怪族",
+      "species_ids": [
+        81,
+        82
+      ],
+      "capability_tags": [
+        "finisher",
+        "rally",
+        "suppression",
+        "triage"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 92,
+      "name": "鬼斯族",
+      "species_ids": [
+        92,
+        93,
+        94
+      ],
+      "capability_tags": [
+        "finisher",
+        "suppression",
+        "tempo"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 95,
+      "name": "大岩蛇族",
+      "species_ids": [
+        95
+      ],
+      "capability_tags": [
+        "counter",
+        "standburst"
+      ],
+      "natural_endpoint_family": true,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 111,
+      "name": "独角犀牛族",
+      "species_ids": [
+        111,
+        112
+      ],
+      "capability_tags": [
+        "counter",
+        "finisher",
+        "standburst"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 116,
+      "name": "墨海马族",
+      "species_ids": [
+        116,
+        117
+      ],
+      "capability_tags": [
+        "rally",
+        "suppression"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 120,
+      "name": "海星星族",
+      "species_ids": [
+        120,
+        121
+      ],
+      "capability_tags": [
+        "finisher",
+        "suppression",
+        "tempo"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 123,
+      "name": "飞天螳螂族",
+      "species_ids": [
+        123
+      ],
+      "capability_tags": [
+        "counter",
+        "finisher",
+        "tempo"
+      ],
+      "natural_endpoint_family": true,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 129,
+      "name": "鲤鱼王族",
+      "species_ids": [
+        129,
+        130
+      ],
+      "capability_tags": [
+        "counter",
+        "finisher",
+        "suppression"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 131,
+      "name": "拉普拉斯族",
+      "species_ids": [
+        131
+      ],
+      "capability_tags": [
+        "counter",
+        "standburst"
+      ],
+      "natural_endpoint_family": true,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 133,
+      "name": "伊布族",
+      "species_ids": [
+        133,
+        134,
+        135,
+        136
+      ],
+      "capability_tags": [
+        "breakthrough",
+        "finisher",
+        "rally",
+        "suppression",
+        "tempo",
+        "triage"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 143,
+      "name": "卡比兽族",
+      "species_ids": [
+        143
+      ],
+      "capability_tags": [
+        "counter",
+        "finisher",
+        "standburst"
+      ],
+      "natural_endpoint_family": true,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    },
+    {
+      "family_head": 147,
+      "name": "迷你龙族",
+      "species_ids": [
+        147,
+        148,
+        149
+      ],
+      "capability_tags": [
+        "breakthrough",
+        "counter",
+        "finisher",
+        "standburst"
+      ],
+      "natural_endpoint_family": false,
+      "notes": "能力标签按当前形态重算；族标签只用于设计审阅，不授予继承资格。"
+    }
+  ],
+  "forms": [
+    {
+      "species_id": 1,
+      "name": "妙蛙种子",
+      "tier": 1,
+      "ranged": true,
+      "base": {
+        "bulk": 143,
+        "max_offense": 65,
+        "speed": 45
+      },
+      "primary_license": "rally",
+      "licenses": [
+        "rally"
+      ],
+      "machines": [
+        "rally_signal"
+      ],
+      "reasons": {
+        "rally": "远程且速度<70：承担慢速指挥与队伍启动任务。"
+      }
+    },
+    {
+      "species_id": 2,
+      "name": "妙蛙草",
+      "tier": 2,
+      "ranged": true,
+      "base": {
+        "bulk": 186,
+        "max_offense": 80,
+        "speed": 60
+      },
+      "primary_license": "rally",
+      "licenses": [
+        "rally"
+      ],
+      "machines": [
+        "rally_signal"
+      ],
+      "reasons": {
+        "rally": "远程且速度<70：承担慢速指挥与队伍启动任务。"
+      }
+    },
+    {
+      "species_id": 3,
+      "name": "妙蛙花",
+      "tier": 3,
+      "ranged": true,
+      "base": {
+        "bulk": 246,
+        "max_offense": 100,
+        "speed": 80
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression",
+        "finisher"
+      ],
+      "machines": [
+        "expose_weakness",
+        "arc_lock"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。"
+      }
+    },
+    {
+      "species_id": 4,
+      "name": "小火龙",
+      "tier": 1,
+      "ranged": true,
+      "base": {
+        "bulk": 125,
+        "max_offense": 60,
+        "speed": 65
+      },
+      "primary_license": "rally",
+      "licenses": [
+        "rally"
+      ],
+      "machines": [
+        "rally_signal"
+      ],
+      "reasons": {
+        "rally": "远程且速度<70：承担慢速指挥与队伍启动任务。"
+      }
+    },
+    {
+      "species_id": 5,
+      "name": "火恐龙",
+      "tier": 2,
+      "ranged": true,
+      "base": {
+        "bulk": 174,
+        "max_offense": 80,
+        "speed": 80
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression"
+      ],
+      "machines": [
+        "arc_lock"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。"
+      }
+    },
+    {
+      "species_id": 6,
+      "name": "喷火龙",
+      "tier": 3,
+      "ranged": true,
+      "base": {
+        "bulk": 234,
+        "max_offense": 109,
+        "speed": 100
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression",
+        "finisher",
+        "tempo"
+      ],
+      "machines": [
+        "expose_weakness",
+        "arc_lock",
+        "tempo_break"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "tempo": "速度≥100：稀有心律可执行一次确定能量削减。"
+      }
+    },
+    {
+      "species_id": 7,
+      "name": "杰尼龟",
+      "tier": 1,
+      "ranged": true,
+      "base": {
+        "bulk": 174,
+        "max_offense": 50,
+        "speed": 43
+      },
+      "primary_license": "rally",
+      "licenses": [
+        "rally"
+      ],
+      "machines": [
+        "rally_signal"
+      ],
+      "reasons": {
+        "rally": "远程且速度<70：承担慢速指挥与队伍启动任务。"
+      }
+    },
+    {
+      "species_id": 8,
+      "name": "卡咪龟",
+      "tier": 2,
+      "ranged": true,
+      "base": {
+        "bulk": 219,
+        "max_offense": 65,
+        "speed": 58
+      },
+      "primary_license": "rally",
+      "licenses": [
+        "rally",
+        "triage"
+      ],
+      "machines": [
+        "rally_signal",
+        "field_triage"
+      ],
+      "reasons": {
+        "rally": "远程且速度<70：承担慢速指挥与队伍启动任务。",
+        "triage": "体格200–259且速度≤70：稳态救援位。"
+      }
+    },
+    {
+      "species_id": 9,
+      "name": "水箭龟",
+      "tier": 3,
+      "ranged": true,
+      "base": {
+        "bulk": 279,
+        "max_offense": 85,
+        "speed": 78
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression",
+        "standburst"
+      ],
+      "machines": [
+        "standburst",
+        "arc_lock"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。",
+        "standburst": "体格≥260：重装爆发可改变邻接阵型。"
+      }
+    },
+    {
+      "species_id": 10,
+      "name": "绿毛虫",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 115,
+        "max_offense": 30,
+        "speed": 45
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 11,
+      "name": "铁甲蛹",
+      "tier": 1,
+      "ranged": true,
+      "base": {
+        "bulk": 160,
+        "max_offense": 25,
+        "speed": 30
+      },
+      "primary_license": "rally",
+      "licenses": [
+        "rally"
+      ],
+      "machines": [
+        "rally_signal"
+      ],
+      "reasons": {
+        "rally": "远程且速度<70：承担慢速指挥与队伍启动任务。"
+      }
+    },
+    {
+      "species_id": 12,
+      "name": "巴大蝶",
+      "tier": 2,
+      "ranged": true,
+      "base": {
+        "bulk": 160,
+        "max_offense": 80,
+        "speed": 70
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression"
+      ],
+      "machines": [
+        "arc_lock"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。"
+      }
+    },
+    {
+      "species_id": 13,
+      "name": "独角虫",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 100,
+        "max_offense": 35,
+        "speed": 50
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 14,
+      "name": "铁壳蛹",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 145,
+        "max_offense": 25,
+        "speed": 35
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 15,
+      "name": "大针蜂",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 145,
+        "max_offense": 80,
+        "speed": 75
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 16,
+      "name": "波波",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 120,
+        "max_offense": 45,
+        "speed": 56
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 17,
+      "name": "比比鸟",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 173,
+        "max_offense": 60,
+        "speed": 71
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 18,
+      "name": "大比鸟",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 233,
+        "max_offense": 80,
+        "speed": 91
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter"
+      ],
+      "machines": [
+        "guardian_riposte"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。"
+      }
+    },
+    {
+      "species_id": 19,
+      "name": "小拉达",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 100,
+        "max_offense": 56,
+        "speed": 72
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 20,
+      "name": "拉达",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 175,
+        "max_offense": 81,
+        "speed": 97
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 21,
+      "name": "烈雀",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 100,
+        "max_offense": 60,
+        "speed": 70
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 22,
+      "name": "大嘴雀",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 195,
+        "max_offense": 90,
+        "speed": 100
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough",
+        "tempo"
+      ],
+      "machines": [
+        "breach_lunge",
+        "tempo_break"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。",
+        "tempo": "速度≥100：稀有心律可执行一次确定能量削减。"
+      }
+    },
+    {
+      "species_id": 25,
+      "name": "皮卡丘",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 95,
+        "max_offense": 55,
+        "speed": 90
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 26,
+      "name": "雷丘",
+      "tier": 2,
+      "ranged": true,
+      "base": {
+        "bulk": 170,
+        "max_offense": 90,
+        "speed": 100
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression",
+        "tempo"
+      ],
+      "machines": [
+        "arc_lock",
+        "tempo_break"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。",
+        "tempo": "速度≥100：稀有心律可执行一次确定能量削减。"
+      }
+    },
+    {
+      "species_id": 29,
+      "name": "尼多兰",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 159,
+        "max_offense": 47,
+        "speed": 41
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 30,
+      "name": "尼多娜",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 204,
+        "max_offense": 62,
+        "speed": 56
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough",
+        "triage"
+      ],
+      "machines": [
+        "breach_lunge",
+        "field_triage"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。",
+        "triage": "体格200–259且速度≤70：稳态救援位。"
+      }
+    },
+    {
+      "species_id": 31,
+      "name": "尼多后",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 264,
+        "max_offense": 82,
+        "speed": 76
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "standburst"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "standburst"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "standburst": "体格≥260：重装爆发可改变邻接阵型。"
+      }
+    },
+    {
+      "species_id": 32,
+      "name": "尼多朗",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 126,
+        "max_offense": 57,
+        "speed": 50
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 33,
+      "name": "尼多力诺",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 175,
+        "max_offense": 72,
+        "speed": 65
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 34,
+      "name": "尼多王",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 235,
+        "max_offense": 92,
+        "speed": 85
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter"
+      ],
+      "machines": [
+        "guardian_riposte"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。"
+      }
+    },
+    {
+      "species_id": 37,
+      "name": "六尾",
+      "tier": 1,
+      "ranged": true,
+      "base": {
+        "bulk": 118,
+        "max_offense": 50,
+        "speed": 65
+      },
+      "primary_license": "rally",
+      "licenses": [
+        "rally"
+      ],
+      "machines": [
+        "rally_signal"
+      ],
+      "reasons": {
+        "rally": "远程且速度<70：承担慢速指挥与队伍启动任务。"
+      }
+    },
+    {
+      "species_id": 38,
+      "name": "九尾",
+      "tier": 3,
+      "ranged": true,
+      "base": {
+        "bulk": 223,
+        "max_offense": 81,
+        "speed": 100
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression",
+        "tempo"
+      ],
+      "machines": [
+        "arc_lock",
+        "tempo_break"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。",
+        "tempo": "速度≥100：稀有心律可执行一次确定能量削减。"
+      }
+    },
+    {
+      "species_id": 41,
+      "name": "超音蝠",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 110,
+        "max_offense": 45,
+        "speed": 55
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 42,
+      "name": "大嘴蝠",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 215,
+        "max_offense": 80,
+        "speed": 90
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 43,
+      "name": "走路草",
+      "tier": 1,
+      "ranged": true,
+      "base": {
+        "bulk": 155,
+        "max_offense": 75,
+        "speed": 30
+      },
+      "primary_license": "rally",
+      "licenses": [
+        "rally"
+      ],
+      "machines": [
+        "rally_signal"
+      ],
+      "reasons": {
+        "rally": "远程且速度<70：承担慢速指挥与队伍启动任务。"
+      }
+    },
+    {
+      "species_id": 44,
+      "name": "臭臭花",
+      "tier": 2,
+      "ranged": true,
+      "base": {
+        "bulk": 200,
+        "max_offense": 85,
+        "speed": 40
+      },
+      "primary_license": "rally",
+      "licenses": [
+        "rally",
+        "triage"
+      ],
+      "machines": [
+        "rally_signal",
+        "field_triage"
+      ],
+      "reasons": {
+        "rally": "远程且速度<70：承担慢速指挥与队伍启动任务。",
+        "triage": "体格200–259且速度≤70：稳态救援位。"
+      }
+    },
+    {
+      "species_id": 45,
+      "name": "霸王花",
+      "tier": 2,
+      "ranged": true,
+      "base": {
+        "bulk": 245,
+        "max_offense": 100,
+        "speed": 50
+      },
+      "primary_license": "rally",
+      "licenses": [
+        "rally",
+        "finisher",
+        "triage"
+      ],
+      "machines": [
+        "expose_weakness",
+        "rally_signal",
+        "field_triage"
+      ],
+      "reasons": {
+        "rally": "远程且速度<70：承担慢速指挥与队伍启动任务。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "triage": "体格200–259且速度≤70：稳态救援位。"
+      }
+    },
+    {
+      "species_id": 54,
+      "name": "可达鸭",
+      "tier": 1,
+      "ranged": true,
+      "base": {
+        "bulk": 146,
+        "max_offense": 65,
+        "speed": 55
+      },
+      "primary_license": "rally",
+      "licenses": [
+        "rally"
+      ],
+      "machines": [
+        "rally_signal"
+      ],
+      "reasons": {
+        "rally": "远程且速度<70：承担慢速指挥与队伍启动任务。"
+      }
+    },
+    {
+      "species_id": 55,
+      "name": "哥达鸭",
+      "tier": 3,
+      "ranged": true,
+      "base": {
+        "bulk": 236,
+        "max_offense": 95,
+        "speed": 85
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression"
+      ],
+      "machines": [
+        "arc_lock"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。"
+      }
+    },
+    {
+      "species_id": 56,
+      "name": "猴怪",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 110,
+        "max_offense": 80,
+        "speed": 70
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 57,
+      "name": "火暴猴",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 185,
+        "max_offense": 105,
+        "speed": 95
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough",
+        "finisher"
+      ],
+      "machines": [
+        "breach_lunge",
+        "expose_weakness"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。"
+      }
+    },
+    {
+      "species_id": 58,
+      "name": "卡蒂狗",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 145,
+        "max_offense": 70,
+        "speed": 60
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 59,
+      "name": "风速狗",
+      "tier": 3,
+      "ranged": false,
+      "base": {
+        "bulk": 250,
+        "max_offense": 110,
+        "speed": 95
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "finisher"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "expose_weakness"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。"
+      }
+    },
+    {
+      "species_id": 60,
+      "name": "蚊香蝌蚪",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 120,
+        "max_offense": 50,
+        "speed": 90
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 61,
+      "name": "蚊香君",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 195,
+        "max_offense": 65,
+        "speed": 90
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 62,
+      "name": "蚊香泳士",
+      "tier": 3,
+      "ranged": false,
+      "base": {
+        "bulk": 280,
+        "max_offense": 85,
+        "speed": 70
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "standburst"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "standburst"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "standburst": "体格≥260：重装爆发可改变邻接阵型。"
+      }
+    },
+    {
+      "species_id": 63,
+      "name": "凯西",
+      "tier": 1,
+      "ranged": true,
+      "base": {
+        "bulk": 55,
+        "max_offense": 105,
+        "speed": 90
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression",
+        "finisher"
+      ],
+      "machines": [
+        "expose_weakness",
+        "arc_lock"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。"
+      }
+    },
+    {
+      "species_id": 64,
+      "name": "勇基拉",
+      "tier": 2,
+      "ranged": true,
+      "base": {
+        "bulk": 100,
+        "max_offense": 120,
+        "speed": 105
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression",
+        "finisher",
+        "tempo"
+      ],
+      "machines": [
+        "expose_weakness",
+        "arc_lock",
+        "tempo_break"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "tempo": "速度≥100：稀有心律可执行一次确定能量削减。"
+      }
+    },
+    {
+      "species_id": 65,
+      "name": "胡地",
+      "tier": 2,
+      "ranged": true,
+      "base": {
+        "bulk": 145,
+        "max_offense": 135,
+        "speed": 120
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression",
+        "finisher",
+        "tempo"
+      ],
+      "machines": [
+        "expose_weakness",
+        "arc_lock",
+        "tempo_break"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "tempo": "速度≥100：稀有心律可执行一次确定能量削减。"
+      }
+    },
+    {
+      "species_id": 66,
+      "name": "腕力",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 170,
+        "max_offense": 80,
+        "speed": 35
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 67,
+      "name": "豪力",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 220,
+        "max_offense": 100,
+        "speed": 45
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "finisher",
+        "triage"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "expose_weakness",
+        "field_triage"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "triage": "体格200–259且速度≤70：稳态救援位。"
+      }
+    },
+    {
+      "species_id": 68,
+      "name": "怪力",
+      "tier": 3,
+      "ranged": false,
+      "base": {
+        "bulk": 250,
+        "max_offense": 130,
+        "speed": 55
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "finisher",
+        "triage"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "expose_weakness",
+        "field_triage"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "triage": "体格200–259且速度≤70：稳态救援位。"
+      }
+    },
+    {
+      "species_id": 69,
+      "name": "喇叭芽",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 120,
+        "max_offense": 75,
+        "speed": 40
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 70,
+      "name": "口呆花",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 165,
+        "max_offense": 90,
+        "speed": 55
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 71,
+      "name": "大食花",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 210,
+        "max_offense": 105,
+        "speed": 70
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough",
+        "finisher",
+        "triage"
+      ],
+      "machines": [
+        "breach_lunge",
+        "expose_weakness",
+        "field_triage"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "triage": "体格200–259且速度≤70：稳态救援位。"
+      }
+    },
+    {
+      "species_id": 74,
+      "name": "小拳石",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 240,
+        "max_offense": 80,
+        "speed": 20
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "triage"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "field_triage"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "triage": "体格200–259且速度≤70：稳态救援位。"
+      }
+    },
+    {
+      "species_id": 75,
+      "name": "隆隆石",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 285,
+        "max_offense": 95,
+        "speed": 35
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "standburst"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "standburst"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "standburst": "体格≥260：重装爆发可改变邻接阵型。"
+      }
+    },
+    {
+      "species_id": 76,
+      "name": "隆隆岩",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 340,
+        "max_offense": 110,
+        "speed": 45
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "finisher",
+        "standburst"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "expose_weakness",
+        "standburst"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "standburst": "体格≥260：重装爆发可改变邻接阵型。"
+      }
+    },
+    {
+      "species_id": 79,
+      "name": "呆呆兽",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 220,
+        "max_offense": 65,
+        "speed": 15
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "triage"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "field_triage"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "triage": "体格200–259且速度≤70：稳态救援位。"
+      }
+    },
+    {
+      "species_id": 80,
+      "name": "呆壳兽",
+      "tier": 2,
+      "ranged": true,
+      "base": {
+        "bulk": 315,
+        "max_offense": 100,
+        "speed": 30
+      },
+      "primary_license": "rally",
+      "licenses": [
+        "rally",
+        "finisher",
+        "standburst"
+      ],
+      "machines": [
+        "expose_weakness",
+        "rally_signal",
+        "standburst"
+      ],
+      "reasons": {
+        "rally": "远程且速度<70：承担慢速指挥与队伍启动任务。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "standburst": "体格≥260：重装爆发可改变邻接阵型。"
+      }
+    },
+    {
+      "species_id": 81,
+      "name": "小磁怪",
+      "tier": 1,
+      "ranged": true,
+      "base": {
+        "bulk": 165,
+        "max_offense": 95,
+        "speed": 45
+      },
+      "primary_license": "rally",
+      "licenses": [
+        "rally"
+      ],
+      "machines": [
+        "rally_signal"
+      ],
+      "reasons": {
+        "rally": "远程且速度<70：承担慢速指挥与队伍启动任务。"
+      }
+    },
+    {
+      "species_id": 82,
+      "name": "三合一磁怪",
+      "tier": 2,
+      "ranged": true,
+      "base": {
+        "bulk": 240,
+        "max_offense": 120,
+        "speed": 70
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression",
+        "finisher",
+        "triage"
+      ],
+      "machines": [
+        "expose_weakness",
+        "arc_lock",
+        "field_triage"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "triage": "体格200–259且速度≤70：稳态救援位。"
+      }
+    },
+    {
+      "species_id": 92,
+      "name": "鬼斯",
+      "tier": 1,
+      "ranged": true,
+      "base": {
+        "bulk": 90,
+        "max_offense": 100,
+        "speed": 80
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression",
+        "finisher"
+      ],
+      "machines": [
+        "expose_weakness",
+        "arc_lock"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。"
+      }
+    },
+    {
+      "species_id": 93,
+      "name": "鬼斯通",
+      "tier": 2,
+      "ranged": true,
+      "base": {
+        "bulk": 135,
+        "max_offense": 115,
+        "speed": 95
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression",
+        "finisher"
+      ],
+      "machines": [
+        "expose_weakness",
+        "arc_lock"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。"
+      }
+    },
+    {
+      "species_id": 94,
+      "name": "耿鬼",
+      "tier": 3,
+      "ranged": true,
+      "base": {
+        "bulk": 180,
+        "max_offense": 130,
+        "speed": 110
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression",
+        "finisher",
+        "tempo"
+      ],
+      "machines": [
+        "expose_weakness",
+        "arc_lock",
+        "tempo_break"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "tempo": "速度≥100：稀有心律可执行一次确定能量削减。"
+      }
+    },
+    {
+      "species_id": 95,
+      "name": "大岩蛇",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 355,
+        "max_offense": 45,
+        "speed": 70
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "standburst"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "standburst"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "standburst": "体格≥260：重装爆发可改变邻接阵型。"
+      }
+    },
+    {
+      "species_id": 111,
+      "name": "独角犀牛",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 270,
+        "max_offense": 85,
+        "speed": 25
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "standburst"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "standburst"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "standburst": "体格≥260：重装爆发可改变邻接阵型。"
+      }
+    },
+    {
+      "species_id": 112,
+      "name": "钻角犀兽",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 345,
+        "max_offense": 130,
+        "speed": 40
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "finisher",
+        "standburst"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "expose_weakness",
+        "standburst"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "standburst": "体格≥260：重装爆发可改变邻接阵型。"
+      }
+    },
+    {
+      "species_id": 116,
+      "name": "墨海马",
+      "tier": 1,
+      "ranged": true,
+      "base": {
+        "bulk": 170,
+        "max_offense": 70,
+        "speed": 60
+      },
+      "primary_license": "rally",
+      "licenses": [
+        "rally"
+      ],
+      "machines": [
+        "rally_signal"
+      ],
+      "reasons": {
+        "rally": "远程且速度<70：承担慢速指挥与队伍启动任务。"
+      }
+    },
+    {
+      "species_id": 117,
+      "name": "海刺龙",
+      "tier": 2,
+      "ranged": true,
+      "base": {
+        "bulk": 245,
+        "max_offense": 95,
+        "speed": 85
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression"
+      ],
+      "machines": [
+        "arc_lock"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。"
+      }
+    },
+    {
+      "species_id": 120,
+      "name": "海星星",
+      "tier": 1,
+      "ranged": true,
+      "base": {
+        "bulk": 140,
+        "max_offense": 70,
+        "speed": 85
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression"
+      ],
+      "machines": [
+        "arc_lock"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。"
+      }
+    },
+    {
+      "species_id": 121,
+      "name": "宝石海星",
+      "tier": 3,
+      "ranged": true,
+      "base": {
+        "bulk": 230,
+        "max_offense": 100,
+        "speed": 115
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression",
+        "finisher",
+        "tempo"
+      ],
+      "machines": [
+        "expose_weakness",
+        "arc_lock",
+        "tempo_break"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "tempo": "速度≥100：稀有心律可执行一次确定能量削减。"
+      }
+    },
+    {
+      "species_id": 123,
+      "name": "飞天螳螂",
+      "tier": 3,
+      "ranged": false,
+      "base": {
+        "bulk": 230,
+        "max_offense": 110,
+        "speed": 105
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "finisher",
+        "tempo"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "expose_weakness",
+        "tempo_break"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "tempo": "速度≥100：稀有心律可执行一次确定能量削减。"
+      }
+    },
+    {
+      "species_id": 129,
+      "name": "鲤鱼王",
+      "tier": 1,
+      "ranged": true,
+      "base": {
+        "bulk": 130,
+        "max_offense": 15,
+        "speed": 80
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression"
+      ],
+      "machines": [
+        "arc_lock"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。"
+      }
+    },
+    {
+      "species_id": 130,
+      "name": "暴鲤龙",
+      "tier": 3,
+      "ranged": false,
+      "base": {
+        "bulk": 253,
+        "max_offense": 125,
+        "speed": 81
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "finisher"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "expose_weakness"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。"
+      }
+    },
+    {
+      "species_id": 131,
+      "name": "拉普拉斯",
+      "tier": 3,
+      "ranged": false,
+      "base": {
+        "bulk": 290,
+        "max_offense": 85,
+        "speed": 60
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "standburst"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "standburst"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "standburst": "体格≥260：重装爆发可改变邻接阵型。"
+      }
+    },
+    {
+      "species_id": 133,
+      "name": "伊布",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 155,
+        "max_offense": 55,
+        "speed": 55
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 134,
+      "name": "水伊布",
+      "tier": 3,
+      "ranged": true,
+      "base": {
+        "bulk": 250,
+        "max_offense": 110,
+        "speed": 65
+      },
+      "primary_license": "rally",
+      "licenses": [
+        "rally",
+        "finisher",
+        "triage"
+      ],
+      "machines": [
+        "expose_weakness",
+        "rally_signal",
+        "field_triage"
+      ],
+      "reasons": {
+        "rally": "远程且速度<70：承担慢速指挥与队伍启动任务。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "triage": "体格200–259且速度≤70：稳态救援位。"
+      }
+    },
+    {
+      "species_id": 135,
+      "name": "雷伊布",
+      "tier": 3,
+      "ranged": true,
+      "base": {
+        "bulk": 185,
+        "max_offense": 110,
+        "speed": 130
+      },
+      "primary_license": "suppression",
+      "licenses": [
+        "suppression",
+        "finisher",
+        "tempo"
+      ],
+      "machines": [
+        "expose_weakness",
+        "arc_lock",
+        "tempo_break"
+      ],
+      "reasons": {
+        "suppression": "远程且速度≥70：承担压制启动节奏的任务。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "tempo": "速度≥100：稀有心律可执行一次确定能量削减。"
+      }
+    },
+    {
+      "species_id": 136,
+      "name": "火伊布",
+      "tier": 3,
+      "ranged": false,
+      "base": {
+        "bulk": 185,
+        "max_offense": 130,
+        "speed": 65
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough",
+        "finisher"
+      ],
+      "machines": [
+        "breach_lunge",
+        "expose_weakness"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。"
+      }
+    },
+    {
+      "species_id": 143,
+      "name": "卡比兽",
+      "tier": 3,
+      "ranged": false,
+      "base": {
+        "bulk": 290,
+        "max_offense": 110,
+        "speed": 30
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "finisher",
+        "standburst"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "expose_weakness",
+        "standburst"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "standburst": "体格≥260：重装爆发可改变邻接阵型。"
+      }
+    },
+    {
+      "species_id": 147,
+      "name": "迷你龙",
+      "tier": 1,
+      "ranged": false,
+      "base": {
+        "bulk": 131,
+        "max_offense": 64,
+        "speed": 50
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 148,
+      "name": "哈克龙",
+      "tier": 2,
+      "ranged": false,
+      "base": {
+        "bulk": 191,
+        "max_offense": 84,
+        "speed": 70
+      },
+      "primary_license": "breakthrough",
+      "licenses": [
+        "breakthrough"
+      ],
+      "machines": [
+        "breach_lunge"
+      ],
+      "reasons": {
+        "breakthrough": "近战且体格<220：以一次成功大招换贴身与阵地，不叠加数值。"
+      }
+    },
+    {
+      "species_id": 149,
+      "name": "快龙",
+      "tier": 3,
+      "ranged": false,
+      "base": {
+        "bulk": 281,
+        "max_offense": 134,
+        "speed": 80
+      },
+      "primary_license": "counter",
+      "licenses": [
+        "counter",
+        "finisher",
+        "standburst"
+      ],
+      "machines": [
+        "guardian_riposte",
+        "expose_weakness",
+        "standburst"
+      ],
+      "reasons": {
+        "counter": "近战且体格≥220：用质量承受并反转一次贴身进攻。",
+        "finisher": "最高双攻≥100：具备稀有终结窗口资格。",
+        "standburst": "体格≥260：重装爆发可改变邻接阵型。"
+      }
+    }
+  ],
+  "shape_formulas": {
+    "bulk": "base.hp + 2 * base.defense",
+    "max_offense": "max(base.attack, base.special_attack)",
+    "range": "profiles.effective_range(piece) > 1",
+    "note": "Bulk intentionally does not use special defense and is not canonical learnset compatibility."
+  },
+  "resolution_contract_version": "teaching-resolution-design-v1",
+  "shared_resolution_contract": {
+    "status": "specified_for_future_prototypes_not_production",
+    "distance": "Manhattan distance on authoritative current positions; four-adjacent means distance one.",
+    "target_order": "Use learner-relative (distance, local_pos, local_idx); never global idx or extra RNG. Wounded selection prefixes current hp/max_hp.",
+    "slot_and_layers": "One teaching slot. Native skill, fixed ability, chosen partner, equipment and synergies remain independent. No global damage or energy multiplier for the first two.",
+    "chain_boundary": "Collect eligibility within a complete native damage/displacement/partner/weather packet, then resolve teaching effects; DOT ticks and standalone moves are separate packets. Do not replay teaching results as native primary hits.",
+    "resolution_order": [
+      "guardian_riposte",
+      "tempo_break",
+      "breach_lunge",
+      "arc_lock",
+      "rally_signal",
+      "expose_weakness",
+      "standburst",
+      "field_triage"
+    ],
+    "same_machine_order": "Canonical team order followed by learner-relative local_idx; check living/target legality again immediately before applying each effect.",
+    "finite_states": "Half-open interval [effective_at, expires_at). Strongest value wins, no equal-strength refresh; target death clears. Source death does not clear an applied lock/mark. Each expiry remains explicit.",
+    "future_passive_cause": "standburst/field_triage require cause_kind and an authoritative unit_state, move or DOT cause_index; the current animation adapter supports only the first two native attack/cast causes."
+  }
+}

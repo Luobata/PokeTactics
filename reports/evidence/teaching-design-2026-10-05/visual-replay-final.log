@@ -1,0 +1,27 @@
+{
+  "output": ".build/teaching-visual-final-replay",
+  "scenes": [
+    "counter_valid",
+    "counter_blocked",
+    "counter_invalid",
+    "counter_lethal",
+    "tempo_valid",
+    "tempo_zero",
+    "tempo_invalid",
+    "tempo_lethal",
+    "full_natural",
+    "tempo_full_natural"
+  ],
+  "outputs": 37,
+  "checks": {
+    "cause_ownership": true,
+    "state_reconciliation": true,
+    "negative_paths": true,
+    "actual_abi_compatibility": true,
+    "event_hash_unchanged": true,
+    "rewind_speed_pixels": true,
+    "teaching_overlay_estimated_budget": true
+  },
+  "authoritative_events_unchanged": true,
+  "metadata": ".build/teaching-visual-final-replay/visual.json"
+}

@@ -1,0 +1,11 @@
+{
+  "python": "3.12.0",
+  "pillow": "12.1.1",
+  "external_resources_sha256": {
+    "/Users/bytedance/luobata/ESP32-PokemonGo/assets/gen1_front.bin": "e9a36fbec5ab678333dbe94e400e1a2398c2974abf5332fbe23baab129bce114",
+    "/Users/bytedance/luobata/ESP32-PokemonGo/assets/palettes.bin": "4217560355328ba3c2016e6c6c859a94c8c64fba74d1918dbdb3c50a1177279d",
+    "/Users/bytedance/luobata/ESP32-PokemonGo/assets/font16.bin": "d52ef01104e0ff0d7312991e07e08ac20a6fc10f0896cfb98669eaa418649fbc",
+    "/System/Library/Fonts/Hiragino Sans GB.ttc": "4b450afb2c61d7529fe05647316e9fc3137ea703a664bded5bca895a5c30748c"
+  },
+  "note": "External art/font hashes bind PC pixels; resources are read-only and not copied into this change. Cross-host reproductions need matching inputs."
+}

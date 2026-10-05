@@ -1,0 +1,767 @@
+{
+  "schema": "teaching-visual-probe-v1",
+  "seed": 7,
+  "renderer": "BattleAnimation.playback_frame + isolated teaching overlay",
+  "prototype_module_sha256": "4309e398eed733a32141b27e0e49ba07619a98c2cc507a2d020829188bc8d22c",
+  "design_truth": {
+    "version": "teaching-skills-v1",
+    "status": "proposal_not_gameplay",
+    "first_batch_parameters": {
+      "guardian_riposte": {
+        "uses_per_battle": 1,
+        "delay_seconds": 0.3,
+        "push_cells": 1
+      },
+      "tempo_break": {
+        "uses_per_battle": 1,
+        "energy_loss": 20
+      }
+    },
+    "note": "Eligibility is read from the design truth; this visual probe does not recompute thresholds."
+  },
+  "sources_sha256": {
+    "docs/32-teaching-skill-animation-contract.md": "69e12f5bf51dc62fe3792ee1e6bba1c1bc987ddcaaec39a90a2f1d2dc1ea0bf5",
+    "docs/design/teaching-skills-v1.json": "835987f6406fbbb5b23faf1bb821698b934323fff35ab45d49f9b3334d425511",
+    "tools/acceptance/teaching_skill_prototype.py": "4309e398eed733a32141b27e0e49ba07619a98c2cc507a2d020829188bc8d22c",
+    "tools/acceptance/teaching_visual_probe.py": "ce49e6e9ed0c6b2de15c1799f5c52bdc95ecfcccfc68b3bfd29b5b8e141f6903",
+    "tools/mockups/animation_timeline.py": "8423516a158eaa028ebbddcfa2f26cea1da0c004f435a3dd3870bb7bda694b3b",
+    "tools/mockups/render_battle_gif.py": "e668ef2ee79690ab273c49564911bfa4af907123805c4e7194827c391a34ce78"
+  },
+  "scenes": {
+    "counter_valid": {
+      "factory_kind": "counter",
+      "scenario": "valid",
+      "unit_count": 2,
+      "event_count": 12,
+      "authoritative_event_sha256": "26c59eba23f802615838be047309fe7026292a776dce5acc8f2b249072d81c59",
+      "after_render_event_sha256": "26c59eba23f802615838be047309fe7026292a776dce5acc8f2b249072d81c59",
+      "teaching_events": [
+        {
+          "raw_index": 7,
+          "machine_id": "guardian_riposte",
+          "source_idx": 1,
+          "target_idx": 0,
+          "cause_index": 4,
+          "cause_parent_kind": "attack",
+          "cause_event_count": 3,
+          "payload": {
+            "cause_index": 4,
+            "source_idx": 1,
+            "target_idx": 0,
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "uses_per_battle": 1,
+            "pushed": true,
+            "from_pos": [
+              2,
+              1
+            ],
+            "to_pos": [
+              2,
+              0
+            ],
+            "delay_seconds": 0.3,
+            "cause_event_count": 3,
+            "event_count": 3,
+            "next_act_before": 2.3147651006711416,
+            "next_act_after": 2.6147651006711414
+          },
+          "owned_raw_indices": [
+            8,
+            9,
+            10
+          ],
+          "parent_timing": {
+            "start": 0.4,
+            "release": 0.65,
+            "impact": 0.7,
+            "recover_end": 0.9
+          }
+        }
+      ],
+      "parent_state_reconciliation": {
+        "parent_raw_index": 4,
+        "parent_kind": "attack",
+        "impact": 0.7,
+        "before": {
+          "0": {
+            "hp": 10000,
+            "energy": 0,
+            "die_t": null
+          },
+          "1": {
+            "hp": 10000,
+            "energy": 0,
+            "die_t": null
+          }
+        },
+        "after": {
+          "0": {
+            "hp": 10000,
+            "energy": 21,
+            "die_t": null
+          },
+          "1": {
+            "hp": 9967,
+            "energy": 10,
+            "die_t": null
+          }
+        },
+        "actual": {},
+        "semantic": {
+          "pushed": true,
+          "delay_seconds": 0.3
+        }
+      },
+      "playback": {
+        "presentation_seconds": 0.7799999999999999,
+        "pixel_sha256": "6b0e05808638dfe3808c130b2e881980d666e3788d7d356049cef1387385a536",
+        "rewind_pixel_sha256": "6b0e05808638dfe3808c130b2e881980d666e3788d7d356049cef1387385a536",
+        "playback_2x_pixel_sha256": "6b0e05808638dfe3808c130b2e881980d666e3788d7d356049cef1387385a536"
+      },
+      "peak_teaching_particles": 42
+    },
+    "counter_blocked": {
+      "factory_kind": "counter",
+      "scenario": "blocked",
+      "unit_count": 2,
+      "event_count": 11,
+      "authoritative_event_sha256": "5ce742d7e9476d8df31e698a9df89136ada7c392bdd5f5b9ec145b990c005595",
+      "after_render_event_sha256": "5ce742d7e9476d8df31e698a9df89136ada7c392bdd5f5b9ec145b990c005595",
+      "teaching_events": [
+        {
+          "raw_index": 7,
+          "machine_id": "guardian_riposte",
+          "source_idx": 1,
+          "target_idx": 0,
+          "cause_index": 4,
+          "cause_parent_kind": "attack",
+          "cause_event_count": 2,
+          "payload": {
+            "cause_index": 4,
+            "source_idx": 1,
+            "target_idx": 0,
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              0
+            ],
+            "uses_per_battle": 1,
+            "pushed": false,
+            "from_pos": [
+              2,
+              0
+            ],
+            "to_pos": [
+              2,
+              0
+            ],
+            "delay_seconds": 0.3,
+            "cause_event_count": 2,
+            "event_count": 2,
+            "next_act_before": 2.3147651006711416,
+            "next_act_after": 2.6147651006711414
+          },
+          "owned_raw_indices": [
+            8,
+            9
+          ],
+          "parent_timing": {
+            "start": 0.4,
+            "release": 0.65,
+            "impact": 0.7,
+            "recover_end": 0.9
+          }
+        }
+      ],
+      "parent_state_reconciliation": {
+        "parent_raw_index": 4,
+        "parent_kind": "attack",
+        "impact": 0.7,
+        "before": {
+          "0": {
+            "hp": 10000,
+            "energy": 0,
+            "die_t": null
+          },
+          "1": {
+            "hp": 10000,
+            "energy": 0,
+            "die_t": null
+          }
+        },
+        "after": {
+          "0": {
+            "hp": 10000,
+            "energy": 21,
+            "die_t": null
+          },
+          "1": {
+            "hp": 9967,
+            "energy": 10,
+            "die_t": null
+          }
+        },
+        "actual": {},
+        "semantic": {
+          "pushed": false,
+          "delay_seconds": 0.3
+        }
+      },
+      "playback": {
+        "presentation_seconds": 0.7799999999999999,
+        "pixel_sha256": "9ef2dd6303596a78a6a84b51f5623fe661773441211446cc23104b21949f751a",
+        "rewind_pixel_sha256": "9ef2dd6303596a78a6a84b51f5623fe661773441211446cc23104b21949f751a",
+        "playback_2x_pixel_sha256": "9ef2dd6303596a78a6a84b51f5623fe661773441211446cc23104b21949f751a"
+      },
+      "peak_teaching_particles": 42
+    },
+    "tempo_valid": {
+      "factory_kind": "tempo",
+      "scenario": "valid",
+      "unit_count": 2,
+      "event_count": 10,
+      "authoritative_event_sha256": "7a99d69577cb2107a0bb379f66f1b44e9a25766ced12946ef85daed6a6f9a414",
+      "after_render_event_sha256": "7a99d69577cb2107a0bb379f66f1b44e9a25766ced12946ef85daed6a6f9a414",
+      "teaching_events": [
+        {
+          "raw_index": 7,
+          "machine_id": "tempo_break",
+          "source_idx": 0,
+          "target_idx": 1,
+          "cause_index": 4,
+          "cause_parent_kind": "cast",
+          "cause_event_count": 1,
+          "payload": {
+            "cause_index": 4,
+            "source_idx": 0,
+            "target_idx": 1,
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "uses_per_battle": 1,
+            "actual_loss": 20,
+            "energy_before": 50,
+            "energy_after": 30,
+            "returned_energy": 0,
+            "cause_event_count": 1,
+            "event_count": 1
+          },
+          "owned_raw_indices": [
+            8
+          ],
+          "parent_timing": {
+            "start": 0.4,
+            "release": 0.8,
+            "impact": 1.0,
+            "recover_end": 1.2
+          }
+        }
+      ],
+      "parent_state_reconciliation": {
+        "parent_raw_index": 4,
+        "parent_kind": "cast",
+        "impact": 1.0,
+        "before": {
+          "0": {
+            "hp": 10000,
+            "energy": 80,
+            "die_t": null
+          },
+          "1": {
+            "hp": 10000,
+            "energy": 40,
+            "die_t": null
+          }
+        },
+        "after": {
+          "0": {
+            "hp": 10000,
+            "energy": 0,
+            "die_t": null
+          },
+          "1": {
+            "hp": 9962,
+            "energy": 30,
+            "die_t": null
+          }
+        },
+        "actual": {},
+        "semantic": {
+          "declared_removed": 20,
+          "before_energy": 40,
+          "after_energy": 30,
+          "zero": false
+        }
+      },
+      "playback": {
+        "presentation_seconds": 1.08,
+        "pixel_sha256": "51a00507facc062431334f12256da1891eb636fbb1922185dc8a93a81b6d569c",
+        "rewind_pixel_sha256": "51a00507facc062431334f12256da1891eb636fbb1922185dc8a93a81b6d569c",
+        "playback_2x_pixel_sha256": "51a00507facc062431334f12256da1891eb636fbb1922185dc8a93a81b6d569c"
+      },
+      "peak_teaching_particles": 36
+    },
+    "tempo_zero": {
+      "factory_kind": "tempo",
+      "scenario": "zero",
+      "unit_count": 2,
+      "event_count": 10,
+      "authoritative_event_sha256": "d43d8fd394b618c42a30c6ae0ec9dd25213d6470df6f72a4a72e56dab451bef8",
+      "after_render_event_sha256": "d43d8fd394b618c42a30c6ae0ec9dd25213d6470df6f72a4a72e56dab451bef8",
+      "teaching_events": [
+        {
+          "raw_index": 7,
+          "machine_id": "tempo_break",
+          "source_idx": 0,
+          "target_idx": 1,
+          "cause_index": 4,
+          "cause_parent_kind": "cast",
+          "cause_event_count": 1,
+          "payload": {
+            "cause_index": 4,
+            "source_idx": 0,
+            "target_idx": 1,
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "uses_per_battle": 1,
+            "actual_loss": 0,
+            "energy_before": 0,
+            "energy_after": 0,
+            "returned_energy": 0,
+            "cause_event_count": 1,
+            "event_count": 1
+          },
+          "owned_raw_indices": [
+            8
+          ],
+          "parent_timing": {
+            "start": 0.4,
+            "release": 0.8,
+            "impact": 1.0,
+            "recover_end": 1.2
+          }
+        }
+      ],
+      "parent_state_reconciliation": {
+        "parent_raw_index": 4,
+        "parent_kind": "cast",
+        "impact": 1.0,
+        "before": {
+          "0": {
+            "hp": 10000,
+            "energy": 80,
+            "die_t": null
+          },
+          "1": {
+            "hp": 10000,
+            "energy": 0,
+            "die_t": null
+          }
+        },
+        "after": {
+          "0": {
+            "hp": 10000,
+            "energy": 0,
+            "die_t": null
+          },
+          "1": {
+            "hp": 9962,
+            "energy": 0,
+            "die_t": null
+          }
+        },
+        "actual": {},
+        "semantic": {
+          "declared_removed": 0,
+          "before_energy": 0,
+          "after_energy": 0,
+          "zero": true
+        }
+      },
+      "playback": {
+        "presentation_seconds": 1.08,
+        "pixel_sha256": "adc0d5bddc6a50b472ba1af7e9513e42c06735cea12293a894ab39ae09fe0ae3",
+        "rewind_pixel_sha256": "adc0d5bddc6a50b472ba1af7e9513e42c06735cea12293a894ab39ae09fe0ae3",
+        "playback_2x_pixel_sha256": "adc0d5bddc6a50b472ba1af7e9513e42c06735cea12293a894ab39ae09fe0ae3"
+      },
+      "peak_teaching_particles": 36
+    },
+    "full_natural": {
+      "factory_kind": "counter",
+      "scenario": "full",
+      "unit_count": 12,
+      "event_count": 445,
+      "authoritative_event_sha256": "3de6833d1289b5f5944f8fbe8bc6e2d152bb69d31e0156a0464bd41da52a080c",
+      "after_render_event_sha256": "3de6833d1289b5f5944f8fbe8bc6e2d152bb69d31e0156a0464bd41da52a080c",
+      "teaching_events": [
+        {
+          "raw_index": 42,
+          "machine_id": "guardian_riposte",
+          "source_idx": 0,
+          "target_idx": 8,
+          "cause_index": 38,
+          "cause_parent_kind": "attack",
+          "cause_event_count": 3,
+          "payload": {
+            "cause_index": 38,
+            "source_idx": 0,
+            "target_idx": 8,
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "uses_per_battle": 1,
+            "pushed": true,
+            "from_pos": [
+              2,
+              1
+            ],
+            "to_pos": [
+              2,
+              0
+            ],
+            "delay_seconds": 0.3,
+            "cause_event_count": 3,
+            "event_count": 3,
+            "next_act_before": 2.3619496855345914,
+            "next_act_after": 2.661949685534591
+          },
+          "owned_raw_indices": [
+            43,
+            44,
+            45
+          ],
+          "parent_timing": {
+            "start": 0.9,
+            "release": 1.35,
+            "impact": 1.4,
+            "recover_end": 1.75
+          }
+        }
+      ],
+      "parent_state_reconciliation": {
+        "parent_raw_index": 38,
+        "parent_kind": "attack",
+        "impact": 1.4,
+        "before": {
+          "0": {
+            "hp": 288,
+            "energy": 21,
+            "die_t": null
+          },
+          "8": {
+            "hp": 278,
+            "energy": 10,
+            "die_t": null
+          }
+        },
+        "after": {
+          "0": {
+            "hp": 263,
+            "energy": 31,
+            "die_t": null
+          },
+          "8": {
+            "hp": 278,
+            "energy": 31,
+            "die_t": null
+          }
+        },
+        "actual": {},
+        "semantic": {
+          "pushed": true,
+          "delay_seconds": 0.3
+        }
+      },
+      "playback": {
+        "presentation_seconds": 1.48,
+        "pixel_sha256": "46a71fd9abdbf2ca5decc206abb5f97d924c0257dfa4c753a0db1ac919f43960",
+        "rewind_pixel_sha256": "46a71fd9abdbf2ca5decc206abb5f97d924c0257dfa4c753a0db1ac919f43960",
+        "playback_2x_pixel_sha256": "46a71fd9abdbf2ca5decc206abb5f97d924c0257dfa4c753a0db1ac919f43960"
+      },
+      "peak_teaching_particles": 42
+    }
+  },
+  "outputs": [
+    {
+      "file": "counter_valid-pre.png",
+      "scene": "counter_valid",
+      "kind": "keyframe",
+      "presentation_seconds": 0.6,
+      "phase": "父动作前 / 不显示成功结果",
+      "teaching_particles": 28,
+      "pixels_sha256": "ccb4c075c513b0fba72c14a3b51f86c1ff6a3d1e9b4718999b1bbedaf2af7322",
+      "bytes": 32029,
+      "sha256": "3f3501bc9411f1a5847135edaa0cb1234d7e75552cc986b10879d262e9d4d527"
+    },
+    {
+      "file": "counter_valid-impact.png",
+      "scene": "counter_valid",
+      "kind": "keyframe",
+      "presentation_seconds": 0.7,
+      "phase": "父命中同拍 / 教学生效",
+      "teaching_particles": 42,
+      "pixels_sha256": "c204092f6b6efd2ac3d7c733bc9a460534a956dad716ca4004e77648309f1565",
+      "bytes": 34299,
+      "sha256": "2bfdac9b1bd0b42d4801e587b791d1b691d1114cf0e572749b3e392c93ec04f7"
+    },
+    {
+      "file": "counter_valid-after.png",
+      "scene": "counter_valid",
+      "kind": "keyframe",
+      "presentation_seconds": 1.0,
+      "phase": "恢复余波 / 权威状态不回写",
+      "teaching_particles": 42,
+      "pixels_sha256": "1ae1ad5f44a9223d47b9825309c68e40e0d6600c33556b1d3df8e1ed10a601c2",
+      "bytes": 35490,
+      "sha256": "605bfa28586c226cd302a8d7aad640a70f537459a8e0db8e7e2a5edc2062b1c2"
+    },
+    {
+      "frames": 8,
+      "fps": 10,
+      "peak_teaching_particles": 42,
+      "range": [
+        0.49999999999999994,
+        1.2
+      ],
+      "file": "counter_valid.gif",
+      "scene": "counter_valid",
+      "kind": "continuous_clip",
+      "bytes": 218642,
+      "sha256": "bed447b6978ad4219fba519cc23aec7f6b30dd250534ed118b0554cd45e537a9"
+    },
+    {
+      "file": "counter_blocked-pre.png",
+      "scene": "counter_blocked",
+      "kind": "keyframe",
+      "presentation_seconds": 0.6,
+      "phase": "父动作前 / 不显示成功结果",
+      "teaching_particles": 28,
+      "pixels_sha256": "8ed9dbd7437edefea25fd449e24d5819463c22989e5ad2e32e4182471aee79f6",
+      "bytes": 33344,
+      "sha256": "dca94a6c3d03fd87ecaa95cffb09e43a989f9d3502c864c450265bac90c1d580"
+    },
+    {
+      "file": "counter_blocked-impact.png",
+      "scene": "counter_blocked",
+      "kind": "keyframe",
+      "presentation_seconds": 0.7,
+      "phase": "父命中同拍 / 教学生效",
+      "teaching_particles": 42,
+      "pixels_sha256": "dcc3f15d6995fd79fe18749d1f3d7e4ab6ffeebf480152fb4c38644c7aefeff4",
+      "bytes": 36471,
+      "sha256": "701d312d034398746b85a6495eb7a53e229e460c8216824bd0abc29477aac33b"
+    },
+    {
+      "file": "counter_blocked-after.png",
+      "scene": "counter_blocked",
+      "kind": "keyframe",
+      "presentation_seconds": 1.0,
+      "phase": "恢复余波 / 权威状态不回写",
+      "teaching_particles": 42,
+      "pixels_sha256": "0e9c55114d4c2e12ab92cafae0478389c483b92d991becbc3c3dd987536a6792",
+      "bytes": 37372,
+      "sha256": "be0157fe157a087483156169169cc9a1eef261aa856e1333887767ca831d0c1a"
+    },
+    {
+      "frames": 8,
+      "fps": 10,
+      "peak_teaching_particles": 42,
+      "range": [
+        0.49999999999999994,
+        1.2
+      ],
+      "file": "counter_blocked.gif",
+      "scene": "counter_blocked",
+      "kind": "continuous_clip",
+      "bytes": 225020,
+      "sha256": "d0639220c90eb4ebc46efb583e75b46b01f2f5918c06fd4473a56e7db58dbc02"
+    },
+    {
+      "file": "tempo_valid-pre.png",
+      "scene": "tempo_valid",
+      "kind": "keyframe",
+      "presentation_seconds": 0.9,
+      "phase": "父动作前 / 不显示成功结果",
+      "teaching_particles": 24,
+      "pixels_sha256": "10529b31a9feb07f2677171ab282e48d04493fdcfaf3e679883ab0b0be95447a",
+      "bytes": 33114,
+      "sha256": "abf3efb527d509d70068d4253e92ecb80c3a0a19cf94e4287a9151f568089766"
+    },
+    {
+      "file": "tempo_valid-impact.png",
+      "scene": "tempo_valid",
+      "kind": "keyframe",
+      "presentation_seconds": 1.0,
+      "phase": "父命中同拍 / 教学生效",
+      "teaching_particles": 36,
+      "pixels_sha256": "06961b2558f95900db634dab901c4c77dce4db353bb208a93caa1caabc93f194",
+      "bytes": 34690,
+      "sha256": "de06cb32589f83c9706cbf63a00ff995989a6040c16ca71bdca7ec81e723b17a"
+    },
+    {
+      "file": "tempo_valid-after.png",
+      "scene": "tempo_valid",
+      "kind": "keyframe",
+      "presentation_seconds": 1.3,
+      "phase": "恢复余波 / 权威状态不回写",
+      "teaching_particles": 36,
+      "pixels_sha256": "2d3bcc4a723eb7f4617897ce2710f1867a7368c25d68008f9964bf4172a1e703",
+      "bytes": 34248,
+      "sha256": "99952bbc04549338e920588348a4f93a423ddf1d46202248a264cef550b0964c"
+    },
+    {
+      "frames": 8,
+      "fps": 10,
+      "peak_teaching_particles": 36,
+      "range": [
+        0.8,
+        1.5
+      ],
+      "file": "tempo_valid.gif",
+      "scene": "tempo_valid",
+      "kind": "continuous_clip",
+      "bytes": 211796,
+      "sha256": "dab8e3dd0af29f518472f21d84fc073f105a83c55bef67bf77b3b2193af72fb7"
+    },
+    {
+      "file": "tempo_zero-pre.png",
+      "scene": "tempo_zero",
+      "kind": "keyframe",
+      "presentation_seconds": 0.9,
+      "phase": "父动作前 / 不显示成功结果",
+      "teaching_particles": 24,
+      "pixels_sha256": "3d45083d7bf0e6fe851c61061163921007b323302469d7ece0aaf1e65245ec03",
+      "bytes": 32951,
+      "sha256": "cfb8fcab559eee62e1def91b9b618ea8638b9d4bac31bd7ea53978df4a3a73cd"
+    },
+    {
+      "file": "tempo_zero-impact.png",
+      "scene": "tempo_zero",
+      "kind": "keyframe",
+      "presentation_seconds": 1.0,
+      "phase": "父命中同拍 / 教学生效",
+      "teaching_particles": 36,
+      "pixels_sha256": "932726bffa3bae35a6d53798b3c7e9b86dd797d01d547cf2c0f5fd95cc4e7d7b",
+      "bytes": 34491,
+      "sha256": "716b145cecb5e46ff36e939071f6ccf4e765364108f2f9a6464cfa438af8ab4c"
+    },
+    {
+      "file": "tempo_zero-after.png",
+      "scene": "tempo_zero",
+      "kind": "keyframe",
+      "presentation_seconds": 1.3,
+      "phase": "恢复余波 / 权威状态不回写",
+      "teaching_particles": 36,
+      "pixels_sha256": "fd0d41d78a977b2d79c51e4140ab20baca529d50129f2d16a91dad29b1121aa7",
+      "bytes": 34131,
+      "sha256": "5cd220a5de8279498f9fa6f976c15d0d1dd753af5ec385528fd2a0a2f36c3a28"
+    },
+    {
+      "frames": 8,
+      "fps": 10,
+      "peak_teaching_particles": 36,
+      "range": [
+        0.8,
+        1.5
+      ],
+      "file": "tempo_zero.gif",
+      "scene": "tempo_zero",
+      "kind": "continuous_clip",
+      "bytes": 207859,
+      "sha256": "780a330ad39e1bf50e63687ba80bc037b0fb384858cf46c7ed6aae98f370239b"
+    },
+    {
+      "file": "full_natural-pre.png",
+      "scene": "full_natural",
+      "kind": "keyframe",
+      "presentation_seconds": 1.3,
+      "phase": "父动作前 / 不显示成功结果",
+      "teaching_particles": 28,
+      "pixels_sha256": "122df43286d59f2188815296f8799ba9799a310ad3464e5f48d9142224a0c800",
+      "bytes": 46408,
+      "sha256": "607cb950ec6d74be5549d6a4ecebeac60c6cfd6b438681b8ed662702f5b85656"
+    },
+    {
+      "file": "full_natural-impact.png",
+      "scene": "full_natural",
+      "kind": "keyframe",
+      "presentation_seconds": 1.4,
+      "phase": "父命中同拍 / 教学生效",
+      "teaching_particles": 42,
+      "pixels_sha256": "15bb1f7afa1eccf7f9111a35a8829167c0dc722086a2a07d616a625c9003e7f1",
+      "bytes": 46573,
+      "sha256": "72baff96919d04b32070161ae66beec9cfb28d71df2143f1aa4d341007cbcf60"
+    },
+    {
+      "file": "full_natural-after.png",
+      "scene": "full_natural",
+      "kind": "keyframe",
+      "presentation_seconds": 1.7,
+      "phase": "恢复余波 / 权威状态不回写",
+      "teaching_particles": 42,
+      "pixels_sha256": "c63839486c4627bb474429a87b6ef23e7f14ba971e6ac1fa33a81c88e1399a17",
+      "bytes": 45671,
+      "sha256": "3616d134955097f5ae6e861edbfd512483ffae57aa9f0c1f0648c450c9ca7b2c"
+    },
+    {
+      "frames": 8,
+      "fps": 10,
+      "peak_teaching_particles": 42,
+      "range": [
+        1.2,
+        1.9
+      ],
+      "file": "full_natural.gif",
+      "scene": "full_natural",
+      "kind": "continuous_clip",
+      "bytes": 303000,
+      "sha256": "5e5cca9070a25ffd3c33215500c2a18cf0d13680376b96769c47f22099584395"
+    },
+    {
+      "file": "teaching-overview.png",
+      "kind": "overview",
+      "bytes": 277638,
+      "sha256": "a8208ee4735e6100600f63d2a5fe1d88c1d79b851dffc2d29b8aff1299f17628"
+    }
+  ],
+  "checks": {
+    "cause_ownership": true,
+    "state_reconciliation": true,
+    "event_hash_unchanged": true,
+    "rewind_speed_pixels": true,
+    "particle_budget": true
+  },
+  "limits": [
+    "All overlays derive from authoritative teaching_effect records and real parent ActionTiming.",
+    "The production renderer and tools/mockups are imported read-only; no default behavior was patched.",
+    "Full is one six-unit natural prototype battle and is not a balance claim.",
+    "PC PNG/GIF evidence does not measure ESP32 memory, cache, C sampling, or frame time.",
+    "The overlay is an isolated acceptance track, not production animation integration."
+  ]
+}

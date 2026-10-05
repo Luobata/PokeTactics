@@ -1,0 +1,8 @@
+{
+  "schema": "teaching-csv-format-repair-v1",
+  "initial_staged_whitespace_exit": 2,
+  "reason": "Python csv default CRLF was flagged by Git as trailing whitespace; unstaged git diff had not included new files.",
+  "repair": "Set probe lineterminator to LF; preserve old raw CSVs as gzip. No row/value/eligibility or battle changes.",
+  "initial_review_run_before_fix": "20261005-111107-a0708fa70cf6",
+  "initial_review_was_dispatched": false
+}

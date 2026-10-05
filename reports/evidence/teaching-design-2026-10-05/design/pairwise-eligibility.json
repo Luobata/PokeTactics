@@ -1,0 +1,4706 @@
+[
+  {
+    "species_id": 1,
+    "name": "妙蛙种子",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格143、最高双攻65、速度45）"
+  },
+  {
+    "species_id": 1,
+    "name": "妙蛙种子",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程远程、体格143、最高双攻65、速度45）"
+  },
+  {
+    "species_id": 1,
+    "name": "妙蛙种子",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格143、最高双攻65、速度45）"
+  },
+  {
+    "species_id": 1,
+    "name": "妙蛙种子",
+    "machine": "rally_signal",
+    "eligible": true,
+    "reason": "远程且速度45<70：慢速指挥职责"
+  },
+  {
+    "species_id": 1,
+    "name": "妙蛙种子",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格143、最高双攻65、速度45）"
+  },
+  {
+    "species_id": 1,
+    "name": "妙蛙种子",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格143、最高双攻65、速度45）"
+  },
+  {
+    "species_id": 1,
+    "name": "妙蛙种子",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格143、最高双攻65、速度45）"
+  },
+  {
+    "species_id": 1,
+    "name": "妙蛙种子",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格143、最高双攻65、速度45）"
+  },
+  {
+    "species_id": 2,
+    "name": "妙蛙草",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格186、最高双攻80、速度60）"
+  },
+  {
+    "species_id": 2,
+    "name": "妙蛙草",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程远程、体格186、最高双攻80、速度60）"
+  },
+  {
+    "species_id": 2,
+    "name": "妙蛙草",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格186、最高双攻80、速度60）"
+  },
+  {
+    "species_id": 2,
+    "name": "妙蛙草",
+    "machine": "rally_signal",
+    "eligible": true,
+    "reason": "远程且速度60<70：慢速指挥职责"
+  },
+  {
+    "species_id": 2,
+    "name": "妙蛙草",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格186、最高双攻80、速度60）"
+  },
+  {
+    "species_id": 2,
+    "name": "妙蛙草",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格186、最高双攻80、速度60）"
+  },
+  {
+    "species_id": 2,
+    "name": "妙蛙草",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格186、最高双攻80、速度60）"
+  },
+  {
+    "species_id": 2,
+    "name": "妙蛙草",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格186、最高双攻80、速度60）"
+  },
+  {
+    "species_id": 3,
+    "name": "妙蛙花",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格246、最高双攻100、速度80）"
+  },
+  {
+    "species_id": 3,
+    "name": "妙蛙花",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度80≥70：远程压启动职责"
+  },
+  {
+    "species_id": 3,
+    "name": "妙蛙花",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格246、最高双攻100、速度80）"
+  },
+  {
+    "species_id": 3,
+    "name": "妙蛙花",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格246、最高双攻100、速度80）"
+  },
+  {
+    "species_id": 3,
+    "name": "妙蛙花",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻100≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 3,
+    "name": "妙蛙花",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格246、最高双攻100、速度80）"
+  },
+  {
+    "species_id": 3,
+    "name": "妙蛙花",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格246、最高双攻100、速度80）"
+  },
+  {
+    "species_id": 3,
+    "name": "妙蛙花",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格246、最高双攻100、速度80）"
+  },
+  {
+    "species_id": 4,
+    "name": "小火龙",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格125、最高双攻60、速度65）"
+  },
+  {
+    "species_id": 4,
+    "name": "小火龙",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程远程、体格125、最高双攻60、速度65）"
+  },
+  {
+    "species_id": 4,
+    "name": "小火龙",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格125、最高双攻60、速度65）"
+  },
+  {
+    "species_id": 4,
+    "name": "小火龙",
+    "machine": "rally_signal",
+    "eligible": true,
+    "reason": "远程且速度65<70：慢速指挥职责"
+  },
+  {
+    "species_id": 4,
+    "name": "小火龙",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格125、最高双攻60、速度65）"
+  },
+  {
+    "species_id": 4,
+    "name": "小火龙",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格125、最高双攻60、速度65）"
+  },
+  {
+    "species_id": 4,
+    "name": "小火龙",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格125、最高双攻60、速度65）"
+  },
+  {
+    "species_id": 4,
+    "name": "小火龙",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格125、最高双攻60、速度65）"
+  },
+  {
+    "species_id": 5,
+    "name": "火恐龙",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格174、最高双攻80、速度80）"
+  },
+  {
+    "species_id": 5,
+    "name": "火恐龙",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度80≥70：远程压启动职责"
+  },
+  {
+    "species_id": 5,
+    "name": "火恐龙",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格174、最高双攻80、速度80）"
+  },
+  {
+    "species_id": 5,
+    "name": "火恐龙",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格174、最高双攻80、速度80）"
+  },
+  {
+    "species_id": 5,
+    "name": "火恐龙",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格174、最高双攻80、速度80）"
+  },
+  {
+    "species_id": 5,
+    "name": "火恐龙",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格174、最高双攻80、速度80）"
+  },
+  {
+    "species_id": 5,
+    "name": "火恐龙",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格174、最高双攻80、速度80）"
+  },
+  {
+    "species_id": 5,
+    "name": "火恐龙",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格174、最高双攻80、速度80）"
+  },
+  {
+    "species_id": 6,
+    "name": "喷火龙",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格234、最高双攻109、速度100）"
+  },
+  {
+    "species_id": 6,
+    "name": "喷火龙",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度100≥70：远程压启动职责"
+  },
+  {
+    "species_id": 6,
+    "name": "喷火龙",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格234、最高双攻109、速度100）"
+  },
+  {
+    "species_id": 6,
+    "name": "喷火龙",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格234、最高双攻109、速度100）"
+  },
+  {
+    "species_id": 6,
+    "name": "喷火龙",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻109≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 6,
+    "name": "喷火龙",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格234、最高双攻109、速度100）"
+  },
+  {
+    "species_id": 6,
+    "name": "喷火龙",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格234、最高双攻109、速度100）"
+  },
+  {
+    "species_id": 6,
+    "name": "喷火龙",
+    "machine": "tempo_break",
+    "eligible": true,
+    "reason": "速度100≥100：稀有心律截断"
+  },
+  {
+    "species_id": 7,
+    "name": "杰尼龟",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格174、最高双攻50、速度43）"
+  },
+  {
+    "species_id": 7,
+    "name": "杰尼龟",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程远程、体格174、最高双攻50、速度43）"
+  },
+  {
+    "species_id": 7,
+    "name": "杰尼龟",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格174、最高双攻50、速度43）"
+  },
+  {
+    "species_id": 7,
+    "name": "杰尼龟",
+    "machine": "rally_signal",
+    "eligible": true,
+    "reason": "远程且速度43<70：慢速指挥职责"
+  },
+  {
+    "species_id": 7,
+    "name": "杰尼龟",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格174、最高双攻50、速度43）"
+  },
+  {
+    "species_id": 7,
+    "name": "杰尼龟",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格174、最高双攻50、速度43）"
+  },
+  {
+    "species_id": 7,
+    "name": "杰尼龟",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格174、最高双攻50、速度43）"
+  },
+  {
+    "species_id": 7,
+    "name": "杰尼龟",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格174、最高双攻50、速度43）"
+  },
+  {
+    "species_id": 8,
+    "name": "卡咪龟",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格219、最高双攻65、速度58）"
+  },
+  {
+    "species_id": 8,
+    "name": "卡咪龟",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程远程、体格219、最高双攻65、速度58）"
+  },
+  {
+    "species_id": 8,
+    "name": "卡咪龟",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格219、最高双攻65、速度58）"
+  },
+  {
+    "species_id": 8,
+    "name": "卡咪龟",
+    "machine": "rally_signal",
+    "eligible": true,
+    "reason": "远程且速度58<70：慢速指挥职责"
+  },
+  {
+    "species_id": 8,
+    "name": "卡咪龟",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格219、最高双攻65、速度58）"
+  },
+  {
+    "species_id": 8,
+    "name": "卡咪龟",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格219、最高双攻65、速度58）"
+  },
+  {
+    "species_id": 8,
+    "name": "卡咪龟",
+    "machine": "field_triage",
+    "eligible": true,
+    "reason": "体格219在200–259且速度58≤70：稳态救援"
+  },
+  {
+    "species_id": 8,
+    "name": "卡咪龟",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格219、最高双攻65、速度58）"
+  },
+  {
+    "species_id": 9,
+    "name": "水箭龟",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格279、最高双攻85、速度78）"
+  },
+  {
+    "species_id": 9,
+    "name": "水箭龟",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度78≥70：远程压启动职责"
+  },
+  {
+    "species_id": 9,
+    "name": "水箭龟",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格279、最高双攻85、速度78）"
+  },
+  {
+    "species_id": 9,
+    "name": "水箭龟",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格279、最高双攻85、速度78）"
+  },
+  {
+    "species_id": 9,
+    "name": "水箭龟",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格279、最高双攻85、速度78）"
+  },
+  {
+    "species_id": 9,
+    "name": "水箭龟",
+    "machine": "standburst",
+    "eligible": true,
+    "reason": "体格279≥260：重装阵型爆发"
+  },
+  {
+    "species_id": 9,
+    "name": "水箭龟",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格279、最高双攻85、速度78）"
+  },
+  {
+    "species_id": 9,
+    "name": "水箭龟",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格279、最高双攻85、速度78）"
+  },
+  {
+    "species_id": 10,
+    "name": "绿毛虫",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格115<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 10,
+    "name": "绿毛虫",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格115、最高双攻30、速度45）"
+  },
+  {
+    "species_id": 10,
+    "name": "绿毛虫",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格115、最高双攻30、速度45）"
+  },
+  {
+    "species_id": 10,
+    "name": "绿毛虫",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格115、最高双攻30、速度45）"
+  },
+  {
+    "species_id": 10,
+    "name": "绿毛虫",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格115、最高双攻30、速度45）"
+  },
+  {
+    "species_id": 10,
+    "name": "绿毛虫",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格115、最高双攻30、速度45）"
+  },
+  {
+    "species_id": 10,
+    "name": "绿毛虫",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格115、最高双攻30、速度45）"
+  },
+  {
+    "species_id": 10,
+    "name": "绿毛虫",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格115、最高双攻30、速度45）"
+  },
+  {
+    "species_id": 11,
+    "name": "铁甲蛹",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格160、最高双攻25、速度30）"
+  },
+  {
+    "species_id": 11,
+    "name": "铁甲蛹",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程远程、体格160、最高双攻25、速度30）"
+  },
+  {
+    "species_id": 11,
+    "name": "铁甲蛹",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格160、最高双攻25、速度30）"
+  },
+  {
+    "species_id": 11,
+    "name": "铁甲蛹",
+    "machine": "rally_signal",
+    "eligible": true,
+    "reason": "远程且速度30<70：慢速指挥职责"
+  },
+  {
+    "species_id": 11,
+    "name": "铁甲蛹",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格160、最高双攻25、速度30）"
+  },
+  {
+    "species_id": 11,
+    "name": "铁甲蛹",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格160、最高双攻25、速度30）"
+  },
+  {
+    "species_id": 11,
+    "name": "铁甲蛹",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格160、最高双攻25、速度30）"
+  },
+  {
+    "species_id": 11,
+    "name": "铁甲蛹",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格160、最高双攻25、速度30）"
+  },
+  {
+    "species_id": 12,
+    "name": "巴大蝶",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格160、最高双攻80、速度70）"
+  },
+  {
+    "species_id": 12,
+    "name": "巴大蝶",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度70≥70：远程压启动职责"
+  },
+  {
+    "species_id": 12,
+    "name": "巴大蝶",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格160、最高双攻80、速度70）"
+  },
+  {
+    "species_id": 12,
+    "name": "巴大蝶",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格160、最高双攻80、速度70）"
+  },
+  {
+    "species_id": 12,
+    "name": "巴大蝶",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格160、最高双攻80、速度70）"
+  },
+  {
+    "species_id": 12,
+    "name": "巴大蝶",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格160、最高双攻80、速度70）"
+  },
+  {
+    "species_id": 12,
+    "name": "巴大蝶",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格160、最高双攻80、速度70）"
+  },
+  {
+    "species_id": 12,
+    "name": "巴大蝶",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格160、最高双攻80、速度70）"
+  },
+  {
+    "species_id": 13,
+    "name": "独角虫",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格100<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 13,
+    "name": "独角虫",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格100、最高双攻35、速度50）"
+  },
+  {
+    "species_id": 13,
+    "name": "独角虫",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格100、最高双攻35、速度50）"
+  },
+  {
+    "species_id": 13,
+    "name": "独角虫",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格100、最高双攻35、速度50）"
+  },
+  {
+    "species_id": 13,
+    "name": "独角虫",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格100、最高双攻35、速度50）"
+  },
+  {
+    "species_id": 13,
+    "name": "独角虫",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格100、最高双攻35、速度50）"
+  },
+  {
+    "species_id": 13,
+    "name": "独角虫",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格100、最高双攻35、速度50）"
+  },
+  {
+    "species_id": 13,
+    "name": "独角虫",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格100、最高双攻35、速度50）"
+  },
+  {
+    "species_id": 14,
+    "name": "铁壳蛹",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格145<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 14,
+    "name": "铁壳蛹",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格145、最高双攻25、速度35）"
+  },
+  {
+    "species_id": 14,
+    "name": "铁壳蛹",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格145、最高双攻25、速度35）"
+  },
+  {
+    "species_id": 14,
+    "name": "铁壳蛹",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格145、最高双攻25、速度35）"
+  },
+  {
+    "species_id": 14,
+    "name": "铁壳蛹",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格145、最高双攻25、速度35）"
+  },
+  {
+    "species_id": 14,
+    "name": "铁壳蛹",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格145、最高双攻25、速度35）"
+  },
+  {
+    "species_id": 14,
+    "name": "铁壳蛹",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格145、最高双攻25、速度35）"
+  },
+  {
+    "species_id": 14,
+    "name": "铁壳蛹",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格145、最高双攻25、速度35）"
+  },
+  {
+    "species_id": 15,
+    "name": "大针蜂",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格145<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 15,
+    "name": "大针蜂",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格145、最高双攻80、速度75）"
+  },
+  {
+    "species_id": 15,
+    "name": "大针蜂",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格145、最高双攻80、速度75）"
+  },
+  {
+    "species_id": 15,
+    "name": "大针蜂",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格145、最高双攻80、速度75）"
+  },
+  {
+    "species_id": 15,
+    "name": "大针蜂",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格145、最高双攻80、速度75）"
+  },
+  {
+    "species_id": 15,
+    "name": "大针蜂",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格145、最高双攻80、速度75）"
+  },
+  {
+    "species_id": 15,
+    "name": "大针蜂",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格145、最高双攻80、速度75）"
+  },
+  {
+    "species_id": 15,
+    "name": "大针蜂",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格145、最高双攻80、速度75）"
+  },
+  {
+    "species_id": 16,
+    "name": "波波",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格120<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 16,
+    "name": "波波",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格120、最高双攻45、速度56）"
+  },
+  {
+    "species_id": 16,
+    "name": "波波",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格120、最高双攻45、速度56）"
+  },
+  {
+    "species_id": 16,
+    "name": "波波",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格120、最高双攻45、速度56）"
+  },
+  {
+    "species_id": 16,
+    "name": "波波",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格120、最高双攻45、速度56）"
+  },
+  {
+    "species_id": 16,
+    "name": "波波",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格120、最高双攻45、速度56）"
+  },
+  {
+    "species_id": 16,
+    "name": "波波",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格120、最高双攻45、速度56）"
+  },
+  {
+    "species_id": 16,
+    "name": "波波",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格120、最高双攻45、速度56）"
+  },
+  {
+    "species_id": 17,
+    "name": "比比鸟",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格173<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 17,
+    "name": "比比鸟",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格173、最高双攻60、速度71）"
+  },
+  {
+    "species_id": 17,
+    "name": "比比鸟",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格173、最高双攻60、速度71）"
+  },
+  {
+    "species_id": 17,
+    "name": "比比鸟",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格173、最高双攻60、速度71）"
+  },
+  {
+    "species_id": 17,
+    "name": "比比鸟",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格173、最高双攻60、速度71）"
+  },
+  {
+    "species_id": 17,
+    "name": "比比鸟",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格173、最高双攻60、速度71）"
+  },
+  {
+    "species_id": 17,
+    "name": "比比鸟",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格173、最高双攻60、速度71）"
+  },
+  {
+    "species_id": 17,
+    "name": "比比鸟",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格173、最高双攻60、速度71）"
+  },
+  {
+    "species_id": 18,
+    "name": "大比鸟",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格233、最高双攻80、速度91）"
+  },
+  {
+    "species_id": 18,
+    "name": "大比鸟",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格233、最高双攻80、速度91）"
+  },
+  {
+    "species_id": 18,
+    "name": "大比鸟",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格233≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 18,
+    "name": "大比鸟",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格233、最高双攻80、速度91）"
+  },
+  {
+    "species_id": 18,
+    "name": "大比鸟",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格233、最高双攻80、速度91）"
+  },
+  {
+    "species_id": 18,
+    "name": "大比鸟",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格233、最高双攻80、速度91）"
+  },
+  {
+    "species_id": 18,
+    "name": "大比鸟",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格233、最高双攻80、速度91）"
+  },
+  {
+    "species_id": 18,
+    "name": "大比鸟",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格233、最高双攻80、速度91）"
+  },
+  {
+    "species_id": 19,
+    "name": "小拉达",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格100<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 19,
+    "name": "小拉达",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格100、最高双攻56、速度72）"
+  },
+  {
+    "species_id": 19,
+    "name": "小拉达",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格100、最高双攻56、速度72）"
+  },
+  {
+    "species_id": 19,
+    "name": "小拉达",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格100、最高双攻56、速度72）"
+  },
+  {
+    "species_id": 19,
+    "name": "小拉达",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格100、最高双攻56、速度72）"
+  },
+  {
+    "species_id": 19,
+    "name": "小拉达",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格100、最高双攻56、速度72）"
+  },
+  {
+    "species_id": 19,
+    "name": "小拉达",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格100、最高双攻56、速度72）"
+  },
+  {
+    "species_id": 19,
+    "name": "小拉达",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格100、最高双攻56、速度72）"
+  },
+  {
+    "species_id": 20,
+    "name": "拉达",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格175<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 20,
+    "name": "拉达",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格175、最高双攻81、速度97）"
+  },
+  {
+    "species_id": 20,
+    "name": "拉达",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格175、最高双攻81、速度97）"
+  },
+  {
+    "species_id": 20,
+    "name": "拉达",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格175、最高双攻81、速度97）"
+  },
+  {
+    "species_id": 20,
+    "name": "拉达",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格175、最高双攻81、速度97）"
+  },
+  {
+    "species_id": 20,
+    "name": "拉达",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格175、最高双攻81、速度97）"
+  },
+  {
+    "species_id": 20,
+    "name": "拉达",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格175、最高双攻81、速度97）"
+  },
+  {
+    "species_id": 20,
+    "name": "拉达",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格175、最高双攻81、速度97）"
+  },
+  {
+    "species_id": 21,
+    "name": "烈雀",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格100<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 21,
+    "name": "烈雀",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格100、最高双攻60、速度70）"
+  },
+  {
+    "species_id": 21,
+    "name": "烈雀",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格100、最高双攻60、速度70）"
+  },
+  {
+    "species_id": 21,
+    "name": "烈雀",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格100、最高双攻60、速度70）"
+  },
+  {
+    "species_id": 21,
+    "name": "烈雀",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格100、最高双攻60、速度70）"
+  },
+  {
+    "species_id": 21,
+    "name": "烈雀",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格100、最高双攻60、速度70）"
+  },
+  {
+    "species_id": 21,
+    "name": "烈雀",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格100、最高双攻60、速度70）"
+  },
+  {
+    "species_id": 21,
+    "name": "烈雀",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格100、最高双攻60、速度70）"
+  },
+  {
+    "species_id": 22,
+    "name": "大嘴雀",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格195<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 22,
+    "name": "大嘴雀",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格195、最高双攻90、速度100）"
+  },
+  {
+    "species_id": 22,
+    "name": "大嘴雀",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格195、最高双攻90、速度100）"
+  },
+  {
+    "species_id": 22,
+    "name": "大嘴雀",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格195、最高双攻90、速度100）"
+  },
+  {
+    "species_id": 22,
+    "name": "大嘴雀",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格195、最高双攻90、速度100）"
+  },
+  {
+    "species_id": 22,
+    "name": "大嘴雀",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格195、最高双攻90、速度100）"
+  },
+  {
+    "species_id": 22,
+    "name": "大嘴雀",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格195、最高双攻90、速度100）"
+  },
+  {
+    "species_id": 22,
+    "name": "大嘴雀",
+    "machine": "tempo_break",
+    "eligible": true,
+    "reason": "速度100≥100：稀有心律截断"
+  },
+  {
+    "species_id": 25,
+    "name": "皮卡丘",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格95<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 25,
+    "name": "皮卡丘",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格95、最高双攻55、速度90）"
+  },
+  {
+    "species_id": 25,
+    "name": "皮卡丘",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格95、最高双攻55、速度90）"
+  },
+  {
+    "species_id": 25,
+    "name": "皮卡丘",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格95、最高双攻55、速度90）"
+  },
+  {
+    "species_id": 25,
+    "name": "皮卡丘",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格95、最高双攻55、速度90）"
+  },
+  {
+    "species_id": 25,
+    "name": "皮卡丘",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格95、最高双攻55、速度90）"
+  },
+  {
+    "species_id": 25,
+    "name": "皮卡丘",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格95、最高双攻55、速度90）"
+  },
+  {
+    "species_id": 25,
+    "name": "皮卡丘",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格95、最高双攻55、速度90）"
+  },
+  {
+    "species_id": 26,
+    "name": "雷丘",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格170、最高双攻90、速度100）"
+  },
+  {
+    "species_id": 26,
+    "name": "雷丘",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度100≥70：远程压启动职责"
+  },
+  {
+    "species_id": 26,
+    "name": "雷丘",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格170、最高双攻90、速度100）"
+  },
+  {
+    "species_id": 26,
+    "name": "雷丘",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格170、最高双攻90、速度100）"
+  },
+  {
+    "species_id": 26,
+    "name": "雷丘",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格170、最高双攻90、速度100）"
+  },
+  {
+    "species_id": 26,
+    "name": "雷丘",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格170、最高双攻90、速度100）"
+  },
+  {
+    "species_id": 26,
+    "name": "雷丘",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格170、最高双攻90、速度100）"
+  },
+  {
+    "species_id": 26,
+    "name": "雷丘",
+    "machine": "tempo_break",
+    "eligible": true,
+    "reason": "速度100≥100：稀有心律截断"
+  },
+  {
+    "species_id": 29,
+    "name": "尼多兰",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格159<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 29,
+    "name": "尼多兰",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格159、最高双攻47、速度41）"
+  },
+  {
+    "species_id": 29,
+    "name": "尼多兰",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格159、最高双攻47、速度41）"
+  },
+  {
+    "species_id": 29,
+    "name": "尼多兰",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格159、最高双攻47、速度41）"
+  },
+  {
+    "species_id": 29,
+    "name": "尼多兰",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格159、最高双攻47、速度41）"
+  },
+  {
+    "species_id": 29,
+    "name": "尼多兰",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格159、最高双攻47、速度41）"
+  },
+  {
+    "species_id": 29,
+    "name": "尼多兰",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格159、最高双攻47、速度41）"
+  },
+  {
+    "species_id": 29,
+    "name": "尼多兰",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格159、最高双攻47、速度41）"
+  },
+  {
+    "species_id": 30,
+    "name": "尼多娜",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格204<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 30,
+    "name": "尼多娜",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格204、最高双攻62、速度56）"
+  },
+  {
+    "species_id": 30,
+    "name": "尼多娜",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格204、最高双攻62、速度56）"
+  },
+  {
+    "species_id": 30,
+    "name": "尼多娜",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格204、最高双攻62、速度56）"
+  },
+  {
+    "species_id": 30,
+    "name": "尼多娜",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格204、最高双攻62、速度56）"
+  },
+  {
+    "species_id": 30,
+    "name": "尼多娜",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格204、最高双攻62、速度56）"
+  },
+  {
+    "species_id": 30,
+    "name": "尼多娜",
+    "machine": "field_triage",
+    "eligible": true,
+    "reason": "体格204在200–259且速度56≤70：稳态救援"
+  },
+  {
+    "species_id": 30,
+    "name": "尼多娜",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格204、最高双攻62、速度56）"
+  },
+  {
+    "species_id": 31,
+    "name": "尼多后",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格264、最高双攻82、速度76）"
+  },
+  {
+    "species_id": 31,
+    "name": "尼多后",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格264、最高双攻82、速度76）"
+  },
+  {
+    "species_id": 31,
+    "name": "尼多后",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格264≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 31,
+    "name": "尼多后",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格264、最高双攻82、速度76）"
+  },
+  {
+    "species_id": 31,
+    "name": "尼多后",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格264、最高双攻82、速度76）"
+  },
+  {
+    "species_id": 31,
+    "name": "尼多后",
+    "machine": "standburst",
+    "eligible": true,
+    "reason": "体格264≥260：重装阵型爆发"
+  },
+  {
+    "species_id": 31,
+    "name": "尼多后",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格264、最高双攻82、速度76）"
+  },
+  {
+    "species_id": 31,
+    "name": "尼多后",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格264、最高双攻82、速度76）"
+  },
+  {
+    "species_id": 32,
+    "name": "尼多朗",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格126<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 32,
+    "name": "尼多朗",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格126、最高双攻57、速度50）"
+  },
+  {
+    "species_id": 32,
+    "name": "尼多朗",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格126、最高双攻57、速度50）"
+  },
+  {
+    "species_id": 32,
+    "name": "尼多朗",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格126、最高双攻57、速度50）"
+  },
+  {
+    "species_id": 32,
+    "name": "尼多朗",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格126、最高双攻57、速度50）"
+  },
+  {
+    "species_id": 32,
+    "name": "尼多朗",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格126、最高双攻57、速度50）"
+  },
+  {
+    "species_id": 32,
+    "name": "尼多朗",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格126、最高双攻57、速度50）"
+  },
+  {
+    "species_id": 32,
+    "name": "尼多朗",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格126、最高双攻57、速度50）"
+  },
+  {
+    "species_id": 33,
+    "name": "尼多力诺",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格175<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 33,
+    "name": "尼多力诺",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格175、最高双攻72、速度65）"
+  },
+  {
+    "species_id": 33,
+    "name": "尼多力诺",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格175、最高双攻72、速度65）"
+  },
+  {
+    "species_id": 33,
+    "name": "尼多力诺",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格175、最高双攻72、速度65）"
+  },
+  {
+    "species_id": 33,
+    "name": "尼多力诺",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格175、最高双攻72、速度65）"
+  },
+  {
+    "species_id": 33,
+    "name": "尼多力诺",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格175、最高双攻72、速度65）"
+  },
+  {
+    "species_id": 33,
+    "name": "尼多力诺",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格175、最高双攻72、速度65）"
+  },
+  {
+    "species_id": 33,
+    "name": "尼多力诺",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格175、最高双攻72、速度65）"
+  },
+  {
+    "species_id": 34,
+    "name": "尼多王",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格235、最高双攻92、速度85）"
+  },
+  {
+    "species_id": 34,
+    "name": "尼多王",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格235、最高双攻92、速度85）"
+  },
+  {
+    "species_id": 34,
+    "name": "尼多王",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格235≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 34,
+    "name": "尼多王",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格235、最高双攻92、速度85）"
+  },
+  {
+    "species_id": 34,
+    "name": "尼多王",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格235、最高双攻92、速度85）"
+  },
+  {
+    "species_id": 34,
+    "name": "尼多王",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格235、最高双攻92、速度85）"
+  },
+  {
+    "species_id": 34,
+    "name": "尼多王",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格235、最高双攻92、速度85）"
+  },
+  {
+    "species_id": 34,
+    "name": "尼多王",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格235、最高双攻92、速度85）"
+  },
+  {
+    "species_id": 37,
+    "name": "六尾",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格118、最高双攻50、速度65）"
+  },
+  {
+    "species_id": 37,
+    "name": "六尾",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程远程、体格118、最高双攻50、速度65）"
+  },
+  {
+    "species_id": 37,
+    "name": "六尾",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格118、最高双攻50、速度65）"
+  },
+  {
+    "species_id": 37,
+    "name": "六尾",
+    "machine": "rally_signal",
+    "eligible": true,
+    "reason": "远程且速度65<70：慢速指挥职责"
+  },
+  {
+    "species_id": 37,
+    "name": "六尾",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格118、最高双攻50、速度65）"
+  },
+  {
+    "species_id": 37,
+    "name": "六尾",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格118、最高双攻50、速度65）"
+  },
+  {
+    "species_id": 37,
+    "name": "六尾",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格118、最高双攻50、速度65）"
+  },
+  {
+    "species_id": 37,
+    "name": "六尾",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格118、最高双攻50、速度65）"
+  },
+  {
+    "species_id": 38,
+    "name": "九尾",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格223、最高双攻81、速度100）"
+  },
+  {
+    "species_id": 38,
+    "name": "九尾",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度100≥70：远程压启动职责"
+  },
+  {
+    "species_id": 38,
+    "name": "九尾",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格223、最高双攻81、速度100）"
+  },
+  {
+    "species_id": 38,
+    "name": "九尾",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格223、最高双攻81、速度100）"
+  },
+  {
+    "species_id": 38,
+    "name": "九尾",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格223、最高双攻81、速度100）"
+  },
+  {
+    "species_id": 38,
+    "name": "九尾",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格223、最高双攻81、速度100）"
+  },
+  {
+    "species_id": 38,
+    "name": "九尾",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格223、最高双攻81、速度100）"
+  },
+  {
+    "species_id": 38,
+    "name": "九尾",
+    "machine": "tempo_break",
+    "eligible": true,
+    "reason": "速度100≥100：稀有心律截断"
+  },
+  {
+    "species_id": 41,
+    "name": "超音蝠",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格110<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 41,
+    "name": "超音蝠",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格110、最高双攻45、速度55）"
+  },
+  {
+    "species_id": 41,
+    "name": "超音蝠",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格110、最高双攻45、速度55）"
+  },
+  {
+    "species_id": 41,
+    "name": "超音蝠",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格110、最高双攻45、速度55）"
+  },
+  {
+    "species_id": 41,
+    "name": "超音蝠",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格110、最高双攻45、速度55）"
+  },
+  {
+    "species_id": 41,
+    "name": "超音蝠",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格110、最高双攻45、速度55）"
+  },
+  {
+    "species_id": 41,
+    "name": "超音蝠",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格110、最高双攻45、速度55）"
+  },
+  {
+    "species_id": 41,
+    "name": "超音蝠",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格110、最高双攻45、速度55）"
+  },
+  {
+    "species_id": 42,
+    "name": "大嘴蝠",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格215<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 42,
+    "name": "大嘴蝠",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格215、最高双攻80、速度90）"
+  },
+  {
+    "species_id": 42,
+    "name": "大嘴蝠",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格215、最高双攻80、速度90）"
+  },
+  {
+    "species_id": 42,
+    "name": "大嘴蝠",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格215、最高双攻80、速度90）"
+  },
+  {
+    "species_id": 42,
+    "name": "大嘴蝠",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格215、最高双攻80、速度90）"
+  },
+  {
+    "species_id": 42,
+    "name": "大嘴蝠",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格215、最高双攻80、速度90）"
+  },
+  {
+    "species_id": 42,
+    "name": "大嘴蝠",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格215、最高双攻80、速度90）"
+  },
+  {
+    "species_id": 42,
+    "name": "大嘴蝠",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格215、最高双攻80、速度90）"
+  },
+  {
+    "species_id": 43,
+    "name": "走路草",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格155、最高双攻75、速度30）"
+  },
+  {
+    "species_id": 43,
+    "name": "走路草",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程远程、体格155、最高双攻75、速度30）"
+  },
+  {
+    "species_id": 43,
+    "name": "走路草",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格155、最高双攻75、速度30）"
+  },
+  {
+    "species_id": 43,
+    "name": "走路草",
+    "machine": "rally_signal",
+    "eligible": true,
+    "reason": "远程且速度30<70：慢速指挥职责"
+  },
+  {
+    "species_id": 43,
+    "name": "走路草",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格155、最高双攻75、速度30）"
+  },
+  {
+    "species_id": 43,
+    "name": "走路草",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格155、最高双攻75、速度30）"
+  },
+  {
+    "species_id": 43,
+    "name": "走路草",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格155、最高双攻75、速度30）"
+  },
+  {
+    "species_id": 43,
+    "name": "走路草",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格155、最高双攻75、速度30）"
+  },
+  {
+    "species_id": 44,
+    "name": "臭臭花",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格200、最高双攻85、速度40）"
+  },
+  {
+    "species_id": 44,
+    "name": "臭臭花",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程远程、体格200、最高双攻85、速度40）"
+  },
+  {
+    "species_id": 44,
+    "name": "臭臭花",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格200、最高双攻85、速度40）"
+  },
+  {
+    "species_id": 44,
+    "name": "臭臭花",
+    "machine": "rally_signal",
+    "eligible": true,
+    "reason": "远程且速度40<70：慢速指挥职责"
+  },
+  {
+    "species_id": 44,
+    "name": "臭臭花",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格200、最高双攻85、速度40）"
+  },
+  {
+    "species_id": 44,
+    "name": "臭臭花",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格200、最高双攻85、速度40）"
+  },
+  {
+    "species_id": 44,
+    "name": "臭臭花",
+    "machine": "field_triage",
+    "eligible": true,
+    "reason": "体格200在200–259且速度40≤70：稳态救援"
+  },
+  {
+    "species_id": 44,
+    "name": "臭臭花",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格200、最高双攻85、速度40）"
+  },
+  {
+    "species_id": 45,
+    "name": "霸王花",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格245、最高双攻100、速度50）"
+  },
+  {
+    "species_id": 45,
+    "name": "霸王花",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程远程、体格245、最高双攻100、速度50）"
+  },
+  {
+    "species_id": 45,
+    "name": "霸王花",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格245、最高双攻100、速度50）"
+  },
+  {
+    "species_id": 45,
+    "name": "霸王花",
+    "machine": "rally_signal",
+    "eligible": true,
+    "reason": "远程且速度50<70：慢速指挥职责"
+  },
+  {
+    "species_id": 45,
+    "name": "霸王花",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻100≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 45,
+    "name": "霸王花",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格245、最高双攻100、速度50）"
+  },
+  {
+    "species_id": 45,
+    "name": "霸王花",
+    "machine": "field_triage",
+    "eligible": true,
+    "reason": "体格245在200–259且速度50≤70：稳态救援"
+  },
+  {
+    "species_id": 45,
+    "name": "霸王花",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格245、最高双攻100、速度50）"
+  },
+  {
+    "species_id": 54,
+    "name": "可达鸭",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格146、最高双攻65、速度55）"
+  },
+  {
+    "species_id": 54,
+    "name": "可达鸭",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程远程、体格146、最高双攻65、速度55）"
+  },
+  {
+    "species_id": 54,
+    "name": "可达鸭",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格146、最高双攻65、速度55）"
+  },
+  {
+    "species_id": 54,
+    "name": "可达鸭",
+    "machine": "rally_signal",
+    "eligible": true,
+    "reason": "远程且速度55<70：慢速指挥职责"
+  },
+  {
+    "species_id": 54,
+    "name": "可达鸭",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格146、最高双攻65、速度55）"
+  },
+  {
+    "species_id": 54,
+    "name": "可达鸭",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格146、最高双攻65、速度55）"
+  },
+  {
+    "species_id": 54,
+    "name": "可达鸭",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格146、最高双攻65、速度55）"
+  },
+  {
+    "species_id": 54,
+    "name": "可达鸭",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格146、最高双攻65、速度55）"
+  },
+  {
+    "species_id": 55,
+    "name": "哥达鸭",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格236、最高双攻95、速度85）"
+  },
+  {
+    "species_id": 55,
+    "name": "哥达鸭",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度85≥70：远程压启动职责"
+  },
+  {
+    "species_id": 55,
+    "name": "哥达鸭",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格236、最高双攻95、速度85）"
+  },
+  {
+    "species_id": 55,
+    "name": "哥达鸭",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格236、最高双攻95、速度85）"
+  },
+  {
+    "species_id": 55,
+    "name": "哥达鸭",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格236、最高双攻95、速度85）"
+  },
+  {
+    "species_id": 55,
+    "name": "哥达鸭",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格236、最高双攻95、速度85）"
+  },
+  {
+    "species_id": 55,
+    "name": "哥达鸭",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格236、最高双攻95、速度85）"
+  },
+  {
+    "species_id": 55,
+    "name": "哥达鸭",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格236、最高双攻95、速度85）"
+  },
+  {
+    "species_id": 56,
+    "name": "猴怪",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格110<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 56,
+    "name": "猴怪",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格110、最高双攻80、速度70）"
+  },
+  {
+    "species_id": 56,
+    "name": "猴怪",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格110、最高双攻80、速度70）"
+  },
+  {
+    "species_id": 56,
+    "name": "猴怪",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格110、最高双攻80、速度70）"
+  },
+  {
+    "species_id": 56,
+    "name": "猴怪",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格110、最高双攻80、速度70）"
+  },
+  {
+    "species_id": 56,
+    "name": "猴怪",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格110、最高双攻80、速度70）"
+  },
+  {
+    "species_id": 56,
+    "name": "猴怪",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格110、最高双攻80、速度70）"
+  },
+  {
+    "species_id": 56,
+    "name": "猴怪",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格110、最高双攻80、速度70）"
+  },
+  {
+    "species_id": 57,
+    "name": "火暴猴",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格185<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 57,
+    "name": "火暴猴",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格185、最高双攻105、速度95）"
+  },
+  {
+    "species_id": 57,
+    "name": "火暴猴",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格185、最高双攻105、速度95）"
+  },
+  {
+    "species_id": 57,
+    "name": "火暴猴",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格185、最高双攻105、速度95）"
+  },
+  {
+    "species_id": 57,
+    "name": "火暴猴",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻105≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 57,
+    "name": "火暴猴",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格185、最高双攻105、速度95）"
+  },
+  {
+    "species_id": 57,
+    "name": "火暴猴",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格185、最高双攻105、速度95）"
+  },
+  {
+    "species_id": 57,
+    "name": "火暴猴",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格185、最高双攻105、速度95）"
+  },
+  {
+    "species_id": 58,
+    "name": "卡蒂狗",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格145<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 58,
+    "name": "卡蒂狗",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格145、最高双攻70、速度60）"
+  },
+  {
+    "species_id": 58,
+    "name": "卡蒂狗",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格145、最高双攻70、速度60）"
+  },
+  {
+    "species_id": 58,
+    "name": "卡蒂狗",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格145、最高双攻70、速度60）"
+  },
+  {
+    "species_id": 58,
+    "name": "卡蒂狗",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格145、最高双攻70、速度60）"
+  },
+  {
+    "species_id": 58,
+    "name": "卡蒂狗",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格145、最高双攻70、速度60）"
+  },
+  {
+    "species_id": 58,
+    "name": "卡蒂狗",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格145、最高双攻70、速度60）"
+  },
+  {
+    "species_id": 58,
+    "name": "卡蒂狗",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格145、最高双攻70、速度60）"
+  },
+  {
+    "species_id": 59,
+    "name": "风速狗",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格250、最高双攻110、速度95）"
+  },
+  {
+    "species_id": 59,
+    "name": "风速狗",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格250、最高双攻110、速度95）"
+  },
+  {
+    "species_id": 59,
+    "name": "风速狗",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格250≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 59,
+    "name": "风速狗",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格250、最高双攻110、速度95）"
+  },
+  {
+    "species_id": 59,
+    "name": "风速狗",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻110≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 59,
+    "name": "风速狗",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格250、最高双攻110、速度95）"
+  },
+  {
+    "species_id": 59,
+    "name": "风速狗",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格250、最高双攻110、速度95）"
+  },
+  {
+    "species_id": 59,
+    "name": "风速狗",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格250、最高双攻110、速度95）"
+  },
+  {
+    "species_id": 60,
+    "name": "蚊香蝌蚪",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格120<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 60,
+    "name": "蚊香蝌蚪",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格120、最高双攻50、速度90）"
+  },
+  {
+    "species_id": 60,
+    "name": "蚊香蝌蚪",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格120、最高双攻50、速度90）"
+  },
+  {
+    "species_id": 60,
+    "name": "蚊香蝌蚪",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格120、最高双攻50、速度90）"
+  },
+  {
+    "species_id": 60,
+    "name": "蚊香蝌蚪",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格120、最高双攻50、速度90）"
+  },
+  {
+    "species_id": 60,
+    "name": "蚊香蝌蚪",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格120、最高双攻50、速度90）"
+  },
+  {
+    "species_id": 60,
+    "name": "蚊香蝌蚪",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格120、最高双攻50、速度90）"
+  },
+  {
+    "species_id": 60,
+    "name": "蚊香蝌蚪",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格120、最高双攻50、速度90）"
+  },
+  {
+    "species_id": 61,
+    "name": "蚊香君",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格195<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 61,
+    "name": "蚊香君",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格195、最高双攻65、速度90）"
+  },
+  {
+    "species_id": 61,
+    "name": "蚊香君",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格195、最高双攻65、速度90）"
+  },
+  {
+    "species_id": 61,
+    "name": "蚊香君",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格195、最高双攻65、速度90）"
+  },
+  {
+    "species_id": 61,
+    "name": "蚊香君",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格195、最高双攻65、速度90）"
+  },
+  {
+    "species_id": 61,
+    "name": "蚊香君",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格195、最高双攻65、速度90）"
+  },
+  {
+    "species_id": 61,
+    "name": "蚊香君",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格195、最高双攻65、速度90）"
+  },
+  {
+    "species_id": 61,
+    "name": "蚊香君",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格195、最高双攻65、速度90）"
+  },
+  {
+    "species_id": 62,
+    "name": "蚊香泳士",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格280、最高双攻85、速度70）"
+  },
+  {
+    "species_id": 62,
+    "name": "蚊香泳士",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格280、最高双攻85、速度70）"
+  },
+  {
+    "species_id": 62,
+    "name": "蚊香泳士",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格280≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 62,
+    "name": "蚊香泳士",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格280、最高双攻85、速度70）"
+  },
+  {
+    "species_id": 62,
+    "name": "蚊香泳士",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格280、最高双攻85、速度70）"
+  },
+  {
+    "species_id": 62,
+    "name": "蚊香泳士",
+    "machine": "standburst",
+    "eligible": true,
+    "reason": "体格280≥260：重装阵型爆发"
+  },
+  {
+    "species_id": 62,
+    "name": "蚊香泳士",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格280、最高双攻85、速度70）"
+  },
+  {
+    "species_id": 62,
+    "name": "蚊香泳士",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格280、最高双攻85、速度70）"
+  },
+  {
+    "species_id": 63,
+    "name": "凯西",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格55、最高双攻105、速度90）"
+  },
+  {
+    "species_id": 63,
+    "name": "凯西",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度90≥70：远程压启动职责"
+  },
+  {
+    "species_id": 63,
+    "name": "凯西",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格55、最高双攻105、速度90）"
+  },
+  {
+    "species_id": 63,
+    "name": "凯西",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格55、最高双攻105、速度90）"
+  },
+  {
+    "species_id": 63,
+    "name": "凯西",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻105≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 63,
+    "name": "凯西",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格55、最高双攻105、速度90）"
+  },
+  {
+    "species_id": 63,
+    "name": "凯西",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格55、最高双攻105、速度90）"
+  },
+  {
+    "species_id": 63,
+    "name": "凯西",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格55、最高双攻105、速度90）"
+  },
+  {
+    "species_id": 64,
+    "name": "勇基拉",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格100、最高双攻120、速度105）"
+  },
+  {
+    "species_id": 64,
+    "name": "勇基拉",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度105≥70：远程压启动职责"
+  },
+  {
+    "species_id": 64,
+    "name": "勇基拉",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格100、最高双攻120、速度105）"
+  },
+  {
+    "species_id": 64,
+    "name": "勇基拉",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格100、最高双攻120、速度105）"
+  },
+  {
+    "species_id": 64,
+    "name": "勇基拉",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻120≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 64,
+    "name": "勇基拉",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格100、最高双攻120、速度105）"
+  },
+  {
+    "species_id": 64,
+    "name": "勇基拉",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格100、最高双攻120、速度105）"
+  },
+  {
+    "species_id": 64,
+    "name": "勇基拉",
+    "machine": "tempo_break",
+    "eligible": true,
+    "reason": "速度105≥100：稀有心律截断"
+  },
+  {
+    "species_id": 65,
+    "name": "胡地",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格145、最高双攻135、速度120）"
+  },
+  {
+    "species_id": 65,
+    "name": "胡地",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度120≥70：远程压启动职责"
+  },
+  {
+    "species_id": 65,
+    "name": "胡地",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格145、最高双攻135、速度120）"
+  },
+  {
+    "species_id": 65,
+    "name": "胡地",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格145、最高双攻135、速度120）"
+  },
+  {
+    "species_id": 65,
+    "name": "胡地",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻135≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 65,
+    "name": "胡地",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格145、最高双攻135、速度120）"
+  },
+  {
+    "species_id": 65,
+    "name": "胡地",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格145、最高双攻135、速度120）"
+  },
+  {
+    "species_id": 65,
+    "name": "胡地",
+    "machine": "tempo_break",
+    "eligible": true,
+    "reason": "速度120≥100：稀有心律截断"
+  },
+  {
+    "species_id": 66,
+    "name": "腕力",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格170<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 66,
+    "name": "腕力",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格170、最高双攻80、速度35）"
+  },
+  {
+    "species_id": 66,
+    "name": "腕力",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格170、最高双攻80、速度35）"
+  },
+  {
+    "species_id": 66,
+    "name": "腕力",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格170、最高双攻80、速度35）"
+  },
+  {
+    "species_id": 66,
+    "name": "腕力",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格170、最高双攻80、速度35）"
+  },
+  {
+    "species_id": 66,
+    "name": "腕力",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格170、最高双攻80、速度35）"
+  },
+  {
+    "species_id": 66,
+    "name": "腕力",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格170、最高双攻80、速度35）"
+  },
+  {
+    "species_id": 66,
+    "name": "腕力",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格170、最高双攻80、速度35）"
+  },
+  {
+    "species_id": 67,
+    "name": "豪力",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格220、最高双攻100、速度45）"
+  },
+  {
+    "species_id": 67,
+    "name": "豪力",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格220、最高双攻100、速度45）"
+  },
+  {
+    "species_id": 67,
+    "name": "豪力",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格220≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 67,
+    "name": "豪力",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格220、最高双攻100、速度45）"
+  },
+  {
+    "species_id": 67,
+    "name": "豪力",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻100≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 67,
+    "name": "豪力",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格220、最高双攻100、速度45）"
+  },
+  {
+    "species_id": 67,
+    "name": "豪力",
+    "machine": "field_triage",
+    "eligible": true,
+    "reason": "体格220在200–259且速度45≤70：稳态救援"
+  },
+  {
+    "species_id": 67,
+    "name": "豪力",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格220、最高双攻100、速度45）"
+  },
+  {
+    "species_id": 68,
+    "name": "怪力",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格250、最高双攻130、速度55）"
+  },
+  {
+    "species_id": 68,
+    "name": "怪力",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格250、最高双攻130、速度55）"
+  },
+  {
+    "species_id": 68,
+    "name": "怪力",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格250≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 68,
+    "name": "怪力",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格250、最高双攻130、速度55）"
+  },
+  {
+    "species_id": 68,
+    "name": "怪力",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻130≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 68,
+    "name": "怪力",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格250、最高双攻130、速度55）"
+  },
+  {
+    "species_id": 68,
+    "name": "怪力",
+    "machine": "field_triage",
+    "eligible": true,
+    "reason": "体格250在200–259且速度55≤70：稳态救援"
+  },
+  {
+    "species_id": 68,
+    "name": "怪力",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格250、最高双攻130、速度55）"
+  },
+  {
+    "species_id": 69,
+    "name": "喇叭芽",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格120<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 69,
+    "name": "喇叭芽",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格120、最高双攻75、速度40）"
+  },
+  {
+    "species_id": 69,
+    "name": "喇叭芽",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格120、最高双攻75、速度40）"
+  },
+  {
+    "species_id": 69,
+    "name": "喇叭芽",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格120、最高双攻75、速度40）"
+  },
+  {
+    "species_id": 69,
+    "name": "喇叭芽",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格120、最高双攻75、速度40）"
+  },
+  {
+    "species_id": 69,
+    "name": "喇叭芽",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格120、最高双攻75、速度40）"
+  },
+  {
+    "species_id": 69,
+    "name": "喇叭芽",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格120、最高双攻75、速度40）"
+  },
+  {
+    "species_id": 69,
+    "name": "喇叭芽",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格120、最高双攻75、速度40）"
+  },
+  {
+    "species_id": 70,
+    "name": "口呆花",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格165<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 70,
+    "name": "口呆花",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格165、最高双攻90、速度55）"
+  },
+  {
+    "species_id": 70,
+    "name": "口呆花",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格165、最高双攻90、速度55）"
+  },
+  {
+    "species_id": 70,
+    "name": "口呆花",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格165、最高双攻90、速度55）"
+  },
+  {
+    "species_id": 70,
+    "name": "口呆花",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格165、最高双攻90、速度55）"
+  },
+  {
+    "species_id": 70,
+    "name": "口呆花",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格165、最高双攻90、速度55）"
+  },
+  {
+    "species_id": 70,
+    "name": "口呆花",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格165、最高双攻90、速度55）"
+  },
+  {
+    "species_id": 70,
+    "name": "口呆花",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格165、最高双攻90、速度55）"
+  },
+  {
+    "species_id": 71,
+    "name": "大食花",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格210<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 71,
+    "name": "大食花",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格210、最高双攻105、速度70）"
+  },
+  {
+    "species_id": 71,
+    "name": "大食花",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格210、最高双攻105、速度70）"
+  },
+  {
+    "species_id": 71,
+    "name": "大食花",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格210、最高双攻105、速度70）"
+  },
+  {
+    "species_id": 71,
+    "name": "大食花",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻105≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 71,
+    "name": "大食花",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格210、最高双攻105、速度70）"
+  },
+  {
+    "species_id": 71,
+    "name": "大食花",
+    "machine": "field_triage",
+    "eligible": true,
+    "reason": "体格210在200–259且速度70≤70：稳态救援"
+  },
+  {
+    "species_id": 71,
+    "name": "大食花",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格210、最高双攻105、速度70）"
+  },
+  {
+    "species_id": 74,
+    "name": "小拳石",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格240、最高双攻80、速度20）"
+  },
+  {
+    "species_id": 74,
+    "name": "小拳石",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格240、最高双攻80、速度20）"
+  },
+  {
+    "species_id": 74,
+    "name": "小拳石",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格240≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 74,
+    "name": "小拳石",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格240、最高双攻80、速度20）"
+  },
+  {
+    "species_id": 74,
+    "name": "小拳石",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格240、最高双攻80、速度20）"
+  },
+  {
+    "species_id": 74,
+    "name": "小拳石",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格240、最高双攻80、速度20）"
+  },
+  {
+    "species_id": 74,
+    "name": "小拳石",
+    "machine": "field_triage",
+    "eligible": true,
+    "reason": "体格240在200–259且速度20≤70：稳态救援"
+  },
+  {
+    "species_id": 74,
+    "name": "小拳石",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格240、最高双攻80、速度20）"
+  },
+  {
+    "species_id": 75,
+    "name": "隆隆石",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格285、最高双攻95、速度35）"
+  },
+  {
+    "species_id": 75,
+    "name": "隆隆石",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格285、最高双攻95、速度35）"
+  },
+  {
+    "species_id": 75,
+    "name": "隆隆石",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格285≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 75,
+    "name": "隆隆石",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格285、最高双攻95、速度35）"
+  },
+  {
+    "species_id": 75,
+    "name": "隆隆石",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格285、最高双攻95、速度35）"
+  },
+  {
+    "species_id": 75,
+    "name": "隆隆石",
+    "machine": "standburst",
+    "eligible": true,
+    "reason": "体格285≥260：重装阵型爆发"
+  },
+  {
+    "species_id": 75,
+    "name": "隆隆石",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格285、最高双攻95、速度35）"
+  },
+  {
+    "species_id": 75,
+    "name": "隆隆石",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格285、最高双攻95、速度35）"
+  },
+  {
+    "species_id": 76,
+    "name": "隆隆岩",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格340、最高双攻110、速度45）"
+  },
+  {
+    "species_id": 76,
+    "name": "隆隆岩",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格340、最高双攻110、速度45）"
+  },
+  {
+    "species_id": 76,
+    "name": "隆隆岩",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格340≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 76,
+    "name": "隆隆岩",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格340、最高双攻110、速度45）"
+  },
+  {
+    "species_id": 76,
+    "name": "隆隆岩",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻110≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 76,
+    "name": "隆隆岩",
+    "machine": "standburst",
+    "eligible": true,
+    "reason": "体格340≥260：重装阵型爆发"
+  },
+  {
+    "species_id": 76,
+    "name": "隆隆岩",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格340、最高双攻110、速度45）"
+  },
+  {
+    "species_id": 76,
+    "name": "隆隆岩",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格340、最高双攻110、速度45）"
+  },
+  {
+    "species_id": 79,
+    "name": "呆呆兽",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格220、最高双攻65、速度15）"
+  },
+  {
+    "species_id": 79,
+    "name": "呆呆兽",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格220、最高双攻65、速度15）"
+  },
+  {
+    "species_id": 79,
+    "name": "呆呆兽",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格220≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 79,
+    "name": "呆呆兽",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格220、最高双攻65、速度15）"
+  },
+  {
+    "species_id": 79,
+    "name": "呆呆兽",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格220、最高双攻65、速度15）"
+  },
+  {
+    "species_id": 79,
+    "name": "呆呆兽",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格220、最高双攻65、速度15）"
+  },
+  {
+    "species_id": 79,
+    "name": "呆呆兽",
+    "machine": "field_triage",
+    "eligible": true,
+    "reason": "体格220在200–259且速度15≤70：稳态救援"
+  },
+  {
+    "species_id": 79,
+    "name": "呆呆兽",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格220、最高双攻65、速度15）"
+  },
+  {
+    "species_id": 80,
+    "name": "呆壳兽",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格315、最高双攻100、速度30）"
+  },
+  {
+    "species_id": 80,
+    "name": "呆壳兽",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程远程、体格315、最高双攻100、速度30）"
+  },
+  {
+    "species_id": 80,
+    "name": "呆壳兽",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格315、最高双攻100、速度30）"
+  },
+  {
+    "species_id": 80,
+    "name": "呆壳兽",
+    "machine": "rally_signal",
+    "eligible": true,
+    "reason": "远程且速度30<70：慢速指挥职责"
+  },
+  {
+    "species_id": 80,
+    "name": "呆壳兽",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻100≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 80,
+    "name": "呆壳兽",
+    "machine": "standburst",
+    "eligible": true,
+    "reason": "体格315≥260：重装阵型爆发"
+  },
+  {
+    "species_id": 80,
+    "name": "呆壳兽",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格315、最高双攻100、速度30）"
+  },
+  {
+    "species_id": 80,
+    "name": "呆壳兽",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格315、最高双攻100、速度30）"
+  },
+  {
+    "species_id": 81,
+    "name": "小磁怪",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格165、最高双攻95、速度45）"
+  },
+  {
+    "species_id": 81,
+    "name": "小磁怪",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程远程、体格165、最高双攻95、速度45）"
+  },
+  {
+    "species_id": 81,
+    "name": "小磁怪",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格165、最高双攻95、速度45）"
+  },
+  {
+    "species_id": 81,
+    "name": "小磁怪",
+    "machine": "rally_signal",
+    "eligible": true,
+    "reason": "远程且速度45<70：慢速指挥职责"
+  },
+  {
+    "species_id": 81,
+    "name": "小磁怪",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格165、最高双攻95、速度45）"
+  },
+  {
+    "species_id": 81,
+    "name": "小磁怪",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格165、最高双攻95、速度45）"
+  },
+  {
+    "species_id": 81,
+    "name": "小磁怪",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格165、最高双攻95、速度45）"
+  },
+  {
+    "species_id": 81,
+    "name": "小磁怪",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格165、最高双攻95、速度45）"
+  },
+  {
+    "species_id": 82,
+    "name": "三合一磁怪",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格240、最高双攻120、速度70）"
+  },
+  {
+    "species_id": 82,
+    "name": "三合一磁怪",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度70≥70：远程压启动职责"
+  },
+  {
+    "species_id": 82,
+    "name": "三合一磁怪",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格240、最高双攻120、速度70）"
+  },
+  {
+    "species_id": 82,
+    "name": "三合一磁怪",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格240、最高双攻120、速度70）"
+  },
+  {
+    "species_id": 82,
+    "name": "三合一磁怪",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻120≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 82,
+    "name": "三合一磁怪",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格240、最高双攻120、速度70）"
+  },
+  {
+    "species_id": 82,
+    "name": "三合一磁怪",
+    "machine": "field_triage",
+    "eligible": true,
+    "reason": "体格240在200–259且速度70≤70：稳态救援"
+  },
+  {
+    "species_id": 82,
+    "name": "三合一磁怪",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格240、最高双攻120、速度70）"
+  },
+  {
+    "species_id": 92,
+    "name": "鬼斯",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格90、最高双攻100、速度80）"
+  },
+  {
+    "species_id": 92,
+    "name": "鬼斯",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度80≥70：远程压启动职责"
+  },
+  {
+    "species_id": 92,
+    "name": "鬼斯",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格90、最高双攻100、速度80）"
+  },
+  {
+    "species_id": 92,
+    "name": "鬼斯",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格90、最高双攻100、速度80）"
+  },
+  {
+    "species_id": 92,
+    "name": "鬼斯",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻100≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 92,
+    "name": "鬼斯",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格90、最高双攻100、速度80）"
+  },
+  {
+    "species_id": 92,
+    "name": "鬼斯",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格90、最高双攻100、速度80）"
+  },
+  {
+    "species_id": 92,
+    "name": "鬼斯",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格90、最高双攻100、速度80）"
+  },
+  {
+    "species_id": 93,
+    "name": "鬼斯通",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格135、最高双攻115、速度95）"
+  },
+  {
+    "species_id": 93,
+    "name": "鬼斯通",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度95≥70：远程压启动职责"
+  },
+  {
+    "species_id": 93,
+    "name": "鬼斯通",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格135、最高双攻115、速度95）"
+  },
+  {
+    "species_id": 93,
+    "name": "鬼斯通",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格135、最高双攻115、速度95）"
+  },
+  {
+    "species_id": 93,
+    "name": "鬼斯通",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻115≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 93,
+    "name": "鬼斯通",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格135、最高双攻115、速度95）"
+  },
+  {
+    "species_id": 93,
+    "name": "鬼斯通",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格135、最高双攻115、速度95）"
+  },
+  {
+    "species_id": 93,
+    "name": "鬼斯通",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格135、最高双攻115、速度95）"
+  },
+  {
+    "species_id": 94,
+    "name": "耿鬼",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格180、最高双攻130、速度110）"
+  },
+  {
+    "species_id": 94,
+    "name": "耿鬼",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度110≥70：远程压启动职责"
+  },
+  {
+    "species_id": 94,
+    "name": "耿鬼",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格180、最高双攻130、速度110）"
+  },
+  {
+    "species_id": 94,
+    "name": "耿鬼",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格180、最高双攻130、速度110）"
+  },
+  {
+    "species_id": 94,
+    "name": "耿鬼",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻130≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 94,
+    "name": "耿鬼",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格180、最高双攻130、速度110）"
+  },
+  {
+    "species_id": 94,
+    "name": "耿鬼",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格180、最高双攻130、速度110）"
+  },
+  {
+    "species_id": 94,
+    "name": "耿鬼",
+    "machine": "tempo_break",
+    "eligible": true,
+    "reason": "速度110≥100：稀有心律截断"
+  },
+  {
+    "species_id": 95,
+    "name": "大岩蛇",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格355、最高双攻45、速度70）"
+  },
+  {
+    "species_id": 95,
+    "name": "大岩蛇",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格355、最高双攻45、速度70）"
+  },
+  {
+    "species_id": 95,
+    "name": "大岩蛇",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格355≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 95,
+    "name": "大岩蛇",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格355、最高双攻45、速度70）"
+  },
+  {
+    "species_id": 95,
+    "name": "大岩蛇",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格355、最高双攻45、速度70）"
+  },
+  {
+    "species_id": 95,
+    "name": "大岩蛇",
+    "machine": "standburst",
+    "eligible": true,
+    "reason": "体格355≥260：重装阵型爆发"
+  },
+  {
+    "species_id": 95,
+    "name": "大岩蛇",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格355、最高双攻45、速度70）"
+  },
+  {
+    "species_id": 95,
+    "name": "大岩蛇",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格355、最高双攻45、速度70）"
+  },
+  {
+    "species_id": 111,
+    "name": "独角犀牛",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格270、最高双攻85、速度25）"
+  },
+  {
+    "species_id": 111,
+    "name": "独角犀牛",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格270、最高双攻85、速度25）"
+  },
+  {
+    "species_id": 111,
+    "name": "独角犀牛",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格270≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 111,
+    "name": "独角犀牛",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格270、最高双攻85、速度25）"
+  },
+  {
+    "species_id": 111,
+    "name": "独角犀牛",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格270、最高双攻85、速度25）"
+  },
+  {
+    "species_id": 111,
+    "name": "独角犀牛",
+    "machine": "standburst",
+    "eligible": true,
+    "reason": "体格270≥260：重装阵型爆发"
+  },
+  {
+    "species_id": 111,
+    "name": "独角犀牛",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格270、最高双攻85、速度25）"
+  },
+  {
+    "species_id": 111,
+    "name": "独角犀牛",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格270、最高双攻85、速度25）"
+  },
+  {
+    "species_id": 112,
+    "name": "钻角犀兽",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格345、最高双攻130、速度40）"
+  },
+  {
+    "species_id": 112,
+    "name": "钻角犀兽",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格345、最高双攻130、速度40）"
+  },
+  {
+    "species_id": 112,
+    "name": "钻角犀兽",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格345≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 112,
+    "name": "钻角犀兽",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格345、最高双攻130、速度40）"
+  },
+  {
+    "species_id": 112,
+    "name": "钻角犀兽",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻130≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 112,
+    "name": "钻角犀兽",
+    "machine": "standburst",
+    "eligible": true,
+    "reason": "体格345≥260：重装阵型爆发"
+  },
+  {
+    "species_id": 112,
+    "name": "钻角犀兽",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格345、最高双攻130、速度40）"
+  },
+  {
+    "species_id": 112,
+    "name": "钻角犀兽",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格345、最高双攻130、速度40）"
+  },
+  {
+    "species_id": 116,
+    "name": "墨海马",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格170、最高双攻70、速度60）"
+  },
+  {
+    "species_id": 116,
+    "name": "墨海马",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程远程、体格170、最高双攻70、速度60）"
+  },
+  {
+    "species_id": 116,
+    "name": "墨海马",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格170、最高双攻70、速度60）"
+  },
+  {
+    "species_id": 116,
+    "name": "墨海马",
+    "machine": "rally_signal",
+    "eligible": true,
+    "reason": "远程且速度60<70：慢速指挥职责"
+  },
+  {
+    "species_id": 116,
+    "name": "墨海马",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格170、最高双攻70、速度60）"
+  },
+  {
+    "species_id": 116,
+    "name": "墨海马",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格170、最高双攻70、速度60）"
+  },
+  {
+    "species_id": 116,
+    "name": "墨海马",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格170、最高双攻70、速度60）"
+  },
+  {
+    "species_id": 116,
+    "name": "墨海马",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格170、最高双攻70、速度60）"
+  },
+  {
+    "species_id": 117,
+    "name": "海刺龙",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格245、最高双攻95、速度85）"
+  },
+  {
+    "species_id": 117,
+    "name": "海刺龙",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度85≥70：远程压启动职责"
+  },
+  {
+    "species_id": 117,
+    "name": "海刺龙",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格245、最高双攻95、速度85）"
+  },
+  {
+    "species_id": 117,
+    "name": "海刺龙",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格245、最高双攻95、速度85）"
+  },
+  {
+    "species_id": 117,
+    "name": "海刺龙",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格245、最高双攻95、速度85）"
+  },
+  {
+    "species_id": 117,
+    "name": "海刺龙",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格245、最高双攻95、速度85）"
+  },
+  {
+    "species_id": 117,
+    "name": "海刺龙",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格245、最高双攻95、速度85）"
+  },
+  {
+    "species_id": 117,
+    "name": "海刺龙",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格245、最高双攻95、速度85）"
+  },
+  {
+    "species_id": 120,
+    "name": "海星星",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格140、最高双攻70、速度85）"
+  },
+  {
+    "species_id": 120,
+    "name": "海星星",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度85≥70：远程压启动职责"
+  },
+  {
+    "species_id": 120,
+    "name": "海星星",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格140、最高双攻70、速度85）"
+  },
+  {
+    "species_id": 120,
+    "name": "海星星",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格140、最高双攻70、速度85）"
+  },
+  {
+    "species_id": 120,
+    "name": "海星星",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格140、最高双攻70、速度85）"
+  },
+  {
+    "species_id": 120,
+    "name": "海星星",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格140、最高双攻70、速度85）"
+  },
+  {
+    "species_id": 120,
+    "name": "海星星",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格140、最高双攻70、速度85）"
+  },
+  {
+    "species_id": 120,
+    "name": "海星星",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格140、最高双攻70、速度85）"
+  },
+  {
+    "species_id": 121,
+    "name": "宝石海星",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格230、最高双攻100、速度115）"
+  },
+  {
+    "species_id": 121,
+    "name": "宝石海星",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度115≥70：远程压启动职责"
+  },
+  {
+    "species_id": 121,
+    "name": "宝石海星",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格230、最高双攻100、速度115）"
+  },
+  {
+    "species_id": 121,
+    "name": "宝石海星",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格230、最高双攻100、速度115）"
+  },
+  {
+    "species_id": 121,
+    "name": "宝石海星",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻100≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 121,
+    "name": "宝石海星",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格230、最高双攻100、速度115）"
+  },
+  {
+    "species_id": 121,
+    "name": "宝石海星",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格230、最高双攻100、速度115）"
+  },
+  {
+    "species_id": 121,
+    "name": "宝石海星",
+    "machine": "tempo_break",
+    "eligible": true,
+    "reason": "速度115≥100：稀有心律截断"
+  },
+  {
+    "species_id": 123,
+    "name": "飞天螳螂",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格230、最高双攻110、速度105）"
+  },
+  {
+    "species_id": 123,
+    "name": "飞天螳螂",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格230、最高双攻110、速度105）"
+  },
+  {
+    "species_id": 123,
+    "name": "飞天螳螂",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格230≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 123,
+    "name": "飞天螳螂",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格230、最高双攻110、速度105）"
+  },
+  {
+    "species_id": 123,
+    "name": "飞天螳螂",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻110≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 123,
+    "name": "飞天螳螂",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格230、最高双攻110、速度105）"
+  },
+  {
+    "species_id": 123,
+    "name": "飞天螳螂",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格230、最高双攻110、速度105）"
+  },
+  {
+    "species_id": 123,
+    "name": "飞天螳螂",
+    "machine": "tempo_break",
+    "eligible": true,
+    "reason": "速度105≥100：稀有心律截断"
+  },
+  {
+    "species_id": 129,
+    "name": "鲤鱼王",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格130、最高双攻15、速度80）"
+  },
+  {
+    "species_id": 129,
+    "name": "鲤鱼王",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度80≥70：远程压启动职责"
+  },
+  {
+    "species_id": 129,
+    "name": "鲤鱼王",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格130、最高双攻15、速度80）"
+  },
+  {
+    "species_id": 129,
+    "name": "鲤鱼王",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格130、最高双攻15、速度80）"
+  },
+  {
+    "species_id": 129,
+    "name": "鲤鱼王",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程远程、体格130、最高双攻15、速度80）"
+  },
+  {
+    "species_id": 129,
+    "name": "鲤鱼王",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格130、最高双攻15、速度80）"
+  },
+  {
+    "species_id": 129,
+    "name": "鲤鱼王",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格130、最高双攻15、速度80）"
+  },
+  {
+    "species_id": 129,
+    "name": "鲤鱼王",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格130、最高双攻15、速度80）"
+  },
+  {
+    "species_id": 130,
+    "name": "暴鲤龙",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格253、最高双攻125、速度81）"
+  },
+  {
+    "species_id": 130,
+    "name": "暴鲤龙",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格253、最高双攻125、速度81）"
+  },
+  {
+    "species_id": 130,
+    "name": "暴鲤龙",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格253≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 130,
+    "name": "暴鲤龙",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格253、最高双攻125、速度81）"
+  },
+  {
+    "species_id": 130,
+    "name": "暴鲤龙",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻125≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 130,
+    "name": "暴鲤龙",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格253、最高双攻125、速度81）"
+  },
+  {
+    "species_id": 130,
+    "name": "暴鲤龙",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格253、最高双攻125、速度81）"
+  },
+  {
+    "species_id": 130,
+    "name": "暴鲤龙",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格253、最高双攻125、速度81）"
+  },
+  {
+    "species_id": 131,
+    "name": "拉普拉斯",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格290、最高双攻85、速度60）"
+  },
+  {
+    "species_id": 131,
+    "name": "拉普拉斯",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格290、最高双攻85、速度60）"
+  },
+  {
+    "species_id": 131,
+    "name": "拉普拉斯",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格290≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 131,
+    "name": "拉普拉斯",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格290、最高双攻85、速度60）"
+  },
+  {
+    "species_id": 131,
+    "name": "拉普拉斯",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格290、最高双攻85、速度60）"
+  },
+  {
+    "species_id": 131,
+    "name": "拉普拉斯",
+    "machine": "standburst",
+    "eligible": true,
+    "reason": "体格290≥260：重装阵型爆发"
+  },
+  {
+    "species_id": 131,
+    "name": "拉普拉斯",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格290、最高双攻85、速度60）"
+  },
+  {
+    "species_id": 131,
+    "name": "拉普拉斯",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格290、最高双攻85、速度60）"
+  },
+  {
+    "species_id": 133,
+    "name": "伊布",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格155<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 133,
+    "name": "伊布",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格155、最高双攻55、速度55）"
+  },
+  {
+    "species_id": 133,
+    "name": "伊布",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格155、最高双攻55、速度55）"
+  },
+  {
+    "species_id": 133,
+    "name": "伊布",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格155、最高双攻55、速度55）"
+  },
+  {
+    "species_id": 133,
+    "name": "伊布",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格155、最高双攻55、速度55）"
+  },
+  {
+    "species_id": 133,
+    "name": "伊布",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格155、最高双攻55、速度55）"
+  },
+  {
+    "species_id": 133,
+    "name": "伊布",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格155、最高双攻55、速度55）"
+  },
+  {
+    "species_id": 133,
+    "name": "伊布",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格155、最高双攻55、速度55）"
+  },
+  {
+    "species_id": 134,
+    "name": "水伊布",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格250、最高双攻110、速度65）"
+  },
+  {
+    "species_id": 134,
+    "name": "水伊布",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程远程、体格250、最高双攻110、速度65）"
+  },
+  {
+    "species_id": 134,
+    "name": "水伊布",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格250、最高双攻110、速度65）"
+  },
+  {
+    "species_id": 134,
+    "name": "水伊布",
+    "machine": "rally_signal",
+    "eligible": true,
+    "reason": "远程且速度65<70：慢速指挥职责"
+  },
+  {
+    "species_id": 134,
+    "name": "水伊布",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻110≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 134,
+    "name": "水伊布",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格250、最高双攻110、速度65）"
+  },
+  {
+    "species_id": 134,
+    "name": "水伊布",
+    "machine": "field_triage",
+    "eligible": true,
+    "reason": "体格250在200–259且速度65≤70：稳态救援"
+  },
+  {
+    "species_id": 134,
+    "name": "水伊布",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程远程、体格250、最高双攻110、速度65）"
+  },
+  {
+    "species_id": 135,
+    "name": "雷伊布",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程远程、体格185、最高双攻110、速度130）"
+  },
+  {
+    "species_id": 135,
+    "name": "雷伊布",
+    "machine": "arc_lock",
+    "eligible": true,
+    "reason": "远程且速度130≥70：远程压启动职责"
+  },
+  {
+    "species_id": 135,
+    "name": "雷伊布",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程远程、体格185、最高双攻110、速度130）"
+  },
+  {
+    "species_id": 135,
+    "name": "雷伊布",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程远程、体格185、最高双攻110、速度130）"
+  },
+  {
+    "species_id": 135,
+    "name": "雷伊布",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻110≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 135,
+    "name": "雷伊布",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程远程、体格185、最高双攻110、速度130）"
+  },
+  {
+    "species_id": 135,
+    "name": "雷伊布",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程远程、体格185、最高双攻110、速度130）"
+  },
+  {
+    "species_id": 135,
+    "name": "雷伊布",
+    "machine": "tempo_break",
+    "eligible": true,
+    "reason": "速度130≥100：稀有心律截断"
+  },
+  {
+    "species_id": 136,
+    "name": "火伊布",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格185<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 136,
+    "name": "火伊布",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格185、最高双攻130、速度65）"
+  },
+  {
+    "species_id": 136,
+    "name": "火伊布",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格185、最高双攻130、速度65）"
+  },
+  {
+    "species_id": 136,
+    "name": "火伊布",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格185、最高双攻130、速度65）"
+  },
+  {
+    "species_id": 136,
+    "name": "火伊布",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻130≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 136,
+    "name": "火伊布",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格185、最高双攻130、速度65）"
+  },
+  {
+    "species_id": 136,
+    "name": "火伊布",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格185、最高双攻130、速度65）"
+  },
+  {
+    "species_id": 136,
+    "name": "火伊布",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格185、最高双攻130、速度65）"
+  },
+  {
+    "species_id": 143,
+    "name": "卡比兽",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格290、最高双攻110、速度30）"
+  },
+  {
+    "species_id": 143,
+    "name": "卡比兽",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格290、最高双攻110、速度30）"
+  },
+  {
+    "species_id": 143,
+    "name": "卡比兽",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格290≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 143,
+    "name": "卡比兽",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格290、最高双攻110、速度30）"
+  },
+  {
+    "species_id": 143,
+    "name": "卡比兽",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻110≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 143,
+    "name": "卡比兽",
+    "machine": "standburst",
+    "eligible": true,
+    "reason": "体格290≥260：重装阵型爆发"
+  },
+  {
+    "species_id": 143,
+    "name": "卡比兽",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格290、最高双攻110、速度30）"
+  },
+  {
+    "species_id": 143,
+    "name": "卡比兽",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格290、最高双攻110、速度30）"
+  },
+  {
+    "species_id": 147,
+    "name": "迷你龙",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格131<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 147,
+    "name": "迷你龙",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格131、最高双攻64、速度50）"
+  },
+  {
+    "species_id": 147,
+    "name": "迷你龙",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格131、最高双攻64、速度50）"
+  },
+  {
+    "species_id": 147,
+    "name": "迷你龙",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格131、最高双攻64、速度50）"
+  },
+  {
+    "species_id": 147,
+    "name": "迷你龙",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格131、最高双攻64、速度50）"
+  },
+  {
+    "species_id": 147,
+    "name": "迷你龙",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格131、最高双攻64、速度50）"
+  },
+  {
+    "species_id": 147,
+    "name": "迷你龙",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格131、最高双攻64、速度50）"
+  },
+  {
+    "species_id": 147,
+    "name": "迷你龙",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格131、最高双攻64、速度50）"
+  },
+  {
+    "species_id": 148,
+    "name": "哈克龙",
+    "machine": "breach_lunge",
+    "eligible": true,
+    "reason": "近战且体格191<220：低体格贴身突破职责"
+  },
+  {
+    "species_id": 148,
+    "name": "哈克龙",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格191、最高双攻84、速度70）"
+  },
+  {
+    "species_id": 148,
+    "name": "哈克龙",
+    "machine": "guardian_riposte",
+    "eligible": false,
+    "reason": "不具备：melee and bulk >= 220（当前射程近战、体格191、最高双攻84、速度70）"
+  },
+  {
+    "species_id": 148,
+    "name": "哈克龙",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格191、最高双攻84、速度70）"
+  },
+  {
+    "species_id": 148,
+    "name": "哈克龙",
+    "machine": "expose_weakness",
+    "eligible": false,
+    "reason": "不具备：max attack/special attack >= 100（当前射程近战、体格191、最高双攻84、速度70）"
+  },
+  {
+    "species_id": 148,
+    "name": "哈克龙",
+    "machine": "standburst",
+    "eligible": false,
+    "reason": "不具备：bulk >= 260（当前射程近战、体格191、最高双攻84、速度70）"
+  },
+  {
+    "species_id": 148,
+    "name": "哈克龙",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格191、最高双攻84、速度70）"
+  },
+  {
+    "species_id": 148,
+    "name": "哈克龙",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格191、最高双攻84、速度70）"
+  },
+  {
+    "species_id": 149,
+    "name": "快龙",
+    "machine": "breach_lunge",
+    "eligible": false,
+    "reason": "不具备：melee and bulk < 220（当前射程近战、体格281、最高双攻134、速度80）"
+  },
+  {
+    "species_id": 149,
+    "name": "快龙",
+    "machine": "arc_lock",
+    "eligible": false,
+    "reason": "不具备：ranged and speed >= 70（当前射程近战、体格281、最高双攻134、速度80）"
+  },
+  {
+    "species_id": 149,
+    "name": "快龙",
+    "machine": "guardian_riposte",
+    "eligible": true,
+    "reason": "近战且体格281≥220：高质量受击反击职责"
+  },
+  {
+    "species_id": 149,
+    "name": "快龙",
+    "machine": "rally_signal",
+    "eligible": false,
+    "reason": "不具备：ranged and speed < 70（当前射程近战、体格281、最高双攻134、速度80）"
+  },
+  {
+    "species_id": 149,
+    "name": "快龙",
+    "machine": "expose_weakness",
+    "eligible": true,
+    "reason": "最高双攻134≥100：稀有终结窗口"
+  },
+  {
+    "species_id": 149,
+    "name": "快龙",
+    "machine": "standburst",
+    "eligible": true,
+    "reason": "体格281≥260：重装阵型爆发"
+  },
+  {
+    "species_id": 149,
+    "name": "快龙",
+    "machine": "field_triage",
+    "eligible": false,
+    "reason": "不具备：200 <= bulk < 260 and speed <= 70（当前射程近战、体格281、最高双攻134、速度80）"
+  },
+  {
+    "species_id": 149,
+    "name": "快龙",
+    "machine": "tempo_break",
+    "eligible": false,
+    "reason": "不具备：speed >= 100（当前射程近战、体格281、最高双攻134、速度80）"
+  }
+]

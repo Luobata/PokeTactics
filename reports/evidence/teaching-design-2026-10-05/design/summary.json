@@ -1,0 +1,53 @@
+{
+  "ok": true,
+  "errors": [],
+  "git_commit": "93de08edc40b8da8b9ee590ce496e5ae0df9c4ee",
+  "design_sha256": "a01c737d53e5f5e9e5f0bb85496778f51be98517d1be6c571a341800185c2cf2",
+  "form_count": 84,
+  "family_count": 35,
+  "evolution_edge_count": 47,
+  "endpoint_count": 37,
+  "natural_endpoint_family_count": 4,
+  "machine_coverage": {
+    "arc_lock": 20,
+    "breach_lunge": 30,
+    "expose_weakness": 26,
+    "field_triage": 11,
+    "guardian_riposte": 19,
+    "rally_signal": 15,
+    "standburst": 12,
+    "tempo_break": 10
+  },
+  "primary_coverage": {
+    "rally": 15,
+    "suppression": 20,
+    "breakthrough": 30,
+    "counter": 19
+  },
+  "first_batch_machine_ids": [
+    "guardian_riposte",
+    "tempo_break"
+  ],
+  "second_batch_machine_ids": [
+    "breach_lunge",
+    "arc_lock",
+    "rally_signal",
+    "expose_weakness",
+    "standburst",
+    "field_triage"
+  ],
+  "formal_six_teachings_unchanged": true,
+  "legacy_teaching_compatibility_counts": {
+    "cut": 41,
+    "surf": 18,
+    "rest": 84,
+    "guard": 84,
+    "sunny_day": 17,
+    "rain_dance": 23
+  },
+  "learning_matrix_machine_count": 14,
+  "learning_matrix_decision_count": 1176,
+  "new_machine_pair_count": 672,
+  "evolution_incompatible_machine_pairs": 24,
+  "all_endpoints_have_primary": true
+}
