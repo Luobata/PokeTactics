@@ -1,0 +1,85 @@
+category,name,sid,subtype,bst,entry_ability,move_effect,move_id,move_name,move_power,move_type,next_sid,parent_in_pool,parent_sid,pool_copies,range,tier,types
+evolving_midstage,妙蛙种子,1,normal_three_into_one,318,,EFFECT_SOLARBEAM,76,日光束,120,GRASS,2,False,,22,3,1,"['GRASS', 'POISON']"
+evolving_midstage,妙蛙草,2,normal_three_into_one,405,,EFFECT_SOLARBEAM,76,日光束,120,GRASS,3,True,1,18,3,2,"['GRASS', 'POISON']"
+terminal,妙蛙花,3,evolved_reachable,525,,EFFECT_SOLARBEAM,76,日光束,120,GRASS,,True,2,12,3,3,"['GRASS', 'POISON']"
+evolving_midstage,小火龙,4,normal_three_into_one,309,,EFFECT_BURN_HIT,53,喷射火焰,95,FIRE,5,False,,22,3,1,['FIRE']
+evolving_midstage,火恐龙,5,normal_three_into_one,405,,EFFECT_BURN_HIT,53,喷射火焰,95,FIRE,6,True,4,18,3,2,['FIRE']
+terminal,喷火龙,6,evolved_reachable,534,,EFFECT_BURN_HIT,53,喷射火焰,95,FIRE,,True,5,12,3,3,"['FIRE', 'FLYING']"
+evolving_midstage,杰尼龟,7,normal_three_into_one,314,,EFFECT_NORMAL_HIT,56,水炮,120,WATER,8,False,,22,3,1,['WATER']
+evolving_midstage,卡咪龟,8,normal_three_into_one,405,,EFFECT_NORMAL_HIT,56,水炮,120,WATER,9,True,7,18,3,2,['WATER']
+terminal,水箭龟,9,evolved_reachable,530,,EFFECT_NORMAL_HIT,56,水炮,120,WATER,,True,8,12,3,3,['WATER']
+evolving_midstage,绿毛虫,10,normal_three_into_one,195,,EFFECT_NORMAL_HIT,33,撞击,35,NORMAL,11,False,,22,1,1,['BUG']
+evolving_midstage,铁甲蛹,11,normal_three_into_one,205,,EFFECT_NORMAL_HIT,33,撞击,35,NORMAL,12,True,10,22,3,1,['BUG']
+terminal,巴大蝶,12,evolved_reachable,385,,EFFECT_GUST,16,起风,40,FLYING,,True,11,18,3,2,"['BUG', 'FLYING']"
+evolving_midstage,独角虫,13,normal_three_into_one,195,,EFFECT_POISON_HIT,40,毒针,15,POISON,14,False,,22,1,1,"['BUG', 'POISON']"
+evolving_midstage,铁壳蛹,14,normal_three_into_one,205,,EFFECT_POISON_HIT,40,毒针,15,POISON,15,True,13,22,1,1,"['BUG', 'POISON']"
+terminal,大针蜂,15,evolved_reachable,385,,EFFECT_POISON_MULTI_HIT,41,双针,25,BUG,,True,14,18,1,2,"['BUG', 'POISON']"
+evolving_midstage,波波,16,normal_three_into_one,251,,EFFECT_NORMAL_HIT,17,翅膀攻击,60,FLYING,17,False,,22,1,1,"['NORMAL', 'FLYING']"
+evolving_midstage,比比鸟,17,normal_three_into_one,349,,EFFECT_NORMAL_HIT,17,翅膀攻击,60,FLYING,18,True,16,22,1,1,"['NORMAL', 'FLYING']"
+terminal,大比鸟,18,evolved_reachable,469,,EFFECT_NORMAL_HIT,17,翅膀攻击,60,FLYING,,True,17,18,1,2,"['NORMAL', 'FLYING']"
+evolving_midstage,小拉达,19,normal_three_into_one,253,,EFFECT_FLINCH_HIT,158,必杀门牙,80,NORMAL,20,False,,22,1,1,['NORMAL']
+terminal,拉达,20,evolved_reachable,413,,EFFECT_FLINCH_HIT,158,必杀门牙,80,NORMAL,,True,19,18,1,2,['NORMAL']
+evolving_midstage,烈雀,21,normal_three_into_one,262,,EFFECT_NORMAL_HIT,65,啄钻,80,FLYING,22,False,,22,1,1,"['NORMAL', 'FLYING']"
+terminal,大嘴雀,22,evolved_reachable,442,,EFFECT_NORMAL_HIT,65,啄钻,80,FLYING,,True,21,18,1,2,"['NORMAL', 'FLYING']"
+evolving_midstage,皮卡丘,25,normal_three_into_one,300,,EFFECT_PARALYZE_HIT,85,十万伏特,95,ELECTRIC,26,False,172,22,1,1,['ELECTRIC']
+terminal,雷丘,26,evolved_reachable,475,,EFFECT_PARALYZE_HIT,85,十万伏特,95,ELECTRIC,,True,25,18,1,2,['ELECTRIC']
+evolving_midstage,尼多兰,29,normal_three_into_one,275,,EFFECT_POISON_HIT,40,毒针,15,POISON,30,False,,22,1,1,['POISON']
+evolving_midstage,尼多娜,30,normal_three_into_one,365,,EFFECT_POISON_HIT,40,毒针,15,POISON,31,True,29,18,1,2,['POISON']
+terminal,尼多后,31,evolved_reachable,495,,EFFECT_POISON_HIT,40,毒针,15,POISON,,True,30,18,1,2,"['POISON', 'GROUND']"
+evolving_midstage,尼多朗,32,normal_three_into_one,273,,EFFECT_POISON_HIT,40,毒针,15,POISON,33,False,,22,1,1,['POISON']
+evolving_midstage,尼多力诺,33,normal_three_into_one,365,,EFFECT_POISON_HIT,40,毒针,15,POISON,34,True,32,18,1,2,['POISON']
+terminal,尼多王,34,evolved_reachable,495,,EFFECT_POISON_HIT,40,毒针,15,POISON,,True,33,18,1,2,"['POISON', 'GROUND']"
+evolving_midstage,六尾,37,normal_three_into_one,299,,EFFECT_BURN_HIT,53,喷射火焰,95,FIRE,38,False,,22,3,1,['FIRE']
+terminal,九尾,38,evolved_reachable,505,drought,EFFECT_BURN_HIT,53,喷射火焰,95,FIRE,,True,37,12,3,3,['FIRE']
+evolving_midstage,超音蝠,41,normal_three_into_one,245,,EFFECT_NORMAL_HIT,17,翅膀攻击,60,FLYING,42,False,,22,1,1,"['POISON', 'FLYING']"
+terminal,大嘴蝠,42,evolved_reachable,455,,EFFECT_NORMAL_HIT,17,翅膀攻击,60,FLYING,,True,41,18,1,2,"['POISON', 'FLYING']"
+evolving_midstage,走路草,43,normal_three_into_one,320,,EFFECT_RAMPAGE,80,花瓣舞,70,GRASS,44,False,,22,3,1,"['GRASS', 'POISON']"
+evolving_midstage,臭臭花,44,normal_three_into_one,395,,EFFECT_RAMPAGE,80,花瓣舞,70,GRASS,45,True,43,18,3,2,"['GRASS', 'POISON']"
+terminal,霸王花,45,evolved_reachable,480,,EFFECT_RAMPAGE,80,花瓣舞,70,GRASS,,True,44,18,3,2,"['GRASS', 'POISON']"
+evolving_midstage,可达鸭,54,normal_three_into_one,320,,EFFECT_NORMAL_HIT,56,水炮,120,WATER,55,False,,22,3,1,['WATER']
+terminal,哥达鸭,55,evolved_reachable,500,,EFFECT_NORMAL_HIT,56,水炮,120,WATER,,True,54,12,3,3,['WATER']
+evolving_midstage,猴怪,56,normal_three_into_one,305,,EFFECT_NORMAL_HIT,238,,100,FIGHTING,57,False,,22,1,1,['FIGHTING']
+terminal,火暴猴,57,evolved_reachable,455,,EFFECT_NORMAL_HIT,238,,100,FIGHTING,,True,56,18,1,2,['FIGHTING']
+evolving_midstage,卡蒂狗,58,normal_three_into_one,350,,EFFECT_BURN_HIT,53,喷射火焰,95,FIRE,59,False,,22,1,1,['FIRE']
+terminal,风速狗,59,evolved_reachable,555,,EFFECT_BURN_HIT,53,喷射火焰,95,FIRE,,True,58,12,1,3,['FIRE']
+evolving_midstage,蚊香蝌蚪,60,normal_three_into_one,300,,EFFECT_NORMAL_HIT,56,水炮,120,WATER,61,False,,22,1,1,['WATER']
+evolving_midstage,蚊香君,61,normal_three_into_one,385,,EFFECT_NORMAL_HIT,56,水炮,120,WATER,62,True,60,18,1,2,['WATER']
+terminal,蚊香泳士,62,evolved_reachable,500,,EFFECT_NORMAL_HIT,56,水炮,120,WATER,,True,61,12,1,3,"['WATER', 'FIGHTING']"
+evolving_midstage,凯西,63,normal_three_into_one,310,,,,,,,64,False,,22,3,1,['PSYCHIC']
+evolving_midstage,勇基拉,64,trade_stone_only,400,,EFFECT_SP_DEF_DOWN_HIT,94,精神强念,90,PSYCHIC,65,True,63,18,3,2,['PSYCHIC']
+terminal,胡地,65,evolved_reachable,490,,EFFECT_SP_DEF_DOWN_HIT,94,精神强念,90,PSYCHIC,,True,64,18,3,2,['PSYCHIC']
+evolving_midstage,腕力,66,normal_three_into_one,305,,EFFECT_NORMAL_HIT,238,,100,FIGHTING,67,False,,22,1,1,['FIGHTING']
+evolving_midstage,豪力,67,trade_stone_only,405,,EFFECT_NORMAL_HIT,238,,100,FIGHTING,68,True,66,18,1,2,['FIGHTING']
+terminal,怪力,68,evolved_reachable,505,,EFFECT_NORMAL_HIT,238,,100,FIGHTING,,True,67,12,1,3,['FIGHTING']
+evolving_midstage,喇叭芽,69,normal_three_into_one,300,,EFFECT_NORMAL_HIT,75,飞叶快刀,55,GRASS,70,False,,22,1,1,"['GRASS', 'POISON']"
+evolving_midstage,口呆花,70,normal_three_into_one,390,,EFFECT_NORMAL_HIT,75,飞叶快刀,55,GRASS,71,True,69,18,1,2,"['GRASS', 'POISON']"
+terminal,大食花,71,evolved_reachable,480,,EFFECT_NORMAL_HIT,75,飞叶快刀,55,GRASS,,True,70,18,1,2,"['GRASS', 'POISON']"
+evolving_midstage,小拳石,74,normal_three_into_one,300,,EFFECT_EARTHQUAKE,89,地震,100,GROUND,75,False,,22,1,1,"['ROCK', 'GROUND']"
+evolving_midstage,隆隆石,75,normal_three_into_one,390,,EFFECT_EARTHQUAKE,89,地震,100,GROUND,76,True,74,18,1,2,"['ROCK', 'GROUND']"
+terminal,隆隆岩,76,evolved_reachable,485,,EFFECT_EARTHQUAKE,89,地震,100,GROUND,,True,75,18,1,2,"['ROCK', 'GROUND']"
+evolving_midstage,呆呆兽,79,normal_three_into_one,315,,EFFECT_SP_DEF_DOWN_HIT,94,精神强念,90,PSYCHIC,80,False,,22,1,1,"['WATER', 'PSYCHIC']"
+terminal,呆壳兽,80,evolved_reachable,490,,EFFECT_SP_DEF_DOWN_HIT,94,精神强念,90,PSYCHIC,,True,79,18,3,2,"['WATER', 'PSYCHIC']"
+evolving_midstage,小磁怪,81,normal_three_into_one,325,,EFFECT_PARALYZE_HIT,84,电击,40,ELECTRIC,82,False,,22,3,1,"['ELECTRIC', 'STEEL']"
+terminal,三合一磁怪,82,evolved_reachable,465,,EFFECT_PARALYZE_HIT,84,电击,40,ELECTRIC,,True,81,18,3,2,"['ELECTRIC', 'STEEL']"
+evolving_midstage,鬼斯,92,normal_three_into_one,310,,EFFECT_PARALYZE_HIT,122,舌舔,20,GHOST,93,False,,22,3,1,"['GHOST', 'POISON']"
+evolving_midstage,鬼斯通,93,trade_stone_only,405,,EFFECT_PARALYZE_HIT,122,舌舔,20,GHOST,94,True,92,18,3,2,"['GHOST', 'POISON']"
+terminal,耿鬼,94,evolved_reachable,500,,EFFECT_PARALYZE_HIT,122,舌舔,20,GHOST,,True,93,12,3,3,"['GHOST', 'POISON']"
+terminal,大岩蛇,95,natural_no_evolution,385,,EFFECT_NORMAL_HIT,88,落石,50,ROCK,,False,,18,1,2,"['ROCK', 'GROUND']"
+evolving_midstage,独角犀牛,111,normal_three_into_one,345,,EFFECT_EARTHQUAKE,89,地震,100,GROUND,112,False,,22,1,1,"['GROUND', 'ROCK']"
+terminal,钻角犀兽,112,evolved_reachable,485,,EFFECT_EARTHQUAKE,89,地震,100,GROUND,,True,111,18,1,2,"['GROUND', 'ROCK']"
+evolving_midstage,墨海马,116,normal_three_into_one,295,,EFFECT_NORMAL_HIT,56,水炮,120,WATER,117,False,,22,3,1,['WATER']
+terminal,海刺龙,117,evolved_reachable,440,,EFFECT_NORMAL_HIT,56,水炮,120,WATER,,True,116,18,3,2,['WATER']
+evolving_midstage,海星星,120,normal_three_into_one,340,,EFFECT_NORMAL_HIT,56,水炮,120,WATER,121,False,,22,3,1,['WATER']
+terminal,宝石海星,121,evolved_reachable,520,,EFFECT_NORMAL_HIT,56,水炮,120,WATER,,True,120,12,3,3,"['WATER', 'PSYCHIC']"
+terminal,飞天螳螂,123,natural_no_evolution,500,,EFFECT_NORMAL_HIT,17,翅膀攻击,60,FLYING,,False,,12,1,3,"['BUG', 'FLYING']"
+evolving_midstage,鲤鱼王,129,normal_three_into_one,200,,EFFECT_NORMAL_HIT,33,撞击,35,NORMAL,130,False,,22,3,1,['WATER']
+terminal,暴鲤龙,130,evolved_reachable,540,,EFFECT_NORMAL_HIT,56,水炮,120,WATER,,True,129,12,1,3,"['WATER', 'FLYING']"
+terminal,拉普拉斯,131,natural_no_evolution,535,drizzle,EFFECT_NORMAL_HIT,56,水炮,120,WATER,,False,,12,1,3,"['WATER', 'ICE']"
+evolving_midstage,伊布,133,normal_three_into_one,325,,EFFECT_RECOIL_HIT,36,猛撞,90,NORMAL,134,False,,22,1,1,['NORMAL']
+terminal,水伊布,134,evolved_reachable,525,,EFFECT_NORMAL_HIT,56,水炮,120,WATER,,True,133,12,3,3,['WATER']
+terminal,雷伊布,135,evolved_branch_unreachable,525,,EFFECT_PARALYZE_HIT,84,电击,40,ELECTRIC,,True,133,12,3,3,['ELECTRIC']
+terminal,火伊布,136,evolved_branch_unreachable,525,,EFFECT_BURN_HIT,53,喷射火焰,95,FIRE,,True,133,12,1,3,['FIRE']
+terminal,卡比兽,143,natural_no_evolution,540,,EFFECT_HYPER_BEAM,63,破坏光线,150,NORMAL,,False,,12,1,3,['NORMAL']
+evolving_midstage,迷你龙,147,normal_three_into_one,300,,EFFECT_RAMPAGE,200,,90,DRAGON,148,False,,22,1,1,['DRAGON']
+evolving_midstage,哈克龙,148,normal_three_into_one,420,,EFFECT_RAMPAGE,200,,90,DRAGON,149,True,147,18,1,2,['DRAGON']
+terminal,快龙,149,evolved_reachable,600,,EFFECT_RAMPAGE,200,,90,DRAGON,,True,148,12,1,3,"['DRAGON', 'FLYING']"

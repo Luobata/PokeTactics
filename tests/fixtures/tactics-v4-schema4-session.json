@@ -1,0 +1,2609 @@
+{
+  "captured_from_commit": "914e89c",
+  "captured_rules_fingerprint": "2a469a66cce17970c78393f495305f55cb52c6a92e2264a164e6861095ac5fbb",
+  "initial": {
+    "rules": "2a469a66cce17970c78393f495305f55cb52c6a92e2264a164e6861095ac5fbb",
+    "seed": 9102027,
+    "round": 1,
+    "ruleset": "tactics_v4",
+    "tactical": [
+      {
+        "guard": null,
+        "weather": null
+      },
+      {
+        "guard": null,
+        "weather": null
+      },
+      {
+        "guard": null,
+        "weather": null
+      },
+      {
+        "guard": null,
+        "weather": null
+      },
+      {
+        "guard": null,
+        "weather": null
+      },
+      {
+        "guard": null,
+        "weather": null
+      },
+      {
+        "guard": null,
+        "weather": null
+      },
+      {
+        "guard": null,
+        "weather": null
+      }
+    ],
+    "rewards": [],
+    "next_unit_id": 32,
+    "expedition_state": {
+      "run_id": "b0020000000000000000000000000000",
+      "loadout": {
+        "partner": 6,
+        "technique": null,
+        "item": null
+      },
+      "discoveries": {
+        "seen": [
+          4,
+          25,
+          37,
+          38,
+          56,
+          58,
+          111,
+          116,
+          131,
+          147
+        ],
+        "fielded": [],
+        "won": []
+      }
+    },
+    "phase": "prep",
+    "seats": [
+      {
+        "gold": 0,
+        "hp": 100,
+        "level": 4,
+        "xp": 0,
+        "streak": 0,
+        "alive": true,
+        "rank": null,
+        "last_damage": 0,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 0,
+        "shop": [
+          58,
+          58,
+          147,
+          111
+        ],
+        "board": [
+          {
+            "species": 38,
+            "item": null,
+            "uid": "u00000029",
+            "technique": null,
+            "sources": [
+              38
+            ],
+            "invested": 3
+          },
+          {
+            "species": 4,
+            "item": null,
+            "uid": "u00000030",
+            "technique": null,
+            "sources": [
+              4
+            ],
+            "invested": 1
+          },
+          {
+            "species": 131,
+            "item": null,
+            "uid": "u00000031",
+            "technique": null,
+            "sources": [
+              131
+            ],
+            "invested": 3
+          }
+        ],
+        "bench": [],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 2,
+        "grid": [
+          [
+            0,
+            2,
+            {
+              "species": 4,
+              "item": null,
+              "uid": "u00000030",
+              "technique": null,
+              "sources": [
+                4
+              ],
+              "invested": 1
+            }
+          ],
+          [
+            0,
+            3,
+            {
+              "species": 131,
+              "item": null,
+              "uid": "u00000031",
+              "technique": null,
+              "sources": [
+                131
+              ],
+              "invested": 3
+            }
+          ],
+          [
+            1,
+            2,
+            {
+              "species": 38,
+              "item": null,
+              "uid": "u00000029",
+              "technique": null,
+              "sources": [
+                38
+              ],
+              "invested": 3
+            }
+          ]
+        ],
+        "refresh_j": 0,
+        "shop_locked": false
+      },
+      {
+        "gold": 3,
+        "hp": 100,
+        "level": 2,
+        "xp": 0,
+        "streak": 0,
+        "alive": true,
+        "rank": null,
+        "last_damage": 0,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 1,
+        "shop": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "board": [
+          {
+            "species": 116,
+            "item": null,
+            "uid": "u00000001",
+            "technique": null,
+            "sources": [
+              116
+            ],
+            "invested": 1
+          },
+          {
+            "species": 1,
+            "item": null,
+            "uid": "u00000002",
+            "technique": null,
+            "sources": [
+              1
+            ],
+            "invested": 1
+          },
+          {
+            "species": 56,
+            "item": null,
+            "uid": "u00000003",
+            "technique": null,
+            "sources": [
+              56
+            ],
+            "invested": 1
+          },
+          {
+            "species": 58,
+            "item": null,
+            "uid": "u00000004",
+            "technique": null,
+            "sources": [
+              58
+            ],
+            "invested": 1
+          }
+        ],
+        "bench": [],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 3,
+        "ability": 1,
+        "personality": "copycat",
+        "target_types": [],
+        "stats": {
+          "gold_curve": [
+            3
+          ],
+          "pop_curve": [
+            4
+          ],
+          "synergy_curve": [
+            [
+              "FIGHTING",
+              1
+            ]
+          ],
+          "synergy_formed_round": null,
+          "synergy_formed_type": null,
+          "refreshes": 0,
+          "item_crafts": 0,
+          "item_equips": 0,
+          "stone_triggers": 0,
+          "craft_stats": {
+            "calls": 1,
+            "made": {},
+            "no_pair": {
+              "lucky_egg": 1,
+              "choice_band": 1,
+              "focus_lens": 1,
+              "sash": 1,
+              "leftovers": 1,
+              "bright_powder": 1,
+              "swift_feather": 1,
+              "scarf_fire": 1,
+              "scarf_water": 1,
+              "scarf_electric": 1,
+              "weather_stone": 1
+            },
+            "gated": {},
+            "shadow": {}
+          }
+        }
+      },
+      {
+        "gold": 3,
+        "hp": 100,
+        "level": 2,
+        "xp": 0,
+        "streak": 0,
+        "alive": true,
+        "rank": null,
+        "last_damage": 0,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 2,
+        "shop": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "board": [
+          {
+            "species": 116,
+            "item": null,
+            "uid": "u00000005",
+            "technique": null,
+            "sources": [
+              116
+            ],
+            "invested": 1
+          },
+          {
+            "species": 37,
+            "item": null,
+            "uid": "u00000006",
+            "technique": null,
+            "sources": [
+              37
+            ],
+            "invested": 1
+          },
+          {
+            "species": 25,
+            "item": null,
+            "uid": "u00000007",
+            "technique": null,
+            "sources": [
+              25
+            ],
+            "invested": 1
+          },
+          {
+            "species": 56,
+            "item": null,
+            "uid": "u00000008",
+            "technique": null,
+            "sources": [
+              56
+            ],
+            "invested": 1
+          }
+        ],
+        "bench": [],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 0,
+        "ability": 1,
+        "personality": "balanced",
+        "target_types": [],
+        "stats": {
+          "gold_curve": [
+            3
+          ],
+          "pop_curve": [
+            4
+          ],
+          "synergy_curve": [
+            [
+              "ELECTRIC",
+              1
+            ]
+          ],
+          "synergy_formed_round": null,
+          "synergy_formed_type": null,
+          "refreshes": 0,
+          "item_crafts": 0,
+          "item_equips": 0,
+          "stone_triggers": 0,
+          "craft_stats": {
+            "calls": 1,
+            "made": {},
+            "no_pair": {
+              "lucky_egg": 1,
+              "choice_band": 1,
+              "focus_lens": 1,
+              "sash": 1,
+              "leftovers": 1,
+              "bright_powder": 1,
+              "swift_feather": 1,
+              "scarf_fire": 1,
+              "scarf_water": 1,
+              "scarf_electric": 1,
+              "weather_stone": 1
+            },
+            "gated": {},
+            "shadow": {}
+          }
+        }
+      },
+      {
+        "gold": 3,
+        "hp": 100,
+        "level": 2,
+        "xp": 0,
+        "streak": 0,
+        "alive": true,
+        "rank": null,
+        "last_damage": 0,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 3,
+        "shop": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "board": [
+          {
+            "species": 43,
+            "item": null,
+            "uid": "u00000009",
+            "technique": null,
+            "sources": [
+              43
+            ],
+            "invested": 1
+          },
+          {
+            "species": 37,
+            "item": null,
+            "uid": "u00000010",
+            "technique": null,
+            "sources": [
+              37
+            ],
+            "invested": 1
+          },
+          {
+            "species": 60,
+            "item": null,
+            "uid": "u00000011",
+            "technique": null,
+            "sources": [
+              60
+            ],
+            "invested": 1
+          },
+          {
+            "species": 79,
+            "item": null,
+            "uid": "u00000012",
+            "technique": null,
+            "sources": [
+              79
+            ],
+            "invested": 1
+          }
+        ],
+        "bench": [],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 1,
+        "ability": 1,
+        "personality": "roller",
+        "target_types": [],
+        "stats": {
+          "gold_curve": [
+            3
+          ],
+          "pop_curve": [
+            4
+          ],
+          "synergy_curve": [
+            [
+              "WATER",
+              2
+            ]
+          ],
+          "synergy_formed_round": null,
+          "synergy_formed_type": null,
+          "refreshes": 0,
+          "item_crafts": 0,
+          "item_equips": 0,
+          "stone_triggers": 0,
+          "craft_stats": {
+            "calls": 1,
+            "made": {},
+            "no_pair": {
+              "lucky_egg": 1,
+              "choice_band": 1,
+              "swift_feather": 1,
+              "focus_lens": 1,
+              "sash": 1,
+              "scarf_fire": 1,
+              "scarf_water": 1,
+              "scarf_electric": 1,
+              "leftovers": 1,
+              "bright_powder": 1,
+              "weather_stone": 1
+            },
+            "gated": {},
+            "shadow": {}
+          }
+        }
+      },
+      {
+        "gold": 3,
+        "hp": 100,
+        "level": 2,
+        "xp": 0,
+        "streak": 0,
+        "alive": true,
+        "rank": null,
+        "last_damage": 0,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 4,
+        "shop": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "board": [
+          {
+            "species": 92,
+            "item": null,
+            "uid": "u00000013",
+            "technique": null,
+            "sources": [
+              92
+            ],
+            "invested": 1
+          },
+          {
+            "species": 120,
+            "item": null,
+            "uid": "u00000014",
+            "technique": null,
+            "sources": [
+              120
+            ],
+            "invested": 1
+          },
+          {
+            "species": 1,
+            "item": null,
+            "uid": "u00000015",
+            "technique": null,
+            "sources": [
+              1
+            ],
+            "invested": 1
+          },
+          {
+            "species": 66,
+            "item": null,
+            "uid": "u00000016",
+            "technique": null,
+            "sources": [
+              66
+            ],
+            "invested": 1
+          }
+        ],
+        "bench": [],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 6,
+        "ability": 2,
+        "personality": "saver",
+        "target_types": [],
+        "stats": {
+          "gold_curve": [
+            3
+          ],
+          "pop_curve": [
+            4
+          ],
+          "synergy_curve": [
+            [
+              "POISON",
+              2
+            ]
+          ],
+          "synergy_formed_round": null,
+          "synergy_formed_type": null,
+          "refreshes": 0,
+          "item_crafts": 0,
+          "item_equips": 0,
+          "stone_triggers": 0,
+          "craft_stats": {
+            "calls": 1,
+            "made": {},
+            "no_pair": {
+              "lucky_egg": 1,
+              "choice_band": 1,
+              "focus_lens": 1,
+              "sash": 1,
+              "leftovers": 1,
+              "bright_powder": 1,
+              "swift_feather": 1,
+              "scarf_fire": 1,
+              "scarf_water": 1,
+              "scarf_electric": 1,
+              "weather_stone": 1
+            },
+            "gated": {},
+            "shadow": {}
+          }
+        }
+      },
+      {
+        "gold": 3,
+        "hp": 100,
+        "level": 2,
+        "xp": 0,
+        "streak": 0,
+        "alive": true,
+        "rank": null,
+        "last_damage": 0,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 5,
+        "shop": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "board": [
+          {
+            "species": 116,
+            "item": null,
+            "uid": "u00000017",
+            "technique": null,
+            "sources": [
+              116
+            ],
+            "invested": 1
+          },
+          {
+            "species": 116,
+            "item": null,
+            "uid": "u00000018",
+            "technique": null,
+            "sources": [
+              116
+            ],
+            "invested": 1
+          },
+          {
+            "species": 10,
+            "item": null,
+            "uid": "u00000019",
+            "technique": null,
+            "sources": [
+              10
+            ],
+            "invested": 1
+          },
+          {
+            "species": 29,
+            "item": null,
+            "uid": "u00000020",
+            "technique": null,
+            "sources": [
+              29
+            ],
+            "invested": 1
+          }
+        ],
+        "bench": [],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 7,
+        "ability": 2,
+        "personality": "balanced",
+        "target_types": [],
+        "stats": {
+          "gold_curve": [
+            3
+          ],
+          "pop_curve": [
+            4
+          ],
+          "synergy_curve": [
+            [
+              "WATER",
+              2
+            ]
+          ],
+          "synergy_formed_round": null,
+          "synergy_formed_type": null,
+          "refreshes": 0,
+          "item_crafts": 0,
+          "item_equips": 0,
+          "stone_triggers": 0,
+          "craft_stats": {
+            "calls": 1,
+            "made": {},
+            "no_pair": {
+              "lucky_egg": 1,
+              "choice_band": 1,
+              "focus_lens": 1,
+              "sash": 1,
+              "leftovers": 1,
+              "bright_powder": 1,
+              "swift_feather": 1,
+              "scarf_fire": 1,
+              "scarf_water": 1,
+              "scarf_electric": 1,
+              "weather_stone": 1
+            },
+            "gated": {},
+            "shadow": {}
+          }
+        }
+      },
+      {
+        "gold": 3,
+        "hp": 100,
+        "level": 2,
+        "xp": 0,
+        "streak": 0,
+        "alive": true,
+        "rank": null,
+        "last_damage": 0,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 6,
+        "shop": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "board": [
+          {
+            "species": 4,
+            "item": null,
+            "uid": "u00000021",
+            "technique": null,
+            "sources": [
+              4
+            ],
+            "invested": 1
+          },
+          {
+            "species": 21,
+            "item": null,
+            "uid": "u00000022",
+            "technique": null,
+            "sources": [
+              21
+            ],
+            "invested": 1
+          },
+          {
+            "species": 19,
+            "item": null,
+            "uid": "u00000023",
+            "technique": null,
+            "sources": [
+              19
+            ],
+            "invested": 1
+          },
+          {
+            "species": 29,
+            "item": null,
+            "uid": "u00000024",
+            "technique": null,
+            "sources": [
+              29
+            ],
+            "invested": 1
+          }
+        ],
+        "bench": [],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 4,
+        "ability": 2,
+        "personality": "copycat",
+        "target_types": [],
+        "stats": {
+          "gold_curve": [
+            3
+          ],
+          "pop_curve": [
+            4
+          ],
+          "synergy_curve": [
+            [
+              "NORMAL",
+              2
+            ]
+          ],
+          "synergy_formed_round": null,
+          "synergy_formed_type": null,
+          "refreshes": 0,
+          "item_crafts": 0,
+          "item_equips": 0,
+          "stone_triggers": 0,
+          "craft_stats": {
+            "calls": 1,
+            "made": {},
+            "no_pair": {
+              "lucky_egg": 1,
+              "choice_band": 1,
+              "focus_lens": 1,
+              "sash": 1,
+              "leftovers": 1,
+              "bright_powder": 1,
+              "swift_feather": 1,
+              "scarf_fire": 1,
+              "scarf_water": 1,
+              "scarf_electric": 1,
+              "weather_stone": 1
+            },
+            "gated": {},
+            "shadow": {}
+          }
+        }
+      },
+      {
+        "gold": 3,
+        "hp": 100,
+        "level": 2,
+        "xp": 0,
+        "streak": 0,
+        "alive": true,
+        "rank": null,
+        "last_damage": 0,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 7,
+        "shop": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "board": [
+          {
+            "species": 120,
+            "item": null,
+            "uid": "u00000025",
+            "technique": null,
+            "sources": [
+              120
+            ],
+            "invested": 1
+          },
+          {
+            "species": 25,
+            "item": null,
+            "uid": "u00000026",
+            "technique": null,
+            "sources": [
+              25
+            ],
+            "invested": 1
+          },
+          {
+            "species": 58,
+            "item": null,
+            "uid": "u00000027",
+            "technique": null,
+            "sources": [
+              58
+            ],
+            "invested": 1
+          },
+          {
+            "species": 29,
+            "item": null,
+            "uid": "u00000028",
+            "technique": null,
+            "sources": [
+              29
+            ],
+            "invested": 1
+          }
+        ],
+        "bench": [],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 5,
+        "ability": 3,
+        "personality": "roller",
+        "target_types": [],
+        "stats": {
+          "gold_curve": [
+            3
+          ],
+          "pop_curve": [
+            4
+          ],
+          "synergy_curve": [
+            [
+              "ELECTRIC",
+              1
+            ]
+          ],
+          "synergy_formed_round": null,
+          "synergy_formed_type": null,
+          "refreshes": 0,
+          "item_crafts": 0,
+          "item_equips": 0,
+          "stone_triggers": 0,
+          "craft_stats": {
+            "calls": 1,
+            "made": {},
+            "no_pair": {
+              "lucky_egg": 1,
+              "choice_band": 1,
+              "swift_feather": 1,
+              "focus_lens": 1,
+              "sash": 1,
+              "scarf_fire": 1,
+              "scarf_water": 1,
+              "scarf_electric": 1,
+              "leftovers": 1,
+              "bright_powder": 1,
+              "weather_stone": 1
+            },
+            "gated": {},
+            "shadow": {}
+          }
+        }
+      }
+    ],
+    "pool": {
+      "1": 20,
+      "4": 20,
+      "7": 22,
+      "10": 21,
+      "11": 22,
+      "13": 22,
+      "14": 22,
+      "16": 22,
+      "17": 22,
+      "21": 21,
+      "19": 21,
+      "25": 20,
+      "29": 19,
+      "32": 22,
+      "37": 20,
+      "41": 22,
+      "43": 21,
+      "54": 22,
+      "56": 20,
+      "58": 18,
+      "60": 21,
+      "63": 22,
+      "66": 21,
+      "69": 22,
+      "74": 22,
+      "79": 21,
+      "81": 22,
+      "92": 21,
+      "111": 21,
+      "116": 18,
+      "120": 20,
+      "129": 22,
+      "133": 22,
+      "147": 21,
+      "2": 18,
+      "5": 18,
+      "8": 18,
+      "12": 18,
+      "15": 18,
+      "18": 18,
+      "22": 18,
+      "20": 18,
+      "26": 18,
+      "30": 18,
+      "31": 18,
+      "33": 18,
+      "34": 18,
+      "42": 18,
+      "44": 18,
+      "45": 18,
+      "57": 18,
+      "61": 18,
+      "64": 18,
+      "65": 18,
+      "67": 18,
+      "70": 18,
+      "71": 18,
+      "75": 18,
+      "76": 18,
+      "80": 18,
+      "82": 18,
+      "93": 18,
+      "95": 18,
+      "112": 18,
+      "117": 18,
+      "148": 18,
+      "3": 12,
+      "6": 12,
+      "9": 12,
+      "38": 11,
+      "55": 12,
+      "59": 12,
+      "62": 12,
+      "68": 12,
+      "94": 12,
+      "121": 12,
+      "123": 12,
+      "130": 12,
+      "131": 11,
+      "134": 12,
+      "135": 12,
+      "136": 12,
+      "143": 12,
+      "149": 12
+    },
+    "pairs": [
+      [
+        2,
+        0
+      ],
+      [
+        4,
+        6
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        7,
+        5
+      ]
+    ],
+    "ghost_seat": null,
+    "ghost_source": null,
+    "opponent_comp": [
+      {
+        "species": 116,
+        "item": null
+      },
+      {
+        "species": 37,
+        "item": null
+      },
+      {
+        "species": 25,
+        "item": null
+      },
+      {
+        "species": 56,
+        "item": null
+      }
+    ],
+    "opponent_learned": [
+      null,
+      null,
+      null,
+      null
+    ],
+    "opponent_tactics": {
+      "guard": null,
+      "weather": null
+    },
+    "log": [
+      "R1｜主搭档：小火龙（-1 金）；进化后保留搭档特性"
+    ],
+    "last_battle": null,
+    "player_battles": 0,
+    "player_frames_total": 0,
+    "eliminated_round": null,
+    "final_team": null
+  },
+  "commands": [
+    {
+      "cmd": "move",
+      "from": "g1,2",
+      "to": "g1,3"
+    },
+    {
+      "cmd": "lock"
+    },
+    {
+      "cmd": "end_prep"
+    },
+    {
+      "cmd": "next"
+    }
+  ],
+  "expected_after": {
+    "rules": "2a469a66cce17970c78393f495305f55cb52c6a92e2264a164e6861095ac5fbb",
+    "seed": 9102027,
+    "round": 2,
+    "ruleset": "tactics_v4",
+    "tactical": [
+      {
+        "guard": null,
+        "weather": null
+      },
+      {
+        "guard": null,
+        "weather": null
+      },
+      {
+        "guard": null,
+        "weather": null
+      },
+      {
+        "guard": null,
+        "weather": null
+      },
+      {
+        "guard": null,
+        "weather": null
+      },
+      {
+        "guard": null,
+        "weather": null
+      },
+      {
+        "guard": null,
+        "weather": null
+      },
+      {
+        "guard": null,
+        "weather": null
+      }
+    ],
+    "rewards": [],
+    "next_unit_id": 42,
+    "expedition_state": {
+      "run_id": "b0020000000000000000000000000000",
+      "loadout": {
+        "partner": 6,
+        "technique": null,
+        "item": null
+      },
+      "discoveries": {
+        "seen": [
+          4,
+          25,
+          37,
+          38,
+          56,
+          58,
+          111,
+          116,
+          131,
+          147
+        ],
+        "fielded": [
+          4,
+          38,
+          131
+        ],
+        "won": [
+          4,
+          38,
+          131
+        ]
+      }
+    },
+    "phase": "prep",
+    "seats": [
+      {
+        "gold": 5,
+        "hp": 100,
+        "level": 4,
+        "xp": 2,
+        "streak": 1,
+        "alive": true,
+        "rank": null,
+        "last_damage": 0,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 0,
+        "shop": [
+          58,
+          58,
+          147,
+          111
+        ],
+        "board": [
+          {
+            "species": 38,
+            "item": null,
+            "uid": "u00000029",
+            "technique": null,
+            "sources": [
+              38
+            ],
+            "invested": 3
+          },
+          {
+            "species": 4,
+            "item": null,
+            "uid": "u00000030",
+            "technique": null,
+            "sources": [
+              4
+            ],
+            "invested": 1
+          },
+          {
+            "species": 131,
+            "item": null,
+            "uid": "u00000031",
+            "technique": null,
+            "sources": [
+              131
+            ],
+            "invested": 3
+          }
+        ],
+        "bench": [],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 3,
+        "grid": [
+          [
+            0,
+            2,
+            {
+              "species": 4,
+              "item": null,
+              "uid": "u00000030",
+              "technique": null,
+              "sources": [
+                4
+              ],
+              "invested": 1
+            }
+          ],
+          [
+            0,
+            3,
+            {
+              "species": 131,
+              "item": null,
+              "uid": "u00000031",
+              "technique": null,
+              "sources": [
+                131
+              ],
+              "invested": 3
+            }
+          ],
+          [
+            1,
+            3,
+            {
+              "species": 38,
+              "item": null,
+              "uid": "u00000029",
+              "technique": null,
+              "sources": [
+                38
+              ],
+              "invested": 3
+            }
+          ]
+        ],
+        "refresh_j": 0,
+        "shop_locked": true
+      },
+      {
+        "gold": 3,
+        "hp": 96,
+        "level": 3,
+        "xp": 0,
+        "streak": -1,
+        "alive": true,
+        "rank": null,
+        "last_damage": 4,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 1,
+        "shop": [
+          null,
+          81,
+          37,
+          29
+        ],
+        "board": [
+          {
+            "species": 116,
+            "item": null,
+            "uid": "u00000001",
+            "technique": null,
+            "sources": [
+              116
+            ],
+            "invested": 1
+          },
+          {
+            "species": 116,
+            "item": null,
+            "uid": "u00000032",
+            "technique": null,
+            "sources": [
+              116
+            ],
+            "invested": 1
+          },
+          {
+            "species": 1,
+            "item": null,
+            "uid": "u00000002",
+            "technique": null,
+            "sources": [
+              1
+            ],
+            "invested": 1
+          },
+          {
+            "species": 56,
+            "item": null,
+            "uid": "u00000003",
+            "technique": null,
+            "sources": [
+              56
+            ],
+            "invested": 1
+          },
+          {
+            "species": 58,
+            "item": null,
+            "uid": "u00000004",
+            "technique": null,
+            "sources": [
+              58
+            ],
+            "invested": 1
+          }
+        ],
+        "bench": [],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 6,
+        "ability": 1,
+        "personality": "copycat",
+        "target_types": [],
+        "stats": {
+          "gold_curve": [
+            3,
+            3
+          ],
+          "pop_curve": [
+            4,
+            5
+          ],
+          "synergy_curve": [
+            [
+              "FIGHTING",
+              1
+            ],
+            [
+              "WATER",
+              2
+            ]
+          ],
+          "synergy_formed_round": null,
+          "synergy_formed_type": null,
+          "refreshes": 0,
+          "item_crafts": 0,
+          "item_equips": 0,
+          "stone_triggers": 0,
+          "craft_stats": {
+            "calls": 2,
+            "made": {},
+            "no_pair": {
+              "lucky_egg": 2,
+              "choice_band": 2,
+              "focus_lens": 2,
+              "sash": 2,
+              "leftovers": 2,
+              "bright_powder": 2,
+              "swift_feather": 2,
+              "scarf_fire": 2,
+              "scarf_water": 2,
+              "scarf_electric": 2,
+              "weather_stone": 2,
+              "healing_needle": 1
+            },
+            "gated": {},
+            "shadow": {}
+          }
+        }
+      },
+      {
+        "gold": 6,
+        "hp": 95,
+        "level": 2,
+        "xp": 2,
+        "streak": -1,
+        "alive": true,
+        "rank": null,
+        "last_damage": 5,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 2,
+        "shop": [
+          133,
+          13,
+          null,
+          null
+        ],
+        "board": [
+          {
+            "species": 37,
+            "item": null,
+            "uid": "u00000006",
+            "technique": null,
+            "sources": [
+              37
+            ],
+            "invested": 1
+          },
+          {
+            "species": 25,
+            "item": null,
+            "uid": "u00000007",
+            "technique": null,
+            "sources": [
+              25
+            ],
+            "invested": 1
+          },
+          {
+            "species": 56,
+            "item": null,
+            "uid": "u00000008",
+            "technique": null,
+            "sources": [
+              56
+            ],
+            "invested": 1
+          },
+          {
+            "species": 66,
+            "item": null,
+            "uid": "u00000033",
+            "technique": null,
+            "sources": [
+              66
+            ],
+            "invested": 1
+          }
+        ],
+        "bench": [
+          {
+            "species": 37,
+            "item": null,
+            "uid": "u00000034",
+            "technique": null,
+            "sources": [
+              37
+            ],
+            "invested": 1
+          },
+          {
+            "species": 116,
+            "item": null,
+            "uid": "u00000005",
+            "technique": null,
+            "sources": [
+              116
+            ],
+            "invested": 1
+          }
+        ],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 5,
+        "ability": 1,
+        "personality": "balanced",
+        "target_types": [],
+        "stats": {
+          "gold_curve": [
+            3,
+            6
+          ],
+          "pop_curve": [
+            4,
+            4
+          ],
+          "synergy_curve": [
+            [
+              "ELECTRIC",
+              1
+            ],
+            [
+              "FIGHTING",
+              2
+            ]
+          ],
+          "synergy_formed_round": null,
+          "synergy_formed_type": null,
+          "refreshes": 0,
+          "item_crafts": 0,
+          "item_equips": 0,
+          "stone_triggers": 0,
+          "craft_stats": {
+            "calls": 2,
+            "made": {},
+            "no_pair": {
+              "lucky_egg": 2,
+              "choice_band": 2,
+              "focus_lens": 2,
+              "sash": 2,
+              "leftovers": 2,
+              "bright_powder": 2,
+              "swift_feather": 2,
+              "scarf_fire": 2,
+              "scarf_water": 2,
+              "scarf_electric": 2,
+              "weather_stone": 2
+            },
+            "gated": {},
+            "shadow": {}
+          }
+        }
+      },
+      {
+        "gold": 6,
+        "hp": 100,
+        "level": 2,
+        "xp": 2,
+        "streak": 1,
+        "alive": true,
+        "rank": null,
+        "last_damage": 0,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 3,
+        "shop": [
+          11,
+          21,
+          null,
+          null
+        ],
+        "board": [
+          {
+            "species": 43,
+            "item": null,
+            "uid": "u00000009",
+            "technique": null,
+            "sources": [
+              43
+            ],
+            "invested": 1
+          },
+          {
+            "species": 4,
+            "item": null,
+            "uid": "u00000035",
+            "technique": null,
+            "sources": [
+              4
+            ],
+            "invested": 1
+          },
+          {
+            "species": 79,
+            "item": null,
+            "uid": "u00000012",
+            "technique": null,
+            "sources": [
+              79
+            ],
+            "invested": 1
+          },
+          {
+            "species": 79,
+            "item": null,
+            "uid": "u00000036",
+            "technique": null,
+            "sources": [
+              79
+            ],
+            "invested": 1
+          }
+        ],
+        "bench": [
+          {
+            "species": 60,
+            "item": null,
+            "uid": "u00000011",
+            "technique": null,
+            "sources": [
+              60
+            ],
+            "invested": 1
+          },
+          {
+            "species": 37,
+            "item": null,
+            "uid": "u00000010",
+            "technique": null,
+            "sources": [
+              37
+            ],
+            "invested": 1
+          }
+        ],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 0,
+        "ability": 1,
+        "personality": "roller",
+        "target_types": [],
+        "stats": {
+          "gold_curve": [
+            3,
+            6
+          ],
+          "pop_curve": [
+            4,
+            4
+          ],
+          "synergy_curve": [
+            [
+              "WATER",
+              2
+            ],
+            [
+              "PSYCHIC",
+              2
+            ]
+          ],
+          "synergy_formed_round": null,
+          "synergy_formed_type": null,
+          "refreshes": 0,
+          "item_crafts": 0,
+          "item_equips": 0,
+          "stone_triggers": 0,
+          "craft_stats": {
+            "calls": 2,
+            "made": {},
+            "no_pair": {
+              "lucky_egg": 2,
+              "choice_band": 2,
+              "swift_feather": 2,
+              "focus_lens": 2,
+              "sash": 2,
+              "scarf_fire": 2,
+              "scarf_water": 2,
+              "scarf_electric": 2,
+              "leftovers": 2,
+              "bright_powder": 2,
+              "weather_stone": 2,
+              "healing_needle": 1
+            },
+            "gated": {},
+            "shadow": {}
+          }
+        }
+      },
+      {
+        "gold": 7,
+        "hp": 100,
+        "level": 2,
+        "xp": 2,
+        "streak": 1,
+        "alive": true,
+        "rank": null,
+        "last_damage": 0,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 4,
+        "shop": [
+          63,
+          null,
+          74,
+          79
+        ],
+        "board": [
+          {
+            "species": 92,
+            "item": null,
+            "uid": "u00000013",
+            "technique": null,
+            "sources": [
+              92
+            ],
+            "invested": 1
+          },
+          {
+            "species": 120,
+            "item": null,
+            "uid": "u00000014",
+            "technique": null,
+            "sources": [
+              120
+            ],
+            "invested": 1
+          },
+          {
+            "species": 1,
+            "item": null,
+            "uid": "u00000015",
+            "technique": null,
+            "sources": [
+              1
+            ],
+            "invested": 1
+          },
+          {
+            "species": 32,
+            "item": null,
+            "uid": "u00000037",
+            "technique": null,
+            "sources": [
+              32
+            ],
+            "invested": 1
+          }
+        ],
+        "bench": [
+          {
+            "species": 66,
+            "item": null,
+            "uid": "u00000016",
+            "technique": null,
+            "sources": [
+              66
+            ],
+            "invested": 1
+          }
+        ],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 7,
+        "ability": 2,
+        "personality": "saver",
+        "target_types": [
+          "POISON"
+        ],
+        "stats": {
+          "gold_curve": [
+            3,
+            7
+          ],
+          "pop_curve": [
+            4,
+            4
+          ],
+          "synergy_curve": [
+            [
+              "POISON",
+              2
+            ],
+            [
+              "POISON",
+              3
+            ]
+          ],
+          "synergy_formed_round": null,
+          "synergy_formed_type": null,
+          "refreshes": 0,
+          "item_crafts": 0,
+          "item_equips": 0,
+          "stone_triggers": 0,
+          "craft_stats": {
+            "calls": 2,
+            "made": {},
+            "no_pair": {
+              "lucky_egg": 2,
+              "choice_band": 2,
+              "focus_lens": 2,
+              "sash": 2,
+              "leftovers": 2,
+              "bright_powder": 2,
+              "swift_feather": 2,
+              "scarf_fire": 2,
+              "scarf_water": 2,
+              "scarf_electric": 2,
+              "weather_stone": 2
+            },
+            "gated": {},
+            "shadow": {}
+          }
+        }
+      },
+      {
+        "gold": 8,
+        "hp": 97,
+        "level": 2,
+        "xp": 2,
+        "streak": -1,
+        "alive": true,
+        "rank": null,
+        "last_damage": 3,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 5,
+        "shop": [
+          14,
+          81,
+          147,
+          147
+        ],
+        "board": [
+          {
+            "species": 116,
+            "item": null,
+            "uid": "u00000017",
+            "technique": null,
+            "sources": [
+              116
+            ],
+            "invested": 1
+          },
+          {
+            "species": 116,
+            "item": null,
+            "uid": "u00000018",
+            "technique": null,
+            "sources": [
+              116
+            ],
+            "invested": 1
+          },
+          {
+            "species": 10,
+            "item": null,
+            "uid": "u00000019",
+            "technique": null,
+            "sources": [
+              10
+            ],
+            "invested": 1
+          },
+          {
+            "species": 29,
+            "item": null,
+            "uid": "u00000020",
+            "technique": null,
+            "sources": [
+              29
+            ],
+            "invested": 1
+          }
+        ],
+        "bench": [],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 2,
+        "ability": 2,
+        "personality": "balanced",
+        "target_types": [
+          "WATER"
+        ],
+        "stats": {
+          "gold_curve": [
+            3,
+            8
+          ],
+          "pop_curve": [
+            4,
+            4
+          ],
+          "synergy_curve": [
+            [
+              "WATER",
+              2
+            ],
+            [
+              "WATER",
+              2
+            ]
+          ],
+          "synergy_formed_round": null,
+          "synergy_formed_type": null,
+          "refreshes": 0,
+          "item_crafts": 0,
+          "item_equips": 0,
+          "stone_triggers": 0,
+          "craft_stats": {
+            "calls": 2,
+            "made": {},
+            "no_pair": {
+              "lucky_egg": 2,
+              "choice_band": 2,
+              "focus_lens": 2,
+              "sash": 2,
+              "leftovers": 2,
+              "bright_powder": 2,
+              "swift_feather": 2,
+              "scarf_fire": 2,
+              "scarf_water": 2,
+              "scarf_electric": 2,
+              "weather_stone": 2
+            },
+            "gated": {},
+            "shadow": {}
+          }
+        }
+      },
+      {
+        "gold": 4,
+        "hp": 95,
+        "level": 3,
+        "xp": 0,
+        "streak": -1,
+        "alive": true,
+        "rank": null,
+        "last_damage": 5,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 6,
+        "shop": [
+          11,
+          54,
+          54,
+          129
+        ],
+        "board": [
+          {
+            "species": 4,
+            "item": null,
+            "uid": "u00000021",
+            "technique": null,
+            "sources": [
+              4
+            ],
+            "invested": 1
+          },
+          {
+            "species": 21,
+            "item": null,
+            "uid": "u00000022",
+            "technique": null,
+            "sources": [
+              21
+            ],
+            "invested": 1
+          },
+          {
+            "species": 19,
+            "item": null,
+            "uid": "u00000023",
+            "technique": null,
+            "sources": [
+              19
+            ],
+            "invested": 1
+          },
+          {
+            "species": 29,
+            "item": null,
+            "uid": "u00000024",
+            "technique": null,
+            "sources": [
+              29
+            ],
+            "invested": 1
+          }
+        ],
+        "bench": [],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 1,
+        "ability": 2,
+        "personality": "copycat",
+        "target_types": [
+          "NORMAL"
+        ],
+        "stats": {
+          "gold_curve": [
+            3,
+            4
+          ],
+          "pop_curve": [
+            4,
+            4
+          ],
+          "synergy_curve": [
+            [
+              "NORMAL",
+              2
+            ],
+            [
+              "NORMAL",
+              2
+            ]
+          ],
+          "synergy_formed_round": null,
+          "synergy_formed_type": null,
+          "refreshes": 0,
+          "item_crafts": 0,
+          "item_equips": 0,
+          "stone_triggers": 0,
+          "craft_stats": {
+            "calls": 2,
+            "made": {},
+            "no_pair": {
+              "lucky_egg": 2,
+              "choice_band": 2,
+              "focus_lens": 2,
+              "sash": 2,
+              "leftovers": 2,
+              "bright_powder": 2,
+              "swift_feather": 2,
+              "scarf_fire": 2,
+              "scarf_water": 2,
+              "scarf_electric": 2,
+              "weather_stone": 2
+            },
+            "gated": {},
+            "shadow": {}
+          }
+        }
+      },
+      {
+        "gold": 4,
+        "hp": 100,
+        "level": 2,
+        "xp": 2,
+        "streak": 1,
+        "alive": true,
+        "rank": null,
+        "last_damage": 0,
+        "combines": 0,
+        "stone_used": false,
+        "item_drops": 0,
+        "seat": 7,
+        "shop": [
+          null,
+          null,
+          null,
+          null
+        ],
+        "board": [
+          {
+            "species": 92,
+            "item": null,
+            "uid": "u00000038",
+            "technique": null,
+            "sources": [
+              92
+            ],
+            "invested": 1
+          },
+          {
+            "species": 120,
+            "item": null,
+            "uid": "u00000025",
+            "technique": null,
+            "sources": [
+              120
+            ],
+            "invested": 1
+          },
+          {
+            "species": 7,
+            "item": null,
+            "uid": "u00000039",
+            "technique": null,
+            "sources": [
+              7
+            ],
+            "invested": 1
+          },
+          {
+            "species": 69,
+            "item": null,
+            "uid": "u00000040",
+            "technique": null,
+            "sources": [
+              69
+            ],
+            "invested": 1
+          }
+        ],
+        "bench": [
+          {
+            "species": 29,
+            "item": null,
+            "uid": "u00000028",
+            "technique": null,
+            "sources": [
+              29
+            ],
+            "invested": 1
+          },
+          {
+            "species": 58,
+            "item": null,
+            "uid": "u00000027",
+            "technique": null,
+            "sources": [
+              58
+            ],
+            "invested": 1
+          },
+          {
+            "species": 25,
+            "item": null,
+            "uid": "u00000026",
+            "technique": null,
+            "sources": [
+              25
+            ],
+            "invested": 1
+          },
+          {
+            "species": 10,
+            "item": null,
+            "uid": "u00000041",
+            "technique": null,
+            "sources": [
+              10
+            ],
+            "invested": 1
+          }
+        ],
+        "components": {
+          "band": 0,
+          "hardstone": 0,
+          "magnet": 0,
+          "shoes": 0,
+          "bell": 0,
+          "charcoal": 0,
+          "mysticwater": 0,
+          "spark": 0
+        },
+        "finished": [],
+        "techniques": {
+          "cut": 0,
+          "surf": 0,
+          "rest": 0,
+          "guard": 0,
+          "sunny_day": 0,
+          "rain_dance": 0
+        },
+        "last_opponent": 4,
+        "ability": 3,
+        "personality": "roller",
+        "target_types": [],
+        "stats": {
+          "gold_curve": [
+            3,
+            4
+          ],
+          "pop_curve": [
+            4,
+            4
+          ],
+          "synergy_curve": [
+            [
+              "ELECTRIC",
+              1
+            ],
+            [
+              "POISON",
+              2
+            ]
+          ],
+          "synergy_formed_round": null,
+          "synergy_formed_type": null,
+          "refreshes": 0,
+          "item_crafts": 0,
+          "item_equips": 0,
+          "stone_triggers": 0,
+          "craft_stats": {
+            "calls": 2,
+            "made": {},
+            "no_pair": {
+              "lucky_egg": 2,
+              "choice_band": 2,
+              "swift_feather": 2,
+              "focus_lens": 2,
+              "sash": 2,
+              "scarf_fire": 2,
+              "scarf_water": 2,
+              "scarf_electric": 2,
+              "leftovers": 2,
+              "bright_powder": 2,
+              "weather_stone": 2,
+              "healing_needle": 1
+            },
+            "gated": {},
+            "shadow": {}
+          }
+        }
+      }
+    ],
+    "pool": {
+      "1": 20,
+      "4": 19,
+      "7": 21,
+      "10": 20,
+      "11": 20,
+      "13": 21,
+      "14": 21,
+      "16": 22,
+      "17": 22,
+      "21": 20,
+      "19": 21,
+      "25": 20,
+      "29": 18,
+      "32": 21,
+      "37": 18,
+      "41": 22,
+      "43": 21,
+      "54": 20,
+      "56": 20,
+      "58": 18,
+      "60": 21,
+      "63": 21,
+      "66": 20,
+      "69": 21,
+      "74": 21,
+      "79": 19,
+      "81": 20,
+      "92": 20,
+      "111": 21,
+      "116": 17,
+      "120": 20,
+      "129": 21,
+      "133": 21,
+      "147": 19,
+      "2": 18,
+      "5": 18,
+      "8": 18,
+      "12": 18,
+      "15": 18,
+      "18": 18,
+      "22": 18,
+      "20": 18,
+      "26": 18,
+      "30": 18,
+      "31": 18,
+      "33": 18,
+      "34": 18,
+      "42": 18,
+      "44": 18,
+      "45": 18,
+      "57": 18,
+      "61": 18,
+      "64": 18,
+      "65": 18,
+      "67": 18,
+      "70": 18,
+      "71": 18,
+      "75": 18,
+      "76": 18,
+      "80": 18,
+      "82": 18,
+      "93": 18,
+      "95": 18,
+      "112": 18,
+      "117": 18,
+      "148": 18,
+      "3": 12,
+      "6": 12,
+      "9": 12,
+      "38": 11,
+      "55": 12,
+      "59": 12,
+      "62": 12,
+      "68": 12,
+      "94": 12,
+      "121": 12,
+      "123": 12,
+      "130": 12,
+      "131": 11,
+      "134": 12,
+      "135": 12,
+      "136": 12,
+      "143": 12,
+      "149": 12
+    },
+    "pairs": [
+      [
+        5,
+        2
+      ],
+      [
+        6,
+        1
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        4,
+        7
+      ]
+    ],
+    "ghost_seat": null,
+    "ghost_source": null,
+    "opponent_comp": [
+      {
+        "species": 43,
+        "item": null
+      },
+      {
+        "species": 4,
+        "item": null
+      },
+      {
+        "species": 79,
+        "item": null
+      },
+      {
+        "species": 79,
+        "item": null
+      }
+    ],
+    "opponent_learned": [
+      null,
+      null,
+      null,
+      null
+    ],
+    "opponent_tactics": {
+      "guard": null,
+      "weather": null
+    },
+    "log": [
+      "R1｜主搭档：小火龙（-1 金）；进化后保留搭档特性",
+      "R1｜vs 2·平衡型L1：你 胜（己方存活 3）｜你不掉血",
+      "R1｜4·攒钱型L2 胜（存活 3）",
+      "R1｜3·梭哈型L1 胜（存活 2）",
+      "R1｜7·梭哈型L3 胜（存活 1）"
+    ],
+    "last_battle": null,
+    "player_battles": 1,
+    "player_frames_total": 0,
+    "eliminated_round": null,
+    "final_team": null
+  },
+  "expected_battles": [
+    {
+      "events_sha256": "38f7ec04fd06805df41a710a4f9d71f28fec8cbe928d275d5b64b3fc79b8fd4f",
+      "event_count": 89,
+      "winner": 0,
+      "survivors": {
+        "0": 3,
+        "1": 0
+      },
+      "duration": 7.39999999999999
+    }
+  ]
+}

@@ -22,7 +22,7 @@ class PacingSessionContracts(unittest.TestCase):
 
     def test_production_version_routes_pressure_and_round19_save_stays_on_its_rules(self):
         codec = SessionCodec()
-        for version in ('base_v1', 'tactics_v1', 'tactics_v2', 'tactics_v3', 'tactics_v4'):
+        for version in ('base_v1', 'tactics_v1', 'tactics_v2', 'tactics_v3', 'tactics_v4', 'tactics_v5'):
             session = demo.Session(7, version)
             session.expedition = {'partner': 6, 'technique': None, 'item': None}
             session.begin_round(19)
@@ -31,10 +31,10 @@ class PacingSessionContracts(unittest.TestCase):
             self.assertEqual(codec.encode(restored), payload)
             self.assertEqual(restored._loss_damage(19, 1), demo.economy.loss_damage(19, 1))
             self.assertEqual(restored._loss_damage(20, 1),
-                             21 if version == 'tactics_v4' else demo.economy.loss_damage(20, 1))
+                             21 if version in ('tactics_v4', 'tactics_v5') else demo.economy.loss_damage(20, 1))
             restored.begin_round(20)
             info = demo.state_json(restored)['pacing']
-            if version == 'tactics_v4':
+            if version in ('tactics_v4', 'tactics_v5'):
                 self.assertTrue(info['active']); self.assertEqual(info['minimum_loss'], 21)
                 self.assertIn('野怪奖励照常', info['note'])
                 self.assertIn('败方', restored.log[-1] if len(restored.log) == 1 else '\n'.join(restored.log))

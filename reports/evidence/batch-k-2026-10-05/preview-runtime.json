@@ -1,0 +1,11 @@
+{
+  "url": "http://127.0.0.1:8807/device",
+  "status": 200,
+  "page_sha256": "3b69891564ba337676be8fecf96ee8bdda12f5b652d42b66a1f2aa7cdaa64aed",
+  "pid": 2237,
+  "old_banks": {
+    "5e9a2d878d07.0": "379620cbd720cbbe44d053df2ca3a6f70ef4112b00f5c238175d048f39b6ddbb",
+    "5e9a2d878d07.1": "b822125fc97f2025dbc468e50cfa3ebb74ed0303fbcac19db90b76e70d062247"
+  },
+  "interaction": "read-only GET; no saved-game action"
+}

@@ -105,6 +105,7 @@ class OwnedPiece:
         self.item = None   # S5 装备栏：每单位 1 格（None = 空手，docs/07 §3）
         self.uid = None  # 会话分配稳定编号；移位、教学和进化沿用。
         self.technique = None
+        self.evolution_locked = False
 
     def __repr__(self) -> str:
         return f"{self.piece.name}(T{self.piece.tier},投{self.invested})"
@@ -181,7 +182,8 @@ def sell_owned(owned: OwnedPiece, pool: SharedPool) -> int:
 
 def try_combine(board: List[OwnedPiece], bench: List[OwnedPiece],
                 pool: SharedPool, templates: Dict[int, Piece],
-                inventory=None) -> List[str]:
+                inventory=None, *, respect_locks=False, only_species=None,
+                single=False, changes=None, selected_uids=None) -> List[str]:
     """3 合 1 自动进化（S2 §1）：凑齐 3 只同图鉴号立即合成下一形态。
 
     在 board+bench 上反复扫描直到无可合成；合成品优先落 bench（备战），
@@ -201,6 +203,12 @@ def try_combine(board: List[OwnedPiece], bench: List[OwnedPiece],
         all_pieces = list(board) + list(bench)
         groups: Dict[int, List[OwnedPiece]] = {}
         for owned in all_pieces:
+            if respect_locks and owned.evolution_locked:
+                continue
+            if only_species is not None and owned.piece.species_id != only_species:
+                continue
+            if selected_uids is not None and owned.uid not in selected_uids:
+                continue
             groups.setdefault(owned.piece.species_id, []).append(owned)
         for sid in sorted(groups):  # 排序保证确定性（宪法 2.2）
             group = groups[sid]
@@ -221,6 +229,11 @@ def try_combine(board: List[OwnedPiece], bench: List[OwnedPiece],
             if inventory is None and (len(learned) > 1 or any(
                     not compatible_species(nxt, t) for t in learned)):
                 continue
+            before_board = list(board)
+            bench_before = len(bench)
+            remaining_before = pool.remaining[nxt]
+            items_before = list(inventory.finished) if inventory is not None else []
+            teachings_before = dict(inventory.techniques) if inventory is not None else {}
             pool.take(nxt)
             new_piece = make_piece(nxt, templates)
             merged_owned = OwnedPiece(new_piece,
@@ -245,7 +258,31 @@ def try_combine(board: List[OwnedPiece], bench: List[OwnedPiece],
             for o in three:  # 三只的池占用已并入 merged_owned.sources 记账
                 (board if o in board else bench).remove(o)
             bench.append(merged_owned)
+            if changes is not None:
+                import synergy
+                changes.append({'from_sid': sid, 'to_sid': nxt,
+                                'from_name': three[0].piece.name, 'to_name': new_piece.name,
+                                'from_tier': three[0].piece.tier, 'to_tier': new_piece.tier,
+                                'from_count': 3, 'to_remaining': remaining_before - 1,
+                                'board_before': len(before_board), 'board_after': len(board),
+                                'bench_before': bench_before, 'bench_after': len(bench),
+                                'source_uids': [o.uid for o in three], 'result_uid': merged_owned.uid,
+                                'invested': merged_owned.invested,
+                                'inherit_item': merged_owned.item,
+                                'inherit_technique': merged_owned.technique,
+                                'returned_items': (list(inventory.finished[len(items_before):])
+                                                   if inventory is not None else []),
+                                'returned_techniques': {key: n-teachings_before.get(key, 0)
+                                                       for key, n in inventory.techniques.items()
+                                                       if n > teachings_before.get(key, 0)}
+                                                       if inventory is not None else {},
+                                'target_remaining_before': remaining_before,
+                                'population_before': len(before_board), 'population_after': len(board),
+                                'synergies_before': synergy.compute([o.piece for o in before_board]),
+                                'synergies_after': synergy.compute([o.piece for o in board])})
             logs.append(f"3合1:{new_piece.name}(T{new_piece.tier})")
             merged = True
+            break
+        if single:
             break
     return logs

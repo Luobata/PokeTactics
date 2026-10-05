@@ -1,0 +1,376 @@
+{
+  "reason": "tactical-v5-prep",
+  "captured_at": "2026-10-05T02:31:12.595160+00:00",
+  "test_clock": 4.6,
+  "screen": {
+    "ok": true,
+    "device_id": "acb0e47c4c646631",
+    "sid": "9a85e5d1c23b",
+    "screen": {
+      "page": "prep",
+      "title": "准备出发",
+      "rows": [
+        {
+          "label": "商店",
+          "detail": "",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 0
+        },
+        {
+          "label": "棋盘与备战",
+          "detail": "",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 1
+        },
+        {
+          "label": "仓库与教学",
+          "detail": "",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 2
+        },
+        {
+          "label": "羁绊",
+          "detail": "",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 3
+        },
+        {
+          "label": "侦察与排名",
+          "detail": "",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 4
+        }
+      ],
+      "selected": 0,
+      "offset": 0,
+      "total": 7,
+      "footer": [
+        "A 上一项  B 下一项  C 确认",
+        "B 按住返回 · C 按住详情 / 关屏"
+      ],
+      "message": "已保存",
+      "hud": {
+        "hp": 100,
+        "gold": 6,
+        "level": 2,
+        "xp": 0,
+        "xp_next": 6,
+        "pop": 4,
+        "on_board": 1,
+        "streak": 0,
+        "alive": true,
+        "rank": null,
+        "combines": 0,
+        "stone_used": false,
+        "bench_cap": 6,
+        "refresh_cost": 2,
+        "shop_locked": false,
+        "xp_cost": 4
+      },
+      "round": 1,
+      "board": [
+        [
+          null,
+          null,
+          {
+            "sid": 4,
+            "name": "小火龙",
+            "tier": 1,
+            "types": [
+              "火"
+            ],
+            "colors": [
+              "#b84840"
+            ],
+            "ranged": true,
+            "range": 3,
+            "role": "远程输出",
+            "skill_name": "连击",
+            "skill_description": "主命中后追加一次 45% 伤害打击",
+            "move": "喷射火焰",
+            "ability": null,
+            "item": null,
+            "item_name": null,
+            "uid": "u00000029",
+            "technique": null,
+            "item_effect": null,
+            "copies": 1,
+            "sell": 1,
+            "evolution": {
+              "locked": false,
+              "can_lock": true,
+              "can_evolve": false,
+              "detail": "需要三只同形态；可暂缓自动进化保留当前职责",
+              "preview": {
+                "merges": [],
+                "auto_allowed": false,
+                "defer_allowed": false,
+                "detail": "需要三只同形态；可暂缓自动进化保留当前职责",
+                "from_sid": 4,
+                "source_uids": []
+              }
+            }
+          },
+          null,
+          null,
+          null
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      ],
+      "bench": [],
+      "row": null,
+      "ruleset": "tactics_v5",
+      "choices": [
+        {
+          "label": "商店",
+          "detail": "",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 0
+        },
+        {
+          "label": "棋盘与备战",
+          "detail": "",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 1
+        },
+        {
+          "label": "仓库与教学",
+          "detail": "",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 2
+        },
+        {
+          "label": "羁绊",
+          "detail": "",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 3
+        },
+        {
+          "label": "侦察与排名",
+          "detail": "",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 4
+        },
+        {
+          "label": "开战",
+          "detail": "当前上场队伍没有天气特性，沿用本轮基础天气。\n第20轮起，败方至少扣21生命；胜方不掉血，野怪奖励照常。",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 5
+        },
+        {
+          "label": "保存 / 返回主页",
+          "detail": "",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 6
+        }
+      ],
+      "scene": {
+        "opponent": {
+          "name": "2·梭哈型L1",
+          "rows": [
+            [
+              null,
+              null,
+              {
+                "sid": 111,
+                "name": "独角犀牛",
+                "tier": 1,
+                "types": [
+                  "地面",
+                  "岩"
+                ],
+                "colors": [
+                  "#a38b63",
+                  "#a38b63"
+                ],
+                "ranged": false,
+                "range": 1,
+                "role": "近战",
+                "skill_name": "铁壁",
+                "skill_description": "施法后自身获得 3 秒 35% 减伤",
+                "move": "地震",
+                "ability": null,
+                "item": null,
+                "item_name": null
+              },
+              {
+                "sid": 66,
+                "name": "腕力",
+                "tier": 1,
+                "types": [
+                  "格斗"
+                ],
+                "colors": [
+                  "#a56954"
+                ],
+                "ranged": false,
+                "range": 1,
+                "role": "近战",
+                "skill_name": "重击",
+                "skill_description": "命中后将目标击退 1 格，目标身后有空位时生效",
+                "move": "cross_chop",
+                "ability": null,
+                "item": null,
+                "item_name": null
+              },
+              {
+                "sid": 7,
+                "name": "杰尼龟",
+                "tier": 1,
+                "types": [
+                  "水"
+                ],
+                "colors": [
+                  "#688ba3"
+                ],
+                "ranged": true,
+                "range": 3,
+                "role": "远程输出",
+                "skill_name": "连击",
+                "skill_description": "主命中后追加一次 45% 伤害打击",
+                "move": "水炮",
+                "ability": null,
+                "item": null,
+                "item_name": null
+              },
+              {
+                "sid": 120,
+                "name": "海星星",
+                "tier": 1,
+                "types": [
+                  "水"
+                ],
+                "colors": [
+                  "#688ba3"
+                ],
+                "ranged": true,
+                "range": 3,
+                "role": "远程输出",
+                "skill_name": "散射",
+                "skill_description": "命中后再攻击距目标最近的至多 2 名敌人，各 40% 伤害",
+                "move": "水炮",
+                "ability": null,
+                "item": null,
+                "item_name": null
+              }
+            ],
+            [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          ]
+        },
+        "weather": {
+          "key": "",
+          "zh": "无",
+          "note": "天气平静"
+        },
+        "entry_weather": {
+          "you": [],
+          "opponent": [],
+          "conflict": false,
+          "weather": null,
+          "zh": "平静天气",
+          "note": "当前上场队伍没有天气特性，沿用本轮基础天气。"
+        },
+        "synergies": [
+          {
+            "type": "FIRE",
+            "zh": "火",
+            "n": 1,
+            "tier": 0,
+            "next": 2,
+            "need": 1,
+            "color": "#b84840",
+            "effect": ""
+          }
+        ],
+        "loadout_partner": 6,
+        "loadout_mode": "expedition",
+        "tactical": {
+          "guard": null,
+          "weather": null
+        },
+        "pending_rewards": 0,
+        "inventory": {
+          "items": 0,
+          "components": 0,
+          "techniques": 0
+        },
+        "result": {}
+      },
+      "active": {
+        "label": "商店",
+        "detail": "",
+        "subtitle": "",
+        "disabled": false,
+        "portrait": null,
+        "icon": ""
+      },
+      "can_back": true
+    },
+    "sleeping": false,
+    "busy": false,
+    "sequence": 1
+  },
+  "session": {
+    "sid": "9a85e5d1c23b",
+    "ruleset": "tactics_v5",
+    "save_sequence": 1,
+    "gold": 6,
+    "round": 1,
+    "bench_count": 0,
+    "bench": [],
+    "board_count": 1,
+    "board_species": [
+      "小火龙"
+    ]
+  }
+}

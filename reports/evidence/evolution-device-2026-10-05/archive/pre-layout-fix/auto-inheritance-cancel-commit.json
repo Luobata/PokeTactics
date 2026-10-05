@@ -1,0 +1,4119 @@
+{
+  "scenario": "auto-inheritance-cancel-commit",
+  "generated_at": "2026-10-05T02:31:12.905618+00:00",
+  "events": [
+    {
+      "n": 1,
+      "timestamp": "2026-10-05T02:31:12.537514+00:00",
+      "test_clock": 1.2999999999999998,
+      "phase": "state",
+      "key": null,
+      "intent": "open isolated device session",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "home",
+        "selected_index": 0,
+        "selected_label": "启程 · 远征",
+        "message": "A / B 选择，C 确认",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 2,
+      "timestamp": "2026-10-05T02:31:12.537724+00:00",
+      "test_clock": 1.4499999999999997,
+      "phase": "down",
+      "key": "B",
+      "intent": "move selection toward 战术远征",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "home",
+        "selected_index": 0,
+        "selected_label": "启程 · 远征",
+        "message": "A / B 选择，C 确认",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 3,
+      "timestamp": "2026-10-05T02:31:12.537754+00:00",
+      "test_clock": 1.5999999999999996,
+      "phase": "up",
+      "key": "B",
+      "intent": "move selection toward 战术远征",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "home",
+        "selected_index": 1,
+        "selected_label": "战术远征 · 护卫与天气",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 4,
+      "timestamp": "2026-10-05T02:31:12.537774+00:00",
+      "test_clock": 1.7499999999999996,
+      "phase": "down",
+      "key": "C",
+      "intent": "activate 战术远征",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "home",
+        "selected_index": 1,
+        "selected_label": "战术远征 · 护卫与天气",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 5,
+      "timestamp": "2026-10-05T02:31:12.543079+00:00",
+      "test_clock": 1.8999999999999995,
+      "phase": "up",
+      "key": "C",
+      "intent": "activate 战术远征",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "expedition",
+        "selected_index": 0,
+        "selected_label": "主搭档 · 未选择",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 6,
+      "timestamp": "2026-10-05T02:31:12.543113+00:00",
+      "test_clock": 2.0499999999999994,
+      "phase": "down",
+      "key": "C",
+      "intent": "activate 主搭档",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "expedition",
+        "selected_index": 0,
+        "selected_label": "主搭档 · 未选择",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 7,
+      "timestamp": "2026-10-05T02:31:12.543145+00:00",
+      "test_clock": 2.1999999999999993,
+      "phase": "up",
+      "key": "C",
+      "intent": "activate 主搭档",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "loadout",
+        "selected_index": 0,
+        "selected_label": "妙蛙花",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 8,
+      "timestamp": "2026-10-05T02:31:12.543171+00:00",
+      "test_clock": 2.349999999999999,
+      "phase": "down",
+      "key": "B",
+      "intent": "move selection toward 喷火龙",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "loadout",
+        "selected_index": 0,
+        "selected_label": "妙蛙花",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 9,
+      "timestamp": "2026-10-05T02:31:12.543194+00:00",
+      "test_clock": 2.499999999999999,
+      "phase": "up",
+      "key": "B",
+      "intent": "move selection toward 喷火龙",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "loadout",
+        "selected_index": 1,
+        "selected_label": "喷火龙",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 10,
+      "timestamp": "2026-10-05T02:31:12.543213+00:00",
+      "test_clock": 2.649999999999999,
+      "phase": "down",
+      "key": "C",
+      "intent": "activate 喷火龙",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "loadout",
+        "selected_index": 1,
+        "selected_label": "喷火龙",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 11,
+      "timestamp": "2026-10-05T02:31:12.543239+00:00",
+      "test_clock": 2.799999999999999,
+      "phase": "up",
+      "key": "C",
+      "intent": "activate 喷火龙",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "expedition",
+        "selected_index": 0,
+        "selected_label": "主搭档 · 喷火龙",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 12,
+      "timestamp": "2026-10-05T02:31:12.543261+00:00",
+      "test_clock": 2.949999999999999,
+      "phase": "down",
+      "key": "B",
+      "intent": "move selection toward 出发",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "expedition",
+        "selected_index": 0,
+        "selected_label": "主搭档 · 喷火龙",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 13,
+      "timestamp": "2026-10-05T02:31:12.543281+00:00",
+      "test_clock": 3.0999999999999988,
+      "phase": "up",
+      "key": "B",
+      "intent": "move selection toward 出发",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "expedition",
+        "selected_index": 1,
+        "selected_label": "招式机器 · 不携带",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 14,
+      "timestamp": "2026-10-05T02:31:12.543297+00:00",
+      "test_clock": 3.2499999999999987,
+      "phase": "down",
+      "key": "B",
+      "intent": "move selection toward 出发",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "expedition",
+        "selected_index": 1,
+        "selected_label": "招式机器 · 不携带",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 15,
+      "timestamp": "2026-10-05T02:31:12.543317+00:00",
+      "test_clock": 3.3999999999999986,
+      "phase": "up",
+      "key": "B",
+      "intent": "move selection toward 出发",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "expedition",
+        "selected_index": 2,
+        "selected_label": "开局装备 · 不携带",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 16,
+      "timestamp": "2026-10-05T02:31:12.543332+00:00",
+      "test_clock": 3.5499999999999985,
+      "phase": "down",
+      "key": "B",
+      "intent": "move selection toward 出发",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "expedition",
+        "selected_index": 2,
+        "selected_label": "开局装备 · 不携带",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 17,
+      "timestamp": "2026-10-05T02:31:12.543351+00:00",
+      "test_clock": 3.6999999999999984,
+      "phase": "up",
+      "key": "B",
+      "intent": "move selection toward 出发",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "expedition",
+        "selected_index": 3,
+        "selected_label": "出发",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 18,
+      "timestamp": "2026-10-05T02:31:12.543367+00:00",
+      "test_clock": 3.8499999999999983,
+      "phase": "down",
+      "key": "C",
+      "intent": "activate 出发",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "expedition",
+        "selected_index": 3,
+        "selected_label": "出发",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 19,
+      "timestamp": "2026-10-05T02:31:12.543388+00:00",
+      "test_clock": 3.9999999999999982,
+      "phase": "up",
+      "key": "C",
+      "intent": "activate 出发",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "confirm",
+        "selected_index": 0,
+        "selected_label": "取消",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": "战术远征出发"
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 20,
+      "timestamp": "2026-10-05T02:31:12.543404+00:00",
+      "test_clock": 4.149999999999999,
+      "phase": "down",
+      "key": "B",
+      "intent": "move selection toward 确认",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "confirm",
+        "selected_index": 0,
+        "selected_label": "取消",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": "战术远征出发"
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 21,
+      "timestamp": "2026-10-05T02:31:12.543419+00:00",
+      "test_clock": 4.299999999999999,
+      "phase": "up",
+      "key": "B",
+      "intent": "move selection toward 确认",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "confirm",
+        "selected_index": 1,
+        "selected_label": "确认执行",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": "战术远征出发"
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 22,
+      "timestamp": "2026-10-05T02:31:12.543431+00:00",
+      "test_clock": 4.449999999999999,
+      "phase": "down",
+      "key": "C",
+      "intent": "activate 确认",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "screen": {
+        "page": "confirm",
+        "selected_index": 1,
+        "selected_label": "确认执行",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": "战术远征出发"
+      },
+      "result_sequence": null,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 23,
+      "timestamp": "2026-10-05T02:31:12.595145+00:00",
+      "test_clock": 4.6,
+      "phase": "up",
+      "key": "C",
+      "intent": "activate 确认",
+      "before": {
+        "sid": "",
+        "ruleset": null,
+        "save_sequence": null,
+        "gold": null,
+        "round": null,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 0,
+        "board_species": []
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 1,
+        "gold": 6,
+        "round": 1,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "prep",
+        "selected_index": 0,
+        "selected_label": "商店",
+        "message": "已保存",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 1,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 23,
+      "timestamp": "2026-10-05T02:31:12.596491+00:00",
+      "test_clock": 4.6,
+      "note": "saved snapshot auto-inheritance-cancel-commit-01-tactical-v5-prep.json"
+    },
+    {
+      "n": 24,
+      "timestamp": "2026-10-05T02:31:12.626012+00:00",
+      "test_clock": 4.75,
+      "phase": "state",
+      "key": null,
+      "intent": "refresh after evidence shop pin",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 1,
+        "gold": 6,
+        "round": 1,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 2,
+        "gold": 50,
+        "round": 1,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "prep",
+        "selected_index": 0,
+        "selected_label": "商店",
+        "message": "存档已在另一页面更新，请重新选择目标",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 2,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 24,
+      "timestamp": "2026-10-05T02:31:12.626023+00:00",
+      "test_clock": 4.75,
+      "note": "fixture pinned all four shop slots to Squirtle sid=7 in isolated save storage"
+    },
+    {
+      "n": 25,
+      "timestamp": "2026-10-05T02:31:12.628879+00:00",
+      "test_clock": 4.9,
+      "phase": "down",
+      "key": "C",
+      "intent": "activate 商店",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 2,
+        "gold": 50,
+        "round": 1,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 2,
+        "gold": 50,
+        "round": 1,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "prep",
+        "selected_index": 0,
+        "selected_label": "商店",
+        "message": "存档已在另一页面更新，请重新选择目标",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 2,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 26,
+      "timestamp": "2026-10-05T02:31:12.632352+00:00",
+      "test_clock": 5.050000000000001,
+      "phase": "up",
+      "key": "C",
+      "intent": "activate 商店",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 2,
+        "gold": 50,
+        "round": 1,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 2,
+        "gold": 50,
+        "round": 1,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "shop",
+        "selected_index": 0,
+        "selected_label": "杰尼龟",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 2,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 27,
+      "timestamp": "2026-10-05T02:31:12.636764+00:00",
+      "test_clock": 5.200000000000001,
+      "phase": "down",
+      "key": "C",
+      "intent": "activate 杰尼龟",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 2,
+        "gold": 50,
+        "round": 1,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 2,
+        "gold": 50,
+        "round": 1,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "shop",
+        "selected_index": 0,
+        "selected_label": "杰尼龟",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 2,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 28,
+      "timestamp": "2026-10-05T02:31:12.674389+00:00",
+      "test_clock": 5.350000000000001,
+      "phase": "up",
+      "key": "C",
+      "intent": "activate 杰尼龟",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 2,
+        "gold": 50,
+        "round": 1,
+        "bench_count": 0,
+        "bench": [],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 3,
+        "gold": 49,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "prep",
+        "selected_index": 0,
+        "selected_label": "商店",
+        "message": "买入 杰尼龟（-1 金）",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 3,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 29,
+      "timestamp": "2026-10-05T02:31:12.677342+00:00",
+      "test_clock": 5.500000000000002,
+      "phase": "down",
+      "key": "C",
+      "intent": "activate 商店",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 3,
+        "gold": 49,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 3,
+        "gold": 49,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "prep",
+        "selected_index": 0,
+        "selected_label": "商店",
+        "message": "买入 杰尼龟（-1 金）",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 3,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 30,
+      "timestamp": "2026-10-05T02:31:12.680205+00:00",
+      "test_clock": 5.650000000000002,
+      "phase": "up",
+      "key": "C",
+      "intent": "activate 商店",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 3,
+        "gold": 49,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 3,
+        "gold": 49,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "shop",
+        "selected_index": 0,
+        "selected_label": "空货架",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 3,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 31,
+      "timestamp": "2026-10-05T02:31:12.683979+00:00",
+      "test_clock": 5.8000000000000025,
+      "phase": "down",
+      "key": "B",
+      "intent": "move selection toward 杰尼龟",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 3,
+        "gold": 49,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 3,
+        "gold": 49,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "shop",
+        "selected_index": 0,
+        "selected_label": "空货架",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 3,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 32,
+      "timestamp": "2026-10-05T02:31:12.687325+00:00",
+      "test_clock": 5.950000000000003,
+      "phase": "up",
+      "key": "B",
+      "intent": "move selection toward 杰尼龟",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 3,
+        "gold": 49,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 3,
+        "gold": 49,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "shop",
+        "selected_index": 1,
+        "selected_label": "杰尼龟",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 3,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 33,
+      "timestamp": "2026-10-05T02:31:12.690246+00:00",
+      "test_clock": 6.100000000000003,
+      "phase": "down",
+      "key": "C",
+      "intent": "activate 杰尼龟",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 3,
+        "gold": 49,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 3,
+        "gold": 49,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "shop",
+        "selected_index": 1,
+        "selected_label": "杰尼龟",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 3,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 34,
+      "timestamp": "2026-10-05T02:31:12.729767+00:00",
+      "test_clock": 6.2500000000000036,
+      "phase": "up",
+      "key": "C",
+      "intent": "activate 杰尼龟",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 3,
+        "gold": 49,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 4,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "prep",
+        "selected_index": 0,
+        "selected_label": "商店",
+        "message": "买入 杰尼龟（-1 金）",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 4,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 35,
+      "timestamp": "2026-10-05T02:31:12.765697+00:00",
+      "test_clock": 6.400000000000004,
+      "phase": "state",
+      "key": null,
+      "intent": "refresh after attaching inherited item and technique",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 4,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "prep",
+        "selected_index": 0,
+        "selected_label": "商店",
+        "message": "存档已在另一页面更新，请重新选择目标",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 35,
+      "timestamp": "2026-10-05T02:31:12.767025+00:00",
+      "test_clock": 6.400000000000004,
+      "note": "saved snapshot auto-inheritance-cancel-commit-02-two-materials-before-preview.json"
+    },
+    {
+      "n": 36,
+      "timestamp": "2026-10-05T02:31:12.770483+00:00",
+      "test_clock": 6.550000000000004,
+      "phase": "down",
+      "key": "C",
+      "intent": "activate 商店",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "prep",
+        "selected_index": 0,
+        "selected_label": "商店",
+        "message": "存档已在另一页面更新，请重新选择目标",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 37,
+      "timestamp": "2026-10-05T02:31:12.773646+00:00",
+      "test_clock": 6.700000000000005,
+      "phase": "up",
+      "key": "C",
+      "intent": "activate 商店",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "shop",
+        "selected_index": 0,
+        "selected_label": "空货架",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 38,
+      "timestamp": "2026-10-05T02:31:12.776759+00:00",
+      "test_clock": 6.850000000000005,
+      "phase": "down",
+      "key": "B",
+      "intent": "move selection toward 杰尼龟",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "shop",
+        "selected_index": 0,
+        "selected_label": "空货架",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 39,
+      "timestamp": "2026-10-05T02:31:12.780136+00:00",
+      "test_clock": 7.000000000000005,
+      "phase": "up",
+      "key": "B",
+      "intent": "move selection toward 杰尼龟",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "shop",
+        "selected_index": 1,
+        "selected_label": "空货架",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 40,
+      "timestamp": "2026-10-05T02:31:12.783772+00:00",
+      "test_clock": 7.150000000000006,
+      "phase": "down",
+      "key": "B",
+      "intent": "move selection toward 杰尼龟",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "shop",
+        "selected_index": 1,
+        "selected_label": "空货架",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 41,
+      "timestamp": "2026-10-05T02:31:12.787301+00:00",
+      "test_clock": 7.300000000000006,
+      "phase": "up",
+      "key": "B",
+      "intent": "move selection toward 杰尼龟",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "shop",
+        "selected_index": 2,
+        "selected_label": "杰尼龟",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 1,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 42,
+      "timestamp": "2026-10-05T02:31:12.791075+00:00",
+      "test_clock": 7.450000000000006,
+      "phase": "down",
+      "key": "C",
+      "intent": "open buy evolution preview",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "shop",
+        "selected_index": 2,
+        "selected_label": "杰尼龟",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 1,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 43,
+      "timestamp": "2026-10-05T02:31:12.794725+00:00",
+      "test_clock": 7.600000000000007,
+      "phase": "up",
+      "key": "C",
+      "intent": "open buy evolution preview",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "evolution_buy",
+        "selected_index": 0,
+        "selected_label": "本次三合一预览",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 1,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 43,
+      "timestamp": "2026-10-05T02:31:12.797041+00:00",
+      "test_clock": 7.600000000000007,
+      "note": "saved snapshot auto-inheritance-cancel-commit-03-buy-evolution-preview.json"
+    },
+    {
+      "n": 44,
+      "timestamp": "2026-10-05T02:31:12.800774+00:00",
+      "test_clock": 7.750000000000007,
+      "phase": "down",
+      "key": "C",
+      "intent": "read full evolution preview: down",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "evolution_buy",
+        "selected_index": 0,
+        "selected_label": "本次三合一预览",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 1,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 45,
+      "timestamp": "2026-10-05T02:31:12.804068+00:00",
+      "test_clock": 8.450000000000008,
+      "phase": "tick",
+      "key": null,
+      "intent": "read full evolution preview: held past threshold",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "detail",
+        "selected_index": 0,
+        "selected_label": null,
+        "message": "",
+        "detail_page": 1,
+        "detail_total": 2,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 46,
+      "timestamp": "2026-10-05T02:31:12.807269+00:00",
+      "test_clock": 8.600000000000009,
+      "phase": "up",
+      "key": "C",
+      "intent": "read full evolution preview: release",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "detail",
+        "selected_index": 0,
+        "selected_label": null,
+        "message": "",
+        "detail_page": 1,
+        "detail_total": 2,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 46,
+      "timestamp": "2026-10-05T02:31:12.808594+00:00",
+      "test_clock": 8.600000000000009,
+      "note": "saved snapshot auto-inheritance-cancel-commit-04-buy-evolution-full-detail.json"
+    },
+    {
+      "n": 47,
+      "timestamp": "2026-10-05T02:31:12.811774+00:00",
+      "test_clock": 8.750000000000009,
+      "phase": "down",
+      "key": "C",
+      "intent": "leave full detail back to preview",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "detail",
+        "selected_index": 0,
+        "selected_label": null,
+        "message": "",
+        "detail_page": 1,
+        "detail_total": 2,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 48,
+      "timestamp": "2026-10-05T02:31:12.814851+00:00",
+      "test_clock": 8.90000000000001,
+      "phase": "up",
+      "key": "C",
+      "intent": "leave full detail back to preview",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "evolution_buy",
+        "selected_index": 0,
+        "selected_label": "本次三合一预览",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 1,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 49,
+      "timestamp": "2026-10-05T02:31:12.817891+00:00",
+      "test_clock": 9.05000000000001,
+      "phase": "down",
+      "key": "B",
+      "intent": "move selection toward 购买并进化",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "evolution_buy",
+        "selected_index": 0,
+        "selected_label": "本次三合一预览",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 1,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 50,
+      "timestamp": "2026-10-05T02:31:12.821220+00:00",
+      "test_clock": 9.20000000000001,
+      "phase": "up",
+      "key": "B",
+      "intent": "move selection toward 购买并进化",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "evolution_buy",
+        "selected_index": 1,
+        "selected_label": "购买并进化",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 1,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 51,
+      "timestamp": "2026-10-05T02:31:12.824316+00:00",
+      "test_clock": 9.35000000000001,
+      "phase": "down",
+      "key": "C",
+      "intent": "open automatic evolution confirmation",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "evolution_buy",
+        "selected_index": 1,
+        "selected_label": "购买并进化",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 1,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 52,
+      "timestamp": "2026-10-05T02:31:12.827408+00:00",
+      "test_clock": 9.50000000000001,
+      "phase": "up",
+      "key": "C",
+      "intent": "open automatic evolution confirmation",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "confirm",
+        "selected_index": 0,
+        "selected_label": "取消",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": "购买 杰尼龟 并按预览进化"
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 52,
+      "timestamp": "2026-10-05T02:31:12.828597+00:00",
+      "test_clock": 9.50000000000001,
+      "note": "saved snapshot auto-inheritance-cancel-commit-05-auto-confirm-default-cancel.json"
+    },
+    {
+      "n": 53,
+      "timestamp": "2026-10-05T02:31:12.832524+00:00",
+      "test_clock": 9.650000000000011,
+      "phase": "down",
+      "key": "C",
+      "intent": "physically release default cancel",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "confirm",
+        "selected_index": 0,
+        "selected_label": "取消",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": "购买 杰尼龟 并按预览进化"
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 54,
+      "timestamp": "2026-10-05T02:31:12.835973+00:00",
+      "test_clock": 9.800000000000011,
+      "phase": "up",
+      "key": "C",
+      "intent": "physically release default cancel",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "evolution_buy",
+        "selected_index": 1,
+        "selected_label": "购买并进化",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 1,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 54,
+      "timestamp": "2026-10-05T02:31:12.838053+00:00",
+      "test_clock": 9.800000000000011,
+      "note": "saved snapshot auto-inheritance-cancel-commit-06-auto-cancel-zero-resource-change.json"
+    },
+    {
+      "n": 55,
+      "timestamp": "2026-10-05T02:31:12.841610+00:00",
+      "test_clock": 9.950000000000012,
+      "phase": "down",
+      "key": "C",
+      "intent": "activate 购买并进化",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "evolution_buy",
+        "selected_index": 1,
+        "selected_label": "购买并进化",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 1,
+        "confirm_prompt": null
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 56,
+      "timestamp": "2026-10-05T02:31:12.844674+00:00",
+      "test_clock": 10.100000000000012,
+      "phase": "up",
+      "key": "C",
+      "intent": "activate 购买并进化",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "confirm",
+        "selected_index": 0,
+        "selected_label": "取消",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": "购买 杰尼龟 并按预览进化"
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 57,
+      "timestamp": "2026-10-05T02:31:12.847723+00:00",
+      "test_clock": 10.250000000000012,
+      "phase": "down",
+      "key": "B",
+      "intent": "move selection toward 确认",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "confirm",
+        "selected_index": 0,
+        "selected_label": "取消",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": "购买 杰尼龟 并按预览进化"
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 58,
+      "timestamp": "2026-10-05T02:31:12.851086+00:00",
+      "test_clock": 10.400000000000013,
+      "phase": "up",
+      "key": "B",
+      "intent": "move selection toward 确认",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "confirm",
+        "selected_index": 1,
+        "selected_label": "确认执行",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": "购买 杰尼龟 并按预览进化"
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 59,
+      "timestamp": "2026-10-05T02:31:12.854252+00:00",
+      "test_clock": 10.550000000000013,
+      "phase": "down",
+      "key": "C",
+      "intent": "commit buy and automatic evolution",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "confirm",
+        "selected_index": 1,
+        "selected_label": "确认执行",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": "购买 杰尼龟 并按预览进化"
+      },
+      "result_sequence": 5,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 60,
+      "timestamp": "2026-10-05T02:31:12.897257+00:00",
+      "test_clock": 10.700000000000014,
+      "phase": "up",
+      "key": "C",
+      "intent": "commit buy and automatic evolution",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 5,
+        "gold": 48,
+        "round": 1,
+        "bench_count": 2,
+        "bench": [
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          },
+          {
+            "name": "杰尼龟",
+            "sid": 7,
+            "uid": "u00000031",
+            "item": null,
+            "technique": null,
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 6,
+        "gold": 47,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "卡咪龟",
+            "sid": 8,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "prep",
+        "selected_index": 0,
+        "selected_label": "商店",
+        "message": "买入 杰尼龟（-1 金）；3合1:卡咪龟(T2)",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 6,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 60,
+      "timestamp": "2026-10-05T02:31:12.898496+00:00",
+      "test_clock": 10.700000000000014,
+      "note": "saved snapshot auto-inheritance-cancel-commit-07-auto-evolution-committed.json"
+    },
+    {
+      "n": 61,
+      "timestamp": "2026-10-05T02:31:12.900611+00:00",
+      "test_clock": 10.850000000000014,
+      "phase": "down",
+      "key": "C",
+      "intent": "begin duplicate release attempt",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 6,
+        "gold": 47,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "卡咪龟",
+            "sid": 8,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 6,
+        "gold": 47,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "卡咪龟",
+            "sid": 8,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "prep",
+        "selected_index": 0,
+        "selected_label": "商店",
+        "message": "买入 杰尼龟（-1 金）；3合1:卡咪龟(T2)",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 6,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 62,
+      "timestamp": "2026-10-05T02:31:12.902476+00:00",
+      "test_clock": 11.000000000000014,
+      "phase": "up",
+      "key": "C",
+      "intent": "duplicate release must not commit",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 6,
+        "gold": 47,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "卡咪龟",
+            "sid": 8,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 6,
+        "gold": 47,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "卡咪龟",
+            "sid": 8,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "shop",
+        "selected_index": 0,
+        "selected_label": "空货架",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 6,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 63,
+      "timestamp": "2026-10-05T02:31:12.904392+00:00",
+      "test_clock": 11.150000000000015,
+      "phase": "tick",
+      "key": null,
+      "intent": "post-duplicate idle tick",
+      "before": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 6,
+        "gold": 47,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "卡咪龟",
+            "sid": 8,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "after": {
+        "sid": "9a85e5d1c23b",
+        "ruleset": "tactics_v5",
+        "save_sequence": 6,
+        "gold": 47,
+        "round": 1,
+        "bench_count": 1,
+        "bench": [
+          {
+            "name": "卡咪龟",
+            "sid": 8,
+            "uid": "u00000030",
+            "item": "leftovers",
+            "technique": "surf",
+            "evolution_locked": false,
+            "can_evolve": false
+          }
+        ],
+        "board_count": 1,
+        "board_species": [
+          "小火龙"
+        ]
+      },
+      "screen": {
+        "page": "shop",
+        "selected_index": 0,
+        "selected_label": "空货架",
+        "message": "",
+        "detail_page": null,
+        "detail_total": null,
+        "merge_count": 0,
+        "confirm_prompt": null
+      },
+      "result_sequence": 6,
+      "sleeping": false,
+      "busy": false
+    },
+    {
+      "n": 63,
+      "timestamp": "2026-10-05T02:31:12.905601+00:00",
+      "test_clock": 11.150000000000015,
+      "note": "saved snapshot auto-inheritance-cancel-commit-08-duplicate-release-safe.json"
+    }
+  ],
+  "snapshots": [
+    "auto-inheritance-cancel-commit-01-tactical-v5-prep.json",
+    "auto-inheritance-cancel-commit-02-two-materials-before-preview.json",
+    "auto-inheritance-cancel-commit-03-buy-evolution-preview.json",
+    "auto-inheritance-cancel-commit-04-buy-evolution-full-detail.json",
+    "auto-inheritance-cancel-commit-05-auto-confirm-default-cancel.json",
+    "auto-inheritance-cancel-commit-06-auto-cancel-zero-resource-change.json",
+    "auto-inheritance-cancel-commit-07-auto-evolution-committed.json",
+    "auto-inheritance-cancel-commit-08-duplicate-release-safe.json"
+  ]
+}

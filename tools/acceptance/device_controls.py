@@ -32,12 +32,14 @@ def owned_rows(state):
 def piece_detail(piece):
     learned = piece.get("technique") or {}
     ability = piece.get("ability") or {}
+    evolution = piece.get("evolution") or {}
     return "\n".join(filter(None, [piece.get("name"), piece.get("role"),
         " / ".join(piece.get("types", [])), f"射程 {piece.get('range', 1)} · {piece.get('tier', 1)} 金",
         piece.get("skill_name"), piece.get("skill_description"),
         f"装备：{piece.get('item_name') or '无'}", piece.get("item_effect"), f"已学：{learned.get('name', '无')}",
         learned.get("description"),
-        f"特性：{ability['name']}" if ability else None, ability.get("description")]))
+        f"特性：{ability['name']}" if ability else None, ability.get("description"),
+        f"进化：{evolution['detail']}" if evolution.get("detail") else None]))
 
 
 @dataclass
@@ -109,6 +111,16 @@ class Device:
         from tactics import enabled
         return enabled(self.state.get("ruleset", "base_v1"))
 
+    def _is_evolution_ui(self):
+        return self.state.get("ruleset") == "tactics_v5"
+
+    def _shop_evolution_preview(self, slot):
+        try:
+            piece = self.state.get("shop", [])[slot]
+        except (IndexError, TypeError):
+            return None
+        return (piece or {}).get("evolution_preview") if isinstance(piece, dict) else None
+
     def _validate_learning(self, species, technique):
         from techniques import validate_learning
         return validate_learning(species, technique, ruleset=self.state.get("ruleset", "base_v1"))
@@ -151,7 +163,7 @@ class Device:
                         self._go(self._base(), now, replace=True)
                         self.message = "目标棋子已变化，请重新选择"
                         return
-                    if command in ("learn", "set_guard", "set_weather"):
+                    if command in ("learn", "set_guard", "set_weather", "evolve", "set_evolution_lock"):
                         params["uid"] = uid
                     else:
                         params["from" if command == "move" else "loc"] = found[0]
@@ -166,7 +178,7 @@ class Device:
             self.message = result.get("error", "操作未完成")
             if result.get("recovery_sid"):
                 self.sid = result["recovery_sid"]
-            if command in ("claim_reward", "set_guard", "set_weather", "learn"):
+            if command in ("claim_reward", "set_guard", "set_weather", "learn", "evolve", "set_evolution_lock"):
                 # A rejected command must not leave an apparently valid target
                 # in a confirmation dialog. The next attempt starts from truth.
                 self._refresh(now)
@@ -242,9 +254,16 @@ class Device:
                         (state.get("pacing") or {}).get("note")]))),
                     row("保存 / 返回主页", "open", page="system")]
         if page == "shop":
-            entries = [row(p["name"] if p else "空货架", "buy", subtitle=f"{p.get('price', p['tier'])} 金" if p else "已售出",
-                           detail=piece_detail(p) if p else "", portrait=p, disabled=not p, i=i)
-                       for i, p in enumerate(state.get("shop", []))]
+            entries = []
+            for i, p in enumerate(state.get("shop", [])):
+                preview = (p or {}).get("evolution_preview") or {}
+                detail = piece_detail(p) if p else ""
+                if preview.get("detail"):
+                    detail = "\n".join(filter(None, [detail, preview["detail"]]))
+                entries.append(row(p["name"] if p else "空货架", "buy",
+                                   subtitle=(f"{p.get('price', p['tier'])} 金 · 三合一预览" if p and preview.get("merges") else
+                                      (f"{p.get('price', p['tier'])} 金" if p else "已售出")),
+                                   detail=detail, portrait=p, disabled=not p, i=i))
             return entries + [row(f"刷新 · {you.get('refresh_cost', 2)} 金", "command", command="refresh"),
                               row("解除锁定" if you.get("shop_locked") else "锁定商店", "command", command="lock"),
                               row(f"购买经验 · {you.get('xp_cost', 4)} 金", "command", command="levelup")]
@@ -264,13 +283,54 @@ class Device:
             if not found:
                 return [row("棋子已变化，请返回", "back")]
             piece = found[1]
-            return [row("移动 / 交换", "move_piece", uid=ctx["uid"]),
+            entries = [row("移动 / 交换", "move_piece", uid=ctx["uid"]),
                     row("装备道具", "equip_piece", uid=ctx["uid"]),
                     row("卸下装备", "command", command="unequip", uid=ctx["uid"], disabled=not piece.get("item")),
                     row("学习招式", "learn_piece", uid=ctx["uid"]),
-                    row(f"卖出 · +{piece.get('sell', 1)} 金", "sell_confirm", uid=ctx["uid"], name=piece["name"]),
-                    row("战术配置" if self._is_tactical() else "查看详情",
-                        "piece_tactics" if self._is_tactical() else "show_detail", uid=ctx["uid"], detail=piece_detail(piece))]
+                    row(f"卖出 · +{piece.get('sell', 1)} 金", "sell_confirm", uid=ctx["uid"], name=piece["name"])]
+            evolution = piece.get("evolution") or {}
+            if self._is_evolution_ui() and evolution:
+                can_evolve = bool(evolution.get("can_evolve"))
+                entries.append(row("进化预览" if can_evolve else "形态状态",
+                                   "piece_evolution" if can_evolve else "show_detail", uid=ctx["uid"],
+                                   subtitle=evolution.get("detail", ""), detail=piece_detail(piece), icon="dex"))
+                if evolution.get("can_lock"):
+                    locked = bool(evolution.get("locked"))
+                    entries.append(row("解除形态锁定" if locked else "锁定当前形态",
+                                       "evolution_lock_confirm", uid=ctx["uid"],
+                                       subtitle="仅改变锁，不触发合成" if locked else "锁定后不会自动三合一",
+                                       detail=piece_detail(piece), icon="guard"))
+            entries.append(row("战术配置" if self._is_tactical() else "查看详情",
+                               "piece_tactics" if self._is_tactical() else "show_detail", uid=ctx["uid"], detail=piece_detail(piece)))
+            return entries
+        if page == "evolution_buy":
+            preview = self._shop_evolution_preview(ctx.get("slot", -1)) or {}
+            if not preview.get("merges"):
+                return [row("预览已变化，请返回", "back", detail=preview.get("detail", ""))]
+            detail = preview.get("detail", "")
+            return [row("本次三合一预览", "show_detail", subtitle="长按 C 查看完整代价", detail=detail, icon="dex"),
+                    row("购买并进化", "evolution_buy_confirm", evolution="auto", icon="battle",
+                        disabled=not preview.get("auto_allowed", True),
+                        subtitle="按当前预览自动完成连锁合成" if preview.get("auto_allowed", True) else "当前不能自动合成",
+                        detail=detail),
+                    row("购买并暂缓", "evolution_buy_confirm", evolution="defer", icon="guard",
+                        disabled=not preview.get("defer_allowed", False),
+                        subtitle="保留三只并锁定同名实例" if preview.get("defer_allowed", False) else "备战席不足，无法保留三只",
+                        detail=detail),
+                    row("取消购买", "back", icon="back")]
+        if page == "evolution_piece":
+            found = self._find_uid(ctx.get("uid"))
+            if not found:
+                return [row("棋子已变化，请返回", "back")]
+            evolution = found[1].get("evolution") or {}
+            preview = evolution.get("preview") or {}
+            detail = "\n".join(filter(None, [preview.get("detail", ""), evolution.get("detail", "")]))
+            if not evolution.get("can_evolve") or not preview.get("merges"):
+                return [row("当前不能进化，请返回", "show_detail", detail=detail)]
+            return [row("本次进化预览", "show_detail", subtitle="长按 C 查看完整代价", detail=detail, icon="dex"),
+                    row("确认进化", "evolution_piece_confirm", uid=ctx["uid"], icon="battle",
+                        detail=detail, subtitle="只执行这一步，不递归合成"),
+                    row("暂缓 / 返回", "back", icon="back", detail=detail)]
         if page == "piece_tactics":
             found = self._find_uid(ctx.get("uid"))
             if not found:
@@ -450,6 +510,10 @@ class Device:
             mode = self.context.get("mode", "expedition")
             self._confirm("战术远征出发" if mode == "tactics" else "远征出发", "new", now, mode=mode, **self.loadout)
         elif action == "buy":
+            preview = self._shop_evolution_preview(data.get("i", -1)) or {}
+            if self._is_evolution_ui() and preview.get("merges"):
+                self._go("evolution_buy", now, slot=data["i"])
+                return
             self._commit("buy", now, **data)
         elif action == "command":
             command = data.pop("command")
@@ -469,6 +533,43 @@ class Device:
             self._go("piece", now, **data)
         elif action == "piece_tactics":
             self._go("piece_tactics", now, uid=data["uid"])
+        elif action == "piece_evolution":
+            self._go("evolution_piece", now, uid=data["uid"])
+        elif action == "evolution_buy_confirm":
+            preview = self._shop_evolution_preview(self.context.get("slot", -1)) or {}
+            if not preview.get("merges"):
+                self.message = "商店或预览已变化，请重新选择"
+                self._go(self._base(), now, replace=True)
+                return
+            piece = self.state.get("shop", [])[self.context["slot"]]
+            if data["evolution"] == "defer":
+                if not preview.get("defer_allowed", False):
+                    self.message = "备战席不足，无法暂缓"
+                    return
+                self._confirm(f"购买 {piece['name']} 并暂缓进化；同名实例全部锁定", "buy", now,
+                              i=self.context["slot"], evolution="defer")
+            else:
+                if not preview.get("auto_allowed", True):
+                    self.message = "当前不能自动进化"
+                    return
+                self._confirm(f"购买 {piece['name']} 并按预览进化", "buy", now,
+                              i=self.context["slot"], evolution="auto")
+        elif action == "evolution_piece_confirm":
+            found = self._find_uid(data.get("uid"))
+            if not found or not ((found[1].get("evolution") or {}).get("can_evolve")):
+                self.message = "目标棋子已变化，请重新选择"
+                return
+            self._confirm(f"{found[1]['name']} 进化；只执行这一步", "evolve", now, uid=data["uid"])
+        elif action == "evolution_lock_confirm":
+            found = self._find_uid(data.get("uid"))
+            if not found or not ((found[1].get("evolution") or {}).get("can_lock")):
+                self.message = "目标棋子不支持形态锁定"
+                return
+            evolution = found[1]["evolution"]
+            locked = bool(evolution.get("locked"))
+            label = "解除形态锁定；不会触发进化" if locked else "锁定当前形态；不会自动三合一"
+            self._confirm(label, "set_evolution_lock", now, uid=data["uid"],
+                          locked="0" if locked else "1")
         elif action == "guard_choose":
             self._go("guard_targets", now, uid=data["uid"])
         elif action == "guard_target":
@@ -587,7 +688,9 @@ class Device:
                   "scout": "对手情报", "standings": "训练家排名", "over": "旅程完结", "result": "战后结算",
                   "spectate": "观战席", "battle": "战斗回放", "system": "旅途菜单", "drops": "已收取物资",
                   "challenges": "挑战记录", "dex": "宝可梦图鉴", "loadout": "选择行囊", "confirm": "请确认"}
-        titles.update(piece_tactics="棋盘 · 战术分工", guard_targets="护卫 · 选择队友", rewards="待领补给", reward_options="教学补给 · 三选一")
+        titles.update(piece_tactics="棋盘 · 战术分工", guard_targets="护卫 · 选择队友", rewards="待领补给",
+                      reward_options="教学补给 · 三选一", evolution_buy="三合一 · 购买预览",
+                      evolution_piece="三合一 · 进化预览")
         if self.page == "expedition" and self.context.get("mode") == "tactics":
             titles["expedition"] = "战术远征行囊"
         entries = self.rows()
@@ -605,7 +708,7 @@ class Device:
                   "ruleset": self.state.get("ruleset", "base_v1")}
         # Presentation data only. The client draws the saved formation, but every
         # action, target UID and confirmation remains owned by this controller.
-        if self.page in ("prep", "shop", "board_rows", "board_columns", "move_rows", "move_columns", "piece", "piece_tactics", "guard_targets", "reward_options"):
+        if self.page in ("prep", "shop", "board_rows", "board_columns", "move_rows", "move_columns", "piece", "piece_tactics", "guard_targets", "reward_options", "evolution_buy", "evolution_piece"):
             screen["choices"] = [{k: v for k, v in entry.items() if k not in ("action", "data")} | {"index": i}
                                  for i, entry in enumerate(entries)]
         opponent = self.state.get("opponent") or {}
@@ -629,6 +732,19 @@ class Device:
         focused = self._find_uid(focus_uid) if focus_uid else None
         if focused:
             screen["focus"] = {"loc": focused[0], "piece": focused[1]}
+        if self.page == "shop" and entries:
+            active = entries[self.selected]
+            preview = self._shop_evolution_preview(active.get("data", {}).get("i", -1))
+            if preview:
+                screen["evolution_preview"] = preview
+        if self.page == "evolution_buy":
+            preview = self._shop_evolution_preview(self.context.get("slot", -1))
+            if preview:
+                screen["evolution_preview"] = preview
+        if self.page == "evolution_piece" and focused:
+            preview = ((focused[1].get("evolution") or {}).get("preview"))
+            if preview:
+                screen["evolution_preview"] = preview
         if self.page == "guard_targets" and entries:
             candidate = entries[self.selected]
             if candidate.get("portrait"):

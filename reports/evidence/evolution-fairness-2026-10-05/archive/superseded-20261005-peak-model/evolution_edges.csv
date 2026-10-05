@@ -1,0 +1,48 @@
+changed_dimensions,changes_tier,has_non_tier_role_change,kind,population_delta,source_name,source_sid,target_name,target_sid
+['tier'],True,False,three_into_one,-2,妙蛙种子,1,妙蛙草,2
+['tier'],True,False,three_into_one,-2,妙蛙草,2,妙蛙花,3
+['tier'],True,False,three_into_one,-2,小火龙,4,火恐龙,5
+"['tier', 'types']",True,True,three_into_one,-2,火恐龙,5,喷火龙,6
+['tier'],True,False,three_into_one,-2,杰尼龟,7,卡咪龟,8
+['tier'],True,False,three_into_one,-2,卡咪龟,8,水箭龟,9
+['range'],False,True,three_into_one,-2,绿毛虫,10,铁甲蛹,11
+"['move_effect', 'move_power', 'move_type', 'tier', 'types']",True,True,three_into_one,-2,铁甲蛹,11,巴大蝶,12
+[],False,False,three_into_one,-2,独角虫,13,铁壳蛹,14
+"['move_effect', 'move_power', 'move_type', 'tier']",True,True,three_into_one,-2,铁壳蛹,14,大针蜂,15
+[],False,False,three_into_one,-2,波波,16,比比鸟,17
+['tier'],True,False,three_into_one,-2,比比鸟,17,大比鸟,18
+['tier'],True,False,three_into_one,-2,小拉达,19,拉达,20
+['tier'],True,False,three_into_one,-2,烈雀,21,大嘴雀,22
+['tier'],True,False,three_into_one,-2,皮卡丘,25,雷丘,26
+['tier'],True,False,three_into_one,-2,尼多兰,29,尼多娜,30
+['types'],False,True,three_into_one,-2,尼多娜,30,尼多后,31
+['tier'],True,False,three_into_one,-2,尼多朗,32,尼多力诺,33
+['types'],False,True,three_into_one,-2,尼多力诺,33,尼多王,34
+"['ability', 'tier']",True,True,three_into_one,-2,六尾,37,九尾,38
+['tier'],True,False,three_into_one,-2,超音蝠,41,大嘴蝠,42
+['tier'],True,False,three_into_one,-2,走路草,43,臭臭花,44
+[],False,False,three_into_one,-2,臭臭花,44,霸王花,45
+['tier'],True,False,three_into_one,-2,可达鸭,54,哥达鸭,55
+['tier'],True,False,three_into_one,-2,猴怪,56,火暴猴,57
+['tier'],True,False,three_into_one,-2,卡蒂狗,58,风速狗,59
+['tier'],True,False,three_into_one,-2,蚊香蝌蚪,60,蚊香君,61
+"['tier', 'types']",True,True,three_into_one,-2,蚊香君,61,蚊香泳士,62
+"['move_effect', 'move_power', 'move_type', 'tier']",True,True,three_into_one,-2,凯西,63,勇基拉,64
+[],False,False,evo_stone,0,勇基拉,64,胡地,65
+['tier'],True,False,three_into_one,-2,腕力,66,豪力,67
+['tier'],True,False,evo_stone,0,豪力,67,怪力,68
+['tier'],True,False,three_into_one,-2,喇叭芽,69,口呆花,70
+[],False,False,three_into_one,-2,口呆花,70,大食花,71
+['tier'],True,False,three_into_one,-2,小拳石,74,隆隆石,75
+[],False,False,three_into_one,-2,隆隆石,75,隆隆岩,76
+"['range', 'tier']",True,True,three_into_one,-2,呆呆兽,79,呆壳兽,80
+['tier'],True,False,three_into_one,-2,小磁怪,81,三合一磁怪,82
+['tier'],True,False,three_into_one,-2,鬼斯,92,鬼斯通,93
+['tier'],True,False,evo_stone,0,鬼斯通,93,耿鬼,94
+['tier'],True,False,three_into_one,-2,独角犀牛,111,钻角犀兽,112
+['tier'],True,False,three_into_one,-2,墨海马,116,海刺龙,117
+"['tier', 'types']",True,True,three_into_one,-2,海星星,120,宝石海星,121
+"['move_power', 'move_type', 'range', 'tier', 'types']",True,True,three_into_one,-2,鲤鱼王,129,暴鲤龙,130
+"['move_effect', 'move_power', 'move_type', 'range', 'tier', 'types']",True,True,three_into_one,-2,伊布,133,水伊布,134
+['tier'],True,False,three_into_one,-2,迷你龙,147,哈克龙,148
+"['tier', 'types']",True,True,three_into_one,-2,哈克龙,148,快龙,149

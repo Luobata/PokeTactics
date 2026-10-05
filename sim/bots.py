@@ -577,7 +577,7 @@ class Bot:
             self.bench.append(owned)
             self.combines += len(try_combine(
                 self.board, self.bench, self.pool, self.templates,
-                self.inventory))
+                self.inventory, respect_locks=tactics.evolution_choices_enabled(self.inventory.ruleset)))
             bought = True
         return bought
 

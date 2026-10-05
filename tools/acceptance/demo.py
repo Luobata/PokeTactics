@@ -60,6 +60,7 @@ import abilities as abilities_mod  # noqa: E402
 import pacing
 import rng as rng_mod  # noqa: E402
 import shop as shop_mod  # noqa: E402
+from data import pokedex  # noqa: E402
 import synergy as syn_mod  # noqa: E402
 import weather as weather_mod  # noqa: E402
 from bots import LINEUP, Bot, assign_personalities  # noqa: E402
@@ -565,7 +566,7 @@ class Session:
         pos_map = {id(o): pos for pos, o in p.grid.items()}
         board_list = list(p.board)
         logs = try_combine(board_list, p.bench, self.pool, self.templates,
-                           p.inventory)
+                           p.inventory, respect_locks=tactics_mod.evolution_choices_enabled(self.ruleset))
         if logs:
             p.combines += len(logs)
             p.grid = {pos_map[id(o)]: o for o in board_list if id(o) in pos_map}
@@ -1140,6 +1141,95 @@ def _entry_weather_view(sess):
             'weather': result, 'zh': label, 'note': note}
 
 
+def _evolution_preview(sess, *, uid=None, shop_index=None):
+    """Read-only rehearsal of the real combine operation, including recursive buys."""
+    p = sess.player
+    plan = {'merges': [], 'auto_allowed': False, 'defer_allowed': False,
+            'detail': '', 'from_sid': None, 'source_uids': []}
+    board, bench, pool, inventory = copy.deepcopy((p.board, p.bench, sess.pool, p.inventory))
+    if shop_index is not None:
+        sid = p.shop.slots[shop_index]
+        if sid is None:
+            plan['detail'] = '商店格为空'
+            return plan
+        bought = shop_mod.OwnedPiece(sess.templates[sid], sess.templates[sid].tier)
+        bought.uid = f'u{sess.next_unit_id:08d}'
+        bench.append(bought)
+        affordable = p.gold >= bought.invested
+        eligible = pokedex().next_evolution(sid) is not None and sid not in shop_mod.TRADE_EVOLUTIONS
+        plan['defer_allowed'] = eligible and affordable and len(bench) <= BENCH_CAP
+        try_combine(board, bench, pool, sess.templates, inventory,
+                    respect_locks=True, changes=plan['merges'])
+        plan['auto_allowed'] = affordable and len(bench) <= BENCH_CAP
+        if not affordable:
+            plan['detail'] = '金币不足'
+        elif not plan['auto_allowed']:
+            plan['detail'] = '购买后备战席超过六格'
+        elif not plan['merges']:
+            plan['detail'] = '购买后没有自动进化；暂缓的实例不会被消耗'
+    else:
+        owned = next((o for o in board + bench if o.uid == uid), None)
+        if owned is None:
+            plan['detail'] = '棋子已移动、合成或卖出，请重新选择'
+            return plan
+        sid = owned.piece.species_id
+        plan['from_sid'] = sid
+        if sid in shop_mod.TRADE_EVOLUTIONS:
+            plan['detail'] = '此形态只通过通信石进化；同名卡不会三合一'
+            return plan
+        if pokedex().next_evolution(sid) is None:
+            plan['detail'] = '此形态已无后续关都进化；同名卡可独立上场或卖出，当前没有升星或训练'
+            return plan
+        others = [o for o in board + bench if o.piece.species_id == sid and o.uid != uid]
+        if len(others) < 2:
+            plan['detail'] = '需要三只同形态；可暂缓自动进化保留当前职责'
+            return plan
+        plan['source_uids'] = [uid] + [o.uid for o in others[:2]]
+        try_combine(board, bench, pool, sess.templates, inventory, only_species=sid,
+                    single=True, selected_uids=plan['source_uids'], changes=plan['merges'])
+        plan['auto_allowed'] = len(plan['merges']) == 1 and len(bench) <= BENCH_CAP
+        if not plan['merges']:
+            plan['detail'] = '共享池里目标形态已售罄；保留当前三只'
+        elif not plan['auto_allowed']:
+            plan['detail'] = '产物需要一格备战席；先空出位置'
+    for merge in plan['merges']:
+        source = _piece_view(sess.templates[merge['from_sid']], ruleset=sess.ruleset)
+        target = _piece_view(sess.templates[merge['to_sid']], ruleset=sess.ruleset)
+        inherited = (items_mod.FINISHED[merge['inherit_item']]['name'] if merge['inherit_item'] else '无装备')
+        teaching = techniques_mod.view(merge['inherit_technique'])
+        returned = [items_mod.FINISHED[key]['name'] for key in merge['returned_items']]
+        returned += [f"{techniques_mod.view(key)['name']}×{n}" for key, n in merge['returned_techniques'].items()]
+        def counts(values):
+            return '、'.join(f'{TYPE_ZH.get(key, key)}{n}' for key, n in sorted(values.items())) or '无'
+        merge['detail'] = (f"{merge['from_name']}×3（{source['role']}；{'/'.join(source['types'])}；{source['skill_name']}）"
+                           f" → {merge['to_name']}（{target['role']}；"
+                           f"{'/'.join(target['types'])}；{target['skill_name']}）。累计投入{merge['invested']}金，"
+                           f"直购目标{merge['to_tier']}金；合成后卖出返{max(1, merge['invested']-1)}金。"
+                           f"目标库存{merge['target_remaining_before']}→{merge['to_remaining']}；"
+                           f"上场{merge['board_before']}→{merge['board_after']}，备战{merge['bench_before']}→{merge['bench_after']}。"
+                           f"上场羁绊 {counts(merge['synergies_before'])} → {counts(merge['synergies_after'])}。"
+                           f"沿用编号{merge['result_uid']}，继承{inherited}、{teaching['name'] if teaching else '无教学'}；"
+                           f"退回仓库{'、'.join(returned) or '无'}。产物在备战席，需要重新上场。")
+    if plan['merges']:
+        detail = ' '.join(row['detail'] for row in plan['merges'])
+        plan['detail'] = ((plan['detail'] + '。') if plan['detail'] else '') + detail
+        if shop_index is not None:
+            plan['detail'] += ' 暂缓会跳过本次所有自动合成，并暂缓该形态全部实例。'
+            if not plan['defer_allowed']:
+                plan['detail'] += ' 当前不能暂缓购买（金币或备战容量不足）。'
+        else:
+            plan['detail'] += ' 明确进化只消耗选中实例及另两只同形态，只进化一步。'
+    return plan
+
+
+def _evolution_view(sess, owned):
+    sid = owned.piece.species_id
+    plan = _evolution_preview(sess, uid=owned.uid)
+    return {'locked': owned.evolution_locked,
+            'can_lock': pokedex().next_evolution(sid) is not None and sid not in shop_mod.TRADE_EVOLUTIONS,
+            'can_evolve': plan['auto_allowed'], 'detail': plan['detail'], 'preview': plan}
+
+
 def state_json(sess) -> dict:
     sess.ensure_unit_ids()
     p = sess.player
@@ -1157,6 +1247,8 @@ def state_json(sess) -> dict:
         v['item_effect'] = _item_effect(o.item, stat_mode) if o.item else None
         v["copies"] = copies.get(o.piece.species_id, 1)
         v["sell"] = sell_value(o)
+        if tactics_mod.evolution_choices_enabled(sess.ruleset):
+            v['evolution'] = _evolution_view(sess, o)
         board_rows[r][c] = v
     bench = []
     for o in p.bench:
@@ -1165,6 +1257,8 @@ def state_json(sess) -> dict:
         v['item_effect'] = _item_effect(o.item, stat_mode) if o.item else None
         v["copies"] = copies.get(o.piece.species_id, 1)
         v["sell"] = sell_value(o)
+        if tactics_mod.evolution_choices_enabled(sess.ruleset):
+            v['evolution'] = _evolution_view(sess, o)
         bench.append(v)
     shop = []
     for i in range(SHOP_SLOTS_UI):
@@ -1174,6 +1268,8 @@ def state_json(sess) -> dict:
         else:
             v = _piece_view(p.templates[sid], ruleset=sess.ruleset)
             v["price"] = p.templates[sid].tier
+            if tactics_mod.evolution_choices_enabled(sess.ruleset):
+                v['evolution_preview'] = _evolution_preview(sess, shop_index=i)
             shop.append(v)
     comps = [{"key": k, "name": items_mod.COMPONENT_NAMES[k], "n": n}
              for k, n in p.inventory.components.items() if n > 0]
@@ -1264,7 +1360,7 @@ def _guard_prep(sess) -> None:
         raise DemoError("当前不是准备阶段")
 
 
-def act_buy(sess, i: int):
+def act_buy(sess, i: int, evolution='auto'):
     _guard_prep(sess)
     p = sess.player
     if not (0 <= i < SHOP_SLOTS_UI) or p.shop.slots[i] is None:
@@ -1272,22 +1368,72 @@ def act_buy(sess, i: int):
     price = p.shop.price(i)
     if p.gold < price:
         raise DemoError(f"金币不足（需要 {price} 金，你有 {p.gold} 金）")
+    choices = tactics_mod.evolution_choices_enabled(sess.ruleset)
+    if evolution not in ('auto', 'defer') or (evolution == 'defer' and not choices):
+        raise DemoError('当前规则不支持这个进化选择')
+    if evolution == 'defer' and (pokedex().next_evolution(p.shop.slots[i]) is None
+                               or p.shop.slots[i] in shop_mod.TRADE_EVOLUTIONS):
+        raise DemoError('该形态没有普通三合一进化')
     # 池恢复可能使其他待合成的场上棋子落入备战席，每次购买都检查最终容量。
     # 失败购买不改变金币、卡池、棋子或装备。
     board, bench, pool, inventory = copy.deepcopy(
         (p.board, p.bench, sess.pool, p.inventory))
     bench.append(shop_mod.OwnedPiece(p.templates[p.shop.slots[i]], price))
-    try_combine(board, bench, pool, sess.templates, inventory)
+    if evolution == 'auto':
+        try_combine(board, bench, pool, sess.templates, inventory, respect_locks=choices)
     if len(bench) > BENCH_CAP:
         raise DemoError(f"备战席已满（{BENCH_CAP} 格）：先上场、卖出或购买可立即合成的第三只")
     owned = p.shop.buy(i)
     p.gold -= price
     p.bench.append(owned)
-    logs = sess.combine_player()
+    if choices:
+        sess.ensure_unit_ids()
+    if evolution == 'defer':
+        # A later fourth copy must not consume the pair the player just retained.
+        for unit in p.all_pieces():
+            if unit.piece.species_id == owned.piece.species_id:
+                unit.evolution_locked = True
+        logs = ['本形态全部实例暂缓进化；可在棋子菜单明确进化']
+    else:
+        logs = sess.combine_player()
     msg = f"买入 {owned.piece.name}（-{price} 金）"
     for line in logs:
         msg += f"；{line}"
     return msg
+
+
+def act_evolution_lock(sess, uid, locked):
+    _guard_prep(sess)
+    if not tactics_mod.evolution_choices_enabled(sess.ruleset):
+        raise DemoError('旧规则不支持暂缓进化')
+    owned, _ = sess.locate_uid(uid)
+    sid = owned.piece.species_id
+    if pokedex().next_evolution(sid) is None or sid in shop_mod.TRADE_EVOLUTIONS:
+        raise DemoError('该形态没有普通三合一进化')
+    if locked not in ('0', '1'):
+        raise DemoError('暂缓状态必须为0或1')
+    owned.evolution_locked = locked == '1'
+    return ('已暂缓' if owned.evolution_locked else '已解除暂缓') + owned.piece.name + '；本次不触发合成'
+
+
+def act_evolve(sess, uid):
+    _guard_prep(sess)
+    if not tactics_mod.evolution_choices_enabled(sess.ruleset):
+        raise DemoError('旧规则不支持手动进化')
+    plan = _evolution_preview(sess, uid=uid)
+    if not plan['auto_allowed']:
+        raise DemoError(plan['detail'])
+    p = sess.player
+    positions = {id(o): pos for pos, o in p.grid.items()}
+    board = list(p.board)
+    logs = try_combine(board, p.bench, sess.pool, sess.templates, p.inventory,
+                       only_species=plan['from_sid'], single=True,
+                       selected_uids=plan['source_uids'])
+    if len(logs) != 1:
+        raise DemoError('进化条件已变化，请重新选择')
+    p.grid = {positions[id(o)]: o for o in board}
+    p.combines += 1
+    return logs[0] + '；只进化一步，产物在备战席'
 
 
 def act_sell(sess, loc: str):
@@ -1558,7 +1704,11 @@ def _apply_action(params: dict):
             elif cmd == "save":
                 msg = "进度已保存"
             elif cmd == "buy":
-                msg = act_buy(sess, int(params.get("i", -1)))
+                msg = act_buy(sess, int(params.get("i", -1)), params.get('evolution', 'auto'))
+            elif cmd == 'set_evolution_lock':
+                msg = act_evolution_lock(sess, params.get('uid', ''), params.get('locked', ''))
+            elif cmd == 'evolve':
+                msg = act_evolve(sess, params.get('uid', ''))
             elif cmd == "sell":
                 msg = act_sell(sess, params.get("loc", ""))
             elif cmd == "refresh":

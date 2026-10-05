@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-10-05T02:31:14.315982+00:00",
+  "source_hashes": {
+    "tools/acceptance/device_controls.py": "2fd112608a6f91c04eb15dcd09c52fc2551cebcf8a23eb36d35c3f4ee6ec9907",
+    "tools/acceptance/device_renderer.js": "5a67767f5fb95c20508619f0f47b98b2250c44d25c626fc4fac25b8146e75299",
+    "tests/test_evolution_device.py": "53b9ba6b64af760d744ef71e6e47bd70daf819527034493daba0fc48596c105d"
+  },
+  "trace_files": [
+    "/Users/bytedance/luobata/PokeTactics/.build/evolution-device-2026-10-05/auto-inheritance-cancel-commit.json",
+    "/Users/bytedance/luobata/PokeTactics/.build/evolution-device-2026-10-05/defer-persist-manual-terminal.json",
+    "/Users/bytedance/luobata/PokeTactics/.build/evolution-device-2026-10-05/unlock-relock-suppressed-buy.json"
+  ],
+  "assertions": [
+    "tactics_v5 buy preview is side-effect free before confirmation",
+    "automatic evolution inherits UID, item, and technique and is duplicate-release safe",
+    "defer keeps three copies, locks all instances, persists, and restores after process restart",
+    "manual evolution performs exactly one canonical step and unlocks the result",
+    "unlock confirmation defaults to cancel, persists mixed lock state, and can relock",
+    "fewer than three unlocked copies bypass evolution preview and do not auto-combine",
+    "terminal species exposes status detail with no lock control across every detail page"
+  ]
+}

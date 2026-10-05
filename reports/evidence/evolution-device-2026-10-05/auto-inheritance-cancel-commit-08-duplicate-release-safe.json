@@ -1,0 +1,491 @@
+{
+  "reason": "duplicate-release-safe",
+  "captured_at": "2026-10-05T02:37:44.682491+00:00",
+  "test_clock": 11.150000000000015,
+  "screen": {
+    "ok": true,
+    "device_id": "11ce24684b05d208",
+    "sid": "f14fabc41403",
+    "screen": {
+      "page": "shop",
+      "title": "林间商店",
+      "rows": [
+        {
+          "label": "空货架",
+          "detail": "",
+          "subtitle": "已售出",
+          "disabled": true,
+          "portrait": null,
+          "icon": "",
+          "index": 0
+        },
+        {
+          "label": "空货架",
+          "detail": "",
+          "subtitle": "已售出",
+          "disabled": true,
+          "portrait": null,
+          "icon": "",
+          "index": 1
+        },
+        {
+          "label": "空货架",
+          "detail": "",
+          "subtitle": "已售出",
+          "disabled": true,
+          "portrait": null,
+          "icon": "",
+          "index": 2
+        },
+        {
+          "label": "杰尼龟",
+          "detail": "杰尼龟\n远程输出\n水\n射程 3 · 1 金\n连击\n主命中后追加一次 45% 伤害打击\n装备：无\n已学：无\n购买后没有自动进化；暂缓的实例不会被消耗",
+          "subtitle": "1 金",
+          "disabled": false,
+          "portrait": {
+            "sid": 7,
+            "name": "杰尼龟",
+            "tier": 1,
+            "types": [
+              "水"
+            ],
+            "colors": [
+              "#688ba3"
+            ],
+            "ranged": true,
+            "range": 3,
+            "role": "远程输出",
+            "skill_name": "连击",
+            "skill_description": "主命中后追加一次 45% 伤害打击",
+            "move": "水炮",
+            "ability": null,
+            "item": null,
+            "item_name": null,
+            "price": 1,
+            "evolution_preview": {
+              "merges": [],
+              "auto_allowed": true,
+              "defer_allowed": true,
+              "detail": "购买后没有自动进化；暂缓的实例不会被消耗",
+              "from_sid": null,
+              "source_uids": []
+            }
+          },
+          "icon": "",
+          "index": 3
+        },
+        {
+          "label": "刷新 · 2 金",
+          "detail": "",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 4
+        }
+      ],
+      "selected": 0,
+      "offset": 0,
+      "total": 7,
+      "footer": [
+        "A 上一项  B 下一项  C 确认",
+        "B 按住返回 · C 按住详情 / 关屏"
+      ],
+      "message": "",
+      "hud": {
+        "hp": 100,
+        "gold": 47,
+        "level": 2,
+        "xp": 0,
+        "xp_next": 6,
+        "pop": 4,
+        "on_board": 1,
+        "streak": 0,
+        "alive": true,
+        "rank": null,
+        "combines": 1,
+        "stone_used": false,
+        "bench_cap": 6,
+        "refresh_cost": 2,
+        "shop_locked": false,
+        "xp_cost": 4
+      },
+      "round": 1,
+      "board": [
+        [
+          null,
+          null,
+          {
+            "sid": 4,
+            "name": "小火龙",
+            "tier": 1,
+            "types": [
+              "火"
+            ],
+            "colors": [
+              "#b84840"
+            ],
+            "ranged": true,
+            "range": 3,
+            "role": "远程输出",
+            "skill_name": "连击",
+            "skill_description": "主命中后追加一次 45% 伤害打击",
+            "move": "喷射火焰",
+            "ability": null,
+            "item": null,
+            "item_name": null,
+            "uid": "u00000029",
+            "technique": null,
+            "item_effect": null,
+            "copies": 1,
+            "sell": 1,
+            "evolution": {
+              "locked": false,
+              "can_lock": true,
+              "can_evolve": false,
+              "detail": "需要三只同形态；可暂缓自动进化保留当前职责",
+              "preview": {
+                "merges": [],
+                "auto_allowed": false,
+                "defer_allowed": false,
+                "detail": "需要三只同形态；可暂缓自动进化保留当前职责",
+                "from_sid": 4,
+                "source_uids": []
+              }
+            }
+          },
+          null,
+          null,
+          null
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      ],
+      "bench": [
+        {
+          "sid": 8,
+          "name": "卡咪龟",
+          "tier": 2,
+          "types": [
+            "水"
+          ],
+          "colors": [
+            "#688ba3"
+          ],
+          "ranged": true,
+          "range": 3,
+          "role": "远程输出",
+          "skill_name": "重击",
+          "skill_description": "命中后将目标击退 1 格，目标身后有空位时生效",
+          "move": "水炮",
+          "ability": null,
+          "item": "leftovers",
+          "item_name": "剩饭",
+          "uid": "u00000030",
+          "technique": {
+            "id": "surf",
+            "name": "冲浪",
+            "description": "首次原生大招造成伤害后，对主目标释放时位置邻格内的至多两名其他敌人追加35威力水属性伤害；追加命中不回能，每场一次。",
+            "partners": [
+              9
+            ],
+            "learn_types": [
+              "WATER"
+            ],
+            "compatibility": "水属性可学"
+          },
+          "item_effect": "每秒回血+1.5%",
+          "copies": 1,
+          "sell": 2,
+          "evolution": {
+            "locked": false,
+            "can_lock": true,
+            "can_evolve": false,
+            "detail": "需要三只同形态；可暂缓自动进化保留当前职责",
+            "preview": {
+              "merges": [],
+              "auto_allowed": false,
+              "defer_allowed": false,
+              "detail": "需要三只同形态；可暂缓自动进化保留当前职责",
+              "from_sid": 8,
+              "source_uids": []
+            }
+          }
+        }
+      ],
+      "row": null,
+      "ruleset": "tactics_v5",
+      "choices": [
+        {
+          "label": "空货架",
+          "detail": "",
+          "subtitle": "已售出",
+          "disabled": true,
+          "portrait": null,
+          "icon": "",
+          "index": 0
+        },
+        {
+          "label": "空货架",
+          "detail": "",
+          "subtitle": "已售出",
+          "disabled": true,
+          "portrait": null,
+          "icon": "",
+          "index": 1
+        },
+        {
+          "label": "空货架",
+          "detail": "",
+          "subtitle": "已售出",
+          "disabled": true,
+          "portrait": null,
+          "icon": "",
+          "index": 2
+        },
+        {
+          "label": "杰尼龟",
+          "detail": "杰尼龟\n远程输出\n水\n射程 3 · 1 金\n连击\n主命中后追加一次 45% 伤害打击\n装备：无\n已学：无\n购买后没有自动进化；暂缓的实例不会被消耗",
+          "subtitle": "1 金",
+          "disabled": false,
+          "portrait": {
+            "sid": 7,
+            "name": "杰尼龟",
+            "tier": 1,
+            "types": [
+              "水"
+            ],
+            "colors": [
+              "#688ba3"
+            ],
+            "ranged": true,
+            "range": 3,
+            "role": "远程输出",
+            "skill_name": "连击",
+            "skill_description": "主命中后追加一次 45% 伤害打击",
+            "move": "水炮",
+            "ability": null,
+            "item": null,
+            "item_name": null,
+            "price": 1,
+            "evolution_preview": {
+              "merges": [],
+              "auto_allowed": true,
+              "defer_allowed": true,
+              "detail": "购买后没有自动进化；暂缓的实例不会被消耗",
+              "from_sid": null,
+              "source_uids": []
+            }
+          },
+          "icon": "",
+          "index": 3
+        },
+        {
+          "label": "刷新 · 2 金",
+          "detail": "",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 4
+        },
+        {
+          "label": "锁定商店",
+          "detail": "",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 5
+        },
+        {
+          "label": "购买经验 · 4 金",
+          "detail": "",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "",
+          "index": 6
+        }
+      ],
+      "scene": {
+        "opponent": {
+          "name": "7·攒钱型L3",
+          "rows": [
+            [
+              null,
+              null,
+              {
+                "sid": 56,
+                "name": "猴怪",
+                "tier": 1,
+                "types": [
+                  "格斗"
+                ],
+                "colors": [
+                  "#a56954"
+                ],
+                "ranged": false,
+                "range": 1,
+                "role": "近战",
+                "skill_name": "连击",
+                "skill_description": "主命中后追加一次 45% 伤害打击",
+                "move": "cross_chop",
+                "ability": null,
+                "item": null,
+                "item_name": null
+              },
+              {
+                "sid": 7,
+                "name": "杰尼龟",
+                "tier": 1,
+                "types": [
+                  "水"
+                ],
+                "colors": [
+                  "#688ba3"
+                ],
+                "ranged": true,
+                "range": 3,
+                "role": "远程输出",
+                "skill_name": "连击",
+                "skill_description": "主命中后追加一次 45% 伤害打击",
+                "move": "水炮",
+                "ability": null,
+                "item": null,
+                "item_name": null
+              },
+              {
+                "sid": 32,
+                "name": "尼多朗",
+                "tier": 1,
+                "types": [
+                  "毒"
+                ],
+                "colors": [
+                  "#977291"
+                ],
+                "ranged": false,
+                "range": 1,
+                "role": "近战",
+                "skill_name": "连击",
+                "skill_description": "主命中后追加一次 45% 伤害打击",
+                "move": "毒针",
+                "ability": null,
+                "item": null,
+                "item_name": null
+              },
+              {
+                "sid": 10,
+                "name": "绿毛虫",
+                "tier": 1,
+                "types": [
+                  "虫"
+                ],
+                "colors": [
+                  "#749164"
+                ],
+                "ranged": false,
+                "range": 1,
+                "role": "近战",
+                "skill_name": "冲锋",
+                "skill_description": "向最远敌人突进至多 2 格，能贴身时转为攻击该目标",
+                "move": "撞击",
+                "ability": null,
+                "item": null,
+                "item_name": null
+              }
+            ],
+            [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          ]
+        },
+        "weather": {
+          "key": "",
+          "zh": "无",
+          "note": "天气平静"
+        },
+        "entry_weather": {
+          "you": [],
+          "opponent": [],
+          "conflict": false,
+          "weather": null,
+          "zh": "平静天气",
+          "note": "当前上场队伍没有天气特性，沿用本轮基础天气。"
+        },
+        "synergies": [
+          {
+            "type": "FIRE",
+            "zh": "火",
+            "n": 1,
+            "tier": 0,
+            "next": 2,
+            "need": 1,
+            "color": "#b84840",
+            "effect": ""
+          }
+        ],
+        "loadout_partner": 6,
+        "loadout_mode": "expedition",
+        "tactical": {
+          "guard": null,
+          "weather": null
+        },
+        "pending_rewards": 0,
+        "inventory": {
+          "items": 0,
+          "components": 0,
+          "techniques": 0
+        },
+        "result": {}
+      },
+      "active": {
+        "label": "空货架",
+        "detail": "",
+        "subtitle": "已售出",
+        "disabled": true,
+        "portrait": null,
+        "icon": ""
+      },
+      "can_back": true
+    },
+    "sleeping": false,
+    "busy": false,
+    "sequence": 6
+  },
+  "session": {
+    "sid": "f14fabc41403",
+    "ruleset": "tactics_v5",
+    "save_sequence": 6,
+    "gold": 47,
+    "round": 1,
+    "bench_count": 1,
+    "bench": [
+      {
+        "name": "卡咪龟",
+        "sid": 8,
+        "uid": "u00000030",
+        "item": "leftovers",
+        "technique": "surf",
+        "evolution_locked": false,
+        "can_evolve": false
+      }
+    ],
+    "board_count": 1,
+    "board_species": [
+      "小火龙"
+    ]
+  }
+}

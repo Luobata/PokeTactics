@@ -62,7 +62,7 @@ class RoutingTests(unittest.TestCase):
         with self.assertRaises(Exception):
             pacing.DEFAULT_NATURAL_END_POLICY.start_round = 21
         with self.assertRaises(ValueError):
-            pacing.loss_damage("tactics_v5", 20, 0)
+            pacing.loss_damage("tactics_v6", 20, 0)
         with self.assertRaises(ValueError):
             pacing.loss_damage("tactics_v3", 20, 0,
                                policy=pacing.DEFAULT_NATURAL_END_POLICY)

@@ -235,7 +235,7 @@ def main(argv=None):
     parser.add_argument('--games', type=int, default=32, help='Independent games, 1–4096 (default: 32).')
     parser.add_argument('--seed-base', type=int, default=2026100500,
                         help='First nonnegative signed-64-bit seed; subsequent games use consecutive seeds.')
-    parser.add_argument('--ruleset', choices=('tactics_v1', 'tactics_v2', 'tactics_v3', 'tactics_v4'), default='tactics_v4',
+    parser.add_argument('--ruleset', choices=('tactics_v1', 'tactics_v2', 'tactics_v3', 'tactics_v4', 'tactics_v5'), default='tactics_v5',
                         help='Explicit battle version; defaults to the current tactical mode.')
     parser.add_argument('--output', type=Path, default=ROOT / '.build/tactics/full-run-probe.json',
                         help='Evidence JSON path; a game save directory is never allowed.')

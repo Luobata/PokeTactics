@@ -1,0 +1,300 @@
+{
+  "schema_version": "independent-reviewer.v1",
+  "review_status": "pass_with_risk",
+  "session_id": "sess-ffc4bb3f-51f5-4888-b9e4-10123cdffd1c",
+  "review_run_id": "20261005-024603-871e92a9129f",
+  "input_fingerprint": "a5c76179376dde67fb37c57f641567d495bd573ccf93ec78736dfacd7df67683",
+  "manifest_path": "reports/evidence/batch-k-2026-10-05/manifest.json",
+  "manifest_sha256": "410242a1aa25d8b679fae782704e6ccfaf6ee890e074e7fcddd117b6b699400d",
+  "review_bundle": ".ai-review/20261005-024603-871e92a9129f/review-bundle.json",
+  "baseline": {
+    "ref": "914e89c",
+    "commit": "914e89c5c7b2c6a7d086b7a76c3188a2a8731dc7",
+    "head_commit": "914e89c5c7b2c6a7d086b7a76c3188a2a8731dc7",
+    "dirty_state": "frozen dirty worktree reviewed as-is"
+  },
+  "repo": {
+    "path": "/Users/bytedance/luobata/PokeTactics",
+    "execution_location": "local",
+    "branch": "main"
+  },
+  "review": {
+    "session_id": "sess-ffc4bb3f-51f5-4888-b9e4-10123cdffd1c",
+    "run_id": "20261005-024603-871e92a9129f",
+    "bundle_path": ".ai-review/20261005-024603-871e92a9129f/review-bundle.json",
+    "input_fingerprint": "a5c76179376dde67fb37c57f641567d495bd573ccf93ec78736dfacd7df67683",
+    "specs": [
+      "docs/28-evolution-choice-contract.md",
+      "docs/27-evolution-fairness.md"
+    ]
+  },
+  "reviewer_agent_status": "created",
+  "reviewer_agents": [
+    {
+      "agent_id": "/root/review_batch_k_final",
+      "role": "risk-reviewer",
+      "lifecycle": "created",
+      "verdict": "pass_with_risk",
+      "bound_scope": "Fresh independent final audit of frozen Batch K source, evidence, integrity, specs 27/28, and focused evolution contracts; no source or evidence edits."
+    }
+  ],
+  "blockers": [],
+  "risks": [
+    {
+      "id": "RISK-QG-CENTRAL-SEMANTIC",
+      "title": "QualityGate central semantic completion was not available",
+      "evidence_refs": [
+        "reports/evidence/batch-k-2026-10-05/qualitygate.json"
+      ],
+      "assessment": "Local raw/gate passed with zero actionable findings and execution complete, but agent_action.task_complete=false and completion_requires explicitly states that local PASS alone is insufficient. Mutation is recorded as not applicable for the current lanes. This final independent semantic/code audit does not convert the QG record into a central-QG PASS.",
+      "re_review_condition": "If central QG semantic completion is a release hard gate, consume a current-fingerprint central semantic result before release; otherwise retain this explicit limitation."
+    },
+    {
+      "id": "RISK-DEVICE-EVIDENCE-SCOPE",
+      "title": "Device evidence is PC/native-canvas replay, not physical-device or independent art review",
+      "evidence_refs": [
+        "reports/evidence/evolution-device-2026-10-05/README.md",
+        "reports/evidence/evolution-device-2026-10-05/summary.json",
+        "reports/evidence/evolution-device-2026-10-05/visual.json"
+      ],
+      "assessment": "Controller and renderer behavior is strongly covered by six focused contracts, 356 records across three workflows, stable source hashes, zero browser errors, and 240x320 native PNG replay. Visual inspection was performed by the main agent, not this reviewer; no physical ESP32 or human-duration trial is claimed.",
+      "re_review_condition": "Run physical-device and human three-key journey review before making hardware, timing, or final visual-quality claims."
+    },
+    {
+      "id": "RISK-STRATEGIC-AI-AND-HUMAN-DURATION",
+      "title": "Automated v5 coverage does not test strategic defer/lock play or human-duration balance",
+      "evidence_refs": [
+        "reports/evidence/batch-k-2026-10-05/tactical-full-run.json"
+      ],
+      "assessment": "The 32-game run is workflow/exception coverage with 32 unique seeds, 3,804 battles, and 43 codec roundtrips. It does not establish that an active lock strategy is desirable or that v5 changes natural-end pacing.",
+      "re_review_condition": "Add strategic-policy experiments and human-duration whole-game evidence before making those broader claims."
+    },
+    {
+      "id": "RISK-FAIRNESS-SCOPE",
+      "title": "Fairness evidence is bounded and cannot support whole-roster balance claims",
+      "evidence_refs": [
+        "docs/27-evolution-fairness.md",
+        "reports/evidence/evolution-fairness-2026-10-05/static.json",
+        "reports/evidence/evolution-fairness-2026-10-05/battle.json"
+      ],
+      "assessment": "The lineage/route accounting is internally consistent and the 16-arm x100-seed v4 endpoint-role comparison is honest about its limits. It is not acquisition-timing, whole-roster, or whole-game balance proof; Ninetales/Lapras differences cannot be reduced to evolution capability.",
+      "re_review_condition": "Use whole-roster and live-acquisition experiments before claiming global price or strength fairness."
+    },
+    {
+      "id": "RISK-EEVEE-BRANCH-CLARITY",
+      "title": "Eevee branch clarity remains unresolved by design",
+      "evidence_refs": [
+        "docs/27-evolution-fairness.md"
+      ],
+      "assessment": "The current deterministic route reaches Vaporeon while Jolteon and Flareon remain evolved but unreachable direct-purchase terminals. The docs explicitly flag this rather than claiming a true branch choice.",
+      "re_review_condition": "Implement a real three-target branch with target-pool checks, or consistently label the siblings as direct-purchase branch products."
+    }
+  ],
+  "evidence_gaps": [
+    "No independent image/art review by this final reviewer; this review audited hashes, text, render code, tests, and raw capture metadata.",
+    "No physical ESP32/device execution or human-duration three-key play evidence.",
+    "No central QualityGate semantic result consumed by the QG record.",
+    "No strategic lock/defer AI or whole-roster acquisition/balance experiment.",
+    "The report's planned reports/evidence/batch-k-2026-10-05/independent-review.json final evidence record was not yet present; this required .build record is the authoritative final-review output for this run and manifest excludes final-review records."
+  ],
+  "findings": [
+    {
+      "id": "GAP-QG-CENTRAL-SEMANTIC",
+      "severity": "evidence_gap",
+      "title": "Central semantic gate absent",
+      "evidence_refs": [
+        "reports/evidence/batch-k-2026-10-05/qualitygate.json"
+      ],
+      "required_action": "Consume a current-fingerprint central semantic result if that gate is mandatory for the next release stage.",
+      "re_review_condition": "No source change and a QG record showing current-fingerprint semantic completion and required validation passed."
+    },
+    {
+      "id": "GAP-INDEPENDENT-VISUAL",
+      "severity": "evidence_gap",
+      "title": "Independent visual review not available",
+      "evidence_refs": [
+        "reports/evidence/evolution-device-2026-10-05/README.md"
+      ],
+      "required_action": "Obtain an independent human visual/art review if final aesthetic acceptance is required.",
+      "re_review_condition": "Independent review bound to unchanged renderer and capture hashes."
+    },
+    {
+      "id": "GAP-PHYSICAL-HUMAN-DEVICE",
+      "severity": "evidence_gap",
+      "title": "Physical and human-duration device evidence not available",
+      "evidence_refs": [
+        "reports/evidence/evolution-device-2026-10-05/README.md"
+      ],
+      "required_action": "Run hardware and human journey acceptance before hardware or duration claims.",
+      "re_review_condition": "Passing physical-device run bound to the frozen source fingerprint."
+    }
+  ],
+  "checks": [
+    {
+      "name": "bundle_manifest_scope_and_hashes",
+      "status": "passed",
+      "command": "Independent Python SHA256 and git-status set comparison against review-bundle.json and manifest.json",
+      "evidence_ref": "reports/evidence/batch-k-2026-10-05/manifest.json",
+      "result": "HEAD equals baseline; live dirty scope, bundle files, and 24 source + 155 evidence + manifest scope are exactly 180 paths; every live source/evidence hash matches; manifest SHA256 is 410242a1aa25d8b679fae782704e6ccfaf6ee890e074e7fcddd117b6b699400d."
+    },
+    {
+      "name": "nested_evidence_manifests",
+      "status": "passed",
+      "command": "Independent hash verification of both MANIFEST.sha256 files",
+      "evidence_ref": "reports/evidence/evolution-device-2026-10-05/MANIFEST.sha256",
+      "result": "Device manifest: 131/131 entries verified. Fairness manifest: 6/6 entries verified."
+    },
+    {
+      "name": "focused_evolution_tests",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=tests python3 -m unittest test_evolution_choices test_evolution_device -v",
+      "evidence_ref": "tests/test_evolution_choices.py",
+      "result": "19 tests passed in 4.864s: 13 choice/save/golden contracts and 6 final focused device contracts."
+    },
+    {
+      "name": "focused_test_module_discovery",
+      "status": "failed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.test_evolution_choices tests.test_evolution_device -v",
+      "evidence_ref": "tests/test_evolution_choices.py",
+      "result": "Invocation-only failure before test execution: sibling test imports require PYTHONPATH=tests. The corrected invocation above passed. No product failure or source/evidence change resulted."
+    },
+    {
+      "name": "targeted_syntax",
+      "status": "passed",
+      "command": "node --check device_renderer/evolution_device_capture; Python compile() over 8 core/probe files",
+      "evidence_ref": "tools/acceptance/device_renderer.js",
+      "result": "Both JavaScript files parsed and all eight selected Python files compiled in memory without writes."
+    },
+    {
+      "name": "staged_whitespace_scoped",
+      "status": "passed",
+      "command": "git -c core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol diff --cached --check",
+      "evidence_ref": "reports/evidence/evolution-fairness-2026-10-05",
+      "result": "Exit 0 with no output. The scoped cr-at-eol mode preserves and validates standard CRLF evidence/archive bytes."
+    },
+    {
+      "name": "final_acceptance_evidence",
+      "status": "passed",
+      "command": "Audited reports/evidence/batch-k-2026-10-05/acceptance.json without expensive rerun",
+      "evidence_ref": "reports/evidence/batch-k-2026-10-05/acceptance.json",
+      "result": "Status passed; 415 unit tests in 58.151s; nine selected checks passed; balance intentionally skipped; started 2026-10-05T02:33:00Z and finished 02:35:20Z."
+    },
+    {
+      "name": "superseded_acceptance_trace",
+      "status": "passed",
+      "command": "Audited archived failure provenance",
+      "evidence_ref": "reports/evidence/batch-k-2026-10-05/acceptance-initial-failed.json",
+      "result": "Initial 415-test run failed one stale unknown-rules assertion after v5 became valid; the failure is retained rather than overwritten."
+    },
+    {
+      "name": "device_evidence_audit",
+      "status": "passed",
+      "command": "Audited probe summary, visual metadata, tests, renderer/controller code, and archive separation",
+      "evidence_ref": "reports/evidence/evolution-device-2026-10-05/summary.json",
+      "result": "source_stable_during_probe=true; six final focused tests OK; three workflows; 356 records (326 input events + 30 notes); 28 snapshots; native 240x320 captures; zero browser errors; helper replays snapshots and performs no new game actions; pre-layout-fix and source-mutated runs are archived as non-current."
+    },
+    {
+      "name": "fairness_evidence_audit",
+      "status": "passed",
+      "command": "Audited probe logic plus static.json, battle.json, route CSVs, and report wording",
+      "evidence_ref": "reports/evidence/evolution-fairness-2026-10-05/static.json",
+      "result": "84 templates partition 47 evolving midstage + 33 evolved terminals + 4 natural terminals; 33 = 31 reachable + SIDs 135/136 branch-unreachable; 37 endpoint triplicate check unchanged; route cost/occupancy and sequential peak accounting are distinct; acquisition model is explicitly full-pool with-replacement; v4 16-arm x100-seed comparison has zero side-swap failures and explicit endpoint-role limits."
+    },
+    {
+      "name": "tactical_v5_full_run_audit",
+      "status": "passed",
+      "command": "Audited reports/evidence/batch-k-2026-10-05/tactical-full-run.json",
+      "evidence_ref": "reports/evidence/batch-k-2026-10-05/tactical-full-run.json",
+      "result": "32 games and unique seeds, all complete, zero errors, 3,804 battles, 43 checkpoint roundtrips, 28 natural + 4 forced terminal outcomes, zero final pending rewards, mean 29.09375 rounds; bounded to workflow coverage."
+    },
+    {
+      "name": "qualitygate_local_audit",
+      "status": "passed",
+      "command": "Audited reports/evidence/batch-k-2026-10-05/qualitygate.json",
+      "evidence_ref": "reports/evidence/batch-k-2026-10-05/qualitygate.json",
+      "result": "Local mode, gate/raw gate pass, execution complete, zero actionable blocks, mutation not applicable; agent_action.task_complete=false and central semantic remains unconsumed."
+    },
+    {
+      "name": "preview_runtime_audit",
+      "status": "passed",
+      "command": "Audited reports/evidence/batch-k-2026-10-05/preview-runtime.json",
+      "evidence_ref": "reports/evidence/batch-k-2026-10-05/preview-runtime.json",
+      "result": "/device returned 200 with read-only GET and no saved-game action; original bank hashes remained 379620cbd720cbbe44d053df2ca3a6f70ef4112b00f5c238175d048f39b6ddbb and b822125fc97f2025dbc468e50cfa3ebb74ed0303fbcac19db90b76e70d062247."
+    },
+    {
+      "name": "balance_probe",
+      "status": "skipped",
+      "command": "Not requested by Batch K validation scope",
+      "evidence_ref": "reports/evidence/batch-k-2026-10-05/manifest.json",
+      "result": "Intentionally skipped; no whole-game balance conclusion is drawn."
+    }
+  ],
+  "integrity": {
+    "baseline": "914e89c5c7b2c6a7d086b7a76c3188a2a8731dc7",
+    "head": "914e89c5c7b2c6a7d086b7a76c3188a2a8731dc7",
+    "review_bundle_files": 180,
+    "live_dirty_paths": 180,
+    "manifest_source_files": 24,
+    "manifest_evidence_files": 155,
+    "manifest_excludes_itself_and_final_review_records": true,
+    "all_source_hashes_match": true,
+    "all_evidence_hashes_match": true,
+    "live_scope_equals_bundle_and_manifest": true,
+    "nested_device_manifest_verified": "131/131",
+    "nested_fairness_manifest_verified": "6/6",
+    "source_or_evidence_modified_by_reviewer": false
+  },
+  "spec_compliance": {
+    "docs/28-evolution-choice-contract.md": {
+      "status": "pass",
+      "evidence": [
+        "sim/tactics.py gates evolution choices exclusively to tactics_v5 while retaining v4 pacing behavior for v5.",
+        "sim/shop.py::try_combine performs eligibility and inventory-return checks before mutation, supports lock-aware recursion, explicit species/UID selection, and single-step mode.",
+        "tools/acceptance/demo.py::_evolution_preview rehearses on deep copies; act_buy separates auto/defer final capacity; act_evolve consumes the selected UID plus deterministic others for exactly one merge.",
+        "tools/acceptance/device_controls.py binds confirmation to save sequence and UID, commits under the demo lock, rejects stale state, and blocks duplicate release through the transaction input window.",
+        "tools/acceptance/session_save.py makes boolean evolution_locked mandatory for every v5 owned record, rejects it on old rules and invalid terminal/trade locks, and leaves the legacy v4 fingerprint unavailable to v5.",
+        "tests/test_evolution_choices.py and tests/test_evolution_device.py cover recursive preview, read-only behavior, fourth-copy selection, capacity/stock, inheritance/guard invalidation, atomic save, old rules, v4/v5 event equivalence, golden replay, cancellation, stale sequence, and duplicate release."
+      ]
+    },
+    "docs/27-evolution-fairness.md": {
+      "status": "pass_with_documented_limits",
+      "evidence": [
+        "The probe derives partitions from complete lineage and checks all 84 templates; endpoint triplication uses the real try_combine.",
+        "Route accounting distinguishes invested gold, cumulative pool occupancy, and minimum sequential peak occupancy.",
+        "The acquisition model explicitly declares full-pool, uniform-within-tier, with-replacement assumptions and excludes live-game dynamics.",
+        "Battle evidence predeclares tactics_v4, 16 arms and 100 independent seeds; side swaps are symmetry checks only; limitations forbid whole-roster and evolution-only causal claims.",
+        "The separate v4/v5 same-input test covers routing/event equivalence over 20 seeds without mislabeling the bounded fairness battle as that test."
+      ]
+    }
+  },
+  "evidence_assessment": {
+    "sufficient_for_batch_k_contract_review": true,
+    "verdict_basis": "No contract blocker was found. Core behavior is implemented with targeted tests and hash-bound evidence. Residual external/evidence limits are explicit and must not be elevated into claims of central QG completion, physical-device acceptance, human-duration balance, strategic lock AI value, or whole-roster fairness.",
+    "known_failures_preserved": [
+      "acceptance-initial-failed.json",
+      "archive/pre-layout-fix",
+      "archive/source-mutated-probe",
+      "archive/superseded-20261005-peak-model"
+    ],
+    "initial_focused_invocation_note": "A reviewer command using dotted tests.* module names failed at import discovery because sibling test modules require PYTHONPATH=tests; no test body ran. The repository-compatible invocation passed all 19 tests."
+  },
+  "re_review_conditions": [
+    "Any source or evidence byte change after this review requires a new bundle/manifest and fresh review; do not reuse this verdict.",
+    "Any change to sim/shop.py, demo action routing, save codec, device confirmation, or renderer requires focused evolution tests plus the relevant device/save evidence.",
+    "A central current-fingerprint QualityGate semantic result is required before claiming central semantic completion.",
+    "Physical-device, human-duration, independent visual, strategic-AI, whole-roster acquisition, and balance conclusions require their own evidence.",
+    "Eevee branch behavior requires re-review if true branch selection is added or direct-purchase labeling changes."
+  ],
+  "next_actions": [
+    "Promote this final record only as independent final review evidence; do not relabel local QG as central semantic PASS.",
+    "Keep documented scope limitations attached to any commit/release note."
+  ],
+  "residual_risks": [
+    "Central QG semantic result not consumed",
+    "PC/native-canvas device evidence only; main-agent visual review",
+    "No physical-device or human-duration trial",
+    "No strategic defer/lock AI or whole-roster balance evidence",
+    "Eevee branch clarity remains a future design decision"
+  ],
+  "generated_at": "2026-10-05T03:04:37.395534Z"
+}

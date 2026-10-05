@@ -71,7 +71,7 @@ class TacticalSessionContracts(unittest.TestCase):
 
     def test_real_reward_learning_guard_and_battle_preserve_machine_and_pool(self):
         reward = self.reach_reward()
-        self.assertEqual(self.state.ruleset, 'tactics_v4')
+        self.assertEqual(self.state.ruleset, 'tactics_v5')
         self.assertEqual(len(reward['options']), 3)
         self.assertIn('guard', reward['options'])
         self.assertEqual(sum(self.state.player.inventory.techniques.values()), 0)

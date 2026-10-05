@@ -1,0 +1,1 @@
+原始流程捕获期间renderer/test继续修图；source_stable_during_probe=false，保留失败记录。正式证据使用冻结后重跑。

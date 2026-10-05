@@ -1,0 +1,720 @@
+{
+  "reason": "manual-one-step-preview",
+  "captured_at": "2026-10-05T02:37:45.104593+00:00",
+  "test_clock": 14.200000000000022,
+  "screen": {
+    "ok": true,
+    "device_id": "7e02de22899480ec",
+    "sid": "812132d9f6df",
+    "screen": {
+      "page": "evolution_piece",
+      "title": "三合一 · 进化预览",
+      "rows": [
+        {
+          "label": "本次进化预览",
+          "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。\n杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+          "subtitle": "长按 C 查看完整代价",
+          "disabled": false,
+          "portrait": null,
+          "icon": "dex",
+          "index": 0
+        },
+        {
+          "label": "确认进化",
+          "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。\n杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+          "subtitle": "只执行这一步，不递归合成",
+          "disabled": false,
+          "portrait": null,
+          "icon": "battle",
+          "index": 1
+        },
+        {
+          "label": "暂缓 / 返回",
+          "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。\n杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "back",
+          "index": 2
+        }
+      ],
+      "selected": 0,
+      "offset": 0,
+      "total": 3,
+      "footer": [
+        "A 上一项  B 下一项  C 确认",
+        "B 按住返回 · C 按住详情 / 关屏"
+      ],
+      "message": "",
+      "hud": {
+        "hp": 100,
+        "gold": 47,
+        "level": 2,
+        "xp": 0,
+        "xp_next": 6,
+        "pop": 4,
+        "on_board": 1,
+        "streak": 0,
+        "alive": true,
+        "rank": null,
+        "combines": 0,
+        "stone_used": false,
+        "bench_cap": 6,
+        "refresh_cost": 2,
+        "shop_locked": false,
+        "xp_cost": 4
+      },
+      "round": 1,
+      "board": [
+        [
+          null,
+          null,
+          {
+            "sid": 4,
+            "name": "小火龙",
+            "tier": 1,
+            "types": [
+              "火"
+            ],
+            "colors": [
+              "#b84840"
+            ],
+            "ranged": true,
+            "range": 3,
+            "role": "远程输出",
+            "skill_name": "连击",
+            "skill_description": "主命中后追加一次 45% 伤害打击",
+            "move": "喷射火焰",
+            "ability": null,
+            "item": null,
+            "item_name": null,
+            "uid": "u00000029",
+            "technique": null,
+            "item_effect": null,
+            "copies": 1,
+            "sell": 1,
+            "evolution": {
+              "locked": false,
+              "can_lock": true,
+              "can_evolve": false,
+              "detail": "需要三只同形态；可暂缓自动进化保留当前职责",
+              "preview": {
+                "merges": [],
+                "auto_allowed": false,
+                "defer_allowed": false,
+                "detail": "需要三只同形态；可暂缓自动进化保留当前职责",
+                "from_sid": 4,
+                "source_uids": []
+              }
+            }
+          },
+          null,
+          null,
+          null
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      ],
+      "bench": [
+        {
+          "sid": 7,
+          "name": "杰尼龟",
+          "tier": 1,
+          "types": [
+            "水"
+          ],
+          "colors": [
+            "#688ba3"
+          ],
+          "ranged": true,
+          "range": 3,
+          "role": "远程输出",
+          "skill_name": "连击",
+          "skill_description": "主命中后追加一次 45% 伤害打击",
+          "move": "水炮",
+          "ability": null,
+          "item": null,
+          "item_name": null,
+          "uid": "u00000030",
+          "technique": null,
+          "item_effect": null,
+          "copies": 3,
+          "sell": 1,
+          "evolution": {
+            "locked": true,
+            "can_lock": true,
+            "can_evolve": true,
+            "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+            "preview": {
+              "merges": [
+                {
+                  "from_sid": 7,
+                  "to_sid": 8,
+                  "from_name": "杰尼龟",
+                  "to_name": "卡咪龟",
+                  "from_tier": 1,
+                  "to_tier": 2,
+                  "from_count": 3,
+                  "to_remaining": 17,
+                  "board_before": 1,
+                  "board_after": 1,
+                  "bench_before": 3,
+                  "bench_after": 1,
+                  "source_uids": [
+                    "u00000030",
+                    "u00000031",
+                    "u00000032"
+                  ],
+                  "result_uid": "u00000030",
+                  "invested": 3,
+                  "inherit_item": null,
+                  "inherit_technique": null,
+                  "returned_items": [],
+                  "returned_techniques": {},
+                  "target_remaining_before": 18,
+                  "population_before": 1,
+                  "population_after": 1,
+                  "synergies_before": {
+                    "FIRE": 1
+                  },
+                  "synergies_after": {
+                    "FIRE": 1
+                  },
+                  "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。"
+                }
+              ],
+              "auto_allowed": true,
+              "defer_allowed": false,
+              "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+              "from_sid": 7,
+              "source_uids": [
+                "u00000030",
+                "u00000031",
+                "u00000032"
+              ]
+            }
+          }
+        },
+        {
+          "sid": 7,
+          "name": "杰尼龟",
+          "tier": 1,
+          "types": [
+            "水"
+          ],
+          "colors": [
+            "#688ba3"
+          ],
+          "ranged": true,
+          "range": 3,
+          "role": "远程输出",
+          "skill_name": "连击",
+          "skill_description": "主命中后追加一次 45% 伤害打击",
+          "move": "水炮",
+          "ability": null,
+          "item": null,
+          "item_name": null,
+          "uid": "u00000031",
+          "technique": null,
+          "item_effect": null,
+          "copies": 3,
+          "sell": 1,
+          "evolution": {
+            "locked": true,
+            "can_lock": true,
+            "can_evolve": true,
+            "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+            "preview": {
+              "merges": [
+                {
+                  "from_sid": 7,
+                  "to_sid": 8,
+                  "from_name": "杰尼龟",
+                  "to_name": "卡咪龟",
+                  "from_tier": 1,
+                  "to_tier": 2,
+                  "from_count": 3,
+                  "to_remaining": 17,
+                  "board_before": 1,
+                  "board_after": 1,
+                  "bench_before": 3,
+                  "bench_after": 1,
+                  "source_uids": [
+                    "u00000030",
+                    "u00000031",
+                    "u00000032"
+                  ],
+                  "result_uid": "u00000030",
+                  "invested": 3,
+                  "inherit_item": null,
+                  "inherit_technique": null,
+                  "returned_items": [],
+                  "returned_techniques": {},
+                  "target_remaining_before": 18,
+                  "population_before": 1,
+                  "population_after": 1,
+                  "synergies_before": {
+                    "FIRE": 1
+                  },
+                  "synergies_after": {
+                    "FIRE": 1
+                  },
+                  "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。"
+                }
+              ],
+              "auto_allowed": true,
+              "defer_allowed": false,
+              "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+              "from_sid": 7,
+              "source_uids": [
+                "u00000031",
+                "u00000030",
+                "u00000032"
+              ]
+            }
+          }
+        },
+        {
+          "sid": 7,
+          "name": "杰尼龟",
+          "tier": 1,
+          "types": [
+            "水"
+          ],
+          "colors": [
+            "#688ba3"
+          ],
+          "ranged": true,
+          "range": 3,
+          "role": "远程输出",
+          "skill_name": "连击",
+          "skill_description": "主命中后追加一次 45% 伤害打击",
+          "move": "水炮",
+          "ability": null,
+          "item": null,
+          "item_name": null,
+          "uid": "u00000032",
+          "technique": null,
+          "item_effect": null,
+          "copies": 3,
+          "sell": 1,
+          "evolution": {
+            "locked": true,
+            "can_lock": true,
+            "can_evolve": true,
+            "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+            "preview": {
+              "merges": [
+                {
+                  "from_sid": 7,
+                  "to_sid": 8,
+                  "from_name": "杰尼龟",
+                  "to_name": "卡咪龟",
+                  "from_tier": 1,
+                  "to_tier": 2,
+                  "from_count": 3,
+                  "to_remaining": 17,
+                  "board_before": 1,
+                  "board_after": 1,
+                  "bench_before": 3,
+                  "bench_after": 1,
+                  "source_uids": [
+                    "u00000030",
+                    "u00000031",
+                    "u00000032"
+                  ],
+                  "result_uid": "u00000030",
+                  "invested": 3,
+                  "inherit_item": null,
+                  "inherit_technique": null,
+                  "returned_items": [],
+                  "returned_techniques": {},
+                  "target_remaining_before": 18,
+                  "population_before": 1,
+                  "population_after": 1,
+                  "synergies_before": {
+                    "FIRE": 1
+                  },
+                  "synergies_after": {
+                    "FIRE": 1
+                  },
+                  "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。"
+                }
+              ],
+              "auto_allowed": true,
+              "defer_allowed": false,
+              "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+              "from_sid": 7,
+              "source_uids": [
+                "u00000032",
+                "u00000030",
+                "u00000031"
+              ]
+            }
+          }
+        }
+      ],
+      "row": null,
+      "ruleset": "tactics_v5",
+      "choices": [
+        {
+          "label": "本次进化预览",
+          "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。\n杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+          "subtitle": "长按 C 查看完整代价",
+          "disabled": false,
+          "portrait": null,
+          "icon": "dex",
+          "index": 0
+        },
+        {
+          "label": "确认进化",
+          "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。\n杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+          "subtitle": "只执行这一步，不递归合成",
+          "disabled": false,
+          "portrait": null,
+          "icon": "battle",
+          "index": 1
+        },
+        {
+          "label": "暂缓 / 返回",
+          "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。\n杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+          "subtitle": "",
+          "disabled": false,
+          "portrait": null,
+          "icon": "back",
+          "index": 2
+        }
+      ],
+      "scene": {
+        "opponent": {
+          "name": "5·攒钱型L2",
+          "rows": [
+            [
+              null,
+              null,
+              {
+                "sid": 79,
+                "name": "呆呆兽",
+                "tier": 1,
+                "types": [
+                  "水",
+                  "超能"
+                ],
+                "colors": [
+                  "#688ba3",
+                  "#977291"
+                ],
+                "ranged": false,
+                "range": 1,
+                "role": "近战",
+                "skill_name": "冲锋",
+                "skill_description": "向最远敌人突进至多 2 格，能贴身时转为攻击该目标",
+                "move": "精神强念",
+                "ability": null,
+                "item": null,
+                "item_name": null
+              },
+              {
+                "sid": 133,
+                "name": "伊布",
+                "tier": 1,
+                "types": [
+                  "一般"
+                ],
+                "colors": [
+                  "#b9ad90"
+                ],
+                "ranged": false,
+                "range": 1,
+                "role": "近战",
+                "skill_name": "冲锋",
+                "skill_description": "向最远敌人突进至多 2 格，能贴身时转为攻击该目标",
+                "move": "猛撞",
+                "ability": null,
+                "item": null,
+                "item_name": null
+              },
+              {
+                "sid": 10,
+                "name": "绿毛虫",
+                "tier": 1,
+                "types": [
+                  "虫"
+                ],
+                "colors": [
+                  "#749164"
+                ],
+                "ranged": false,
+                "range": 1,
+                "role": "近战",
+                "skill_name": "冲锋",
+                "skill_description": "向最远敌人突进至多 2 格，能贴身时转为攻击该目标",
+                "move": "撞击",
+                "ability": null,
+                "item": null,
+                "item_name": null
+              },
+              {
+                "sid": 43,
+                "name": "走路草",
+                "tier": 1,
+                "types": [
+                  "草",
+                  "毒"
+                ],
+                "colors": [
+                  "#749164",
+                  "#977291"
+                ],
+                "ranged": true,
+                "range": 3,
+                "role": "远程输出",
+                "skill_name": "连击",
+                "skill_description": "主命中后追加一次 45% 伤害打击",
+                "move": "花瓣舞",
+                "ability": null,
+                "item": null,
+                "item_name": null
+              }
+            ],
+            [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          ]
+        },
+        "weather": {
+          "key": "",
+          "zh": "无",
+          "note": "天气平静"
+        },
+        "entry_weather": {
+          "you": [],
+          "opponent": [],
+          "conflict": false,
+          "weather": null,
+          "zh": "平静天气",
+          "note": "当前上场队伍没有天气特性，沿用本轮基础天气。"
+        },
+        "synergies": [
+          {
+            "type": "FIRE",
+            "zh": "火",
+            "n": 1,
+            "tier": 0,
+            "next": 2,
+            "need": 1,
+            "color": "#b84840",
+            "effect": ""
+          }
+        ],
+        "loadout_partner": 6,
+        "loadout_mode": "expedition",
+        "tactical": {
+          "guard": null,
+          "weather": null
+        },
+        "pending_rewards": 0,
+        "inventory": {
+          "items": 0,
+          "components": 0,
+          "techniques": 0
+        },
+        "result": {}
+      },
+      "focus": {
+        "loc": "b0",
+        "piece": {
+          "sid": 7,
+          "name": "杰尼龟",
+          "tier": 1,
+          "types": [
+            "水"
+          ],
+          "colors": [
+            "#688ba3"
+          ],
+          "ranged": true,
+          "range": 3,
+          "role": "远程输出",
+          "skill_name": "连击",
+          "skill_description": "主命中后追加一次 45% 伤害打击",
+          "move": "水炮",
+          "ability": null,
+          "item": null,
+          "item_name": null,
+          "uid": "u00000030",
+          "technique": null,
+          "item_effect": null,
+          "copies": 3,
+          "sell": 1,
+          "evolution": {
+            "locked": true,
+            "can_lock": true,
+            "can_evolve": true,
+            "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+            "preview": {
+              "merges": [
+                {
+                  "from_sid": 7,
+                  "to_sid": 8,
+                  "from_name": "杰尼龟",
+                  "to_name": "卡咪龟",
+                  "from_tier": 1,
+                  "to_tier": 2,
+                  "from_count": 3,
+                  "to_remaining": 17,
+                  "board_before": 1,
+                  "board_after": 1,
+                  "bench_before": 3,
+                  "bench_after": 1,
+                  "source_uids": [
+                    "u00000030",
+                    "u00000031",
+                    "u00000032"
+                  ],
+                  "result_uid": "u00000030",
+                  "invested": 3,
+                  "inherit_item": null,
+                  "inherit_technique": null,
+                  "returned_items": [],
+                  "returned_techniques": {},
+                  "target_remaining_before": 18,
+                  "population_before": 1,
+                  "population_after": 1,
+                  "synergies_before": {
+                    "FIRE": 1
+                  },
+                  "synergies_after": {
+                    "FIRE": 1
+                  },
+                  "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。"
+                }
+              ],
+              "auto_allowed": true,
+              "defer_allowed": false,
+              "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+              "from_sid": 7,
+              "source_uids": [
+                "u00000030",
+                "u00000031",
+                "u00000032"
+              ]
+            }
+          }
+        }
+      },
+      "evolution_preview": {
+        "merges": [
+          {
+            "from_sid": 7,
+            "to_sid": 8,
+            "from_name": "杰尼龟",
+            "to_name": "卡咪龟",
+            "from_tier": 1,
+            "to_tier": 2,
+            "from_count": 3,
+            "to_remaining": 17,
+            "board_before": 1,
+            "board_after": 1,
+            "bench_before": 3,
+            "bench_after": 1,
+            "source_uids": [
+              "u00000030",
+              "u00000031",
+              "u00000032"
+            ],
+            "result_uid": "u00000030",
+            "invested": 3,
+            "inherit_item": null,
+            "inherit_technique": null,
+            "returned_items": [],
+            "returned_techniques": {},
+            "target_remaining_before": 18,
+            "population_before": 1,
+            "population_after": 1,
+            "synergies_before": {
+              "FIRE": 1
+            },
+            "synergies_after": {
+              "FIRE": 1
+            },
+            "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。"
+          }
+        ],
+        "auto_allowed": true,
+        "defer_allowed": false,
+        "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+        "from_sid": 7,
+        "source_uids": [
+          "u00000030",
+          "u00000031",
+          "u00000032"
+        ]
+      },
+      "active": {
+        "label": "本次进化预览",
+        "detail": "杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。\n杰尼龟×3（远程输出；水；连击） → 卡咪龟（远程输出；水；重击）。累计投入3金，直购目标2金；合成后卖出返2金。目标库存18→17；上场1→1，备战3→1。上场羁绊 火1 → 火1。沿用编号u00000030，继承无装备、无教学；退回仓库无。产物在备战席，需要重新上场。 明确进化只消耗选中实例及另两只同形态，只进化一步。",
+        "subtitle": "长按 C 查看完整代价",
+        "disabled": false,
+        "portrait": null,
+        "icon": "dex"
+      },
+      "can_back": true
+    },
+    "sleeping": false,
+    "busy": false,
+    "sequence": 6
+  },
+  "session": {
+    "sid": "812132d9f6df",
+    "ruleset": "tactics_v5",
+    "save_sequence": 6,
+    "gold": 47,
+    "round": 1,
+    "bench_count": 3,
+    "bench": [
+      {
+        "name": "杰尼龟",
+        "sid": 7,
+        "uid": "u00000030",
+        "item": null,
+        "technique": null,
+        "evolution_locked": true,
+        "can_evolve": true
+      },
+      {
+        "name": "杰尼龟",
+        "sid": 7,
+        "uid": "u00000031",
+        "item": null,
+        "technique": null,
+        "evolution_locked": true,
+        "can_evolve": true
+      },
+      {
+        "name": "杰尼龟",
+        "sid": 7,
+        "uid": "u00000032",
+        "item": null,
+        "technique": null,
+        "evolution_locked": true,
+        "can_evolve": true
+      }
+    ],
+    "board_count": 1,
+    "board_species": [
+      "小火龙"
+    ]
+  }
+}

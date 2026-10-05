@@ -22,6 +22,7 @@ BOT_STATS = ("gold_curve", "pop_curve", "synergy_curve", "synergy_formed_round",
 LEGACY_BASE_FINGERPRINT = '2f9426505cad1addbab7b5db1e9f5a673a72ec0937a1ed4cf916926c04d015ad'
 LEGACY_TACTICS_FINGERPRINT = 'f05ad20bf84e27917c269487469914f042cc03bde53176a2c4b845b092bb343c'
 LEGACY_ABILITIES_FINGERPRINT = 'b39cb3c1756b71d4a26a1f79b613683ee6852bdad66709fc1cd1138d66cde23f'
+LEGACY_COUNTER_PACING_FINGERPRINT = '2a469a66cce17970c78393f495305f55cb52c6a92e2264a164e6861095ac5fbb'
 
 
 class UnknownRulesError(UnsupportedVersionError, ValueError):
@@ -48,10 +49,13 @@ def sequence(value, maximum, label):
     return value
 
 
-def owned_record(owned):
-    return {"species": owned.piece.species_id, "item": owned.item,
+def owned_record(owned, evolution_choices=False):
+    record = {"species": owned.piece.species_id, "item": owned.item,
             "uid": owned.uid, "technique": owned.technique,
             "sources": list(owned.sources), "invested": owned.invested}
+    if evolution_choices:
+        record['evolution_locked'] = owned.evolution_locked
+    return record
 
 
 def comp_record(comp):
@@ -64,19 +68,21 @@ class SessionCodec:
     schema_version = 4
 
     def encode(self, state):
+        import tactics
+        choices = tactics.evolution_choices_enabled(state.ruleset)
         state.ensure_unit_ids()
         seats = []
         for seat in state.seats:
             data = {key: getattr(seat, key) for key in COMMON}
             data.update({"seat": seat.seat, "shop": list(seat.shop.slots),
-                         "board": [owned_record(o) for o in seat.board],
-                         "bench": [owned_record(o) for o in seat.bench],
+                         "board": [owned_record(o, choices) for o in seat.board],
+                         "bench": [owned_record(o, choices) for o in seat.bench],
                          "components": dict(seat.inventory.components),
                          "finished": list(seat.inventory.finished),
                          "techniques": dict(seat.inventory.techniques),
                          "last_opponent": getattr(getattr(seat, "_last_opp", None), "seat", None)})
             if seat.seat == 0:
-                data.update({"grid": [[r, c, owned_record(seat.grid[(r, c)])]
+                data.update({"grid": [[r, c, owned_record(seat.grid[(r, c)], choices)]
                                       for r, c in sorted(seat.grid)],
                              "refresh_j": seat.refresh_j, "shop_locked": seat.shop_locked})
             else:
@@ -141,6 +147,9 @@ class SessionCodec:
             supported.add(LEGACY_TACTICS_FINGERPRINT)
         if ruleset in (tactics.BASE_RULESET, tactics.TACTICS_RULESET, tactics.ABILITIES_RULESET):
             supported.add(LEGACY_ABILITIES_FINGERPRINT)
+        choices = tactics.evolution_choices_enabled(ruleset)
+        if not choices:
+            supported.add(LEGACY_COUNTER_PACING_FINGERPRINT)
         if fingerprint not in supported:
             raise UnknownRulesError('无法识别此存档的规则指纹；需要对应版本继续，原存档未修改')
         state = demo.Session(integer(data["seed"], -(2 ** 63), 2 ** 63 - 1, "seed"), ruleset=ruleset)
@@ -179,6 +188,15 @@ class SessionCodec:
             if schema_version >= 3 and 'technique' not in record:
                 raise ValueError('棋子缺少教学记录')
             result.technique = techniques.validate_learning(sid, record.get('technique'), ruleset=ruleset)
+            if choices:
+                locked = record.get('evolution_locked')
+                if type(locked) is not bool:
+                    raise ValueError('棋子缺少有效的暂缓进化记录')
+                if locked and (demo.pokedex().next_evolution(sid) is None or sid in demo.shop_mod.TRADE_EVOLUTIONS):
+                    raise ValueError('该形态不能暂缓普通进化')
+                result.evolution_locked = locked
+            elif 'evolution_locked' in record:
+                raise ValueError('旧规则不能包含暂缓进化记录')
             held.update(sources)
             return result
 
@@ -217,7 +235,7 @@ class SessionCodec:
                     seat.grid[pos] = piece(owned)
                 normalized_board = [{**o, 'uid': o.get('uid'), 'technique': o.get('technique')}
                                     for o in record['board']]
-                if [owned_record(o) for o in seat.board] != normalized_board:
+                if [owned_record(o, choices) for o in seat.board] != normalized_board:
                     raise ValueError("棋盘格位与棋子顺序不一致")
                 seat.refresh_j = integer(record["refresh_j"], 0, 1000000, "refresh_j")
                 if type(record["shop_locked"]) is not bool:

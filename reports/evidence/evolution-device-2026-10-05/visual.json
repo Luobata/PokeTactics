@@ -1,0 +1,270 @@
+{
+  "kind": "native-canvas-from-three-key-snapshots",
+  "sources_sha256": {
+    "tools/acceptance/device_renderer.js": "097e9b4b1747d3844b55ffe33f32beb239f4faa0a100349926e82c97a4e4b4e7",
+    "tools/acceptance/device_controls.py": "2fd112608a6f91c04eb15dcd09c52fc2551cebcf8a23eb36d35c3f4ee6ec9907",
+    "tests/test_evolution_device.py": "46ba128e221e45cc6214bd957876b636242a616ab371f860f29b2e8be5ba76c8",
+    "tools/acceptance/demo.py": "f32f9f7f29e5148e487c126609af7bd895c3d608187d79b0e39b6b3c2cd8a93f",
+    "tools/acceptance/evolution_device_capture.js": "5dd74bacce28b30e7fb04e473bf34bb6b5a2d4415b8666768912d3cf586be5af"
+  },
+  "outputs": [
+    {
+      "snapshot": "auto-inheritance-cancel-commit-01-tactical-v5-prep.json",
+      "snapshot_sha256": "9ed1bd737b04f48a9b54e277237b45986f0b4e912db006c41a3175dd236bb01c",
+      "png": "auto-inheritance-cancel-commit-01-tactical-v5-prep.png",
+      "png_sha256": "af71a85f93f778422b53300c5efc37fa1fe92bac96fbdd5d2028bbbe6b5f31a8",
+      "width": 240,
+      "height": 320,
+      "page": "prep"
+    },
+    {
+      "snapshot": "auto-inheritance-cancel-commit-02-two-materials-before-preview.json",
+      "snapshot_sha256": "60552f6a5bb1b63ae9777442b321394d0e7c511e3c0bc8c01eee6447ce6f8fbd",
+      "png": "auto-inheritance-cancel-commit-02-two-materials-before-preview.png",
+      "png_sha256": "61c4db5ad03ab2ecd5b699ca97e7c04f8ba4e448c2b21f3181ad87fcf6de3286",
+      "width": 240,
+      "height": 320,
+      "page": "prep"
+    },
+    {
+      "snapshot": "auto-inheritance-cancel-commit-03-buy-evolution-preview.json",
+      "snapshot_sha256": "8e69f79dfc2d87c0874ce779910b31b6459160d02a0a8e87ecb2947642927ec3",
+      "png": "auto-inheritance-cancel-commit-03-buy-evolution-preview.png",
+      "png_sha256": "2125c5c0a699eb80f6d5b811c499f149eed61efa57ed98b0d7f1b1e3ce04a73c",
+      "width": 240,
+      "height": 320,
+      "page": "evolution_buy"
+    },
+    {
+      "snapshot": "auto-inheritance-cancel-commit-04-buy-evolution-full-detail.json",
+      "snapshot_sha256": "5282196523f789a0113a9981a41496c0e8f9410f03bc2bdfa3e898fe02f43e67",
+      "png": "auto-inheritance-cancel-commit-04-buy-evolution-full-detail.png",
+      "png_sha256": "241727dc3f582ab9012e4c262136a237db1e384b27fdb2860a526406c5009e26",
+      "width": 240,
+      "height": 320,
+      "page": "detail"
+    },
+    {
+      "snapshot": "auto-inheritance-cancel-commit-05-auto-confirm-default-cancel.json",
+      "snapshot_sha256": "2e20680e1819c24a8413e61845f5089529ade8acd0a9de1f52249f0d34ee9827",
+      "png": "auto-inheritance-cancel-commit-05-auto-confirm-default-cancel.png",
+      "png_sha256": "f6f63daedade3780b05ef1cf5c84683ba3db3ab1645695f26247d1dbd23652e8",
+      "width": 240,
+      "height": 320,
+      "page": "confirm"
+    },
+    {
+      "snapshot": "auto-inheritance-cancel-commit-06-auto-cancel-zero-resource-change.json",
+      "snapshot_sha256": "a67705cb1ad6498bb42574058255a8b6363108a05196010bb17cc259d0e3f4fd",
+      "png": "auto-inheritance-cancel-commit-06-auto-cancel-zero-resource-change.png",
+      "png_sha256": "b573df6cb8454314e950e8b42be26cf741e829d32be6337a84d67a8b2158edb6",
+      "width": 240,
+      "height": 320,
+      "page": "evolution_buy"
+    },
+    {
+      "snapshot": "auto-inheritance-cancel-commit-07-auto-evolution-committed.json",
+      "snapshot_sha256": "268f0bedc86f99565953c4da8e429424e046109465d83c8d5dee429189a35e4e",
+      "png": "auto-inheritance-cancel-commit-07-auto-evolution-committed.png",
+      "png_sha256": "02a1f8eb627ff09c162ad06d473524d8d370e17fd61a53d9af1b3cb19143b50b",
+      "width": 240,
+      "height": 320,
+      "page": "prep"
+    },
+    {
+      "snapshot": "auto-inheritance-cancel-commit-08-duplicate-release-safe.json",
+      "snapshot_sha256": "b2826c07dcc900cd159a481a3dbb84dc4c0c105d715bd4072a9f8458de2253b9",
+      "png": "auto-inheritance-cancel-commit-08-duplicate-release-safe.png",
+      "png_sha256": "68047f15c3436d032daf9a7f7e2cc11e03f9015b34999d5b929361c726269960",
+      "width": 240,
+      "height": 320,
+      "page": "shop"
+    },
+    {
+      "snapshot": "defer-persist-manual-terminal-01-defer-preview-two-options.json",
+      "snapshot_sha256": "1e5f81d763a4015447d96be2832d904040f41aa2681c8a44632964885bc1393f",
+      "png": "defer-persist-manual-terminal-01-defer-preview-two-options.png",
+      "png_sha256": "c29b89e64c35bb093d9ecf407700e3618fecca1bbb9a1cd51daa6e9976980260",
+      "width": 240,
+      "height": 320,
+      "page": "evolution_buy"
+    },
+    {
+      "snapshot": "defer-persist-manual-terminal-02-defer-confirm-default-cancel.json",
+      "snapshot_sha256": "e34dfeab7505ae4b9083bffc30f0bb926b8507859eb99475287b4b9862ec2d6e",
+      "png": "defer-persist-manual-terminal-02-defer-confirm-default-cancel.png",
+      "png_sha256": "f411a965cd2201bd776d16ee5b9137de6a84510da19202f16a2dc179e58e02d1",
+      "width": 240,
+      "height": 320,
+      "page": "confirm"
+    },
+    {
+      "snapshot": "defer-persist-manual-terminal-03-defer-cancel-zero-resource-change.json",
+      "snapshot_sha256": "69a43e84dd3f69ec2ddb8800a54674a6f9ad2f6eb5d299dee79612e2e1fa70b0",
+      "png": "defer-persist-manual-terminal-03-defer-cancel-zero-resource-change.png",
+      "png_sha256": "a8c0f86f32c7b25a2063a9fb6811306dc04f38f50141caaa299cc27fec7ab948",
+      "width": 240,
+      "height": 320,
+      "page": "evolution_buy"
+    },
+    {
+      "snapshot": "defer-persist-manual-terminal-04-defer-three-locked-copies.json",
+      "snapshot_sha256": "baa3ddabcb593ff79cd9de3f98bee32cdca31d37fe74e7f80a00bb6926cb01c0",
+      "png": "defer-persist-manual-terminal-04-defer-three-locked-copies.png",
+      "png_sha256": "495c946864bacbdd24000457fc73d03002c078d26ff3f5ef1a8519b8248ded8b",
+      "width": 240,
+      "height": 320,
+      "page": "prep"
+    },
+    {
+      "snapshot": "defer-persist-manual-terminal-05-locks-restored-after-restart.json",
+      "snapshot_sha256": "b541fb33e5010772d3f7ca4b21e4b4cddaae3645ca067a733534cd0d91bb24aa",
+      "png": "defer-persist-manual-terminal-05-locks-restored-after-restart.png",
+      "png_sha256": "495c946864bacbdd24000457fc73d03002c078d26ff3f5ef1a8519b8248ded8b",
+      "width": 240,
+      "height": 320,
+      "page": "prep"
+    },
+    {
+      "snapshot": "defer-persist-manual-terminal-06-piece-menu-eight-rows.json",
+      "snapshot_sha256": "9954ab007a7a4d4c680867fa5cb8d215d04c2840efdd7de985e64ede5af01e99",
+      "png": "defer-persist-manual-terminal-06-piece-menu-eight-rows.png",
+      "png_sha256": "825aa7af50442c036bc6bf4a375897403091edc5dbed93d2e76c71bef3b9d662",
+      "width": 240,
+      "height": 320,
+      "page": "piece"
+    },
+    {
+      "snapshot": "defer-persist-manual-terminal-07-manual-one-step-preview.json",
+      "snapshot_sha256": "05231ccf46d97fde282c221c8bebabe9e456e4fbeba08f4f6524cd867bab1713",
+      "png": "defer-persist-manual-terminal-07-manual-one-step-preview.png",
+      "png_sha256": "e3539a7960d80b94bfa77752e8a244d4f4ef986a7d0615ff07afd002b2098f30",
+      "width": 240,
+      "height": 320,
+      "page": "evolution_piece"
+    },
+    {
+      "snapshot": "defer-persist-manual-terminal-08-manual-full-detail.json",
+      "snapshot_sha256": "b4d8e19ef7a43591b704574e1aeebfe628b751e2556f9d5756b39f1d8761934e",
+      "png": "defer-persist-manual-terminal-08-manual-full-detail.png",
+      "png_sha256": "a834598ded06150defddb5968ac80399b9dc941abc6df235c24e2fd99899e07f",
+      "width": 240,
+      "height": 320,
+      "page": "detail"
+    },
+    {
+      "snapshot": "defer-persist-manual-terminal-09-manual-confirm-default-cancel.json",
+      "snapshot_sha256": "79dc21960b410881824cb2cb48ca5c0bef2cec960ff3308fa39dc04773358462",
+      "png": "defer-persist-manual-terminal-09-manual-confirm-default-cancel.png",
+      "png_sha256": "fd78616df600c1cab2e6349a91a69245ec8a335929a322112a1dd9bb33d2ef5f",
+      "width": 240,
+      "height": 320,
+      "page": "confirm"
+    },
+    {
+      "snapshot": "defer-persist-manual-terminal-10-manual-one-step-committed.json",
+      "snapshot_sha256": "220b2f6492c735158c5c467a92b59052d95b0a090ab6625801f5f0b0e3d8985c",
+      "png": "defer-persist-manual-terminal-10-manual-one-step-committed.png",
+      "png_sha256": "5a4f1bb98979a7514e3034b976bd323f35f84ed5bcace33c60b67c0318420386",
+      "width": 240,
+      "height": 320,
+      "page": "prep"
+    },
+    {
+      "snapshot": "defer-persist-manual-terminal-11-terminal-piece-menu-no-lock.json",
+      "snapshot_sha256": "1aa00ffd743030a26c552bb21bd3990e217c51f402d6a3525730ae3792f52d27",
+      "png": "defer-persist-manual-terminal-11-terminal-piece-menu-no-lock.png",
+      "png_sha256": "147b5cc728c7b44304d547ace72379259f7ecf0a2a8f5133965715f3ecdb25b7",
+      "width": 240,
+      "height": 320,
+      "page": "piece"
+    },
+    {
+      "snapshot": "defer-persist-manual-terminal-12-terminal-detail-page.json",
+      "snapshot_sha256": "59a32852b0618d60d779b9ba6206b1f3dcf430338314603bafd8f0ad964807f2",
+      "png": "defer-persist-manual-terminal-12-terminal-detail-page.png",
+      "png_sha256": "f2d35ae320b25199f2796f10fa27c45da9af570d71e45b0abf19c0c10efe9d98",
+      "width": 240,
+      "height": 320,
+      "page": "detail"
+    },
+    {
+      "snapshot": "defer-persist-manual-terminal-13-terminal-detail-page.json",
+      "snapshot_sha256": "0f0cc32f19626ba862c00408b35220be8b75fe6d29a895a267b172e8c9235644",
+      "png": "defer-persist-manual-terminal-13-terminal-detail-page.png",
+      "png_sha256": "742bbbc1b33ba889b8ae6c8b4ac142806f95443dca554b14e34e930b839033ce",
+      "width": 240,
+      "height": 320,
+      "page": "detail"
+    },
+    {
+      "snapshot": "unlock-relock-suppressed-buy-01-all-three-locked.json",
+      "snapshot_sha256": "a9a68270299674c45c3f9f07274a649d9d9bff8ae14e1b52561f3a03f0b6c2bd",
+      "png": "unlock-relock-suppressed-buy-01-all-three-locked.png",
+      "png_sha256": "aafc7d7cae8354a474d13e4382cea074bad02f0f0f5ceeba75ee93efdc75e43d",
+      "width": 240,
+      "height": 320,
+      "page": "prep"
+    },
+    {
+      "snapshot": "unlock-relock-suppressed-buy-02-unlock-confirm-default-cancel.json",
+      "snapshot_sha256": "56930b5151ca60ef7898f401af19f20ce801364dc07828a5493f089f5cc72e85",
+      "png": "unlock-relock-suppressed-buy-02-unlock-confirm-default-cancel.png",
+      "png_sha256": "48625414102165b6ecfdc7b6e6392e1478bc3e8100f64759ba627b8bb2808274",
+      "width": 240,
+      "height": 320,
+      "page": "confirm"
+    },
+    {
+      "snapshot": "unlock-relock-suppressed-buy-03-unlock-cancel-zero-lock-change.json",
+      "snapshot_sha256": "60c76c56fdefc520244a566867ede438e5cd1c5207d51887e73dec7c60f44309",
+      "png": "unlock-relock-suppressed-buy-03-unlock-cancel-zero-lock-change.png",
+      "png_sha256": "99b1aab724112710922f48cc4087966709657d1ec62d405fbd44793436af26d2",
+      "width": 240,
+      "height": 320,
+      "page": "piece"
+    },
+    {
+      "snapshot": "unlock-relock-suppressed-buy-04-one-instance-unlocked.json",
+      "snapshot_sha256": "86aee3a8cb69967b98ef591a1698496681a885a7f9941738e39394bd1cea9d5e",
+      "png": "unlock-relock-suppressed-buy-04-one-instance-unlocked.png",
+      "png_sha256": "aafc7d7cae8354a474d13e4382cea074bad02f0f0f5ceeba75ee93efdc75e43d",
+      "width": 240,
+      "height": 320,
+      "page": "prep"
+    },
+    {
+      "snapshot": "unlock-relock-suppressed-buy-05-mixed-locks-restored.json",
+      "snapshot_sha256": "d45f7d35c7ea75d5122cdbc95986f1637aea4e5f8af7a4a32d22b467996349c5",
+      "png": "unlock-relock-suppressed-buy-05-mixed-locks-restored.png",
+      "png_sha256": "aafc7d7cae8354a474d13e4382cea074bad02f0f0f5ceeba75ee93efdc75e43d",
+      "width": 240,
+      "height": 320,
+      "page": "prep"
+    },
+    {
+      "snapshot": "unlock-relock-suppressed-buy-06-all-locks-restored-by-user.json",
+      "snapshot_sha256": "dcc55fd39376b0b6ccaad151222695419b430d858c0521e5c14524379d20510b",
+      "png": "unlock-relock-suppressed-buy-06-all-locks-restored-by-user.png",
+      "png_sha256": "aafc7d7cae8354a474d13e4382cea074bad02f0f0f5ceeba75ee93efdc75e43d",
+      "width": 240,
+      "height": 320,
+      "page": "prep"
+    },
+    {
+      "snapshot": "unlock-relock-suppressed-buy-07-locked-copies-suppress-automatic-combine.json",
+      "snapshot_sha256": "acce33c8d350fd95f87632cd49b07d6f3960ae17e6e9e2dfc0c45f6d46d2839f",
+      "png": "unlock-relock-suppressed-buy-07-locked-copies-suppress-automatic-combine.png",
+      "png_sha256": "efcbad005d40949480b54e3011d6b1c0ad2c3d5d1cda7023505a76de1b982dab",
+      "width": 240,
+      "height": 320,
+      "page": "prep"
+    }
+  ],
+  "errors": [],
+  "limits": [
+    "Production renderer of captured three-key state; screenshots replay snapshots and do not perform new game actions.",
+    "PC presentation only; no physical-device or human timed-play claim.",
+    "Sprites loaded through read-only local server; no real save changes."
+  ]
+}
