@@ -1,0 +1,401 @@
+{
+  "identity_checks": 55,
+  "checks": [
+    {
+      "a": "garden",
+      "b": "battery",
+      "seed": 2026100580000,
+      "event_count": 317,
+      "event_sha256": "9a4e1ef65817f0890f9db72ef9d92c33ef1f69f71d90354f3c7a934f11b763b1"
+    },
+    {
+      "a": "garden",
+      "b": "dive",
+      "seed": 2026100580000,
+      "event_count": 460,
+      "event_sha256": "7f3e69949fac936754025f1b98a28bf7fbf268387c0243b317a29a97bf37f4d9"
+    },
+    {
+      "a": "garden",
+      "b": "disrupt",
+      "seed": 2026100580000,
+      "event_count": 464,
+      "event_sha256": "8dc025b2392160fc3bcf750b9234040ec99d35295449cc4872aea5ad6c005913"
+    },
+    {
+      "a": "garden",
+      "b": "ghost_guard_active",
+      "seed": 2026100580000,
+      "event_count": 481,
+      "event_sha256": "ea16c33f170674bfaf7832bf6497a1912bf47e653bc7fc9a7943145240746267"
+    },
+    {
+      "a": "garden",
+      "b": "sun",
+      "seed": 2026100580000,
+      "event_count": 407,
+      "event_sha256": "4721963169da3c52093a54c2eadba0922e5b7d9d81384bbe6ca85f00af1e49e5"
+    },
+    {
+      "a": "garden",
+      "b": "sun_control",
+      "seed": 2026100580000,
+      "event_count": 439,
+      "event_sha256": "30d0406db6bbb8d995cd67c5e561b1439280b897af593c0caedec2a410a5aac4"
+    },
+    {
+      "a": "garden",
+      "b": "rain",
+      "seed": 2026100580000,
+      "event_count": 621,
+      "event_sha256": "e85d979a3f7699a28448b48ab1406edb139e2f26aa62301b4c60fa783dd0663e"
+    },
+    {
+      "a": "garden",
+      "b": "rain_garden",
+      "seed": 2026100580000,
+      "event_count": 691,
+      "event_sha256": "f75972a11bbba92935c402f71b2f95e26fc797caec15d3f38285e4276a56600d"
+    },
+    {
+      "a": "garden",
+      "b": "disrupt_healing_needle",
+      "seed": 2026100580000,
+      "event_count": 410,
+      "event_sha256": "dc09f1a7fa1b94375342d4d8ac47a04e382e9f9da1333108ac2ce4473e27f796"
+    },
+    {
+      "a": "garden",
+      "b": "disrupt_reversed_rows",
+      "seed": 2026100580000,
+      "event_count": 497,
+      "event_sha256": "bf345b554e34c9186acb19cd5de300d3a86f50f1b0cb2d0533cbf68f178eedfe"
+    },
+    {
+      "a": "battery",
+      "b": "dive",
+      "seed": 2026100580000,
+      "event_count": 231,
+      "event_sha256": "1bf0bec8ebb44bdd7a3bf7cccb74bd0b2cc808c25702aa2dd0229f2b34265db0"
+    },
+    {
+      "a": "battery",
+      "b": "disrupt",
+      "seed": 2026100580000,
+      "event_count": 232,
+      "event_sha256": "41bafc17aa5186fbc24a35bff5700c5b19fdb9e8ec1d19e22bf43dba74a54a9f"
+    },
+    {
+      "a": "battery",
+      "b": "ghost_guard_active",
+      "seed": 2026100580000,
+      "event_count": 376,
+      "event_sha256": "88a67e3c81483841ade998d6ecabd4338e7cca1a8c4441aea3d2d0f9b58f434e"
+    },
+    {
+      "a": "battery",
+      "b": "sun",
+      "seed": 2026100580000,
+      "event_count": 258,
+      "event_sha256": "bae86520d88b0c7a1c88ddc0f536487b316933713eb5721979042e3a6dc23517"
+    },
+    {
+      "a": "battery",
+      "b": "sun_control",
+      "seed": 2026100580000,
+      "event_count": 249,
+      "event_sha256": "7c3fba8805abe8a1dd9c833aad7618fede5a2cd1520b0042b8b8c625eb30cef3"
+    },
+    {
+      "a": "battery",
+      "b": "rain",
+      "seed": 2026100580000,
+      "event_count": 345,
+      "event_sha256": "37843a0478d738336d51021e38189169a61c822048d18d88b544091faeb6e977"
+    },
+    {
+      "a": "battery",
+      "b": "rain_garden",
+      "seed": 2026100580000,
+      "event_count": 336,
+      "event_sha256": "746e4d62e5aa85f97a83d55d1e8cd7a8c6342cf37e6dbec3d430a4423645994d"
+    },
+    {
+      "a": "battery",
+      "b": "disrupt_healing_needle",
+      "seed": 2026100580000,
+      "event_count": 232,
+      "event_sha256": "7f50ee39780d7f5422293e8d935ad652c9458c91b2ac17a4e320c3f54c933388"
+    },
+    {
+      "a": "battery",
+      "b": "disrupt_reversed_rows",
+      "seed": 2026100580000,
+      "event_count": 210,
+      "event_sha256": "a8d80f80bafeec3a0e15da462d6b74a61d59d55330844282565a8503ea2d2627"
+    },
+    {
+      "a": "dive",
+      "b": "disrupt",
+      "seed": 2026100580000,
+      "event_count": 272,
+      "event_sha256": "a21ce959e39c993a01b4f6bbf35cdd4884d5d62b4ac0d74a77cd58aca6f79926"
+    },
+    {
+      "a": "dive",
+      "b": "ghost_guard_active",
+      "seed": 2026100580000,
+      "event_count": 458,
+      "event_sha256": "0a74b15fdb4b6f19b0da7e97c04bfac48411649c6b977369e9d129f412eb1d2f"
+    },
+    {
+      "a": "dive",
+      "b": "sun",
+      "seed": 2026100580000,
+      "event_count": 291,
+      "event_sha256": "d01867065a726023d180909c16fc03b2256f40630e5ea70afffcd4648fced828"
+    },
+    {
+      "a": "dive",
+      "b": "sun_control",
+      "seed": 2026100580000,
+      "event_count": 288,
+      "event_sha256": "a9c52958ae329d6d4ea5506113ec869b49e3cb08c60d2a14056b6eb077f15164"
+    },
+    {
+      "a": "dive",
+      "b": "rain",
+      "seed": 2026100580000,
+      "event_count": 318,
+      "event_sha256": "a6e756985e06563266b94fd3b96a534683216da4f24531f0592e1ccb29e10ed8"
+    },
+    {
+      "a": "dive",
+      "b": "rain_garden",
+      "seed": 2026100580000,
+      "event_count": 390,
+      "event_sha256": "f9ce504452c4bea195b3299ce47a4aef02e72aafebd89958d32240a9c11ec69d"
+    },
+    {
+      "a": "dive",
+      "b": "disrupt_healing_needle",
+      "seed": 2026100580000,
+      "event_count": 281,
+      "event_sha256": "865be2b7e79fb1ae456176244f477540031316688e719e2cb7e5f1c9a6246a01"
+    },
+    {
+      "a": "dive",
+      "b": "disrupt_reversed_rows",
+      "seed": 2026100580000,
+      "event_count": 213,
+      "event_sha256": "b09c90d23fc7a57edf82ee55c0eeb2e7d79f57b42772b167946d8d8ea9bca4fe"
+    },
+    {
+      "a": "disrupt",
+      "b": "ghost_guard_active",
+      "seed": 2026100580000,
+      "event_count": 355,
+      "event_sha256": "7113b94d410200310ea58112cdc0f7f3a07142e17d1a2c541fa9306f4faadb1c"
+    },
+    {
+      "a": "disrupt",
+      "b": "sun",
+      "seed": 2026100580000,
+      "event_count": 263,
+      "event_sha256": "edd8496ffbf744cf10056dd45285ef9296004530b09c630e738b893e5bcc033a"
+    },
+    {
+      "a": "disrupt",
+      "b": "sun_control",
+      "seed": 2026100580000,
+      "event_count": 243,
+      "event_sha256": "9b8bab507d524f7528cde3e5a27c08277aee03804eebc32bae88d1ac9033fd12"
+    },
+    {
+      "a": "disrupt",
+      "b": "rain",
+      "seed": 2026100580000,
+      "event_count": 380,
+      "event_sha256": "56bb4fd00794a00dd7a8cabf2445254ff08fb75791154f8606c0c132890d1ec9"
+    },
+    {
+      "a": "disrupt",
+      "b": "rain_garden",
+      "seed": 2026100580000,
+      "event_count": 449,
+      "event_sha256": "211b997553f52afe3abd34d2c1e92c1acf23b74865ced20a1b5106fec18cfff4"
+    },
+    {
+      "a": "disrupt",
+      "b": "disrupt_healing_needle",
+      "seed": 2026100580000,
+      "event_count": 268,
+      "event_sha256": "10f13fdbfe652caab8f3ed95d673c5657d844a93f1f447ac8f3c378189187fa4"
+    },
+    {
+      "a": "disrupt",
+      "b": "disrupt_reversed_rows",
+      "seed": 2026100580000,
+      "event_count": 253,
+      "event_sha256": "c884406077f4cf6a3781667410db110731e7014ff3958f7a6943c67094ae6e17"
+    },
+    {
+      "a": "ghost_guard_active",
+      "b": "sun",
+      "seed": 2026100580000,
+      "event_count": 381,
+      "event_sha256": "efac2cd20ed845dbf7acbb945c4815c7f0609a7dadfeb9d6e4d127332f54d411"
+    },
+    {
+      "a": "ghost_guard_active",
+      "b": "sun_control",
+      "seed": 2026100580000,
+      "event_count": 417,
+      "event_sha256": "bb481de22e2345d6ae925b0850aa21e66389f4b9c906d93ef07ce27724576c6e"
+    },
+    {
+      "a": "ghost_guard_active",
+      "b": "rain",
+      "seed": 2026100580000,
+      "event_count": 621,
+      "event_sha256": "db428d3a9bb54b2084d0aa28a1aadde7b36435fd2cf680bdd112d496cd4f547a"
+    },
+    {
+      "a": "ghost_guard_active",
+      "b": "rain_garden",
+      "seed": 2026100580000,
+      "event_count": 550,
+      "event_sha256": "a73738b3668fa0f6c3eaca7162554a2ee67ac793bda04acfc213504830483627"
+    },
+    {
+      "a": "ghost_guard_active",
+      "b": "disrupt_healing_needle",
+      "seed": 2026100580000,
+      "event_count": 347,
+      "event_sha256": "d71e9c7d720e1e260eb220d2543d7e477af577649b24f53144b42c137cf5295a"
+    },
+    {
+      "a": "ghost_guard_active",
+      "b": "disrupt_reversed_rows",
+      "seed": 2026100580000,
+      "event_count": 411,
+      "event_sha256": "53efbc0beb04fbcb0b2ab3a531a3f6c7608d41a2e5bac4871b42a6a7960aeca4"
+    },
+    {
+      "a": "sun",
+      "b": "sun_control",
+      "seed": 2026100580000,
+      "event_count": 253,
+      "event_sha256": "288901e64252d0178729be16ec870c718f48a0d2184364563b9c6e6e021249d7"
+    },
+    {
+      "a": "sun",
+      "b": "rain",
+      "seed": 2026100580000,
+      "event_count": 363,
+      "event_sha256": "9d205e35624c4c7b1ee01e1c69ca93b0ec1cf9d47f482a05cf27d73ace8080c9"
+    },
+    {
+      "a": "sun",
+      "b": "rain_garden",
+      "seed": 2026100580000,
+      "event_count": 399,
+      "event_sha256": "551e1cf4cec9d98207706278f82c6935905f378bb38870ef315f529832a76a7e"
+    },
+    {
+      "a": "sun",
+      "b": "disrupt_healing_needle",
+      "seed": 2026100580000,
+      "event_count": 263,
+      "event_sha256": "867aae199f5c1e23f2845c5b3ce307984a1147bf2e0d8e6e0c4bb81eadaaf194"
+    },
+    {
+      "a": "sun",
+      "b": "disrupt_reversed_rows",
+      "seed": 2026100580000,
+      "event_count": 301,
+      "event_sha256": "199abb208158ad405eb4040cbc9d61ccd16009f61803a2e43e57fe90048f2086"
+    },
+    {
+      "a": "sun_control",
+      "b": "rain",
+      "seed": 2026100580000,
+      "event_count": 364,
+      "event_sha256": "373b6f3acce756d1e6f8134f0fa71236202eb207bf78a00770e6b3fe4f47d1f3"
+    },
+    {
+      "a": "sun_control",
+      "b": "rain_garden",
+      "seed": 2026100580000,
+      "event_count": 413,
+      "event_sha256": "554f56637c248af4c253d2360b3093feed8042c3ab40db105b5eb3390c5bdbb5"
+    },
+    {
+      "a": "sun_control",
+      "b": "disrupt_healing_needle",
+      "seed": 2026100580000,
+      "event_count": 239,
+      "event_sha256": "f42d64c001f1f54e0ced4e76ed453951204ade433ff0868617869911547ae0e1"
+    },
+    {
+      "a": "sun_control",
+      "b": "disrupt_reversed_rows",
+      "seed": 2026100580000,
+      "event_count": 273,
+      "event_sha256": "e7e20196647bd169bcd0c18ad7817aad8fefcae5dfb7d3908bc768718ec1f3bd"
+    },
+    {
+      "a": "rain",
+      "b": "rain_garden",
+      "seed": 2026100580000,
+      "event_count": 674,
+      "event_sha256": "d2046375fc074afbc5148e663b14bcb957aeb9c67363cebc86e5974070351069"
+    },
+    {
+      "a": "rain",
+      "b": "disrupt_healing_needle",
+      "seed": 2026100580000,
+      "event_count": 372,
+      "event_sha256": "cc7624474f19003ad479cfff8567ff485c26f9a2886eddaac2420440ab81627f"
+    },
+    {
+      "a": "rain",
+      "b": "disrupt_reversed_rows",
+      "seed": 2026100580000,
+      "event_count": 383,
+      "event_sha256": "b59e2b5faa69b79e661b055b7245c08daf9449960af614ca990737665713b641"
+    },
+    {
+      "a": "rain_garden",
+      "b": "disrupt_healing_needle",
+      "seed": 2026100580000,
+      "event_count": 391,
+      "event_sha256": "7eea68e971980928ef379f6687d09c5ed9c13bd5e30a04a7a2ba22620b8105f9"
+    },
+    {
+      "a": "rain_garden",
+      "b": "disrupt_reversed_rows",
+      "seed": 2026100580000,
+      "event_count": 396,
+      "event_sha256": "b1140ac97744e0ac91aeba0e02824fc294801b382187b5b193ad4e6d4f5e9b0d"
+    },
+    {
+      "a": "disrupt_healing_needle",
+      "b": "disrupt_reversed_rows",
+      "seed": 2026100580000,
+      "event_count": 258,
+      "event_sha256": "e5455176ad15800287f145a4959dd48109e89b6fd2a2cd6576b44d52f2efdb7d"
+    }
+  ],
+  "exact_events_match": true,
+  "stable_result_projection_match": true,
+  "unit_fingerprints_match": true,
+  "source_hashes_match": true,
+  "original_banks_unchanged": true,
+  "initial_verification_failure": {
+    "assertion": "full result dict equality",
+    "reason": "result.units holds distinct Unit instances; authoritative values and events were equal",
+    "product_failure": false,
+    "resolution": "Compare winner/duration/survivors, team unit fingerprints and complete events; verify saved event hashes."
+  }
+}

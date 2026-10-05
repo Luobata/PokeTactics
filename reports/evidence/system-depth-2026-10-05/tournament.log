@@ -1,0 +1,70 @@
+garden vs battery: 100/0/0
+garden vs dive: 29/71/0
+garden vs disrupt: 87/13/0
+garden vs ghost_guard_active: 100/0/0
+garden vs sun: 99/1/0
+garden vs sun_control: 83/17/0
+garden vs rain: 99/1/0
+garden vs rain_garden: 33/67/0
+garden vs disrupt_healing_needle: 71/29/0
+garden vs disrupt_reversed_rows: 43/57/0
+battery vs dive: 0/100/0
+battery vs disrupt: 95/5/0
+battery vs ghost_guard_active: 26/74/0
+battery vs sun: 40/60/0
+battery vs sun_control: 98/2/0
+battery vs rain: 27/73/0
+battery vs rain_garden: 0/100/0
+battery vs disrupt_healing_needle: 97/3/0
+battery vs disrupt_reversed_rows: 97/3/0
+dive vs disrupt: 76/24/0
+dive vs ghost_guard_active: 22/78/0
+dive vs sun: 100/0/0
+dive vs sun_control: 73/27/0
+dive vs rain: 88/12/0
+dive vs rain_garden: 77/23/0
+dive vs disrupt_healing_needle: 97/3/0
+dive vs disrupt_reversed_rows: 100/0/0
+disrupt vs ghost_guard_active: 64/36/0
+disrupt vs sun: 21/79/0
+disrupt vs sun_control: 11/89/0
+disrupt vs rain: 65/35/0
+disrupt vs rain_garden: 7/93/0
+disrupt vs disrupt_healing_needle: 66/34/0
+disrupt vs disrupt_reversed_rows: 2/98/0
+ghost_guard_active vs sun: 0/100/0
+ghost_guard_active vs sun_control: 42/58/0
+ghost_guard_active vs rain: 28/72/0
+ghost_guard_active vs rain_garden: 0/100/0
+ghost_guard_active vs disrupt_healing_needle: 24/76/0
+ghost_guard_active vs disrupt_reversed_rows: 68/32/0
+sun vs sun_control: 37/63/0
+sun vs rain: 54/46/0
+sun vs rain_garden: 1/99/0
+sun vs disrupt_healing_needle: 78/22/0
+sun vs disrupt_reversed_rows: 100/0/0
+sun_control vs rain: 54/46/0
+sun_control vs rain_garden: 17/83/0
+sun_control vs disrupt_healing_needle: 98/2/0
+sun_control vs disrupt_reversed_rows: 52/48/0
+rain vs rain_garden: 0/100/0
+rain vs disrupt_healing_needle: 83/17/0
+rain vs disrupt_reversed_rows: 63/37/0
+rain_garden vs disrupt_healing_needle: 72/28/0
+rain_garden vs disrupt_reversed_rows: 66/34/0
+disrupt_healing_needle vs disrupt_reversed_rows: 19/81/0
+{
+  "roster_count": 84,
+  "source_stable": true,
+  "battles": 11000,
+  "screened_families": [
+    "anti_dive",
+    "battery",
+    "disrupt",
+    "dive",
+    "garden",
+    "rain",
+    "sun"
+  ],
+  "elapsed_seconds": 44.105
+}

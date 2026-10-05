@@ -1,0 +1,25 @@
+{
+  "audit_pass": true,
+  "inventory_roster": 84,
+  "configurations": 11,
+  "families": 7,
+  "independent_seeds_per_pair": 100,
+  "matches": 55,
+  "battles_including_swaps": 11000,
+  "side_swap_failures": 0,
+  "identity_checks": 55,
+  "source_stable": true,
+  "source_hashes_current": true,
+  "original_banks_unchanged": true,
+  "selected_volley_types": 14,
+  "shadowed_volleys": {
+    "ROCK": [
+      "GROUND"
+    ],
+    "STEEL": [
+      "ELECTRIC"
+    ]
+  },
+  "battle_data_unchanged_after_expanding_static_audit": true,
+  "validation_scope": "Inventory and fixed authored team audit only; no runtime changes, live acquisition, whole-roster balance or physical-device claim."
+}

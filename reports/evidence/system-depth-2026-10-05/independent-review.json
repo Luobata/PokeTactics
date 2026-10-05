@@ -1,0 +1,181 @@
+{
+  "schema_version": "independent-reviewer.v1",
+  "review_status": "pass_with_risk",
+  "repo": {
+    "path": "/Users/bytedance/luobata/PokeTactics",
+    "execution_location": "local",
+    "branch": "main",
+    "base_ref": "24090f5caa49dcb95908c7b4f36442300bc5d9a0",
+    "head_ref": "24090f5caa49dcb95908c7b4f36442300bc5d9a0",
+    "commit_range": "dirty worktree on 24090f5",
+    "dirty_state": {
+      "staged": 21,
+      "unstaged": 0,
+      "untracked": 0
+    }
+  },
+  "review": {
+    "session_id": "sess-ffc4bb3f-51f5-4888-b9e4-10123cdffd1c",
+    "run_id": "20261005-095709-0eaed15cef7e",
+    "bundle_path": "/Users/bytedance/luobata/PokeTactics/.ai-review/20261005-095709-0eaed15cef7e/review-bundle.json",
+    "dashboard_url": null,
+    "input_fingerprint": "91169d01ccd4dbc5f237141e4f954fc7681222985cd6f21a7c57278ca251028d",
+    "evidence_manifest_sha256": "ce9f9d4236aaf7c1a4fa978e9b723602f82394908762f4ccbcd5a5190e27e6d8",
+    "created_at": "2026-10-05T09:57:09.050Z",
+    "updated_at": "2026-10-05T10:06:06Z"
+  },
+  "reviewer_agents": [
+    {
+      "agent_id": "/root/review_system_depth",
+      "role": "risk-reviewer",
+      "lifecycle": "reused",
+      "verdict": "pass_with_risk",
+      "bound_scope": "Narrow independent re-review of the corrected staged Batch L delivery and the two findings from run 20261005-093917-6088f38cf25e; substantive evidence reuse is limited to unchanged runtime dependencies and the unchanged final frozen battle artifact. No tracked edits or commits."
+    }
+  ],
+  "findings": [],
+  "resolved_findings": [
+    {
+      "id": "SD-BLOCKER-001",
+      "original_severity": "blocker",
+      "resolution": "resolved",
+      "title": "Durable handoff now separates Batch 11 commit history from staged Batch 12",
+      "evidence_refs": [
+        "docs/next-session-handoff.md:9",
+        "reports/evidence/system-depth-2026-10-05/archive/handoff-before-fix.md:9",
+        "reports/evidence/system-depth-2026-10-05/archive/manifest-before-handoff-fix.json",
+        "reports/evidence/system-depth-2026-10-05/manifest.json"
+      ],
+      "verification": "Current line 9 states that Batch 11 was reviewed, committed, and pushed as 24090f5 and that Batch 12 plus the updated handoff are the current staged work. The old wording remains archived. Current manifest SHA256 is ce9f9d4236aaf7c1a4fa978e9b723602f82394908762f4ccbcd5a5190e27e6d8; archived pre-fix manifest SHA256 is 1d8518c2f88bfb33166f4145e310c404904fcbd124db4a8d996a68d81fd96802. Only docs/next-session-handoff.md changed among the four delivery sources, and its hash changed from e6dec6186f4e77e5fa73f4e71d438f56aa6fc818e909294c389f0ff292a9469a to bab5a00cd0a50ebe34268abb3700aa68db957e4e0c4b9e5b7630bea48d594add."
+    },
+    {
+      "id": "SD-GAP-001",
+      "original_severity": "evidence_gap",
+      "resolution": "resolved",
+      "title": "Pre/post volley-expansion battle equality is now retained and independently bound",
+      "evidence_refs": [
+        "reports/evidence/system-depth-2026-10-05/archive/tournament-before-volley-expansion.json.gz",
+        "reports/evidence/system-depth-2026-10-05/tournament.json.gz",
+        "reports/evidence/system-depth-2026-10-05/expansion-comparison.json"
+      ],
+      "verification": "Pre artifact compressed/raw SHA256 are 2722a2fe7f4e76edf135254c3301110be4a5c5ca57dadb9637cbdfc020cd1eb8 and da509543700fd19e627c90a2b179d954a2ef200e6c16c53dfbb1f19515d4779e; post artifact hashes are 561cae0127ff3c14d7b3b04902c658fcb3e0832dc116c59617d7bdacf510bbe1 and 6c0ccc25202d9aa566974f3e261a2ed3b3e5796130573059262d2b0c939fe2f6. Canonical battle-section SHA256 is 2263b3ca5f2674d406164dbb41ad4e8aec823e249ddca35a05b0a689576cd15a on both sides, and complete Python battle dictionaries compare equal. Both use tactics_v5, HEAD 24090f5, seeds 2026100580000..2026100580099, 55 matches, 100 primary seeds per matchup, 11,000 battles including swaps, 0 swap failures, and 10 screened configurations. Among embedded runtime dependency hashes only tools/acceptance/system_depth_probe.py changed (8df9ed9f... to 44db6587...); expansion-comparison values match recomputation."
+    }
+  ],
+  "checks": [
+    {
+      "name": "current_snapshot_and_bundle_binding",
+      "status": "passed",
+      "command": "git status --short --branch; git rev-parse HEAD; inspect .ai-review/20261005-095709-0eaed15cef7e/review-bundle.json",
+      "evidence_ref": "Branch main at 24090f5caa49dcb95908c7b4f36442300bc5d9a0; bundle and current worktree both cover 21 resulting paths; 21 staged, 0 unstaged, 0 untracked. Bundle SHA256 is 247706cade6e0879f7713c884fb58c96dc93d54e14f27e2ce2c3b37b732501c6."
+    },
+    {
+      "name": "current_manifest_hash_binding",
+      "status": "passed",
+      "command": "Independent SHA256 verification over current manifest entries",
+      "evidence_ref": "4/4 delivery source hashes, 48/48 runtime dependency hashes, and 16/16 evidence hashes match current files. Manifest SHA256 exactly ce9f9d4236aaf7c1a4fa978e9b723602f82394908762f4ccbcd5a5190e27e6d8 and declared input fingerprint exactly 91169d01ccd4dbc5f237141e4f954fc7681222985cd6f21a7c57278ca251028d."
+    },
+    {
+      "name": "blocked_review_preservation",
+      "status": "passed",
+      "command": "SHA256 compare .build/system-depth/independent-review.json with archive copy",
+      "evidence_ref": "Both are byte-for-byte fb5b9dc12ac41ea53e526270ac916466407ee73d8f6fc1ad3d563f5ed8c25be6. The original record was not overwritten."
+    },
+    {
+      "name": "handoff_correction_recheck",
+      "status": "passed",
+      "command": "Compare archived/current handoff line 9 and archived/current delivery source hashes",
+      "evidence_ref": "Current wording accurately distinguishes historical Batch 11 commit 24090f5 from current staged Batch 12; archived wording remains retained; only handoff delivery hash changed."
+    },
+    {
+      "name": "expansion_comparison_recheck",
+      "status": "passed",
+      "command": "Decompress and compare pre/post battle sections; verify expansion-comparison.json values",
+      "evidence_ref": "Complete battle dictionaries are identical and canonical battle hashes match; only probe hash differs among 48 embedded runtime dependencies."
+    },
+    {
+      "name": "substantive_audit_reuse",
+      "status": "passed",
+      "command": "Compare runtime dependency and final frozen tournament hashes from blocked run and corrected run",
+      "evidence_ref": "All 48 runtime dependencies are unchanged from the substantive first review. Final tournament compressed SHA remains 561cae0127ff3c14d7b3b04902c658fcb3e0832dc116c59617d7bdacf510bbe1 and raw SHA remains 6c0ccc25202d9aa566974f3e261a2ed3b3e5796130573059262d2b0c939fe2f6. Game, probe, config, seeds, and final tournament did not change in the correction snapshot."
+    },
+    {
+      "name": "bundle_diff_renderer_drift_assessment",
+      "status": "passed",
+      "command": "Compare resulting bundle/current path sets and manifest-bound current hashes",
+      "evidence_ref": "Bundle raw diff is not byte-identical to git diff --cached because its renderer detects archived handoff as a copy from the modified handoff while Git emits it as a new file. This is copy/rename heuristic drift over the same 21-path resulting tree, not a source mismatch."
+    },
+    {
+      "name": "qualitygate_semantic_completion",
+      "status": "skipped",
+      "command": "Inspect qualitygate.json, qg-repo-readiness.json, qg-runner.json",
+      "evidence_ref": "Local raw/gate output is not treated as semantic completion: no script rule matched, task_complete=false, central repository mutation state is not ready, and runner dependencies including AST/MCP/mutation/gremlins/gomutants/goimports paths are unavailable. No central semantic completion is claimed."
+    },
+    {
+      "name": "broad_or_full_tournament_rerun",
+      "status": "skipped",
+      "command": "Not run by review decision",
+      "evidence_ref": "No broad/full 11,000-battle rerun was performed or needed for this narrow correction: final dependencies and gzip/raw battle hashes are unchanged, and the retained pre/post artifacts resolve the historical equality question. Existing substantive reproduction and replay checks remain reusable."
+    }
+  ],
+  "reuse_rationale": {
+    "source_run_id": "20261005-093917-6088f38cf25e",
+    "eligible": true,
+    "basis": [
+      "All 48 runtime dependency hashes are unchanged from the substantive first review.",
+      "Final tournament compressed and raw SHA256 values are unchanged.",
+      "Game/probe/config/seeds/final tournament were unchanged in the handoff-and-evidence correction snapshot.",
+      "The current manifest independently validates all delivery, runtime dependency, and evidence hashes."
+    ],
+    "boundary": "Reuse is for the already-audited substantive system-depth evidence. It does not convert the local QG raw pass into semantic completion or broaden coverage beyond the original fixed-squad and replay scope."
+  },
+  "review_history": [
+    {
+      "run_id": "20261005-093917-6088f38cf25e",
+      "verdict": "blocked",
+      "input_fingerprint": "e18ad9865340fbd0010562c911e7f81c68eddc2e810cf3052a1c5413e21e3342",
+      "evidence_manifest_sha256": "1d8518c2f88bfb33166f4145e310c404904fcbd124db4a8d996a68d81fd96802",
+      "record": ".build/system-depth/independent-review.json",
+      "archive": "reports/evidence/system-depth-2026-10-05/archive/independent-review-blocked.json",
+      "record_sha256": "fb5b9dc12ac41ea53e526270ac916466407ee73d8f6fc1ad3d563f5ed8c25be6"
+    },
+    {
+      "run_id": "20261005-095709-0eaed15cef7e",
+      "verdict": "pass_with_risk",
+      "input_fingerprint": "91169d01ccd4dbc5f237141e4f954fc7681222985cd6f21a7c57278ca251028d",
+      "evidence_manifest_sha256": "ce9f9d4236aaf7c1a4fa978e9b723602f82394908762f4ccbcd5a5190e27e6d8",
+      "record": ".build/system-depth/independent-review-final.json"
+    }
+  ],
+  "next_actions": [
+    "Proceed only with the explicit residual-risk boundary: central semantic QG, mutation coverage, physical-device/human operation, and broader balance claims remain separate follow-up work.",
+    "If any runtime dependency, final tournament hash, seed/config, or reviewed source changes, invalidate this reuse rationale and create a fresh substantive review run."
+  ],
+  "residual_risks": [
+    "Local QualityGate raw/gate output is not semantic completion: no matched script rule, task_complete=false, and central/AST/mutation-related dependencies remain unavailable.",
+    "The league uses fixed authored squads only; it is not a full-roster search and makes no live recruitment, AI-opponent, human-duration, or physical-device claim.",
+    "Pointwise Wilson intervals are exploratory and unadjusted for 55 comparisons.",
+    "Whole-configuration outcomes do not prove weather, guard, or item causation.",
+    "Deep 4/6 synergy and volley strength remain insufficiently tested by this evidence set.",
+    "Side swaps verify bounded projections and outcomes, not coordinate-normalized full swapped event streams."
+  ],
+  "scope": {
+    "included": [
+      "Narrow re-review of corrected staged Batch L at 24090f5",
+      "Resolution checks for SD-BLOCKER-001 and SD-GAP-001",
+      "Current bundle/manifest/status hash binding",
+      "Reuse audit for unchanged runtime dependencies and final tournament artifact"
+    ],
+    "excluded": [
+      "Tracked delivery/evidence edits or commits",
+      "Broad or full 11,000-battle rerun",
+      "New substantive system-depth tests beyond retained/recomputed evidence",
+      "Central QG onboarding or dependency installation",
+      "Full-roster, live recruitment, AI, human, or physical-device validation"
+    ]
+  },
+  "gaps": [
+    "The optional byte-level reconstruction of the pre-fix README from the first bundle was not performed. It is not needed to resolve either finding because all current manifest hashes and the relevant archived handoff, blocked review, manifest, and pre/post tournament artifacts are independently bound.",
+    "Central semantic QG, mutation, physical-device, and human-operation coverage remain outside this package."
+  ],
+  "semantic_summary": "Both blockers and evidence gaps from the prior blocked run are resolved. The corrected staged package remains pass_with_risk because substantive system-depth evidence is reusable under unchanged dependency and frozen-battle bindings, while semantic-QG and broad balance/generalization limitations remain explicit."
+}

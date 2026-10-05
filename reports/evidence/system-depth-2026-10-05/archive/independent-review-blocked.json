@@ -1,0 +1,187 @@
+{
+  "schema_version": "independent-reviewer.v1",
+  "review_status": "blocked",
+  "repo": {
+    "path": "/Users/bytedance/luobata/PokeTactics",
+    "execution_location": "local",
+    "branch": "main",
+    "base_ref": "24090f5caa49dcb95908c7b4f36442300bc5d9a0",
+    "head_ref": "24090f5caa49dcb95908c7b4f36442300bc5d9a0",
+    "commit_range": "dirty worktree on 24090f5",
+    "dirty_state": {
+      "staged": 16,
+      "unstaged": 0,
+      "untracked": 0
+    }
+  },
+  "review": {
+    "session_id": "sess-ffc4bb3f-51f5-4888-b9e4-10123cdffd1c",
+    "run_id": "20261005-093917-6088f38cf25e",
+    "bundle_path": "/Users/bytedance/luobata/PokeTactics/.ai-review/20261005-093917-6088f38cf25e/review-bundle.json",
+    "dashboard_url": null,
+    "input_fingerprint": "e18ad9865340fbd0010562c911e7f81c68eddc2e810cf3052a1c5413e21e3342",
+    "evidence_manifest_sha256": "1d8518c2f88bfb33166f4145e310c404904fcbd124db4a8d996a68d81fd96802",
+    "created_at": "2026-10-05T09:39:17.997Z",
+    "updated_at": "2026-10-05T17:49:58.020889+08:00"
+  },
+  "reviewer_agents": [
+    {
+      "agent_id": "/root/review_system_depth",
+      "role": "risk-reviewer",
+      "lifecycle": "created",
+      "verdict": "blocked",
+      "bound_scope": "Independent source/raw-evidence audit of staged Batch L system-depth claims; no tracked edits or commits."
+    }
+  ],
+  "findings": [
+    {
+      "id": "SD-BLOCKER-001",
+      "severity": "blocker",
+      "title": "Handoff commit association is stale after adding Batch L",
+      "evidence_refs": [
+        "docs/next-session-handoff.md:9",
+        "git HEAD 24090f5 = committed Batch K/eleventh batch; current staged Batch L modifies the same handoff",
+        ".ai-review/20261005-093917-6088f38cf25e/raw/target.diff"
+      ],
+      "file": "docs/next-session-handoff.md",
+      "line": 9,
+      "hunk_id": "F-docs-next-session-handoff.md",
+      "required_action": "Reword the durable handoff to state that Batch 11 was committed with its prior handoff version at 24090f5, while Batch 12 is the current staged follow-up. Then refresh the manifest/delivery hashes because this file is one of the four bound delivery sources.",
+      "re_review_condition": "Staged sentence accurately distinguishes historical Batch 11 commit 24090f5 from the new Batch L commit; regenerated manifest hash and input fingerprint match the corrected staged tree; fresh git status/diff review has no unexpected tracked changes."
+    },
+    {
+      "id": "SD-GAP-001",
+      "severity": "evidence_gap",
+      "title": "Historical 'battle data unchanged after static-audit expansion' assertion lacks a retained before/after artifact",
+      "evidence_refs": [
+        "reports/evidence/system-depth-2026-10-05/README.md:15",
+        "reports/evidence/system-depth-2026-10-05/acceptance.json:battle_data_unchanged_after_expanding_static_audit",
+        "reports/evidence/system-depth-2026-10-05/tournament.json.gz"
+      ],
+      "file": "reports/evidence/system-depth-2026-10-05/README.md",
+      "line": 15,
+      "hunk_id": "F-reports-evidence-system-depth-README",
+      "required_action": "Either retain/recompute a hash binding the pre-expansion and post-expansion battle payloads, or narrow the sentence to the independently supported statement that the current frozen battle payload reproduces from the current source/config/seeds.",
+      "re_review_condition": "Corrected evidence text or attached pre/post hashes support the exact historical-equality claim; manifest and evidence hashes are refreshed together."
+    }
+  ],
+  "checks": [
+    {
+      "name": "git_and_bundle_diff_binding",
+      "status": "passed",
+      "command": "git status --short --branch; git rev-parse HEAD; cmp <(git diff --cached --no-ext-diff --no-color --binary) .ai-review/20261005-093917-6088f38cf25e/raw/target.diff",
+      "evidence_ref": "HEAD 24090f5; 16 staged / 0 unstaged / 0 untracked; bundle diff byte-identical (cmp exit 0)."
+    },
+    {
+      "name": "manifest_delivery_dependency_evidence_hashes",
+      "status": "passed",
+      "command": "python3 hashlib verification over reports/evidence/system-depth-2026-10-05/manifest.json",
+      "evidence_ref": "4/4 delivery hashes, 48/48 runtime dependency hashes, and 11/11 evidence hashes match current files; manifest SHA256=1d8518c2f88bfb33166f4145e310c404904fcbd124db4a8d996a68d81fd96802; declared input_fingerprint=e18ad9865340fbd0010562c911e7f81c68eddc2e810cf3052a1c5413e21e3342."
+    },
+    {
+      "name": "gzip_dual_hash_and_log_alignment",
+      "status": "passed",
+      "command": "gzip.decompress + SHA256 + parse tournament.log",
+      "evidence_ref": "compressed SHA 561cae0127ff3c14d7b3b04902c658fcb3e0832dc116c59617d7bdacf510bbe1, 387076 bytes; raw SHA 6c0ccc25202d9aa566974f3e261a2ed3b3e5796130573059262d2b0c939fe2f6, 5130662 bytes; all 55 log rows align to raw matchup totals."
+    },
+    {
+      "name": "python_compile",
+      "status": "passed",
+      "command": "python3 -m py_compile tools/acceptance/system_depth_probe.py tools/acceptance/counterplay_probe.py tools/acceptance/weather_ability_probe.py",
+      "evidence_ref": "Exit 0."
+    },
+    {
+      "name": "live_inventory_reproduction",
+      "status": "passed",
+      "command": "python3 tools/acceptance/system_depth_probe.py --output .build/system-depth/independent-inventory.json",
+      "evidence_ref": "Current inventory value-equal to frozen inventory; source_stable=true."
+    },
+    {
+      "name": "current_system_counts",
+      "status": "passed",
+      "command": "Independent imports of roster/skills/abilities/partners/techniques/items/synergy/combo plus inventory recomputation",
+      "evidence_ref": "84 forms / 35 families; tiers 34/32/18; 8 signature + 76 generic; 14 total skill primitives; 22 selected native move IDs and Abra fallback 63; 2 species abilities; 5 partners; 6 teachings with compatibility 41/18/84/84/17/23; 8 components, 13 finished items, 36 recipes with 22 evo-stone defaults; 17 defined / 16 pool synergy types; 37 endpoints = 33 evolved + 4 natural."
+    },
+    {
+      "name": "volley_reachability_and_selection",
+      "status": "passed",
+      "command": "Independent two-carrier duplicate search calling combo.volley_pick over current roster",
+      "evidence_ref": "52 defined, 49 duplicate-reachable, and 39 distinct-form threshold states; 16 types can reach highest count with duplicates, 11 can with six distinct forms; actual volley_pick witnesses exist for 14 types; ROCK is always shadowed by GROUND and STEEL by ELECTRIC; no unresolved carrier type."
+    },
+    {
+      "name": "raw_combination_counts",
+      "status": "passed",
+      "command": "Recompute C(84,6) and tier-count solutions to population=6 and direct cost=15",
+      "evidence_ref": "406481544 arbitrary six-distinct-form compositions and 7376640 exact-15-gold compositions; report correctly labels both as non-playability bounds."
+    },
+    {
+      "name": "strict_fixture_budget_and_loadout_invariants",
+      "status": "passed",
+      "command": "Import CONFIGS/PIECES and independently validate species, tier cost, item, teaching, position, and partner constraints",
+      "evidence_ref": "11/11 configs: six distinct species, direct cost exactly 15, exactly three valid finished items, exactly one compatible teaching, six unique legal positions rows 2-3, and a deployed partner-family member."
+    },
+    {
+      "name": "raw_tournament_structure_and_statistics",
+      "status": "passed",
+      "command": "Selective gzip JSON audit without dumping trial arrays",
+      "evidence_ref": "11 fixtures, 55 unique pairs, exactly 100 expected seeds 2026100580000..099 per pair; 5500 primaries and 11000 including source-executed swaps; every matchup wins+losses+draws=100, scores/medians/Wilson intervals recompute; 0 failed swap flags; 10 configs and all 7 authored families pass the predeclared cross-family tradeoff screen; same-family variants are excluded."
+    },
+    {
+      "name": "small_live_tournament_reproduction",
+      "status": "passed",
+      "command": "python3 tools/acceptance/system_depth_probe.py --battle --seeds 2 --output .build/system-depth/independent-battle-2.json",
+      "evidence_ref": "All 55 first-seed winner/duration/metrics/event-hash/event-count/swap records exactly match frozen raw; 220 live battles including swaps; 0 swap failures."
+    },
+    {
+      "name": "replay_projection_and_event_digest",
+      "status": "passed",
+      "command": "Reconstruct each of the 55 first-seed matchups twice from frozen source/config/seed",
+      "evidence_ref": "55/55 exact event streams stable across two fresh constructions; winner/duration/survivors and unit projections stable; all winner/duration/event_count/event_sha256 values match frozen raw and replay references."
+    },
+    {
+      "name": "mutation_and_bank_freeze",
+      "status": "passed",
+      "command": "Staged diff review + manifest dependency verification + current bank SHA comparison",
+      "evidence_ref": "No sim/, data/, or battle/gameplay source in staged diff; all 48 runtime dependency hashes current; both original user bank files match 379620cb... and b822125f...; probe records source and bank hashes unchanged across run."
+    },
+    {
+      "name": "qualitygate_semantic_completion",
+      "status": "skipped",
+      "command": "Inspect qualitygate.json, qg-repo-readiness.json, qg-runner.json",
+      "evidence_ref": "Local raw/gate pass has no matching script rule and task_complete=false; repo external capsule not ready; runner lacks ast_lint, mutation gate, gremlins, gomutants, and goimports. Correctly not claimed as semantic coverage."
+    }
+  ],
+  "next_actions": [
+    "Correct docs/next-session-handoff.md:9 and regenerate bound manifest/fingerprint for the corrected delivery files.",
+    "Either evidence-bind the historical pre/post static-audit battle equality or narrow that sentence to current-source reproduction.",
+    "Re-run this review against the corrected staged diff; substantive system-depth checks can be reused only while the 48 runtime dependencies and raw gzip hashes remain unchanged."
+  ],
+  "residual_risks": [
+    "Side-swap verification compares winner, duration, and bounded unit fingerprints, not a coordinate-normalized full swapped event stream; the report does not claim the latter.",
+    "The 11 squads are authored candidates, not a full-roster search or live acquisition/AI/human simulation; the 60% plus Wilson-lower-bound screen is explicitly exploratory and unadjusted for 55 comparisons.",
+    "Whole-configuration outcomes do not establish weather, guard, or item causation; existing causal statements come from earlier separate evidence, not this Batch L league.",
+    "Deep 4/6 synergy and volley strength remain insufficiently covered because the strong fixed teams are dominated by shallow interactions.",
+    "No central semantic QG, mutation, physical-device, or human-operation evidence is provided."
+  ],
+  "scope": {
+    "included": [
+      "Staged Batch L worktree diff at 24090f5",
+      "docs/29-system-depth-and-augments.md",
+      "reports/system-depth-batch-l-2026-10-05.md",
+      "tools/acceptance/system_depth_probe.py",
+      "reports/evidence/system-depth-2026-10-05/*"
+    ],
+    "excluded": [
+      "Tracked source/evidence edits or commits",
+      "Broad full test-suite execution",
+      "New gameplay implementation",
+      "Central QG onboarding or dependency installation",
+      "Full 100-seed rerun beyond exact first-seed reproduction and a 2-seed all-matchup rerun"
+    ]
+  },
+  "gaps": [
+    "Live recruitment/component availability, progression, evolution funding, AI, human duration, physical device, and full-roster balance are outside evidence.",
+    "The current report's bounded augment recommendation is design guidance only; tactics_v6 and augment features are not implemented or acceptance-tested."
+  ],
+  "semantic_summary": "Substantive Batch L system-depth evidence passes independent checks. The blocked verdict is limited to the stale durable handoff commit association; one additional evidence gap concerns an unsupported historical before/after equality sentence."
+}

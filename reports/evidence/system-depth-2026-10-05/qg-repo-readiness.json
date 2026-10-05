@@ -1,0 +1,75 @@
+{
+  "command": "repo inspect",
+  "status": "pass",
+  "steps": [
+    {
+      "name": "repository_state",
+      "ok": false,
+      "detail": "quality-gate repo ensure /Users/bytedance/luobata/PokeTactics --repo Luobata/PokeTactics --domain microservice-backend",
+      "inspect": {
+        "kind": "qualitygate.bootstrap.inspect",
+        "workspace": "/Users/bytedance/luobata/PokeTactics",
+        "is_git_repo": true,
+        "remote_url": "https://github.com/Luobata/PokeTactics",
+        "repo": "Luobata/PokeTactics",
+        "repo_source": "argument",
+        "domain": "microservice-backend",
+        "domain_source": "default",
+        "repository_state_ready": false,
+        "capsule_ready": false,
+        "mutation_config_ready": false,
+        "local_cli_ready": "unknown",
+        "local_runner_ready": "unknown",
+        "readiness_scope": "central_repository_state_only",
+        "local_preflight": {
+          "required": false,
+          "reason": "inspect_workspace checks central external repository state only; the Agent Host must verify the coding devbox CLI and runner locally",
+          "commands": [
+            "command -v quality-gate",
+            "quality-gate runner check"
+          ]
+        },
+        "integration_mode": "external_capsule",
+        "state_home": "/Users/bytedance/.qualitygate",
+        "state_files": {
+          "external_capsule": {
+            "path": "/Users/bytedance/.qualitygate/repos/Luobata_PokeTactics/qualitygate.json",
+            "exists": false
+          },
+          "external_agent_protocol": {
+            "path": "/Users/bytedance/.qualitygate/repos/Luobata_PokeTactics/agent-protocol.md",
+            "exists": false
+          },
+          "external_mutation_config": {
+            "path": "/Users/bytedance/.qualitygate/repos/Luobata_PokeTactics/mutation/ut-mutation-gate.json",
+            "exists": false
+          },
+          "external_gremlins_config": {
+            "path": "/Users/bytedance/.qualitygate/repos/Luobata_PokeTactics/mutation/gremlins.yaml",
+            "exists": false
+          },
+          "external_mutation_env_resolution": {
+            "path": "/Users/bytedance/.qualitygate/repos/Luobata_PokeTactics/mutation/env-resolution.json",
+            "exists": false
+          },
+          "state_dir": {
+            "path": "/Users/bytedance/.qualitygate/repos/Luobata_PokeTactics",
+            "exists": false
+          }
+        },
+        "missing": [
+          "external_capsule",
+          "external_agent_protocol",
+          "external_mutation_config",
+          "external_gremlins_config",
+          "external_mutation_env_resolution"
+        ],
+        "recommended_command": "quality-gate repo ensure /Users/bytedance/luobata/PokeTactics --repo Luobata/PokeTactics --domain microservice-backend",
+        "next_action": "run_ensure_onboarded"
+      }
+    }
+  ],
+  "next": [
+    "quality-gate repo ensure /Users/bytedance/luobata/PokeTactics --repo Luobata/PokeTactics --domain microservice-backend"
+  ]
+}

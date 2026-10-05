@@ -1,0 +1,84 @@
+{
+  "schema_version": "independent-reviewer.v1",
+  "review_status": "pass_with_risk",
+  "session_id": "sess-ffc4bb3f-51f5-4888-b9e4-10123cdffd1c",
+  "review_run_id": "20261005-095709-0eaed15cef7e",
+  "reviewer_agent_status": "reused",
+  "reviewer_agent": "/root/review_system_depth",
+  "review_bundle": ".ai-review/20261005-095709-0eaed15cef7e/review-bundle.json",
+  "input_fingerprint": "91169d01ccd4dbc5f237141e4f954fc7681222985cd6f21a7c57278ca251028d",
+  "manifest_path": "reports/evidence/system-depth-2026-10-05/manifest.json",
+  "manifest_sha256": "ce9f9d4236aaf7c1a4fa978e9b723602f82394908762f4ccbcd5a5190e27e6d8",
+  "independent_review_path": "reports/evidence/system-depth-2026-10-05/independent-review.json",
+  "independent_review_sha256": "f5703ec913a6a6d95fd6c8775b1a4ab58c70b66f32768222ca41fcebc2da1961",
+  "blockers": [],
+  "risks": [
+    "Local QualityGate raw/gate output is not semantic completion: no matched script rule, task_complete=false, and central/AST/mutation-related dependencies remain unavailable.",
+    "The league uses fixed authored squads only; it is not a full-roster search and makes no live recruitment, AI-opponent, human-duration, or physical-device claim.",
+    "Pointwise Wilson intervals are exploratory and unadjusted for 55 comparisons.",
+    "Whole-configuration outcomes do not prove weather, guard, or item causation.",
+    "Deep 4/6 synergy and volley strength remain insufficiently tested by this evidence set.",
+    "Side swaps verify bounded projections and outcomes, not coordinate-normalized full swapped event streams."
+  ],
+  "evidence_gaps": [
+    "The optional byte-level reconstruction of the pre-fix README from the first bundle was not performed. It is not needed to resolve either finding because all current manifest hashes and the relevant archived handoff, blocked review, manifest, and pre/post tournament artifacts are independently bound.",
+    "Central semantic QG, mutation, physical-device, and human-operation coverage remain outside this package."
+  ],
+  "resolved_findings": [
+    "SD-BLOCKER-001",
+    "SD-GAP-001"
+  ],
+  "review_history": [
+    {
+      "run_id": "20261005-093917-6088f38cf25e",
+      "verdict": "blocked",
+      "input_fingerprint": "e18ad9865340fbd0010562c911e7f81c68eddc2e810cf3052a1c5413e21e3342",
+      "evidence_manifest_sha256": "1d8518c2f88bfb33166f4145e310c404904fcbd124db4a8d996a68d81fd96802",
+      "record": ".build/system-depth/independent-review.json",
+      "archive": "reports/evidence/system-depth-2026-10-05/archive/independent-review-blocked.json",
+      "record_sha256": "fb5b9dc12ac41ea53e526270ac916466407ee73d8f6fc1ad3d563f5ed8c25be6"
+    },
+    {
+      "run_id": "20261005-095709-0eaed15cef7e",
+      "verdict": "pass_with_risk",
+      "input_fingerprint": "91169d01ccd4dbc5f237141e4f954fc7681222985cd6f21a7c57278ca251028d",
+      "evidence_manifest_sha256": "ce9f9d4236aaf7c1a4fa978e9b723602f82394908762f4ccbcd5a5190e27e6d8",
+      "record": ".build/system-depth/independent-review-final.json"
+    }
+  ],
+  "reviewer_lifecycle": [
+    {
+      "agent": "/root/review_system_depth",
+      "lifecycle": "created",
+      "run": "20261005-093917-6088f38cf25e",
+      "verdict": "blocked"
+    },
+    {
+      "agent": "/root/review_system_depth",
+      "lifecycle": "reused",
+      "run": "20261005-095709-0eaed15cef7e",
+      "verdict": "pass_with_risk",
+      "reason": "Narrow verification of original findings; unchanged substantive probe/dependency/battle hashes."
+    }
+  ],
+  "checks_rerun": [
+    "Final delivery/dependency/evidence/gzip/fingerprint hashes match",
+    "Final indexed bytes match frozen delivery files",
+    "Python compile passed",
+    "Staged whitespace check passed",
+    "Original two save banks unchanged"
+  ],
+  "qualitygate": {
+    "local_raw_gate": "pass",
+    "local_gate": "pass",
+    "agent_action_task_complete": false,
+    "central_semantic_consumed": false,
+    "mutation_executed": false,
+    "applicable_script_rule_coverage": false
+  },
+  "publication": "Exact independent .build record published without edits; manifest excludes final records to avoid circular hashes. Archived initial blocked verdict remains historical.",
+  "next_actions": [
+    "Authorized commit and push of the system-depth audit; no gameplay or augment implementation claim."
+  ],
+  "generated_at": "2026-10-05T10:08:04.436296+00:00"
+}

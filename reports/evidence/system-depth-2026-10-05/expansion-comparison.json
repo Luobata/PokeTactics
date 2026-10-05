@@ -1,0 +1,16 @@
+{
+  "pre_artifact": "archive/tournament-before-volley-expansion.json.gz",
+  "post_artifact": "tournament.json.gz",
+  "pre_raw_sha256": "da509543700fd19e627c90a2b179d954a2ef200e6c16c53dfbb1f19515d4779e",
+  "post_raw_sha256": "6c0ccc25202d9aa566974f3e261a2ed3b3e5796130573059262d2b0c939fe2f6",
+  "canonical_serialization": "json.dumps(battle, ensure_ascii=False, sort_keys=True, separators=(comma,colon)).encode(utf8)",
+  "pre_battle_sha256": "2263b3ca5f2674d406164dbb41ad4e8aec823e249ddca35a05b0a689576cd15a",
+  "post_battle_sha256": "2263b3ca5f2674d406164dbb41ad4e8aec823e249ddca35a05b0a689576cd15a",
+  "battle_sections_equal": true,
+  "changed_runtime_dependencies": [
+    "tools/acceptance/system_depth_probe.py"
+  ],
+  "pre_probe_sha256": "8df9ed9fed032b1094c55e5cb93b23eec099f6ab55d3341bd5eefb48787ce9ef",
+  "post_probe_sha256": "44db658734fa9229a493475379fec4208396435e2ef933cc7eb5f7a0b69ee4d5",
+  "limits": "Archived pre-expansion artifact is historical. Its old probe source is not archived; final source can reproduce the identical battle section, and all sim/data/helper hashes other than the audit probe match."
+}

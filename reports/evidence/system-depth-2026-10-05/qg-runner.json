@@ -1,0 +1,181 @@
+{
+  "command": "runner check",
+  "status": "fail",
+  "runner_state": {
+    "state_home": "/Users/bytedance/.qualitygate",
+    "runtime_home": "/private/var/folders/qd/m9_7dd6d5cz75c374dn9v2_c0000gn/T/qualitygate-501",
+    "runtime_home_exists": false,
+    "runtime_parent_writable": true,
+    "binary_dir": "/Users/bytedance/.qualitygate/runner/bin",
+    "binary_dir_exists": true,
+    "binary_dir_writable": true
+  },
+  "steps": [
+    {
+      "name": "dependency_pyyaml",
+      "ok": true,
+      "source": "python",
+      "managed_path": "",
+      "managed_required": false,
+      "detail": "python module yaml; version=6.0.3; required=>=6.0.0,<7.0.0; source=python",
+      "fix": "python3 -m pip install --break-system-packages 'PyYAML>=6.0.0,<7.0.0'; python3 -c 'import yaml; print(yaml.__version__)'"
+    },
+    {
+      "name": "dependency_mcp",
+      "ok": true,
+      "source": "python",
+      "managed_path": "",
+      "managed_required": false,
+      "detail": "python module mcp; version=1.30.0; required=installed; source=python",
+      "fix": "python3 -m pip install --break-system-packages mcp; python3 -c 'import mcp; print(mcp.__file__)'"
+    },
+    {
+      "name": "dependency_uvicorn",
+      "ok": true,
+      "source": "python",
+      "managed_path": "",
+      "managed_required": false,
+      "detail": "python module uvicorn; version=0.52.4; required=installed; source=python",
+      "fix": "python3 -m pip install --break-system-packages uvicorn; python3 -c 'import uvicorn; print(uvicorn.__file__)'"
+    },
+    {
+      "name": "dependency_ut_mutation_gate",
+      "ok": false,
+      "source": "python",
+      "managed_path": "",
+      "managed_required": false,
+      "detail": "python module bytedance.ut_mutation_gate; version=unknown; required=>=0.0.16; source=python",
+      "fix": "python3 -m pip install --break-system-packages 'bytedance.ut_mutation_gate>=0.0.16'; python3 -c 'import bytedance.ut_mutation_gate; print(bytedance.ut_mutation_gate.__version__)'"
+    },
+    {
+      "name": "dependency_gremlins",
+      "ok": false,
+      "source": "missing",
+      "managed_path": "/Users/bytedance/.qualitygate/runner/bin/gremlins",
+      "managed_required": false,
+      "detail": "; version=unknown; required=>=0.6.0; source=missing",
+      "fix": "quality-gate runner install && quality-gate runner check",
+      "managed_diagnostic": {
+        "path": "/Users/bytedance/.qualitygate/runner/bin/gremlins",
+        "state_home": "/Users/bytedance/.qualitygate",
+        "exists": false,
+        "is_file": false,
+        "executable": false,
+        "mode": "",
+        "size_bytes": null,
+        "parent_exists": true,
+        "parent_writable": true
+      }
+    },
+    {
+      "name": "dependency_gomutants",
+      "ok": false,
+      "source": "missing",
+      "managed_path": "/Users/bytedance/.qualitygate/runner/bin/gomutants",
+      "managed_required": false,
+      "detail": "; version=unknown; required=>=0.4.0; source=missing",
+      "fix": "quality-gate runner install && quality-gate runner check",
+      "managed_diagnostic": {
+        "path": "/Users/bytedance/.qualitygate/runner/bin/gomutants",
+        "state_home": "/Users/bytedance/.qualitygate",
+        "exists": false,
+        "is_file": false,
+        "executable": false,
+        "mode": "",
+        "size_bytes": null,
+        "parent_exists": true,
+        "parent_writable": true
+      }
+    },
+    {
+      "name": "dependency_goimports",
+      "ok": false,
+      "source": "missing",
+      "managed_path": "/Users/bytedance/.qualitygate/runner/bin/goimports",
+      "managed_required": false,
+      "detail": "; version=unknown; required=>=0.24.0; source=missing",
+      "fix": "quality-gate runner install && quality-gate runner check",
+      "managed_diagnostic": {
+        "path": "/Users/bytedance/.qualitygate/runner/bin/goimports",
+        "state_home": "/Users/bytedance/.qualitygate",
+        "exists": false,
+        "is_file": false,
+        "executable": false,
+        "mode": "",
+        "size_bytes": null,
+        "parent_exists": true,
+        "parent_writable": true
+      }
+    },
+    {
+      "name": "dependency_golintx",
+      "ok": true,
+      "source": "managed",
+      "managed_path": "/Users/bytedance/.qualitygate/runner/bin/golintx",
+      "managed_required": false,
+      "detail": "/Users/bytedance/.qualitygate/runner/bin/golintx; version=unknown; required=installed; source=managed",
+      "fix": "quality-gate runner install && quality-gate runner check",
+      "managed_diagnostic": {
+        "path": "/Users/bytedance/.qualitygate/runner/bin/golintx",
+        "state_home": "/Users/bytedance/.qualitygate",
+        "exists": true,
+        "is_file": true,
+        "executable": true,
+        "mode": "0o755",
+        "size_bytes": 55417480,
+        "parent_exists": true,
+        "parent_writable": true
+      }
+    },
+    {
+      "name": "ast_lint",
+      "ok": false,
+      "detail": "/Users/bytedance/.qualitygate/runner/bin/ast_lint; missing",
+      "source": "/Users/bytedance/.local/lib/python3.12/site-packages/qualitygate/_assets/analyzers/astlint/cmd/ast_lint/main.go",
+      "source_sha256": "f01457accad09f1f2664bf55caccc80675812edfb09eddb05f9ef022aa7384f5",
+      "fix": "quality-gate runner install && quality-gate runner check"
+    }
+  ],
+  "env_hints": [
+    {
+      "name": "QG_REPO",
+      "required_when": "generate-out or runtime generation is executed without --repo",
+      "detail": "repository key used to resolve registry/repo rules, for example org/repo_name"
+    },
+    {
+      "name": "QG_CODEBASE_TOKEN or CODEBASE_TOKEN",
+      "required_when": "script rules need to fetch private Codebase modules, such as go.mod default-branch checks",
+      "detail": "personal access token; keep it in the local shell, CI secret store, host secret store, or ~/.qualitygate/shared.env"
+    },
+    {
+      "name": "QG_LOCAL_ENV",
+      "required_when": "MCP server should load developer-local secrets or binary overrides",
+      "detail": "optional path to a git-ignored local env file; external capsule/router mode normally uses QG_SHARED_ENV"
+    },
+    {
+      "name": "CODE_TOKEN",
+      "required_when": "GitLab/Code review comment collection is enabled",
+      "detail": "personal access token consumed by qualitygate/adapters/gitlab/collect_cr_comments.py"
+    },
+    {
+      "name": "QG_GREMLINS_BIN / QG_GOMUTANTS_BIN / QG_GOIMPORTS_BIN / QG_GOLINTX_BIN",
+      "required_when": "a managed runner binary needs an explicit external override",
+      "detail": "Go tools and golintx install under ~/.qualitygate/runner/bin by default; set the matching variable only for an externally managed binary"
+    },
+    {
+      "name": "QG_AST_BIN / QG_UT_MUTATION_GATE_BIN",
+      "required_when": "runner binaries are managed outside their default locations",
+      "detail": "binary overrides for the shared AST runner and mutation-gate integration"
+    },
+    {
+      "name": "QG_GO_COMPILE_TIMEOUT_SEC / QG_GO_COMPILE_TIMEOUTS_JSON / QG_GO_DEPENDENCY_DOWNLOAD_TIMEOUT_SEC / QG_GO_COMPILE_MAX_PARALLELISM",
+      "required_when": "changed Go packages need a compile resource or changed-module download budget override",
+      "detail": "compile uses registry repository profiles before the mode default; each Go build defaults to at most 8 package workers without changing MR job concurrency; RGO preparation and changed-module downloads have independent budgets and all explicit timeout overrides are bounded to 30-3600 seconds"
+    },
+    {
+      "name": "QG_UPLOAD_ENDPOINT / QG_UPLOAD_TOKEN",
+      "required_when": "Repair Ledger runs should be collected by the BOE platform",
+      "detail": "host install writes BOE MVP defaults into ~/.qualitygate/shared.env; override them for another ingestion target"
+    }
+  ]
+}

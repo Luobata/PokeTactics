@@ -1,0 +1,4327 @@
+{
+  "schema": "system-depth-v1",
+  "ruleset": "tactics_v5",
+  "head": "24090f5caa49dcb95908c7b4f36442300bc5d9a0",
+  "sources_sha256": {
+    "data/moves.json": "c325a820ad613604fb583b643eddd4f7f772081c10f308f5417184e888975d09",
+    "data/pokemon.json": "626a0d126e54826c431f03e88865fbbf0283d6950d462de4ca0d278942780142",
+    "data/typechart.json": "23a30c150ad4ddbc149bcb00179db103bc4ba16e72b51ecc36a1c1e01b26ac0e",
+    "sim/abilities.py": "f4d10c7a2db11c0f5ed99aaada352f89f9cc8b85152eca0a5f3c6ac1b4afba97",
+    "sim/bots.py": "26c4ae07ccad3f9b9f27be99f50a1c91fa7ca5f9c5b1f4e99c6e14283a5ee0dd",
+    "sim/build_rules.py": "346e5820e5a43b34f525bd44aa39f98ad22f346b0d5161bc7c74e00dd963b317",
+    "sim/combat.py": "2f36d9f32f363bbaa8ca5f2809c25c47b792a20d6b3e990f8591d98fd32103ba",
+    "sim/combo.py": "1d44d13521260a8d88a93901a3638e92504fc500012dcc746ed0a8c9b944faae",
+    "sim/data.py": "c55d8ac5bbc29598e0d8421671f7aa227d2e42a49b05708c8c4c13d99fa2a05b",
+    "sim/economy.py": "b6ad3cb7bfdecfce499757cc27c813955cb890469abe9d5c14cb29a4a4b9dde4",
+    "sim/experiment_balance.py": "c5813e83352e39bc59773798a0fb4765eb1f78b3b86df376f960be0e3f5cfb0d",
+    "sim/experiment_build_diversity.py": "462b89aeab42dfc5027ea78516d571a35398464252dc99686ee77c5be17d9611",
+    "sim/experiment_combo.py": "fd5f049f483c3f07251a13f8bc13643860adc6db45382c339504ae1b811c5042",
+    "sim/experiment_effectiveness.py": "a7421d9652281232a6eefbaf68bd91fdac243d3d6cfa173850bf3216fe9abf7b",
+    "sim/experiment_items.py": "d3679fa9a1cb80535591e5ff439e78ba32071a4bd4dd2f25c0080c7b361dcde0",
+    "sim/experiment_match.py": "5f9836ae5c80bf9b2987a2480286eb5f49f1f0c70c39430fb89030ee849b89ee",
+    "sim/experiment_matchbalance.py": "406a717d6d3ae43ef37f8fd630965a95c018f06f420bc4af680fa1dbb74f4eb5",
+    "sim/experiment_melee.py": "8d8acfa63ac8a716bca21a1614de9f44b8cab2155d37e999252cb1e1818f5612",
+    "sim/experiment_pacing.py": "97b518027e02b8b074989f60e6797e0e853a71e5dbc9e49c938c567daceda86a",
+    "sim/experiment_partner_budget.py": "340d9947ba1d22ed58a83f1c837c255f3cb8165b9d77b170fa6466618718ac84",
+    "sim/experiment_profiles.py": "c6dc8eb0372e0b03269d0d62117ddaf16a008f3fe6cccaf24aabb2f632f71a1d",
+    "sim/experiment_signatures.py": "b6932906df9098ee79414d4074aabac4ad661701f60b776fa99f2f27a4a968af",
+    "sim/experiment_status.py": "e90bf62a50fabbfc41f40f8c93ab29430ab25292083fd3f4c93c074c29258797",
+    "sim/experiment_synergy.py": "902d5b9b3e47e91452c549a00fe76956ba03df5d3d7ce3f82821cf259a36b8a6",
+    "sim/experiment_tactics.py": "7a8f0c719c04b04c46698d7e3cf7f5e4a69ff3d1fe283735573f16e6a241dd13",
+    "sim/experiment_tiering.py": "53dd43a814429b8a1ab91393cbe6e3df7698384abc2d5446748508b964e43c9c",
+    "sim/experiment_weather.py": "e92cd540740a16523721e2e85e152c50dc5cf57e85cb4cc17fc0f987250f2c14",
+    "sim/items.py": "e3d466cdc5b7a28e6aebff3783407bb4b9d25a6827815cf051e503361f90d4d3",
+    "sim/match.py": "aa5d874c16f404e4ca9f8fede82a0af9497bec4372fe714566c05dae12bd2443",
+    "sim/metagame.py": "6994be25666c92020b4b76ff9c66a23a364764692247522a03372f697b781982",
+    "sim/pacing.py": "7f163aeaf679f16f682d5d6a051c0f1557e9da39f3bd3e860458e9663c0a167f",
+    "sim/partners.py": "02fc8ff77488e11bcb502f69529873986e4da85bfc4be1f941141b69990632c8",
+    "sim/profiles.py": "b1b02ef37b0b9da2eb8427c3807c48c27ee884a3f80830a94af7fbcb6f334759",
+    "sim/prototype.py": "a7893f12990b963d563707648653e7773545f5161db1fad50e0c7cbddcfc176c",
+    "sim/rng.py": "f3132fb0afd84075ac821037461f107c0b2eb81c4d85b0abe760b96b9d9c0b31",
+    "sim/roster.py": "cd73d70615a14c2f9042644fa8e2cd8127fca5917519a68848cae44d4393a04e",
+    "sim/shop.py": "be8265266eee4f9ccd0982f8ef1c2b6d75c11bb11498c7c049b791cbefe60a58",
+    "sim/skills.py": "827d756c5e2f5ad1c28dbb24dbd14241a690c2a9b48350e04d36384d5f897200",
+    "sim/stat_budget.py": "19834bef39384d3b034081ed9198ede1e31e2a7ddb45201d0194b1c8099e6aac",
+    "sim/status.py": "42f7cb524a30487ce9ab8c8dd7703dfeb2e7d02759c34d7a9aa5cb7b2aa2bcc9",
+    "sim/synergy.py": "35d5f7ba6ace375a652a5531859b6a4fd18b0c3a9811ec6c6385adad39e2ef33",
+    "sim/tactics.py": "775315d704c801941de07c2207e990bb06b8476ff90ca5779735fe4874b4c552",
+    "sim/techniques.py": "6878ab4ff8b6a94821ee5a133105c0b360700d258f92265beb1088d1cd01f2fe",
+    "sim/weather.py": "5a9d0e0ff6044225f6bf2591d5af3f176a530171bd67f286a8e3c84e4f5e9703",
+    "sim/weather_control.py": "b0f5998dd9c95563c5c69407849b7362869a71f9c6f05a41c511a6f8a18c11bd",
+    "tools/acceptance/counterplay_probe.py": "d69b5a44a178cc607ac33666ec1b496471c61d8faedafecb0462fb7c93faa477",
+    "tools/acceptance/system_depth_probe.py": "44db658734fa9229a493475379fec4208396435e2ef933cc7eb5f7a0b69ee4d5",
+    "tools/acceptance/weather_ability_probe.py": "2d7ec64d1986e054e61a6add3b0c6b20c8364d3be18af03c117619816e46e1db"
+  },
+  "inventory": {
+    "roster_count": 84,
+    "curated_families": 35,
+    "source_dex_entries": 151,
+    "source_move_entries": 251,
+    "tiers": {
+      "1": 34,
+      "2": 32,
+      "3": 18
+    },
+    "range_counts": {
+      "3": 35,
+      "1": 49
+    },
+    "signature_forms": 8,
+    "generic_forms": 76,
+    "skill_arch_counts": {
+      "double_strike": 20,
+      "charge": 16,
+      "heavy_blow": 26,
+      "volley_shot": 10,
+      "bulwark": 2,
+      "chain_lightning": 1,
+      "mend": 2,
+      "blink_strike": 1,
+      "quake_break": 1,
+      "solar_siphon": 1,
+      "splash": 1,
+      "line_push": 1,
+      "energy_drain": 1,
+      "slam_heal": 1
+    },
+    "role_tag_counts_overlapping": {
+      "output": 77,
+      "dive": 17,
+      "disrupt": 29,
+      "area": 15,
+      "defense": 6,
+      "healing": 4
+    },
+    "generic_engine_roles": {
+      "ranged_dps": 28,
+      "melee_dps": 39,
+      "tank": 9
+    },
+    "distinct_native_move_ids": 22,
+    "generic_fallback_forms": [
+      63
+    ],
+    "behavior_signatures_without_stat_shapes": 80,
+    "same_behavior_signature_groups": [
+      [
+        4,
+        37
+      ],
+      [
+        29,
+        32
+      ],
+      [
+        54,
+        120
+      ],
+      [
+        30,
+        33
+      ]
+    ],
+    "species_rows": [
+      {
+        "sid": 1,
+        "name": "妙蛙种子",
+        "tier": 1,
+        "types": [
+          "GRASS",
+          "POISON"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 76,
+          "name": "solarbeam",
+          "type": "GRASS",
+          "power": 120,
+          "accuracy": 100,
+          "effect": "EFFECT_SOLARBEAM",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 4,
+        "name": "小火龙",
+        "tier": 1,
+        "types": [
+          "FIRE"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 53,
+          "name": "flamethrower",
+          "type": "FIRE",
+          "power": 95,
+          "accuracy": 100,
+          "effect": "EFFECT_BURN_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 7,
+        "name": "杰尼龟",
+        "tier": 1,
+        "types": [
+          "WATER"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 56,
+          "name": "hydro_pump",
+          "type": "WATER",
+          "power": 120,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 10,
+        "name": "绿毛虫",
+        "tier": 1,
+        "types": [
+          "BUG"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 33,
+          "name": "tackle",
+          "type": "NORMAL",
+          "power": 35,
+          "accuracy": 95,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 11,
+        "name": "铁甲蛹",
+        "tier": 1,
+        "types": [
+          "BUG"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 33,
+          "name": "tackle",
+          "type": "NORMAL",
+          "power": 35,
+          "accuracy": 95,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 13,
+        "name": "独角虫",
+        "tier": 1,
+        "types": [
+          "BUG",
+          "POISON"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 40,
+          "name": "poison_sting",
+          "type": "POISON",
+          "power": 15,
+          "accuracy": 100,
+          "effect": "EFFECT_POISON_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 14,
+        "name": "铁壳蛹",
+        "tier": 1,
+        "types": [
+          "BUG",
+          "POISON"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 40,
+          "name": "poison_sting",
+          "type": "POISON",
+          "power": 15,
+          "accuracy": 100,
+          "effect": "EFFECT_POISON_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 16,
+        "name": "波波",
+        "tier": 1,
+        "types": [
+          "NORMAL",
+          "FLYING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 17,
+          "name": "wing_attack",
+          "type": "FLYING",
+          "power": 60,
+          "accuracy": 100,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 17,
+        "name": "比比鸟",
+        "tier": 1,
+        "types": [
+          "NORMAL",
+          "FLYING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 17,
+          "name": "wing_attack",
+          "type": "FLYING",
+          "power": 60,
+          "accuracy": 100,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 21,
+        "name": "烈雀",
+        "tier": 1,
+        "types": [
+          "NORMAL",
+          "FLYING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 65,
+          "name": "drill_peck",
+          "type": "FLYING",
+          "power": 80,
+          "accuracy": 100,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 19,
+        "name": "小拉达",
+        "tier": 1,
+        "types": [
+          "NORMAL"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 158,
+          "name": "hyper_fang",
+          "type": "NORMAL",
+          "power": 80,
+          "accuracy": 90,
+          "effect": "EFFECT_FLINCH_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 25,
+        "name": "皮卡丘",
+        "tier": 1,
+        "types": [
+          "ELECTRIC"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 85,
+          "name": "thunderbolt",
+          "type": "ELECTRIC",
+          "power": 95,
+          "accuracy": 100,
+          "effect": "EFFECT_PARALYZE_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 29,
+        "name": "尼多兰",
+        "tier": 1,
+        "types": [
+          "POISON"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 40,
+          "name": "poison_sting",
+          "type": "POISON",
+          "power": 15,
+          "accuracy": 100,
+          "effect": "EFFECT_POISON_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 32,
+        "name": "尼多朗",
+        "tier": 1,
+        "types": [
+          "POISON"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 40,
+          "name": "poison_sting",
+          "type": "POISON",
+          "power": 15,
+          "accuracy": 100,
+          "effect": "EFFECT_POISON_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 37,
+        "name": "六尾",
+        "tier": 1,
+        "types": [
+          "FIRE"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 53,
+          "name": "flamethrower",
+          "type": "FIRE",
+          "power": 95,
+          "accuracy": 100,
+          "effect": "EFFECT_BURN_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 41,
+        "name": "超音蝠",
+        "tier": 1,
+        "types": [
+          "POISON",
+          "FLYING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 17,
+          "name": "wing_attack",
+          "type": "FLYING",
+          "power": 60,
+          "accuracy": 100,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 43,
+        "name": "走路草",
+        "tier": 1,
+        "types": [
+          "GRASS",
+          "POISON"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 80,
+          "name": "petal_dance",
+          "type": "GRASS",
+          "power": 70,
+          "accuracy": 100,
+          "effect": "EFFECT_RAMPAGE",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 54,
+        "name": "可达鸭",
+        "tier": 1,
+        "types": [
+          "WATER"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "散射",
+          "arch": "volley_shot",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 56,
+          "name": "hydro_pump",
+          "type": "WATER",
+          "power": 120,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "area"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 56,
+        "name": "猴怪",
+        "tier": 1,
+        "types": [
+          "FIGHTING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 238,
+          "name": "cross_chop",
+          "type": "FIGHTING",
+          "power": 100,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 58,
+        "name": "卡蒂狗",
+        "tier": 1,
+        "types": [
+          "FIRE"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 53,
+          "name": "flamethrower",
+          "type": "FIRE",
+          "power": 95,
+          "accuracy": 100,
+          "effect": "EFFECT_BURN_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 60,
+        "name": "蚊香蝌蚪",
+        "tier": 1,
+        "types": [
+          "WATER"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 56,
+          "name": "hydro_pump",
+          "type": "WATER",
+          "power": 120,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 63,
+        "name": "凯西",
+        "tier": 1,
+        "types": [
+          "PSYCHIC"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "散射",
+          "arch": "volley_shot",
+          "tier": "generic"
+        },
+        "move": {
+          "id": null,
+          "name": "generic_volley_shot",
+          "type": "NONE",
+          "power": 40,
+          "accuracy": 100,
+          "effect": null,
+          "damage_stat": "best"
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "area"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 66,
+        "name": "腕力",
+        "tier": 1,
+        "types": [
+          "FIGHTING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 238,
+          "name": "cross_chop",
+          "type": "FIGHTING",
+          "power": 100,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 69,
+        "name": "喇叭芽",
+        "tier": 1,
+        "types": [
+          "GRASS",
+          "POISON"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 75,
+          "name": "razor_leaf",
+          "type": "GRASS",
+          "power": 55,
+          "accuracy": 95,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 74,
+        "name": "小拳石",
+        "tier": 1,
+        "types": [
+          "ROCK",
+          "GROUND"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 89,
+          "name": "earthquake",
+          "type": "GROUND",
+          "power": 100,
+          "accuracy": 100,
+          "effect": "EFFECT_EARTHQUAKE",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 79,
+        "name": "呆呆兽",
+        "tier": 1,
+        "types": [
+          "WATER",
+          "PSYCHIC"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 94,
+          "name": "psychic_m",
+          "type": "PSYCHIC",
+          "power": 90,
+          "accuracy": 100,
+          "effect": "EFFECT_SP_DEF_DOWN_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 81,
+        "name": "小磁怪",
+        "tier": 1,
+        "types": [
+          "ELECTRIC",
+          "STEEL"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "散射",
+          "arch": "volley_shot",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 84,
+          "name": "thundershock",
+          "type": "ELECTRIC",
+          "power": 40,
+          "accuracy": 100,
+          "effect": "EFFECT_PARALYZE_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "area"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 92,
+        "name": "鬼斯",
+        "tier": 1,
+        "types": [
+          "GHOST",
+          "POISON"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 122,
+          "name": "lick",
+          "type": "GHOST",
+          "power": 20,
+          "accuracy": 100,
+          "effect": "EFFECT_PARALYZE_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 111,
+        "name": "独角犀牛",
+        "tier": 1,
+        "types": [
+          "GROUND",
+          "ROCK"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "铁壁",
+          "arch": "bulwark",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 89,
+          "name": "earthquake",
+          "type": "GROUND",
+          "power": 100,
+          "accuracy": 100,
+          "effect": "EFFECT_EARTHQUAKE",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "defense"
+        ],
+        "engine_role": "tank",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 116,
+        "name": "墨海马",
+        "tier": 1,
+        "types": [
+          "WATER"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 56,
+          "name": "hydro_pump",
+          "type": "WATER",
+          "power": 120,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 120,
+        "name": "海星星",
+        "tier": 1,
+        "types": [
+          "WATER"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "散射",
+          "arch": "volley_shot",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 56,
+          "name": "hydro_pump",
+          "type": "WATER",
+          "power": 120,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "area"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 129,
+        "name": "鲤鱼王",
+        "tier": 1,
+        "types": [
+          "WATER"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "散射",
+          "arch": "volley_shot",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 33,
+          "name": "tackle",
+          "type": "NORMAL",
+          "power": 35,
+          "accuracy": 95,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "area"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 133,
+        "name": "伊布",
+        "tier": 1,
+        "types": [
+          "NORMAL"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 36,
+          "name": "take_down",
+          "type": "NORMAL",
+          "power": 90,
+          "accuracy": 85,
+          "effect": "EFFECT_RECOIL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 147,
+        "name": "迷你龙",
+        "tier": 1,
+        "types": [
+          "DRAGON"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 200,
+          "name": "outrage",
+          "type": "DRAGON",
+          "power": 90,
+          "accuracy": 100,
+          "effect": "EFFECT_RAMPAGE",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 2,
+        "name": "妙蛙草",
+        "tier": 2,
+        "types": [
+          "GRASS",
+          "POISON"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 76,
+          "name": "solarbeam",
+          "type": "GRASS",
+          "power": 120,
+          "accuracy": 100,
+          "effect": "EFFECT_SOLARBEAM",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 5,
+        "name": "火恐龙",
+        "tier": 2,
+        "types": [
+          "FIRE"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 53,
+          "name": "flamethrower",
+          "type": "FIRE",
+          "power": 95,
+          "accuracy": 100,
+          "effect": "EFFECT_BURN_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 8,
+        "name": "卡咪龟",
+        "tier": 2,
+        "types": [
+          "WATER"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 56,
+          "name": "hydro_pump",
+          "type": "WATER",
+          "power": 120,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 12,
+        "name": "巴大蝶",
+        "tier": 2,
+        "types": [
+          "BUG",
+          "FLYING"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "散射",
+          "arch": "volley_shot",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 16,
+          "name": "gust",
+          "type": "FLYING",
+          "power": 40,
+          "accuracy": 100,
+          "effect": "EFFECT_GUST",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "area"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 15,
+        "name": "大针蜂",
+        "tier": 2,
+        "types": [
+          "BUG",
+          "POISON"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 41,
+          "name": "twineedle",
+          "type": "BUG",
+          "power": 25,
+          "accuracy": 100,
+          "effect": "EFFECT_POISON_MULTI_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 18,
+        "name": "大比鸟",
+        "tier": 2,
+        "types": [
+          "NORMAL",
+          "FLYING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 17,
+          "name": "wing_attack",
+          "type": "FLYING",
+          "power": 60,
+          "accuracy": 100,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 22,
+        "name": "大嘴雀",
+        "tier": 2,
+        "types": [
+          "NORMAL",
+          "FLYING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 65,
+          "name": "drill_peck",
+          "type": "FLYING",
+          "power": 80,
+          "accuracy": 100,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 20,
+        "name": "拉达",
+        "tier": 2,
+        "types": [
+          "NORMAL"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 158,
+          "name": "hyper_fang",
+          "type": "NORMAL",
+          "power": 80,
+          "accuracy": 90,
+          "effect": "EFFECT_FLINCH_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 26,
+        "name": "雷丘",
+        "tier": 2,
+        "types": [
+          "ELECTRIC"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "十万伏特",
+          "arch": "chain_lightning",
+          "tier": "signature"
+        },
+        "move": {
+          "id": 85,
+          "name": "thunderbolt",
+          "type": "ELECTRIC",
+          "power": 95,
+          "accuracy": 100,
+          "effect": "EFFECT_PARALYZE_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "area"
+        ],
+        "engine_role": "远程连锁电击",
+        "compatible_teachings": [
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 30,
+        "name": "尼多娜",
+        "tier": 2,
+        "types": [
+          "POISON"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 40,
+          "name": "poison_sting",
+          "type": "POISON",
+          "power": 15,
+          "accuracy": 100,
+          "effect": "EFFECT_POISON_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 31,
+        "name": "尼多后",
+        "tier": 2,
+        "types": [
+          "POISON",
+          "GROUND"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "自愈",
+          "arch": "mend",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 40,
+          "name": "poison_sting",
+          "type": "POISON",
+          "power": 15,
+          "accuracy": 100,
+          "effect": "EFFECT_POISON_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "defense",
+          "healing"
+        ],
+        "engine_role": "tank",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 33,
+        "name": "尼多力诺",
+        "tier": 2,
+        "types": [
+          "POISON"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 40,
+          "name": "poison_sting",
+          "type": "POISON",
+          "power": 15,
+          "accuracy": 100,
+          "effect": "EFFECT_POISON_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 34,
+        "name": "尼多王",
+        "tier": 2,
+        "types": [
+          "POISON",
+          "GROUND"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 40,
+          "name": "poison_sting",
+          "type": "POISON",
+          "power": 15,
+          "accuracy": 100,
+          "effect": "EFFECT_POISON_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 42,
+        "name": "大嘴蝠",
+        "tier": 2,
+        "types": [
+          "POISON",
+          "FLYING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 17,
+          "name": "wing_attack",
+          "type": "FLYING",
+          "power": 60,
+          "accuracy": 100,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 44,
+        "name": "臭臭花",
+        "tier": 2,
+        "types": [
+          "GRASS",
+          "POISON"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 80,
+          "name": "petal_dance",
+          "type": "GRASS",
+          "power": 70,
+          "accuracy": 100,
+          "effect": "EFFECT_RAMPAGE",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 45,
+        "name": "霸王花",
+        "tier": 2,
+        "types": [
+          "GRASS",
+          "POISON"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "散射",
+          "arch": "volley_shot",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 80,
+          "name": "petal_dance",
+          "type": "GRASS",
+          "power": 70,
+          "accuracy": 100,
+          "effect": "EFFECT_RAMPAGE",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "area"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 57,
+        "name": "火暴猴",
+        "tier": 2,
+        "types": [
+          "FIGHTING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 238,
+          "name": "cross_chop",
+          "type": "FIGHTING",
+          "power": 100,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 61,
+        "name": "蚊香君",
+        "tier": 2,
+        "types": [
+          "WATER"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 56,
+          "name": "hydro_pump",
+          "type": "WATER",
+          "power": 120,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 64,
+        "name": "勇基拉",
+        "tier": 2,
+        "types": [
+          "PSYCHIC"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 94,
+          "name": "psychic_m",
+          "type": "PSYCHIC",
+          "power": 90,
+          "accuracy": 100,
+          "effect": "EFFECT_SP_DEF_DOWN_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 65,
+        "name": "胡地",
+        "tier": 2,
+        "types": [
+          "PSYCHIC"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "精神强念",
+          "arch": "blink_strike",
+          "tier": "signature"
+        },
+        "move": {
+          "id": 94,
+          "name": "psychic_m",
+          "type": "PSYCHIC",
+          "power": 90,
+          "accuracy": 100,
+          "effect": "EFFECT_SP_DEF_DOWN_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "瞬移刺客",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 67,
+        "name": "豪力",
+        "tier": 2,
+        "types": [
+          "FIGHTING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 238,
+          "name": "cross_chop",
+          "type": "FIGHTING",
+          "power": 100,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 70,
+        "name": "口呆花",
+        "tier": 2,
+        "types": [
+          "GRASS",
+          "POISON"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 75,
+          "name": "razor_leaf",
+          "type": "GRASS",
+          "power": 55,
+          "accuracy": 95,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 71,
+        "name": "大食花",
+        "tier": 2,
+        "types": [
+          "GRASS",
+          "POISON"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 75,
+          "name": "razor_leaf",
+          "type": "GRASS",
+          "power": 55,
+          "accuracy": 95,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 75,
+        "name": "隆隆石",
+        "tier": 2,
+        "types": [
+          "ROCK",
+          "GROUND"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "铁壁",
+          "arch": "bulwark",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 89,
+          "name": "earthquake",
+          "type": "GROUND",
+          "power": 100,
+          "accuracy": 100,
+          "effect": "EFFECT_EARTHQUAKE",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "defense"
+        ],
+        "engine_role": "tank",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 76,
+        "name": "隆隆岩",
+        "tier": 2,
+        "types": [
+          "ROCK",
+          "GROUND"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "地震",
+          "arch": "quake_break",
+          "tier": "signature"
+        },
+        "move": {
+          "id": 89,
+          "name": "earthquake",
+          "type": "GROUND",
+          "power": 100,
+          "accuracy": 100,
+          "effect": "EFFECT_EARTHQUAKE",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "defense",
+          "area",
+          "disrupt"
+        ],
+        "engine_role": "邻格震击控制",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 80,
+        "name": "呆壳兽",
+        "tier": 2,
+        "types": [
+          "WATER",
+          "PSYCHIC"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 94,
+          "name": "psychic_m",
+          "type": "PSYCHIC",
+          "power": 90,
+          "accuracy": 100,
+          "effect": "EFFECT_SP_DEF_DOWN_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "tank",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 82,
+        "name": "三合一磁怪",
+        "tier": 2,
+        "types": [
+          "ELECTRIC",
+          "STEEL"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 84,
+          "name": "thundershock",
+          "type": "ELECTRIC",
+          "power": 40,
+          "accuracy": 100,
+          "effect": "EFFECT_PARALYZE_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 93,
+        "name": "鬼斯通",
+        "tier": 2,
+        "types": [
+          "GHOST",
+          "POISON"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "散射",
+          "arch": "volley_shot",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 122,
+          "name": "lick",
+          "type": "GHOST",
+          "power": 20,
+          "accuracy": 100,
+          "effect": "EFFECT_PARALYZE_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "area"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 95,
+        "name": "大岩蛇",
+        "tier": 2,
+        "types": [
+          "ROCK",
+          "GROUND"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 88,
+          "name": "rock_throw",
+          "type": "ROCK",
+          "power": 50,
+          "accuracy": 90,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "tank",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 112,
+        "name": "钻角犀兽",
+        "tier": 2,
+        "types": [
+          "GROUND",
+          "ROCK"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "自愈",
+          "arch": "mend",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 89,
+          "name": "earthquake",
+          "type": "GROUND",
+          "power": 100,
+          "accuracy": 100,
+          "effect": "EFFECT_EARTHQUAKE",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "defense",
+          "healing"
+        ],
+        "engine_role": "tank",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 117,
+        "name": "海刺龙",
+        "tier": 2,
+        "types": [
+          "WATER"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "散射",
+          "arch": "volley_shot",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 56,
+          "name": "hydro_pump",
+          "type": "WATER",
+          "power": 120,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "area"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 148,
+        "name": "哈克龙",
+        "tier": 2,
+        "types": [
+          "DRAGON"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 200,
+          "name": "outrage",
+          "type": "DRAGON",
+          "power": 90,
+          "accuracy": 100,
+          "effect": "EFFECT_RAMPAGE",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 3,
+        "name": "妙蛙花",
+        "tier": 3,
+        "types": [
+          "GRASS",
+          "POISON"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "日光束",
+          "arch": "solar_siphon",
+          "tier": "signature"
+        },
+        "move": {
+          "id": 76,
+          "name": "solarbeam",
+          "type": "GRASS",
+          "power": 120,
+          "accuracy": 100,
+          "effect": "EFFECT_SOLARBEAM",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "healing"
+        ],
+        "engine_role": "伤害转化治疗",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 6,
+        "name": "喷火龙",
+        "tier": 3,
+        "types": [
+          "FIRE",
+          "FLYING"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "喷射火焰",
+          "arch": "splash",
+          "tier": "signature"
+        },
+        "move": {
+          "id": 53,
+          "name": "flamethrower",
+          "type": "FIRE",
+          "power": 95,
+          "accuracy": 100,
+          "effect": "EFFECT_BURN_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "area"
+        ],
+        "engine_role": "远程轰炸主C",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 9,
+        "name": "水箭龟",
+        "tier": 3,
+        "types": [
+          "WATER"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "水炮",
+          "arch": "line_push",
+          "tier": "signature"
+        },
+        "move": {
+          "id": 56,
+          "name": "hydro_pump",
+          "type": "WATER",
+          "power": 120,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "area",
+          "disrupt"
+        ],
+        "engine_role": "直线贯穿击退",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 38,
+        "name": "九尾",
+        "tier": 3,
+        "types": [
+          "FIRE"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 53,
+          "name": "flamethrower",
+          "type": "FIRE",
+          "power": 95,
+          "accuracy": 100,
+          "effect": "EFFECT_BURN_HIT",
+          "damage_stat": null
+        },
+        "ability": {
+          "id": "drought",
+          "name": "日照",
+          "weather": "sun",
+          "species": 38,
+          "trigger": "battle_start",
+          "uses": 1,
+          "duration": 8.0,
+          "custom": true,
+          "description": "本作固定特性：上场时自动制造8秒全场晴天，不占教学槽；同刻晴雨相抵，双方共享天气，后续教学可覆盖，每场一次。"
+        },
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 55,
+        "name": "哥达鸭",
+        "tier": 3,
+        "types": [
+          "WATER"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 56,
+          "name": "hydro_pump",
+          "type": "WATER",
+          "power": 120,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 59,
+        "name": "风速狗",
+        "tier": 3,
+        "types": [
+          "FIRE"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 53,
+          "name": "flamethrower",
+          "type": "FIRE",
+          "power": 95,
+          "accuracy": 100,
+          "effect": "EFFECT_BURN_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 62,
+        "name": "蚊香泳士",
+        "tier": 3,
+        "types": [
+          "WATER",
+          "FIGHTING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 56,
+          "name": "hydro_pump",
+          "type": "WATER",
+          "power": 120,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "tank",
+        "compatible_teachings": [
+          "cut",
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 68,
+        "name": "怪力",
+        "tier": 3,
+        "types": [
+          "FIGHTING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 238,
+          "name": "cross_chop",
+          "type": "FIGHTING",
+          "power": 100,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 94,
+        "name": "耿鬼",
+        "tier": 3,
+        "types": [
+          "GHOST",
+          "POISON"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "舌舔",
+          "arch": "energy_drain",
+          "tier": "signature"
+        },
+        "move": {
+          "id": 122,
+          "name": "lick",
+          "type": "GHOST",
+          "power": 65,
+          "accuracy": 100,
+          "effect": "EFFECT_PARALYZE_HIT",
+          "damage_stat": "best"
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "disrupt"
+        ],
+        "engine_role": "能量干扰",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 121,
+        "name": "宝石海星",
+        "tier": 3,
+        "types": [
+          "WATER",
+          "PSYCHIC"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "连击",
+          "arch": "double_strike",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 56,
+          "name": "hydro_pump",
+          "type": "WATER",
+          "power": 120,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 123,
+        "name": "飞天螳螂",
+        "tier": 3,
+        "types": [
+          "BUG",
+          "FLYING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 17,
+          "name": "wing_attack",
+          "type": "FLYING",
+          "power": 60,
+          "accuracy": 100,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 130,
+        "name": "暴鲤龙",
+        "tier": 3,
+        "types": [
+          "WATER",
+          "FLYING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 56,
+          "name": "hydro_pump",
+          "type": "WATER",
+          "power": 120,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 131,
+        "name": "拉普拉斯",
+        "tier": 3,
+        "types": [
+          "WATER",
+          "ICE"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 56,
+          "name": "hydro_pump",
+          "type": "WATER",
+          "power": 120,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": {
+          "id": "drizzle",
+          "name": "降雨",
+          "weather": "rain",
+          "species": 131,
+          "trigger": "battle_start",
+          "uses": 1,
+          "duration": 8.0,
+          "custom": true,
+          "description": "本作固定特性：上场时自动制造8秒全场雨天，不占教学槽；同刻晴雨相抵，双方共享天气，后续教学可覆盖，每场一次。"
+        },
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "tank",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 134,
+        "name": "水伊布",
+        "tier": 3,
+        "types": [
+          "WATER"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 56,
+          "name": "hydro_pump",
+          "type": "WATER",
+          "power": 120,
+          "accuracy": 80,
+          "effect": "EFFECT_NORMAL_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "surf",
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 135,
+        "name": "雷伊布",
+        "tier": 3,
+        "types": [
+          "ELECTRIC"
+        ],
+        "range": 3,
+        "skill": {
+          "name": "散射",
+          "arch": "volley_shot",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 84,
+          "name": "thundershock",
+          "type": "ELECTRIC",
+          "power": 40,
+          "accuracy": 100,
+          "effect": "EFFECT_PARALYZE_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "area"
+        ],
+        "engine_role": "ranged_dps",
+        "compatible_teachings": [
+          "rest",
+          "guard",
+          "rain_dance"
+        ]
+      },
+      {
+        "sid": 136,
+        "name": "火伊布",
+        "tier": 3,
+        "types": [
+          "FIRE"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "冲锋",
+          "arch": "charge",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 53,
+          "name": "flamethrower",
+          "type": "FIRE",
+          "power": 95,
+          "accuracy": 100,
+          "effect": "EFFECT_BURN_HIT",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "dive"
+        ],
+        "engine_role": "melee_dps",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard",
+          "sunny_day"
+        ]
+      },
+      {
+        "sid": 143,
+        "name": "卡比兽",
+        "tier": 3,
+        "types": [
+          "NORMAL"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "破坏光线",
+          "arch": "slam_heal",
+          "tier": "signature"
+        },
+        "move": {
+          "id": 63,
+          "name": "hyper_beam",
+          "type": "NORMAL",
+          "power": 150,
+          "accuracy": 90,
+          "effect": "EFFECT_HYPER_BEAM",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "defense",
+          "healing",
+          "area"
+        ],
+        "engine_role": "前排巨坦",
+        "compatible_teachings": [
+          "cut",
+          "rest",
+          "guard"
+        ]
+      },
+      {
+        "sid": 149,
+        "name": "快龙",
+        "tier": 3,
+        "types": [
+          "DRAGON",
+          "FLYING"
+        ],
+        "range": 1,
+        "skill": {
+          "name": "重击",
+          "arch": "heavy_blow",
+          "tier": "generic"
+        },
+        "move": {
+          "id": 200,
+          "name": "outrage",
+          "type": "DRAGON",
+          "power": 90,
+          "accuracy": 100,
+          "effect": "EFFECT_RAMPAGE",
+          "damage_stat": null
+        },
+        "ability": null,
+        "audit_role_tags": [
+          "output",
+          "disrupt"
+        ],
+        "engine_role": "tank",
+        "compatible_teachings": [
+          "rest",
+          "guard"
+        ]
+      }
+    ],
+    "species_abilities": [
+      {
+        "id": "drought",
+        "name": "日照",
+        "weather": "sun",
+        "species": 38,
+        "trigger": "battle_start",
+        "uses": 1,
+        "duration": 8.0,
+        "custom": true,
+        "description": "本作固定特性：上场时自动制造8秒全场晴天，不占教学槽；同刻晴雨相抵，双方共享天气，后续教学可覆盖，每场一次。"
+      },
+      {
+        "id": "drizzle",
+        "name": "降雨",
+        "weather": "rain",
+        "species": 131,
+        "trigger": "battle_start",
+        "uses": 1,
+        "duration": 8.0,
+        "custom": true,
+        "description": "本作固定特性：上场时自动制造8秒全场雨天，不占教学槽；同刻晴雨相抵，双方共享天气，后续教学可覆盖，每场一次。"
+      }
+    ],
+    "partners": [
+      {
+        "id": 3,
+        "name": "妙蛙花",
+        "trait_name": "共生花园",
+        "starter": true,
+        "trait_description": "首次释放原生大招后，治疗两格内生命比例最低的一名受伤队友，回复其最大生命的20%；每场一次。",
+        "family_ids": [
+          1,
+          2,
+          3
+        ],
+        "techniques": [
+          "cut",
+          "rest"
+        ]
+      },
+      {
+        "id": 6,
+        "name": "喷火龙",
+        "trait_name": "振翼鼓舞",
+        "starter": true,
+        "trait_description": "首次释放原生大招后，两格内最近的至多两名队友各获得18能量；每场一次。",
+        "family_ids": [
+          4,
+          5,
+          6
+        ],
+        "techniques": [
+          "cut",
+          "rest"
+        ]
+      },
+      {
+        "id": 9,
+        "name": "水箭龟",
+        "trait_name": "并肩坚壳",
+        "starter": true,
+        "trait_description": "开场为两格内最近的至多两名队友提供20%减伤，持续6秒；每场一次。",
+        "family_ids": [
+          7,
+          8,
+          9
+        ],
+        "techniques": [
+          "surf",
+          "rest"
+        ]
+      },
+      {
+        "id": 26,
+        "name": "雷丘",
+        "trait_name": "接力电流",
+        "starter": false,
+        "trait_description": "前两次普攻造成伤害后，两格内能量最低的一名队友获得16能量；每场至多两次。",
+        "family_ids": [
+          25,
+          26
+        ],
+        "techniques": [
+          "rest"
+        ]
+      },
+      {
+        "id": 143,
+        "name": "卡比兽",
+        "trait_name": "分享便当",
+        "starter": false,
+        "trait_description": "首次受击后仍存活且生命不高于一半时，治疗两格内生命比例最低的至多两名受伤队友，各回复最大生命的15%；每场一次。",
+        "family_ids": [
+          143
+        ],
+        "techniques": [
+          "rest"
+        ]
+      }
+    ],
+    "teachings": [
+      {
+        "id": "cut",
+        "name": "居合斩",
+        "description": "首次普攻造成伤害后，追加攻击主目标邻格内的一名其他敌人（普通属性、35威力、物理）；追加命中不回能，每场一次。",
+        "partners": [
+          3,
+          6
+        ],
+        "learn_types": [
+          "BUG",
+          "FIGHTING",
+          "FIRE",
+          "GRASS",
+          "NORMAL",
+          "STEEL"
+        ],
+        "compatibility": "草、火、虫、一般、格斗或钢属性可学"
+      },
+      {
+        "id": "surf",
+        "name": "冲浪",
+        "description": "首次原生大招造成伤害后，对主目标释放时位置邻格内的至多两名其他敌人追加35威力水属性伤害；追加命中不回能，每场一次。",
+        "partners": [
+          9
+        ],
+        "learn_types": [
+          "WATER"
+        ],
+        "compatibility": "水属性可学"
+      },
+      {
+        "id": "rest",
+        "name": "睡觉",
+        "description": "首次在生命不高于一半时行动，用该次行动回复自身最大生命的25%，随后休息一个攻击间隔；每场一次。",
+        "partners": [
+          3,
+          6,
+          9,
+          26,
+          143
+        ],
+        "learn_types": [],
+        "compatibility": "所有宝可梦可学"
+      },
+      {
+        "id": "guard",
+        "name": "护卫",
+        "description": "准备期指定相邻队友；替其承受一次实际突进后的主命中，每队一名护卫，每场一次。",
+        "partners": [],
+        "learn_types": [],
+        "compatibility": "所有宝可梦可学"
+      },
+      {
+        "id": "sunny_day",
+        "name": "晴天",
+        "description": "指定为天气手后，首次原生大招申请8秒全场晴天；双方都会受益或受损，每队每场一次。",
+        "partners": [],
+        "learn_types": [
+          "FIRE",
+          "GRASS"
+        ],
+        "compatibility": "火或草属性可学"
+      },
+      {
+        "id": "rain_dance",
+        "name": "求雨",
+        "description": "指定为天气手后，首次原生大招申请8秒全场雨天；双方都会受益或受损，每队每场一次。",
+        "partners": [],
+        "learn_types": [
+          "ELECTRIC",
+          "WATER"
+        ],
+        "compatibility": "水或电属性可学"
+      }
+    ],
+    "teaching_compatibility_counts": {
+      "cut": 41,
+      "surf": 18,
+      "rest": 84,
+      "guard": 84,
+      "sunny_day": 17,
+      "rain_dance": 23
+    },
+    "components": [
+      {
+        "id": "band",
+        "name": "力量头带"
+      },
+      {
+        "id": "hardstone",
+        "name": "硬石头"
+      },
+      {
+        "id": "magnet",
+        "name": "磁铁线圈"
+      },
+      {
+        "id": "shoes",
+        "name": "加速鞋"
+      },
+      {
+        "id": "bell",
+        "name": "贝壳铃"
+      },
+      {
+        "id": "charcoal",
+        "name": "木炭"
+      },
+      {
+        "id": "mysticwater",
+        "name": "神秘水滴"
+      },
+      {
+        "id": "spark",
+        "name": "雷之石碎片"
+      }
+    ],
+    "finished_items": {
+      "healing_needle": {
+        "name": "封疗针",
+        "pairs": [
+          [
+            "band",
+            "charcoal"
+          ]
+        ],
+        "healing_reduction": 0.6,
+        "duration": 8.0
+      },
+      "leftovers": {
+        "name": "剩饭",
+        "pairs": [
+          [
+            "hardstone",
+            "bell"
+          ]
+        ],
+        "heal": 0.015
+      },
+      "sash": {
+        "name": "气势披带",
+        "pairs": [
+          [
+            "band",
+            "hardstone"
+          ]
+        ],
+        "sash": true
+      },
+      "choice_band": {
+        "name": "专爱头巾",
+        "pairs": [
+          [
+            "band",
+            "magnet"
+          ]
+        ],
+        "atk": 0.35
+      },
+      "bright_powder": {
+        "name": "亮粉",
+        "pairs": [
+          [
+            "hardstone",
+            "shoes"
+          ]
+        ],
+        "dodge": 0.15
+      },
+      "focus_lens": {
+        "name": "聚光镜",
+        "pairs": [
+          [
+            "magnet",
+            "bell"
+          ]
+        ],
+        "ult_dmg": 0.25
+      },
+      "swift_feather": {
+        "name": "疾风羽",
+        "pairs": [
+          [
+            "shoes",
+            "shoes"
+          ]
+        ],
+        "speed": 0.25
+      },
+      "scarf_fire": {
+        "name": "红围巾",
+        "pairs": [
+          [
+            "charcoal",
+            "magnet"
+          ]
+        ],
+        "type_dmg": {
+          "FIRE": 0.3
+        }
+      },
+      "scarf_water": {
+        "name": "蓝围巾",
+        "pairs": [
+          [
+            "mysticwater",
+            "magnet"
+          ]
+        ],
+        "type_dmg": {
+          "WATER": 0.3
+        }
+      },
+      "scarf_electric": {
+        "name": "黄围巾",
+        "pairs": [
+          [
+            "spark",
+            "magnet"
+          ],
+          [
+            "spark",
+            "spark"
+          ]
+        ],
+        "type_dmg": {
+          "ELECTRIC": 0.3
+        }
+      },
+      "weather_stone": {
+        "name": "天气石",
+        "pairs": [
+          [
+            "hardstone",
+            "hardstone"
+          ],
+          [
+            "magnet",
+            "hardstone"
+          ]
+        ],
+        "dr": 0.08
+      },
+      "lucky_egg": {
+        "name": "幸运蛋",
+        "pairs": [
+          [
+            "band",
+            "bell"
+          ]
+        ],
+        "gold_per_round": 1
+      },
+      "evo_stone": {
+        "name": "进化石",
+        "pairs": null,
+        "stone": true
+      }
+    },
+    "recipes": [
+      {
+        "a": "band",
+        "b": "band",
+        "result": "evo_stone"
+      },
+      {
+        "a": "band",
+        "b": "hardstone",
+        "result": "sash"
+      },
+      {
+        "a": "band",
+        "b": "magnet",
+        "result": "choice_band"
+      },
+      {
+        "a": "band",
+        "b": "shoes",
+        "result": "evo_stone"
+      },
+      {
+        "a": "band",
+        "b": "bell",
+        "result": "lucky_egg"
+      },
+      {
+        "a": "band",
+        "b": "charcoal",
+        "result": "healing_needle"
+      },
+      {
+        "a": "band",
+        "b": "mysticwater",
+        "result": "evo_stone"
+      },
+      {
+        "a": "band",
+        "b": "spark",
+        "result": "evo_stone"
+      },
+      {
+        "a": "hardstone",
+        "b": "hardstone",
+        "result": "weather_stone"
+      },
+      {
+        "a": "hardstone",
+        "b": "magnet",
+        "result": "weather_stone"
+      },
+      {
+        "a": "hardstone",
+        "b": "shoes",
+        "result": "bright_powder"
+      },
+      {
+        "a": "hardstone",
+        "b": "bell",
+        "result": "leftovers"
+      },
+      {
+        "a": "hardstone",
+        "b": "charcoal",
+        "result": "evo_stone"
+      },
+      {
+        "a": "hardstone",
+        "b": "mysticwater",
+        "result": "evo_stone"
+      },
+      {
+        "a": "hardstone",
+        "b": "spark",
+        "result": "evo_stone"
+      },
+      {
+        "a": "magnet",
+        "b": "magnet",
+        "result": "evo_stone"
+      },
+      {
+        "a": "magnet",
+        "b": "shoes",
+        "result": "evo_stone"
+      },
+      {
+        "a": "magnet",
+        "b": "bell",
+        "result": "focus_lens"
+      },
+      {
+        "a": "magnet",
+        "b": "charcoal",
+        "result": "scarf_fire"
+      },
+      {
+        "a": "magnet",
+        "b": "mysticwater",
+        "result": "scarf_water"
+      },
+      {
+        "a": "magnet",
+        "b": "spark",
+        "result": "scarf_electric"
+      },
+      {
+        "a": "shoes",
+        "b": "shoes",
+        "result": "swift_feather"
+      },
+      {
+        "a": "shoes",
+        "b": "bell",
+        "result": "evo_stone"
+      },
+      {
+        "a": "shoes",
+        "b": "charcoal",
+        "result": "evo_stone"
+      },
+      {
+        "a": "shoes",
+        "b": "mysticwater",
+        "result": "evo_stone"
+      },
+      {
+        "a": "shoes",
+        "b": "spark",
+        "result": "evo_stone"
+      },
+      {
+        "a": "bell",
+        "b": "bell",
+        "result": "evo_stone"
+      },
+      {
+        "a": "bell",
+        "b": "charcoal",
+        "result": "evo_stone"
+      },
+      {
+        "a": "bell",
+        "b": "mysticwater",
+        "result": "evo_stone"
+      },
+      {
+        "a": "bell",
+        "b": "spark",
+        "result": "evo_stone"
+      },
+      {
+        "a": "charcoal",
+        "b": "charcoal",
+        "result": "evo_stone"
+      },
+      {
+        "a": "charcoal",
+        "b": "mysticwater",
+        "result": "evo_stone"
+      },
+      {
+        "a": "charcoal",
+        "b": "spark",
+        "result": "evo_stone"
+      },
+      {
+        "a": "mysticwater",
+        "b": "mysticwater",
+        "result": "evo_stone"
+      },
+      {
+        "a": "mysticwater",
+        "b": "spark",
+        "result": "evo_stone"
+      },
+      {
+        "a": "spark",
+        "b": "spark",
+        "result": "scarf_electric"
+      }
+    ],
+    "recipe_result_counts": {
+      "evo_stone": 22,
+      "sash": 1,
+      "choice_band": 1,
+      "lucky_egg": 1,
+      "healing_needle": 1,
+      "weather_stone": 2,
+      "bright_powder": 1,
+      "leftovers": 1,
+      "focus_lens": 1,
+      "scarf_fire": 1,
+      "scarf_water": 1,
+      "scarf_electric": 2,
+      "swift_feather": 1
+    },
+    "synergies": [
+      {
+        "type": "POISON",
+        "theme": "瘴气侵蚀",
+        "distinct_forms": 23,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "duplicate_allowed_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "2": {
+            "dmg": 0.04
+          },
+          "4": {
+            "dmg": 0.07,
+            "ult_dmg": 0.04
+          },
+          "6": {
+            "dmg": 0.1,
+            "ult_dmg": 0.08
+          }
+        }
+      },
+      {
+        "type": "WATER",
+        "theme": "治愈之泉",
+        "distinct_forms": 18,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "duplicate_allowed_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "2": {
+            "heal": 0.005
+          },
+          "4": {
+            "heal": 0.01
+          },
+          "6": {
+            "heal": 0.015
+          }
+        }
+      },
+      {
+        "type": "FLYING",
+        "theme": "顺风滑翔",
+        "distinct_forms": 12,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "duplicate_allowed_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "2": {
+            "speed": 0.06
+          },
+          "4": {
+            "speed": 0.12,
+            "dmg": 0.04
+          },
+          "6": {
+            "speed": 0.18,
+            "dmg": 0.08
+          }
+        }
+      },
+      {
+        "type": "NORMAL",
+        "theme": "齐心",
+        "distinct_forms": 9,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "duplicate_allowed_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "2": {
+            "hp": 0.06
+          },
+          "4": {
+            "hp": 0.12,
+            "defense": 0.05
+          },
+          "6": {
+            "hp": 0.18,
+            "defense": 0.1
+          }
+        }
+      },
+      {
+        "type": "GRASS",
+        "theme": "坚韧再生",
+        "distinct_forms": 9,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "duplicate_allowed_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "2": {
+            "dr": 0.06
+          },
+          "4": {
+            "dr": 0.1,
+            "heal": 0.005
+          },
+          "6": {
+            "dr": 0.15,
+            "heal": 0.01
+          }
+        }
+      },
+      {
+        "type": "FIRE",
+        "theme": "烈焰过载",
+        "distinct_forms": 8,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "duplicate_allowed_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "2": {
+            "ult_dmg": 0.1
+          },
+          "4": {
+            "ult_dmg": 0.18,
+            "dmg": 0.04
+          },
+          "6": {
+            "ult_dmg": 0.26,
+            "dmg": 0.08
+          }
+        }
+      },
+      {
+        "type": "FIGHTING",
+        "theme": "斗气全开",
+        "distinct_forms": 6,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "duplicate_allowed_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "2": {
+            "atk": 0.08
+          },
+          "4": {
+            "atk": 0.14,
+            "speed": 0.06
+          },
+          "6": {
+            "atk": 0.2,
+            "speed": 0.12
+          }
+        }
+      },
+      {
+        "type": "PSYCHIC",
+        "theme": "精神洪流",
+        "distinct_forms": 6,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "duplicate_allowed_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "2": {
+            "energy": 0.15
+          },
+          "4": {
+            "energy": 0.28
+          },
+          "6": {
+            "energy": 0.45,
+            "ult_dmg": 0.1
+          }
+        }
+      },
+      {
+        "type": "BUG",
+        "theme": "虫群围猎",
+        "distinct_forms": 7,
+        "defined_thresholds": [
+          1,
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [
+          1,
+          2,
+          4,
+          6
+        ],
+        "duplicate_allowed_thresholds": [
+          1,
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "1": {
+            "speed": 0.05,
+            "dmg": 0.03,
+            "hp": 0.06
+          },
+          "2": {
+            "speed": 0.1,
+            "dmg": 0.05,
+            "hp": 0.12
+          },
+          "4": {
+            "speed": 0.16,
+            "dmg": 0.09,
+            "hp": 0.18,
+            "heal": 0.003
+          },
+          "6": {
+            "speed": 0.22,
+            "dmg": 0.13,
+            "hp": 0.24,
+            "heal": 0.006
+          }
+        }
+      },
+      {
+        "type": "ELECTRIC",
+        "theme": "雷光疾走",
+        "distinct_forms": 5,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [
+          2,
+          4
+        ],
+        "duplicate_allowed_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "2": {
+            "speed": 0.12
+          },
+          "4": {
+            "speed": 0.22,
+            "energy": 0.1
+          },
+          "6": {
+            "speed": 0.35,
+            "energy": 0.2
+          }
+        }
+      },
+      {
+        "type": "ROCK",
+        "theme": "岩壁",
+        "distinct_forms": 6,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "duplicate_allowed_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "2": {
+            "sp_defense": 0.12
+          },
+          "4": {
+            "sp_defense": 0.24,
+            "hp": 0.06
+          },
+          "6": {
+            "sp_defense": 0.36,
+            "hp": 0.12
+          }
+        }
+      },
+      {
+        "type": "GROUND",
+        "theme": "大地缓冲",
+        "distinct_forms": 8,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "duplicate_allowed_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "2": {
+            "dr": 0.04
+          },
+          "4": {
+            "dr": 0.04,
+            "ult_cap": 0.6
+          },
+          "6": {
+            "dr": 0.08,
+            "ult_cap": 0.4
+          }
+        }
+      },
+      {
+        "type": "STEEL",
+        "theme": "钢铁之躯",
+        "distinct_forms": 2,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [
+          2
+        ],
+        "duplicate_allowed_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "2": {
+            "defense": 0.08
+          },
+          "4": {
+            "defense": 0.16
+          },
+          "6": {
+            "defense": 0.24,
+            "dr": 0.06
+          }
+        }
+      },
+      {
+        "type": "GHOST",
+        "theme": "灵异夜袭",
+        "distinct_forms": 3,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [
+          2
+        ],
+        "duplicate_allowed_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "2": {
+            "ult_dmg": 0.1
+          },
+          "4": {
+            "ult_dmg": 0.2,
+            "energy": 0.1
+          },
+          "6": {
+            "ult_dmg": 0.3,
+            "energy": 0.2
+          }
+        }
+      },
+      {
+        "type": "DRAGON",
+        "theme": "龙之威压",
+        "distinct_forms": 3,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [
+          2
+        ],
+        "duplicate_allowed_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "2": {
+            "dmg": 0.08
+          },
+          "4": {
+            "dmg": 0.14,
+            "defense": 0.06
+          },
+          "6": {
+            "dmg": 0.2,
+            "defense": 0.12
+          }
+        }
+      },
+      {
+        "type": "ICE",
+        "theme": "凝冰之躯",
+        "distinct_forms": 1,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [],
+        "duplicate_allowed_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "effects": {
+          "2": {
+            "dr": 0.02
+          },
+          "4": {
+            "dr": 0.1,
+            "hp": 0.08
+          },
+          "6": {
+            "dr": 0.16,
+            "hp": 0.16
+          }
+        }
+      },
+      {
+        "type": "DARK",
+        "theme": "暗影反噬",
+        "distinct_forms": 0,
+        "defined_thresholds": [
+          2,
+          4,
+          6
+        ],
+        "distinct_form_thresholds": [],
+        "duplicate_allowed_thresholds": [],
+        "effects": {
+          "2": {
+            "ult_dmg": 0.1,
+            "energy": 0.08
+          },
+          "4": {
+            "ult_dmg": 0.18,
+            "dr": 0.06
+          },
+          "6": {
+            "ult_dmg": 0.26,
+            "dr": 0.1
+          }
+        }
+      }
+    ],
+    "defined_synergy_threshold_states": 52,
+    "duplicate_reachable_threshold_states": 49,
+    "distinct_form_reachable_threshold_states": 39,
+    "volley_types_with_duplicates": [
+      "POISON",
+      "WATER",
+      "FLYING",
+      "NORMAL",
+      "GRASS",
+      "FIRE",
+      "FIGHTING",
+      "PSYCHIC",
+      "BUG",
+      "ELECTRIC",
+      "ROCK",
+      "GROUND",
+      "STEEL",
+      "GHOST",
+      "DRAGON",
+      "ICE"
+    ],
+    "selected_volley_witnesses": {
+      "POISON": [
+        1,
+        1,
+        1,
+        13,
+        13,
+        13
+      ],
+      "WATER": [
+        7,
+        7,
+        7,
+        7,
+        7,
+        7
+      ],
+      "FLYING": [
+        16,
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "NORMAL": [
+        16,
+        16,
+        16,
+        19,
+        19,
+        19
+      ],
+      "GRASS": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "FIRE": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "FIGHTING": [
+        56,
+        56,
+        56,
+        56,
+        56,
+        56
+      ],
+      "PSYCHIC": [
+        63,
+        63,
+        63,
+        63,
+        63,
+        63
+      ],
+      "BUG": [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "ELECTRIC": [
+        25,
+        25,
+        25,
+        25,
+        25,
+        25
+      ],
+      "GROUND": [
+        74,
+        74,
+        74,
+        74,
+        74,
+        74
+      ],
+      "GHOST": [
+        92,
+        92,
+        92,
+        92,
+        92,
+        92
+      ],
+      "DRAGON": [
+        147,
+        147,
+        147,
+        147,
+        147,
+        147
+      ],
+      "ICE": [
+        131,
+        131,
+        131,
+        131,
+        131,
+        131
+      ]
+    },
+    "guaranteed_shadowed_volley_types": {
+      "ROCK": [
+        "GROUND"
+      ],
+      "STEEL": [
+        "ELECTRIC"
+      ]
+    },
+    "volley_types_with_six_distinct_forms": [
+      "POISON",
+      "WATER",
+      "FLYING",
+      "NORMAL",
+      "GRASS",
+      "FIRE",
+      "FIGHTING",
+      "PSYCHIC",
+      "BUG",
+      "ROCK",
+      "GROUND"
+    ],
+    "raw_six_distinct_compositions": 406481544,
+    "raw_six_distinct_exact_15_gold_compositions": 7376640,
+    "limits": [
+      "Role tags are audit labels and overlap, not implemented classes.",
+      "Native move IDs are payloads, not unique skill behavior counts.",
+      "Behavior signatures omit stats; group membership does not imply identical units.",
+      "Synergies currently count duplicate instances; distinct-only counts are a hypothetical comparison.",
+      "Reachable threshold states are counted separately, not simultaneously reachable in one squad.",
+      "Raw composition counts ignore shop, acquisition, positions, equipment and strategic value.",
+      "Natural weather, partner traits and species abilities are separate systems."
+    ]
+  },
+  "battle": null,
+  "source_stable": true,
+  "original_banks_unchanged": true,
+  "original_bank_hashes": {
+    "5e9a2d878d07.0": "379620cbd720cbbe44d053df2ca3a6f70ef4112b00f5c238175d048f39b6ddbb",
+    "5e9a2d878d07.1": "b822125fc97f2025dbc468e50cfa3ebb74ed0303fbcac19db90b76e70d062247"
+  },
+  "elapsed_seconds": 0.022
+}

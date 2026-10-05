@@ -1,0 +1,2535 @@
+{
+  "schema": "system-depth-v1",
+  "ruleset": "tactics_v5",
+  "head": "24090f5caa49dcb95908c7b4f36442300bc5d9a0",
+  "sources_sha256": {
+    "data/moves.json": "c325a820ad613604fb583b643eddd4f7f772081c10f308f5417184e888975d09",
+    "data/pokemon.json": "626a0d126e54826c431f03e88865fbbf0283d6950d462de4ca0d278942780142",
+    "data/typechart.json": "23a30c150ad4ddbc149bcb00179db103bc4ba16e72b51ecc36a1c1e01b26ac0e",
+    "sim/abilities.py": "f4d10c7a2db11c0f5ed99aaada352f89f9cc8b85152eca0a5f3c6ac1b4afba97",
+    "sim/bots.py": "26c4ae07ccad3f9b9f27be99f50a1c91fa7ca5f9c5b1f4e99c6e14283a5ee0dd",
+    "sim/build_rules.py": "346e5820e5a43b34f525bd44aa39f98ad22f346b0d5161bc7c74e00dd963b317",
+    "sim/combat.py": "2f36d9f32f363bbaa8ca5f2809c25c47b792a20d6b3e990f8591d98fd32103ba",
+    "sim/combo.py": "1d44d13521260a8d88a93901a3638e92504fc500012dcc746ed0a8c9b944faae",
+    "sim/data.py": "c55d8ac5bbc29598e0d8421671f7aa227d2e42a49b05708c8c4c13d99fa2a05b",
+    "sim/economy.py": "b6ad3cb7bfdecfce499757cc27c813955cb890469abe9d5c14cb29a4a4b9dde4",
+    "sim/experiment_balance.py": "c5813e83352e39bc59773798a0fb4765eb1f78b3b86df376f960be0e3f5cfb0d",
+    "sim/experiment_build_diversity.py": "462b89aeab42dfc5027ea78516d571a35398464252dc99686ee77c5be17d9611",
+    "sim/experiment_combo.py": "fd5f049f483c3f07251a13f8bc13643860adc6db45382c339504ae1b811c5042",
+    "sim/experiment_effectiveness.py": "a7421d9652281232a6eefbaf68bd91fdac243d3d6cfa173850bf3216fe9abf7b",
+    "sim/experiment_items.py": "d3679fa9a1cb80535591e5ff439e78ba32071a4bd4dd2f25c0080c7b361dcde0",
+    "sim/experiment_match.py": "5f9836ae5c80bf9b2987a2480286eb5f49f1f0c70c39430fb89030ee849b89ee",
+    "sim/experiment_matchbalance.py": "406a717d6d3ae43ef37f8fd630965a95c018f06f420bc4af680fa1dbb74f4eb5",
+    "sim/experiment_melee.py": "8d8acfa63ac8a716bca21a1614de9f44b8cab2155d37e999252cb1e1818f5612",
+    "sim/experiment_pacing.py": "97b518027e02b8b074989f60e6797e0e853a71e5dbc9e49c938c567daceda86a",
+    "sim/experiment_partner_budget.py": "340d9947ba1d22ed58a83f1c837c255f3cb8165b9d77b170fa6466618718ac84",
+    "sim/experiment_profiles.py": "c6dc8eb0372e0b03269d0d62117ddaf16a008f3fe6cccaf24aabb2f632f71a1d",
+    "sim/experiment_signatures.py": "b6932906df9098ee79414d4074aabac4ad661701f60b776fa99f2f27a4a968af",
+    "sim/experiment_status.py": "e90bf62a50fabbfc41f40f8c93ab29430ab25292083fd3f4c93c074c29258797",
+    "sim/experiment_synergy.py": "902d5b9b3e47e91452c549a00fe76956ba03df5d3d7ce3f82821cf259a36b8a6",
+    "sim/experiment_tactics.py": "7a8f0c719c04b04c46698d7e3cf7f5e4a69ff3d1fe283735573f16e6a241dd13",
+    "sim/experiment_tiering.py": "53dd43a814429b8a1ab91393cbe6e3df7698384abc2d5446748508b964e43c9c",
+    "sim/experiment_weather.py": "e92cd540740a16523721e2e85e152c50dc5cf57e85cb4cc17fc0f987250f2c14",
+    "sim/items.py": "e3d466cdc5b7a28e6aebff3783407bb4b9d25a6827815cf051e503361f90d4d3",
+    "sim/match.py": "aa5d874c16f404e4ca9f8fede82a0af9497bec4372fe714566c05dae12bd2443",
+    "sim/metagame.py": "6994be25666c92020b4b76ff9c66a23a364764692247522a03372f697b781982",
+    "sim/pacing.py": "7f163aeaf679f16f682d5d6a051c0f1557e9da39f3bd3e860458e9663c0a167f",
+    "sim/partners.py": "02fc8ff77488e11bcb502f69529873986e4da85bfc4be1f941141b69990632c8",
+    "sim/profiles.py": "b1b02ef37b0b9da2eb8427c3807c48c27ee884a3f80830a94af7fbcb6f334759",
+    "sim/prototype.py": "a7893f12990b963d563707648653e7773545f5161db1fad50e0c7cbddcfc176c",
+    "sim/rng.py": "f3132fb0afd84075ac821037461f107c0b2eb81c4d85b0abe760b96b9d9c0b31",
+    "sim/roster.py": "cd73d70615a14c2f9042644fa8e2cd8127fca5917519a68848cae44d4393a04e",
+    "sim/shop.py": "be8265266eee4f9ccd0982f8ef1c2b6d75c11bb11498c7c049b791cbefe60a58",
+    "sim/skills.py": "827d756c5e2f5ad1c28dbb24dbd14241a690c2a9b48350e04d36384d5f897200",
+    "sim/stat_budget.py": "19834bef39384d3b034081ed9198ede1e31e2a7ddb45201d0194b1c8099e6aac",
+    "sim/status.py": "42f7cb524a30487ce9ab8c8dd7703dfeb2e7d02759c34d7a9aa5cb7b2aa2bcc9",
+    "sim/synergy.py": "35d5f7ba6ace375a652a5531859b6a4fd18b0c3a9811ec6c6385adad39e2ef33",
+    "sim/tactics.py": "775315d704c801941de07c2207e990bb06b8476ff90ca5779735fe4874b4c552",
+    "sim/techniques.py": "6878ab4ff8b6a94821ee5a133105c0b360700d258f92265beb1088d1cd01f2fe",
+    "sim/weather.py": "5a9d0e0ff6044225f6bf2591d5af3f176a530171bd67f286a8e3c84e4f5e9703",
+    "sim/weather_control.py": "b0f5998dd9c95563c5c69407849b7362869a71f9c6f05a41c511a6f8a18c11bd",
+    "tools/acceptance/counterplay_probe.py": "d69b5a44a178cc607ac33666ec1b496471c61d8faedafecb0462fb7c93faa477",
+    "tools/acceptance/system_depth_probe.py": "44db658734fa9229a493475379fec4208396435e2ef933cc7eb5f7a0b69ee4d5",
+    "tools/acceptance/weather_ability_probe.py": "2d7ec64d1986e054e61a6add3b0c6b20c8364d3be18af03c117619816e46e1db"
+  },
+  "source_stable": true,
+  "original_banks_unchanged": true,
+  "original_bank_hashes": {
+    "5e9a2d878d07.0": "379620cbd720cbbe44d053df2ca3a6f70ef4112b00f5c238175d048f39b6ddbb",
+    "5e9a2d878d07.1": "b822125fc97f2025dbc468e50cfa3ebb74ed0303fbcac19db90b76e70d062247"
+  },
+  "elapsed_seconds": 44.105,
+  "inventory_counts": {
+    "roster_count": 84,
+    "curated_families": 35,
+    "source_dex_entries": 151,
+    "source_move_entries": 251,
+    "tiers": {
+      "1": 34,
+      "2": 32,
+      "3": 18
+    },
+    "range_counts": {
+      "3": 35,
+      "1": 49
+    },
+    "signature_forms": 8,
+    "generic_forms": 76,
+    "skill_arch_counts": {
+      "double_strike": 20,
+      "charge": 16,
+      "heavy_blow": 26,
+      "volley_shot": 10,
+      "bulwark": 2,
+      "chain_lightning": 1,
+      "mend": 2,
+      "blink_strike": 1,
+      "quake_break": 1,
+      "solar_siphon": 1,
+      "splash": 1,
+      "line_push": 1,
+      "energy_drain": 1,
+      "slam_heal": 1
+    },
+    "role_tag_counts_overlapping": {
+      "output": 77,
+      "dive": 17,
+      "disrupt": 29,
+      "area": 15,
+      "defense": 6,
+      "healing": 4
+    },
+    "generic_engine_roles": {
+      "ranged_dps": 28,
+      "melee_dps": 39,
+      "tank": 9
+    },
+    "distinct_native_move_ids": 22,
+    "generic_fallback_forms": [
+      63
+    ],
+    "behavior_signatures_without_stat_shapes": 80,
+    "species_abilities": [
+      {
+        "id": "drought",
+        "name": "日照",
+        "weather": "sun",
+        "species": 38,
+        "trigger": "battle_start",
+        "uses": 1,
+        "duration": 8.0,
+        "custom": true,
+        "description": "本作固定特性：上场时自动制造8秒全场晴天，不占教学槽；同刻晴雨相抵，双方共享天气，后续教学可覆盖，每场一次。"
+      },
+      {
+        "id": "drizzle",
+        "name": "降雨",
+        "weather": "rain",
+        "species": 131,
+        "trigger": "battle_start",
+        "uses": 1,
+        "duration": 8.0,
+        "custom": true,
+        "description": "本作固定特性：上场时自动制造8秒全场雨天，不占教学槽；同刻晴雨相抵，双方共享天气，后续教学可覆盖，每场一次。"
+      }
+    ],
+    "teaching_compatibility_counts": {
+      "cut": 41,
+      "surf": 18,
+      "rest": 84,
+      "guard": 84,
+      "sunny_day": 17,
+      "rain_dance": 23
+    },
+    "recipe_result_counts": {
+      "evo_stone": 22,
+      "sash": 1,
+      "choice_band": 1,
+      "lucky_egg": 1,
+      "healing_needle": 1,
+      "weather_stone": 2,
+      "bright_powder": 1,
+      "leftovers": 1,
+      "focus_lens": 1,
+      "scarf_fire": 1,
+      "scarf_water": 1,
+      "scarf_electric": 2,
+      "swift_feather": 1
+    },
+    "defined_synergy_threshold_states": 52,
+    "duplicate_reachable_threshold_states": 49,
+    "distinct_form_reachable_threshold_states": 39,
+    "volley_types_with_duplicates": [
+      "POISON",
+      "WATER",
+      "FLYING",
+      "NORMAL",
+      "GRASS",
+      "FIRE",
+      "FIGHTING",
+      "PSYCHIC",
+      "BUG",
+      "ELECTRIC",
+      "ROCK",
+      "GROUND",
+      "STEEL",
+      "GHOST",
+      "DRAGON",
+      "ICE"
+    ],
+    "selected_volley_witnesses": {
+      "POISON": [
+        1,
+        1,
+        1,
+        13,
+        13,
+        13
+      ],
+      "WATER": [
+        7,
+        7,
+        7,
+        7,
+        7,
+        7
+      ],
+      "FLYING": [
+        16,
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "NORMAL": [
+        16,
+        16,
+        16,
+        19,
+        19,
+        19
+      ],
+      "GRASS": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "FIRE": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "FIGHTING": [
+        56,
+        56,
+        56,
+        56,
+        56,
+        56
+      ],
+      "PSYCHIC": [
+        63,
+        63,
+        63,
+        63,
+        63,
+        63
+      ],
+      "BUG": [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "ELECTRIC": [
+        25,
+        25,
+        25,
+        25,
+        25,
+        25
+      ],
+      "GROUND": [
+        74,
+        74,
+        74,
+        74,
+        74,
+        74
+      ],
+      "GHOST": [
+        92,
+        92,
+        92,
+        92,
+        92,
+        92
+      ],
+      "DRAGON": [
+        147,
+        147,
+        147,
+        147,
+        147,
+        147
+      ],
+      "ICE": [
+        131,
+        131,
+        131,
+        131,
+        131,
+        131
+      ]
+    },
+    "guaranteed_shadowed_volley_types": {
+      "ROCK": [
+        "GROUND"
+      ],
+      "STEEL": [
+        "ELECTRIC"
+      ]
+    },
+    "volley_types_with_six_distinct_forms": [
+      "POISON",
+      "WATER",
+      "FLYING",
+      "NORMAL",
+      "GRASS",
+      "FIRE",
+      "FIGHTING",
+      "PSYCHIC",
+      "BUG",
+      "ROCK",
+      "GROUND"
+    ],
+    "raw_six_distinct_compositions": 406481544,
+    "raw_six_distinct_exact_15_gold_compositions": 7376640,
+    "limits": [
+      "Role tags are audit labels and overlap, not implemented classes.",
+      "Native move IDs are payloads, not unique skill behavior counts.",
+      "Behavior signatures omit stats; group membership does not imply identical units.",
+      "Synergies currently count duplicate instances; distinct-only counts are a hypothetical comparison.",
+      "Reachable threshold states are counted separately, not simultaneously reachable in one squad.",
+      "Raw composition counts ignore shop, acquisition, positions, equipment and strategic value.",
+      "Natural weather, partner traits and species abilities are separate systems."
+    ]
+  },
+  "battle": {
+    "fixtures": [
+      {
+        "key": "garden",
+        "name": "花园续航",
+        "species": [
+          143,
+          9,
+          3,
+          80,
+          76,
+          2
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ]
+        ],
+        "items": [
+          "leftovers",
+          "sash",
+          "focus_lens",
+          null,
+          null,
+          null
+        ],
+        "partner": 3,
+        "learned": [
+          "rest",
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "卡比兽承伤、剩饭/睡觉与妙蛙花治疗；水系持续回复，紧密站位换治疗覆盖，付出群伤暴露。",
+        "family": "garden",
+        "tactics": null,
+        "cost": 15,
+        "names": [
+          "卡比兽",
+          "水箭龟",
+          "妙蛙花",
+          "呆壳兽",
+          "隆隆岩",
+          "妙蛙草"
+        ],
+        "synergies": {
+          "NORMAL": 1,
+          "WATER": 2,
+          "GRASS": 2,
+          "POISON": 2,
+          "PSYCHIC": 1,
+          "ROCK": 1,
+          "GROUND": 1
+        }
+      },
+      {
+        "key": "battery",
+        "name": "电流法阵",
+        "species": [
+          9,
+          6,
+          94,
+          26,
+          65,
+          82
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            1,
+            3
+          ]
+        ],
+        "items": [
+          "sash",
+          "focus_lens",
+          null,
+          "swift_feather",
+          null,
+          null
+        ],
+        "partner": 26,
+        "learned": [
+          "surf",
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "水箭龟挡前排，雷丘加速法系第一次施法，喷火龙群伤、耿鬼干扰；后排密集且单坦。",
+        "family": "battery",
+        "tactics": null,
+        "cost": 15,
+        "names": [
+          "水箭龟",
+          "喷火龙",
+          "耿鬼",
+          "雷丘",
+          "胡地",
+          "三合一磁怪"
+        ],
+        "synergies": {
+          "WATER": 1,
+          "FIRE": 1,
+          "FLYING": 1,
+          "GHOST": 1,
+          "POISON": 1,
+          "ELECTRIC": 2,
+          "PSYCHIC": 1,
+          "STEEL": 1
+        }
+      },
+      {
+        "key": "dive",
+        "name": "双翼突进",
+        "species": [
+          130,
+          68,
+          143,
+          67,
+          22,
+          65
+        ],
+        "positions": [
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            4,
+            3
+          ]
+        ],
+        "items": [
+          "sash",
+          "choice_band",
+          null,
+          "swift_feather",
+          null,
+          null
+        ],
+        "partner": 143,
+        "learned": [
+          null,
+          "cut",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "暴鲤龙/豪力/大嘴雀突破两格内可达后排，胡地收割；物理爆发配格斗羁绊，缺少持续远程群伤。",
+        "family": "dive",
+        "tactics": null,
+        "cost": 15,
+        "names": [
+          "暴鲤龙",
+          "怪力",
+          "卡比兽",
+          "豪力",
+          "大嘴雀",
+          "胡地"
+        ],
+        "synergies": {
+          "WATER": 1,
+          "FLYING": 2,
+          "FIGHTING": 2,
+          "NORMAL": 2,
+          "PSYCHIC": 1
+        }
+      },
+      {
+        "key": "disrupt",
+        "name": "幽影控场",
+        "species": [
+          94,
+          3,
+          6,
+          26,
+          76,
+          65
+        ],
+        "positions": [
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            5,
+            3
+          ]
+        ],
+        "items": [
+          "swift_feather",
+          null,
+          "focus_lens",
+          null,
+          "sash",
+          null
+        ],
+        "partner": 6,
+        "learned": [
+          null,
+          "cut",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "隆隆岩牵制近战，喷火龙首次施法接力，耿鬼压最高能量目标；依赖首次技能，面对快速突进脆弱。",
+        "family": "disrupt",
+        "tactics": null,
+        "cost": 15,
+        "names": [
+          "耿鬼",
+          "妙蛙花",
+          "喷火龙",
+          "雷丘",
+          "隆隆岩",
+          "胡地"
+        ],
+        "synergies": {
+          "GHOST": 1,
+          "POISON": 2,
+          "GRASS": 1,
+          "FIRE": 1,
+          "FLYING": 1,
+          "ELECTRIC": 1,
+          "ROCK": 1,
+          "GROUND": 1,
+          "PSYCHIC": 1
+        }
+      },
+      {
+        "key": "ghost_guard_active",
+        "name": "幽影护阵",
+        "species": [
+          94,
+          9,
+          3,
+          80,
+          76,
+          2
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "items": [
+          "leftovers",
+          "sash",
+          "focus_lens",
+          null,
+          null,
+          null
+        ],
+        "partner": 3,
+        "learned": [
+          null,
+          "guard",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "Frozen anti-rush candidate: Wartortle guards the adjacent Venusaur after Gengar replaces Snorlax.",
+        "family": "anti_dive",
+        "tactics": {
+          "guard": {
+            "source": 1,
+            "target": 2
+          }
+        },
+        "cost": 15,
+        "names": [
+          "耿鬼",
+          "水箭龟",
+          "妙蛙花",
+          "呆壳兽",
+          "隆隆岩",
+          "妙蛙草"
+        ],
+        "synergies": {
+          "GHOST": 1,
+          "POISON": 3,
+          "WATER": 2,
+          "GRASS": 2,
+          "PSYCHIC": 1,
+          "ROCK": 1,
+          "GROUND": 1
+        }
+      },
+      {
+        "key": "sun",
+        "name": "日照接力",
+        "species": [
+          38,
+          6,
+          3,
+          26,
+          76,
+          2
+        ],
+        "positions": [
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            5,
+            2
+          ]
+        ],
+        "items": [
+          null,
+          "focus_lens",
+          null,
+          "swift_feather",
+          "sash",
+          null
+        ],
+        "partner": 26,
+        "learned": [
+          null,
+          null,
+          "cut",
+          null,
+          null,
+          null
+        ],
+        "plan": "九尾先开晴天，雷丘接力与能量装备让火草技能赶上八秒窗口。",
+        "family": "sun",
+        "tactics": null,
+        "cost": 15,
+        "names": [
+          "九尾",
+          "喷火龙",
+          "妙蛙花",
+          "雷丘",
+          "隆隆岩",
+          "妙蛙草"
+        ],
+        "synergies": {
+          "FIRE": 2,
+          "FLYING": 1,
+          "GRASS": 2,
+          "POISON": 2,
+          "ELECTRIC": 1,
+          "ROCK": 1,
+          "GROUND": 1
+        }
+      },
+      {
+        "key": "sun_control",
+        "name": "日照控场",
+        "species": [
+          38,
+          3,
+          6,
+          26,
+          76,
+          65
+        ],
+        "positions": [
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            5,
+            3
+          ]
+        ],
+        "items": [
+          "swift_feather",
+          null,
+          "focus_lens",
+          null,
+          "sash",
+          null
+        ],
+        "partner": 6,
+        "learned": [
+          null,
+          "cut",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "用九尾替换耿鬼，保留喷火龙能量装备与首次技能接力；失去偷能，换开场火草窗口。",
+        "family": "sun",
+        "tactics": null,
+        "cost": 15,
+        "names": [
+          "九尾",
+          "妙蛙花",
+          "喷火龙",
+          "雷丘",
+          "隆隆岩",
+          "胡地"
+        ],
+        "synergies": {
+          "FIRE": 2,
+          "GRASS": 1,
+          "POISON": 1,
+          "FLYING": 1,
+          "ELECTRIC": 1,
+          "ROCK": 1,
+          "GROUND": 1,
+          "PSYCHIC": 1
+        }
+      },
+      {
+        "key": "rain",
+        "name": "降雨水阵",
+        "species": [
+          131,
+          9,
+          80,
+          26,
+          76,
+          143
+        ],
+        "positions": [
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            4,
+            2
+          ]
+        ],
+        "items": [
+          "focus_lens",
+          null,
+          null,
+          "swift_feather",
+          null,
+          "sash"
+        ],
+        "partner": 26,
+        "learned": [
+          null,
+          "surf",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "拉普拉斯入场降雨，雷丘接力、起手能量与三水羁绊支持前排技能。",
+        "family": "rain",
+        "tactics": null,
+        "cost": 15,
+        "names": [
+          "拉普拉斯",
+          "水箭龟",
+          "呆壳兽",
+          "雷丘",
+          "隆隆岩",
+          "卡比兽"
+        ],
+        "synergies": {
+          "WATER": 3,
+          "ICE": 1,
+          "PSYCHIC": 1,
+          "ELECTRIC": 1,
+          "ROCK": 1,
+          "GROUND": 1,
+          "NORMAL": 1
+        }
+      },
+      {
+        "key": "rain_garden",
+        "name": "降雨续航",
+        "species": [
+          143,
+          131,
+          3,
+          80,
+          76,
+          2
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ]
+        ],
+        "items": [
+          "leftovers",
+          "sash",
+          "focus_lens",
+          null,
+          null,
+          null
+        ],
+        "partner": 3,
+        "learned": [
+          "rest",
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "用拉普拉斯替换水箭龟，保留睡觉、剩饭和妙蛙花治疗；降雨强化呆壳兽水招，原生冰招不获雨增幅。",
+        "family": "rain",
+        "tactics": null,
+        "cost": 15,
+        "names": [
+          "卡比兽",
+          "拉普拉斯",
+          "妙蛙花",
+          "呆壳兽",
+          "隆隆岩",
+          "妙蛙草"
+        ],
+        "synergies": {
+          "NORMAL": 1,
+          "WATER": 2,
+          "ICE": 1,
+          "GRASS": 2,
+          "POISON": 2,
+          "PSYCHIC": 1,
+          "ROCK": 1,
+          "GROUND": 1
+        }
+      },
+      {
+        "key": "disrupt_healing_needle",
+        "name": "幽影封疗",
+        "species": [
+          94,
+          3,
+          6,
+          26,
+          76,
+          65
+        ],
+        "positions": [
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            5,
+            3
+          ]
+        ],
+        "items": [
+          "swift_feather",
+          null,
+          "healing_needle",
+          null,
+          "sash",
+          null
+        ],
+        "partner": 6,
+        "learned": [
+          null,
+          "cut",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "Original frozen disrupt build with Charizard's focus lens replaced by healing needle.",
+        "family": "disrupt",
+        "tactics": null,
+        "cost": 15,
+        "names": [
+          "耿鬼",
+          "妙蛙花",
+          "喷火龙",
+          "雷丘",
+          "隆隆岩",
+          "胡地"
+        ],
+        "synergies": {
+          "GHOST": 1,
+          "POISON": 2,
+          "GRASS": 1,
+          "FIRE": 1,
+          "FLYING": 1,
+          "ELECTRIC": 1,
+          "ROCK": 1,
+          "GROUND": 1,
+          "PSYCHIC": 1
+        }
+      },
+      {
+        "key": "disrupt_reversed_rows",
+        "name": "幽影换阵",
+        "species": [
+          94,
+          3,
+          6,
+          26,
+          76,
+          65
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            5,
+            2
+          ]
+        ],
+        "items": [
+          "swift_feather",
+          null,
+          "focus_lens",
+          null,
+          "sash",
+          null
+        ],
+        "partner": 6,
+        "learned": [
+          null,
+          "cut",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "只交换原幽影的前后排，保留全部物种、装备、教学及搭档。",
+        "family": "disrupt",
+        "tactics": null,
+        "cost": 15,
+        "names": [
+          "耿鬼",
+          "妙蛙花",
+          "喷火龙",
+          "雷丘",
+          "隆隆岩",
+          "胡地"
+        ],
+        "synergies": {
+          "GHOST": 1,
+          "POISON": 2,
+          "GRASS": 1,
+          "FIRE": 1,
+          "FLYING": 1,
+          "ELECTRIC": 1,
+          "ROCK": 1,
+          "GROUND": 1,
+          "PSYCHIC": 1
+        }
+      }
+    ],
+    "summaries": [
+      {
+        "key": "garden",
+        "family": "garden",
+        "favorable": [
+          "battery",
+          "disrupt",
+          "ghost_guard_active",
+          "sun",
+          "sun_control",
+          "rain",
+          "disrupt_healing_needle"
+        ],
+        "unfavorable": [
+          "dive",
+          "rain_garden"
+        ],
+        "uncertain": [
+          "disrupt_reversed_rows"
+        ],
+        "has_tradeoff_in_sample": true
+      },
+      {
+        "key": "battery",
+        "family": "battery",
+        "favorable": [
+          "disrupt",
+          "sun_control",
+          "disrupt_healing_needle",
+          "disrupt_reversed_rows"
+        ],
+        "unfavorable": [
+          "garden",
+          "dive",
+          "ghost_guard_active",
+          "sun",
+          "rain",
+          "rain_garden"
+        ],
+        "uncertain": [],
+        "has_tradeoff_in_sample": true
+      },
+      {
+        "key": "dive",
+        "family": "dive",
+        "favorable": [
+          "garden",
+          "battery",
+          "disrupt",
+          "sun",
+          "sun_control",
+          "rain",
+          "rain_garden",
+          "disrupt_healing_needle",
+          "disrupt_reversed_rows"
+        ],
+        "unfavorable": [
+          "ghost_guard_active"
+        ],
+        "uncertain": [],
+        "has_tradeoff_in_sample": true
+      },
+      {
+        "key": "disrupt",
+        "family": "disrupt",
+        "favorable": [
+          "ghost_guard_active",
+          "rain"
+        ],
+        "unfavorable": [
+          "garden",
+          "battery",
+          "dive",
+          "sun",
+          "sun_control",
+          "rain_garden"
+        ],
+        "uncertain": [],
+        "has_tradeoff_in_sample": true
+      },
+      {
+        "key": "ghost_guard_active",
+        "family": "anti_dive",
+        "favorable": [
+          "battery",
+          "dive",
+          "disrupt_reversed_rows"
+        ],
+        "unfavorable": [
+          "garden",
+          "disrupt",
+          "sun",
+          "rain",
+          "rain_garden",
+          "disrupt_healing_needle"
+        ],
+        "uncertain": [
+          "sun_control"
+        ],
+        "has_tradeoff_in_sample": true
+      },
+      {
+        "key": "sun",
+        "family": "sun",
+        "favorable": [
+          "battery",
+          "disrupt",
+          "ghost_guard_active",
+          "disrupt_healing_needle",
+          "disrupt_reversed_rows"
+        ],
+        "unfavorable": [
+          "garden",
+          "dive",
+          "rain_garden"
+        ],
+        "uncertain": [
+          "rain"
+        ],
+        "has_tradeoff_in_sample": true
+      },
+      {
+        "key": "sun_control",
+        "family": "sun",
+        "favorable": [
+          "disrupt",
+          "disrupt_healing_needle"
+        ],
+        "unfavorable": [
+          "garden",
+          "battery",
+          "dive",
+          "rain_garden"
+        ],
+        "uncertain": [
+          "ghost_guard_active",
+          "rain",
+          "disrupt_reversed_rows"
+        ],
+        "has_tradeoff_in_sample": true
+      },
+      {
+        "key": "rain",
+        "family": "rain",
+        "favorable": [
+          "battery",
+          "ghost_guard_active",
+          "disrupt_healing_needle",
+          "disrupt_reversed_rows"
+        ],
+        "unfavorable": [
+          "garden",
+          "dive",
+          "disrupt"
+        ],
+        "uncertain": [
+          "sun",
+          "sun_control"
+        ],
+        "has_tradeoff_in_sample": true
+      },
+      {
+        "key": "rain_garden",
+        "family": "rain",
+        "favorable": [
+          "garden",
+          "battery",
+          "disrupt",
+          "ghost_guard_active",
+          "sun",
+          "sun_control",
+          "disrupt_healing_needle",
+          "disrupt_reversed_rows"
+        ],
+        "unfavorable": [
+          "dive"
+        ],
+        "uncertain": [],
+        "has_tradeoff_in_sample": true
+      },
+      {
+        "key": "disrupt_healing_needle",
+        "family": "disrupt",
+        "favorable": [
+          "ghost_guard_active"
+        ],
+        "unfavorable": [
+          "garden",
+          "battery",
+          "dive",
+          "sun",
+          "sun_control",
+          "rain",
+          "rain_garden"
+        ],
+        "uncertain": [],
+        "has_tradeoff_in_sample": true
+      },
+      {
+        "key": "disrupt_reversed_rows",
+        "family": "disrupt",
+        "favorable": [],
+        "unfavorable": [
+          "battery",
+          "dive",
+          "ghost_guard_active",
+          "sun",
+          "rain",
+          "rain_garden"
+        ],
+        "uncertain": [
+          "garden",
+          "sun_control"
+        ],
+        "has_tradeoff_in_sample": false
+      }
+    ],
+    "candidate_families": [
+      "anti_dive",
+      "battery",
+      "disrupt",
+      "dive",
+      "garden",
+      "rain",
+      "sun"
+    ],
+    "screened_families_with_tradeoff": [
+      "anti_dive",
+      "battery",
+      "disrupt",
+      "dive",
+      "garden",
+      "rain",
+      "sun"
+    ],
+    "screened_configurations_with_tradeoff": 10,
+    "seed_range": [
+      2026100580000,
+      2026100580099
+    ],
+    "independent_seeds_per_matchup": 100,
+    "matches": 55,
+    "battles_including_symmetry_checks": 11000,
+    "side_swap_failures": 0,
+    "predeclared_screen": "Outside own authored family: >=60% wins with Wilson95 lower>50% is favorable; same criterion for losses is unfavorable. At least one of each screens a configuration as having a tradeoff. Draws count as neither win nor loss.",
+    "limits": [
+      "Eleven existing authored configurations in seven authored families; not all-roster search.",
+      "Same six population, 15 direct-purchase gold, three ordinary finished items, one teaching and one partner; initial weather clear.",
+      "Uses tactics_v5 and budget_v1; no gameplay values changed.",
+      "Same 100 primary seeds shared across matchups; swapped trials are checks, not extra samples.",
+      "Pointwise Wilson intervals are not adjusted for multiple comparisons; thresholds are exploratory screens, not proof of global balance.",
+      "A whole-config win cannot be attributed to its namesake weather/guard/item without an ablation.",
+      "No recruitment, component availability, progression, live AI, human-duration or physical-device claim."
+    ],
+    "matchups": [
+      {
+        "a": "garden",
+        "b": "battery",
+        "family_a": "garden",
+        "family_b": "battery",
+        "wins": 100,
+        "losses": 0,
+        "draws": 0,
+        "score": 1.0,
+        "win_wilson_95": [
+          0.9630065017930143,
+          1.0
+        ],
+        "loss_wilson_95": [
+          3.469446951953614e-18,
+          0.03699349820698568
+        ],
+        "duration_median": 12.79999999999997,
+        "side_swap_failures": []
+      },
+      {
+        "a": "garden",
+        "b": "dive",
+        "family_a": "garden",
+        "family_b": "dive",
+        "wins": 29,
+        "losses": 71,
+        "draws": 0,
+        "score": 0.29,
+        "win_wilson_95": [
+          0.2101483574912227,
+          0.3853889117557111
+        ],
+        "loss_wilson_95": [
+          0.6146110882442888,
+          0.7898516425087772
+        ],
+        "duration_median": 20.900000000000027,
+        "side_swap_failures": []
+      },
+      {
+        "a": "garden",
+        "b": "disrupt",
+        "family_a": "garden",
+        "family_b": "disrupt",
+        "wins": 87,
+        "losses": 13,
+        "draws": 0,
+        "score": 0.87,
+        "win_wilson_95": [
+          0.7901964855992357,
+          0.9224283257275948
+        ],
+        "loss_wilson_95": [
+          0.07757167427240512,
+          0.20980351440076428
+        ],
+        "duration_median": 19.65000000000001,
+        "side_swap_failures": []
+      },
+      {
+        "a": "garden",
+        "b": "ghost_guard_active",
+        "family_a": "garden",
+        "family_b": "anti_dive",
+        "wins": 100,
+        "losses": 0,
+        "draws": 0,
+        "score": 1.0,
+        "win_wilson_95": [
+          0.9630065017930143,
+          1.0
+        ],
+        "loss_wilson_95": [
+          3.469446951953614e-18,
+          0.03699349820698568
+        ],
+        "duration_median": 22.900000000000055,
+        "side_swap_failures": []
+      },
+      {
+        "a": "garden",
+        "b": "sun",
+        "family_a": "garden",
+        "family_b": "sun",
+        "wins": 99,
+        "losses": 1,
+        "draws": 0,
+        "score": 0.99,
+        "win_wilson_95": [
+          0.9455138038212946,
+          0.9982325679358593
+        ],
+        "loss_wilson_95": [
+          0.0017674320641406505,
+          0.054486196178705315
+        ],
+        "duration_median": 18.24999999999999,
+        "side_swap_failures": []
+      },
+      {
+        "a": "garden",
+        "b": "sun_control",
+        "family_a": "garden",
+        "family_b": "sun",
+        "wins": 83,
+        "losses": 17,
+        "draws": 0,
+        "score": 0.83,
+        "win_wilson_95": [
+          0.7445199523239887,
+          0.8910643388594006
+        ],
+        "loss_wilson_95": [
+          0.10893566114059931,
+          0.25548004767601123
+        ],
+        "duration_median": 19.450000000000006,
+        "side_swap_failures": []
+      },
+      {
+        "a": "garden",
+        "b": "rain",
+        "family_a": "garden",
+        "family_b": "rain",
+        "wins": 99,
+        "losses": 1,
+        "draws": 0,
+        "score": 0.99,
+        "win_wilson_95": [
+          0.9455138038212946,
+          0.9982325679358593
+        ],
+        "loss_wilson_95": [
+          0.0017674320641406505,
+          0.054486196178705315
+        ],
+        "duration_median": 20.000000000000014,
+        "side_swap_failures": []
+      },
+      {
+        "a": "garden",
+        "b": "rain_garden",
+        "family_a": "garden",
+        "family_b": "rain",
+        "wins": 33,
+        "losses": 67,
+        "draws": 0,
+        "score": 0.33,
+        "win_wilson_95": [
+          0.24563122734128034,
+          0.4269465620490947
+        ],
+        "loss_wilson_95": [
+          0.5730534379509052,
+          0.7543687726587197
+        ],
+        "duration_median": 31.150000000000173,
+        "side_swap_failures": []
+      },
+      {
+        "a": "garden",
+        "b": "disrupt_healing_needle",
+        "family_a": "garden",
+        "family_b": "disrupt",
+        "wins": 71,
+        "losses": 29,
+        "draws": 0,
+        "score": 0.71,
+        "win_wilson_95": [
+          0.6146110882442888,
+          0.7898516425087772
+        ],
+        "loss_wilson_95": [
+          0.2101483574912227,
+          0.3853889117557111
+        ],
+        "duration_median": 20.50000000000002,
+        "side_swap_failures": []
+      },
+      {
+        "a": "garden",
+        "b": "disrupt_reversed_rows",
+        "family_a": "garden",
+        "family_b": "disrupt",
+        "wins": 43,
+        "losses": 57,
+        "draws": 0,
+        "score": 0.43,
+        "win_wilson_95": [
+          0.33733298524110106,
+          0.5278461045078768
+        ],
+        "loss_wilson_95": [
+          0.47215389549212305,
+          0.6626670147588988
+        ],
+        "duration_median": 21.00000000000003,
+        "side_swap_failures": []
+      },
+      {
+        "a": "battery",
+        "b": "dive",
+        "family_a": "battery",
+        "family_b": "dive",
+        "wins": 0,
+        "losses": 100,
+        "draws": 0,
+        "score": 0.0,
+        "win_wilson_95": [
+          3.469446951953614e-18,
+          0.03699349820698568
+        ],
+        "loss_wilson_95": [
+          0.9630065017930143,
+          1.0
+        ],
+        "duration_median": 9.699999999999982,
+        "side_swap_failures": []
+      },
+      {
+        "a": "battery",
+        "b": "disrupt",
+        "family_a": "battery",
+        "family_b": "disrupt",
+        "wins": 95,
+        "losses": 5,
+        "draws": 0,
+        "score": 0.95,
+        "win_wilson_95": [
+          0.8882495307680808,
+          0.9784563208456319
+        ],
+        "loss_wilson_95": [
+          0.02154367915436796,
+          0.11175046923191913
+        ],
+        "duration_median": 8.799999999999985,
+        "side_swap_failures": []
+      },
+      {
+        "a": "battery",
+        "b": "ghost_guard_active",
+        "family_a": "battery",
+        "family_b": "anti_dive",
+        "wins": 26,
+        "losses": 74,
+        "draws": 0,
+        "score": 0.26,
+        "win_wilson_95": [
+          0.18404698464748132,
+          0.3537098944918718
+        ],
+        "loss_wilson_95": [
+          0.6462901055081282,
+          0.8159530153525186
+        ],
+        "duration_median": 16.19999999999996,
+        "side_swap_failures": []
+      },
+      {
+        "a": "battery",
+        "b": "sun",
+        "family_a": "battery",
+        "family_b": "sun",
+        "wins": 40,
+        "losses": 60,
+        "draws": 0,
+        "score": 0.4,
+        "win_wilson_95": [
+          0.3094012864324589,
+          0.4979974132089382
+        ],
+        "loss_wilson_95": [
+          0.5020025867910618,
+          0.6905987135675411
+        ],
+        "duration_median": 15.199999999999962,
+        "side_swap_failures": []
+      },
+      {
+        "a": "battery",
+        "b": "sun_control",
+        "family_a": "battery",
+        "family_b": "sun",
+        "wins": 98,
+        "losses": 2,
+        "draws": 0,
+        "score": 0.98,
+        "win_wilson_95": [
+          0.929988209271456,
+          0.9944980324498376
+        ],
+        "loss_wilson_95": [
+          0.00550196755016235,
+          0.07001179072854388
+        ],
+        "duration_median": 9.299999999999983,
+        "side_swap_failures": []
+      },
+      {
+        "a": "battery",
+        "b": "rain",
+        "family_a": "battery",
+        "family_b": "rain",
+        "wins": 27,
+        "losses": 73,
+        "draws": 0,
+        "score": 0.27,
+        "win_wilson_95": [
+          0.1926958414957634,
+          0.36432116767944994
+        ],
+        "loss_wilson_95": [
+          0.6356788323205499,
+          0.8073041585042365
+        ],
+        "duration_median": 13.399999999999968,
+        "side_swap_failures": []
+      },
+      {
+        "a": "battery",
+        "b": "rain_garden",
+        "family_a": "battery",
+        "family_b": "rain",
+        "wins": 0,
+        "losses": 100,
+        "draws": 0,
+        "score": 0.0,
+        "win_wilson_95": [
+          3.469446951953614e-18,
+          0.03699349820698568
+        ],
+        "loss_wilson_95": [
+          0.9630065017930143,
+          1.0
+        ],
+        "duration_median": 14.899999999999963,
+        "side_swap_failures": []
+      },
+      {
+        "a": "battery",
+        "b": "disrupt_healing_needle",
+        "family_a": "battery",
+        "family_b": "disrupt",
+        "wins": 97,
+        "losses": 3,
+        "draws": 0,
+        "score": 0.97,
+        "win_wilson_95": [
+          0.9154806357094724,
+          0.9897454759759611
+        ],
+        "loss_wilson_95": [
+          0.010254524024038925,
+          0.0845193642905276
+        ],
+        "duration_median": 9.799999999999981,
+        "side_swap_failures": []
+      },
+      {
+        "a": "battery",
+        "b": "disrupt_reversed_rows",
+        "family_a": "battery",
+        "family_b": "disrupt",
+        "wins": 97,
+        "losses": 3,
+        "draws": 0,
+        "score": 0.97,
+        "win_wilson_95": [
+          0.9154806357094724,
+          0.9897454759759611
+        ],
+        "loss_wilson_95": [
+          0.010254524024038925,
+          0.0845193642905276
+        ],
+        "duration_median": 10.29999999999998,
+        "side_swap_failures": []
+      },
+      {
+        "a": "dive",
+        "b": "disrupt",
+        "family_a": "dive",
+        "family_b": "disrupt",
+        "wins": 76,
+        "losses": 24,
+        "draws": 0,
+        "score": 0.76,
+        "win_wilson_95": [
+          0.6676766365018553,
+          0.8330867444305122
+        ],
+        "loss_wilson_95": [
+          0.16691325556948772,
+          0.33232336349814473
+        ],
+        "duration_median": 14.199999999999966,
+        "side_swap_failures": []
+      },
+      {
+        "a": "dive",
+        "b": "ghost_guard_active",
+        "family_a": "dive",
+        "family_b": "anti_dive",
+        "wins": 22,
+        "losses": 78,
+        "draws": 0,
+        "score": 0.22,
+        "win_wilson_95": [
+          0.150012823846054,
+          0.31070353514985793
+        ],
+        "loss_wilson_95": [
+          0.6892964648501421,
+          0.8499871761539459
+        ],
+        "duration_median": 21.70000000000004,
+        "side_swap_failures": []
+      },
+      {
+        "a": "dive",
+        "b": "sun",
+        "family_a": "dive",
+        "family_b": "sun",
+        "wins": 100,
+        "losses": 0,
+        "draws": 0,
+        "score": 1.0,
+        "win_wilson_95": [
+          0.9630065017930143,
+          1.0
+        ],
+        "loss_wilson_95": [
+          3.469446951953614e-18,
+          0.03699349820698568
+        ],
+        "duration_median": 12.199999999999973,
+        "side_swap_failures": []
+      },
+      {
+        "a": "dive",
+        "b": "sun_control",
+        "family_a": "dive",
+        "family_b": "sun",
+        "wins": 73,
+        "losses": 27,
+        "draws": 0,
+        "score": 0.73,
+        "win_wilson_95": [
+          0.6356788323205499,
+          0.8073041585042365
+        ],
+        "loss_wilson_95": [
+          0.1926958414957634,
+          0.36432116767944994
+        ],
+        "duration_median": 14.049999999999965,
+        "side_swap_failures": []
+      },
+      {
+        "a": "dive",
+        "b": "rain",
+        "family_a": "dive",
+        "family_b": "rain",
+        "wins": 88,
+        "losses": 12,
+        "draws": 0,
+        "score": 0.88,
+        "win_wilson_95": [
+          0.8018790057328857,
+          0.9300059356298052
+        ],
+        "loss_wilson_95": [
+          0.06999406437019488,
+          0.19812099426711421
+        ],
+        "duration_median": 14.299999999999965,
+        "side_swap_failures": []
+      },
+      {
+        "a": "dive",
+        "b": "rain_garden",
+        "family_a": "dive",
+        "family_b": "rain",
+        "wins": 77,
+        "losses": 23,
+        "draws": 0,
+        "score": 0.77,
+        "win_wilson_95": [
+          0.6784561697712622,
+          0.8415673411969654
+        ],
+        "loss_wilson_95": [
+          0.15843265880303448,
+          0.3215438302287378
+        ],
+        "duration_median": 21.00000000000003,
+        "side_swap_failures": []
+      },
+      {
+        "a": "dive",
+        "b": "disrupt_healing_needle",
+        "family_a": "dive",
+        "family_b": "disrupt",
+        "wins": 97,
+        "losses": 3,
+        "draws": 0,
+        "score": 0.97,
+        "win_wilson_95": [
+          0.9154806357094724,
+          0.9897454759759611
+        ],
+        "loss_wilson_95": [
+          0.010254524024038925,
+          0.0845193642905276
+        ],
+        "duration_median": 11.499999999999975,
+        "side_swap_failures": []
+      },
+      {
+        "a": "dive",
+        "b": "disrupt_reversed_rows",
+        "family_a": "dive",
+        "family_b": "disrupt",
+        "wins": 100,
+        "losses": 0,
+        "draws": 0,
+        "score": 1.0,
+        "win_wilson_95": [
+          0.9630065017930143,
+          1.0
+        ],
+        "loss_wilson_95": [
+          3.469446951953614e-18,
+          0.03699349820698568
+        ],
+        "duration_median": 8.699999999999985,
+        "side_swap_failures": []
+      },
+      {
+        "a": "disrupt",
+        "b": "ghost_guard_active",
+        "family_a": "disrupt",
+        "family_b": "anti_dive",
+        "wins": 64,
+        "losses": 36,
+        "draws": 0,
+        "score": 0.64,
+        "win_wilson_95": [
+          0.5423540245160874,
+          0.7272877959859567
+        ],
+        "loss_wilson_95": [
+          0.2727122040140433,
+          0.4576459754839126
+        ],
+        "duration_median": 14.999999999999963,
+        "side_swap_failures": []
+      },
+      {
+        "a": "disrupt",
+        "b": "sun",
+        "family_a": "disrupt",
+        "family_b": "sun",
+        "wins": 21,
+        "losses": 79,
+        "draws": 0,
+        "score": 0.21,
+        "win_wilson_95": [
+          0.141656540619153,
+          0.29979968834089865
+        ],
+        "loss_wilson_95": [
+          0.7002003116591013,
+          0.858343459380847
+        ],
+        "duration_median": 14.399999999999965,
+        "side_swap_failures": []
+      },
+      {
+        "a": "disrupt",
+        "b": "sun_control",
+        "family_a": "disrupt",
+        "family_b": "sun",
+        "wins": 11,
+        "losses": 89,
+        "draws": 0,
+        "score": 0.11,
+        "win_wilson_95": [
+          0.06254196357064568,
+          0.18631296503080313
+        ],
+        "loss_wilson_95": [
+          0.8136870349691969,
+          0.9374580364293543
+        ],
+        "duration_median": 13.249999999999968,
+        "side_swap_failures": []
+      },
+      {
+        "a": "disrupt",
+        "b": "rain",
+        "family_a": "disrupt",
+        "family_b": "rain",
+        "wins": 65,
+        "losses": 35,
+        "draws": 0,
+        "score": 0.65,
+        "win_wilson_95": [
+          0.5525444329688796,
+          0.7363575175690247
+        ],
+        "loss_wilson_95": [
+          0.26364248243097527,
+          0.44745556703112027
+        ],
+        "duration_median": 17.399999999999977,
+        "side_swap_failures": []
+      },
+      {
+        "a": "disrupt",
+        "b": "rain_garden",
+        "family_a": "disrupt",
+        "family_b": "rain",
+        "wins": 7,
+        "losses": 93,
+        "draws": 0,
+        "score": 0.07,
+        "win_wilson_95": [
+          0.03431926106727268,
+          0.137495147390735
+        ],
+        "loss_wilson_95": [
+          0.8625048526092651,
+          0.9656807389327273
+        ],
+        "duration_median": 17.49999999999998,
+        "side_swap_failures": []
+      },
+      {
+        "a": "disrupt",
+        "b": "disrupt_healing_needle",
+        "family_a": "disrupt",
+        "family_b": "disrupt",
+        "wins": 66,
+        "losses": 34,
+        "draws": 0,
+        "score": 0.66,
+        "win_wilson_95": [
+          0.5627772885472462,
+          0.7453847920265184
+        ],
+        "loss_wilson_95": [
+          0.25461520797348164,
+          0.43722271145275377
+        ],
+        "duration_median": 14.099999999999966,
+        "side_swap_failures": []
+      },
+      {
+        "a": "disrupt",
+        "b": "disrupt_reversed_rows",
+        "family_a": "disrupt",
+        "family_b": "disrupt",
+        "wins": 2,
+        "losses": 98,
+        "draws": 0,
+        "score": 0.02,
+        "win_wilson_95": [
+          0.00550196755016235,
+          0.07001179072854388
+        ],
+        "loss_wilson_95": [
+          0.929988209271456,
+          0.9944980324498376
+        ],
+        "duration_median": 12.79999999999997,
+        "side_swap_failures": []
+      },
+      {
+        "a": "ghost_guard_active",
+        "b": "sun",
+        "family_a": "anti_dive",
+        "family_b": "sun",
+        "wins": 0,
+        "losses": 100,
+        "draws": 0,
+        "score": 0.0,
+        "win_wilson_95": [
+          3.469446951953614e-18,
+          0.03699349820698568
+        ],
+        "loss_wilson_95": [
+          0.9630065017930143,
+          1.0
+        ],
+        "duration_median": 16.24999999999996,
+        "side_swap_failures": []
+      },
+      {
+        "a": "ghost_guard_active",
+        "b": "sun_control",
+        "family_a": "anti_dive",
+        "family_b": "sun",
+        "wins": 42,
+        "losses": 58,
+        "draws": 0,
+        "score": 0.42,
+        "win_wilson_95": [
+          0.3279838267435473,
+          0.5179351329695703
+        ],
+        "loss_wilson_95": [
+          0.4820648670304296,
+          0.6720161732564526
+        ],
+        "duration_median": 16.89999999999997,
+        "side_swap_failures": []
+      },
+      {
+        "a": "ghost_guard_active",
+        "b": "rain",
+        "family_a": "anti_dive",
+        "family_b": "rain",
+        "wins": 28,
+        "losses": 72,
+        "draws": 0,
+        "score": 0.28,
+        "win_wilson_95": [
+          0.20139685211186212,
+          0.3748802870992116
+        ],
+        "loss_wilson_95": [
+          0.6251197129007884,
+          0.7986031478881379
+        ],
+        "duration_median": 24.800000000000082,
+        "side_swap_failures": []
+      },
+      {
+        "a": "ghost_guard_active",
+        "b": "rain_garden",
+        "family_a": "anti_dive",
+        "family_b": "rain",
+        "wins": 0,
+        "losses": 100,
+        "draws": 0,
+        "score": 0.0,
+        "win_wilson_95": [
+          3.469446951953614e-18,
+          0.03699349820698568
+        ],
+        "loss_wilson_95": [
+          0.9630065017930143,
+          1.0
+        ],
+        "duration_median": 19.400000000000006,
+        "side_swap_failures": []
+      },
+      {
+        "a": "ghost_guard_active",
+        "b": "disrupt_healing_needle",
+        "family_a": "anti_dive",
+        "family_b": "disrupt",
+        "wins": 24,
+        "losses": 76,
+        "draws": 0,
+        "score": 0.24,
+        "win_wilson_95": [
+          0.16691325556948772,
+          0.33232336349814473
+        ],
+        "loss_wilson_95": [
+          0.6676766365018553,
+          0.8330867444305122
+        ],
+        "duration_median": 14.799999999999963,
+        "side_swap_failures": []
+      },
+      {
+        "a": "ghost_guard_active",
+        "b": "disrupt_reversed_rows",
+        "family_a": "anti_dive",
+        "family_b": "disrupt",
+        "wins": 68,
+        "losses": 32,
+        "draws": 0,
+        "score": 0.68,
+        "win_wilson_95": [
+          0.5833738138954762,
+          0.7633085267500092
+        ],
+        "loss_wilson_95": [
+          0.23669147324999093,
+          0.41662618610452384
+        ],
+        "duration_median": 14.799999999999963,
+        "side_swap_failures": []
+      },
+      {
+        "a": "sun",
+        "b": "sun_control",
+        "family_a": "sun",
+        "family_b": "sun",
+        "wins": 37,
+        "losses": 63,
+        "draws": 0,
+        "score": 0.37,
+        "win_wilson_95": [
+          0.28182360534324524,
+          0.4677947041905709
+        ],
+        "loss_wilson_95": [
+          0.5322052958094291,
+          0.7181763946567546
+        ],
+        "duration_median": 12.94999999999997,
+        "side_swap_failures": []
+      },
+      {
+        "a": "sun",
+        "b": "rain",
+        "family_a": "sun",
+        "family_b": "rain",
+        "wins": 54,
+        "losses": 46,
+        "draws": 0,
+        "score": 0.54,
+        "win_wilson_95": [
+          0.44264860323368227,
+          0.6343919169097589
+        ],
+        "loss_wilson_95": [
+          0.36560808309024106,
+          0.5573513967663177
+        ],
+        "duration_median": 16.99999999999997,
+        "side_swap_failures": []
+      },
+      {
+        "a": "sun",
+        "b": "rain_garden",
+        "family_a": "sun",
+        "family_b": "rain",
+        "wins": 1,
+        "losses": 99,
+        "draws": 0,
+        "score": 0.01,
+        "win_wilson_95": [
+          0.0017674320641406505,
+          0.054486196178705315
+        ],
+        "loss_wilson_95": [
+          0.9455138038212946,
+          0.9982325679358593
+        ],
+        "duration_median": 19.200000000000003,
+        "side_swap_failures": []
+      },
+      {
+        "a": "sun",
+        "b": "disrupt_healing_needle",
+        "family_a": "sun",
+        "family_b": "disrupt",
+        "wins": 78,
+        "losses": 22,
+        "draws": 0,
+        "score": 0.78,
+        "win_wilson_95": [
+          0.6892964648501421,
+          0.8499871761539459
+        ],
+        "loss_wilson_95": [
+          0.150012823846054,
+          0.31070353514985793
+        ],
+        "duration_median": 14.699999999999964,
+        "side_swap_failures": []
+      },
+      {
+        "a": "sun",
+        "b": "disrupt_reversed_rows",
+        "family_a": "sun",
+        "family_b": "disrupt",
+        "wins": 100,
+        "losses": 0,
+        "draws": 0,
+        "score": 1.0,
+        "win_wilson_95": [
+          0.9630065017930143,
+          1.0
+        ],
+        "loss_wilson_95": [
+          3.469446951953614e-18,
+          0.03699349820698568
+        ],
+        "duration_median": 12.89999999999997,
+        "side_swap_failures": []
+      },
+      {
+        "a": "sun_control",
+        "b": "rain",
+        "family_a": "sun",
+        "family_b": "rain",
+        "wins": 54,
+        "losses": 46,
+        "draws": 0,
+        "score": 0.54,
+        "win_wilson_95": [
+          0.44264860323368227,
+          0.6343919169097589
+        ],
+        "loss_wilson_95": [
+          0.36560808309024106,
+          0.5573513967663177
+        ],
+        "duration_median": 18.29999999999999,
+        "side_swap_failures": []
+      },
+      {
+        "a": "sun_control",
+        "b": "rain_garden",
+        "family_a": "sun",
+        "family_b": "rain",
+        "wins": 17,
+        "losses": 83,
+        "draws": 0,
+        "score": 0.17,
+        "win_wilson_95": [
+          0.10893566114059931,
+          0.25548004767601123
+        ],
+        "loss_wilson_95": [
+          0.7445199523239887,
+          0.8910643388594006
+        ],
+        "duration_median": 17.299999999999976,
+        "side_swap_failures": []
+      },
+      {
+        "a": "sun_control",
+        "b": "disrupt_healing_needle",
+        "family_a": "sun",
+        "family_b": "disrupt",
+        "wins": 98,
+        "losses": 2,
+        "draws": 0,
+        "score": 0.98,
+        "win_wilson_95": [
+          0.929988209271456,
+          0.9944980324498376
+        ],
+        "loss_wilson_95": [
+          0.00550196755016235,
+          0.07001179072854388
+        ],
+        "duration_median": 12.499999999999972,
+        "side_swap_failures": []
+      },
+      {
+        "a": "sun_control",
+        "b": "disrupt_reversed_rows",
+        "family_a": "sun",
+        "family_b": "disrupt",
+        "wins": 52,
+        "losses": 48,
+        "draws": 0,
+        "score": 0.52,
+        "win_wilson_95": [
+          0.4231657776522397,
+          0.615354482419481
+        ],
+        "loss_wilson_95": [
+          0.384645517580519,
+          0.5768342223477603
+        ],
+        "duration_median": 19.05,
+        "side_swap_failures": []
+      },
+      {
+        "a": "rain",
+        "b": "rain_garden",
+        "family_a": "rain",
+        "family_b": "rain",
+        "wins": 0,
+        "losses": 100,
+        "draws": 0,
+        "score": 0.0,
+        "win_wilson_95": [
+          3.469446951953614e-18,
+          0.03699349820698568
+        ],
+        "loss_wilson_95": [
+          0.9630065017930143,
+          1.0
+        ],
+        "duration_median": 20.100000000000016,
+        "side_swap_failures": []
+      },
+      {
+        "a": "rain",
+        "b": "disrupt_healing_needle",
+        "family_a": "rain",
+        "family_b": "disrupt",
+        "wins": 83,
+        "losses": 17,
+        "draws": 0,
+        "score": 0.83,
+        "win_wilson_95": [
+          0.7445199523239887,
+          0.8910643388594006
+        ],
+        "loss_wilson_95": [
+          0.10893566114059931,
+          0.25548004767601123
+        ],
+        "duration_median": 16.84999999999997,
+        "side_swap_failures": []
+      },
+      {
+        "a": "rain",
+        "b": "disrupt_reversed_rows",
+        "family_a": "rain",
+        "family_b": "disrupt",
+        "wins": 63,
+        "losses": 37,
+        "draws": 0,
+        "score": 0.63,
+        "win_wilson_95": [
+          0.5322052958094291,
+          0.7181763946567546
+        ],
+        "loss_wilson_95": [
+          0.28182360534324524,
+          0.4677947041905709
+        ],
+        "duration_median": 20.650000000000023,
+        "side_swap_failures": []
+      },
+      {
+        "a": "rain_garden",
+        "b": "disrupt_healing_needle",
+        "family_a": "rain",
+        "family_b": "disrupt",
+        "wins": 72,
+        "losses": 28,
+        "draws": 0,
+        "score": 0.72,
+        "win_wilson_95": [
+          0.6251197129007884,
+          0.7986031478881379
+        ],
+        "loss_wilson_95": [
+          0.20139685211186212,
+          0.3748802870992116
+        ],
+        "duration_median": 17.299999999999976,
+        "side_swap_failures": []
+      },
+      {
+        "a": "rain_garden",
+        "b": "disrupt_reversed_rows",
+        "family_a": "rain",
+        "family_b": "disrupt",
+        "wins": 66,
+        "losses": 34,
+        "draws": 0,
+        "score": 0.66,
+        "win_wilson_95": [
+          0.5627772885472462,
+          0.7453847920265184
+        ],
+        "loss_wilson_95": [
+          0.25461520797348164,
+          0.43722271145275377
+        ],
+        "duration_median": 17.54999999999998,
+        "side_swap_failures": []
+      },
+      {
+        "a": "disrupt_healing_needle",
+        "b": "disrupt_reversed_rows",
+        "family_a": "disrupt",
+        "family_b": "disrupt",
+        "wins": 19,
+        "losses": 81,
+        "draws": 0,
+        "score": 0.19,
+        "win_wilson_95": [
+          0.12514751509768735,
+          0.27778845379064376
+        ],
+        "loss_wilson_95": [
+          0.7222115462093562,
+          0.8748524849023126
+        ],
+        "duration_median": 13.599999999999968,
+        "side_swap_failures": []
+      }
+    ]
+  }
+}
