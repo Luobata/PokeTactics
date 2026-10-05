@@ -1,0 +1,10 @@
+test_full_natural_scenes_require_their_first_batch_machine (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_full_natural_scenes_require_their_first_batch_machine) ... ok
+test_removed_full_natural_teaching_cannot_become_a_negative_scene (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_removed_full_natural_teaching_cannot_become_a_negative_scene) ... ok
+test_broken_parent_cause_and_unrelated_native_events_are_rejected (tests.test_teaching_visual_probe.NativePacketContracts.test_broken_parent_cause_and_unrelated_native_events_are_rejected) ... ok
+test_real_unwrapped_side_hit_and_native_heal_reconcile (tests.test_teaching_visual_probe.NativePacketContracts.test_real_unwrapped_side_hit_and_native_heal_reconcile) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.034s
+
+OK
+exit=0

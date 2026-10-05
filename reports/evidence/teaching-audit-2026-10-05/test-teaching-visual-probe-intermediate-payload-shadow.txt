@@ -1,0 +1,29 @@
+test_full_natural_scenes_require_their_first_batch_machine (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_full_natural_scenes_require_their_first_batch_machine) ... ok
+test_removed_full_natural_teaching_cannot_become_a_negative_scene (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_removed_full_natural_teaching_cannot_become_a_negative_scene) ... ok
+test_broken_parent_cause_and_unrelated_native_events_are_rejected (tests.test_teaching_visual_probe.NativePacketContracts.test_broken_parent_cause_and_unrelated_native_events_are_rejected) ... FAIL
+test_real_unwrapped_side_hit_and_native_heal_reconcile (tests.test_teaching_visual_probe.NativePacketContracts.test_real_unwrapped_side_and_heal_reconcile) ... FAIL
+
+======================================================================
+FAIL: test_broken_parent_cause_and_unrelated_native_events_are_rejected (tests.test_teaching_visual_probe.NativePacketContracts.test_broken_parent_cause_and_unrelated_native_events_are_rejected)
+----------------------------------------------------------------------
+AssertionError: tampered_parent: invalid cause_index 14
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/bytedance/luobata/PokeTactics/tests/test_teaching_visual_probe.py", line 160, in test_broken_parent_cause_and_unrelated_native_events_are_rejected
+    with self.assertRaisesRegex(
+AssertionError: "source/target must match" does not match "tampered_parent: invalid cause_index 14"
+
+======================================================================
+FAIL: test_real_unwrapped_side_hit_and_native_heal_reconcile (tests.test_teaching_visual_probe.NativePacketContracts.test_real_unwrapped_side_and_heal_reconcile)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/bytedance/luobata/PokeTactics/tools/acceptance/teaching_visual_probe.py", line 526, in reconcile_parent_state
+    raise AssertionError(
+AssertionError: native_unwrapped_side_and_heal: tempo result semantics are incomplete: removed=None, before=None, after=None, returned=None
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.029s
+
+FAILED (failures=2)

@@ -1,0 +1,48 @@
+{
+  "schema": "teaching-review-state-v1",
+  "review_status": "insufficient_evidence",
+  "main_agent_review_status": "pass_with_risk",
+  "session_id": "sess-ffc4bb3f-51f5-4888-b9e4-10123cdffd1c",
+  "review_run_id": "20261005-112744-b10f7d3fa4b6",
+  "reviewer_agent_status": "unavailable",
+  "review_bundle": "/Users/bytedance/luobata/PokeTactics/.ai-review/20261005-112744-b10f7d3fa4b6/review-bundle.json",
+  "input_fingerprint": "afb65a7474de1d55be9374122cc8eef9d54f8c39d59197475861459c7d704876",
+  "blockers": [],
+  "risks": [
+    "Independent final review unavailable after three 429 errors; no independent pass",
+    "Shared native/weather/teaching budget is unverified; teaching-only estimate is separately named"
+  ],
+  "evidence_gaps": [
+    "Central semantic unavailable and local QG no matching script coverage",
+    "Production new machine learning/UI/save/AI/renderer not implemented",
+    "Whole-pool/acquisition fairness, real-device and independent art not verified"
+  ],
+  "checks_rerun": [
+    "Main-agent 24 exact complete-event replays, 8 paired statistics and 8 boundary fixtures",
+    "Final learning matrix/counts/source bindings and CSV parsed row equality",
+    "Final visual 37 outputs and metadata reproduce byte-for-byte",
+    "All frozen sources/dependencies/evidence/gzip hashes match",
+    "Focused tests, compile, staged whitespace; production rules and old banks unchanged"
+  ],
+  "qualitygate": {
+    "gate": "pass",
+    "raw_gate": "pass",
+    "agent_action_task_complete": false,
+    "central_semantic_consumed": false,
+    "mutation_executed": false,
+    "applicable_script_rule_coverage": false
+  },
+  "next_actions": [
+    "Complete independent review before production integration"
+  ],
+  "delivery_kind": "User-authorized isolated design/prototype source and evidence archive, no production rules registration",
+  "updated_at": "2026-10-05T11:30:43.901705+00:00",
+  "delivery": {
+    "commit": "cf087dea231aef46d8031002e290d7a3493f6f9a",
+    "branch": "main",
+    "remote_ref_verified": true,
+    "worktree_clean": true,
+    "old_banks_unchanged": true,
+    "experimental_not_production": true
+  }
+}

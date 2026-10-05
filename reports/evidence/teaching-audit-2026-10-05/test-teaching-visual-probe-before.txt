@@ -1,0 +1,63 @@
+test_full_natural_scenes_require_their_first_batch_machine (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_full_natural_scenes_require_their_first_batch_machine) ... FAIL
+test_removed_full_natural_teaching_cannot_become_a_negative_scene (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_removed_full_natural_teaching_cannot_become_a_negative_scene) ... /Users/bytedance/luobata/PokeTactics/tools/mockups/motion.py:465: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  bright = max((c for c in cel.getdata() if c[3]), key=lambda c: sum(c[:3]))
+/Users/bytedance/luobata/PokeTactics/tools/mockups/character_rigs.py:321: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  opaque = [pixel[:3] for pixel in cel.getdata() if pixel[3]]
+/Users/bytedance/luobata/PokeTactics/tools/mockups/character_rigs.py:308: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  color = max((pixel for pixel in cel.getdata() if pixel[3]),
+ERROR
+test_broken_parent_cause_and_unrelated_native_events_are_rejected (tests.test_teaching_visual_probe.NativePacketContracts.test_broken_parent_cause_and_unrelated_native_events_are_rejected) ... FAIL
+test_real_unwrapped_side_hit_and_native_heal_reconcile (tests.test_teaching_visual_probe.NativePacketContracts.test_real_unwrapped_side_hit_and_native_heal_reconcile) ... FAIL
+
+======================================================================
+ERROR: test_removed_full_natural_teaching_cannot_become_a_negative_scene (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_removed_full_natural_teaching_cannot_become_a_negative_scene)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/bytedance/luobata/PokeTactics/tests/test_teaching_visual_probe.py", line 71, in test_removed_full_natural_teaching_cannot_become_a_negative_scene
+    probe.run_probe(
+  File "/Users/bytedance/luobata/PokeTactics/tools/acceptance/teaching_visual_probe.py", line 764, in run_probe
+    "negative_reason": {
+                       ^
+KeyError: 'full_natural'
+
+======================================================================
+FAIL: test_full_natural_scenes_require_their_first_batch_machine (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_full_natural_scenes_require_their_first_batch_machine)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/bytedance/luobata/PokeTactics/tests/test_teaching_visual_probe.py", line 50, in test_full_natural_scenes_require_their_first_batch_machine
+    self.assertEqual(probe.MACHINE_BY_SCENE["full_natural"], "guardian_riposte")
+AssertionError: None != 'guardian_riposte'
+
+======================================================================
+FAIL: test_broken_parent_cause_and_unrelated_native_events_are_rejected (tests.test_teaching_visual_probe.NativePacketContracts.test_broken_parent_cause_and_unrelated_native_events_are_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/bytedance/luobata/PokeTactics/tests/test_teaching_visual_probe.py", line 150, in test_broken_parent_cause_and_unrelated_native_events_are_rejected
+    battle, _animation, _binding = self.binding()
+                                   ^^^^^^^^^^^^^^
+  File "/Users/bytedance/luobata/PokeTactics/tests/test_teaching_visual_probe.py", line 111, in binding
+    bindings = probe.collect_teachings(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bytedance/luobata/PokeTactics/tools/acceptance/teaching_visual_probe.py", line 215, in collect_teachings
+    raise AssertionError(f"{scene}: native packet event {child_index} is unsupported")
+AssertionError: native_unwrapped_side_and_heal: native packet event 11 is unsupported
+
+======================================================================
+FAIL: test_real_unwrapped_side_hit_and_native_heal_reconcile (tests.test_teaching_visual_probe.NativePacketContracts.test_real_unwrapped_side_hit_and_native_heal_reconcile)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/bytedance/luobata/PokeTactics/tests/test_teaching_visual_probe.py", line 117, in test_real_unwrapped_side_hit_and_native_heal_reconcile
+    battle, animation, binding = self.binding()
+                                 ^^^^^^^^^^^^^^
+  File "/Users/bytedance/luobata/PokeTactics/tests/test_teaching_visual_probe.py", line 111, in binding
+    bindings = probe.collect_teachings(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bytedance/luobata/PokeTactics/tools/acceptance/teaching_visual_probe.py", line 215, in collect_teachings
+    raise AssertionError(f"{scene}: native packet event {child_index} is unsupported")
+AssertionError: native_unwrapped_side_and_heal: native packet event 11 is unsupported
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.396s
+
+FAILED (failures=3, errors=1)
+exit=1

@@ -50,10 +50,11 @@ MACHINE_BY_SCENE = {
     "tempo_zero": "tempo_break",
     "tempo_invalid": "tempo_break",
     "tempo_lethal": "tempo_break",
-    "full_natural": None,
-    "tempo_full_natural": None,
+    "full_natural": "guardian_riposte",
+    "tempo_full_natural": "tempo_break",
 }
 POSITIVE_DIRECTED_SCENES = {"counter_valid", "counter_blocked", "tempo_valid", "tempo_zero"}
+POSITIVE_SCENES = POSITIVE_DIRECTED_SCENES | {"full_natural", "tempo_full_natural"}
 PAPER, INK, MUTED = "#f3f0e7", "#24332f", "#66746f"
 CARD_W, CARD_H, SCALE = 516, 830, 2
 
@@ -126,6 +127,8 @@ class TeachingBinding:
     parent: tuple
     timing: object
     owned: list
+    native_side_hits: list
+    native_heals: list
 
 
 def find_parent_timing(animation, parent_index, parent):
@@ -186,7 +189,7 @@ def collect_teachings(scene, battle, animation, expected_machine=None):
                 raise AssertionError(f"{scene}: teaching payload lacks valid {key}")
 
         def related_agents(candidate):
-            if candidate[1] in ("attack", "cast", "skill_effect"):
+            if candidate[1] in ("attack", "cast", "skill_effect", "partner_effect"):
                 return set(candidate[2:4])
             if candidate[1] in ("move", "unit_state", "status", "regen", "sash", "die"):
                 return {candidate[2]}
@@ -195,27 +198,93 @@ def collect_teachings(scene, battle, animation, expected_machine=None):
         legal = {source_idx, target_idx, parent[2], parent[3]}
         allowed = {"attack", "cast", "move", "unit_state", "status", "regen",
                    "sash", "die", "miss", "skill_effect"}
-        native_side_children = set()
+        native_allowed = allowed | {"partner_effect"}
+        units_by_idx = {unit.idx: unit for unit in battle.units}
+        native_covered = set()
+        native_side_hits = []
+        native_heals = []
+
+        # Existing signature packets explicitly publish their bounded ownership.
+        # A wrapper may cover a third agent, but it still cannot cross the
+        # teaching marker or change the parent caster.
         for child_index in range(cause_index + 1, index):
             child = battle.events[child_index]
             if child[1] != "skill_effect":
                 continue
             native_payload = child[6] if len(child) == 7 else {}
             count = native_payload.get("event_count") if isinstance(native_payload, dict) else None
+            end = child_index + 1 + (count if type(count) is int else 0)
             if (not isinstance(native_payload, dict) or native_payload.get("cast_index") != cause_index
                     or type(count) is not int or not 0 <= count
-                    or child_index + count >= len(battle.events)):
+                    or end > index):
                 raise AssertionError(f"{scene}: native skill_effect {child_index} is not owned by the parent cast")
             if child[2] != parent[2]:
                 raise AssertionError(f"{scene}: native skill_effect {child_index} changes caster")
-            native_side_children.update(range(child_index + 1, child_index + count + 1))
+            native_covered.update(range(child_index, end))
+
+        # Splash and volley side hits are real legacy native events without a
+        # skill_effect wrapper.  Accept at most one third-target attack when its
+        # exact attacker/target state triple follows it.
         for child_index in range(cause_index + 1, index):
             child = battle.events[child_index]
-            if child[1] == "teaching_effect" or child[1] not in allowed:
+            if child_index in native_covered or child[1] != "attack":
+                continue
+            if child[2] != parent[2] or child[3] in legal:
+                continue
+            if native_side_hits:
+                raise AssertionError(f"{scene}: multiple unwrapped native side hits are unsupported")
+            if (len(child) != 7 or type(child[4]) is not int or child[4] <= 0
+                    or child_index + 3 > index):
+                raise AssertionError(f"{scene}: native packet event {child_index} is not a valid native side hit")
+            state_attacker, state_target = battle.events[child_index + 1:child_index + 3]
+            if (state_attacker[1] != "unit_state" or state_attacker[2] != child[2]
+                    or state_target[1] != "unit_state" or state_target[2] != child[3]):
+                raise AssertionError(f"{scene}: unwrapped native side hit {child_index} lacks its state pair")
+            native_side_hits.append({
+                "raw_index": child_index,
+                "target_idx": child[3],
+                "damage": child[4],
+            })
+            native_covered.update(range(child_index, child_index + 3))
+
+        # A primary target's real Snorlax partner can heal a wounded mate inside
+        # the same native packet.  The marker, regen and state triple must name
+        # the same patient and agree on the actual positive amount.
+        for child_index in range(cause_index + 1, index):
+            child = battle.events[child_index]
+            if child_index in native_covered or child[1] != "partner_effect":
+                continue
+            if (len(child) != 7 or child[5] != "share_lunch"
+                    or child[2] != parent[3]):
+                raise AssertionError(f"{scene}: native healing marker {child_index} is not owned by the parent target")
+            source, patient = units_by_idx.get(child[2]), units_by_idx.get(child[3])
+            heal_payload = child[6] if isinstance(child[6], dict) else None
+            amount = heal_payload.get("amount") if isinstance(heal_payload, dict) else None
+            if (source is None or patient is None or source is patient
+                    or source.team != patient.team or type(amount) is not int or amount <= 0
+                    or child_index + 3 > index):
+                raise AssertionError(f"{scene}: native healing marker {child_index} has invalid subjects or amount")
+            regen, patient_state = battle.events[child_index + 1:child_index + 3]
+            if (regen[1] != "regen" or regen[2] != patient.idx or regen[3] != amount
+                    or patient_state[1] != "unit_state" or patient_state[2] != patient.idx):
+                raise AssertionError(f"{scene}: native healing marker {child_index} disagrees with its regen/state packet")
+            native_heals.append({
+                "marker_raw_index": child_index,
+                "regen_raw_index": child_index + 1,
+                "state_raw_index": child_index + 2,
+                "source_idx": source.idx,
+                "patient_idx": patient.idx,
+                "amount": amount,
+            })
+            native_covered.update(range(child_index, child_index + 3))
+
+        for child_index in range(cause_index + 1, index):
+            child = battle.events[child_index]
+            if child[1] == "teaching_effect" or child[1] not in native_allowed:
                 raise AssertionError(f"{scene}: native packet event {child_index} is unsupported")
             if child[1] == "skill_effect":
                 continue
-            if child_index in native_side_children:
+            if child_index in native_covered:
                 continue
             if not related_agents(child).issubset(legal):
                 raise AssertionError(f"{scene}: native packet event {child_index} introduces an unrelated unit")
@@ -238,7 +307,7 @@ def collect_teachings(scene, battle, animation, expected_machine=None):
         bindings.append(TeachingBinding(
             scene, index, event, machine_id, payload, actual_view(payload),
             "nested" if "actual" in payload else "flat",
-            cause_index, parent, timing, owned))
+            cause_index, parent, timing, owned, native_side_hits, native_heals))
     return bindings
 
 
@@ -416,7 +485,41 @@ def reconcile_parent_state(scene, binding, battle, animation, parameters):
         "presentation_after": compact_state(presentation_after, agents),
         "actual_shape": binding.actual_shape,
         "actual": binding.actual_data,
+        "native_reconciliation": {
+            "side_hits": [],
+            "heals": [],
+        },
     }
+    for side in binding.native_side_hits:
+        event = battle.events[side["raw_index"]]
+        side_before = replay_at_index(raw_rows, side["raw_index"])
+        side_after = replay_at_index(raw_rows, side["raw_index"] + 3)
+        target_idx = side["target_idx"]
+        hp_loss = max(0, side_before[target_idx]["hp"] - side_after[target_idx]["hp"])
+        if hp_loss != event[4]:
+            raise AssertionError(
+                f"{scene}: native side hit {side['raw_index']} damage does not match HP loss")
+        row["native_reconciliation"]["side_hits"].append({
+            **side,
+            "hp_before": side_before[target_idx]["hp"],
+            "hp_after": side_after[target_idx]["hp"],
+            "hp_loss": hp_loss,
+        })
+    for heal in binding.native_heals:
+        marker = battle.events[heal["marker_raw_index"]]
+        patient_idx = heal["patient_idx"]
+        heal_before = replay_at_index(raw_rows, heal["marker_raw_index"])
+        heal_after = replay_at_index(raw_rows, heal["state_raw_index"] + 1)
+        hp_gain = max(0, heal_after[patient_idx]["hp"] - heal_before[patient_idx]["hp"])
+        if hp_gain != heal["amount"] or marker[6].get("amount") != hp_gain:
+            raise AssertionError(
+                f"{scene}: native healing {heal['marker_raw_index']} disagrees with authoritative HP")
+        row["native_reconciliation"]["heals"].append({
+            **heal,
+            "hp_before": heal_before[patient_idx]["hp"],
+            "hp_after": heal_after[patient_idx]["hp"],
+            "hp_gain": hp_gain,
+        })
     if binding.machine_id == "guardian_riposte":
         if not native_after[source]["hp"] < before[source]["hp"]:
             raise AssertionError(f"{scene}: guardian source did not lose authoritative HP")
@@ -721,13 +824,14 @@ def run_probe(args, fonts, factory, design, design_machines, failure):
                 raise AssertionError(f"full scene population is {team_counts}, expected 6 per side")
         bindings = collect_teachings(scene, battle, animation, expected)
         positive = bool(bindings)
-        if scene in POSITIVE_DIRECTED_SCENES and not positive:
+        if scene in POSITIVE_SCENES and not positive:
             all_checks["negative_paths"] = False
             raise AssertionError(f"{scene}: expected directed teaching event")
+        if scene not in POSITIVE_SCENES and any(
+                event[1] == "teaching_effect" for event in battle.events):
+            all_checks["negative_paths"] = False
+            raise AssertionError(f"{scene}: negative scenario emitted teaching_effect")
         if not positive:
-            if any(event[1] == "teaching_effect" for event in battle.events):
-                all_checks["negative_paths"] = False
-                raise AssertionError(f"{scene}: negative scenario emitted teaching_effect")
             native_event, moment = native_negative_moment(scene, battle, animation, expected)
             title = f"{scene} · {expected or kind}"
             shots = (

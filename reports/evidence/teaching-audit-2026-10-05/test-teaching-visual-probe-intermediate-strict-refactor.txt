@@ -1,0 +1,11 @@
+test_full_natural_cases_export_real_cause_and_reconciliation (...) ... ERROR
+test_full_natural_scenes_require_their_first_batch_machine (...) ... ok
+test_removed_full_natural_teaching_cannot_become_a_negative_scene (...) ... ok
+test_broken_parent_cause_and_unrelated_native_events_are_rejected (...) ... ERROR
+test_real_unwrapped_side_hit_and_native_heal_reconcile (...) ... ERROR
+
+Summary:
+- full natural export: TypeError TeachingBinding missing native_side_hits/native_heals
+- negative packet cases: NameError native_side_targets during strict-refactor transition
+Ran 5 tests
+FAILED (errors=4)

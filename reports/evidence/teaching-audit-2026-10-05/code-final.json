@@ -1,0 +1,156 @@
+{
+  "schema_version": "independent-reviewer.v1",
+  "review_status": "pass",
+  "repo": {
+    "path": "/Users/bytedance/luobata/PokeTactics",
+    "execution_location": "local",
+    "branch": "main",
+    "base_ref": "cf087dea231aef46d8031002e290d7a3493f6f9a",
+    "head_ref": "dirty worktree bound by source SHA-256",
+    "commit_range": "cf087dea231aef46d8031002e290d7a3493f6f9a..scoped dirty worktree",
+    "dirty_state": {
+      "staged": 0,
+      "unstaged": 2,
+      "untracked": 30
+    }
+  },
+  "review": {
+    "session_id": "sess-ffc4bb3f-51f5-4888-b9e4-10123cdffd1c",
+    "run_id": "20261005-120441-8b177ddd43e9",
+    "bundle_path": "/Users/bytedance/luobata/PokeTactics/.ai-review/20261005-120441-8b177ddd43e9/review-bundle.json",
+    "dashboard_url": "",
+    "input_fingerprint": "8e0685bcfdef7e0bd43663f2ef968779614ee8bcca2af2ae43d6db37e00f63f0",
+    "created_at": "2026-10-05T20:09:53+08:00",
+    "updated_at": "2026-10-05T20:09:53+08:00",
+    "review_bundle_sha256": "1292430781d0729c24b89edef223582552bc0eda22c5c7c1f47bdd50e9fd162c",
+    "review_input_path": "/Users/bytedance/luobata/PokeTactics/reports/evidence/teaching-audit-2026-10-05/review-input.json",
+    "initial_verdict_path": "/Users/bytedance/luobata/PokeTactics/.build/teaching-prototype/audit-code-initial.json",
+    "initial_verdict_sha256": "d97dcdbfdc2fb223d44d22bb6dbc82847fb3216fb83af5ebb572fd2a6f47c20b",
+    "initial_verdict_preserved": true
+  },
+  "reviewer_agents": [
+    {
+      "agent_id": "/root/audit_m_code",
+      "role": "general-reviewer",
+      "lifecycle": "reused",
+      "verdict": "pass",
+      "bound_scope": "Narrow same-issue recheck of initial VISUAL-001/002 only: tools/acceptance/teaching_visual_probe.py and tests/test_teaching_visual_probe.py against unchanged docs32/prototype/design contracts and review-input evidence; text-only, no image inspection."
+    }
+  ],
+  "findings": [],
+  "resolved_findings": [
+    {
+      "id": "VISUAL-001",
+      "resolution": "passed",
+      "evidence_refs": [
+        "tools/acceptance/teaching_visual_probe.py:44",
+        "tools/acceptance/teaching_visual_probe.py:56",
+        "tools/acceptance/teaching_visual_probe.py:825",
+        "tools/acceptance/teaching_visual_probe.py:827",
+        "tools/acceptance/teaching_visual_probe.py:830",
+        "tests/test_teaching_visual_probe.py:72",
+        "tests/test_teaching_visual_probe.py:77",
+        "tests/test_teaching_visual_probe.py:122",
+        "reports/evidence/teaching-audit-2026-10-05/negative-success-before.log",
+        "reports/evidence/teaching-audit-2026-10-05/test-teaching-visual-probe-before.txt",
+        "reports/evidence/teaching-audit-2026-10-05/tests-final.log"
+      ],
+      "verification": "Both full-natural scenes now declare and require their exact first-batch machine; all six positive scenes fail when bindings are absent, and all four negative scenes fail immediately when any teaching_effect appears. Red logs show these tests failed on cf087de; the current 20-test run passes."
+    },
+    {
+      "id": "VISUAL-002",
+      "resolution": "passed",
+      "evidence_refs": [
+        "tools/acceptance/teaching_visual_probe.py:207",
+        "tools/acceptance/teaching_visual_probe.py:225",
+        "tools/acceptance/teaching_visual_probe.py:250",
+        "tools/acceptance/teaching_visual_probe.py:281",
+        "tools/acceptance/teaching_visual_probe.py:291",
+        "tools/acceptance/teaching_visual_probe.py:493",
+        "tools/acceptance/teaching_visual_probe.py:508",
+        "tests/test_teaching_visual_probe.py:143",
+        "tests/test_teaching_visual_probe.py:182",
+        "tests/test_teaching_visual_probe.py:223",
+        "reports/evidence/teaching-audit-2026-10-05/packet-cases.json.gz",
+        "reports/evidence/teaching-audit-2026-10-05/packet-artifact.json"
+      ],
+      "verification": "A real tempo packet containing one unwrapped splash side hit and one share_lunch heal is accepted only as exact attack/state/state and marker/regen/state triples, then independently reconciled to authoritative HP. Parent, unrelated/third-agent move, owned partner_effect, and malformed heal tampering are rejected. The teaching owned-event whitelist remains the original set and does not admit partner_effect."
+    }
+  ],
+  "checks": [
+    {
+      "name": "new_input_binding",
+      "status": "passed",
+      "command": "read-only SHA-256 verification of review-input source/evidence fields and bundle",
+      "evidence_ref": "2 source +25 evidence hashes matched; bundle SHA-256 1292430781d0729c24b89edef223582552bc0eda22c5c7c1f47bdd50e9fd162c; source hashes c36eb99e0b8cbed5f6aac80f8a678bfe0dcd66c159a944956d1c070d48a369c0 and f731a5f7e84e4fbdf0ab13302affe089d3c67d8c398d9ec7e1b04d2e2cd242b1."
+    },
+    {
+      "name": "scoped_diff_review",
+      "status": "passed",
+      "command": "git diff -- tools/acceptance/teaching_visual_probe.py tests/test_teaching_visual_probe.py",
+      "evidence_ref": "Only 117 insertions/13 deletions in the probe plus the new 288-line focused test. No sim/, data/, docs/design, docs32, or prototype tracked modifications."
+    },
+    {
+      "name": "protected_contracts_unchanged",
+      "status": "passed",
+      "command": "git diff --quiet -- sim data docs/32-teaching-skill-animation-contract.md docs/design/teaching-skills-v1.json tools/acceptance/teaching_skill_prototype.py",
+      "evidence_ref": "docs32=1f90de638d18a9d8af11dcc04d069d7c34bb6e1d629ffb34ea04f7d0ab7a6bc; design JSON=a01c737d53e5f5e9e5f0bb85496778f51be98517d1be6c571a341800185c2cf2; prototype=4309e398eed733a32141b27e0e49ba07619a98c2cc507a2d020829188bc8d22c."
+    },
+    {
+      "name": "red_green_validation",
+      "status": "passed",
+      "command": "review archived logs plus python3 -m unittest -v tests.test_teaching_prototype tests.test_teaching_visual_probe",
+      "evidence_ref": "Original-code logs fail full-natural expectations, packet parsing, and four negative-success cases; current independent rerun: 20 tests, all OK."
+    },
+    {
+      "name": "real_packet_artifact_recheck",
+      "status": "passed",
+      "command": "read-only parse/hash/reduction of packet-cases.json.gz",
+      "evidence_ref": "3 cases; compressed SHA a619e92b0ec78426c30f3db590b62c8f74013d36d22d052142d6dcbf78acab8, uncompressed SHA e60c8a69066d3c352ec1173bb9fcaa6a59ac32e9789f4b20f32936ec6f339fa3. Event hashes and owned ranges match. Side hit damage 28 equals HP loss 28; share_lunch amount 1500 equals HP gain 1500."
+    },
+    {
+      "name": "full_natural_authoritative_replay",
+      "status": "passed",
+      "command": "compare packet case event hashes to old visual metadata",
+      "evidence_ref": "full_natural and tempo_full_natural event hashes exactly match cf087de visual evidence; each contains exactly one expected teaching machine."
+    },
+    {
+      "name": "affected_visual_rerun_metadata",
+      "status": "passed",
+      "command": "text-only JSON comparison of old/new visual metadata and affected-validation",
+      "evidence_ref": "10/10 authoritative scene hashes equal; 37/37 output names, byte sizes, and SHA-256 hashes equal; all seven visual checks true. No image pixels were opened or inspected by this reviewer."
+    },
+    {
+      "name": "compile_whitespace",
+      "status": "passed",
+      "command": "python3 -m py_compile tools/acceptance/teaching_visual_probe.py tests/test_teaching_visual_probe.py; git diff --check -- tools/acceptance/teaching_visual_probe.py tests/test_teaching_visual_probe.py",
+      "evidence_ref": "Both commands exited 0 in independent rerun."
+    },
+    {
+      "name": "frozen_league_inputs_and_banks",
+      "status": "passed",
+      "command": "read-only affected-validation review",
+      "evidence_ref": "48/48 league input hashes unchanged and both user bank hashes unchanged."
+    },
+    {
+      "name": "local_qualitygate",
+      "status": "passed",
+      "command": "review reports/evidence/teaching-audit-2026-10-05/qualitygate-final.json",
+      "evidence_ref": "Local gate/raw gate pass; central semantic and Mutation were unavailable/not executed and remain outside this narrow code recheck."
+    }
+  ],
+  "next_actions": [
+    "No action required for the narrow VISUAL-001/002 recheck.",
+    "If future visual evidence needs packets with multiple unwrapped side hits or healing of the primary target, extend the parser with new real fixtures and request a fresh review."
+  ],
+  "residual_risks": [
+    "The acceptance parser intentionally supports at most one unwrapped third-target side hit and the specific real share_lunch marker/regen/state pattern; broader native packet shapes remain outside this reviewed evidence set.",
+    "This pass is only for the isolated visual acceptance probe. It does not authorize production teaching registration, saving, learning UI, renderer integration, whole-pool balance, ESP32, or shared budget verification.",
+    "Central semantic review and Mutation were unavailable; local QualityGate had no matching script-rule coverage."
+  ],
+  "scope_boundaries": [
+    "Initial audit-code-initial.json was preserved byte-for-byte.",
+    "No business or evidence files were modified by this reviewer; only audit-code-final.json was written under .build.",
+    "Concurrent handoff/report/evidence additions were outside the two-source review scope and were bound by review-input hashes rather than audited as prose."
+  ]
+}

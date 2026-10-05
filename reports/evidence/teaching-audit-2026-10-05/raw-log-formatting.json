@@ -1,0 +1,16 @@
+{
+  "schema": "teaching-audit-raw-log-formatting-v1",
+  "command": [
+    "git",
+    "diff",
+    "--cached",
+    "--check"
+  ],
+  "exit_code": 2,
+  "stdout": "reports/evidence/teaching-audit-2026-10-05/negative-success-before.log:1: trailing whitespace.\n+test_negative_scenes_reject_a_real_successful_teaching_packet (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_negative_scenes_reject_a_real_successful_teaching_packet) ... \n",
+  "stderr": "",
+  "file": "reports/evidence/teaching-audit-2026-10-05/negative-success-before.log",
+  "sha256": "59651d830afac0479454edccc536fbc175c9b075d65c5fe123b20d9e2fc1c51e",
+  "raw_log_edited": false,
+  "resolution": "Scoped .gitattributes disables whitespace diagnostics only for this immutable raw unittest log. All code and other artifacts retain normal whitespace checking. Review-input evidence hashes remain unchanged."
+}

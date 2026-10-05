@@ -1,0 +1,55 @@
+{
+  "schema": "teaching-audit-narrow-input-v1",
+  "reviewed_commit": "cf087dea231aef46d8031002e290d7a3493f6f9a",
+  "prior_input_fingerprint": "afb65a7474de1d55be9374122cc8eef9d54f8c39d59197475861459c7d704876",
+  "scope": "Narrow recheck of VISUAL-001/002 and explicit positive/negative scenario gates; acceptance-only, not production integration",
+  "source_sha256": {
+    "tools/acceptance/teaching_visual_probe.py": "c36eb99e0b8cbed5f6aac80f8a678bfe0dcd66c159a944956d1c070d48a369c0",
+    "tests/test_teaching_visual_probe.py": "f731a5f7e84e4fbdf0ab13302affe089d3c67d8c398d9ec7e1b04d2e2cd242b1"
+  },
+  "evidence_sha256": {
+    "reports/evidence/teaching-audit-2026-10-05/affected-validation.json": "adc68049987f2e2108faac81b857a188717465a846b3921ba88879427f34eb6f",
+    "reports/evidence/teaching-audit-2026-10-05/code-initial.json": "d97dcdbfdc2fb223d44d22bb6dbc82847fb3216fb83af5ebb572fd2a6f47c20b",
+    "reports/evidence/teaching-audit-2026-10-05/commands-final.json": "cd4f9ee30f22bc11bdfd5369e9823012a27b78c810cbc92306f76c65bb371c47",
+    "reports/evidence/teaching-audit-2026-10-05/evidence-initial.json": "0205bbc6f46c386265ecfb3ae179b6e27d1f6b0c735a7e16e40ff87532e98b7f",
+    "reports/evidence/teaching-audit-2026-10-05/frozen-hashes.json": "646f747504c08829dae04fec677b2bfbbc8d4c42e3582f4085f466c39282d913",
+    "reports/evidence/teaching-audit-2026-10-05/git-diff-check-final.txt": "19eaf43821a7660ec323a87c8457bf74823beb296c39f5e01aa8a683aa50f061",
+    "reports/evidence/teaching-audit-2026-10-05/negative-success-before.log": "59651d830afac0479454edccc536fbc175c9b075d65c5fe123b20d9e2fc1c51e",
+    "reports/evidence/teaching-audit-2026-10-05/packet-artifact.json": "8e5ae6024de6fd09973ceb805554f65607e2bff9952e0f06c5898d3f9f9d414b",
+    "reports/evidence/teaching-audit-2026-10-05/packet-cases-validation-final.txt": "7efd556483d3faa463d26521f8559c9a5f1d5de6d49bfa78c3febe5bef1b7014",
+    "reports/evidence/teaching-audit-2026-10-05/packet-cases.json.gz": "a619e92b0ec78426c30f3db590b62c8f74013d36d22d0521427d6dcbf78acab8",
+    "reports/evidence/teaching-audit-2026-10-05/preflight.json": "0e25c1c61406acffa58fa67086194475e2ef3b4043c181044e1c1683535c13db",
+    "reports/evidence/teaching-audit-2026-10-05/prior-local-review-state.json": "a6150a0842749ab88ff3bffb0d9b6e82e06f49d918b7d517868596eb94e4f6ec",
+    "reports/evidence/teaching-audit-2026-10-05/py_compile-final.txt": "19eaf43821a7660ec323a87c8457bf74823beb296c39f5e01aa8a683aa50f061",
+    "reports/evidence/teaching-audit-2026-10-05/qualitygate-final.json": "5089c00caf7cf3907034b24e36a1b27614cb44ab4992416b47b5d29fcd3be4c8",
+    "reports/evidence/teaching-audit-2026-10-05/qualitygate-final.log": "8328ff6c058cbec2073e1ea2d61a2aacbb7d42a427b9be23cdb14fba8db39076",
+    "reports/evidence/teaching-audit-2026-10-05/qualitygate-readiness.json": "4663eb5fb357ed2e4dbe709dd8ff19388fa91aa25c4e903c1c031080261a50ea",
+    "reports/evidence/teaching-audit-2026-10-05/review-generate.json": "0badda35a4d4bb441f2340cb0e72c194816c265f34630d214c23229657eed35c",
+    "reports/evidence/teaching-audit-2026-10-05/test-teaching-prototype-visual-final.txt": "01ad11d6c59cf66789931610a41d9e6becfcd89e4cf16f60a2acf0aea6179288",
+    "reports/evidence/teaching-audit-2026-10-05/test-teaching-visual-probe-after-superseded-success.txt": "0053e70c385410a774703777c06e59fb500a0cd54d572f488624c721134ce594",
+    "reports/evidence/teaching-audit-2026-10-05/test-teaching-visual-probe-before.txt": "b6430b623054b8d727b76af0998d2875a5cb0c83dc3026a8188491d025c37cb7",
+    "reports/evidence/teaching-audit-2026-10-05/test-teaching-visual-probe-intermediate-payload-shadow.txt": "1c3c955e3de3a7ee6decc38a269d118c2ddff0afab0f9fcf754dbe1decae09f1",
+    "reports/evidence/teaching-audit-2026-10-05/test-teaching-visual-probe-intermediate-strict-refactor.txt": "f703195241f0b5196e7aa28c64a17ad3b15d404035a17fa3e1924b2ff2f49036",
+    "reports/evidence/teaching-audit-2026-10-05/tests-final.log": "46c57803ff8ef0571b05a27e41276b85d0e8bc4e83f4be047eabf4e4e28a3c9c",
+    "reports/evidence/teaching-audit-2026-10-05/visual.json": "af72d3d65566286f3643eae57c41d965b92261d1e9d75d76f77474944b0e146a",
+    "reports/evidence/teaching-audit-2026-10-05/visual.log": "c04d4e815b04254fc35a1bffece4ea230734fbdd180cbeb24ff5e1cadae50803"
+  },
+  "input_fingerprint": "8e0685bcfdef7e0bd43663f2ef968779614ee8bcca2af2ae43d6db37e00f63f0",
+  "session_id": "sess-ffc4bb3f-51f5-4888-b9e4-10123cdffd1c",
+  "review_run_id": "20261005-120441-8b177ddd43e9",
+  "review_bundle": "/Users/bytedance/luobata/PokeTactics/.ai-review/20261005-120441-8b177ddd43e9/review-bundle.json",
+  "review_bundle_sha256": "1292430781d0729c24b89edef223582552bc0eda22c5c7c1f47bdd50e9fd162c",
+  "final_validation": {
+    "tests": "20 passed; tests-final.log",
+    "visual": "10 scenes, 37 rerun outputs equal old media bytes; affected-validation.json",
+    "new_real_event_cases": "3 cases in packet-cases.json.gz with double hashes",
+    "compile_whitespace": "passed; affected-validation.json"
+  },
+  "scope_boundaries": [
+    "No sim/data/prototype/design changes",
+    "Old 4800-battle inputs all 48 unchanged, no full rerun claimed",
+    "Old manifest remains cf087de historical snapshot; future handoff edits must use git show to verify its old hash",
+    "Central QualityGate rule context/semantic unavailable; raw local pass with no matched rules is not task completion",
+    "No production learning/UI/save/AI/renderer, whole-pool fairness, ESP32 or combined budget verification"
+  ]
+}

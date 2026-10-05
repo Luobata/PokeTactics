@@ -1,0 +1,64 @@
+{
+  "commands": [
+    {
+      "command": "python3 -m unittest -v tests.test_teaching_visual_probe",
+      "phase": "original-code red test",
+      "status": "failed_as_expected",
+      "log": ".build/teaching-prototype/audit/test-teaching-visual-probe-before.txt",
+      "result": "4 tests: 3 failures, 1 error"
+    },
+    {
+      "command": "python3 -m unittest -v tests.test_teaching_visual_probe",
+      "phase": "intermediate payload-shadow diagnosis",
+      "status": "failed",
+      "log": ".build/teaching-prototype/audit/test-teaching-visual-probe-intermediate-payload-shadow.txt",
+      "result": "4 tests: 2 failures"
+    },
+    {
+      "command": "python3 -m unittest -v tests.test_teaching_visual_probe",
+      "phase": "intermediate strict-refactor diagnosis",
+      "status": "failed",
+      "log": ".build/teaching-prototype/audit/test-teaching-visual-probe-intermediate-strict-refactor.txt",
+      "result": "5 tests: 4 errors"
+    },
+    {
+      "command": "python3 -m unittest -v tests.test_teaching_prototype tests.test_teaching_visual_probe",
+      "phase": "final",
+      "status": "passed",
+      "log": ".build/teaching-prototype/audit/test-teaching-prototype-visual-final.txt",
+      "result": "19 tests passed"
+    },
+    {
+      "command": "python3 -m py_compile tools/acceptance/teaching_visual_probe.py tests/test_teaching_visual_probe.py",
+      "phase": "final",
+      "status": "passed",
+      "log": ".build/teaching-prototype/audit/py_compile-final.txt"
+    },
+    {
+      "command": "git diff --check -- tools/acceptance/teaching_visual_probe.py tests/test_teaching_visual_probe.py",
+      "phase": "final",
+      "status": "passed",
+      "log": ".build/teaching-prototype/audit/git-diff-check-final.txt"
+    },
+    {
+      "command": "python3 validation snippet over .build/teaching-prototype/audit/packet-cases.json",
+      "phase": "final",
+      "status": "passed",
+      "log": ".build/teaching-prototype/audit/packet-cases-validation-final.txt",
+      "result": "3 real cases; event hashes and native HP reconciliations match"
+    }
+  ],
+  "evidence": ".build/teaching-prototype/audit/packet-cases.json",
+  "scope_notes": [
+    "No staging, commit, push, installation, upgrade, or Mutation execution.",
+    "Original ten visual scenes and their seed/parameters were not changed."
+  ],
+  "diagnostic_attempts_not_counted_as_validation": [
+    {
+      "issue": "packet JSON validation snippet omitted tools/acceptance from sys.path and failed with ModuleNotFoundError before rerun"
+    },
+    {
+      "issue": "one shell heredoc redirect was placed after the terminator and failed with SyntaxError before rerun"
+    }
+  ]
+}

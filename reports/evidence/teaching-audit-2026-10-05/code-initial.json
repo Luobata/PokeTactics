@@ -1,0 +1,151 @@
+{
+  "schema_version": "independent-reviewer.v1",
+  "review_status": "pass_with_risk",
+  "repo": {
+    "path": "/Users/bytedance/luobata/PokeTactics",
+    "execution_location": "local",
+    "branch": "main",
+    "base_ref": "93de08edc40b8da8b9ee590ce496e5ae0df9c4ee",
+    "head_ref": "cf087dea231aef46d8031002e290d7a3493f6f9a",
+    "commit_range": "93de08edc40b8da8b9ee590ce496e5ae0df9c4ee..cf087dea231aef46d8031002e290d7a3493f6f9a",
+    "dirty_state": {
+      "staged": 0,
+      "unstaged": 0,
+      "untracked": 0
+    }
+  },
+  "review": {
+    "session_id": "sess-ffc4bb3f-51f5-4888-b9e4-10123cdffd1c",
+    "run_id": "20261005-113232-e8622ddb4935",
+    "bundle_path": "/Users/bytedance/luobata/PokeTactics/.ai-review/20261005-113232-e8622ddb4935/review-bundle.json",
+    "dashboard_url": "",
+    "input_fingerprint": "afb65a7474de1d55be9374122cc8eef9d54f8c39d59197475861459c7d704876",
+    "created_at": "2026-10-05T19:41:46+08:00",
+    "updated_at": "2026-10-05T19:41:46+08:00"
+  },
+  "reviewer_agents": [
+    {
+      "agent_id": "/root/audit_m_code",
+      "role": "general-reviewer",
+      "lifecycle": "created",
+      "verdict": "pass_with_risk",
+      "bound_scope": "Fresh text-only correctness audit of teaching_skill_prototype.py, teaching_visual_probe.py, tests/test_teaching_prototype.py against docs/30, docs/32, teaching-skills-v1.json, commit cf087dea, review bundle, and frozen evidence; no image inspection and no business-file edits."
+    }
+  ],
+  "findings": [
+    {
+      "id": "VISUAL-001",
+      "severity": "evidence_gap",
+      "title": "Full-natural visual scenes are not hard-gated to a positive teaching occurrence",
+      "evidence_refs": [
+        "tools/acceptance/teaching_visual_probe.py:727",
+        "tools/acceptance/teaching_visual_probe.py:760",
+        "tools/acceptance/teaching_visual_probe.py:779",
+        "reports/evidence/teaching-visual-2026-10-05/visual.json:scenes.full_natural",
+        "reports/evidence/teaching-visual-2026-10-05/visual.json:scenes.tempo_full_natural"
+      ],
+      "file": "tools/acceptance/teaching_visual_probe.py",
+      "line": 727,
+      "hunk_id": "",
+      "required_action": "For future regression use, require the expected machine in full_natural and tempo_full_natural, or give those scenes explicit expected-positive/expected-negative status instead of treating any absence as a negative path.",
+      "re_review_condition": "A probe regression test must fail when the full-natural teaching event is removed, then pass after the positive expectation is enforced; current frozen visual.json does contain one event for each full-natural scene."
+    },
+    {
+      "id": "VISUAL-002",
+      "severity": "suggestion",
+      "title": "Visual packet reconciliation covers the frozen evidence shapes but is narrow for broader native packets",
+      "evidence_refs": [
+        "tools/acceptance/teaching_visual_probe.py:188",
+        "tools/acceptance/teaching_visual_probe.py:195",
+        "tools/acceptance/teaching_visual_probe.py:212",
+        "tools/acceptance/teaching_visual_probe.py:362",
+        "tools/acceptance/teaching_visual_probe.py:386",
+        "docs/32-teaching-skill-animation-contract.md:49",
+        "reports/evidence/teaching-visual-2026-10-05/visual.json:checks"
+      ],
+      "file": "tools/acceptance/teaching_visual_probe.py",
+      "line": 220,
+      "hunk_id": "",
+      "required_action": "Before reusing the adapter beyond the frozen scenarios, account for legitimate unwrapped native side hits on third agents and native healing when reconciling parent damage to authoritative HP; current frozen directed and full-natural evidence stays within supported packet shapes and all seven visual checks pass.",
+      "re_review_condition": "Add directed visual cases containing an unwrapped native side-target record and a native heal in the same packet; both must reconcile without weakening teaching ownership checks."
+    }
+  ],
+  "checks": [
+    {
+      "name": "commit_and_worktree_scope",
+      "status": "passed",
+      "command": "git status --short --branch; git rev-parse HEAD; git rev-parse cf087dea^",
+      "evidence_ref": "HEAD=cf087dea231aef46d8031002e290d7a3493f6f9a; parent=93de08edc40b8da8b9ee590ce496e5ae0df9c4ee; clean tracked worktree"
+    },
+    {
+      "name": "production_isolation_diff_scope",
+      "status": "passed",
+      "command": "git diff-tree --no-commit-id --name-status -r cf087dea231aef46d8031002e290d7a3493f6f9a",
+      "evidence_ref": "No sim/, data/, or tools/mockups production source changes; additions are docs/design/report/evidence plus isolated acceptance tools and focused tests."
+    },
+    {
+      "name": "independent_eligibility_recompute",
+      "status": "passed",
+      "command": "read-only Python recomputation over roster/profile/data and docs/design/teaching-skills-v1.json",
+      "evidence_ref": "84/84 current forms covered; base bulk=max hp+2 defense, max offense, speed, and effective_range all match; guardian_riposte=19 forms, tempo_break=10 forms."
+    },
+    {
+      "name": "assignment_slot_and_trigger_code_audit",
+      "status": "passed",
+      "command": "focused source review",
+      "evidence_ref": "tools/acceptance/teaching_skill_prototype.py:47-79 validates machine eligibility, list length, bool switch, and occupied native slot; :81-91 snapshots primary hit, real HP loss, adjacency, and survival; :93-136 resolves after super()._strike and rechecks survival."
+    },
+    {
+      "name": "counter_boundary_replay",
+      "status": "passed",
+      "command": "read-only real Battle replay with patched deterministic hit roll",
+      "evidence_ref": "Adjacent line_push primary hit knocked the defender from (2,1) to (2,0); counter still resolved from current positions, pushed attacker from (2,2) to (2,3), and delayed exactly 0.3s. Double-strike primary followed by resolution-time death emitted no teaching event and did not consume the use."
+    },
+    {
+      "name": "focused_prototype_tests",
+      "status": "passed",
+      "command": "python3 -m unittest tests.test_teaching_prototype -v",
+      "evidence_ref": "14 tests passed in 0.060s; reports/evidence/teaching-design-2026-10-05/tests-final.log also records 14/14 OK."
+    },
+    {
+      "name": "python_compile",
+      "status": "passed",
+      "command": "python3 -m py_compile tools/acceptance/teaching_skill_prototype.py tools/acceptance/teaching_visual_probe.py tests/test_teaching_prototype.py",
+      "evidence_ref": "exit 0"
+    },
+    {
+      "name": "off_arm_formal_equivalence",
+      "status": "passed",
+      "command": "read-only Python comparison of PrototypeBattle(off) versus Battle for seeds 2026100590000..2026100590002",
+      "evidence_ref": "All three natural runs had identical event arrays, result projections, and final RNG states."
+    },
+    {
+      "name": "enabled_path_no_new_random",
+      "status": "passed",
+      "command": "focused test plus source audit",
+      "evidence_ref": "tests/test_teaching_prototype.py:395-404; teaching resolution uses deterministic _knock_cell/state emission and no rng call."
+    },
+    {
+      "name": "manifest_and_evidence_hashes",
+      "status": "passed",
+      "command": "read-only Python SHA-256 verification",
+      "evidence_ref": "reports/evidence/teaching-design-2026-10-05/manifest.json input_fingerprint matches afb65a7474de1d55be9374122cc8eef9d54f8c39d59197475861459c7d704876; 11 source, 86 dependency, 4 external dependency, and 83 evidence hashes match; visual source hashes and all 37 visual output hashes match."
+    },
+    {
+      "name": "visual_contract_metadata",
+      "status": "passed",
+      "command": "read-only parse of reports/evidence/teaching-visual-2026-10-05/visual.json",
+      "evidence_ref": "All seven checks true; six positive teaching scenes, four negative scenes, 37 outputs; owned event counts and cause metadata reconcile without reading images."
+    }
+  ],
+  "next_actions": [
+    "No action required for the stated isolated experiment at commit cf087dea.",
+    "Apply VISUAL-001 and VISUAL-002 before promoting the visual probe as a broader regression gate or running it outside the frozen scenarios."
+  ],
+  "residual_risks": [
+    "The visual probe is acceptance-only and PC-rendered; production animation does not consume teaching_effect in this commit.",
+    "The visual full-natural positive occurrence is demonstrated by frozen evidence but is not enforced by probe control flow for future runs.",
+    "The visual packet validator/reconciler is narrowed to the packet shapes represented by the frozen evidence; unwrapped third-agent side effects and same-packet healing remain future cases.",
+    "Production learning, acquisition, save/UI integration, ESP32 rendering, whole-pool balance, and shared animation budget are intentionally outside this isolated prototype and remain unverified."
+  ]
+}

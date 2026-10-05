@@ -1,0 +1,2 @@
+packet-cases validation: 3 real cases; hashes and native HP reconciliations match
+exit=0

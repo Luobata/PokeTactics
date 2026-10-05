@@ -1,0 +1,61 @@
+{
+  "schema": "teaching-audit-preflight-v1",
+  "reviewed_commit": "cf087dea231aef46d8031002e290d7a3493f6f9a",
+  "commands": [
+    {
+      "command": [
+        "git",
+        "status",
+        "--short",
+        "--branch"
+      ],
+      "exit_code": 0,
+      "stdout": "## main...origin/main\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "stdout": "cf087dea231aef46d8031002e290d7a3493f6f9a\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "tools/acceptance/teaching_design_probe.py",
+        "tools/acceptance/teaching_skill_prototype.py",
+        "tools/acceptance/teaching_visual_probe.py",
+        "tests/test_teaching_prototype.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "frozen_manifest": "reports/evidence/teaching-design-2026-10-05/manifest.json",
+  "frozen_manifest_input_fingerprint": "afb65a7474de1d55be9374122cc8eef9d54f8c39d59197475861459c7d704876",
+  "all_frozen_hashes_match": true,
+  "user_banks": {
+    "5e9a2d878d07.0": "379620cbd720cbbe44d053df2ca3a6f70ef4112b00f5c238175d048f39b6ddbb",
+    "5e9a2d878d07.1": "b822125fc97f2025dbc468e50cfa3ebb74ed0303fbcac19db90b76e70d062247"
+  },
+  "user_banks_unchanged": true,
+  "central_semantic_tools_available": false,
+  "mutation_executed": false
+}

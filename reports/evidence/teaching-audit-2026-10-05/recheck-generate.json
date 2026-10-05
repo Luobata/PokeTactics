@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "action": "created",
+  "reviewId": "20261005-120441-8b177ddd43e9",
+  "reviewDir": "/Users/bytedance/luobata/PokeTactics/.ai-review/20261005-120441-8b177ddd43e9",
+  "bundlePath": "/Users/bytedance/luobata/PokeTactics/.ai-review/20261005-120441-8b177ddd43e9/review-bundle.json",
+  "requirementId": "req-3ee61e49-fb5d-4e3b-8ef6-552f384ab2a6",
+  "target": {
+    "type": "worktree",
+    "headRef": "HEAD",
+    "isMutable": true
+  },
+  "filesChanged": 27,
+  "additions": 5980,
+  "deletions": 13
+}

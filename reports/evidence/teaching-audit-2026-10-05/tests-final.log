@@ -1,0 +1,26 @@
+test_eligibility_and_one_native_slot_are_enforced (tests.test_teaching_prototype.AssignmentContracts.test_eligibility_and_one_native_slot_are_enforced) ... ok
+test_off_arm_still_validates_and_switch_must_be_boolean (tests.test_teaching_prototype.AssignmentContracts.test_off_arm_still_validates_and_switch_must_be_boolean) ... ok
+test_adjacent_primary_hit_pushes_once_and_adds_exactly_delay (tests.test_teaching_prototype.CounterContracts.test_adjacent_primary_hit_pushes_once_and_adds_exactly_delay) ... ok
+test_counter_has_no_direct_damage_or_energy_return (tests.test_teaching_prototype.CounterContracts.test_counter_has_no_direct_damage_or_energy_return) ... ok
+test_distance_over_one_blocked_edge_and_death_do_not_consume (tests.test_teaching_prototype.CounterContracts.test_distance_over_one_blocked_edge_and_death_do_not_consume) ... ok
+test_guard_redirect_means_original_target_never_received_primary (tests.test_teaching_prototype.CounterContracts.test_guard_redirect_means_original_target_never_received_primary) ... ok
+test_remote_unit_adjacent_at_hit_still_triggers (tests.test_teaching_prototype.CounterContracts.test_remote_unit_adjacent_at_hit_still_triggers) ... ok
+test_disabled_effects_match_formal_battle_events_and_projection (tests.test_teaching_prototype.IsolationContracts.test_disabled_effects_match_formal_battle_events_and_projection) ... ok
+test_enabled_effect_adds_no_random_draw (tests.test_teaching_prototype.IsolationContracts.test_enabled_effect_adds_no_random_draw) ... ok
+test_natural_full_run_is_replayable_and_rotation_symmetric (tests.test_teaching_prototype.IsolationContracts.test_natural_full_run_is_replayable_and_rotation_symmetric) ... ok
+test_energy_loss_uses_post_native_hit_energy_and_clamps_to_zero (tests.test_teaching_prototype.TempoContracts.test_energy_loss_uses_post_native_hit_energy_and_clamps_to_zero) ... ok
+test_miss_immunity_and_death_do_not_consume_tempo (tests.test_teaching_prototype.TempoContracts.test_miss_immunity_and_death_do_not_consume_tempo) ... ok
+test_tempo_is_once_per_battle (tests.test_teaching_prototype.TempoContracts.test_tempo_is_once_per_battle) ... ok
+test_tempo_waits_for_full_native_chain_packet (tests.test_teaching_prototype.TempoContracts.test_tempo_waits_for_full_native_chain_packet) ... ok
+test_full_natural_cases_export_real_cause_and_reconciliation (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_full_natural_cases_export_real_cause_and_reconciliation) ... ok
+test_full_natural_scenes_require_their_first_batch_machine (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_full_natural_scenes_require_their_first_batch_machine) ... ok
+test_negative_scenes_reject_a_real_successful_teaching_packet (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_negative_scenes_reject_a_real_successful_teaching_packet) ... ok
+test_removed_full_natural_teaching_cannot_become_a_negative_scene (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_removed_full_natural_teaching_cannot_become_a_negative_scene) ... ok
+test_broken_parent_cause_and_unrelated_native_events_are_rejected (tests.test_teaching_visual_probe.NativePacketContracts.test_broken_parent_cause_and_unrelated_native_events_are_rejected) ... ok
+test_real_unwrapped_side_hit_and_native_heal_reconcile (tests.test_teaching_visual_probe.NativePacketContracts.test_real_unwrapped_side_hit_and_native_heal_reconcile) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.144s
+
+OK
+exit=0

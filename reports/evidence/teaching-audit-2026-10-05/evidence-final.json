@@ -1,0 +1,180 @@
+{
+  "schema": "teaching-evidence-independent-audit-v1",
+  "recorded_at": "2026-10-05T20:14:50+08:00",
+  "auditor_role": "fresh_text_only_supplemental_evidence_auditor",
+  "verdict": "pass_with_risk",
+  "verdict_scope": "Narrow supplemental evidence recheck for the isolated teaching visual acceptance repair; not production, release, whole-pool fairness, real-device, or combined-budget authorization",
+  "supplemental_input": {
+    "path": "/Users/bytedance/luobata/PokeTactics/reports/evidence/teaching-audit-2026-10-05/review-input.json",
+    "sha256": "a2bfc7226cd70e60d975653ea266c43ca4cfd13f20715f79ac78f54d4f3642c0",
+    "schema": "teaching-audit-narrow-input-v1",
+    "input_fingerprint": "8e0685bcfdef7e0bd43663f2ef968779614ee8bcca2af2ae43d6db37e00f63f0",
+    "fingerprint_matches_user_supplied": true,
+    "source_count": 2,
+    "evidence_count": 25,
+    "source_sha256": {
+      "tools/acceptance/teaching_visual_probe.py": "c36eb99e0b8cbed5f6aac80f8a678bfe0dcd66c159a944956d1c070d48a369c0",
+      "tests/test_teaching_visual_probe.py": "f731a5f7e84e4fbdf0ab13302affe089d3c67d8c398d9ec7e1b04d2e2cd242b1"
+    },
+    "evidence_hash_check": {
+      "declared": 25,
+      "matched": 25,
+      "mismatched": 0
+    },
+    "review_run_id": "20261005-120441-8b177ddd43e9",
+    "session_id": "sess-ffc4bb3f-51f5-4888-b9e4-10123cdffd1c",
+    "review_bundle": "/Users/bytedance/luobata/PokeTactics/.ai-review/20261005-120441-8b177ddd43e9/review-bundle.json",
+    "review_bundle_sha256": "1292430781d0729c24b89edef223582552bc0eda22c5c7c1f47bdd50e9fd162c",
+    "raw_target_diff_sha256": "4c2bfbaeb2f02c8af3cae68d3d8057a81f4e782e825d77951003ea2a367edaa2"
+  },
+  "commit_binding": {
+    "immutable_base": "cf087dea231aef46d8031002e290d7a3493f6f9a",
+    "parent": "93de08edc40b8da8b9ee590ce496e5ae0df9c4ee",
+    "current_head_during_recheck": "cf087dea231aef46d8031002e290d7a3493f6f9a",
+    "historical_manifest_verification_method": "git show cf087dea231aef46d8031002e290d7a3493f6f9a:<path>",
+    "later_handoff_or_report_changes_excluded_from_binding": true
+  },
+  "independent_review_status": {
+    "initial_code_verdict": {
+      "path": "/Users/bytedance/luobata/PokeTactics/.build/teaching-prototype/audit-code-initial.json",
+      "sha256": "d97dcdbfdc2fb223d44d22bb6dbc82847fb3216fb83af5ebb572fd2a6f47c20b",
+      "verdict": "pass_with_risk",
+      "received": true
+    },
+    "initial_evidence_verdict": {
+      "path": "/Users/bytedance/luobata/PokeTactics/.build/teaching-prototype/audit-evidence-initial.json",
+      "sha256": "0205bbc6f46c386265ecfb3ae179b6e27d1f6b0c735a7e16e40ff87532e98b7f",
+      "verdict": "pass_with_risk",
+      "received": true
+    },
+    "supplemental_code_verdict": {
+      "path": "/Users/bytedance/luobata/PokeTactics/.build/teaching-prototype/audit-code-final.json",
+      "sha256": "bd237ae864b098fcf40a32dfdb2aa9cf65e90e4023cc2a3c0ee74c3cc6edb352",
+      "verdict": "pass",
+      "received": true,
+      "archived_copy": {
+        "path": "/Users/bytedance/luobata/PokeTactics/reports/evidence/teaching-audit-2026-10-05/code-final.json",
+        "sha256": "bd237ae864b098fcf40a32dfdb2aa9cf65e90e4023cc2a3c0ee74c3cc6edb352",
+        "byte_identical_to_original": true
+      }
+    },
+    "historical_release_review_429s": "Preserved as a fact about the old package at the time; three 429 attempts and no verdict from that earlier reviewer.",
+    "current_two_initial_independent_judgments_received": true,
+    "central_semantic_review_available": false,
+    "post_bundle_metadata_additions": {
+      "report_and_handoff_claim_audit": "outside this narrow evidence binding; not treated as source evidence",
+      "code_final_copy_verified_after_bundle_creation": true
+    }
+  },
+  "findings": [
+    {
+      "id": "SE1",
+      "status": "pass",
+      "title": "New input and immutable historical bindings reconcile",
+      "evidence": [
+        "review-input.json SHA-256 is a2bfc7226cd70e60d975653ea266c43ca4cfd13f20715f79ac78f54d4f3642c0; its fingerprint field exactly matches the supplied 8e0685bcfdef7e0bd43663f2ef968779614ee8bcca2af2ae43d6db37e00f63f0.",
+        "Both declared source hashes and all 25 declared evidence hashes match current bytes.",
+        "The bundle SHA is 1292430781d0729c24b89edef223582552bc0eda22c5c7c1f47bdd50e9fd162c; raw target.diff hashes to the bundle digest 4c2bfbaeb2f02c8af3cae68d3d8057a81f4e782e825d77951003ea2a367edaa2.",
+        "Old manifest SHA from git show cf087de is a501bda9d0d8b905da7f9e8ad8388e70ba0043d649793a65669be6fb13579706 with fingerprint afb65a7474de1d55be9374122cc8eef9d54f8c39d59197475861459c7d704876.",
+        "From immutable cf087de blobs, 11/11 source, 86/86 dependency, 83/83 evidence, 4/4 external dependency, and 7/7 compressed artifact hashes match. Current worktree handoff/report additions do not invalidate this Git-history binding."
+      ]
+    },
+    {
+      "id": "SE2",
+      "status": "pass",
+      "title": "Three packet cases are real, hash-bound, and reconcile to authoritative HP",
+      "evidence": [
+        "packet-cases.json.gz compressed SHA is a619e92b0ec78426c30f3db590b62c8f74013d36d22d0521427d6dcbf78acab8; decompressed SHA is e60c8a69066d3c352ec1173bb9fcaa6a59ac32e9789f4b20f32936ec6f339fa3 over 93,473 bytes.",
+        "full_natural has 445 events and event SHA 3de6833d1289b5f5944f8fbe8bc6e2d152bb69d31e0156a0464bd41da52a080c, matching old visual evidence.",
+        "tempo_full_natural has 299 events and event SHA 06319f6098f546f2a070e87969e77a94812635c7914f23088b12442df4c62b65, matching old visual evidence.",
+        "native_unwrapped_side_and_heal has 19 events and event SHA 3ca7b47511e56cca97f70848e38518efa542c190eb6e834ccdbc0e38cf860dae. It is a real Charizard (species 6) flamethrower packet with one unwrapped third-target side hit and a same-team Snorlax (species 143) partner share_lunch heal before tempo_break.",
+        "The side hit records damage 28 and authoritative HP 10000->9972; share_lunch records amount 1500 and authoritative HP 1000->2500. The fresh focused test rerun reproduced the packet JSON byte-for-byte after decompression."
+      ]
+    },
+    {
+      "id": "SE3",
+      "status": "pass",
+      "title": "Authoritative 20-test log and fresh current-source rerun agree",
+      "evidence": [
+        "tests-final.log records exactly 20 tests: 14 prototype tests and 6 visual-probe tests, ending OK with exit 0; SHA 46c57803ff8ef0571b05a27e41276b85d0e8bc4e83f4be047eabf4e4e28a3c9c.",
+        "An independent rerun at the two bound source hashes also passed all 20 tests. py_compile and git diff --check exited 0.",
+        "commands-final.json and its 19-test final snapshot are retained only as the historical snapshot before adding the negative-success gate.",
+        "test-teaching-visual-probe-intermediate-strict-refactor.txt is a diagnostic summary, not a complete raw trace and is not treated as final validation."
+      ]
+    },
+    {
+      "id": "SE4",
+      "status": "pass",
+      "title": "Original ten-scene visual evidence reproduces byte-for-byte",
+      "evidence": [
+        "A fresh text-only run generated all 10 scenes and exactly 37 outputs; all seven checks passed and authoritative events were unchanged after rendering.",
+        "All 10 fresh authoritative and after-render event hashes equal the cf087de visual metadata; all 37 fresh output bytes, sizes, and SHA-256 values equal the old media files.",
+        "The new archived visual.json exactly matches the fresh rerun metadata. Relative to the old metadata it necessarily updates the probe source hash and adds empty native_reconciliation structures to positive parent reconciliation rows; authoritative events and outputs remain unchanged.",
+        "No image files were opened, rendered visually in a viewer, or emitted by this auditor; comparison was byte/hash/metadata only."
+      ]
+    },
+    {
+      "id": "SE5",
+      "status": "pass",
+      "title": "Not rerunning the old 4800-battle league is valid for this unchanged-input supplement",
+      "evidence": [
+        "All 48 league inputs listed by affected-validation match both current files and immutable cf087de blobs: 46 dependency inputs plus 2 old-manifest source inputs.",
+        "The old league.json.gz and six other frozen compressed artifacts remain byte-identical to cf087de and satisfy compressed/decompressed hashes and byte counts.",
+        "Therefore the repair supplement does not alter the frozen league inputs or require a new 4800-battle rerun to preserve the old evidence. No new league strength, whole-pool fairness, or production-opportunity-cost claim is made."
+      ]
+    },
+    {
+      "id": "SE6",
+      "status": "pass",
+      "title": "User save banks remain read-only and unchanged",
+      "evidence": [
+        "5e9a2d878d07.0 remains 379620cbd720cbbe44d053df2ca3a6f70ef4112b00f5c238175d048f39b6ddbb.",
+        "5e9a2d878d07.1 remains b822125fc97f2025dbc468e50cfa3ebb74ed0303fbcac19db90b76e70d062247.",
+        "This audit performed no bank writes."
+      ]
+    },
+    {
+      "id": "SE7",
+      "status": "pass_with_risk",
+      "title": "QualityGate and semantic boundaries are correctly not overstated",
+      "evidence": [
+        "qualitygate-readiness.json records central MCP tools not exposed, rule context unavailable, central semantic not executed, and repository/runner readiness incomplete.",
+        "qualitygate-final.json records local gate/raw gate pass, but zero matched rules, empty effective rules and semantic prompts, no independent lanes, Mutation not executed, and agent_action.task_complete=false.",
+        "Accordingly the local PASS is a raw signal only and is not central semantic completion.",
+        "The earlier three-429/unavailable final-review statement remains historical old-package context; two initial independent code/evidence pass_with_risk judgments and the current supplemental code pass have now been received. Central semantic review remains missing."
+      ]
+    }
+  ],
+  "scope_and_claim_boundaries": {
+    "source_changes_reviewed": [
+      "tools/acceptance/teaching_visual_probe.py",
+      "tests/test_teaching_visual_probe.py"
+    ],
+    "protected_paths_unchanged_from_cf087de": [
+      "sim/",
+      "data/",
+      "docs/32-teaching-skill-animation-contract.md",
+      "docs/design/teaching-skills-v1.json",
+      "tools/acceptance/teaching_skill_prototype.py",
+      "old tracked evidence"
+    ],
+    "not_verified_or_claimed": [
+      "production learning, acquisition, save/UI/AI/renderer integration",
+      "formal gameplay feature or release authorization",
+      "whole-pool or acquisition-rate fairness",
+      "ESP32/real-device performance or independent art",
+      "combined native/weather/teaching shared animation budget",
+      "central semantic review completion"
+    ],
+    "teaching_budget_numbers_remain": "42 and 36 are teaching-overlay estimates only"
+  },
+  "limitations": [
+    "Text-only evidence audit; no images were viewed and no image tool was used.",
+    "The supplemental fingerprint and all listed file/bundle hashes were matched exactly; later root report/handoff prose is outside this evidence hash binding and was not audited as a claim source.",
+    "The old 4800-battle run was not rerun. This conclusion only verifies unchanged inputs and preserves the prior bounded result.",
+    "The visual parser remains acceptance-scoped and supports only the reviewed real packet shapes, including at most one unwrapped side hit and the reviewed share_lunch pattern."
+  ],
+  "audit_output": "/Users/bytedance/luobata/PokeTactics/.build/teaching-prototype/audit-evidence-final.json",
+  "source_files_modified_by_this_audit": [],
+  "initial_verdict_overwritten": false
+}

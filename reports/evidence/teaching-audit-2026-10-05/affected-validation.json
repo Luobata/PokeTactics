@@ -1,0 +1,637 @@
+{
+  "schema": "teaching-audit-affected-validation-v1",
+  "reviewed_commit": "cf087dea231aef46d8031002e290d7a3493f6f9a",
+  "sources_sha256": {
+    "tools/acceptance/teaching_visual_probe.py": "c36eb99e0b8cbed5f6aac80f8a678bfe0dcd66c159a944956d1c070d48a369c0",
+    "tests/test_teaching_visual_probe.py": "f731a5f7e84e4fbdf0ab13302affe089d3c67d8c398d9ec7e1b04d2e2cd242b1"
+  },
+  "checks": {
+    "all_37_output_bytes_match": true,
+    "all_10_authoritative_scenes_match": true,
+    "all_visual_checks_pass": true,
+    "all_48_league_inputs_unchanged": true,
+    "user_banks_unchanged": true,
+    "compile_whitespace_pass": true
+  },
+  "outputs": [
+    {
+      "file": "counter_valid-pre.png",
+      "old_sha256": "0f8b4715477312c3638ad31c2c8669108e863eb56206878e27b47f29f9617c22",
+      "new_sha256": "0f8b4715477312c3638ad31c2c8669108e863eb56206878e27b47f29f9617c22",
+      "bytes_equal": true,
+      "old_size": 31462,
+      "new_size": 31462
+    },
+    {
+      "file": "counter_valid-impact.png",
+      "old_sha256": "2101234c5b1fc37544da0824ea792fd886efa69b82699398f5e18c3d02abc322",
+      "new_sha256": "2101234c5b1fc37544da0824ea792fd886efa69b82699398f5e18c3d02abc322",
+      "bytes_equal": true,
+      "old_size": 33717,
+      "new_size": 33717
+    },
+    {
+      "file": "counter_valid-after.png",
+      "old_sha256": "9ed4cd91f20bce8e28773ab30c904e195554392491d66c7f4ea5a9ad16b9e12d",
+      "new_sha256": "9ed4cd91f20bce8e28773ab30c904e195554392491d66c7f4ea5a9ad16b9e12d",
+      "bytes_equal": true,
+      "old_size": 34883,
+      "new_size": 34883
+    },
+    {
+      "file": "counter_valid.gif",
+      "old_sha256": "2dec77fd7c2a66ea04686636bf189e419aa1234cfda945c83543cef4c592f06f",
+      "new_sha256": "2dec77fd7c2a66ea04686636bf189e419aa1234cfda945c83543cef4c592f06f",
+      "bytes_equal": true,
+      "old_size": 223021,
+      "new_size": 223021
+    },
+    {
+      "file": "counter_blocked-pre.png",
+      "old_sha256": "2b8e5e90bace4af028316ef3da04dd4110f4ad00940dc4ebe6d3dccbbad0b7a4",
+      "new_sha256": "2b8e5e90bace4af028316ef3da04dd4110f4ad00940dc4ebe6d3dccbbad0b7a4",
+      "bytes_equal": true,
+      "old_size": 32785,
+      "new_size": 32785
+    },
+    {
+      "file": "counter_blocked-impact.png",
+      "old_sha256": "d629ccbc5d263217413d6542133b02826b9523007b6d182709463fbf673f9561",
+      "new_sha256": "d629ccbc5d263217413d6542133b02826b9523007b6d182709463fbf673f9561",
+      "bytes_equal": true,
+      "old_size": 35894,
+      "new_size": 35894
+    },
+    {
+      "file": "counter_blocked-after.png",
+      "old_sha256": "87401ad65aae48ecee98ed9d5cf863e0b07846a290a913d76c8e0fd2e275ada6",
+      "new_sha256": "87401ad65aae48ecee98ed9d5cf863e0b07846a290a913d76c8e0fd2e275ada6",
+      "bytes_equal": true,
+      "old_size": 36805,
+      "new_size": 36805
+    },
+    {
+      "file": "counter_blocked.gif",
+      "old_sha256": "4ea913da3faa103d07a8d62e5df56cfc1fe4a91c9a4aed52497306e72d94b09d",
+      "new_sha256": "4ea913da3faa103d07a8d62e5df56cfc1fe4a91c9a4aed52497306e72d94b09d",
+      "bytes_equal": true,
+      "old_size": 226895,
+      "new_size": 226895
+    },
+    {
+      "file": "counter_invalid-pre.png",
+      "old_sha256": "a27efc3f833fb31f741b80e2946d3d4504ff23a16df29ced33175ad0b8b0700b",
+      "new_sha256": "a27efc3f833fb31f741b80e2946d3d4504ff23a16df29ced33175ad0b8b0700b",
+      "bytes_equal": true,
+      "old_size": 32809,
+      "new_size": 32809
+    },
+    {
+      "file": "counter_invalid-outcome.png",
+      "old_sha256": "445ce193f48877ffc6c8dfe23fd79a913b1605b8695552a420b7bcb70d57a9e0",
+      "new_sha256": "445ce193f48877ffc6c8dfe23fd79a913b1605b8695552a420b7bcb70d57a9e0",
+      "bytes_equal": true,
+      "old_size": 33921,
+      "new_size": 33921
+    },
+    {
+      "file": "counter_invalid.gif",
+      "old_sha256": "8ee2c6376d1648eb315141d1c063cb8b1f00eb16a2254565056a9561f09e9b1a",
+      "new_sha256": "8ee2c6376d1648eb315141d1c063cb8b1f00eb16a2254565056a9561f09e9b1a",
+      "bytes_equal": true,
+      "old_size": 249852,
+      "new_size": 249852
+    },
+    {
+      "file": "counter_lethal-pre.png",
+      "old_sha256": "8c73fb17b0d4713a545126b9de0d0305ee30a500550c7817f7de81f8291468da",
+      "new_sha256": "8c73fb17b0d4713a545126b9de0d0305ee30a500550c7817f7de81f8291468da",
+      "bytes_equal": true,
+      "old_size": 30934,
+      "new_size": 30934
+    },
+    {
+      "file": "counter_lethal-outcome.png",
+      "old_sha256": "dd9d0a2ca7f6a1b6587bd976d80aa0c69d3b34b56f1d18bfc4f4998624ffd5c4",
+      "new_sha256": "dd9d0a2ca7f6a1b6587bd976d80aa0c69d3b34b56f1d18bfc4f4998624ffd5c4",
+      "bytes_equal": true,
+      "old_size": 32340,
+      "new_size": 32340
+    },
+    {
+      "file": "counter_lethal.gif",
+      "old_sha256": "ed3f8352cd254ef0f6343af3606ddf4d1ea34e9f42a975be611bed96a1e7ed3c",
+      "new_sha256": "ed3f8352cd254ef0f6343af3606ddf4d1ea34e9f42a975be611bed96a1e7ed3c",
+      "bytes_equal": true,
+      "old_size": 215228,
+      "new_size": 215228
+    },
+    {
+      "file": "tempo_valid-pre.png",
+      "old_sha256": "8f3eb64fd876cb6ba09da47295e715e5a8d0ca297ce16c7c633877264735c4ac",
+      "new_sha256": "8f3eb64fd876cb6ba09da47295e715e5a8d0ca297ce16c7c633877264735c4ac",
+      "bytes_equal": true,
+      "old_size": 32435,
+      "new_size": 32435
+    },
+    {
+      "file": "tempo_valid-impact.png",
+      "old_sha256": "0c64ed4ab2cd9f0a06f0aee9df1b096fd503d1f24bf89d9b34a896e37683befc",
+      "new_sha256": "0c64ed4ab2cd9f0a06f0aee9df1b096fd503d1f24bf89d9b34a896e37683befc",
+      "bytes_equal": true,
+      "old_size": 34003,
+      "new_size": 34003
+    },
+    {
+      "file": "tempo_valid-after.png",
+      "old_sha256": "acd1a2144dd9e66ac43376fcf1dfc278ff219702646d24f491216d1aa86c8a18",
+      "new_sha256": "acd1a2144dd9e66ac43376fcf1dfc278ff219702646d24f491216d1aa86c8a18",
+      "bytes_equal": true,
+      "old_size": 33594,
+      "new_size": 33594
+    },
+    {
+      "file": "tempo_valid.gif",
+      "old_sha256": "bbc111c3902757cc3354b94d6c6b69b6da519999337cb41c819a46a2c10b79ec",
+      "new_sha256": "bbc111c3902757cc3354b94d6c6b69b6da519999337cb41c819a46a2c10b79ec",
+      "bytes_equal": true,
+      "old_size": 217787,
+      "new_size": 217787
+    },
+    {
+      "file": "tempo_zero-pre.png",
+      "old_sha256": "d8b9b8f19edfa4a5c76c8cc2305d53f90bc9f7f6dd8348935458905949ddbdc3",
+      "new_sha256": "d8b9b8f19edfa4a5c76c8cc2305d53f90bc9f7f6dd8348935458905949ddbdc3",
+      "bytes_equal": true,
+      "old_size": 32278,
+      "new_size": 32278
+    },
+    {
+      "file": "tempo_zero-impact.png",
+      "old_sha256": "d41b68a5151276933bc0785ee9c07d8244c4195e30634b6bd30767fdfbbff27b",
+      "new_sha256": "d41b68a5151276933bc0785ee9c07d8244c4195e30634b6bd30767fdfbbff27b",
+      "bytes_equal": true,
+      "old_size": 33771,
+      "new_size": 33771
+    },
+    {
+      "file": "tempo_zero-after.png",
+      "old_sha256": "031e2a7621ca808b13bdf2e81d90b2464f3b26b345376ecc57ac9d453617839d",
+      "new_sha256": "031e2a7621ca808b13bdf2e81d90b2464f3b26b345376ecc57ac9d453617839d",
+      "bytes_equal": true,
+      "old_size": 33464,
+      "new_size": 33464
+    },
+    {
+      "file": "tempo_zero.gif",
+      "old_sha256": "510c18c3fcb1fe8b15ab8d0081e915c48c4576f21d0eb5fd9a8ccfb7cc5cb48a",
+      "new_sha256": "510c18c3fcb1fe8b15ab8d0081e915c48c4576f21d0eb5fd9a8ccfb7cc5cb48a",
+      "bytes_equal": true,
+      "old_size": 216900,
+      "new_size": 216900
+    },
+    {
+      "file": "tempo_invalid-pre.png",
+      "old_sha256": "5623c835ebc0ad8ec04f1c1b33775e33326731375a73bbcc3f6107a917575e85",
+      "new_sha256": "5623c835ebc0ad8ec04f1c1b33775e33326731375a73bbcc3f6107a917575e85",
+      "bytes_equal": true,
+      "old_size": 30516,
+      "new_size": 30516
+    },
+    {
+      "file": "tempo_invalid-outcome.png",
+      "old_sha256": "9629ee638c444fed5c753377f03987ebb679fa6c857176beb31aa9751ba74778",
+      "new_sha256": "9629ee638c444fed5c753377f03987ebb679fa6c857176beb31aa9751ba74778",
+      "bytes_equal": true,
+      "old_size": 30618,
+      "new_size": 30618
+    },
+    {
+      "file": "tempo_invalid.gif",
+      "old_sha256": "15217732135c1b901c8a089cc0c1bf5a7f55ec6f607eef94d42cceda5231753e",
+      "new_sha256": "15217732135c1b901c8a089cc0c1bf5a7f55ec6f607eef94d42cceda5231753e",
+      "bytes_equal": true,
+      "old_size": 179694,
+      "new_size": 179694
+    },
+    {
+      "file": "tempo_lethal-pre.png",
+      "old_sha256": "ad81635ebd93f1e35d0d6d645918146b98edf67dc10925051b4fdaf2c8e3d170",
+      "new_sha256": "ad81635ebd93f1e35d0d6d645918146b98edf67dc10925051b4fdaf2c8e3d170",
+      "bytes_equal": true,
+      "old_size": 32281,
+      "new_size": 32281
+    },
+    {
+      "file": "tempo_lethal-outcome.png",
+      "old_sha256": "2ad52ff7180ecd5631a9ac6742d50d5759a89433ba2d3b1811ffbd7622b2eb23",
+      "new_sha256": "2ad52ff7180ecd5631a9ac6742d50d5759a89433ba2d3b1811ffbd7622b2eb23",
+      "bytes_equal": true,
+      "old_size": 31046,
+      "new_size": 31046
+    },
+    {
+      "file": "tempo_lethal.gif",
+      "old_sha256": "690063f2c5322e43ccf93973fa51597f9061dbe917f0c7f6309c8ff9d23f0489",
+      "new_sha256": "690063f2c5322e43ccf93973fa51597f9061dbe917f0c7f6309c8ff9d23f0489",
+      "bytes_equal": true,
+      "old_size": 215220,
+      "new_size": 215220
+    },
+    {
+      "file": "full_natural-pre.png",
+      "old_sha256": "41aee8823a8316f1c9080456ff65b07b7834eedc21b96b3c821a156a394b5d7a",
+      "new_sha256": "41aee8823a8316f1c9080456ff65b07b7834eedc21b96b3c821a156a394b5d7a",
+      "bytes_equal": true,
+      "old_size": 45525,
+      "new_size": 45525
+    },
+    {
+      "file": "full_natural-impact.png",
+      "old_sha256": "47123b6c8632a7f01e03be7b774e956f6c1ac67425b430d10f1849cec5d85995",
+      "new_sha256": "47123b6c8632a7f01e03be7b774e956f6c1ac67425b430d10f1849cec5d85995",
+      "bytes_equal": true,
+      "old_size": 45775,
+      "new_size": 45775
+    },
+    {
+      "file": "full_natural-after.png",
+      "old_sha256": "2760fea30a722d3e1c0d7d65fa1cd8bb486f8bdfb95bcec15f4ddad171d6c8fc",
+      "new_sha256": "2760fea30a722d3e1c0d7d65fa1cd8bb486f8bdfb95bcec15f4ddad171d6c8fc",
+      "bytes_equal": true,
+      "old_size": 45254,
+      "new_size": 45254
+    },
+    {
+      "file": "full_natural.gif",
+      "old_sha256": "916c5f00cea48943937873d0b900ab2f8da72c7e77616519d952b4359f0564bc",
+      "new_sha256": "916c5f00cea48943937873d0b900ab2f8da72c7e77616519d952b4359f0564bc",
+      "bytes_equal": true,
+      "old_size": 305467,
+      "new_size": 305467
+    },
+    {
+      "file": "tempo_full_natural-pre.png",
+      "old_sha256": "63f28290dd5c26c1b730b7184eafa6e26f8dd4360e6c41f6285db1f17408f40f",
+      "new_sha256": "63f28290dd5c26c1b730b7184eafa6e26f8dd4360e6c41f6285db1f17408f40f",
+      "bytes_equal": true,
+      "old_size": 39626,
+      "new_size": 39626
+    },
+    {
+      "file": "tempo_full_natural-impact.png",
+      "old_sha256": "596d92e43545b89fcafc4fbff789f8a16eb6b591cc21152562c6526dd6eb2046",
+      "new_sha256": "596d92e43545b89fcafc4fbff789f8a16eb6b591cc21152562c6526dd6eb2046",
+      "bytes_equal": true,
+      "old_size": 41366,
+      "new_size": 41366
+    },
+    {
+      "file": "tempo_full_natural-after.png",
+      "old_sha256": "074e8eee0aecb604913c0a2f5ff2c4fec68f7ab3bf4a5a1ad68fecf0e4a0865d",
+      "new_sha256": "074e8eee0aecb604913c0a2f5ff2c4fec68f7ab3bf4a5a1ad68fecf0e4a0865d",
+      "bytes_equal": true,
+      "old_size": 41335,
+      "new_size": 41335
+    },
+    {
+      "file": "tempo_full_natural.gif",
+      "old_sha256": "4a753c369824966f3640d8612c505d58bd2c8506963a34020511e13ce46be263",
+      "new_sha256": "4a753c369824966f3640d8612c505d58bd2c8506963a34020511e13ce46be263",
+      "bytes_equal": true,
+      "old_size": 277039,
+      "new_size": 277039
+    },
+    {
+      "file": "teaching-overview.png",
+      "old_sha256": "f560dd0b9d17d65a8c387ad49388356ac81bce2d36eca952cf76aa472370f691",
+      "new_sha256": "f560dd0b9d17d65a8c387ad49388356ac81bce2d36eca952cf76aa472370f691",
+      "bytes_equal": true,
+      "old_size": 342562,
+      "new_size": 342562
+    }
+  ],
+  "scenes": {
+    "counter_valid": {
+      "authoritative_events_equal": true,
+      "teaching_count_equal": true
+    },
+    "counter_blocked": {
+      "authoritative_events_equal": true,
+      "teaching_count_equal": true
+    },
+    "counter_invalid": {
+      "authoritative_events_equal": true,
+      "teaching_count_equal": true
+    },
+    "counter_lethal": {
+      "authoritative_events_equal": true,
+      "teaching_count_equal": true
+    },
+    "tempo_valid": {
+      "authoritative_events_equal": true,
+      "teaching_count_equal": true
+    },
+    "tempo_zero": {
+      "authoritative_events_equal": true,
+      "teaching_count_equal": true
+    },
+    "tempo_invalid": {
+      "authoritative_events_equal": true,
+      "teaching_count_equal": true
+    },
+    "tempo_lethal": {
+      "authoritative_events_equal": true,
+      "teaching_count_equal": true
+    },
+    "full_natural": {
+      "authoritative_events_equal": true,
+      "teaching_count_equal": true
+    },
+    "tempo_full_natural": {
+      "authoritative_events_equal": true,
+      "teaching_count_equal": true
+    }
+  },
+  "league_inputs": {
+    "sim/abilities.py": {
+      "expected_sha256": "f4d10c7a2db11c0f5ed99aaada352f89f9cc8b85152eca0a5f3c6ac1b4afba97",
+      "current_sha256": "f4d10c7a2db11c0f5ed99aaada352f89f9cc8b85152eca0a5f3c6ac1b4afba97",
+      "matches": true
+    },
+    "sim/bots.py": {
+      "expected_sha256": "26c4ae07ccad3f9b9f27be99f50a1c91fa7ca5f9c5b1f4e99c6e14283a5ee0dd",
+      "current_sha256": "26c4ae07ccad3f9b9f27be99f50a1c91fa7ca5f9c5b1f4e99c6e14283a5ee0dd",
+      "matches": true
+    },
+    "sim/build_rules.py": {
+      "expected_sha256": "346e5820e5a43b34f525bd44aa39f98ad22f346b0d5161bc7c74e00dd963b317",
+      "current_sha256": "346e5820e5a43b34f525bd44aa39f98ad22f346b0d5161bc7c74e00dd963b317",
+      "matches": true
+    },
+    "sim/combat.py": {
+      "expected_sha256": "2f36d9f32f363bbaa8ca5f2809c25c47b792a20d6b3e990f8591d98fd32103ba",
+      "current_sha256": "2f36d9f32f363bbaa8ca5f2809c25c47b792a20d6b3e990f8591d98fd32103ba",
+      "matches": true
+    },
+    "sim/combo.py": {
+      "expected_sha256": "1d44d13521260a8d88a93901a3638e92504fc500012dcc746ed0a8c9b944faae",
+      "current_sha256": "1d44d13521260a8d88a93901a3638e92504fc500012dcc746ed0a8c9b944faae",
+      "matches": true
+    },
+    "sim/data.py": {
+      "expected_sha256": "c55d8ac5bbc29598e0d8421671f7aa227d2e42a49b05708c8c4c13d99fa2a05b",
+      "current_sha256": "c55d8ac5bbc29598e0d8421671f7aa227d2e42a49b05708c8c4c13d99fa2a05b",
+      "matches": true
+    },
+    "sim/economy.py": {
+      "expected_sha256": "b6ad3cb7bfdecfce499757cc27c813955cb890469abe9d5c14cb29a4a4b9dde4",
+      "current_sha256": "b6ad3cb7bfdecfce499757cc27c813955cb890469abe9d5c14cb29a4a4b9dde4",
+      "matches": true
+    },
+    "sim/experiment_balance.py": {
+      "expected_sha256": "c5813e83352e39bc59773798a0fb4765eb1f78b3b86df376f960be0e3f5cfb0d",
+      "current_sha256": "c5813e83352e39bc59773798a0fb4765eb1f78b3b86df376f960be0e3f5cfb0d",
+      "matches": true
+    },
+    "sim/experiment_build_diversity.py": {
+      "expected_sha256": "462b89aeab42dfc5027ea78516d571a35398464252dc99686ee77c5be17d9611",
+      "current_sha256": "462b89aeab42dfc5027ea78516d571a35398464252dc99686ee77c5be17d9611",
+      "matches": true
+    },
+    "sim/experiment_combo.py": {
+      "expected_sha256": "fd5f049f483c3f07251a13f8bc13643860adc6db45382c339504ae1b811c5042",
+      "current_sha256": "fd5f049f483c3f07251a13f8bc13643860adc6db45382c339504ae1b811c5042",
+      "matches": true
+    },
+    "sim/experiment_effectiveness.py": {
+      "expected_sha256": "a7421d9652281232a6eefbaf68bd91fdac243d3d6cfa173850bf3216fe9abf7b",
+      "current_sha256": "a7421d9652281232a6eefbaf68bd91fdac243d3d6cfa173850bf3216fe9abf7b",
+      "matches": true
+    },
+    "sim/experiment_items.py": {
+      "expected_sha256": "d3679fa9a1cb80535591e5ff439e78ba32071a4bd4dd2f25c0080c7b361dcde0",
+      "current_sha256": "d3679fa9a1cb80535591e5ff439e78ba32071a4bd4dd2f25c0080c7b361dcde0",
+      "matches": true
+    },
+    "sim/experiment_match.py": {
+      "expected_sha256": "5f9836ae5c80bf9b2987a2480286eb5f49f1f0c70c39430fb89030ee849b89ee",
+      "current_sha256": "5f9836ae5c80bf9b2987a2480286eb5f49f1f0c70c39430fb89030ee849b89ee",
+      "matches": true
+    },
+    "sim/experiment_matchbalance.py": {
+      "expected_sha256": "406a717d6d3ae43ef37f8fd630965a95c018f06f420bc4af680fa1dbb74f4eb5",
+      "current_sha256": "406a717d6d3ae43ef37f8fd630965a95c018f06f420bc4af680fa1dbb74f4eb5",
+      "matches": true
+    },
+    "sim/experiment_melee.py": {
+      "expected_sha256": "8d8acfa63ac8a716bca21a1614de9f44b8cab2155d37e999252cb1e1818f5612",
+      "current_sha256": "8d8acfa63ac8a716bca21a1614de9f44b8cab2155d37e999252cb1e1818f5612",
+      "matches": true
+    },
+    "sim/experiment_pacing.py": {
+      "expected_sha256": "97b518027e02b8b074989f60e6797e0e853a71e5dbc9e49c938c567daceda86a",
+      "current_sha256": "97b518027e02b8b074989f60e6797e0e853a71e5dbc9e49c938c567daceda86a",
+      "matches": true
+    },
+    "sim/experiment_partner_budget.py": {
+      "expected_sha256": "340d9947ba1d22ed58a83f1c837c255f3cb8165b9d77b170fa6466618718ac84",
+      "current_sha256": "340d9947ba1d22ed58a83f1c837c255f3cb8165b9d77b170fa6466618718ac84",
+      "matches": true
+    },
+    "sim/experiment_profiles.py": {
+      "expected_sha256": "c6dc8eb0372e0b03269d0d62117ddaf16a008f3fe6cccaf24aabb2f632f71a1d",
+      "current_sha256": "c6dc8eb0372e0b03269d0d62117ddaf16a008f3fe6cccaf24aabb2f632f71a1d",
+      "matches": true
+    },
+    "sim/experiment_signatures.py": {
+      "expected_sha256": "b6932906df9098ee79414d4074aabac4ad661701f60b776fa99f2f27a4a968af",
+      "current_sha256": "b6932906df9098ee79414d4074aabac4ad661701f60b776fa99f2f27a4a968af",
+      "matches": true
+    },
+    "sim/experiment_status.py": {
+      "expected_sha256": "e90bf62a50fabbfc41f40f8c93ab29430ab25292083fd3f4c93c074c29258797",
+      "current_sha256": "e90bf62a50fabbfc41f40f8c93ab29430ab25292083fd3f4c93c074c29258797",
+      "matches": true
+    },
+    "sim/experiment_synergy.py": {
+      "expected_sha256": "902d5b9b3e47e91452c549a00fe76956ba03df5d3d7ce3f82821cf259a36b8a6",
+      "current_sha256": "902d5b9b3e47e91452c549a00fe76956ba03df5d3d7ce3f82821cf259a36b8a6",
+      "matches": true
+    },
+    "sim/experiment_tactics.py": {
+      "expected_sha256": "7a8f0c719c04b04c46698d7e3cf7f5e4a69ff3d1fe283735573f16e6a241dd13",
+      "current_sha256": "7a8f0c719c04b04c46698d7e3cf7f5e4a69ff3d1fe283735573f16e6a241dd13",
+      "matches": true
+    },
+    "sim/experiment_tiering.py": {
+      "expected_sha256": "53dd43a814429b8a1ab91393cbe6e3df7698384abc2d5446748508b964e43c9c",
+      "current_sha256": "53dd43a814429b8a1ab91393cbe6e3df7698384abc2d5446748508b964e43c9c",
+      "matches": true
+    },
+    "sim/experiment_weather.py": {
+      "expected_sha256": "e92cd540740a16523721e2e85e152c50dc5cf57e85cb4cc17fc0f987250f2c14",
+      "current_sha256": "e92cd540740a16523721e2e85e152c50dc5cf57e85cb4cc17fc0f987250f2c14",
+      "matches": true
+    },
+    "sim/items.py": {
+      "expected_sha256": "e3d466cdc5b7a28e6aebff3783407bb4b9d25a6827815cf051e503361f90d4d3",
+      "current_sha256": "e3d466cdc5b7a28e6aebff3783407bb4b9d25a6827815cf051e503361f90d4d3",
+      "matches": true
+    },
+    "sim/match.py": {
+      "expected_sha256": "aa5d874c16f404e4ca9f8fede82a0af9497bec4372fe714566c05dae12bd2443",
+      "current_sha256": "aa5d874c16f404e4ca9f8fede82a0af9497bec4372fe714566c05dae12bd2443",
+      "matches": true
+    },
+    "sim/metagame.py": {
+      "expected_sha256": "6994be25666c92020b4b76ff9c66a23a364764692247522a03372f697b781982",
+      "current_sha256": "6994be25666c92020b4b76ff9c66a23a364764692247522a03372f697b781982",
+      "matches": true
+    },
+    "sim/pacing.py": {
+      "expected_sha256": "7f163aeaf679f16f682d5d6a051c0f1557e9da39f3bd3e860458e9663c0a167f",
+      "current_sha256": "7f163aeaf679f16f682d5d6a051c0f1557e9da39f3bd3e860458e9663c0a167f",
+      "matches": true
+    },
+    "sim/partners.py": {
+      "expected_sha256": "02fc8ff77488e11bcb502f69529873986e4da85bfc4be1f941141b69990632c8",
+      "current_sha256": "02fc8ff77488e11bcb502f69529873986e4da85bfc4be1f941141b69990632c8",
+      "matches": true
+    },
+    "sim/profiles.py": {
+      "expected_sha256": "b1b02ef37b0b9da2eb8427c3807c48c27ee884a3f80830a94af7fbcb6f334759",
+      "current_sha256": "b1b02ef37b0b9da2eb8427c3807c48c27ee884a3f80830a94af7fbcb6f334759",
+      "matches": true
+    },
+    "sim/prototype.py": {
+      "expected_sha256": "a7893f12990b963d563707648653e7773545f5161db1fad50e0c7cbddcfc176c",
+      "current_sha256": "a7893f12990b963d563707648653e7773545f5161db1fad50e0c7cbddcfc176c",
+      "matches": true
+    },
+    "sim/rng.py": {
+      "expected_sha256": "f3132fb0afd84075ac821037461f107c0b2eb81c4d85b0abe760b96b9d9c0b31",
+      "current_sha256": "f3132fb0afd84075ac821037461f107c0b2eb81c4d85b0abe760b96b9d9c0b31",
+      "matches": true
+    },
+    "sim/roster.py": {
+      "expected_sha256": "cd73d70615a14c2f9042644fa8e2cd8127fca5917519a68848cae44d4393a04e",
+      "current_sha256": "cd73d70615a14c2f9042644fa8e2cd8127fca5917519a68848cae44d4393a04e",
+      "matches": true
+    },
+    "sim/shop.py": {
+      "expected_sha256": "be8265266eee4f9ccd0982f8ef1c2b6d75c11bb11498c7c049b791cbefe60a58",
+      "current_sha256": "be8265266eee4f9ccd0982f8ef1c2b6d75c11bb11498c7c049b791cbefe60a58",
+      "matches": true
+    },
+    "sim/skills.py": {
+      "expected_sha256": "827d756c5e2f5ad1c28dbb24dbd14241a690c2a9b48350e04d36384d5f897200",
+      "current_sha256": "827d756c5e2f5ad1c28dbb24dbd14241a690c2a9b48350e04d36384d5f897200",
+      "matches": true
+    },
+    "sim/stat_budget.py": {
+      "expected_sha256": "19834bef39384d3b034081ed9198ede1e31e2a7ddb45201d0194b1c8099e6aac",
+      "current_sha256": "19834bef39384d3b034081ed9198ede1e31e2a7ddb45201d0194b1c8099e6aac",
+      "matches": true
+    },
+    "sim/status.py": {
+      "expected_sha256": "42f7cb524a30487ce9ab8c8dd7703dfeb2e7d02759c34d7a9aa5cb7b2aa2bcc9",
+      "current_sha256": "42f7cb524a30487ce9ab8c8dd7703dfeb2e7d02759c34d7a9aa5cb7b2aa2bcc9",
+      "matches": true
+    },
+    "sim/synergy.py": {
+      "expected_sha256": "35d5f7ba6ace375a652a5531859b6a4fd18b0c3a9811ec6c6385adad39e2ef33",
+      "current_sha256": "35d5f7ba6ace375a652a5531859b6a4fd18b0c3a9811ec6c6385adad39e2ef33",
+      "matches": true
+    },
+    "sim/tactics.py": {
+      "expected_sha256": "775315d704c801941de07c2207e990bb06b8476ff90ca5779735fe4874b4c552",
+      "current_sha256": "775315d704c801941de07c2207e990bb06b8476ff90ca5779735fe4874b4c552",
+      "matches": true
+    },
+    "sim/techniques.py": {
+      "expected_sha256": "6878ab4ff8b6a94821ee5a133105c0b360700d258f92265beb1088d1cd01f2fe",
+      "current_sha256": "6878ab4ff8b6a94821ee5a133105c0b360700d258f92265beb1088d1cd01f2fe",
+      "matches": true
+    },
+    "sim/weather.py": {
+      "expected_sha256": "5a9d0e0ff6044225f6bf2591d5af3f176a530171bd67f286a8e3c84e4f5e9703",
+      "current_sha256": "5a9d0e0ff6044225f6bf2591d5af3f176a530171bd67f286a8e3c84e4f5e9703",
+      "matches": true
+    },
+    "sim/weather_control.py": {
+      "expected_sha256": "b0f5998dd9c95563c5c69407849b7362869a71f9c6f05a41c511a6f8a18c11bd",
+      "current_sha256": "b0f5998dd9c95563c5c69407849b7362869a71f9c6f05a41c511a6f8a18c11bd",
+      "matches": true
+    },
+    "data/moves.json": {
+      "expected_sha256": "c325a820ad613604fb583b643eddd4f7f772081c10f308f5417184e888975d09",
+      "current_sha256": "c325a820ad613604fb583b643eddd4f7f772081c10f308f5417184e888975d09",
+      "matches": true
+    },
+    "data/pokemon.json": {
+      "expected_sha256": "626a0d126e54826c431f03e88865fbbf0283d6950d462de4ca0d278942780142",
+      "current_sha256": "626a0d126e54826c431f03e88865fbbf0283d6950d462de4ca0d278942780142",
+      "matches": true
+    },
+    "data/typechart.json": {
+      "expected_sha256": "23a30c150ad4ddbc149bcb00179db103bc4ba16e72b51ecc36a1c1e01b26ac0e",
+      "current_sha256": "23a30c150ad4ddbc149bcb00179db103bc4ba16e72b51ecc36a1c1e01b26ac0e",
+      "matches": true
+    },
+    "docs/design/teaching-skills-v1.json": {
+      "expected_sha256": "a01c737d53e5f5e9e5f0bb85496778f51be98517d1be6c571a341800185c2cf2",
+      "current_sha256": "a01c737d53e5f5e9e5f0bb85496778f51be98517d1be6c571a341800185c2cf2",
+      "matches": true
+    },
+    "tools/acceptance/teaching_skill_prototype.py": {
+      "expected_sha256": "4309e398eed733a32141b27e0e49ba07619a98c2cc507a2d020829188bc8d22c",
+      "current_sha256": "4309e398eed733a32141b27e0e49ba07619a98c2cc507a2d020829188bc8d22c",
+      "matches": true
+    },
+    "tools/acceptance/counterplay_probe.py": {
+      "expected_sha256": "d69b5a44a178cc607ac33666ec1b496471c61d8faedafecb0462fb7c93faa477",
+      "current_sha256": "d69b5a44a178cc607ac33666ec1b496471c61d8faedafecb0462fb7c93faa477",
+      "matches": true
+    }
+  },
+  "user_banks": {
+    "5e9a2d878d07.0": "379620cbd720cbbe44d053df2ca3a6f70ef4112b00f5c238175d048f39b6ddbb",
+    "5e9a2d878d07.1": "b822125fc97f2025dbc468e50cfa3ebb74ed0303fbcac19db90b76e70d062247"
+  },
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "tools/acceptance/teaching_visual_probe.py",
+        "tests/test_teaching_visual_probe.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "qualitygate": {
+    "gate": "pass",
+    "raw_gate": "pass",
+    "block_merge": false,
+    "execution_complete": true,
+    "agent_action_task_complete": false,
+    "semantic_executed": false,
+    "central_mcp_available": false,
+    "mutation_executed": false,
+    "coverage": "no matching local script rules, no applicable Go AST; central semantic unavailable"
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "schema": "teaching-evidence-independent-audit-v1",
+  "recorded_at": "2026-10-05T19:43:28+08:00",
+  "auditor_role": "fresh_text_only_evidence_auditor",
+  "verdict": "pass_with_risk",
+  "verdict_scope": "Isolated design/evidence audit of commit cf087de; not production/release authorization",
+  "commit": {
+    "head": "cf087dea231aef46d8031002e290d7a3493f6f9a",
+    "parent": "93de08edc40b8da8b9ee590ce496e5ae0df9c4ee",
+    "worktree_clean_before_audit": true,
+    "source_files_modified_by_this_audit": [],
+    "audit_output": ".build/teaching-prototype/audit-evidence-initial.json"
+  },
+  "review_binding": {
+    "bundle": "reports/../.ai-review/20261005-113232-e8622ddb4935/review-bundle.json",
+    "bundle_sha256": "1ca738423b793548687dbfbac1e07b81587620f9d6efded672270ad0f04e0533",
+    "run_id": "20261005-113232-e8622ddb4935",
+    "session_id": "sess-ffc4bb3f-51f5-4888-b9e4-10123cdffd1c",
+    "target_base": "cf087dea231aef46d8031002e290d7a3493f6f9a^",
+    "target_head": "cf087dea231aef46d8031002e290d7a3493f6f9a",
+    "diff_digest": "e9feb46082331256473a0a426c1ede5658e885bc195f6724e903f3b8109142c0",
+    "diff_verified_against_git_diff_binary": true,
+    "bundle_untracked_files": 0,
+    "session_event_found": true
+  },
+  "manifest_binding": {
+    "path": "reports/evidence/teaching-design-2026-10-05/manifest.json",
+    "sha256": "a501bda9d0d8b905da7f9e8ad8388e70ba0043d649793a65669be6fb13579706",
+    "declared_input_fingerprint": "afb65a7474de1d55be9374122cc8eef9d54f8c39d59197475861459c7d704876",
+    "input_fingerprint_matches_user_supplied": true,
+    "hash_maps": {
+      "source_sha256": {
+        "declared": 11,
+        "worktree_mismatch": 0,
+        "commit_mismatch": 0
+      },
+      "dependency_sha256": {
+        "declared": 86,
+        "worktree_mismatch": 0,
+        "commit_mismatch": 0
+      },
+      "external_dependency_sha256": {
+        "declared": 4,
+        "worktree_mismatch": 0
+      },
+      "evidence_sha256": {
+        "declared": 83,
+        "worktree_mismatch": 0,
+        "commit_mismatch": 0
+      }
+    },
+    "compressed_artifacts": {
+      "count": 7,
+      "compressed_sha256_matches": 7,
+      "uncompressed_sha256_matches": 7,
+      "uncompressed_bytes_matches": 7
+    },
+    "excluded_final_records": 4,
+    "freshness": "All tracked source/dependency/evidence hashes match both current worktree and immutable cf087de blobs; external hashed inputs also match. The later review bundle is bound to immutable commit cf087de."
+  },
+  "findings": [
+    {
+      "id": "E1",
+      "status": "pass",
+      "title": "84x14 learning table and 672 new-pair reasons reproduce exactly",
+      "evidence": [
+        "learning-matrix.csv has 84 rows and exactly 14 machine decision columns, yielding 1176 decisions; all 1176 reason fields are nonempty.",
+        "pairwise-eligibility.json has exactly 672 form/new-machine records, each with a reason; its boolean and reason values match the final CSV exactly.",
+        "Primary coverage is breakthrough=30, counter=19, suppression=20, rally=15 (sum 84). New machine coverage is breach_lunge=30, guardian_riposte=19, arc_lock=20, rally_signal=15, expose_weakness=26, standburst=12, field_triage=11, tempo_break=10.",
+        "Old teaching counts remain cut=41, surf=18, rest=84, guard=84, sunny_day=17, rain_dance=23."
+      ],
+      "repair_or_narrow_check": "No repair for the audited design archive. For any future design edit, rerun the probe and require CSV/pairwise exact equality plus these counts."
+    },
+    {
+      "id": "E2",
+      "status": "pass",
+      "title": "47 evolution edges and 24 incompatibilities are internally derived, not only asserted",
+      "evidence": [
+        "evolution-inheritance.json contains 47 unique edges.",
+        "Recomputing new-machine current-form-eligible but target-ineligible pairs from those edges and the final matrix yields exactly 24.",
+        "The derived set equals evolution-incompatibilities.csv exactly; machine split is breach_lunge=10, rally_signal=8, field_triage=4, guardian_riposte=1, arc_lock=1."
+      ],
+      "repair_or_narrow_check": "Future evolution-rule edits must rerun this derivation and preserve preview/return-on-commit as unimplemented until a real transaction exists."
+    },
+    {
+      "id": "E3",
+      "status": "pass",
+      "title": "42 old and 14 new focused tests have real stored output and still pass",
+      "evidence": [
+        "preparation-checks.json stores four commands and stderr outputs: 19+9+8+6=42, all exit 0.",
+        "tests-final.log stores 14 test names and OK.",
+        "Fresh rerun at cf087de: 14 prototype, 19 device-controls, 9 technique-inventory, 8 tactical-device, and 6 evolution-device tests all exited 0.",
+        "54 preparation input hashes are unchanged before/after and both user bank hashes match expected."
+      ],
+      "repair_or_narrow_check": "These support scripted PC status only. Human three-key, real-device, and future production integration remain outside this evidence."
+    },
+    {
+      "id": "E4",
+      "status": "pass",
+      "title": "4800-battle league configuration, seeds, event hashes, controls, and statistics reconcile",
+      "evidence": [
+        "league.json.gz records tactics_v5, 2 candidates, 4 opponents, 3 arms, seeds 2026100590000..2026100590099, and 2400 primary battles; every arm has the exact 100 seed sequence and each of the 2400 primary records carries a SHA-256 event hash.",
+        "The declared 4800 total equals 2400 primary plus 2400 controls: 23*100 side-swap checks and 100 self-identity checks. Failure lists are empty and source/bank hashes are stable.",
+        "All winners are binary. All 8 score rows and both exact paired McNemar comparisons per row recompute exactly.",
+        "Independent first-seed replay of all 24 candidate/opponent/arm combinations matched stored complete-event SHA and winner. Independent replay of the 23 first-seed swap controls and 1 self-identity control passed."
+      ],
+      "repair_or_narrow_check": "A full independent 2400 replay is possible but unnecessary for this audit. For a new source/config/seed, replay at least all first seeds plus targeted changed matchups before reusing conclusions."
+    },
+    {
+      "id": "E5",
+      "status": "pass_with_risk",
+      "title": "Fixed-league strength/fairness conclusions remain bounded",
+      "evidence": [
+        "Counter vs dive is on/off 28 positive/5 negative, exact p=0.0000661877; on vs old rest is 23/9, p=0.0200616. Mirror, garden, and battery results do not support a general counter claim.",
+        "All tempo effect-vs-off and on-vs-alternative tests have p>0.05; despite 460/1520 energy loss in the cited matchups, net wins are -3/+2.",
+        "The 100 primary seeds are reused across all matchups, swaps are controls rather than additional independent seeds, and no multiple-comparison correction is applied."
+      ],
+      "risk": "No whole-pool, acquisition-rate, production-opportunity-cost, or complete-run fairness conclusion is established.",
+      "repair_or_narrow_check": "Keep the report wording fixed-squad/exploratory. A future claim requires preregistered full-pool acquisition/complete-run experiments and an explicit multiplicity policy."
+    },
+    {
+      "id": "E6",
+      "status": "pass_with_risk",
+      "title": "Animation evidence is real but acceptance-adapter only; shared budget remains unproven",
+      "evidence": [
+        "visual.json has 10 scenes, 37 outputs, and 7 passing checks. All 37 output byte sizes/hashes match files; final published outputs are byte-identical to the replay output.",
+        "All 10 authoritative scene event hashes were independently regenerated from the frozen isolated prototype; positive/negative teaching event counts match their scenes.",
+        "Teaching overlay peaks are counter=42 and tempo=36; each is only a constant teaching-overlay estimate checked against 192.",
+        "The metadata explicitly says production_renderer_consumes_teaching_effect=false and native/weather/teaching shared total budget is not implemented or verified. The prior scheduling failure and raw events are preserved in visual.failure-scheduling.json."
+      ],
+      "risk": "This does not verify production timeline ordering, production renderer integration, native+weather+teaching shared draw budget, ESP32 limits, or independent art.",
+      "repair_or_narrow_check": "A production claim requires real integration plus measured native/weather/teaching totals and device timing; the current 42/36 values must stay named teaching-overlay estimates."
+    },
+    {
+      "id": "E7",
+      "status": "pass_with_risk",
+      "title": "Unimplemented production and review gaps are disclosed rather than misrepresented",
+      "evidence": [
+        "build-checks.json marks production_and_new_machine_learning_integration=false. Between baseline and cf087de, all 82 claimed production/runtime files are unchanged; only four isolated acceptance/test files plus docs/evidence were added.",
+        "New first-batch IDs appear in isolated tools/tests/design evidence, not production sim/data/device/save/renderer paths; tactics_v6/hex implementation is absent.",
+        "qualitygate-final.json has local gate/raw_gate pass but agent_action.task_complete=false, no effective semantic rules, no independent semantic lanes, and mutation not applicable/executed.",
+        "independent-review.json records three 429 failures and no final independent verdict; main-agent-self-review is explicitly non-independent."
+      ],
+      "risk": "Local QG and main-agent self-review cannot authorize production or substitute for central semantic/final independent review.",
+      "repair_or_narrow_check": "Before production integration, obtain a current-fingerprint central semantic result and a fresh independent code/release review after service recovery. Preserve current failures; do not rewrite them into passes."
+    }
+  ],
+  "claim_audit": {
+    "reports/teaching-design-2026-10-05.md": "Supported for design counts and explicitly excludes balance, real UI, device, and full production acceptance.",
+    "reports/teaching-prototype-2026-10-05.md": "Supported within isolated design/prototype/visual evidence boundaries; its fixed-squad, seed-reuse, missing shared-budget, and missing independent-review disclosures match raw evidence.",
+    "docs/30-skill-machines-and-learning.md": "Design and eligibility claims are supported. Strength/fairness language is bounded by its unbalanced status, section 4.2 no-strength-conclusion statement, and complete-run fairness requirement.",
+    "docs/31-prebattle-preparation-flow.md": "Existing 42-test support is real but script-only; hex, reward-to-learning improvements, real-human timing, and production extensions are clearly proposal/unimplemented.",
+    "docs/32-teaching-skill-animation-contract.md": "Ten-scene isolated visual evidence supports the stated adapter coverage, but the document correctly limits production rendering, ESP32, old-teaching fixes, and shared budget."
+  },
+  "bank_readonly": {
+    "5e9a2d878d07.0": {
+      "expected": "379620cbd720cbbe44d053df2ca3a6f70ef4112b00f5c238175d048f39b6ddbb",
+      "current_matches": true
+    },
+    "5e9a2d878d07.1": {
+      "expected": "b822125fc97f2025dbc468e50cfa3ebb74ed0303fbcac19db90b76e70d062247",
+      "current_matches": true
+    },
+    "writes_performed": 0
+  },
+  "limitations": [
+    "This is an evidence audit, not an independent code-correctness/release review.",
+    "No images were opened or emitted; binary visual outputs were only listed/hash-compared.",
+    "The full 4800 battles were not blindly rerun; all statistics were recomputed from raw JSON and 24 primary replays plus all first-seed symmetry controls were independently regenerated.",
+    "Central semantic/final independent review remains unavailable, so pass_with_risk applies only to evidence completeness and bounded claims."
+  ],
+  "next_steps": [
+    "Keep this change classified as isolated design/prototype only.",
+    "Before production: integrate through real learning/reward/save/UI/renderer paths and obtain central semantic plus fresh independent review.",
+    "Before animation release: measure the combined native/weather/teaching budget on the target runtime rather than reusing 42/36 estimates.",
+    "Before balance/fairness claims: run preregistered full-pool acquisition/complete-run experiments with distinct or explicitly modeled seed reuse and multiplicity control."
+  ]
+}

@@ -1,0 +1,43 @@
+test_negative_scenes_reject_a_real_successful_teaching_packet (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_negative_scenes_reject_a_real_successful_teaching_packet) ... 
+  test_negative_scenes_reject_a_real_successful_teaching_packet (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_negative_scenes_reject_a_real_successful_teaching_packet) (scene='counter_invalid') ... FAIL
+  test_negative_scenes_reject_a_real_successful_teaching_packet (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_negative_scenes_reject_a_real_successful_teaching_packet) (scene='counter_lethal') ... FAIL
+  test_negative_scenes_reject_a_real_successful_teaching_packet (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_negative_scenes_reject_a_real_successful_teaching_packet) (scene='tempo_invalid') ... FAIL
+  test_negative_scenes_reject_a_real_successful_teaching_packet (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_negative_scenes_reject_a_real_successful_teaching_packet) (scene='tempo_lethal') ... FAIL
+
+======================================================================
+FAIL: test_negative_scenes_reject_a_real_successful_teaching_packet (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_negative_scenes_reject_a_real_successful_teaching_packet) (scene='counter_invalid')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/bytedance/luobata/PokeTactics/tests/test_teaching_visual_probe.py", line 137, in test_negative_scenes_reject_a_real_successful_teaching_packet
+    with self.assertRaisesRegex(
+AssertionError: AssertionError not raised
+
+======================================================================
+FAIL: test_negative_scenes_reject_a_real_successful_teaching_packet (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_negative_scenes_reject_a_real_successful_teaching_packet) (scene='counter_lethal')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/bytedance/luobata/PokeTactics/tests/test_teaching_visual_probe.py", line 137, in test_negative_scenes_reject_a_real_successful_teaching_packet
+    with self.assertRaisesRegex(
+AssertionError: AssertionError not raised
+
+======================================================================
+FAIL: test_negative_scenes_reject_a_real_successful_teaching_packet (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_negative_scenes_reject_a_real_successful_teaching_packet) (scene='tempo_invalid')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/bytedance/luobata/PokeTactics/tests/test_teaching_visual_probe.py", line 137, in test_negative_scenes_reject_a_real_successful_teaching_packet
+    with self.assertRaisesRegex(
+AssertionError: AssertionError not raised
+
+======================================================================
+FAIL: test_negative_scenes_reject_a_real_successful_teaching_packet (tests.test_teaching_visual_probe.FullNaturalPositiveContracts.test_negative_scenes_reject_a_real_successful_teaching_packet) (scene='tempo_lethal')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/bytedance/luobata/PokeTactics/tests/test_teaching_visual_probe.py", line 137, in test_negative_scenes_reject_a_real_successful_teaching_packet
+    with self.assertRaisesRegex(
+AssertionError: AssertionError not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 1.202s
+
+FAILED (failures=4)
+exit=1

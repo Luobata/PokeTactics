@@ -1,0 +1,48 @@
+{
+  "schema": "teaching-audit-packet-artifact-v1",
+  "file": "packet-cases.json.gz",
+  "compressed_sha256": "a619e92b0ec78426c30f3db590b62c8f74013d36d22d0521427d6dcbf78acab8",
+  "uncompressed_sha256": "e60c8a69066d3c352ec1173bb9fcaa6a59ac32e9789f4b20f32936ec6f339fa3",
+  "uncompressed_bytes": 93473,
+  "cases": {
+    "full_natural": {
+      "event_count": 445,
+      "event_sha256": "3de6833d1289b5f5944f8fbe8bc6e2d152bb69d31e0156a0464bd41da52a080c",
+      "cause": {
+        "parent_raw_index": 38,
+        "teaching_raw_index": 42,
+        "machine_id": "guardian_riposte",
+        "owned_raw_indices": [
+          43,
+          44,
+          45
+        ]
+      }
+    },
+    "tempo_full_natural": {
+      "event_count": 299,
+      "event_sha256": "06319f6098f546f2a070e87969e77a94812635c7914f23088b12442df4c62b65",
+      "cause": {
+        "parent_raw_index": 260,
+        "teaching_raw_index": 272,
+        "machine_id": "tempo_break",
+        "owned_raw_indices": [
+          273
+        ]
+      }
+    },
+    "native_unwrapped_side_and_heal": {
+      "event_count": 19,
+      "event_sha256": "3ca7b47511e56cca97f70848e38518efa542c190eb6e834ccdbc0e38cf860dae",
+      "cause": {
+        "parent_raw_index": 8,
+        "teaching_raw_index": 17,
+        "machine_id": "tempo_break",
+        "owned_raw_indices": [
+          18
+        ]
+      }
+    }
+  },
+  "media_location": "Original 37 media files remain in reports/evidence/teaching-visual-2026-10-05; affected-validation.json proves rerun bytes equal. This supplement saves new metadata and exact raw packet events without duplicating the media."
+}

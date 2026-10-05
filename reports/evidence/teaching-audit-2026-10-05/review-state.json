@@ -1,0 +1,147 @@
+{
+  "schema_version": "independent-reviewer.v1",
+  "record_kind": "main_agent_aggregate_of_preserved_independent_records",
+  "review_status": "pass_with_risk",
+  "repo": {
+    "path": "/Users/bytedance/luobata/PokeTactics",
+    "execution_location": "local",
+    "branch": "main",
+    "base_ref": "cf087dea231aef46d8031002e290d7a3493f6f9a",
+    "head_ref": "source hashes in review-input.json; see Git history for supplemental delivery commit"
+  },
+  "review": {
+    "session_id": "sess-ffc4bb3f-51f5-4888-b9e4-10123cdffd1c",
+    "run_id": "20261005-120441-8b177ddd43e9",
+    "prior_immutable_run_id": "20261005-113232-e8622ddb4935",
+    "bundle_path": "/Users/bytedance/luobata/PokeTactics/.ai-review/20261005-120441-8b177ddd43e9/review-bundle.json",
+    "dashboard_url": "",
+    "input_fingerprint": "8e0685bcfdef7e0bd43663f2ef968779614ee8bcca2af2ae43d6db37e00f63f0",
+    "updated_at": "2026-10-05T12:17:39.398969+00:00"
+  },
+  "reviewer_agents": [
+    {
+      "agent_id": "/root/audit_m_code",
+      "role": "general-reviewer",
+      "lifecycle": "reused",
+      "initial_verdict": "pass_with_risk",
+      "verdict": "pass",
+      "bound_scope": "Original isolated prototype correctness plus narrow VISUAL-001/002 repair closure"
+    },
+    {
+      "agent_id": "/root/audit_m_evidence",
+      "role": "test-reviewer",
+      "lifecycle": "reused",
+      "initial_verdict": "pass_with_risk",
+      "verdict": "pass_with_risk",
+      "bound_scope": "Original frozen evidence/statistics plus narrow current-source packet/visual/log/input freshness recheck"
+    }
+  ],
+  "raw_records": {
+    "code-initial": {
+      "path": "reports/evidence/teaching-audit-2026-10-05/code-initial.json",
+      "sha256": "d97dcdbfdc2fb223d44d22bb6dbc82847fb3216fb83af5ebb572fd2a6f47c20b"
+    },
+    "evidence-initial": {
+      "path": "reports/evidence/teaching-audit-2026-10-05/evidence-initial.json",
+      "sha256": "0205bbc6f46c386265ecfb3ae179b6e27d1f6b0c735a7e16e40ff87532e98b7f"
+    },
+    "code-final": {
+      "path": "reports/evidence/teaching-audit-2026-10-05/code-final.json",
+      "sha256": "bd237ae864b098fcf40a32dfdb2aa9cf65e90e4023cc2a3c0ee74c3cc6edb352"
+    },
+    "evidence-final": {
+      "path": "reports/evidence/teaching-audit-2026-10-05/evidence-final.json",
+      "sha256": "6a4218ead2c89c630a5c98da170af71b7af93d57f5fef41de8c19d4d215c1537"
+    }
+  },
+  "findings": [
+    {
+      "id": "VISUAL-001",
+      "status": "resolved",
+      "evidence_refs": [
+        "reports/evidence/teaching-audit-2026-10-05/code-final.json",
+        "tests/test_teaching_visual_probe.py"
+      ]
+    },
+    {
+      "id": "VISUAL-002",
+      "status": "resolved_for_reviewed_real_packet_pattern",
+      "evidence_refs": [
+        "reports/evidence/teaching-audit-2026-10-05/code-final.json",
+        "reports/evidence/teaching-audit-2026-10-05/packet-artifact.json"
+      ]
+    }
+  ],
+  "blockers": [],
+  "checks": [
+    {
+      "name": "focused_tests",
+      "status": "passed",
+      "command": "python3 -m unittest tests.test_teaching_prototype tests.test_teaching_visual_probe -v",
+      "evidence_ref": "tests-final.log",
+      "tests": 20
+    },
+    {
+      "name": "visual_replay",
+      "status": "passed",
+      "command": "python3 tools/acceptance/teaching_visual_probe.py --out .build/teaching-prototype/audit/visual",
+      "evidence_ref": "affected-validation.json",
+      "scenes": 10,
+      "byte_identical_media": 37
+    },
+    {
+      "name": "historical_frozen_inputs",
+      "status": "passed",
+      "evidence_ref": "frozen-hashes.json"
+    },
+    {
+      "name": "current_league_inputs_and_banks",
+      "status": "passed",
+      "evidence_ref": "affected-validation.json",
+      "league_inputs": 48
+    },
+    {
+      "name": "compile_whitespace",
+      "status": "passed",
+      "evidence_ref": "affected-validation.json"
+    },
+    {
+      "name": "local_qualitygate_execution",
+      "status": "passed_without_applicable_rule_coverage",
+      "evidence_ref": "qualitygate-final.json"
+    },
+    {
+      "name": "central_qualitygate_semantic",
+      "status": "unavailable",
+      "evidence_ref": "qualitygate-readiness.json"
+    },
+    {
+      "name": "mutation",
+      "status": "not_executed_policy_paused",
+      "evidence_ref": "qualitygate-readiness.json"
+    }
+  ],
+  "qualitygate": {
+    "gate": "pass",
+    "raw_gate": "pass",
+    "block_merge": false,
+    "execution_complete": true,
+    "agent_action_task_complete": false,
+    "applicable_script_rule_coverage": false,
+    "central_semantic_consumed": false,
+    "mutation_executed": false,
+    "readiness_complete": false
+  },
+  "prior_429_and_initial_verdicts_unchanged": true,
+  "residual_risks": [
+    "Production learning/reward/UI/save/AI/renderer integration is unimplemented and requires fresh acceptance/review",
+    "Whole-pool acquisition/complete-run fairness and generalized native packet handling are outside scope",
+    "Real-human three-key, ESP32, independent art and combined native/weather/teaching budget are unverified",
+    "Central QualityGate semantic/rule context unavailable; local no-rule pass is not semantic completion"
+  ],
+  "next_actions": [
+    "No remaining blocker within this isolated audit supplement",
+    "Before future production integration, validate its actual rules/transactions/renderer/shared budget and obtain fresh review"
+  ],
+  "delivery_kind": "User-authorized audit archive and narrowly corrected isolated acceptance probe; no production registration"
+}
