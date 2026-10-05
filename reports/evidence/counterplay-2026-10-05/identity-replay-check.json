@@ -1,0 +1,726 @@
+{
+  "schema": "counterplay-probe-v3",
+  "mode": "identity-replay-and-coin-check",
+  "phase": "1-identity-diagnostic",
+  "fixture_invariants": {
+    "population": 6,
+    "unit_cost": 15,
+    "finished_items": 3,
+    "teachings": 1,
+    "ruleset": "tactics_v2",
+    "stat_mode": "budget_v1",
+    "original_build_keys": [
+      "garden",
+      "battery",
+      "dive",
+      "disrupt"
+    ],
+    "candidate": {
+      "key": "ghost_guard_active",
+      "name": "幽影护阵",
+      "species": [
+        94,
+        9,
+        3,
+        80,
+        76,
+        2
+      ],
+      "positions": [
+        [
+          2,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "items": [
+        "leftovers",
+        "sash",
+        "focus_lens",
+        null,
+        null,
+        null
+      ],
+      "partner": 3,
+      "learned": [
+        null,
+        "guard",
+        null,
+        null,
+        null,
+        null
+      ],
+      "plan": "Frozen anti-rush candidate: Wartortle guards the adjacent Venusaur after Gengar replaces Snorlax.",
+      "cost": 15,
+      "unit_names": [
+        "耿鬼",
+        "水箭龟",
+        "妙蛙花",
+        "呆壳兽",
+        "隆隆岩",
+        "妙蛙草"
+      ]
+    },
+    "builds": [
+      {
+        "key": "garden",
+        "name": "花园续航",
+        "species": [
+          143,
+          9,
+          3,
+          80,
+          76,
+          2
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ]
+        ],
+        "items": [
+          "leftovers",
+          "sash",
+          "focus_lens",
+          null,
+          null,
+          null
+        ],
+        "partner": 3,
+        "learned": [
+          "rest",
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "卡比兽承伤、剩饭/睡觉与妙蛙花治疗；水系持续回复，紧密站位换治疗覆盖，付出群伤暴露。",
+        "cost": 15,
+        "unit_names": [
+          "卡比兽",
+          "水箭龟",
+          "妙蛙花",
+          "呆壳兽",
+          "隆隆岩",
+          "妙蛙草"
+        ]
+      },
+      {
+        "key": "battery",
+        "name": "电流法阵",
+        "species": [
+          9,
+          6,
+          94,
+          26,
+          65,
+          82
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            1,
+            3
+          ]
+        ],
+        "items": [
+          "sash",
+          "focus_lens",
+          null,
+          "swift_feather",
+          null,
+          null
+        ],
+        "partner": 26,
+        "learned": [
+          "surf",
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "水箭龟挡前排，雷丘加速法系第一次施法，喷火龙群伤、耿鬼干扰；后排密集且单坦。",
+        "cost": 15,
+        "unit_names": [
+          "水箭龟",
+          "喷火龙",
+          "耿鬼",
+          "雷丘",
+          "胡地",
+          "三合一磁怪"
+        ]
+      },
+      {
+        "key": "dive",
+        "name": "双翼突进",
+        "species": [
+          130,
+          68,
+          143,
+          67,
+          22,
+          65
+        ],
+        "positions": [
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            4,
+            3
+          ]
+        ],
+        "items": [
+          "sash",
+          "choice_band",
+          null,
+          "swift_feather",
+          null,
+          null
+        ],
+        "partner": 143,
+        "learned": [
+          null,
+          "cut",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "暴鲤龙/豪力/大嘴雀突破两格内可达后排，胡地收割；物理爆发配格斗羁绊，缺少持续远程群伤。",
+        "cost": 15,
+        "unit_names": [
+          "暴鲤龙",
+          "怪力",
+          "卡比兽",
+          "豪力",
+          "大嘴雀",
+          "胡地"
+        ]
+      },
+      {
+        "key": "disrupt",
+        "name": "幽影控场",
+        "species": [
+          94,
+          3,
+          6,
+          26,
+          76,
+          65
+        ],
+        "positions": [
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            5,
+            3
+          ]
+        ],
+        "items": [
+          "swift_feather",
+          null,
+          "focus_lens",
+          null,
+          "sash",
+          null
+        ],
+        "partner": 6,
+        "learned": [
+          null,
+          "cut",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "隆隆岩牵制近战，喷火龙首次施法接力，耿鬼压最高能量目标；依赖首次技能，面对快速突进脆弱。",
+        "cost": 15,
+        "unit_names": [
+          "耿鬼",
+          "妙蛙花",
+          "喷火龙",
+          "雷丘",
+          "隆隆岩",
+          "胡地"
+        ]
+      },
+      {
+        "key": "garden_formation_only",
+        "name": "花园换阵",
+        "species": [
+          143,
+          9,
+          3,
+          80,
+          76,
+          2
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "items": [
+          "leftovers",
+          "sash",
+          "focus_lens",
+          null,
+          null,
+          null
+        ],
+        "partner": 3,
+        "learned": [
+          "rest",
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "Original garden species/items/rest/partner with the frozen counterplay formation.",
+        "cost": 15,
+        "unit_names": [
+          "卡比兽",
+          "水箭龟",
+          "妙蛙花",
+          "呆壳兽",
+          "隆隆岩",
+          "妙蛙草"
+        ]
+      },
+      {
+        "key": "ghost_rest_line",
+        "name": "幽影休息护阵",
+        "species": [
+          94,
+          9,
+          3,
+          80,
+          76,
+          2
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "items": [
+          "leftovers",
+          "sash",
+          "focus_lens",
+          null,
+          null,
+          null
+        ],
+        "partner": 3,
+        "learned": [
+          null,
+          "rest",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "Gengar replaces Snorlax; Wartortle keeps one teaching as rest in the frozen formation.",
+        "cost": 15,
+        "unit_names": [
+          "耿鬼",
+          "水箭龟",
+          "妙蛙花",
+          "呆壳兽",
+          "隆隆岩",
+          "妙蛙草"
+        ]
+      },
+      {
+        "key": "ghost_guard_learned",
+        "name": "幽影护卫学习",
+        "species": [
+          94,
+          9,
+          3,
+          80,
+          76,
+          2
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "items": [
+          "leftovers",
+          "sash",
+          "focus_lens",
+          null,
+          null,
+          null
+        ],
+        "partner": 3,
+        "learned": [
+          null,
+          "guard",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "The frozen squad learns guard but does not select it in battle.",
+        "cost": 15,
+        "unit_names": [
+          "耿鬼",
+          "水箭龟",
+          "妙蛙花",
+          "呆壳兽",
+          "隆隆岩",
+          "妙蛙草"
+        ]
+      },
+      {
+        "key": "ghost_guard_active",
+        "name": "幽影护阵",
+        "species": [
+          94,
+          9,
+          3,
+          80,
+          76,
+          2
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "items": [
+          "leftovers",
+          "sash",
+          "focus_lens",
+          null,
+          null,
+          null
+        ],
+        "partner": 3,
+        "learned": [
+          null,
+          "guard",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "Frozen anti-rush candidate: Wartortle guards the adjacent Venusaur after Gengar replaces Snorlax.",
+        "cost": 15,
+        "unit_names": [
+          "耿鬼",
+          "水箭龟",
+          "妙蛙花",
+          "呆壳兽",
+          "隆隆岩",
+          "妙蛙草"
+        ]
+      },
+      {
+        "key": "dive_horizontal_mirror",
+        "name": "双翼突进",
+        "species": [
+          130,
+          68,
+          143,
+          67,
+          22,
+          65
+        ],
+        "positions": [
+          [
+            4,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            1,
+            3
+          ]
+        ],
+        "items": [
+          "sash",
+          "choice_band",
+          null,
+          "swift_feather",
+          null,
+          null
+        ],
+        "partner": 143,
+        "learned": [
+          null,
+          "cut",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "Original dive resources and units with columns mirrored; symmetry control only.",
+        "cost": 15,
+        "unit_names": [
+          "暴鲤龙",
+          "怪力",
+          "卡比兽",
+          "豪力",
+          "大嘴雀",
+          "胡地"
+        ]
+      }
+    ],
+    "checks": [
+      "original BUILDS preserved",
+      "equal budget/resources",
+      "unique legal positions",
+      "guard adjacency",
+      "one rest or guard teaching"
+    ]
+  },
+  "source_before": {
+    "git": {
+      "head": "d3a26ce6dee44074d9087ea5cee6b2a35fd236a4",
+      "status_porcelain": "M docs/next-session-handoff.md\n M sim/bots.py\n M sim/combat.py\n M sim/items.py\n M sim/tactics.py\n M tests/test_tactical_device.py\n M tests/test_tactical_session.py\n M tools/acceptance/demo.py\n M tools/acceptance/device_controls.py\n M tools/acceptance/device_renderer.js\n M tools/acceptance/session_save.py\n M tools/acceptance/tactical_run_probe.py\n M tools/mockups/animation_timeline.py\n M tools/mockups/render_battle_gif.py\n M tools/mockups/render_mockups.py\n?? docs/25-evolution-direction-review.md\n?? docs/26-counterplay-and-natural-end.md\n?? reports/evidence/batch-j-2026-10-05/acceptance.json\n?? reports/evidence/batch-j-2026-10-05/counter-presentation.log\n?? reports/evidence/batch-j-2026-10-05/counter-visual.log\n?? reports/evidence/batch-j-2026-10-05/qualitygate-scope.txt\n?? reports/evidence/batch-j-2026-10-05/qualitygate.json\n?? reports/evidence/batch-j-2026-10-05/qualitygate.stderr\n?? reports/evidence/batch-j-2026-10-05/source-manifest.json\n?? reports/evidence/batch-j-2026-10-05/validation-summary.json\n?? reports/evidence/counter-visual-2026-10-05/before-hit.png\n?? reports/evidence/counter-visual-2026-10-05/counter-overview.png\n?? reports/evidence/counter-visual-2026-10-05/expired.png\n?? reports/evidence/counter-visual-2026-10-05/expiry.gif\n?? reports/evidence/counter-visual-2026-10-05/healing.png\n?? reports/evidence/counter-visual-2026-10-05/hit.png\n?? reports/evidence/counter-visual-2026-10-05/natural.gif\n?? reports/evidence/counter-visual-2026-10-05/visual.json\n?? reports/evidence/counterplay-2026-10-05/README.md\n?? reports/evidence/counterplay-2026-10-05/counterplay_probe.formal-v2.py\n?? reports/evidence/counterplay-2026-10-05/counterplay_probe.py\n?? reports/evidence/counterplay-2026-10-05/evidence-manifest.json\n?? reports/evidence/counterplay-2026-10-05/formation-explore.json\n?? reports/evidence/counterplay-2026-10-05/formation-recheck.json\n?? reports/evidence/counterplay-2026-10-05/identity-replay-check.json\n?? reports/evidence/counterplay-2026-10-05/phase1-formal.json\n?? reports/evidence/counterplay-2026-10-05/phase2-archive-seal-explore-75.json\n?? reports/evidence/counterplay-2026-10-05/phase2-archive-seal-explore-75.py\n?? reports/evidence/counterplay-2026-10-05/phase2-archive-seal-explore-no-lens.json\n?? reports/evidence/counterplay-2026-10-05/phase2-archive-seal-explore.json\n?? reports/evidence/counterplay-2026-10-05/phase2-archive-seal-explore.py\n?? reports/evidence/counterplay-2026-10-05/phase2-formal.json\n?? reports/evidence/natural-end-2026-10-05/exploration/baseline-v2-n64.json.gz\n?? reports/evidence/natural-end-2026-10-05/exploration/boundary_pressure_probe.py\n?? reports/evidence/natural-end-2026-10-05/exploration/pressure-arms-n64.json.gz\n?? reports/evidence/natural-end-2026-10-05/exploration/pressure-boundary-n64.json.gz\n?? reports/evidence/natural-end-2026-10-05/exploration/pressure-refine-n64.json.gz\n?? reports/evidence/natural-end-2026-10-05/exploration/pressure_probe.py\n?? reports/evidence/natural-end-2026-10-05/exploration/refine_pressure_probe.py\n?? reports/evidence/natural-end-2026-10-05/formal-fingerprints.json\n?? reports/evidence/natural-end-2026-10-05/natural-end-evidence-manifest.json\n?? reports/evidence/natural-end-2026-10-05/natural-end-n100.json.gz\n?? reports/evidence/natural-end-2026-10-05/production-overrides-smoke.json.gz\n?? reports/evidence/natural-end-2026-10-05/production-routing-smoke.json.gz\n?? reports/natural-end-2026-10-05.md\n?? reports/system-optimization-batch-j-2026-10-05.md\n?? sim/pacing.py\n?? tests/fixtures/tactics-v2-schema4-session.json\n?? tests/test_counter_device.py\n?? tests/test_counter_presentation.py\n?? tests/test_counterplay.py\n?? tests/test_pacing.py\n?? tests/test_pacing_session.py\n?? tools/acceptance/counter_visual_probe.py\n?? tools/acceptance/counterplay_probe.py\n?? tools/acceptance/pacing_probe.py"
+    },
+    "rules_fingerprint": "2a469a66cce17970c78393f495305f55cb52c6a92e2264a164e6861095ac5fbb"
+  },
+  "source_after": {
+    "git": {
+      "head": "d3a26ce6dee44074d9087ea5cee6b2a35fd236a4",
+      "status_porcelain": "M docs/next-session-handoff.md\n M sim/bots.py\n M sim/combat.py\n M sim/items.py\n M sim/tactics.py\n M tests/test_tactical_device.py\n M tests/test_tactical_session.py\n M tools/acceptance/demo.py\n M tools/acceptance/device_controls.py\n M tools/acceptance/device_renderer.js\n M tools/acceptance/session_save.py\n M tools/acceptance/tactical_run_probe.py\n M tools/mockups/animation_timeline.py\n M tools/mockups/render_battle_gif.py\n M tools/mockups/render_mockups.py\n?? docs/25-evolution-direction-review.md\n?? docs/26-counterplay-and-natural-end.md\n?? reports/evidence/batch-j-2026-10-05/acceptance.json\n?? reports/evidence/batch-j-2026-10-05/counter-presentation.log\n?? reports/evidence/batch-j-2026-10-05/counter-visual.log\n?? reports/evidence/batch-j-2026-10-05/qualitygate-scope.txt\n?? reports/evidence/batch-j-2026-10-05/qualitygate.json\n?? reports/evidence/batch-j-2026-10-05/qualitygate.stderr\n?? reports/evidence/batch-j-2026-10-05/source-manifest.json\n?? reports/evidence/batch-j-2026-10-05/validation-summary.json\n?? reports/evidence/counter-visual-2026-10-05/before-hit.png\n?? reports/evidence/counter-visual-2026-10-05/counter-overview.png\n?? reports/evidence/counter-visual-2026-10-05/expired.png\n?? reports/evidence/counter-visual-2026-10-05/expiry.gif\n?? reports/evidence/counter-visual-2026-10-05/healing.png\n?? reports/evidence/counter-visual-2026-10-05/hit.png\n?? reports/evidence/counter-visual-2026-10-05/natural.gif\n?? reports/evidence/counter-visual-2026-10-05/visual.json\n?? reports/evidence/counterplay-2026-10-05/README.md\n?? reports/evidence/counterplay-2026-10-05/counterplay_probe.formal-v2.py\n?? reports/evidence/counterplay-2026-10-05/counterplay_probe.py\n?? reports/evidence/counterplay-2026-10-05/evidence-manifest.json\n?? reports/evidence/counterplay-2026-10-05/formation-explore.json\n?? reports/evidence/counterplay-2026-10-05/formation-recheck.json\n?? reports/evidence/counterplay-2026-10-05/identity-replay-check.json\n?? reports/evidence/counterplay-2026-10-05/phase1-formal.json\n?? reports/evidence/counterplay-2026-10-05/phase2-archive-seal-explore-75.json\n?? reports/evidence/counterplay-2026-10-05/phase2-archive-seal-explore-75.py\n?? reports/evidence/counterplay-2026-10-05/phase2-archive-seal-explore-no-lens.json\n?? reports/evidence/counterplay-2026-10-05/phase2-archive-seal-explore.json\n?? reports/evidence/counterplay-2026-10-05/phase2-archive-seal-explore.py\n?? reports/evidence/counterplay-2026-10-05/phase2-formal.json\n?? reports/evidence/natural-end-2026-10-05/exploration/baseline-v2-n64.json.gz\n?? reports/evidence/natural-end-2026-10-05/exploration/boundary_pressure_probe.py\n?? reports/evidence/natural-end-2026-10-05/exploration/pressure-arms-n64.json.gz\n?? reports/evidence/natural-end-2026-10-05/exploration/pressure-boundary-n64.json.gz\n?? reports/evidence/natural-end-2026-10-05/exploration/pressure-refine-n64.json.gz\n?? reports/evidence/natural-end-2026-10-05/exploration/pressure_probe.py\n?? reports/evidence/natural-end-2026-10-05/exploration/refine_pressure_probe.py\n?? reports/evidence/natural-end-2026-10-05/formal-fingerprints.json\n?? reports/evidence/natural-end-2026-10-05/natural-end-evidence-manifest.json\n?? reports/evidence/natural-end-2026-10-05/natural-end-n100.json.gz\n?? reports/evidence/natural-end-2026-10-05/production-overrides-smoke.json.gz\n?? reports/evidence/natural-end-2026-10-05/production-routing-smoke.json.gz\n?? reports/natural-end-2026-10-05.md\n?? reports/system-optimization-batch-j-2026-10-05.md\n?? sim/pacing.py\n?? tests/fixtures/tactics-v2-schema4-session.json\n?? tests/test_counter_device.py\n?? tests/test_counter_presentation.py\n?? tests/test_counterplay.py\n?? tests/test_pacing.py\n?? tests/test_pacing_session.py\n?? tools/acceptance/counter_visual_probe.py\n?? tools/acceptance/counterplay_probe.py\n?? tools/acceptance/pacing_probe.py"
+    },
+    "rules_fingerprint": "2a469a66cce17970c78393f495305f55cb52c6a92e2264a164e6861095ac5fbb"
+  },
+  "source_stable_during_run": true,
+  "script_sha256": "d69b5a44a178cc607ac33666ec1b496471c61d8faedafecb0462fb7c93faa477",
+  "elapsed_seconds": 1.732,
+  "seed_range": [
+    2026100550000,
+    2026100550099
+  ],
+  "independent_trials": 100,
+  "games_including_replay": 200,
+  "games": 200,
+  "side_swap_failure_count": 0,
+  "winner_distribution": {
+    "team0": 55,
+    "team1": 45
+  },
+  "winner_mismatches": [],
+  "event_replay_mismatches": [],
+  "side_fingerprint_mismatches": [],
+  "duration_mismatches": [],
+  "team_order_first_counts": {
+    "0": 52,
+    "1": 48
+  },
+  "team_order_first_exact_binomial_two_sided_p": 0.764353,
+  "method": {
+    "expected_winner_rule": "For an exact equal loadout, the swapped invocation replays the same team inputs; winner must stay the same team index.",
+    "old_phase1_assertion_error": "The earlier probe expected 1-winner for garden-versus-garden. That rule is for distinct teams and incorrectly classified all 100 identity replays as failures.",
+    "fair_coin_rule": "Equal deployment keys consume one randrange(2) before deployment. The diagnostic gates replay invariance and reports the observed first-team count/binomial summary; it does not claim to prove long-run fairness from 100 seeds.",
+    "distinct_team_rule": "Distinct teams continue to require winner inversion and 180-degree rotated side fingerprints."
+  },
+  "limits": [
+    "A 55/45 or similar finite outcome split is not itself evidence of bias.",
+    "Exact event replay is the hard invariant; the binomial p-value is descriptive."
+  ]
+}

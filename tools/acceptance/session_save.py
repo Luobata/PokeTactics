@@ -21,6 +21,7 @@ BOT_STATS = ("gold_curve", "pop_curve", "synergy_curve", "synergy_formed_round",
              "stone_triggers", "craft_stats")
 LEGACY_BASE_FINGERPRINT = '2f9426505cad1addbab7b5db1e9f5a673a72ec0937a1ed4cf916926c04d015ad'
 LEGACY_TACTICS_FINGERPRINT = 'f05ad20bf84e27917c269487469914f042cc03bde53176a2c4b845b092bb343c'
+LEGACY_ABILITIES_FINGERPRINT = 'b39cb3c1756b71d4a26a1f79b613683ee6852bdad66709fc1cd1138d66cde23f'
 
 
 class UnknownRulesError(UnsupportedVersionError, ValueError):
@@ -138,6 +139,8 @@ class SessionCodec:
             supported.add(LEGACY_BASE_FINGERPRINT)
         if ruleset in (tactics.BASE_RULESET, tactics.TACTICS_RULESET):
             supported.add(LEGACY_TACTICS_FINGERPRINT)
+        if ruleset in (tactics.BASE_RULESET, tactics.TACTICS_RULESET, tactics.ABILITIES_RULESET):
+            supported.add(LEGACY_ABILITIES_FINGERPRINT)
         if fingerprint not in supported:
             raise UnknownRulesError('无法识别此存档的规则指纹；需要对应版本继续，原存档未修改')
         state = demo.Session(integer(data["seed"], -(2 ** 63), 2 ** 63 - 1, "seed"), ruleset=ruleset)
@@ -153,7 +156,7 @@ class SessionCodec:
             if sid not in state.templates:
                 raise ValueError("存档包含当前版本不支持的棋子")
             item = record["item"]
-            if item is not None and item not in demo.items_mod.FINISHED:
+            if item is not None and item not in demo.items_mod.catalog(ruleset):
                 raise ValueError("未知装备")
             template = state.templates[sid]
             if not owned:
@@ -251,7 +254,7 @@ class SessionCodec:
                     raise ValueError("合成统计字段不完整")
                 integer(craft["calls"], 0, 1000000, "craft_calls")
                 for key in ("made", "no_pair", "gated", "shadow"):
-                    if not isinstance(craft[key], dict) or set(craft[key]) - set(demo.items_mod.FINISHED):
+                    if not isinstance(craft[key], dict) or set(craft[key]) - set(demo.items_mod.catalog(ruleset)):
                         raise ValueError("合成统计含未知装备")
                     for value in craft[key].values():
                         integer(value, 0, 1000000, "craft_count")
@@ -273,7 +276,7 @@ class SessionCodec:
                 raise ValueError("组件字段不一致")
             seat.inventory.components = {k: integer(v, 0, 1000, k) for k, v in components.items()}
             finished = sequence(record["finished"], 1000, "finished")
-            if any(key not in demo.items_mod.FINISHED for key in finished):
+            if any(key not in demo.items_mod.catalog(ruleset) for key in finished):
                 raise ValueError("仓库含未知装备")
             seat.inventory.finished = list(finished)
             machines = record.get('techniques', dict.fromkeys(techniques.ids_for(ruleset), 0))

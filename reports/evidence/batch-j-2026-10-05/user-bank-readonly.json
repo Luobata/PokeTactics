@@ -1,0 +1,15 @@
+{
+  "scope": "read-only existing original slot; no writes",
+  "files": [
+    {
+      "path": ".build/saves/poketactics/5e9a2d878d07.0",
+      "bytes": 10494,
+      "sha256": "379620cbd720cbbe44d053df2ca3a6f70ef4112b00f5c238175d048f39b6ddbb"
+    },
+    {
+      "path": ".build/saves/poketactics/5e9a2d878d07.1",
+      "bytes": 10585,
+      "sha256": "b822125fc97f2025dbc468e50cfa3ebb74ed0303fbcac19db90b76e70d062247"
+    }
+  ]
+}

@@ -106,7 +106,8 @@ class Device:
         return [r for r in self.state.get("rewards", []) if r.get("status") == "pending"]
 
     def _is_tactical(self):
-        return self.state.get("ruleset") in ("tactics_v1", "tactics_v2")
+        from tactics import enabled
+        return enabled(self.state.get("ruleset", "base_v1"))
 
     def _validate_learning(self, species, technique):
         from techniques import validate_learning
@@ -194,7 +195,7 @@ class Device:
         you = state.get("you", {})
         if page == "home":
             return [row("启程 · 远征", "expedition", detail="选择主搭档、招式机器与开局装备。"),
-                    row("战术远征 · 护卫与天气", "tactics", detail="九尾日照、拉普拉斯降雨在上场时自动触发。野怪轮获取护卫、晴天与求雨教学，选择队友分工。"),
+                    row("战术远征 · 护卫与天气", "tactics", detail="九尾日照、拉普拉斯降雨；野怪轮教学三选一。两组件可合封疗针；第20轮起增加败方扣血，胜方不掉血。"),
                     row("继续存档", "resume", subtitle="继续已保存的这一局" if self.sid else "尚无存档编号", disabled=not self.sid),
                     row("经典对局", "classic", detail="从商店组建队伍，八位训练家同场竞技。"),
                     row("挑战与图鉴", "collection")]
@@ -236,7 +237,9 @@ class Device:
             return [row("商店", "open", page="shop"), row("棋盘与备战", "open", page="board_rows"),
                     row("仓库与教学" + (f" · {len(self._pending_rewards())} 待领" if self._pending_rewards() else ""), "open", page="inventory"), row("羁绊", "open", page="synergies"),
                     row("侦察与排名", "open", page="scout"),
-                    row("开战", "battle_confirm", detail=(state.get("entry_weather") or {}).get("note", "")),
+                    row("开战", "battle_confirm", detail="\n".join(filter(None, [
+                        (state.get("entry_weather") or {}).get("note"),
+                        (state.get("pacing") or {}).get("note")]))),
                     row("保存 / 返回主页", "open", page="system")]
         if page == "shop":
             entries = [row(p["name"] if p else "空货架", "buy", subtitle=f"{p.get('price', p['tier'])} 金" if p else "已售出",

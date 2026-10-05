@@ -7,20 +7,31 @@ whereas ``tactics_v1`` opts a match into guard and weather teaching and
 
 BASE_RULESET = "base_v1"
 TACTICS_RULESET = "tactics_v1"
-CURRENT_TACTICS_RULESET = "tactics_v2"
+ABILITIES_RULESET = "tactics_v2"
+COUNTERS_RULESET = "tactics_v3"
+CURRENT_TACTICS_RULESET = "tactics_v4"
 
 
 def validate_ruleset(value):
-    if not isinstance(value, str) or value not in (BASE_RULESET, TACTICS_RULESET, CURRENT_TACTICS_RULESET):
+    if not isinstance(value, str) or value not in (BASE_RULESET, TACTICS_RULESET, ABILITIES_RULESET,
+                                                COUNTERS_RULESET, CURRENT_TACTICS_RULESET):
         raise ValueError("unknown battle ruleset")
     return value
 
 
 def enabled(value):
-    return validate_ruleset(value) in (TACTICS_RULESET, CURRENT_TACTICS_RULESET)
+    return validate_ruleset(value) != BASE_RULESET
 
 
 def entry_abilities_enabled(value):
+    return validate_ruleset(value) in (ABILITIES_RULESET, COUNTERS_RULESET, CURRENT_TACTICS_RULESET)
+
+
+def counters_enabled(value):
+    return validate_ruleset(value) in (COUNTERS_RULESET, CURRENT_TACTICS_RULESET)
+
+
+def pacing_enabled(value):
     return validate_ruleset(value) == CURRENT_TACTICS_RULESET
 
 

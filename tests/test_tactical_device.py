@@ -42,7 +42,7 @@ class TacticalDeviceContracts(unittest.TestCase):
         self.choose("喷火龙")
         self.choose("出发")
         self.choose("确认")
-        self.assertEqual(self.device.state["ruleset"], "tactics_v2")
+        self.assertEqual(self.device.state["ruleset"], "tactics_v4")
         self.assertEqual(self.device.page, "prep")
         return demo.SESSIONS[self.device.sid]
 

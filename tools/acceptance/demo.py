@@ -57,6 +57,7 @@ import items as items_mod  # noqa: E402
 import techniques as techniques_mod  # noqa: E402
 import tactics as tactics_mod  # noqa: E402
 import abilities as abilities_mod  # noqa: E402
+import pacing
 import rng as rng_mod  # noqa: E402
 import shop as shop_mod  # noqa: E402
 import synergy as syn_mod  # noqa: E402
@@ -240,6 +241,10 @@ def _fmt_event(anim, e: tuple) -> str:
         weather_label = lambda value: weather_mod.WEATHERS[value]['label'] if value else '平静天气'
         if effect == 'guard':
             return f"<b>{name(e[2])} · 护卫</b> 替 {name(e[3])} 承受本次突进主命中（本场次数已用完）"
+        if effect == 'healing_block':
+            return f"<b>{name(e[2])} · 封疗针</b>：{name(e[3])} 的治疗减少60%，持续8秒（本场已用）"
+        if effect == 'healing_prevented':
+            return f"{name(e[3])} 因封疗少恢复 {info['amount']} 生命，实际恢复 {info['healed']}"
         if effect == 'weather_request':
             if info.get('source_kind') == 'ability':
                 return f"<b>{name(e[2])} · 入场特性</b> 申请 {weather_label(info['new_weather'])}（入场统一裁定）"
@@ -353,6 +358,7 @@ class Session:
         self.expedition = None
         self.discoveries = {"seen": [], "fielded": [], "won": []}
         for seat in self.seats:
+            seat.inventory.ruleset = self.ruleset
             seat.inventory.techniques = dict.fromkeys(techniques_mod.ids_for(self.ruleset), 0)
 
     def battle_options(self, a=None, b=None):
@@ -585,6 +591,9 @@ class Session:
             raise DemoError(f"无法识别的位置 {loc!r}")
 
     # ---- 回合推进 ----
+    def _loss_damage(self, round_no, survivors):
+        return pacing.loss_damage(self.ruleset, round_no, survivors)
+
     def begin_round(self, r: int) -> None:
         self.round_no = r
         self.phase = "prep"
@@ -592,6 +601,8 @@ class Session:
         self.opponent_comp = None
         self.opponent_learned = None
         self.opponent_tactics = None
+        if pacing.enabled(self.ruleset) and r >= pacing.DEFAULT_NATURAL_END_POLICY.start_round:
+            self._say(f'终局压力：败方本轮至少扣 {pacing.DEFAULT_NATURAL_END_POLICY.minimum_loss} 生命；胜方不掉血')
         for e in self._alive():
             e.gold += economy.round_income(e.gold, e.streak)
             e.gold += items_mod.lucky_egg_income(e)
@@ -735,14 +746,14 @@ class Session:
                     meta = self._fight_rendered(r, battle_i, me, opp, weather)
                     w, surv = meta["winner"], meta["survivors"]
                     if w == 0:
-                        dmg[id(opp)] = economy.loss_damage(r, surv[0])
+                        dmg[id(opp)] = self._loss_damage(r, surv[0])
                         note = f"你 胜（己方存活 {surv[0]}）"
                     elif w == 1:
-                        dmg[id(me)] = economy.loss_damage(r, surv[1])
+                        dmg[id(me)] = self._loss_damage(r, surv[1])
                         note = f"{opp.name} 胜（存活 {surv[1]}）"
                     else:
-                        dmg[id(me)] = economy.loss_damage(r, surv[1])
-                        dmg[id(opp)] = economy.loss_damage(r, surv[0])
+                        dmg[id(me)] = self._loss_damage(r, surv[1])
+                        dmg[id(opp)] = self._loss_damage(r, surv[0])
                         note = "平局双伤"
                     self._streak(me, w == 0)
                     self._streak(opp, w == 1)
@@ -752,14 +763,14 @@ class Session:
                 else:
                     res = self._fight(r, battle_i, a, b, weather)
                     if res["winner"] == 0:
-                        dmg[id(b)] = economy.loss_damage(r, res["survivors"][0])
+                        dmg[id(b)] = self._loss_damage(r, res["survivors"][0])
                         note = f"{a.name} 胜（存活 {res['survivors'][0]}）"
                     elif res["winner"] == 1:
-                        dmg[id(a)] = economy.loss_damage(r, res["survivors"][1])
+                        dmg[id(a)] = self._loss_damage(r, res["survivors"][1])
                         note = f"{b.name} 胜（存活 {res['survivors'][1]}）"
                     else:
-                        dmg[id(a)] = economy.loss_damage(r, res["survivors"][1])
-                        dmg[id(b)] = economy.loss_damage(r, res["survivors"][0])
+                        dmg[id(a)] = self._loss_damage(r, res["survivors"][1])
+                        dmg[id(b)] = self._loss_damage(r, res["survivors"][0])
                         note = "平局双伤"
                     self._streak(a, res["winner"] == 0)
                     self._streak(b, res["winner"] == 1)
@@ -768,13 +779,13 @@ class Session:
                 battle_i += 1
             else:
                 if a.battle_comp():
-                    dmg[id(b)] = economy.loss_damage(r, len(a.battle_comp()))
+                    dmg[id(b)] = self._loss_damage(r, len(a.battle_comp()))
                     self._streak(a, True), self._streak(b, False)
                     note = f"{a.name} 不战而胜"
                     if a is p:
                         self.observe(won=[o.piece.species_id for o in p.board])
                 elif b.battle_comp():
-                    dmg[id(a)] = economy.loss_damage(r, len(b.battle_comp()))
+                    dmg[id(a)] = self._loss_damage(r, len(b.battle_comp()))
                     self._streak(b, True), self._streak(a, False)
                     note = f"{b.name} 不战而胜"
                     if b is p:
@@ -812,7 +823,7 @@ class Session:
                        "survivors": {0: 0, 1: len(self.ghost_src.battle_comp())}}
             dmg = 0
             if res["winner"] == 1:
-                dmg = economy.loss_damage(r, res["survivors"][1])
+                dmg = self._loss_damage(r, res["survivors"][1])
                 self._streak(odd, False)
             else:
                 self._streak(odd, True)
@@ -848,13 +859,13 @@ class Session:
                     if e is p:
                         self._say(f"野怪轮胜（+{gold} 金）")
                 else:
-                    dmg = economy.loss_damage(r, res["survivors"][1])
+                    dmg = self._loss_damage(r, res["survivors"][1])
                     if e is p:
                         self._say(f"野怪轮败 -{dmg}（存活敌棋 "
                                   f"{res['survivors'][1]}）")
                     events.append((e, dmg, "野怪败"))
             else:
-                dmg = economy.loss_damage(r, len(wave))
+                dmg = self._loss_damage(r, len(wave))
                 if e is p:
                     self._say(f"野怪轮不战而败 -{dmg}（场上没有棋子！）")
                 events.append((e, dmg, "野怪空场"))
@@ -1032,6 +1043,8 @@ def _owned_view(owned, ruleset=tactics_mod.BASE_RULESET):
 
 
 def _item_effect(key: str, stat_mode='legacy') -> str:
+    if key == 'healing_needle':
+        return '首次原生大招成功主命中后，最终主目标8秒内治疗减少60%；单槽取代启动或输出装备。'
     from build_rules import item_description
     override = item_description(key, stat_mode)
     if override:
@@ -1170,7 +1183,7 @@ def state_json(sess) -> dict:
     craftable = []
     lucky_capped = items_mod.lucky_egg_count(sess.seats) >= \
         items_mod.LUCKY_EGG_GLOBAL_CAP
-    for key, spec in items_mod.FINISHED.items():
+    for key, spec in items_mod.catalog(sess.ruleset).items():
         if key in p.inventory.finished:
             continue
         pair = p.inventory.craftable(key)
@@ -1197,6 +1210,11 @@ def state_json(sess) -> dict:
                     "zh": weather_mod.WEATHERS[weather]["label"] if weather else "无",
                     "note": WEATHER_NOTE[weather]},
         "entry_weather": _entry_weather_view(sess),
+        "pacing": ({"starts_at": pacing.DEFAULT_NATURAL_END_POLICY.start_round,
+                    "minimum_loss": pacing.DEFAULT_NATURAL_END_POLICY.minimum_loss,
+                    "active": sess.round_no >= pacing.DEFAULT_NATURAL_END_POLICY.start_round,
+                    "note": f'第{pacing.DEFAULT_NATURAL_END_POLICY.start_round}轮起，败方至少扣{pacing.DEFAULT_NATURAL_END_POLICY.minimum_loss}生命；胜方不掉血，野怪奖励照常。'}
+                   if pacing.enabled(sess.ruleset) else None),
         "shop": shop,
         "board": board_rows,
         "bench": bench,
@@ -1377,7 +1395,7 @@ def act_move(sess, frm: str, to: str):
 def act_craft(sess, key: str):
     _guard_prep(sess)
     p = sess.player
-    if key not in items_mod.FINISHED:
+    if key not in items_mod.catalog(sess.ruleset):
         raise DemoError("未知装备")
     pair = p.inventory.craftable(key)
     if pair is None:

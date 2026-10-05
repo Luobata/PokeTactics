@@ -1,0 +1,162 @@
+{
+  "purpose": "Repo-tracked natural-ending formal evidence and preserved failed exploration samples.",
+  "formal_seed_range": "2026103000-2026103099",
+  "formal_rules_fingerprint": "2a469a66cce17970c78393f495305f55cb52c6a92e2264a164e6861095ac5fbb",
+  "formal_result": {
+    "tactics_v3_natural": 21,
+    "tactics_v3_total": 100,
+    "tactics_v4_floor21_natural": 93,
+    "tactics_v4_total": 100
+  },
+  "archive_note": "Raw JSON payloads larger than 10MB are losslessly gzip-archived; both archive and uncompressed hashes are recorded.",
+  "files": [
+    {
+      "path": "reports/natural-end-2026-10-05.md",
+      "archive_bytes": 5998,
+      "archive_sha256": "d977d4f9c097f05b46be34f4b36cd5378821dfbebbcbbda34efec186f784df1a",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/evidence/natural-end-2026-10-05/r20_state_check.py",
+      "encoding": "identity",
+      "archive_bytes": 5464,
+      "archive_sha256": "e15544940e46e68923190c7b5b7f004cda64cc339047cd12ff6a9ccfc281c17e"
+    },
+    {
+      "path": "reports/evidence/natural-end-2026-10-05/r20-state-check.json",
+      "encoding": "identity",
+      "archive_bytes": 23126,
+      "archive_sha256": "9ce1e32a8fad705fc0fb1fa1a8c238225d56ceb4d25f3ccec9f25845086484be"
+    },
+    {
+      "path": "reports/evidence/natural-end-2026-10-05/formal-fingerprints.json",
+      "archive_bytes": 440,
+      "archive_sha256": "0599e5f397a79bc32512dc15632d82cdecad55351780af9a2ed4afd7f1686e94",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/evidence/natural-end-2026-10-05/exploration/pressure_probe.py",
+      "archive_bytes": 5232,
+      "archive_sha256": "c7aed9ad774a6bc4427d2cca0e79719efa0085f6c2f52ff6ad00a25afa84491e",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/evidence/natural-end-2026-10-05/exploration/refine_pressure_probe.py",
+      "archive_bytes": 1241,
+      "archive_sha256": "65f1b3a3a6a79642ebb2ef35cd162cb03bf31bfbbcfa57bd5c5d8308affb5782",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/evidence/natural-end-2026-10-05/exploration/boundary_pressure_probe.py",
+      "archive_bytes": 1140,
+      "archive_sha256": "d104f4da22235c0f5e709b7955d26c2feaaf409c2c8c3f14effb42d4b264f53f",
+      "encoding": "identity"
+    },
+    {
+      "path": "reports/evidence/natural-end-2026-10-05/natural-end-n100.json.gz",
+      "archive_bytes": 1053335,
+      "archive_sha256": "3702082eb9bf72597bef2409700e26d69dd7f734fedc2a72b7835116f7aaf306",
+      "encoding": "gzip",
+      "uncompressed_bytes": 17938936,
+      "uncompressed_sha256": "4bf6f67a386826271ced39369c22e7ade492baececf41dd73dee66d5b16653a2",
+      "uncompressed_path_source_at_run_time": ".build/pacing/natural-end-n100.json",
+      "gzip_roundtrip_verified": true
+    },
+    {
+      "path": "reports/evidence/natural-end-2026-10-05/production-routing-smoke.json.gz",
+      "archive_bytes": 43430,
+      "archive_sha256": "eeeee5c68eecbf444177a815d6c15b73669dba42fedc1447b6ef0669871fe65b",
+      "encoding": "gzip",
+      "uncompressed_bytes": 673894,
+      "uncompressed_sha256": "7633cc40c21e070b50dbd8f1d06b1b7b6412e7952acfc8267622ea87754395ed",
+      "uncompressed_path_source_at_run_time": ".build/pacing/production-routing-smoke.json",
+      "gzip_roundtrip_verified": true
+    },
+    {
+      "path": "reports/evidence/natural-end-2026-10-05/production-overrides-smoke.json.gz",
+      "archive_bytes": 43187,
+      "archive_sha256": "ed356e6f148cf53417896546ec96450a5bc7fe429e52a2e03159039947111c14",
+      "encoding": "gzip",
+      "uncompressed_bytes": 664672,
+      "uncompressed_sha256": "32ee328651666823609d9661b1f3e78099b290027c4703d0b736497a3d47a313",
+      "uncompressed_path_source_at_run_time": ".build/pacing/production-overrides-smoke.json",
+      "gzip_roundtrip_verified": true
+    },
+    {
+      "path": "reports/evidence/natural-end-2026-10-05/exploration/baseline-v2-n64.json.gz",
+      "archive_bytes": 50335,
+      "archive_sha256": "ee85e06341f4e6c623bcc752f033a0a3d1daf138e003f813cbaad4cef4858532",
+      "encoding": "gzip",
+      "uncompressed_bytes": 1366755,
+      "uncompressed_sha256": "0ef11077057ab267ea3cc66675e039993fbeeb57817434b2623250b4f75270dd",
+      "uncompressed_path_source_at_run_time": ".build/natural-end-explore/baseline-v2-n64.json",
+      "gzip_roundtrip_verified": true
+    },
+    {
+      "path": "reports/evidence/natural-end-2026-10-05/exploration/pressure-arms-n64.json.gz",
+      "archive_bytes": 302855,
+      "archive_sha256": "1b0fe3c7d42ad1e7a25c572c86cb3ed406cacb1056650e58fa613c0f61d6bbf6",
+      "encoding": "gzip",
+      "uncompressed_bytes": 9503801,
+      "uncompressed_sha256": "ed41431f4822ecbb8af4b0ae3d7f01ee447e9d13ee1d846c26ec8c1161b1b443",
+      "uncompressed_path_source_at_run_time": ".build/natural-end-explore/pressure-arms-n64.json",
+      "gzip_roundtrip_verified": true
+    },
+    {
+      "path": "reports/evidence/natural-end-2026-10-05/exploration/pressure-refine-n64.json.gz",
+      "archive_bytes": 150531,
+      "archive_sha256": "07fcbb211f97d47ff924ecc71c5a1d85474aaee1d873d9d6d8c6b42554ed30c1",
+      "encoding": "gzip",
+      "uncompressed_bytes": 4686573,
+      "uncompressed_sha256": "ba59813768b9733e69347a912009526f72d503cf907c1cb77a343cd08e669c36",
+      "uncompressed_path_source_at_run_time": ".build/natural-end-explore/pressure-refine-n64.json",
+      "gzip_roundtrip_verified": true
+    },
+    {
+      "path": "reports/evidence/natural-end-2026-10-05/exploration/pressure-boundary-n64.json.gz",
+      "archive_bytes": 100771,
+      "archive_sha256": "2a9b9817e6a9e986fc05c91a9d15600ec801c1410e318282c90e10644a34044c",
+      "encoding": "gzip",
+      "uncompressed_bytes": 3118528,
+      "uncompressed_sha256": "957b483521608e330278678c356c83dd363d4ec1159ee1a98f52c46e305e4076",
+      "uncompressed_path_source_at_run_time": ".build/natural-end-explore/pressure-boundary-n64.json",
+      "gzip_roundtrip_verified": true
+    },
+    {
+      "path": "sim/pacing.py",
+      "archive_bytes": 4066,
+      "archive_sha256": "69367f6d9eda3a46bd3476b25dfaf9709b9023aa6f22b2f8201d23ef81ed9424",
+      "encoding": "identity"
+    },
+    {
+      "path": "tests/test_pacing.py",
+      "archive_bytes": 4139,
+      "archive_sha256": "c491f03b4854915ad8e7eec3cc7a348ca1abfa0db1d008f2ef090de5bd609ffe",
+      "encoding": "identity"
+    },
+    {
+      "path": "tools/acceptance/pacing_probe.py",
+      "archive_bytes": 20306,
+      "archive_sha256": "15f1bcb252fe8b6675a1b821ba03f05e78cd5bd20b0818451e9c883747a06b71",
+      "encoding": "identity"
+    },
+    {
+      "path": "sim/tactics.py",
+      "archive_bytes": 2587,
+      "archive_sha256": "75a8b200ce812704b3d1bcb9eaad122979c89be4e173ab8ca89afcf4c36b33cb",
+      "encoding": "identity"
+    },
+    {
+      "path": "tools/acceptance/demo.py",
+      "archive_bytes": 117139,
+      "archive_sha256": "66715a6665fc0922db0b3261f854e1547d37881114c951bb909211b361429824",
+      "encoding": "identity"
+    },
+    {
+      "path": "tools/acceptance/session_save.py",
+      "archive_bytes": 28882,
+      "archive_sha256": "481df919c4d0d4f35b26e4e2b7caf120857cfc53336187fccb3783e4c25a5c08",
+      "encoding": "identity"
+    }
+  ]
+}

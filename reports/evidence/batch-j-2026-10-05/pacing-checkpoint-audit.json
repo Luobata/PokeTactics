@@ -1,0 +1,45 @@
+{
+  "scope": "Existing archived formal data; no rerun or raw modification",
+  "after_end_prep_rounds": {
+    "15": {
+      "record_mismatch_seeds": [],
+      "recorded_fields": [
+        "round",
+        "alive_before",
+        "alive_after",
+        "eliminated",
+        "seat_alive_after",
+        "seat_levels_after",
+        "seat_gold_after",
+        "seat_board_after",
+        "seat_machines_after",
+        "player_before",
+        "player_after",
+        "pending_rewards"
+      ],
+      "independent_seeds": 100
+    },
+    "20": {
+      "record_mismatch_seeds": [],
+      "recorded_fields": [
+        "round",
+        "alive_before",
+        "alive_after",
+        "eliminated",
+        "seat_alive_after",
+        "seat_levels_after",
+        "seat_gold_after",
+        "seat_board_after",
+        "seat_machines_after",
+        "player_before",
+        "player_after",
+        "pending_rewards"
+      ],
+      "independent_seeds": 100
+    }
+  },
+  "limits": [
+    "All-seat HP and exact compositions are not captured in stage_rounds; no full-state equality claim.",
+    "R20 pressure is active even though observed R20 records match."
+  ]
+}

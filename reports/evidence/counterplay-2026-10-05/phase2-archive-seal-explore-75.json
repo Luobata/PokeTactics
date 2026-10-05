@@ -1,0 +1,46 @@
+[
+  {
+    "arm": "seal_60_8",
+    "a": "battery",
+    "b": "garden",
+    "a_win_rate": 0.0,
+    "a_casts_mean": 6.05,
+    "tactical_trigger_trials": {
+      "seal": 16
+    },
+    "side_swap_failures": []
+  },
+  {
+    "arm": "seal_60_8",
+    "a": "disrupt",
+    "b": "garden",
+    "a_win_rate": 0.45,
+    "a_casts_mean": 8.9,
+    "tactical_trigger_trials": {
+      "seal": 18
+    },
+    "side_swap_failures": []
+  },
+  {
+    "arm": "seal_60_8",
+    "a": "lens_on_gengar",
+    "b": "garden",
+    "a_win_rate": 0.0,
+    "a_casts_mean": 6.05,
+    "tactical_trigger_trials": {
+      "seal": 7
+    },
+    "side_swap_failures": []
+  },
+  {
+    "arm": "seal_60_8",
+    "a": "lens_on_gengar",
+    "b": "garden",
+    "a_win_rate": 0.05,
+    "a_casts_mean": 8.7,
+    "tactical_trigger_trials": {
+      "seal": 20
+    },
+    "side_swap_failures": []
+  }
+]

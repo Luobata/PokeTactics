@@ -20,8 +20,12 @@ import random
 from data import pokedex
 import economy
 import items as items_mod   # S5 装备：仓库 + 合成/装备策略（L1+）
+import skills
+import synergy
 import shop as shop_mod
 from profiles import effective_range
+import profiles
+import tactics
 from combat import COLS  # C-sym 棋盘列数（docs/10 §1.5）：列对位随棋盘常量走
 from shop import OwnedPiece, SharedPool, try_combine
 
@@ -215,6 +219,12 @@ class Bot:
             for o in self.all_pieces())
         behind = self._is_behind(others)   # 落后方：幸运蛋提前（追赶条款）
         priority = items_mod.craft_priority(self.pers_key, stone_ok, behind)
+        # Only public, previously encountered opponent pieces inform this choice.
+        # No future shop, seed or hidden inventory is inspected.
+        opponent = getattr(self, '_last_opp', None)
+        if (tactics.counters_enabled(self.inventory.ruleset)
+                and opponent is not None and self._healing_threat(opponent.board)):
+            priority = ('healing_needle',) + priority
         craft_gate = self._craft_gate(round_no)
         while True:
             lucky_ok = items_mod.lucky_egg_count(others) < \
@@ -293,6 +303,14 @@ class Bot:
             return True
         return gate
 
+    @staticmethod
+    def _healing_threat(board):
+        if synergy.compute([o.piece for o in board]).get('WATER', 0) >= 2:
+            return True
+        return any(o.item == 'leftovers' or o.technique == 'rest'
+                   or skills.arch_of(o.piece.species_id) in ('mend', profiles.ARCH_SOLAR, profiles.ARCH_SLAM)
+                   for o in board)
+
     def _item_target(self, key: str):
         """装备去向（针对性使用条件，2026-09-14 平衡修订）：
 
@@ -308,6 +326,10 @@ class Bot:
         free = [o for o in self.all_pieces() if o.item is None]
         if not free:
             return None
+        if key == 'healing_needle':
+            casters = [o for o in free if skills.resolve_cast(o.piece) is not None]
+            return max(casters, key=lambda o: (
+                effective_range(o.piece) > 1, dex.bst(o.piece.species_id)), default=None)
         if key.startswith("scarf_"):
             t = key.rsplit("_", 1)[1].upper()
             on_type = [o for o in free if t in o.piece.types]

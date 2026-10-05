@@ -146,6 +146,8 @@ class Unit:
         self.item_type_dmg = None   # 系别伤害加成 {属性: 比例}（三色围巾）
         self.item_sash = False      # 气势披带：致命伤保留 1 HP
         self.item_sash_used = False # 披带一次/场
+        self.needle_used = False
+        self.healing_blocks = []  # Bounded: at most one entry per enemy needle.
 
     @property
     def alive(self) -> bool:
@@ -356,6 +358,8 @@ class Battle:
             # S5 装备协议：comp 元素可为 (Piece, item_key) 二元组（带装备）或
             # 裸 Piece（无装备——prototype/野怪波次走此路径，行为不变）
             piece, item_key = entry if isinstance(entry, tuple) else (entry, None)
+            if item_key is not None and item_key not in items_mod.catalog(self.ruleset):
+                raise ValueError('equipment unavailable in this ruleset')
             unit = Unit(piece, team, pos, stat_mode=self.stat_mode)
             unit.technique = self.learned[team][local_idx]
             if item_key is not None:   # S5 施加点（S3 synergy.apply 同模式）
@@ -389,12 +393,8 @@ class Battle:
             if regen_units and t + 1e-9 >= next_regen:
                 for u in regen_units:
                     if u.alive and u.hp < u.max_hp:
-                        healed = min(u.max_hp, u.hp + max(
-                            1, int(u.max_hp * (u.synergy_heal + u.item_heal)))) - u.hp
-                        u.hp += healed
-                        if healed:
-                            self.events.append((t, "regen", u.idx, healed))
-                            self._emit_state(u, t)
+                        self._heal(u, max(1, int(u.max_hp * (
+                            u.synergy_heal + u.item_heal))), t)
                 next_regen += 1.0
             status_mod.tick(self, t)  # S12：DOT/到期（默认无操作）
             t += TICK
@@ -614,7 +614,8 @@ class Battle:
                     healed = min(patient.max_hp - patient.hp,
                                  int(lost_hp * profiles_mod.SOLAR_HEAL_FRAC))
                     with self._skill_effect(u, patient, "heal", t, cast_index,
-                                            amount=healed, origin_idx=target.idx):
+                                            amount=self._healing_amount(patient, healed, t)[0],
+                                            origin_idx=target.idx):
                         self._heal(patient, healed, t)
             if dmg > 0 and u.ult_arch == profiles_mod.ARCH_CHAIN:
                 previous, struck = target, {target.idx}
@@ -815,6 +816,8 @@ class Battle:
         attacker.damage_dealt += max(0, hp_before - target.hp)
         self._emit_state(attacker, t)
         self._emit_state(target, t)
+        if cast and primary and hp_before > target.hp:
+            self._apply_healing_needle(attacker, target, t)
         if primary:
             status_mod.on_hit(self, attacker, target, move, t, damage=damage)
         if (damage > 0 and target.alive and target.partner_id == 143
@@ -838,7 +841,8 @@ class Battle:
     def _partner_heal(self, unit, target, fraction, t, effect):
         amount = min(target.max_hp - target.hp, int(target.max_hp * fraction))
         if amount > 0 and target.alive:
-            self._partner_event(unit, target, effect, t, amount=amount)
+            self._partner_event(unit, target, effect, t,
+                                amount=self._healing_amount(target, amount, t)[0])
             self._heal(target, amount, t)
 
     def _partner_energy(self, unit, target, amount, t, effect):
@@ -945,12 +949,40 @@ class Battle:
     def _emit_state(self, unit, t):
         self.events.append((t, "unit_state", unit.idx, unit.hp, unit.energy))
 
+    def _apply_healing_needle(self, unit, target, t):
+        if (not tactics_mod.counters_enabled(self.ruleset)
+                or getattr(unit, 'item_key', None) != 'healing_needle'
+                or unit.needle_used or not target.alive):
+            return
+        unit.needle_used = True
+        spec = items_mod.FINISHED['healing_needle']
+        row = {'source': unit.idx, 'fraction': spec['healing_reduction'],
+               'expires_at': t + spec['duration']}
+        target.healing_blocks.append(row)
+        self.events.append((t, 'tactical_effect', unit.idx, target.idx, 'healing_block',
+                            {**row, 'source_pos': unit.pos, 'target_pos': target.pos,
+                             'remaining': 0, 'reason': 'native_primary_hit'}))
+
+    def _healing_amount(self, unit, amount, t):
+        possible = max(0, min(unit.max_hp - unit.hp, amount)) if unit.alive else 0
+        blocks = [row for row in unit.healing_blocks if t < row['expires_at']]
+        strongest = max(blocks, key=lambda row: row['fraction'], default=None)
+        healed = int(possible * (1.0 - strongest['fraction'])) if strongest else possible
+        return healed, possible - healed, strongest
+
     def _heal(self, unit, amount, t):
-        healed = min(unit.max_hp, unit.hp + amount) - unit.hp
+        healed, blocked, source = self._healing_amount(unit, amount, t)
+        if blocked:
+            self.events.append((t, 'tactical_effect', source['source'], unit.idx,
+                                'healing_prevented',
+                                {'amount': blocked, 'healed': healed,
+                                 'fraction': source['fraction'], 'expires_at': source['expires_at'],
+                                 'target_pos': unit.pos, 'reason': 'actual_missing_hp'}))
         if healed > 0:
             unit.hp += healed
             self.events.append((t, "regen", unit.idx, healed))
             self._emit_state(unit, t)
+        return healed
 
     def _death_check(self, target: Unit, t: float) -> None:
         if target.idx in self._dead:

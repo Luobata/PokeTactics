@@ -1,0 +1,6625 @@
+{
+  "schema": "counterplay-probe-v2",
+  "mode": "phase1-recheck",
+  "phase": "1-current-mechanism",
+  "fixture_invariants": {
+    "population": 6,
+    "unit_cost": 15,
+    "finished_items": 3,
+    "teachings": 1,
+    "ruleset": "tactics_v2",
+    "stat_mode": "budget_v1",
+    "original_build_keys": [
+      "garden",
+      "battery",
+      "dive",
+      "disrupt"
+    ],
+    "candidate": {
+      "key": "ghost_guard_active",
+      "name": "幽影护阵",
+      "species": [
+        94,
+        9,
+        3,
+        80,
+        76,
+        2
+      ],
+      "positions": [
+        [
+          2,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "items": [
+        "leftovers",
+        "sash",
+        "focus_lens",
+        null,
+        null,
+        null
+      ],
+      "partner": 3,
+      "learned": [
+        null,
+        "guard",
+        null,
+        null,
+        null,
+        null
+      ],
+      "plan": "Frozen anti-rush candidate: Wartortle guards the adjacent Venusaur after Gengar replaces Snorlax.",
+      "cost": 15,
+      "unit_names": [
+        "耿鬼",
+        "水箭龟",
+        "妙蛙花",
+        "呆壳兽",
+        "隆隆岩",
+        "妙蛙草"
+      ]
+    },
+    "builds": [
+      {
+        "key": "garden",
+        "name": "花园续航",
+        "species": [
+          143,
+          9,
+          3,
+          80,
+          76,
+          2
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ]
+        ],
+        "items": [
+          "leftovers",
+          "sash",
+          "focus_lens",
+          null,
+          null,
+          null
+        ],
+        "partner": 3,
+        "learned": [
+          "rest",
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "卡比兽承伤、剩饭/睡觉与妙蛙花治疗；水系持续回复，紧密站位换治疗覆盖，付出群伤暴露。",
+        "cost": 15,
+        "unit_names": [
+          "卡比兽",
+          "水箭龟",
+          "妙蛙花",
+          "呆壳兽",
+          "隆隆岩",
+          "妙蛙草"
+        ]
+      },
+      {
+        "key": "battery",
+        "name": "电流法阵",
+        "species": [
+          9,
+          6,
+          94,
+          26,
+          65,
+          82
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            1,
+            3
+          ]
+        ],
+        "items": [
+          "sash",
+          "focus_lens",
+          null,
+          "swift_feather",
+          null,
+          null
+        ],
+        "partner": 26,
+        "learned": [
+          "surf",
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "水箭龟挡前排，雷丘加速法系第一次施法，喷火龙群伤、耿鬼干扰；后排密集且单坦。",
+        "cost": 15,
+        "unit_names": [
+          "水箭龟",
+          "喷火龙",
+          "耿鬼",
+          "雷丘",
+          "胡地",
+          "三合一磁怪"
+        ]
+      },
+      {
+        "key": "dive",
+        "name": "双翼突进",
+        "species": [
+          130,
+          68,
+          143,
+          67,
+          22,
+          65
+        ],
+        "positions": [
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            4,
+            3
+          ]
+        ],
+        "items": [
+          "sash",
+          "choice_band",
+          null,
+          "swift_feather",
+          null,
+          null
+        ],
+        "partner": 143,
+        "learned": [
+          null,
+          "cut",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "暴鲤龙/豪力/大嘴雀突破两格内可达后排，胡地收割；物理爆发配格斗羁绊，缺少持续远程群伤。",
+        "cost": 15,
+        "unit_names": [
+          "暴鲤龙",
+          "怪力",
+          "卡比兽",
+          "豪力",
+          "大嘴雀",
+          "胡地"
+        ]
+      },
+      {
+        "key": "disrupt",
+        "name": "幽影控场",
+        "species": [
+          94,
+          3,
+          6,
+          26,
+          76,
+          65
+        ],
+        "positions": [
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            5,
+            3
+          ]
+        ],
+        "items": [
+          "swift_feather",
+          null,
+          "focus_lens",
+          null,
+          "sash",
+          null
+        ],
+        "partner": 6,
+        "learned": [
+          null,
+          "cut",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "隆隆岩牵制近战，喷火龙首次施法接力，耿鬼压最高能量目标；依赖首次技能，面对快速突进脆弱。",
+        "cost": 15,
+        "unit_names": [
+          "耿鬼",
+          "妙蛙花",
+          "喷火龙",
+          "雷丘",
+          "隆隆岩",
+          "胡地"
+        ]
+      },
+      {
+        "key": "garden_formation_only",
+        "name": "花园换阵",
+        "species": [
+          143,
+          9,
+          3,
+          80,
+          76,
+          2
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "items": [
+          "leftovers",
+          "sash",
+          "focus_lens",
+          null,
+          null,
+          null
+        ],
+        "partner": 3,
+        "learned": [
+          "rest",
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "Original garden species/items/rest/partner with the frozen counterplay formation.",
+        "cost": 15,
+        "unit_names": [
+          "卡比兽",
+          "水箭龟",
+          "妙蛙花",
+          "呆壳兽",
+          "隆隆岩",
+          "妙蛙草"
+        ]
+      },
+      {
+        "key": "ghost_rest_line",
+        "name": "幽影休息护阵",
+        "species": [
+          94,
+          9,
+          3,
+          80,
+          76,
+          2
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "items": [
+          "leftovers",
+          "sash",
+          "focus_lens",
+          null,
+          null,
+          null
+        ],
+        "partner": 3,
+        "learned": [
+          null,
+          "rest",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "Gengar replaces Snorlax; Wartortle keeps one teaching as rest in the frozen formation.",
+        "cost": 15,
+        "unit_names": [
+          "耿鬼",
+          "水箭龟",
+          "妙蛙花",
+          "呆壳兽",
+          "隆隆岩",
+          "妙蛙草"
+        ]
+      },
+      {
+        "key": "ghost_guard_learned",
+        "name": "幽影护卫学习",
+        "species": [
+          94,
+          9,
+          3,
+          80,
+          76,
+          2
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "items": [
+          "leftovers",
+          "sash",
+          "focus_lens",
+          null,
+          null,
+          null
+        ],
+        "partner": 3,
+        "learned": [
+          null,
+          "guard",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "The frozen squad learns guard but does not select it in battle.",
+        "cost": 15,
+        "unit_names": [
+          "耿鬼",
+          "水箭龟",
+          "妙蛙花",
+          "呆壳兽",
+          "隆隆岩",
+          "妙蛙草"
+        ]
+      },
+      {
+        "key": "ghost_guard_active",
+        "name": "幽影护阵",
+        "species": [
+          94,
+          9,
+          3,
+          80,
+          76,
+          2
+        ],
+        "positions": [
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "items": [
+          "leftovers",
+          "sash",
+          "focus_lens",
+          null,
+          null,
+          null
+        ],
+        "partner": 3,
+        "learned": [
+          null,
+          "guard",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "Frozen anti-rush candidate: Wartortle guards the adjacent Venusaur after Gengar replaces Snorlax.",
+        "cost": 15,
+        "unit_names": [
+          "耿鬼",
+          "水箭龟",
+          "妙蛙花",
+          "呆壳兽",
+          "隆隆岩",
+          "妙蛙草"
+        ]
+      },
+      {
+        "key": "dive_horizontal_mirror",
+        "name": "双翼突进",
+        "species": [
+          130,
+          68,
+          143,
+          67,
+          22,
+          65
+        ],
+        "positions": [
+          [
+            4,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            1,
+            3
+          ]
+        ],
+        "items": [
+          "sash",
+          "choice_band",
+          null,
+          "swift_feather",
+          null,
+          null
+        ],
+        "partner": 143,
+        "learned": [
+          null,
+          "cut",
+          null,
+          null,
+          null,
+          null
+        ],
+        "plan": "Original dive resources and units with columns mirrored; symmetry control only.",
+        "cost": 15,
+        "unit_names": [
+          "暴鲤龙",
+          "怪力",
+          "卡比兽",
+          "豪力",
+          "大嘴雀",
+          "胡地"
+        ]
+      }
+    ],
+    "checks": [
+      "original BUILDS preserved",
+      "equal budget/resources",
+      "unique legal positions",
+      "guard adjacency",
+      "one rest or guard teaching"
+    ]
+  },
+  "source_before": {
+    "git": {
+      "head": "d3a26ce6dee44074d9087ea5cee6b2a35fd236a4",
+      "status_porcelain": "M sim/bots.py\n M sim/combat.py\n M sim/items.py\n M sim/tactics.py\n M tests/test_tactical_device.py\n M tests/test_tactical_session.py\n M tools/acceptance/demo.py\n M tools/acceptance/device_controls.py\n M tools/acceptance/device_renderer.js\n M tools/acceptance/session_save.py\n M tools/acceptance/tactical_run_probe.py\n M tools/mockups/render_battle_gif.py\n?? docs/25-evolution-direction-review.md\n?? reports/evidence/counterplay-2026-10-05/counterplay_probe.py\n?? reports/evidence/counterplay-2026-10-05/formation-explore.json\n?? sim/pacing.py\n?? tests/fixtures/tactics-v2-schema4-session.json\n?? tests/test_counter_device.py\n?? tests/test_counterplay.py\n?? tests/test_pacing.py\n?? tests/test_pacing_session.py\n?? tools/acceptance/counterplay_probe.py\n?? tools/acceptance/pacing_probe.py"
+    },
+    "rules_fingerprint": "2a469a66cce17970c78393f495305f55cb52c6a92e2264a164e6861095ac5fbb"
+  },
+  "source_after": {
+    "git": {
+      "head": "d3a26ce6dee44074d9087ea5cee6b2a35fd236a4",
+      "status_porcelain": "M sim/bots.py\n M sim/combat.py\n M sim/items.py\n M sim/tactics.py\n M tests/test_tactical_device.py\n M tests/test_tactical_session.py\n M tools/acceptance/demo.py\n M tools/acceptance/device_controls.py\n M tools/acceptance/device_renderer.js\n M tools/acceptance/session_save.py\n M tools/acceptance/tactical_run_probe.py\n M tools/mockups/render_battle_gif.py\n?? docs/25-evolution-direction-review.md\n?? reports/evidence/counterplay-2026-10-05/counterplay_probe.py\n?? reports/evidence/counterplay-2026-10-05/formation-explore.json\n?? sim/pacing.py\n?? tests/fixtures/tactics-v2-schema4-session.json\n?? tests/test_counter_device.py\n?? tests/test_counterplay.py\n?? tests/test_pacing.py\n?? tests/test_pacing_session.py\n?? tools/acceptance/counterplay_probe.py\n?? tools/acceptance/pacing_probe.py"
+    },
+    "rules_fingerprint": "2a469a66cce17970c78393f495305f55cb52c6a92e2264a164e6861095ac5fbb"
+  },
+  "source_stable_during_run": true,
+  "script_sha256": "6acff4d4ac637e1bf7a923e097036dfd08c092ae21d40cdcc1e2fd46eb106082",
+  "elapsed_seconds": 0.23,
+  "seed_range": [
+    310200,
+    310219
+  ],
+  "independent_trials_per_arm_opponent": 20,
+  "arms": [
+    {
+      "arm": "guard_selected_recheck",
+      "a": "ghost_guard_active",
+      "b": "dive",
+      "opponent_label": "dive_original",
+      "ruleset": "tactics_v2",
+      "needle_counter_disabled": false,
+      "tactics_a": {
+        "guard": {
+          "source": 1,
+          "target": 2
+        }
+      },
+      "independent_trials": 20,
+      "games_including_symmetry_swaps": 40,
+      "outcomes": {
+        "win": 15,
+        "loss": 5
+      },
+      "score": 0.75,
+      "win_rate": 0.75,
+      "win_wilson_95": [
+        0.5313,
+        0.8881
+      ],
+      "duration_median": 22.05,
+      "trigger_trials": 6,
+      "effective_trigger_trials": 6,
+      "guard_trigger_events": 6,
+      "guard_effective_events": 6,
+      "healing_prevented_amount": 0,
+      "healing_block_trials": 0,
+      "healing_prevented_trials": 0,
+      "a_metrics_mean": {
+        "damage": 1119.3,
+        "casts": 9.8,
+        "healing": 149.65,
+        "partner_energy": 0,
+        "technique_uses": 0.3,
+        "first_cast": 4.14,
+        "drained_energy": 31,
+        "survivors": 1.55
+      },
+      "side_swap_failures": [],
+      "trials": [
+        {
+          "seed": 310200,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 18.19999999999999,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1144,
+            "casts": 10,
+            "healing": 143,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 40,
+            "survivors": 3
+          },
+          "b_metrics": {
+            "damage": 625,
+            "casts": 6,
+            "healing": 30,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.899999999999999,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "line_push": 1,
+            "solar_siphon": 2,
+            "energy_drain": 2,
+            "quake_break": 2
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310201,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 18.29999999999999,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1144,
+            "casts": 10,
+            "healing": 145,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 60,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 737,
+            "casts": 7,
+            "healing": 30,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.000000000000002,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 3,
+            "quake_break": 2
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310202,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 22.300000000000047,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1144,
+            "casts": 10,
+            "healing": 153,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 846,
+            "casts": 8,
+            "healing": 30,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.000000000000002,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 1,
+            "quake_break": 2,
+            "line_push": 1
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310203,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 21.20000000000003,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1005,
+            "casts": 9,
+            "healing": 166,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1038,
+            "casts": 9,
+            "healing": 75,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.000000000000002,
+            "drained_energy": 0,
+            "survivors": 3
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "energy_drain": 1,
+            "quake_break": 4,
+            "tactical:guard": 1
+          },
+          "b_controls": {},
+          "guard_trigger_count": 1,
+          "guard_effective_count": 1,
+          "guard_events": [
+            {
+              "time": 16.89999999999997,
+              "source": 1,
+              "protected": 2,
+              "result_kind": "cast",
+              "result_recipient": 1,
+              "result_event_count": 3,
+              "effective_primary_redirection": true
+            }
+          ],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310204,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 18.699999999999996,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1144,
+            "casts": 10,
+            "healing": 135,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 40,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 715,
+            "casts": 6,
+            "healing": 30,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.5,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 2,
+            "quake_break": 2,
+            "line_push": 1
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310205,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 23.000000000000057,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 952,
+            "casts": 8,
+            "healing": 142,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1014,
+            "casts": 8,
+            "healing": 30,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.000000000000002,
+            "drained_energy": 0,
+            "survivors": 3
+          },
+          "a_controls": {
+            "line_push": 2,
+            "solar_siphon": 2
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310206,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 25.30000000000009,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1144,
+            "casts": 10,
+            "healing": 153,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 822,
+            "casts": 8,
+            "healing": 30,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.5,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "line_push": 1,
+            "solar_siphon": 3,
+            "energy_drain": 1,
+            "quake_break": 1,
+            "tactical:guard": 1
+          },
+          "b_controls": {},
+          "guard_trigger_count": 1,
+          "guard_effective_count": 1,
+          "guard_events": [
+            {
+              "time": 17.799999999999983,
+              "source": 1,
+              "protected": 2,
+              "result_kind": "cast",
+              "result_recipient": 1,
+              "result_event_count": 2,
+              "effective_primary_redirection": true
+            }
+          ],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310207,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 24.500000000000078,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1101,
+            "casts": 9,
+            "healing": 151,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1023,
+            "casts": 10,
+            "healing": 30,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.000000000000002,
+            "drained_energy": 0,
+            "survivors": 1
+          },
+          "a_controls": {
+            "line_push": 2,
+            "solar_siphon": 3,
+            "energy_drain": 1,
+            "quake_break": 2
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310208,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 27.200000000000117,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1099,
+            "casts": 11,
+            "healing": 167,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1039,
+            "casts": 9,
+            "healing": 105,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 3.900000000000002,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "energy_drain": 1,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310209,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 21.90000000000004,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1144,
+            "casts": 10,
+            "healing": 136,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 40,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 724,
+            "casts": 7,
+            "healing": 30,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 3.900000000000002,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "line_push": 1,
+            "solar_siphon": 2,
+            "energy_drain": 2,
+            "quake_break": 2
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310210,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 22.200000000000045,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1144,
+            "casts": 10,
+            "healing": 146,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 40,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 822,
+            "casts": 8,
+            "healing": 30,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.000000000000002,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 2,
+            "quake_break": 2,
+            "tactical:guard": 1
+          },
+          "b_controls": {},
+          "guard_trigger_count": 1,
+          "guard_effective_count": 1,
+          "guard_events": [
+            {
+              "time": 17.899999999999984,
+              "source": 1,
+              "protected": 2,
+              "result_kind": "cast",
+              "result_recipient": 1,
+              "result_event_count": 2,
+              "effective_primary_redirection": true
+            }
+          ],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310211,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 24.60000000000008,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1144,
+            "casts": 11,
+            "healing": 159,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 1
+          },
+          "b_metrics": {
+            "damage": 961,
+            "casts": 8,
+            "healing": 30,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "energy_drain": 1,
+            "quake_break": 2,
+            "line_push": 1
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310212,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 18.19999999999999,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1144,
+            "casts": 10,
+            "healing": 143,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 40,
+            "survivors": 3
+          },
+          "b_metrics": {
+            "damage": 659,
+            "casts": 6,
+            "healing": 30,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.000000000000002,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "line_push": 2,
+            "solar_siphon": 2,
+            "energy_drain": 2,
+            "quake_break": 1
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310213,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 20.50000000000002,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1009,
+            "casts": 10,
+            "healing": 162,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1034,
+            "casts": 8,
+            "healing": 75,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.5,
+            "drained_energy": 0,
+            "survivors": 3
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "energy_drain": 1,
+            "quake_break": 4
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310214,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 24.200000000000074,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1174,
+            "casts": 11,
+            "healing": 156,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 40,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 848,
+            "casts": 9,
+            "healing": 60,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "line_push": 1,
+            "solar_siphon": 3,
+            "energy_drain": 2,
+            "quake_break": 2,
+            "tactical:guard": 1
+          },
+          "b_controls": {},
+          "guard_trigger_count": 1,
+          "guard_effective_count": 1,
+          "guard_events": [
+            {
+              "time": 17.899999999999984,
+              "source": 1,
+              "protected": 2,
+              "result_kind": "cast",
+              "result_recipient": 1,
+              "result_event_count": 2,
+              "effective_primary_redirection": true
+            }
+          ],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310215,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 21.80000000000004,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1144,
+            "casts": 9,
+            "healing": 148,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 40,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 857,
+            "casts": 7,
+            "healing": 30,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 3.900000000000002,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 2,
+            "quake_break": 2,
+            "line_push": 1
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310216,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 22.50000000000005,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1144,
+            "casts": 10,
+            "healing": 134,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 40,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 820,
+            "casts": 8,
+            "healing": 30,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.000000000000002,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 2,
+            "quake_break": 2,
+            "line_push": 1,
+            "tactical:guard": 1
+          },
+          "b_controls": {},
+          "guard_trigger_count": 1,
+          "guard_effective_count": 1,
+          "guard_events": [
+            {
+              "time": 16.99999999999997,
+              "source": 1,
+              "protected": 2,
+              "result_kind": "cast",
+              "result_recipient": 1,
+              "result_event_count": 2,
+              "effective_primary_redirection": true
+            }
+          ],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310217,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 22.40000000000005,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1174,
+            "casts": 10,
+            "healing": 160,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 892,
+            "casts": 8,
+            "healing": 60,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 3.900000000000002,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "line_push": 2,
+            "solar_siphon": 3,
+            "energy_drain": 1
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310218,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 20.30000000000002,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1144,
+            "casts": 9,
+            "healing": 148,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 40,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 802,
+            "casts": 8,
+            "healing": 30,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 2,
+            "quake_break": 2,
+            "line_push": 1,
+            "tactical:guard": 1
+          },
+          "b_controls": {},
+          "guard_trigger_count": 1,
+          "guard_effective_count": 1,
+          "guard_events": [
+            {
+              "time": 17.099999999999973,
+              "source": 1,
+              "protected": 2,
+              "result_kind": "cast",
+              "result_recipient": 1,
+              "result_event_count": 2,
+              "effective_primary_redirection": true
+            }
+          ],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        },
+        {
+          "seed": 310219,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 21.80000000000004,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1144,
+            "casts": 9,
+            "healing": 146,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 40,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 831,
+            "casts": 7,
+            "healing": 30,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 3.900000000000002,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 2,
+            "quake_break": 2,
+            "line_push": 1
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive"
+          }
+        }
+      ],
+      "fixture": {
+        "a": {
+          "key": "ghost_guard_active",
+          "name": "幽影护阵",
+          "species": [
+            94,
+            9,
+            3,
+            80,
+            76,
+            2
+          ],
+          "positions": [
+            [
+              2,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "items": [
+            "leftovers",
+            "sash",
+            "focus_lens",
+            null,
+            null,
+            null
+          ],
+          "partner": 3,
+          "learned": [
+            null,
+            "guard",
+            null,
+            null,
+            null,
+            null
+          ],
+          "plan": "Frozen anti-rush candidate: Wartortle guards the adjacent Venusaur after Gengar replaces Snorlax.",
+          "cost": 15,
+          "unit_names": [
+            "耿鬼",
+            "水箭龟",
+            "妙蛙花",
+            "呆壳兽",
+            "隆隆岩",
+            "妙蛙草"
+          ]
+        },
+        "b": {
+          "key": "dive",
+          "name": "双翼突进",
+          "species": [
+            130,
+            68,
+            143,
+            67,
+            22,
+            65
+          ],
+          "positions": [
+            [
+              1,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              4,
+              3
+            ]
+          ],
+          "items": [
+            "sash",
+            "choice_band",
+            null,
+            "swift_feather",
+            null,
+            null
+          ],
+          "partner": 143,
+          "learned": [
+            null,
+            "cut",
+            null,
+            null,
+            null,
+            null
+          ],
+          "plan": "暴鲤龙/豪力/大嘴雀突破两格内可达后排，胡地收割；物理爆发配格斗羁绊，缺少持续远程群伤。",
+          "cost": 15,
+          "unit_names": [
+            "暴鲤龙",
+            "怪力",
+            "卡比兽",
+            "豪力",
+            "大嘴雀",
+            "胡地"
+          ]
+        }
+      }
+    },
+    {
+      "arm": "guard_selected_recheck",
+      "a": "ghost_guard_active",
+      "b": "dive_horizontal_mirror",
+      "opponent_label": "dive_horizontal_mirror",
+      "ruleset": "tactics_v2",
+      "needle_counter_disabled": false,
+      "tactics_a": {
+        "guard": {
+          "source": 1,
+          "target": 2
+        }
+      },
+      "independent_trials": 20,
+      "games_including_symmetry_swaps": 40,
+      "outcomes": {
+        "loss": 16,
+        "win": 4
+      },
+      "score": 0.2,
+      "win_rate": 0.2,
+      "win_wilson_95": [
+        0.0807,
+        0.416
+      ],
+      "duration_median": 22.7,
+      "trigger_trials": 0,
+      "effective_trigger_trials": 0,
+      "guard_trigger_events": 0,
+      "guard_effective_events": 0,
+      "healing_prevented_amount": 0,
+      "healing_block_trials": 0,
+      "healing_prevented_trials": 0,
+      "a_metrics_mean": {
+        "damage": 1123.85,
+        "casts": 9,
+        "healing": 140.95,
+        "partner_energy": 0,
+        "technique_uses": 0,
+        "first_cast": 4.155,
+        "drained_energy": 3,
+        "survivors": 0.4
+      },
+      "side_swap_failures": [],
+      "trials": [
+        {
+          "seed": 310200,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 25.500000000000092,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1081,
+            "casts": 9,
+            "healing": 148,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1020,
+            "casts": 9,
+            "healing": 135,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.4,
+            "drained_energy": 0,
+            "survivors": 1
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 1,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310201,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 22.300000000000047,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1203,
+            "casts": 10,
+            "healing": 138,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 827,
+            "casts": 8,
+            "healing": 89,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 3.900000000000002,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 3,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310202,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 17.69999999999998,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 882,
+            "casts": 8,
+            "healing": 101,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 973,
+            "casts": 8,
+            "healing": 45,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "a_controls": {
+            "solar_siphon": 1,
+            "line_push": 1,
+            "quake_break": 2
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310203,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 23.10000000000006,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1106,
+            "casts": 9,
+            "healing": 136,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1008,
+            "casts": 9,
+            "healing": 149,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.000000000000002,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 2,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310204,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 30.30000000000016,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1218,
+            "casts": 11,
+            "healing": 147,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1019,
+            "casts": 9,
+            "healing": 135,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 3.900000000000002,
+            "drained_energy": 0,
+            "survivors": 1
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 4,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310205,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 21.10000000000003,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1132,
+            "casts": 8,
+            "healing": 139,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1011,
+            "casts": 8,
+            "healing": 149,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "a_controls": {
+            "line_push": 1,
+            "solar_siphon": 2,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310206,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 27.800000000000125,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1201,
+            "casts": 10,
+            "healing": 162,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1034,
+            "casts": 9,
+            "healing": 134,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 1
+          },
+          "a_controls": {
+            "line_push": 1,
+            "solar_siphon": 3,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310207,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 23.20000000000006,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1134,
+            "casts": 9,
+            "healing": 148,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1020,
+            "casts": 9,
+            "healing": 179,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.4,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "a_controls": {
+            "line_push": 3,
+            "solar_siphon": 3,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310208,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 20.200000000000017,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1174,
+            "casts": 9,
+            "healing": 115,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 3
+          },
+          "b_metrics": {
+            "damage": 779,
+            "casts": 8,
+            "healing": 60,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 3.900000000000002,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "line_push": 3,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310209,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 23.800000000000068,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1055,
+            "casts": 9,
+            "healing": 132,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1004,
+            "casts": 9,
+            "healing": 104,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.4,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "a_controls": {
+            "line_push": 2,
+            "solar_siphon": 3,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310210,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 21.10000000000003,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1116,
+            "casts": 8,
+            "healing": 137,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1009,
+            "casts": 8,
+            "healing": 149,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 3.900000000000002,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "line_push": 1,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310211,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 22.200000000000045,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1263,
+            "casts": 10,
+            "healing": 160,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 1
+          },
+          "b_metrics": {
+            "damage": 960,
+            "casts": 7,
+            "healing": 149,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.4,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "energy_drain": 1,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310212,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 21.00000000000003,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1052,
+            "casts": 8,
+            "healing": 131,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1003,
+            "casts": 8,
+            "healing": 104,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.5,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "a_controls": {
+            "line_push": 3,
+            "solar_siphon": 2,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310213,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 19.300000000000004,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 952,
+            "casts": 7,
+            "healing": 135,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1007,
+            "casts": 8,
+            "healing": 116,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.5,
+            "drained_energy": 0,
+            "survivors": 3
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 1
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310214,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 27.700000000000124,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1106,
+            "casts": 9,
+            "healing": 139,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1011,
+            "casts": 10,
+            "healing": 90,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 3.900000000000002,
+            "drained_energy": 0,
+            "survivors": 1
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310215,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 21.10000000000003,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1093,
+            "casts": 9,
+            "healing": 144,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1016,
+            "casts": 9,
+            "healing": 149,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.000000000000002,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "line_push": 1,
+            "quake_break": 2
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310216,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 20.800000000000026,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 1218,
+            "casts": 9,
+            "healing": 140,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 845,
+            "casts": 6,
+            "healing": 104,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.5,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 1,
+            "quake_break": 3,
+            "line_push": 1
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310217,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 23.20000000000006,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1066,
+            "casts": 9,
+            "healing": 141,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1013,
+            "casts": 9,
+            "healing": 135,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 2,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310218,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 23.30000000000006,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1187,
+            "casts": 9,
+            "healing": 161,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1033,
+            "casts": 8,
+            "healing": 149,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 1,
+            "quake_break": 3
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        },
+        {
+          "seed": 310219,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 27.900000000000126,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1238,
+            "casts": 10,
+            "healing": 165,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1037,
+            "casts": 10,
+            "healing": 180,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.4,
+            "drained_energy": 0,
+            "survivors": 1
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "quake_break": 3,
+            "line_push": 2
+          },
+          "b_controls": {},
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "dive_horizontal_mirror"
+          }
+        }
+      ],
+      "fixture": {
+        "a": {
+          "key": "ghost_guard_active",
+          "name": "幽影护阵",
+          "species": [
+            94,
+            9,
+            3,
+            80,
+            76,
+            2
+          ],
+          "positions": [
+            [
+              2,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "items": [
+            "leftovers",
+            "sash",
+            "focus_lens",
+            null,
+            null,
+            null
+          ],
+          "partner": 3,
+          "learned": [
+            null,
+            "guard",
+            null,
+            null,
+            null,
+            null
+          ],
+          "plan": "Frozen anti-rush candidate: Wartortle guards the adjacent Venusaur after Gengar replaces Snorlax.",
+          "cost": 15,
+          "unit_names": [
+            "耿鬼",
+            "水箭龟",
+            "妙蛙花",
+            "呆壳兽",
+            "隆隆岩",
+            "妙蛙草"
+          ]
+        },
+        "b": {
+          "key": "dive_horizontal_mirror",
+          "name": "双翼突进",
+          "species": [
+            130,
+            68,
+            143,
+            67,
+            22,
+            65
+          ],
+          "positions": [
+            [
+              4,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              1,
+              3
+            ]
+          ],
+          "items": [
+            "sash",
+            "choice_band",
+            null,
+            "swift_feather",
+            null,
+            null
+          ],
+          "partner": 143,
+          "learned": [
+            null,
+            "cut",
+            null,
+            null,
+            null,
+            null
+          ],
+          "plan": "Original dive resources and units with columns mirrored; symmetry control only.",
+          "cost": 15,
+          "unit_names": [
+            "暴鲤龙",
+            "怪力",
+            "卡比兽",
+            "豪力",
+            "大嘴雀",
+            "胡地"
+          ]
+        }
+      }
+    },
+    {
+      "arm": "guard_selected_recheck",
+      "a": "ghost_guard_active",
+      "b": "garden",
+      "opponent_label": "garden_original",
+      "ruleset": "tactics_v2",
+      "needle_counter_disabled": false,
+      "tactics_a": {
+        "guard": {
+          "source": 1,
+          "target": 2
+        }
+      },
+      "independent_trials": 20,
+      "games_including_symmetry_swaps": 40,
+      "outcomes": {
+        "loss": 20
+      },
+      "score": 0.0,
+      "win_rate": 0.0,
+      "win_wilson_95": [
+        -0.0,
+        0.1611
+      ],
+      "duration_median": 22.4,
+      "trigger_trials": 0,
+      "effective_trigger_trials": 0,
+      "guard_trigger_events": 0,
+      "guard_effective_events": 0,
+      "healing_prevented_amount": 0,
+      "healing_block_trials": 0,
+      "healing_prevented_trials": 0,
+      "a_metrics_mean": {
+        "damage": 795.9,
+        "casts": 7.9,
+        "healing": 116.55,
+        "partner_energy": 0,
+        "technique_uses": 0,
+        "first_cast": 4.2,
+        "drained_energy": 1,
+        "survivors": 0
+      },
+      "side_swap_failures": [],
+      "trials": [
+        {
+          "seed": 310200,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 28.10000000000013,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 1005,
+            "casts": 10,
+            "healing": 131,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1003,
+            "casts": 11,
+            "healing": 415,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 3
+          },
+          "b_controls": {
+            "solar_siphon": 3
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310201,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 20.600000000000023,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 683,
+            "casts": 7,
+            "healing": 98,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 970,
+            "casts": 9,
+            "healing": 197,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 2
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "line_push": 1,
+            "quake_break": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310202,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 22.900000000000055,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 821,
+            "casts": 8,
+            "healing": 117,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 989,
+            "casts": 10,
+            "healing": 280,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 3
+          },
+          "a_controls": {
+            "solar_siphon": 3
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310203,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 20.40000000000002,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 698,
+            "casts": 7,
+            "healing": 126,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 998,
+            "casts": 9,
+            "healing": 207,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 2
+          },
+          "b_controls": {
+            "solar_siphon": 3,
+            "line_push": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310204,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 22.60000000000005,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 756,
+            "casts": 8,
+            "healing": 95,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 967,
+            "casts": 11,
+            "healing": 179,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 2
+          },
+          "b_controls": {
+            "solar_siphon": 3,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310205,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 22.300000000000047,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 944,
+            "casts": 8,
+            "healing": 107,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 979,
+            "casts": 9,
+            "healing": 302,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 3
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "line_push": 4
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310206,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 22.200000000000045,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 821,
+            "casts": 9,
+            "healing": 129,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1001,
+            "casts": 9,
+            "healing": 291,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 2,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310207,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 22.300000000000047,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 769,
+            "casts": 7,
+            "healing": 142,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1014,
+            "casts": 9,
+            "healing": 254,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 3
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "line_push": 1
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "line_push": 1,
+            "quake_break": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310208,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 23.30000000000006,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 798,
+            "casts": 8,
+            "healing": 94,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 966,
+            "casts": 10,
+            "healing": 222,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 3
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "line_push": 2
+          },
+          "b_controls": {
+            "solar_siphon": 3,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310209,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 24.300000000000075,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 871,
+            "casts": 8,
+            "healing": 165,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1037,
+            "casts": 10,
+            "healing": 273,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 3
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 3
+          },
+          "b_controls": {
+            "solar_siphon": 3,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310210,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 23.10000000000006,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 823,
+            "casts": 8,
+            "healing": 133,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1005,
+            "casts": 10,
+            "healing": 270,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 1
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310211,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 20.50000000000002,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 698,
+            "casts": 8,
+            "healing": 100,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 972,
+            "casts": 9,
+            "healing": 202,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 2
+          },
+          "b_controls": {
+            "solar_siphon": 3,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310212,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 22.50000000000005,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 851,
+            "casts": 8,
+            "healing": 133,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1005,
+            "casts": 9,
+            "healing": 301,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 3
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 2
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310213,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 20.40000000000002,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 683,
+            "casts": 7,
+            "healing": 101,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 973,
+            "casts": 9,
+            "healing": 162,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 3
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 2
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "line_push": 1,
+            "quake_break": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310214,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 19.400000000000006,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 796,
+            "casts": 7,
+            "healing": 123,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 995,
+            "casts": 8,
+            "healing": 227,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 3
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "line_push": 2
+          },
+          "b_controls": {
+            "line_push": 2,
+            "solar_siphon": 2,
+            "quake_break": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310215,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 20.50000000000002,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 714,
+            "casts": 8,
+            "healing": 99,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 971,
+            "casts": 9,
+            "healing": 204,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 2
+          },
+          "b_controls": {
+            "solar_siphon": 3,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310216,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 22.900000000000055,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 748,
+            "casts": 8,
+            "healing": 97,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 969,
+            "casts": 11,
+            "healing": 176,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 3
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 2
+          },
+          "b_controls": {
+            "solar_siphon": 3,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310217,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 24.400000000000077,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 960,
+            "casts": 9,
+            "healing": 161,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 1033,
+            "casts": 10,
+            "healing": 379,
+            "partner_energy": 0,
+            "technique_uses": 1,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 2
+          },
+          "b_controls": {
+            "line_push": 1,
+            "solar_siphon": 2,
+            "quake_break": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310218,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 20.600000000000023,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 734,
+            "casts": 7,
+            "healing": 90,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 962,
+            "casts": 8,
+            "healing": 189,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 3
+          },
+          "a_controls": {
+            "solar_siphon": 1,
+            "line_push": 4
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        },
+        {
+          "seed": 310219,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 22.700000000000053,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 745,
+            "casts": 8,
+            "healing": 90,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 962,
+            "casts": 11,
+            "healing": 175,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "line_push": 2
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "garden"
+          }
+        }
+      ],
+      "fixture": {
+        "a": {
+          "key": "ghost_guard_active",
+          "name": "幽影护阵",
+          "species": [
+            94,
+            9,
+            3,
+            80,
+            76,
+            2
+          ],
+          "positions": [
+            [
+              2,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "items": [
+            "leftovers",
+            "sash",
+            "focus_lens",
+            null,
+            null,
+            null
+          ],
+          "partner": 3,
+          "learned": [
+            null,
+            "guard",
+            null,
+            null,
+            null,
+            null
+          ],
+          "plan": "Frozen anti-rush candidate: Wartortle guards the adjacent Venusaur after Gengar replaces Snorlax.",
+          "cost": 15,
+          "unit_names": [
+            "耿鬼",
+            "水箭龟",
+            "妙蛙花",
+            "呆壳兽",
+            "隆隆岩",
+            "妙蛙草"
+          ]
+        },
+        "b": {
+          "key": "garden",
+          "name": "花园续航",
+          "species": [
+            143,
+            9,
+            3,
+            80,
+            76,
+            2
+          ],
+          "positions": [
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              3
+            ]
+          ],
+          "items": [
+            "leftovers",
+            "sash",
+            "focus_lens",
+            null,
+            null,
+            null
+          ],
+          "partner": 3,
+          "learned": [
+            "rest",
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "plan": "卡比兽承伤、剩饭/睡觉与妙蛙花治疗；水系持续回复，紧密站位换治疗覆盖，付出群伤暴露。",
+          "cost": 15,
+          "unit_names": [
+            "卡比兽",
+            "水箭龟",
+            "妙蛙花",
+            "呆壳兽",
+            "隆隆岩",
+            "妙蛙草"
+          ]
+        }
+      }
+    },
+    {
+      "arm": "guard_selected_recheck",
+      "a": "ghost_guard_active",
+      "b": "disrupt",
+      "opponent_label": "disrupt_original",
+      "ruleset": "tactics_v2",
+      "needle_counter_disabled": false,
+      "tactics_a": {
+        "guard": {
+          "source": 1,
+          "target": 2
+        }
+      },
+      "independent_trials": 20,
+      "games_including_symmetry_swaps": 40,
+      "outcomes": {
+        "win": 3,
+        "loss": 17
+      },
+      "score": 0.15,
+      "win_rate": 0.15,
+      "win_wilson_95": [
+        0.0524,
+        0.3604
+      ],
+      "duration_median": 16.0,
+      "trigger_trials": 0,
+      "effective_trigger_trials": 0,
+      "guard_trigger_events": 0,
+      "guard_effective_events": 0,
+      "healing_prevented_amount": 0,
+      "healing_block_trials": 0,
+      "healing_prevented_trials": 0,
+      "a_metrics_mean": {
+        "damage": 625.75,
+        "casts": 5.35,
+        "healing": 93.65,
+        "partner_energy": 0,
+        "technique_uses": 0,
+        "first_cast": 4.16,
+        "drained_energy": 20,
+        "survivors": 0.25
+      },
+      "side_swap_failures": [],
+      "trials": [
+        {
+          "seed": 310200,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 20.800000000000026,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 809,
+            "casts": 7,
+            "healing": 131,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 20,
+            "survivors": 1
+          },
+          "b_metrics": {
+            "damage": 975,
+            "casts": 8,
+            "healing": 19,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 2.1000000000000005,
+            "drained_energy": 40,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 2,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310201,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 13.09999999999997,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 516,
+            "casts": 5,
+            "healing": 112,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 984,
+            "casts": 8,
+            "healing": 20,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 2.0000000000000004,
+            "drained_energy": 40,
+            "survivors": 3
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 2,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310202,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 15.199999999999962,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 567,
+            "casts": 5,
+            "healing": 83,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 949,
+            "casts": 7,
+            "healing": 13,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 2.1000000000000005,
+            "drained_energy": 40,
+            "survivors": 2
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 2,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310203,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 16.79999999999997,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 687,
+            "casts": 6,
+            "healing": 89,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 961,
+            "casts": 7,
+            "healing": 16,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 1.9000000000000006,
+            "drained_energy": 40,
+            "survivors": 2
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 2,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310204,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 11.099999999999977,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 619,
+            "casts": 5,
+            "healing": 72,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 938,
+            "casts": 6,
+            "healing": 13,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 1.9000000000000006,
+            "drained_energy": 20,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310205,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 9.799999999999981,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 410,
+            "casts": 4,
+            "healing": 71,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 943,
+            "casts": 6,
+            "healing": 15,
+            "partner_energy": 26,
+            "technique_uses": 1,
+            "first_cast": 2.500000000000001,
+            "drained_energy": 20,
+            "survivors": 5
+          },
+          "a_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310206,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 17.399999999999977,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 687,
+            "casts": 6,
+            "healing": 90,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 962,
+            "casts": 7,
+            "healing": 19,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 1.9000000000000006,
+            "drained_energy": 40,
+            "survivors": 2
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 2,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310207,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 14.299999999999965,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 804,
+            "casts": 6,
+            "healing": 120,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 20,
+            "survivors": 3
+          },
+          "b_metrics": {
+            "damage": 731,
+            "casts": 4,
+            "healing": 14,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 2.0000000000000004,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310208,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 11.099999999999977,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 502,
+            "casts": 4,
+            "healing": 72,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 944,
+            "casts": 6,
+            "healing": 15,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 1.9000000000000006,
+            "drained_energy": 0,
+            "survivors": 5
+          },
+          "a_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 1,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310209,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 9.199999999999983,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 404,
+            "casts": 3,
+            "healing": 70,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 941,
+            "casts": 6,
+            "healing": 13,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 2.0000000000000004,
+            "drained_energy": 20,
+            "survivors": 5
+          },
+          "a_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310210,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 16.79999999999997,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 694,
+            "casts": 6,
+            "healing": 93,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 965,
+            "casts": 8,
+            "healing": 20,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 2.1000000000000005,
+            "drained_energy": 60,
+            "survivors": 2
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 3,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310211,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 20.40000000000002,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 760,
+            "casts": 6,
+            "healing": 98,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 970,
+            "casts": 8,
+            "healing": 18,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 2.0000000000000004,
+            "drained_energy": 40,
+            "survivors": 1
+          },
+          "a_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 2,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310212,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 24.400000000000077,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 803,
+            "casts": 6,
+            "healing": 145,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 1
+          },
+          "b_metrics": {
+            "damage": 922,
+            "casts": 7,
+            "healing": 13,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 2.0000000000000004,
+            "drained_energy": 60,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 3,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310213,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 11.099999999999977,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 569,
+            "casts": 4,
+            "healing": 73,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 945,
+            "casts": 7,
+            "healing": 15,
+            "partner_energy": 26,
+            "technique_uses": 1,
+            "first_cast": 2.3000000000000007,
+            "drained_energy": 20,
+            "survivors": 5
+          },
+          "a_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310214,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 12.299999999999972,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 535,
+            "casts": 5,
+            "healing": 75,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 947,
+            "casts": 7,
+            "healing": 15,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 2.1000000000000005,
+            "drained_energy": 40,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 2,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310215,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 17.69999999999998,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 590,
+            "casts": 5,
+            "healing": 95,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 967,
+            "casts": 8,
+            "healing": 19,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 1.9000000000000006,
+            "drained_energy": 60,
+            "survivors": 2
+          },
+          "a_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 3,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310216,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 24.100000000000072,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 729,
+            "casts": 8,
+            "healing": 98,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 964,
+            "casts": 9,
+            "healing": 23,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 2.2000000000000006,
+            "drained_energy": 0,
+            "survivors": 1
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 3,
+            "quake_break": 3,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310217,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 11.199999999999976,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 404,
+            "casts": 4,
+            "healing": 73,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 945,
+            "casts": 6,
+            "healing": 15,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 2.0000000000000004,
+            "drained_energy": 20,
+            "survivors": 5
+          },
+          "a_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310218,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 25.200000000000088,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 773,
+            "casts": 6,
+            "healing": 101,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 973,
+            "casts": 8,
+            "healing": 19,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 2.1000000000000005,
+            "drained_energy": 40,
+            "survivors": 1
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 2,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        },
+        {
+          "seed": 310219,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 17.799999999999983,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 653,
+            "casts": 6,
+            "healing": 112,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 978,
+            "casts": 8,
+            "healing": 18,
+            "partner_energy": 36,
+            "technique_uses": 1,
+            "first_cast": 2.0000000000000004,
+            "drained_energy": 60,
+            "survivors": 2
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 3,
+            "chain_lightning": 2
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "disrupt"
+          }
+        }
+      ],
+      "fixture": {
+        "a": {
+          "key": "ghost_guard_active",
+          "name": "幽影护阵",
+          "species": [
+            94,
+            9,
+            3,
+            80,
+            76,
+            2
+          ],
+          "positions": [
+            [
+              2,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "items": [
+            "leftovers",
+            "sash",
+            "focus_lens",
+            null,
+            null,
+            null
+          ],
+          "partner": 3,
+          "learned": [
+            null,
+            "guard",
+            null,
+            null,
+            null,
+            null
+          ],
+          "plan": "Frozen anti-rush candidate: Wartortle guards the adjacent Venusaur after Gengar replaces Snorlax.",
+          "cost": 15,
+          "unit_names": [
+            "耿鬼",
+            "水箭龟",
+            "妙蛙花",
+            "呆壳兽",
+            "隆隆岩",
+            "妙蛙草"
+          ]
+        },
+        "b": {
+          "key": "disrupt",
+          "name": "幽影控场",
+          "species": [
+            94,
+            3,
+            6,
+            26,
+            76,
+            65
+          ],
+          "positions": [
+            [
+              2,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              5,
+              3
+            ]
+          ],
+          "items": [
+            "swift_feather",
+            null,
+            "focus_lens",
+            null,
+            "sash",
+            null
+          ],
+          "partner": 6,
+          "learned": [
+            null,
+            "cut",
+            null,
+            null,
+            null,
+            null
+          ],
+          "plan": "隆隆岩牵制近战，喷火龙首次施法接力，耿鬼压最高能量目标；依赖首次技能，面对快速突进脆弱。",
+          "cost": 15,
+          "unit_names": [
+            "耿鬼",
+            "妙蛙花",
+            "喷火龙",
+            "雷丘",
+            "隆隆岩",
+            "胡地"
+          ]
+        }
+      }
+    },
+    {
+      "arm": "guard_selected_recheck",
+      "a": "ghost_guard_active",
+      "b": "battery",
+      "opponent_label": "battery_original",
+      "ruleset": "tactics_v2",
+      "needle_counter_disabled": false,
+      "tactics_a": {
+        "guard": {
+          "source": 1,
+          "target": 2
+        }
+      },
+      "independent_trials": 20,
+      "games_including_symmetry_swaps": 40,
+      "outcomes": {
+        "win": 12,
+        "loss": 8
+      },
+      "score": 0.6,
+      "win_rate": 0.6,
+      "win_wilson_95": [
+        0.3866,
+        0.7812
+      ],
+      "duration_median": 16.25,
+      "trigger_trials": 0,
+      "effective_trigger_trials": 0,
+      "guard_trigger_events": 0,
+      "guard_effective_events": 0,
+      "healing_prevented_amount": 0,
+      "healing_block_trials": 0,
+      "healing_prevented_trials": 0,
+      "a_metrics_mean": {
+        "damage": 676.75,
+        "casts": 5.2,
+        "healing": 105.65,
+        "partner_energy": 0,
+        "technique_uses": 0,
+        "first_cast": 4.2,
+        "drained_energy": 8,
+        "survivors": 0.95
+      },
+      "side_swap_failures": [],
+      "trials": [
+        {
+          "seed": 310200,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 15.89999999999996,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 738,
+            "casts": 4,
+            "healing": 123,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 786,
+            "casts": 7,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 2.9000000000000012,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "line_push": 1
+          },
+          "b_controls": {
+            "chain_lightning": 1,
+            "energy_drain": 1,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310201,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 15.79999999999996,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 738,
+            "casts": 5,
+            "healing": 100,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 803,
+            "casts": 8,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 3.0000000000000013,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "line_push": 1
+          },
+          "b_controls": {
+            "chain_lightning": 1,
+            "energy_drain": 1,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310202,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 15.299999999999962,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 541,
+            "casts": 4,
+            "healing": 100,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 971,
+            "casts": 9,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 2.9000000000000012,
+            "drained_energy": 20,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 2
+          },
+          "b_controls": {
+            "chain_lightning": 1,
+            "energy_drain": 1,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310203,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 18.699999999999996,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 738,
+            "casts": 7,
+            "healing": 112,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 1
+          },
+          "b_metrics": {
+            "damage": 820,
+            "casts": 8,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 0,
+            "first_cast": 3.0000000000000013,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "chain_lightning": 1,
+            "energy_drain": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310204,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 15.69999999999996,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 738,
+            "casts": 5,
+            "healing": 101,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 802,
+            "casts": 8,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 3.0000000000000013,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "line_push": 2
+          },
+          "b_controls": {
+            "chain_lightning": 1,
+            "energy_drain": 1,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310205,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 20.40000000000002,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 738,
+            "casts": 6,
+            "healing": 104,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 20,
+            "survivors": 1
+          },
+          "b_metrics": {
+            "damage": 838,
+            "casts": 9,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 3.1000000000000014,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "chain_lightning": 1,
+            "energy_drain": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310206,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 16.699999999999967,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 738,
+            "casts": 5,
+            "healing": 114,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 750,
+            "casts": 7,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 3.1000000000000014,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2
+          },
+          "b_controls": {
+            "chain_lightning": 1,
+            "energy_drain": 1,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310207,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 12.99999999999997,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 599,
+            "casts": 4,
+            "healing": 88,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 960,
+            "casts": 9,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 2.9000000000000012,
+            "drained_energy": 20,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 1,
+            "line_push": 1
+          },
+          "b_controls": {
+            "chain_lightning": 1,
+            "energy_drain": 1,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310208,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 18.499999999999993,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 634,
+            "casts": 5,
+            "healing": 105,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 977,
+            "casts": 7,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 3.1000000000000014,
+            "drained_energy": 20,
+            "survivors": 2
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "energy_drain": 1,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310209,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 15.199999999999962,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 543,
+            "casts": 4,
+            "healing": 100,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 972,
+            "casts": 9,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 3.0000000000000013,
+            "drained_energy": 20,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 2
+          },
+          "b_controls": {
+            "chain_lightning": 1,
+            "energy_drain": 1,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310210,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 15.89999999999996,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 738,
+            "casts": 5,
+            "healing": 100,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 802,
+            "casts": 8,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 3.0000000000000013,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "line_push": 1
+          },
+          "b_controls": {
+            "chain_lightning": 1,
+            "energy_drain": 1,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310211,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 24.300000000000075,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 738,
+            "casts": 7,
+            "healing": 113,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 20,
+            "survivors": 1
+          },
+          "b_metrics": {
+            "damage": 848,
+            "casts": 9,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 0,
+            "first_cast": 3.1000000000000014,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "energy_drain": 1,
+            "chain_lightning": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310212,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 16.19999999999996,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 540,
+            "casts": 4,
+            "healing": 99,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 971,
+            "casts": 9,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 3.1000000000000014,
+            "drained_energy": 20,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 2
+          },
+          "b_controls": {
+            "chain_lightning": 1,
+            "energy_drain": 1,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310213,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 15.299999999999962,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 541,
+            "casts": 4,
+            "healing": 100,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 971,
+            "casts": 9,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 3.1000000000000014,
+            "drained_energy": 20,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 2
+          },
+          "b_controls": {
+            "energy_drain": 1,
+            "chain_lightning": 1,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310214,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 20.900000000000027,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 738,
+            "casts": 7,
+            "healing": 90,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 20,
+            "survivors": 1
+          },
+          "b_metrics": {
+            "damage": 824,
+            "casts": 8,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 3.3000000000000016,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 1,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "energy_drain": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310215,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 16.399999999999963,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 738,
+            "casts": 7,
+            "healing": 102,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.100000000000001,
+            "drained_energy": 20,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 782,
+            "casts": 8,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 3.0000000000000013,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "chain_lightning": 1,
+            "energy_drain": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310216,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 16.29999999999996,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 738,
+            "casts": 4,
+            "healing": 127,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 0,
+            "survivors": 2
+          },
+          "b_metrics": {
+            "damage": 817,
+            "casts": 7,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 2.9000000000000012,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2
+          },
+          "b_controls": {
+            "chain_lightning": 1,
+            "energy_drain": 1,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310217,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 22.50000000000005,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 737,
+            "casts": 6,
+            "healing": 125,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 997,
+            "casts": 9,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 3.3000000000000016,
+            "drained_energy": 20,
+            "survivors": 1
+          },
+          "a_controls": {
+            "solar_siphon": 3,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "energy_drain": 1,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310218,
+          "winner": 1,
+          "score": 0.0,
+          "duration": 15.099999999999962,
+          "swap_winner": 0,
+          "swap_expected_winner": 0,
+          "a_metrics": {
+            "damage": 544,
+            "casts": 4,
+            "healing": 100,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.300000000000001,
+            "drained_energy": 0,
+            "survivors": 0
+          },
+          "b_metrics": {
+            "damage": 971,
+            "casts": 9,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 1,
+            "first_cast": 3.1000000000000014,
+            "drained_energy": 20,
+            "survivors": 4
+          },
+          "a_controls": {
+            "solar_siphon": 2
+          },
+          "b_controls": {
+            "chain_lightning": 1,
+            "energy_drain": 1,
+            "line_push": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        },
+        {
+          "seed": 310219,
+          "winner": 0,
+          "score": 1.0,
+          "duration": 18.799999999999997,
+          "swap_winner": 1,
+          "swap_expected_winner": 1,
+          "a_metrics": {
+            "damage": 738,
+            "casts": 7,
+            "healing": 110,
+            "partner_energy": 0,
+            "technique_uses": 0,
+            "first_cast": 4.200000000000001,
+            "drained_energy": 20,
+            "survivors": 1
+          },
+          "b_metrics": {
+            "damage": 818,
+            "casts": 8,
+            "healing": 0,
+            "partner_energy": 32,
+            "technique_uses": 0,
+            "first_cast": 3.1000000000000014,
+            "drained_energy": 20,
+            "survivors": 0
+          },
+          "a_controls": {
+            "solar_siphon": 2,
+            "energy_drain": 1
+          },
+          "b_controls": {
+            "chain_lightning": 1,
+            "energy_drain": 1
+          },
+          "guard_trigger_count": 0,
+          "guard_effective_count": 0,
+          "guard_events": [],
+          "healing_needle": {
+            "block_events": 0,
+            "prevented_events": 0,
+            "prevented_amount": 0,
+            "blocked_target_species": {},
+            "events": []
+          },
+          "fixture": {
+            "a": "ghost_guard_active",
+            "b": "battery"
+          }
+        }
+      ],
+      "fixture": {
+        "a": {
+          "key": "ghost_guard_active",
+          "name": "幽影护阵",
+          "species": [
+            94,
+            9,
+            3,
+            80,
+            76,
+            2
+          ],
+          "positions": [
+            [
+              2,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              2,
+              3
+            ]
+          ],
+          "items": [
+            "leftovers",
+            "sash",
+            "focus_lens",
+            null,
+            null,
+            null
+          ],
+          "partner": 3,
+          "learned": [
+            null,
+            "guard",
+            null,
+            null,
+            null,
+            null
+          ],
+          "plan": "Frozen anti-rush candidate: Wartortle guards the adjacent Venusaur after Gengar replaces Snorlax.",
+          "cost": 15,
+          "unit_names": [
+            "耿鬼",
+            "水箭龟",
+            "妙蛙花",
+            "呆壳兽",
+            "隆隆岩",
+            "妙蛙草"
+          ]
+        },
+        "b": {
+          "key": "battery",
+          "name": "电流法阵",
+          "species": [
+            9,
+            6,
+            94,
+            26,
+            65,
+            82
+          ],
+          "positions": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              1,
+              3
+            ]
+          ],
+          "items": [
+            "sash",
+            "focus_lens",
+            null,
+            "swift_feather",
+            null,
+            null
+          ],
+          "partner": 26,
+          "learned": [
+            "surf",
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "plan": "水箭龟挡前排，雷丘加速法系第一次施法，喷火龙群伤、耿鬼干扰；后排密集且单坦。",
+          "cost": 15,
+          "unit_names": [
+            "水箭龟",
+            "喷火龙",
+            "耿鬼",
+            "雷丘",
+            "胡地",
+            "三合一磁怪"
+          ]
+        }
+      }
+    }
+  ],
+  "reproduction_failures": [],
+  "games": 200,
+  "side_swap_failure_count": 0,
+  "limits": [
+    "This reuses exploration seeds solely as a deterministic replay check, not as new evidence."
+  ]
+}

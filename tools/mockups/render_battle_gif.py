@@ -70,6 +70,8 @@ PARTICLE_LIMIT = 192
 OPENING_LIFE = 4 * FPS_DT
 FULL_GOLD = (255, 208, 64)
 SCAR_FRAMES = 8
+HEALING_BLOCK_RED = (208, 86, 78)
+HEALING_BLOCK_GOLD = (255, 214, 104)
 
 # GIF 棋盘 = C-sym 布局（docs/10 §1.1/§1.5）：6 列 × 6 视觉行 × 40px（240px 满宽）。
 # 视觉行分区：0 敌备战行（虚线观战格）/ 1-2 敌方战场（沙色）/ 3-4 己方战场
@@ -525,6 +527,9 @@ class BattleAnimation:
         self.weather_name = self._initial_weather_name
         self.weather_until = None
         self.tactical_effects = []
+        # Presentation-only rows copied from applied tactical events.  They never
+        # replace Unit.hp, Unit.healing_blocks, or a future simulator decision.
+        self.healing_blocks = []
         self.units = {u.idx: AnimUnit(u) for u in b.units}
         self.by_idx = {u.idx: u for u in b.units}
         self.events = b.events
@@ -594,6 +599,7 @@ class BattleAnimation:
         self.weather_name = self._initial_weather_name
         self.weather_until = None
         self.tactical_effects = []
+        self.healing_blocks = []
         # The training/compatibility tools replace the event list on a copied
         # animation before resetting; detect its contract from the new stream.
         self.authoritative_states = any(ev[1] == "unit_state" for ev in self.events)
@@ -720,6 +726,26 @@ class BattleAnimation:
             self.tactical_effects = self.tactical_effects[-12:]
             if effect == 'guard':
                 self.msg = (t, f"{self.by_idx[source].piece.name}替{self.by_idx[target].piece.name}承受攻击！")
+            elif effect == 'healing_block':
+                # Expiry is converted from the event's simulation clock.  The
+                # presentation clock can shift concurrent action/state fences, so
+                # subtracting raw timestamps here would shorten the visible window.
+                started = payload.get('simulation_time', t)
+                self.healing_blocks.append({
+                    'source': source, 'target': target, 'started': t,
+                    'expires_at': t + max(0., payload['expires_at']-started),
+                    'fraction': payload['fraction'],
+                    'source_pos': payload['source_pos'], 'target_pos': payload['target_pos'],
+                })
+                self.msg = (t, f"{self.by_idx[target].piece.name}封锁{payload['fraction']:.0%} "
+                               f"{payload['expires_at']-started:g}秒")
+            elif effect == 'healing_prevented':
+                # The simulator has already computed this from missing HP.  The
+                # unapplied amount is display data; no replacement HP is inferred.
+                self.floats.append((t, *self.units[target].cell_px(payload['target_pos']),
+                                    f"X{payload['amount']}", HP_LOW))
+                self.msg = (t, f"{self.by_idx[target].piece.name}回复+{payload['healed']} "
+                               f"少{payload['amount']}")
             elif effect in ('weather_start', 'weather_end', 'weather_conflict'):
                 self.weather_name = payload['new_weather']
                 # Display this already announced window. Reading the next weather
@@ -965,11 +991,62 @@ class BattleAnimation:
             draw_skill_effect(img, sid, effect, source, target, T-ev[0], budget,
                               self.visual_config(sid), payload, arch=ev[4])
 
-    def _draw_tactical_outcomes(self, img, T, budget):
-        """A bounded transfer link marks the authoritative interception recipient."""
+    def _active_healing_blocks(self, T):
+        """Return at most one displayed row per target, all from applied events."""
+        strongest = {}
+        for row in self.healing_blocks:
+            if (not row['started'] <= T < row['expires_at']
+                    or self.units[row['target']].dying(T)):
+                continue
+            current = strongest.get(row['target'])
+            # Match the simulator's first active row on equal strength.  Later
+            # sources keep their own deadline and become visible after it expires.
+            if current is None or row['fraction'] > current['fraction']:
+                strongest[row['target']] = row
+        return [strongest[idx] for idx in sorted(strongest)]
+
+    def _draw_healing_block_badge(self, img, T, budget):
+        """Needle icon and bounded countdown; expiry removes it without replay hints."""
         draw = ImageDraw.Draw(img)
+        for row in self._active_healing_blocks(T):
+            if not budget.take(2, required=True):
+                continue
+            x, y = self._event_position(row['target'], T)
+            cx, cy = round(x)+BCELL-6, round(y)-8
+            draw.line((cx-4, cy-4, cx+4, cy+4), fill=HEALING_BLOCK_RED+(255,), width=2)
+            draw.line((cx-4, cy+4, cx+4, cy-4), fill=HEALING_BLOCK_RED+(255,), width=2)
+            draw.line((cx-5, cy-1, cx+1, cy+5), fill=HEALING_BLOCK_GOLD+(230,), width=1)
+            total = max(1e-9, row['expires_at']-row['started'])
+            remaining = max(0., min(1., (row['expires_at']-T)/total))
+            draw.rectangle((cx-6, cy+7, cx+6, cy+8), outline=INK+(180,), width=1)
+            draw.rectangle((cx-5, cy+7, cx-5+round(10*remaining), cy+8),
+                           fill=HEALING_BLOCK_RED+(230,))
+
+    def _draw_tactical_outcomes(self, img, T, budget):
+        """Bounded event-driven links for guard and finite healing suppression."""
+        draw = ImageDraw.Draw(img)
+        self._draw_healing_block_badge(img, T, budget)
         for event in self.tactical_effects[-4:]:
             age = T-event[0]
+            if event[4] == 'healing_block' and 0 <= age <= .5:
+                if not budget.take(1, minimum=1):
+                    continue
+                payload = event[5]
+                source = self.units[event[2]].cell_px(payload['source_pos'])
+                target = self.units[event[3]].cell_px(payload['target_pos'])
+                source = source[0]+BCELL//2, source[1]+BOARD_FOOT-16
+                target = target[0]+BCELL//2, target[1]+BOARD_FOOT-16
+                k = min(1., age/.25)
+                tip = (round(source[0]+(target[0]-source[0])*k),
+                       round(source[1]+(target[1]-source[1])*k))
+                draw.line((source, tip), fill=INK+(210,), width=3)
+                draw.line((source, tip), fill=HEALING_BLOCK_GOLD+(255,), width=1)
+                if k >= 1:
+                    draw.line((tip[0]-3, tip[1]-3, tip[0]+3, tip[1]+3),
+                              fill=HEALING_BLOCK_RED+(255,), width=2)
+                    draw.line((tip[0]-3, tip[1]+3, tip[0]+3, tip[1]-3),
+                              fill=HEALING_BLOCK_RED+(255,), width=2)
+                continue
             if event[4] != 'guard' or not 0 <= age <= .5:
                 continue
             if not budget.take(1, minimum=1):

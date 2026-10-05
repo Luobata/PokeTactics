@@ -1,0 +1,1 @@
+{"output": "/Users/bytedance/luobata/PokeTactics/reports/evidence/counterplay-2026-10-05/identity-replay-check.json", "schema": "counterplay-probe-v3", "mode": "identity-replay-and-coin-check", "games": 200, "side_swap_failures": 0, "source_stable_during_run": true}

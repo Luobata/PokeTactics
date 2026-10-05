@@ -45,6 +45,7 @@ reports/items-balance-2026-09-14.md）：
 """
 
 from typing import Dict, List, Optional, Tuple
+import tactics
 
 # ---- 模块级开关（模式照抄 synergy.SYNERGIES_ON，默认关，主线裁定后翻开）----
 # 由 sim/experiment_items.py 切换臂；match 层（掉落/幸运蛋/通信进化门）与
@@ -79,6 +80,8 @@ COMPONENT_NAMES: Dict[str, str] = {
 # pairs：该成品的具体配方（组件对，同组件允许 ×2）；None = 任意两组件
 # （进化石兜底）。效果字段 = items.apply_to_unit 写进 Unit 的维度。
 FINISHED: Dict[str, dict] = {
+    "healing_needle": {"name": "封疗针", "pairs": (("band", "charcoal"),),
+                       "healing_reduction": 0.60, "duration": 8.0},
     "leftovers":     {"name": "剩饭", "pairs": (("hardstone", "bell"),),
                       "heal": 0.015},                    # 每秒回 1.5% maxHP
     "sash":          {"name": "气势披带", "pairs": (("band", "hardstone"),),
@@ -123,10 +126,16 @@ PVE_BONUS_DROPS = 2
 
 
 # ---- 配方查询 ----
-def _pair_lookup() -> Dict[Tuple[str, str], str]:
+def catalog(ruleset=tactics.BASE_RULESET):
+    active = tactics.counters_enabled(ruleset)
+    return {key: spec for key, spec in FINISHED.items()
+            if key != "healing_needle" or active}
+
+
+def _pair_lookup(ruleset=tactics.BASE_RULESET) -> Dict[Tuple[str, str], str]:
     """排序后的组件对 → 成品 key（进化石不在表内 = 兜底）。"""
     table: Dict[Tuple[str, str], str] = {}
-    for key, spec in FINISHED.items():
+    for key, spec in catalog(ruleset).items():
         for a, b in spec["pairs"] or ():
             table[tuple(sorted((a, b)))] = key
     return table
@@ -135,16 +144,18 @@ def _pair_lookup() -> Dict[Tuple[str, str], str]:
 _PAIR_TABLE = _pair_lookup()
 
 
-def craft_result(a: str, b: str) -> str:
+def craft_result(a: str, b: str, ruleset=tactics.BASE_RULESET) -> str:
     """两组件 → 成品 key：无特定配方的对子兜底为进化石。"""
-    return _PAIR_TABLE.get(tuple(sorted((a, b))), "evo_stone")
+    table = _pair_lookup(ruleset) if tactics.counters_enabled(ruleset) else _PAIR_TABLE
+    return table.get(tuple(sorted((a, b))), "evo_stone")
 
 
 # ---- 仓库模型 ----
 class Inventory:
     """一名玩家的装备仓库：组件池 + 待装备成品。"""
 
-    def __init__(self) -> None:
+    def __init__(self, ruleset=tactics.BASE_RULESET) -> None:
+        self.ruleset = tactics.validate_ruleset(ruleset)
         self.components: Dict[str, int] = {c: 0 for c in COMPONENT_ORDER}
         self.finished: List[str] = []   # 待装备的成品 key（合成即完成）
         self.techniques = dict.fromkeys(('cut', 'surf', 'rest'), 0)
@@ -164,6 +175,8 @@ class Inventory:
 
     def craftable(self, key: str) -> Optional[Tuple[str, str]]:
         """某成品当前是否可合成；可则返回一组配方（确定性取序最先者）。"""
+        if key not in catalog(self.ruleset):
+            return None
         if key == "evo_stone":
             return self._stone_pair()
         for pair in sorted(FINISHED[key]["pairs"]):
@@ -184,7 +197,7 @@ class Inventory:
                 if self.components[a] >= 1 and self.components[b] >= (2 if a == b else 1):
                     if fallback is None:
                         fallback = (a, b)
-                    if craft_result(a, b) == "evo_stone":
+                    if craft_result(a, b, self.ruleset) == "evo_stone":
                         return (a, b)
         return fallback
 

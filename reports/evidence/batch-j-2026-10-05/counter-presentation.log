@@ -1,0 +1,12 @@
+test_hit_badge_heal_payload_hp_and_exclusive_expiry (test_counter_presentation.CounterPresentation.test_hit_badge_heal_payload_hp_and_exclusive_expiry) ... ok
+test_independent_deadlines_hide_dead_target_and_respect_budget (test_counter_presentation.CounterPresentation.test_independent_deadlines_hide_dead_target_and_respect_budget) ... ok
+test_natural_energy_mixed_team_rewind_speed_and_no_future_badge (test_counter_presentation.CounterPresentation.test_natural_energy_mixed_team_rewind_speed_and_no_future_badge) ... /Users/bytedance/luobata/PokeTactics/tools/mockups/character_rigs.py:321: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  opaque = [pixel[:3] for pixel in cel.getdata() if pixel[3]]
+/Users/bytedance/luobata/PokeTactics/tools/mockups/character_rigs.py:308: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+  color = max((pixel for pixel in cel.getdata() if pixel[3]),
+ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.055s
+
+OK

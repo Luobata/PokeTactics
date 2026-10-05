@@ -1,0 +1,23 @@
+{
+  "schema": "counterplay-evidence-manifest-v1",
+  "source": {
+    "git_head": "d3a26ce6dee44074d9087ea5cee6b2a35fd236a4",
+    "rules_fingerprint": "2a469a66cce17970c78393f495305f55cb52c6a92e2264a164e6861095ac5fbb"
+  },
+  "scripts": {
+    "formal_v2_sha256": "6acff4d4ac637e1bf7a923e097036dfd08c092ae21d40cdcc1e2fd46eb106082",
+    "formal_v2_archive": "counterplay_probe.formal-v2.py",
+    "current_v3_sha256": "d69b5a44a178cc607ac33666ec1b496471c61d8faedafecb0462fb7c93faa477",
+    "current_v3_copy": "counterplay_probe.py"
+  },
+  "runs": {
+    "formation-explore.json": "Produced by formal v2; raw legacy identity expectation failures retained.",
+    "formation-recheck.json": "Produced by formal v2.",
+    "phase1-formal.json": "Produced by formal v2; raw 100 garden-identity expectation failures retained. Outcomes were 55 team0 / 45 team1.",
+    "phase2-formal.json": "Produced by formal v2.",
+    "identity-replay-check.json": "Produced by current v3 after phase metadata fix; same original 100 seeds, zero hard mismatches. Formal matrices remain archived v2."
+  },
+  "limits": [
+    "Archived phase2-formal.json phase constant mislabeled Phase I; mode/ruleset/arms identify Phase II. No old raw JSON rewritten."
+  ]
+}

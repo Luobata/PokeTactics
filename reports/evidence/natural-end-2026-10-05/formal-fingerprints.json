@@ -1,0 +1,19 @@
+{
+  "start": "2a469a66cce17970c78393f495305f55cb52c6a92e2264a164e6861095ac5fbb",
+  "end": "2a469a66cce17970c78393f495305f55cb52c6a92e2264a164e6861095ac5fbb",
+  "same": true,
+  "command": [
+    "python3",
+    "tools/acceptance/pacing_probe.py",
+    "--games",
+    "100",
+    "--seed-base",
+    "2026103000",
+    "--arms",
+    "baseline_v3",
+    "floor21_v4",
+    "--output",
+    ".build/pacing/natural-end-n100.json"
+  ],
+  "exit_code": 0
+}

@@ -215,7 +215,7 @@ def game(seed, personality, ruleset):
         row.update(status='complete', player_rank=session.player.rank,
                    player_rounds=session.eliminated_round or session.round_no,
                    table_rounds=session.round_no, final_alive=len(session._alive()),
-                   natural_terminal=len(session._alive()) <= 1,
+                   natural_terminal=len(session._alive()) == 1,
                    forced_ranking=session.round_no == demo.MAX_ROUNDS and len(session._alive()) > 1,
                    final_pending=sum(r['status'] == 'pending' for r in session.rewards),
                    rewarded_machines=sum(r['status'] == 'claimed' for r in session.rewards),
@@ -235,7 +235,7 @@ def main(argv=None):
     parser.add_argument('--games', type=int, default=32, help='Independent games, 1–4096 (default: 32).')
     parser.add_argument('--seed-base', type=int, default=2026100500,
                         help='First nonnegative signed-64-bit seed; subsequent games use consecutive seeds.')
-    parser.add_argument('--ruleset', choices=('tactics_v1', 'tactics_v2'), default='tactics_v2',
+    parser.add_argument('--ruleset', choices=('tactics_v1', 'tactics_v2', 'tactics_v3', 'tactics_v4'), default='tactics_v4',
                         help='Explicit battle version; defaults to the current tactical mode.')
     parser.add_argument('--output', type=Path, default=ROOT / '.build/tactics/full-run-probe.json',
                         help='Evidence JSON path; a game save directory is never allowed.')

@@ -1,0 +1,42 @@
+{
+  "unified_acceptance": "passed",
+  "summary": {
+    "passed": 9,
+    "failed": 0,
+    "skipped": 1
+  },
+  "unit_tests": 396,
+  "qualitygate": {
+    "gate": "pass",
+    "raw_gate": "pass",
+    "block_merge": false,
+    "execution_complete": true,
+    "mutation_status": "not_applicable",
+    "quality_confidence": "full",
+    "incomplete_engines": [],
+    "actionable_block_findings": 0,
+    "agent_action": {
+      "schema_version": "qualitygate.agent-action.v1",
+      "state": "local_checks_passed",
+      "next_action": "finalize_semantic_and_tests",
+      "task_complete": false,
+      "actionable_block_count": 0,
+      "repair_round": 0,
+      "stop_reasons": [],
+      "repair_findings": [],
+      "required_validation": [
+        "format",
+        "diff_check",
+        "compile",
+        "focused_tests"
+      ],
+      "completion_requires": "current-fingerprint semantic result consumed and relevant validation passed; local PASS alone is insufficient"
+    }
+  },
+  "limits": [
+    "QualityGate central MCP rule context and semantic lane unavailable; not executed, no central semantic PASS claimed.",
+    "Mutation not executed; CLI status not_applicable.",
+    "Independent code/evidence review recorded separately.",
+    "PC visual evidence inspected by root; no independent art or physical-device acceptance."
+  ]
+}

@@ -112,7 +112,7 @@ function formation(s){
   hud(s);const opp=s.scene?.opponent||{};
   rect(0,27,240,18,C.ink);label(opp.name?`对手 · ${opp.name}`:'等待配对',6,39,140,10,C.paper);
   const weather=s.scene?.weather?.zh&&s.scene.weather.zh!=='无'?s.scene.weather.zh:'晴朗';
-  const tactical=['tactics_v1','tactics_v2'].includes(s.ruleset),entry=s.scene?.entry_weather;
+  const tactical=['tactics_v1','tactics_v2','tactics_v3','tactics_v4'].includes(s.ruleset),entry=s.scene?.entry_weather;
   const opening=entry&&(entry.you?.length||entry.opponent?.length);
   label(opening?`入场 · ${entry.conflict?'晴雨相抵':entry.zh}`:tactical?`共用 · ${weather}`:weather,tactical?151:190,39,tactical?83:44,10,'#d8cf99');
   for(let r=0;r<2;r++)for(let c=0;c<6;c++)cell(opp.rows?.[r]?.[c],c,45+r*40,{enemy:true});
@@ -129,7 +129,7 @@ function formation(s){
   if(!(s.bench||[]).some(Boolean))center('备 战 席',0,235,240,10,C.muted);
 }
 function tacticsOverlay(s){
-  if(!['tactics_v1','tactics_v2'].includes(s.ruleset))return;
+  if(!['tactics_v1','tactics_v2','tactics_v3','tactics_v4'].includes(s.ruleset))return;
   const located=new Map();
   (s.board||[]).forEach((cells,r)=>cells.forEach((p,c)=>{if(p)located.set(p.uid,{x:c*40,y:130+r*40,p});}));
   const saved=s.scene?.tactical||{},preview=s.tactical_preview;
@@ -208,7 +208,7 @@ function piece(s){
   label(p.skill_name,85,116,138,12,C.ink,true);
   label(`装备 · ${p.item_name||'无'}`,85,136,138,10,C.muted);label(`招式 · ${p.technique?.name||'未学习'}`,85,153,138,10,C.muted);
   partyStrip(s,169);
-  const names=['移动 / 交换','装备道具','卸下装备','学习招式','卖出',['tactics_v1','tactics_v2'].includes(s.ruleset)?'战术配置':'查看详情'];
+  const names=['移动 / 交换','装备道具','卸下装备','学习招式','卖出',['tactics_v1','tactics_v2','tactics_v3','tactics_v4'].includes(s.ruleset)?'战术配置':'查看详情'];
   (s.choices||[]).forEach((r,i)=>{const x=8+i%2*114,y=209+Math.floor(i/2)*27,on=s.selected===i;box(x,y,110,24,on?C.ink:C.white);icon(['board','item','item','technique','coin','dex'][i],x+6,y+8,on?C.paper:C.muted);label(names[i],x+22,y+16,83,11,r.disabled?C.muted:on?C.paper:C.ink);});
 }
 function tactical(s){

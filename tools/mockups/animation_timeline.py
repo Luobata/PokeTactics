@@ -272,6 +272,14 @@ class AnimationTimeline:
                 elif effect == 'weather_request':
                     owner = actions_by_source.get(payload.get('cast_index'))
                     emit(ev, owner.impact if owner is not None else max(t, weather_ready))
+                elif effect == 'healing_prevented':
+                    # This result belongs to the patient's following regen/state,
+                    # not the original needle source (which may already be dead).
+                    patient = ev[3]
+                    belongs = packet is not None and patient in (packet.attacker, packet.target)
+                    at = (packet.impact if belongs else
+                          max(t + last_shift[patient], state_ready[patient]))
+                    emit(ev, at)
                 else:
                     emit(ev, max(t, weather_ready, state_ready.get(ev[2], 0.),
                                  state_ready.get(ev[3], 0.)))

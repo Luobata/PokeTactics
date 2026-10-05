@@ -1,0 +1,234 @@
+{
+  "schema_version": "independent-reviewer.v1",
+  "review_status": "pass_with_risk",
+  "repo": {
+    "path": "/Users/bytedance/luobata/PokeTactics",
+    "execution_location": "local",
+    "branch": "main",
+    "base_ref": "d3a26ce6dee44074d9087ea5cee6b2a35fd236a4",
+    "head_ref": "d3a26ce6dee44074d9087ea5cee6b2a35fd236a4",
+    "commit_range": "d3a26ce6dee44074d9087ea5cee6b2a35fd236a4..d3a26ce6dee44074d9087ea5cee6b2a35fd236a4 (dirty Batch J target)",
+    "dirty_state": {
+      "staged": 1,
+      "unstaged": 14,
+      "untracked": 64
+    }
+  },
+  "review": {
+    "session_id": "poketactics-2026-10-05",
+    "run_id": "batch-j-core",
+    "bundle_path": "reports/evidence/batch-j-2026-10-05/source-manifest.json",
+    "dashboard_url": "",
+    "input_fingerprint": "d177ab65bade75c3668924e4bf2dc43ca64039573763763e8ab3af7a20b2283c",
+    "created_at": "2026-10-05T10:48:53+09:00",
+    "updated_at": "2026-10-05T10:48:53+09:00",
+    "bound_manifest_sha256": "7961886720c26ce5c2aba35f5447cf79fd253cbb6d466ef2a777cfc0e85bbb24",
+    "review_method": "independent text/code/evidence audit; no source edits, no real-save writes, no image inspection or image-tool calls; root performed visual image inspection"
+  },
+  "reviewer_agents": [
+    {
+      "agent_id": "/root/review_batch_j",
+      "role": "test-reviewer",
+      "lifecycle": "created",
+      "verdict": "pass_with_risk",
+      "bound_scope": "Batch J correctness, tests, evidence provenance, version/save safety, counterplay/pacing conclusions, and text/code visual contracts"
+    }
+  ],
+  "findings": [
+    {
+      "id": "BJ-E01",
+      "severity": "evidence_gap",
+      "title": "Anti-dive improvement is not causal evidence for the selected guard",
+      "evidence_refs": [
+        "reports/evidence/counterplay-2026-10-05/phase1-formal.json#/arms",
+        "reports/evidence/counterplay-2026-10-05/README.md#phase-i-formal-readout",
+        "docs/26-counterplay-and-natural-end.md:31"
+      ],
+      "file": "docs/26-counterplay-and-natural-end.md",
+      "line": 34,
+      "hunk_id": "counterplay-guard-causality",
+      "required_action": "No blocker while reports attribute the gain to species/formation/resources. Obtain a paired enabled/disabled counterfactual before any future claim that guard independently wins games.",
+      "re_review_condition": "A causal guard claim requires a predeclared held-out contrast with identical build/resources and a non-zero paired outcome/mechanism effect attributable to guard selection."
+    },
+    {
+      "id": "BJ-E02",
+      "severity": "evidence_gap",
+      "title": "Natural-end statistical lower bound does not reach 90%",
+      "evidence_refs": [
+        "reports/evidence/natural-end-2026-10-05/natural-end-n100.json.gz#arms.floor21_v4.summary",
+        "reports/natural-end-2026-10-05.md:12",
+        "docs/26-counterplay-and-natural-end.md:48"
+      ],
+      "file": "reports/natural-end-2026-10-05.md",
+      "line": 12,
+      "hunk_id": "natural-end-ci",
+      "required_action": "No blocker for the stated observed-rate screen. If a statistical 90% lower-bound gate is later required, increase independent formal N or use a predeclared sequential boundary design.",
+      "re_review_condition": "A lower-bound acceptance claim needs a fresh predeclared sample whose Wilson 95% lower bound is at least 90%."
+    },
+    {
+      "id": "BJ-E03",
+      "severity": "evidence_gap",
+      "title": "Fixed squads do not establish acquisition, full-run adaptive use, or human timing",
+      "evidence_refs": [
+        "reports/evidence/counterplay-2026-10-05/README.md#interpretation-and-limits",
+        "docs/26-counterplay-and-natural-end.md:21",
+        "reports/natural-end-2026-10-05.md#自动时间读数边界"
+      ],
+      "file": "docs/26-counterplay-and-natural-end.md",
+      "line": 39,
+      "hunk_id": "external-validity",
+      "required_action": "Keep fixed-squad and automatic-time claims scoped. Add full-session adaptive acquisition and human three-key timing evidence in the next package.",
+      "re_review_condition": "Do not claim live acquisition frequency, all-roster balance, or D12 human-duration acceptance without full runs and human timing samples."
+    },
+    {
+      "id": "BJ-S01",
+      "severity": "suggestion",
+      "title": "Archived Phase II JSON retains a legacy phase-label mismatch",
+      "evidence_refs": [
+        "reports/evidence/counterplay-2026-10-05/evidence-manifest.json#limits",
+        "reports/evidence/counterplay-2026-10-05/phase2-formal.json#phase",
+        "tools/acceptance/counterplay_probe.py:364"
+      ],
+      "file": "reports/evidence/counterplay-2026-10-05/phase2-formal.json",
+      "line": 2,
+      "hunk_id": "probe-phase-metadata",
+      "required_action": "No rerun needed: mode, ruleset, arms, README, and manifest disambiguate the archived v2 artifact. Prefer the corrected phase field for all future artifacts.",
+      "re_review_condition": "Any future Phase II artifact must carry the supplied phase value; do not rewrite the archived formal raw data retroactively."
+    },
+    {
+      "id": "BJ-R01",
+      "severity": "suggestion",
+      "title": "Visual acceptance is root-inspected PC evidence, not independent art or hardware acceptance",
+      "evidence_refs": [
+        "reports/evidence/counter-visual-2026-10-05/visual.json#outputs",
+        "reports/evidence/batch-j-2026-10-05/validation-summary.json#limits",
+        "reports/system-optimization-batch-j-2026-10-05.md:12"
+      ],
+      "file": "reports/evidence/counter-visual-2026-10-05/visual.json",
+      "line": 1,
+      "hunk_id": "visual-scope",
+      "required_action": "Preserve the scope statement. Do not cite PC PNG/GIF evidence as independent art review, physical-device, or human-readability acceptance.",
+      "re_review_condition": "Hardware acceptance requires the planned real-device execution and timing evidence; independent art review requires a separate image-inspection-capable reviewer."
+    },
+    {
+      "id": "BJ-R02",
+      "severity": "suggestion",
+      "title": "QualityGate central semantic lane remains unavailable",
+      "evidence_refs": [
+        "reports/evidence/batch-j-2026-10-05/qualitygate.json#agent_action",
+        "reports/evidence/batch-j-2026-10-05/qualitygate-probe-metadata.json#agent_action",
+        "reports/evidence/batch-j-2026-10-05/validation-summary.json#limits"
+      ],
+      "file": "reports/evidence/batch-j-2026-10-05/validation-summary.json",
+      "line": 1,
+      "hunk_id": "qualitygate-semantic-limit",
+      "required_action": "Treat local QualityGate PASS and this independent review as the available gates; do not represent central semantic validation as complete.",
+      "re_review_condition": "A central semantic completion claim requires a current-fingerprint central result with agent_action.task_complete=true or equivalent provider completion."
+    }
+  ],
+  "checks": [
+    {
+      "name": "current_full_unittest",
+      "status": "passed",
+      "command": "python3 -m unittest discover -s tests -v",
+      "evidence_ref": ".build/batch-j-review-unittest-current.log (396/396 passed; final later change was probe metadata only, followed by compile and focused tests)"
+    },
+    {
+      "name": "diff_whitespace",
+      "status": "passed",
+      "command": "git diff --check d3a26ce6dee44074d9087ea5cee6b2a35fd236a4",
+      "evidence_ref": "review command exit 0"
+    },
+    {
+      "name": "python_and_js_syntax",
+      "status": "passed",
+      "command": "python3 -m compileall -q sim tools/acceptance tests && node --check tools/acceptance/device_renderer.js",
+      "evidence_ref": "review command exit 0; final probe metadata change also compiled"
+    },
+    {
+      "name": "focused_post_metadata_fix",
+      "status": "passed",
+      "command": "python3 -m unittest discover -s tests -p test_counterplay.py -v && python3 -m unittest discover -s tests -p test_counter_presentation.py -v",
+      "evidence_ref": "review command: 9/9 then 3/3 passed"
+    },
+    {
+      "name": "final_source_evidence_manifest",
+      "status": "passed",
+      "command": "hash verify source-manifest.json sources/evidence",
+      "evidence_ref": "reports/evidence/batch-j-2026-10-05/source-manifest.json (27/27 sources, 51/51 evidence; SHA-256 7961886720c26ce5c2aba35f5447cf79fd253cbb6d466ef2a777cfc0e85bbb24)"
+    },
+    {
+      "name": "natural_archive_provenance",
+      "status": "passed",
+      "command": "verify archive SHA-256, gzip-uncompressed SHA-256, and byte counts for natural-end evidence manifest",
+      "evidence_ref": "reports/evidence/natural-end-2026-10-05/natural-end-evidence-manifest.json (18/18 entries)"
+    },
+    {
+      "name": "natural_raw_summary",
+      "status": "passed",
+      "command": "decompress and inspect formal natural-end JSON",
+      "evidence_ref": "reports/evidence/natural-end-2026-10-05/natural-end-n100.json.gz (100 unique seeds/arm, complete/errors=100/0, natural 21 vs 93, forced 79 vs 7; current pacing/probe hashes embedded)"
+    },
+    {
+      "name": "pacing_checkpoint_boundary_audit",
+      "status": "passed",
+      "command": "inspect archived formal stage_round projection audit",
+      "evidence_ref": "reports/evidence/batch-j-2026-10-05/pacing-checkpoint-audit.json (R15 and R20: 100/100 seeds, zero recorded-field mismatches; HP/exact composition not claimed)"
+    },
+    {
+      "name": "counterplay_identity_replay",
+      "status": "passed",
+      "command": "verify artifact and independently replay 100 equal-loadout fixtures in memory",
+      "evidence_ref": "reports/evidence/counterplay-2026-10-05/identity-replay-check.json (winner/event/fingerprint/duration mismatch 0; 55/45 winners; 52/48 first order)"
+    },
+    {
+      "name": "counterplay_formal_conclusions",
+      "status": "passed",
+      "command": "recompute arm outcome and healing mechanism totals from formal JSON",
+      "evidence_ref": "reports/evidence/counterplay-2026-10-05/phase2-formal.json (garden +0.23, 26 gains/3 losses, 816 prevented events/7402 HP; dive denial delta 0; battery 33 block trials/no actual heal prevented)"
+    },
+    {
+      "name": "visual_text_and_provenance",
+      "status": "passed",
+      "command": "verify visual source/output/event hashes and run presentation tests",
+      "evidence_ref": "reports/evidence/counter-visual-2026-10-05/visual.json (7 sources, 7 outputs, 2 scene event hashes; no mismatch); .build/counter-presentation.log (3/3)"
+    },
+    {
+      "name": "unified_acceptance",
+      "status": "passed",
+      "command": "inspect final selected automated checks",
+      "evidence_ref": "reports/evidence/batch-j-2026-10-05/acceptance.json (9 selected checks passed; balance explicitly skipped by scope)"
+    },
+    {
+      "name": "local_qualitygate",
+      "status": "passed",
+      "command": "inspect full and probe-metadata QualityGate records",
+      "evidence_ref": "reports/evidence/batch-j-2026-10-05/qualitygate.json and qualitygate-probe-metadata.json (raw gates pass, 0 findings; agent task_complete remains false by design)"
+    },
+    {
+      "name": "original_user_bank_readonly",
+      "status": "passed",
+      "command": "verify current original user bank bytes and SHA-256 against final evidence",
+      "evidence_ref": "reports/evidence/batch-j-2026-10-05/user-bank-readonly.json (.0=379620cb...b6ddbb, .1=b822125f...d062247; preview runtime also reports unchanged)"
+    },
+    {
+      "name": "current_preview_runtime",
+      "status": "passed",
+      "command": "inspect current-source server restart and read-only device GET smoke",
+      "evidence_ref": "reports/evidence/batch-j-2026-10-05/preview-runtime.json (new PID 62821, HTTP 200, banks unchanged)"
+    }
+  ],
+  "next_actions": [
+    "Commit the frozen Batch J inputs without content changes; refresh this review only if source/evidence hashes change.",
+    "Do not claim causal guard benefit, statistical 90% lower-bound passage, full-session adaptive acquisition, human timing, independent art review, physical-device acceptance, or central semantic completion.",
+    "Next package: guard causal counterfactual and scouting/transition AI; human three-key full-run timing; evolution preview/defer/lock."
+  ],
+  "residual_risks": [
+    "The observed 93% natural-champion rate has a 95% Wilson lower bound of 86.25%, below 90%.",
+    "The measured anti-dive gain is attributable to the frozen species/formation/resources; selected guard produced no winner change versus learned-but-unselected guard.",
+    "Fixed squads and automatic timings do not estimate live acquisition frequency, full-session adaptive crafting/equipping, all-roster balance, or human operation duration.",
+    "The old formal v2 self-mirror expectation bug remains in archived JSON and is corrected by a separate current-probe identity diagnostic; formal matrices were not rerun under v3.",
+    "PC visual evidence was text/hash/test audited here and visually inspected by root; no independent art or hardware reviewer covered it.",
+    "Central MCP semantic validation and mutation testing were not executed; local QualityGate PASS and independent review do not replace those unavailable gates."
+  ]
+}

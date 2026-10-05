@@ -1,0 +1,1028 @@
+{
+  "method": "Re-run the formal seeds through R20 and compare an explicit seat projection.",
+  "seed_base": 2026103000,
+  "games": 100,
+  "rules_fingerprint": "2a469a66cce17970c78393f495305f55cb52c6a92e2264a164e6861095ac5fbb",
+  "summary": {
+    "games": 100,
+    "complete_pairs": 100,
+    "same_full_projection": 100,
+    "same_pending_rewards": 100,
+    "field_same_counts": {
+      "alive": 100,
+      "hp": 100,
+      "rank": 100,
+      "level": 100,
+      "gold": 100,
+      "board": 100,
+      "bench": 100,
+      "combines": 100,
+      "machines": 100
+    }
+  },
+  "comparisons": [
+    {
+      "seed": 2026103000,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103001,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103002,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103003,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103004,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103005,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103006,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103007,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103008,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103009,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103010,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103011,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103012,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103013,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103014,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103015,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103016,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103017,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103018,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103019,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103020,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103021,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103022,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103023,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103024,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103025,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103026,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103027,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103028,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103029,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103030,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103031,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103032,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103033,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103034,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103035,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103036,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103037,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103038,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103039,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103040,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103041,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103042,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103043,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103044,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103045,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103046,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103047,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103048,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103049,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103050,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103051,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103052,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103053,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103054,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103055,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103056,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103057,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103058,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103059,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103060,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103061,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103062,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103063,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103064,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103065,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103066,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103067,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103068,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103069,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103070,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103071,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103072,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103073,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103074,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103075,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103076,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103077,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103078,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103079,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103080,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103081,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103082,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103083,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103084,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103085,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103086,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103087,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103088,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103089,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103090,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103091,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103092,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103093,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103094,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103095,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103096,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103097,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103098,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    },
+    {
+      "seed": 2026103099,
+      "status_pair": [
+        "stopped_after_r20",
+        "stopped_after_r20"
+      ],
+      "same_projection": true,
+      "differing_fields": [],
+      "same_pending_rewards": true
+    }
+  ],
+  "limits": [
+    "Limited state projection after end_prep(R20); not a claim that unrecorded runtime objects are identical."
+  ]
+}

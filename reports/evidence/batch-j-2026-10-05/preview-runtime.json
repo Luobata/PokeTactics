@@ -1,0 +1,18 @@
+{
+  "old_pid": 54309,
+  "new_pid": 62821,
+  "command": [
+    "/Users/bytedance/.pyenv/versions/3.12.0/bin/python3",
+    "tools/acceptance/server.py",
+    "--port",
+    "8807"
+  ],
+  "device_http_status": 200,
+  "url": "http://127.0.0.1:8807/device",
+  "user_banks_unchanged": true,
+  "bank_sha256": {
+    ".build/saves/poketactics/5e9a2d878d07.0": "379620cbd720cbbe44d053df2ca3a6f70ef4112b00f5c238175d048f39b6ddbb",
+    ".build/saves/poketactics/5e9a2d878d07.1": "b822125fc97f2025dbc468e50cfa3ebb74ed0303fbcac19db90b76e70d062247"
+  },
+  "scope": "current runtime restart and read-only page smoke; no game actions"
+}
