@@ -103,6 +103,7 @@ function cell(p,c,y,{enemy=false,bench=false,active=false,source=false}={}){
     sprite(p,x+3,y+(bench?0:2),bench?30:34);
     if(p.item)rect(x+3,y+3,3,3,C.gold);
     if(p.technique)rect(x+8,y+3,3,3,'#527d98');
+    if(enemy&&p.ability&&!bench){box(x+2,y+24,10,12,C.paper,'#87703f');text(p.ability.weather==='rain'?'雨':'日',x+3,y+33,8,'#87703f',true);}
   }else{rect(x+19,y+Math.floor(h/2),2,2,bench?'#aeb694':enemy?'#b4a57e':'#97a981');}
   if(source){rect(x+1,y+1,10,10,C.ink);text('起',x+2,y+9,8,C.white);}
   if(active){box(x+1,y+1,38,h-2,'transparent',C.ink);corner(x+1,y+1,37,h-3,C.white);rect(x+16,y+h-4,8,3,C.gold);}
@@ -111,7 +112,9 @@ function formation(s){
   hud(s);const opp=s.scene?.opponent||{};
   rect(0,27,240,18,C.ink);label(opp.name?`对手 · ${opp.name}`:'等待配对',6,39,140,10,C.paper);
   const weather=s.scene?.weather?.zh&&s.scene.weather.zh!=='无'?s.scene.weather.zh:'晴朗';
-  label(s.ruleset==='tactics_v1'?`共用 · ${weather}`:weather,s.ruleset==='tactics_v1'?151:190,39,s.ruleset==='tactics_v1'?83:44,10,'#d8cf99');
+  const tactical=['tactics_v1','tactics_v2'].includes(s.ruleset),entry=s.scene?.entry_weather;
+  const opening=entry&&(entry.you?.length||entry.opponent?.length);
+  label(opening?`入场 · ${entry.conflict?'晴雨相抵':entry.zh}`:tactical?`共用 · ${weather}`:weather,tactical?151:190,39,tactical?83:44,10,'#d8cf99');
   for(let r=0;r<2;r++)for(let c=0;c<6;c++)cell(opp.rows?.[r]?.[c],c,45+r*40,{enemy:true});
   rect(0,125,240,5,C.ink);for(let x=4;x<240;x+=10)rect(x,127,4,1,C.gold);
   const selectingRows=s.page==='board_rows'||s.page==='move_rows';
@@ -126,13 +129,14 @@ function formation(s){
   if(!(s.bench||[]).some(Boolean))center('备 战 席',0,235,240,10,C.muted);
 }
 function tacticsOverlay(s){
-  if(s.ruleset!=='tactics_v1')return;
+  if(!['tactics_v1','tactics_v2'].includes(s.ruleset))return;
   const located=new Map();
   (s.board||[]).forEach((cells,r)=>cells.forEach((p,c)=>{if(p)located.set(p.uid,{x:c*40,y:130+r*40,p});}));
   const saved=s.scene?.tactical||{},preview=s.tactical_preview;
   const guard=preview?.guard||saved.guard,weather=preview?.weather||saved.weather;
   const color=preview?.guard&&preview.valid===false?C.red:'#536f86';
-  const mark=(at,glyph,tint,offset=28)=>{if(!at)return;box(at.x+offset,at.y+2,10,12,C.paper,tint);text(glyph,at.x+offset+1,at.y+11,8,tint,true);};
+  const mark=(at,glyph,tint,offset=28,yOffset=2)=>{if(!at)return;box(at.x+offset,at.y+yOffset,10,12,C.paper,tint);text(glyph,at.x+offset+1,at.y+yOffset+9,8,tint,true);};
+  for(const at of located.values())if(at.p.ability)mark(at,at.p.ability.weather==='rain'?'雨':'日','#87703f',2,24);
   if(guard){
     const source=located.get(guard.uid),target=located.get(guard.target_uid);
     if(source&&target){
@@ -200,11 +204,11 @@ function piece(s){
   if(!p){list(s,60);return;}
   box(8,60,224,104,C.white);rect(9,61,68,102,'#dbe1c6');sprite(p,15,71,56);
   center(s.focus.loc?.startsWith('b')?'备战中':'已上场',9,150,68,10,C.muted);
-  label(p.role||'队伍成员',85,78,138,12,C.ink,true);label((p.types||[]).join(' / '),85,96,138,11,C.muted);
+  label(p.role||'队伍成员',85,78,138,12,C.ink,true);label((p.types||[]).join(' / ')+(p.ability?` · ${p.ability.name}`:''),85,96,138,11,C.muted);
   label(p.skill_name,85,116,138,12,C.ink,true);
   label(`装备 · ${p.item_name||'无'}`,85,136,138,10,C.muted);label(`招式 · ${p.technique?.name||'未学习'}`,85,153,138,10,C.muted);
   partyStrip(s,169);
-  const names=['移动 / 交换','装备道具','卸下装备','学习招式','卖出',s.ruleset==='tactics_v1'?'战术配置':'查看详情'];
+  const names=['移动 / 交换','装备道具','卸下装备','学习招式','卖出',['tactics_v1','tactics_v2'].includes(s.ruleset)?'战术配置':'查看详情'];
   (s.choices||[]).forEach((r,i)=>{const x=8+i%2*114,y=209+Math.floor(i/2)*27,on=s.selected===i;box(x,y,110,24,on?C.ink:C.white);icon(['board','item','item','technique','coin','dex'][i],x+6,y+8,on?C.paper:C.muted);label(names[i],x+22,y+16,83,11,r.disabled?C.muted:on?C.paper:C.ink);});
 }
 function tactical(s){

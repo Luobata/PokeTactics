@@ -1,0 +1,43 @@
+{
+  "scope": "Final cosmetic changes only: full-weather wording and unobscured entry badges, plus the two new standalone probe scripts. Original nine-check acceptance covers preceding production behavior; affected checks rerun after the final cosmetic edits.",
+  "checks": [
+    {
+      "command": "python3 -m unittest discover -s tests -p 'test_tactical_device.py' -q",
+      "returncode": 0,
+      "tests": 8,
+      "status": "passed"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests -p 'test_weather_abilities.py' -q",
+      "returncode": 0,
+      "tests": 15,
+      "status": "passed"
+    },
+    {
+      "command": "python3 -m compileall -q tools/acceptance/weather_ability_probe.py tools/acceptance/weather_ability_visual_probe.py tools/acceptance/demo.py",
+      "returncode": 0,
+      "status": "passed"
+    },
+    {
+      "command": "node --check tools/acceptance/device_renderer.js",
+      "returncode": 0,
+      "status": "passed"
+    }
+  ],
+  "browser": {
+    "tool": "cua_repl",
+    "live_url": "http://127.0.0.1:8807/device",
+    "isolated_fixture_url": "http://127.0.0.1:8808/device?sid=b00300000000",
+    "fixture_scope": "Synthetic five-unit high-level prep snapshot; separate .build/entry-weather/visual-saves, no real user save or profile modified; UI observation only, no new battle.",
+    "observed": [
+      "Current entry description explicitly names Ninetales drought and Lapras drizzle.",
+      "Own deployed sun/rain badges and opening conflict header visible.",
+      "Ninetales holds focus_lens and sunny_day; item/learning dots remain above the entry badge.",
+      "Three physical button controls remain the only game interaction."
+    ],
+    "screenshots": [
+      "device-entry.jpg",
+      "device-formation.jpg"
+    ]
+  }
+}

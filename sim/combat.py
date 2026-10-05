@@ -45,6 +45,7 @@ import combo as combo_mod    # S10 组合技 A：默认 COMBOS_ON=False（docs/0
 import synergy  # S3 羁绊：默认 SYNERGIES_ON=False，零随机、零事件流变更
 import status as status_mod   # S12 状态/Buff：默认 STATUS_ON=False（docs/06）
 import weather as weather_mod  # S11 天气：默认无天气（docs/05）
+import abilities as abilities_mod
 import items as items_mod     # S5 装备：comp 元素可带 (Piece, item) 二元组（docs/07）
 import profiles as profiles_mod  # R1 单体档案（docs/13 §5）：有理由的覆盖项
 import skills as skills_mod      # 通用/专属两级技能（2026-10-04 用户裁定）
@@ -266,6 +267,7 @@ class Battle:
         for unit in self.units:
             self._emit_state(unit, 0.0)
         self._opening_partner_traits()
+        self._opening_abilities()
 
     def _validate_learning(self, comp, learned):
         if learned is None:
@@ -742,6 +744,28 @@ class Battle:
                    "expires_at": round(request["effective_at"] + WEATHER_WINDOW_SECONDS, 9)}
         self.events.append((t, "tactical_effect", unit.idx, unit.idx,
                             "weather_request", payload))
+
+    def _opening_abilities(self):
+        if not tactics_mod.entry_abilities_enabled(self.ruleset):
+            return
+        for unit in self.units:
+            ability = abilities_mod.for_species(unit.piece.species_id, self.ruleset)
+            if not unit.alive or ability is None:
+                continue
+            request = self._weather_control.request_entry(
+                unit.team, unit.idx, unit.pos, ability["weather"], ability["id"])
+            payload = {"reason": "entry", "requests": [request], "remaining": 0,
+                       "source_kind": "ability", "ability_id": ability["id"],
+                       "source_pos": unit.pos, "target_pos": unit.pos,
+                       "cast_index": None, "weather": ability["weather"],
+                       "old_weather": self.weather_name, "new_weather": ability["weather"],
+                       "base_weather": self.base_weather_name,
+                       "effective_at": 0.0, "expires_at": WEATHER_WINDOW_SECONDS}
+            self.events.append((0.0, "tactical_effect", unit.idx, unit.idx,
+                                "weather_request", payload))
+        # All opening abilities contend together, including same-team conflicts.
+        # Neither traversal order nor later calls to run() can repeat them.
+        self.flush_tactics(0.0)
 
     def flush_tactics(self, t):
         """Advance weather before tick actions; direct-strike callers may use it.

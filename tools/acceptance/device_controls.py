@@ -31,11 +31,13 @@ def owned_rows(state):
 
 def piece_detail(piece):
     learned = piece.get("technique") or {}
+    ability = piece.get("ability") or {}
     return "\n".join(filter(None, [piece.get("name"), piece.get("role"),
         " / ".join(piece.get("types", [])), f"射程 {piece.get('range', 1)} · {piece.get('tier', 1)} 金",
         piece.get("skill_name"), piece.get("skill_description"),
         f"装备：{piece.get('item_name') or '无'}", piece.get("item_effect"), f"已学：{learned.get('name', '无')}",
-        learned.get("description")]))
+        learned.get("description"),
+        f"特性：{ability['name']}" if ability else None, ability.get("description")]))
 
 
 @dataclass
@@ -104,7 +106,7 @@ class Device:
         return [r for r in self.state.get("rewards", []) if r.get("status") == "pending"]
 
     def _is_tactical(self):
-        return self.state.get("ruleset") == "tactics_v1"
+        return self.state.get("ruleset") in ("tactics_v1", "tactics_v2")
 
     def _validate_learning(self, species, technique):
         from techniques import validate_learning
@@ -192,7 +194,7 @@ class Device:
         you = state.get("you", {})
         if page == "home":
             return [row("启程 · 远征", "expedition", detail="选择主搭档、招式机器与开局装备。"),
-                    row("战术远征 · 护卫与天气", "tactics", detail="沿用远征行囊。在野怪轮获取护卫、晴天与求雨教学，选择队友分工。"),
+                    row("战术远征 · 护卫与天气", "tactics", detail="九尾日照、拉普拉斯降雨在上场时自动触发。野怪轮获取护卫、晴天与求雨教学，选择队友分工。"),
                     row("继续存档", "resume", subtitle="继续已保存的这一局" if self.sid else "尚无存档编号", disabled=not self.sid),
                     row("经典对局", "classic", detail="从商店组建队伍，八位训练家同场竞技。"),
                     row("挑战与图鉴", "collection")]
@@ -233,7 +235,8 @@ class Device:
         if page == "prep":
             return [row("商店", "open", page="shop"), row("棋盘与备战", "open", page="board_rows"),
                     row("仓库与教学" + (f" · {len(self._pending_rewards())} 待领" if self._pending_rewards() else ""), "open", page="inventory"), row("羁绊", "open", page="synergies"),
-                    row("侦察与排名", "open", page="scout"), row("开战", "battle_confirm"),
+                    row("侦察与排名", "open", page="scout"),
+                    row("开战", "battle_confirm", detail=(state.get("entry_weather") or {}).get("note", "")),
                     row("保存 / 返回主页", "open", page="system")]
         if page == "shop":
             entries = [row(p["name"] if p else "空货架", "buy", subtitle=f"{p.get('price', p['tier'])} 金" if p else "已售出",
@@ -606,6 +609,7 @@ class Device:
         screen["scene"] = {
             "opponent": {"name": opponent.get("name", "等待配对"), "rows": opponent.get("rows", [])},
             "weather": self.state.get("weather", {}),
+            "entry_weather": self.state.get("entry_weather"),
             "synergies": self.state.get("synergies", []),
             "loadout_partner": self.loadout.get("partner"),
             "loadout_mode": self.context.get("mode", "expedition"),

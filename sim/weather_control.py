@@ -29,6 +29,20 @@ class WeatherController:
         self._pending.setdefault(tick, []).append(row)
         return dict(row)
 
+    def request_entry(self, team, source, source_pos, weather, ability_id):
+        """Queue deployment abilities together, before the first action.
+
+        The separate queue bucket preserves the timing and payload of existing
+        teaching requests, including all tactical-v1 event goldens.
+        """
+        if weather not in ("sun", "rain") or not isinstance(ability_id, str):
+            raise ValueError("invalid opening weather ability")
+        row = {"team": team, "source": source, "source_pos": tuple(source_pos),
+               "weather": weather, "requested_at": 0.0, "cast_index": None,
+               "effective_at": 0.0, "source_kind": "ability", "ability_id": ability_id}
+        self._pending.setdefault(-1, []).append(row)
+        return dict(row)
+
     def _transition(self, kind, t, requests, reason, old_weather,
                     previous_expires_at=None):
         return {"kind": kind, "time": t, "requests": [dict(r) for r in requests],

@@ -1,0 +1,28 @@
+{
+  "review_status": "pass",
+  "session_id": "poketactics-20261005",
+  "review_run_id": "batch-i-close",
+  "reviewer_agent": "/root/review_batch_i",
+  "reviewer_agent_status": "created",
+  "base_commit": "6e33a020866232b3beaab373a5128fc18438d2b1",
+  "rules_fingerprint": "b39cb3c1756b71d4a26a1f79b613683ee6852bdad66709fc1cd1138d66cde23f",
+  "review_bundle": "reports/evidence/abilities-2026-10-05/source-manifest.json",
+  "dashboard_url": "",
+  "blockers": [],
+  "evidence_gaps": [],
+  "checks_rerun": [
+    "369 unit tests passed (reviewer 48.554s)",
+    "changed Python compile",
+    "JS syntax",
+    "diff whitespace",
+    "recorded diff reverse apply",
+    "22 source + 23 evidence hashes matched",
+    "old user banks decoded read-only and byte stable",
+    "weather boundary + fingerprint matrix"
+  ],
+  "limits": [
+    "QualityGate MCP rules and central semantic review unavailable in current Host session; local gate is not semantic PASS",
+    "Mutation intentionally not executed",
+    "Full pool balance, human usability and ESP32 hardware remain unverified"
+  ]
+}

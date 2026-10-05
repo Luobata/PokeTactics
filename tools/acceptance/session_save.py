@@ -20,6 +20,7 @@ BOT_STATS = ("gold_curve", "pop_curve", "synergy_curve", "synergy_formed_round",
              "synergy_formed_type", "refreshes", "item_crafts", "item_equips",
              "stone_triggers", "craft_stats")
 LEGACY_BASE_FINGERPRINT = '2f9426505cad1addbab7b5db1e9f5a673a72ec0937a1ed4cf916926c04d015ad'
+LEGACY_TACTICS_FINGERPRINT = 'f05ad20bf84e27917c269487469914f042cc03bde53176a2c4b845b092bb343c'
 
 
 class UnknownRulesError(UnsupportedVersionError, ValueError):
@@ -135,6 +136,8 @@ class SessionCodec:
         supported = {rules_fingerprint()}
         if ruleset == tactics.BASE_RULESET:
             supported.add(LEGACY_BASE_FINGERPRINT)
+        if ruleset in (tactics.BASE_RULESET, tactics.TACTICS_RULESET):
+            supported.add(LEGACY_TACTICS_FINGERPRINT)
         if fingerprint not in supported:
             raise UnknownRulesError('无法识别此存档的规则指纹；需要对应版本继续，原存档未修改')
         state = demo.Session(integer(data["seed"], -(2 ** 63), 2 ** 63 - 1, "seed"), ruleset=ruleset)
@@ -329,10 +332,11 @@ class SessionCodec:
                 (b if a is state.player else a for a, b in state.pairs or [] if state.player in (a, b)), None)
             if src is not None and state.opponent_comp is not None:
                 comp = state.opponent_comp
-                views = [demo._piece_view(o[0], o[1]) if isinstance(o, tuple) else demo._piece_view(o) for o in comp]
+                views = [demo._piece_view(o[0], o[1], ruleset) if isinstance(o, tuple)
+                         else demo._piece_view(o, ruleset=ruleset) for o in comp]
                 state.opp_view = {"name": (f"幽灵（{src.name} 镜像）" if state.ghost_seat is state.player else src.name),
                                   "hp": src.hp, "level": src.level, "rows": state._enemy_rows(views),
-                                  "bench": [demo._piece_view(o.piece, o.item) for o in src.bench]}
+                                  "bench": [demo._piece_view(o.piece, o.item, ruleset) for o in src.bench]}
         log = sequence(data["log"], 240, "log")
         if any(not isinstance(line, str) or len(line) > 1000 for line in log):
             raise ValueError("战报文本无效")
@@ -341,7 +345,7 @@ class SessionCodec:
             setattr(state, key, integer(data[key], 0, 1000000, key))
         state.eliminated_round = (integer(data["eliminated_round"], 1, state.round_no, "eliminated_round")
                                   if data["eliminated_round"] is not None else None)
-        state.final_team = ([demo._piece_view(p[0], p[1]) if isinstance(p, tuple) else demo._piece_view(p)
+        state.final_team = ([demo._piece_view(p[0], p[1], ruleset) if isinstance(p, tuple) else demo._piece_view(p, ruleset=ruleset)
                              for p in [piece(o, owned=False) for o in sequence(data["final_team"], 9, "final_team")]]
                             if data["final_team"] is not None else None)
         for record, view in zip(data['final_team'] or [], state.final_team or []):

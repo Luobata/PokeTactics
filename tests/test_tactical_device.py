@@ -42,7 +42,7 @@ class TacticalDeviceContracts(unittest.TestCase):
         self.choose("喷火龙")
         self.choose("出发")
         self.choose("确认")
-        self.assertEqual(self.device.state["ruleset"], "tactics_v1")
+        self.assertEqual(self.device.state["ruleset"], "tactics_v2")
         self.assertEqual(self.device.page, "prep")
         return demo.SESSIONS[self.device.sid]
 
@@ -197,6 +197,36 @@ class TacticalDeviceContracts(unittest.TestCase):
         self.assertIsNone(session.tactical[0]["weather"])
         self.assertEqual(water.technique, "rain_dance")
 
+    def test_opening_traits_three_key_detail_learning_move_and_resume(self):
+        session = self.tactical()
+        self.add_piece(session, 38, (0, 3))
+        self.add_piece(session, 131)
+        session.player.inventory.techniques['sunny_day'] = 1
+        self.save_fixture(session)
+        self.assertEqual(self.state['screen']['scene']['entry_weather']['weather'], 'sun')
+        self.open_piece('九尾')
+        self.assertEqual(self.state['screen']['focus']['piece']['ability']['name'], '日照')
+        for _ in range(5):
+            self.click('B')
+        detail = self.long('C')
+        pages = [''.join(detail['screen']['detail'])]
+        for _ in range(detail['screen']['detail_total']-1):
+            pages.append(''.join(self.click('B')['screen']['detail']))
+        self.assertIn('不占教学槽', ''.join(pages))
+        self.long('B'); self.long('B'); self.long('B'); self.long('B')
+        self.learn('晴天', '九尾')
+        nine = session.player.grid[(0, 3)]
+        self.assertEqual(nine.technique, 'sunny_day')
+        self.assertEqual(session.player.inventory.techniques['sunny_day'], 0)
+        self.open_piece('拉普拉斯', '备战席')
+        self.choose('移动 / 交换'); self.choose('战场第一行')
+        self.choose('5 · 空位')
+        self.assertTrue(self.device.state['entry_weather']['conflict'])
+        self.choose('保存 / 返回主页'); self.choose('返回主页')
+        self.choose('继续存档')
+        self.assertTrue(self.device.state['entry_weather']['conflict'])
+        self.assertEqual(demo.SESSIONS[session.sid].player.grid[(0, 3)].technique, 'sunny_day')
+
     def test_pending_reward_resume_skip_and_stale_held_confirmation(self):
         session = self.tactical()
         self.add_piece(session, 7, (0, 3), "guard")
@@ -264,6 +294,8 @@ class TacticalDeviceContracts(unittest.TestCase):
         snapshots = [copy.deepcopy(self.state)]
         session = self.tactical()
         self.add_piece(session, 7, (0, 3), "guard")
+        self.add_piece(session, 38, (1, 3), "sunny_day")
+        self.add_piece(session, 131, (1, 4))
         session.begin_round(6)
         session._grant_technique_choice(session.player, 5)
         self.save_fixture(session)
@@ -297,6 +329,12 @@ for(const state of screens){view=state;drawing=[];draw();
  if(state.screen.page==='guard_targets'){
    assert.ok(drawing.some(d=>d.kind==='rect'&&d.y===130&&d.w===40),'own board disappeared');
    assert.ok(drawing.some(d=>d.kind==='text'&&d.s==='护'),'guard marker absent');
+ }
+ if(state.screen.scene?.entry_weather?.you?.length){
+   if(['prep','piece_tactics','guard_targets'].includes(state.screen.page)){
+     assert.ok(drawing.some(d=>d.kind==='text'&&d.s==='日'),'opening sun badge absent');
+     assert.ok(drawing.some(d=>d.kind==='text'&&d.s==='雨'),'opening rain badge absent');
+   }
  }
  if(state.screen.page==='reward_options')assert.ok(drawing.filter(d=>d.kind==='rect'&&d.w===226).length>=4,'missing choice cards');
 }

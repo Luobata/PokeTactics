@@ -730,6 +730,8 @@ class BattleAnimation:
                 label = {None: '无天气', 'sun': '晴天', 'rain': '雨天', 'sand': '沙暴', 'hail': '冰雹'}[self.weather_name]
                 reason = ('晴雨冲突，恢复' if effect == 'weather_conflict' else
                           '天气结束，恢复' if effect == 'weather_end' else '全场天气变为')
+                if effect == 'weather_start' and any(r.get('source_kind') == 'ability' for r in payload.get('requests', [])):
+                    reason = self.by_idx[source].piece.name + '带来'
                 self.msg = (t, reason + label)
         elif kind == "end":
             self.result = ev[2]

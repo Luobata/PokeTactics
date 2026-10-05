@@ -1,0 +1,128 @@
+{
+  "schema_version": "independent-reviewer.v1",
+  "review_status": "insufficient_evidence",
+  "ordinary_review_status": "pass_with_risk",
+  "reviewer_agent_status": "unavailable",
+  "repo": {
+    "path": "/Users/bytedance/luobata/PokeTactics",
+    "execution_location": "local",
+    "branch": "main",
+    "base_ref": "6e33a020866232b3beaab373a5128fc18438d2b1",
+    "head_ref": "6e33a020866232b3beaab373a5128fc18438d2b1",
+    "commit_range": "",
+    "dirty_state": {
+      "staged": 0,
+      "unstaged": 16,
+      "untracked": 28
+    }
+  },
+  "review": {
+    "session_id": "poketactics-system-optimization",
+    "run_id": "batch-i-opening-weather-2026-10-05",
+    "bundle_path": "reports/evidence/abilities-2026-10-05/source.diff",
+    "dashboard_url": "",
+    "input_fingerprint": "edcbea96a0f8f2686b9f112b6a002e93e01e6debcce5005e9ed13f7edc484b9f",
+    "created_at": "2026-10-05T00:45:02.871622+00:00",
+    "capture": "Local diff/evidence bundle. worktree-review is installed; dashboard capture was not requested or enabled for this run."
+  },
+  "reviewer_agents": [
+    {
+      "agent_id": "/root/entry_weather_combat",
+      "role": "general-reviewer",
+      "lifecycle": "unavailable",
+      "verdict": "insufficient_evidence",
+      "bound_scope": "Opening weather combat",
+      "reason": "The 'glm-5.3' model is not supported when using Codex with a ChatGPT account."
+    },
+    {
+      "agent_id": "/root/evolution_decision",
+      "role": "general-reviewer",
+      "lifecycle": "unavailable",
+      "verdict": "insufficient_evidence",
+      "bound_scope": "Evolution policy",
+      "reason": "The 'glm-5.3' model is not supported when using Codex with a ChatGPT account."
+    },
+    {
+      "agent_id": "/root/playstyle_review",
+      "role": "general-reviewer",
+      "lifecycle": "unavailable",
+      "verdict": "insufficient_evidence",
+      "bound_scope": "Current build combinations",
+      "reason": "The 'glm-5.3' model is not supported when using Codex with a ChatGPT account."
+    }
+  ],
+  "findings": [
+    {
+      "id": "I-R1",
+      "severity": "suggestion",
+      "status": "closed_by_ordinary_review",
+      "title": "Frozen opponent view reconstruction omitted the saved ruleset.",
+      "file": "tools/acceptance/session_save.py",
+      "evidence_refs": [
+        "tests/test_weather_abilities.py",
+        "supplementary-checks.json"
+      ],
+      "required_action": "Pass the saved ruleset when rebuilding opponent and final-team views.",
+      "re_review_condition": "Forecast and raw battle events remain identical before and after schema-4 roundtrip."
+    },
+    {
+      "id": "I-R2",
+      "severity": "suggestion",
+      "status": "closed_by_ordinary_review",
+      "title": "Opening weather badge covered item and learning dots.",
+      "file": "tools/acceptance/device_renderer.js",
+      "evidence_refs": [
+        "supplementary-checks.json",
+        "device-formation.jpg"
+      ],
+      "required_action": "Place opening badge away from existing top-left equipment/learning markers, keeping guard and weather-teaching badges.",
+      "re_review_condition": "Native bounds and actual browser fixture with both equipment and learning are visible."
+    }
+  ],
+  "checks": [
+    {
+      "name": "full_automated_acceptance",
+      "status": "passed",
+      "evidence_ref": "acceptance.json"
+    },
+    {
+      "name": "final_cosmetic_scoped_checks",
+      "status": "passed",
+      "evidence_ref": "supplementary-checks.json"
+    },
+    {
+      "name": "32_run_smoke",
+      "status": "passed",
+      "evidence_ref": "full-run.json"
+    },
+    {
+      "name": "fixed_squad_symmetry",
+      "status": "passed",
+      "evidence_ref": "replacement-ablation.json"
+    },
+    {
+      "name": "competitive_build_balance",
+      "status": "failed",
+      "evidence_ref": "ability-ablation.json"
+    },
+    {
+      "name": "independent_agent_review",
+      "status": "blocked",
+      "evidence_ref": "review.json"
+    }
+  ],
+  "blockers": [],
+  "evidence_gaps": [
+    "No independent agent review because the configured inherited model failed to start.",
+    "No physical ESP32 or human play test."
+  ],
+  "residual_risks": [
+    "Weather builds do not form a balanced counter cycle.",
+    "25/32 full runs still required R31 forced ranking.",
+    "Instance training, talents and mechanical synergy rework remain proposals."
+  ],
+  "next_actions": [
+    "Review the current diff with an available reviewer model before treating this as independently approved.",
+    "Validate anti-dive/healing counterplay and natural end pacing as separate batches."
+  ]
+}

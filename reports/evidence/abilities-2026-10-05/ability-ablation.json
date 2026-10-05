@@ -1,0 +1,592 @@
+{
+  "schema": 1,
+  "method": "Paired tactical-v1/v2 ablation of opening weather with unchanged fixed squads.\n\nEvery squad costs 15 gold, has six units, three ordinary equipped items, one\nlearning slot and one partner. Side-swaps verify symmetry and are not additional\nindependent trials. No acquisition, all-roster balance or human-play claim.\n",
+  "rules_fingerprint": "b39cb3c1756b71d4a26a1f79b613683ee6852bdad66709fc1cd1138d66cde23f",
+  "script_sha256": "cfdd2cac9ed80a4fc84dbb5cce8b3d1282fac609cc6b5bcf7750cd528c7bd473",
+  "seed_range": [
+    202610051000,
+    202610051099
+  ],
+  "builds": [
+    {
+      "key": "sun",
+      "name": "日照接力",
+      "species": [
+        38,
+        6,
+        3,
+        26,
+        76,
+        2
+      ],
+      "positions": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          5,
+          2
+        ]
+      ],
+      "items": [
+        null,
+        "focus_lens",
+        null,
+        "swift_feather",
+        "sash",
+        null
+      ],
+      "partner": 26,
+      "learned": [
+        null,
+        null,
+        "cut",
+        null,
+        null,
+        null
+      ],
+      "plan": "九尾先开晴天，雷丘接力与能量装备让火草技能赶上八秒窗口。",
+      "cost": 15
+    },
+    {
+      "key": "rain",
+      "name": "降雨水阵",
+      "species": [
+        131,
+        9,
+        80,
+        26,
+        76,
+        143
+      ],
+      "positions": [
+        [
+          3,
+          2
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          4,
+          2
+        ]
+      ],
+      "items": [
+        "focus_lens",
+        null,
+        null,
+        "swift_feather",
+        null,
+        "sash"
+      ],
+      "partner": 26,
+      "learned": [
+        null,
+        "surf",
+        null,
+        null,
+        null,
+        null
+      ],
+      "plan": "拉普拉斯入场降雨，雷丘接力、起手能量与三水羁绊支持前排技能。",
+      "cost": 15
+    },
+    {
+      "key": "garden",
+      "name": "花园续航",
+      "species": [
+        143,
+        9,
+        3,
+        80,
+        76,
+        2
+      ],
+      "positions": [
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ]
+      ],
+      "items": [
+        "leftovers",
+        "sash",
+        "focus_lens",
+        null,
+        null,
+        null
+      ],
+      "partner": 3,
+      "learned": [
+        "rest",
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "plan": "卡比兽承伤、剩饭/睡觉与妙蛙花治疗；水系持续回复，紧密站位换治疗覆盖，付出群伤暴露。",
+      "cost": 15
+    },
+    {
+      "key": "dive",
+      "name": "双翼突进",
+      "species": [
+        130,
+        68,
+        143,
+        67,
+        22,
+        65
+      ],
+      "positions": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          4,
+          3
+        ]
+      ],
+      "items": [
+        "sash",
+        "choice_band",
+        null,
+        "swift_feather",
+        null,
+        null
+      ],
+      "partner": 143,
+      "learned": [
+        null,
+        "cut",
+        null,
+        null,
+        null,
+        null
+      ],
+      "plan": "暴鲤龙/豪力/大嘴雀突破两格内可达后排，胡地收割；物理爆发配格斗羁绊，缺少持续远程群伤。",
+      "cost": 15
+    }
+  ],
+  "arms": [
+    {
+      "a": "sun",
+      "b": "garden",
+      "ruleset": "tactics_v1",
+      "trials": 100,
+      "games_including_swaps": 200,
+      "wins": 0,
+      "losses": 100,
+      "draws": 0,
+      "score": 0.0,
+      "duration_median": 18.0,
+      "side_swap_failures": [],
+      "a_metrics": {
+        "damage": 842.47,
+        "casts": 7.81,
+        "healing": 36.27,
+        "partner_energy": 32,
+        "technique_uses": 1,
+        "first_cast": 3.365,
+        "drained_energy": 0,
+        "survivors": 0
+      },
+      "a_windows": {
+        "casts": 7.81,
+        "window_buffed_casts": 0,
+        "window_nerfed_casts": 0,
+        "weather_windows": 0,
+        "first_cast": 3.365
+      }
+    },
+    {
+      "a": "sun",
+      "b": "garden",
+      "ruleset": "tactics_v2",
+      "trials": 100,
+      "games_including_swaps": 200,
+      "wins": 0,
+      "losses": 100,
+      "draws": 0,
+      "score": 0.0,
+      "duration_median": 18.0,
+      "side_swap_failures": [],
+      "a_metrics": {
+        "damage": 856.7,
+        "casts": 7.87,
+        "healing": 36.05,
+        "partner_energy": 32,
+        "technique_uses": 1,
+        "first_cast": 3.365,
+        "drained_energy": 0,
+        "survivors": 0
+      },
+      "a_windows": {
+        "casts": 7.87,
+        "window_buffed_casts": 3.11,
+        "window_nerfed_casts": 0,
+        "weather_windows": 1,
+        "first_cast": 3.365
+      }
+    },
+    {
+      "a": "sun",
+      "b": "dive",
+      "ruleset": "tactics_v1",
+      "trials": 100,
+      "games_including_swaps": 200,
+      "wins": 0,
+      "losses": 100,
+      "draws": 0,
+      "score": 0.0,
+      "duration_median": 12.2,
+      "side_swap_failures": [],
+      "a_metrics": {
+        "damage": 685.92,
+        "casts": 4.45,
+        "healing": 20.48,
+        "partner_energy": 32,
+        "technique_uses": 1,
+        "first_cast": 2.778,
+        "drained_energy": 0,
+        "survivors": 0
+      },
+      "a_windows": {
+        "casts": 4.45,
+        "window_buffed_casts": 0,
+        "window_nerfed_casts": 0,
+        "weather_windows": 0,
+        "first_cast": 2.778
+      }
+    },
+    {
+      "a": "sun",
+      "b": "dive",
+      "ruleset": "tactics_v2",
+      "trials": 100,
+      "games_including_swaps": 200,
+      "wins": 0,
+      "losses": 100,
+      "draws": 0,
+      "score": 0.0,
+      "duration_median": 12.3,
+      "side_swap_failures": [],
+      "a_metrics": {
+        "damage": 723.7,
+        "casts": 4.6,
+        "healing": 24.12,
+        "partner_energy": 32,
+        "technique_uses": 1,
+        "first_cast": 2.778,
+        "drained_energy": 0,
+        "survivors": 0
+      },
+      "a_windows": {
+        "casts": 4.6,
+        "window_buffed_casts": 2.74,
+        "window_nerfed_casts": 0,
+        "weather_windows": 1,
+        "first_cast": 2.778
+      }
+    },
+    {
+      "a": "rain",
+      "b": "garden",
+      "ruleset": "tactics_v1",
+      "trials": 100,
+      "games_including_swaps": 200,
+      "wins": 0,
+      "losses": 100,
+      "draws": 0,
+      "score": 0.0,
+      "duration_median": 19.85,
+      "side_swap_failures": [],
+      "a_metrics": {
+        "damage": 944.79,
+        "casts": 9.07,
+        "healing": 126.14,
+        "partner_energy": 32,
+        "technique_uses": 0.98,
+        "first_cast": 2.43,
+        "drained_energy": 0,
+        "survivors": 0
+      },
+      "a_windows": {
+        "casts": 9.07,
+        "window_buffed_casts": 0,
+        "window_nerfed_casts": 0,
+        "weather_windows": 0,
+        "first_cast": 2.43
+      }
+    },
+    {
+      "a": "rain",
+      "b": "garden",
+      "ruleset": "tactics_v2",
+      "trials": 100,
+      "games_including_swaps": 200,
+      "wins": 1,
+      "losses": 99,
+      "draws": 0,
+      "score": 0.01,
+      "duration_median": 19.95,
+      "side_swap_failures": [],
+      "a_metrics": {
+        "damage": 962.69,
+        "casts": 9.09,
+        "healing": 126.27,
+        "partner_energy": 32,
+        "technique_uses": 0.98,
+        "first_cast": 2.43,
+        "drained_energy": 0,
+        "survivors": 0.01
+      },
+      "a_windows": {
+        "casts": 9.09,
+        "window_buffed_casts": 2,
+        "window_nerfed_casts": 0,
+        "weather_windows": 1,
+        "first_cast": 2.43
+      }
+    },
+    {
+      "a": "rain",
+      "b": "dive",
+      "ruleset": "tactics_v1",
+      "trials": 100,
+      "games_including_swaps": 200,
+      "wins": 5,
+      "losses": 95,
+      "draws": 0,
+      "score": 0.05,
+      "duration_median": 15.2,
+      "side_swap_failures": [],
+      "a_metrics": {
+        "damage": 818,
+        "casts": 5.61,
+        "healing": 74.02,
+        "partner_energy": 32,
+        "technique_uses": 0.78,
+        "first_cast": 2.782,
+        "drained_energy": 0,
+        "survivors": 0.13
+      },
+      "a_windows": {
+        "casts": 5.61,
+        "window_buffed_casts": 0,
+        "window_nerfed_casts": 0,
+        "weather_windows": 0,
+        "first_cast": 2.782
+      }
+    },
+    {
+      "a": "rain",
+      "b": "dive",
+      "ruleset": "tactics_v2",
+      "trials": 100,
+      "games_including_swaps": 200,
+      "wins": 6,
+      "losses": 94,
+      "draws": 0,
+      "score": 0.06,
+      "duration_median": 15.0,
+      "side_swap_failures": [],
+      "a_metrics": {
+        "damage": 817.18,
+        "casts": 5.5,
+        "healing": 74.08,
+        "partner_energy": 32,
+        "technique_uses": 0.76,
+        "first_cast": 2.782,
+        "drained_energy": 0,
+        "survivors": 0.15
+      },
+      "a_windows": {
+        "casts": 5.5,
+        "window_buffed_casts": 1.91,
+        "window_nerfed_casts": 0,
+        "weather_windows": 1,
+        "first_cast": 2.782
+      }
+    },
+    {
+      "a": "sun",
+      "b": "rain",
+      "ruleset": "tactics_v1",
+      "trials": 100,
+      "games_including_swaps": 200,
+      "wins": 47,
+      "losses": 53,
+      "draws": 0,
+      "score": 0.47,
+      "duration_median": 16.4,
+      "side_swap_failures": [],
+      "a_metrics": {
+        "damage": 1050.19,
+        "casts": 6.75,
+        "healing": 39.06,
+        "partner_energy": 32,
+        "technique_uses": 1,
+        "first_cast": 3.102,
+        "drained_energy": 0,
+        "survivors": 1.23
+      },
+      "a_windows": {
+        "casts": 6.75,
+        "window_buffed_casts": 0,
+        "window_nerfed_casts": 0,
+        "weather_windows": 0,
+        "first_cast": 3.102
+      }
+    },
+    {
+      "a": "sun",
+      "b": "rain",
+      "ruleset": "tactics_v2",
+      "trials": 100,
+      "games_including_swaps": 200,
+      "wins": 47,
+      "losses": 53,
+      "draws": 0,
+      "score": 0.47,
+      "duration_median": 16.4,
+      "side_swap_failures": [],
+      "a_metrics": {
+        "damage": 1050.19,
+        "casts": 6.75,
+        "healing": 39.06,
+        "partner_energy": 32,
+        "technique_uses": 1,
+        "first_cast": 3.102,
+        "drained_energy": 0,
+        "survivors": 1.23
+      },
+      "a_windows": {
+        "casts": 6.75,
+        "window_buffed_casts": 0,
+        "window_nerfed_casts": 0,
+        "weather_windows": 0,
+        "first_cast": 3.102
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "a": "sun",
+      "b": "garden",
+      "v1_score": 0.0,
+      "v2_score": 0.0,
+      "v2_minus_v1_pp": 0.0,
+      "v2_window_buffed_casts": 3.11
+    },
+    {
+      "a": "sun",
+      "b": "dive",
+      "v1_score": 0.0,
+      "v2_score": 0.0,
+      "v2_minus_v1_pp": 0.0,
+      "v2_window_buffed_casts": 2.74
+    },
+    {
+      "a": "rain",
+      "b": "garden",
+      "v1_score": 0.0,
+      "v2_score": 0.01,
+      "v2_minus_v1_pp": 1.0,
+      "v2_window_buffed_casts": 2
+    },
+    {
+      "a": "rain",
+      "b": "dive",
+      "v1_score": 0.05,
+      "v2_score": 0.06,
+      "v2_minus_v1_pp": 1.0,
+      "v2_window_buffed_casts": 1.91
+    },
+    {
+      "a": "sun",
+      "b": "rain",
+      "v1_score": 0.47,
+      "v2_score": 0.47,
+      "v2_minus_v1_pp": 0.0,
+      "v2_window_buffed_casts": 0
+    }
+  ],
+  "games": 2000,
+  "side_swap_failures": 0,
+  "limits": [
+    "Fixed authored squads, not the live recruitment economy.",
+    "Same seeds and every resource held fixed across v1/v2.",
+    "Swaps validate symmetry; they do not double sample size.",
+    "No inferential claim from a 100-seed prototype sample."
+  ]
+}

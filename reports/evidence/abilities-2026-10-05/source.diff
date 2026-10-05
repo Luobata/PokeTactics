@@ -1,0 +1,4031 @@
+diff --git a/docs/13-core-gameplay.md b/docs/13-core-gameplay.md
+index cbfd22c..fef5fc0 100644
+--- a/docs/13-core-gameplay.md
++++ b/docs/13-core-gameplay.md
+@@ -4,6 +4,8 @@
+ > 不代表现行代码已实现。当前 84 池、进化、搭档及教学的联动复核与替代方案见
+ > [22 · 系统联动与玩法方案评审](22-system-interactions-and-playstyles.md)。护卫与晴雨的可试玩子集见
+ > [23 · 战术远征合同](23-tactical-expedition.md)，其余推荐仍待实施，旧档不自动切换新规则。
++> 2026-10-05 主线决策已确定保留进化；最终形态池与独立升星不再作为当前实施主线。
++> 当前决策及入场特性见 [24 · 进化、构筑与入场特性](24-evolution-builds-and-opening-abilities.md)。
+ 
+ 状态：**v2（已吸收 Codex 交叉评审，2026-09-15）**。评审原文见
+ [reports/design-review-codex-2026-09-15.md](../reports/design-review-codex-2026-09-15.md)——
+diff --git a/docs/14-system-optimization-acceptance.md b/docs/14-system-optimization-acceptance.md
+index 44fb728..36e0219 100644
+--- a/docs/14-system-optimization-acceptance.md
++++ b/docs/14-system-optimization-acceptance.md
+@@ -1,5 +1,10 @@
+ # 14 · 分系统优化与验收路线
+ 
++2026-10-05 第九批已确定保留进化，并交付新开 `tactics_v2` 战术远征的九尾/拉普拉斯入场天气、
++预告/冲突提示、三键详情和旧规则隔离。369 项测试通过，32 局全流程无异常/阻塞；
++25/32 局仍需 R31 收官，天气候选也未形成均衡克制。见 [当前合同](24-evolution-builds-and-opening-abilities.md)及
++[第九批报告](../reports/system-optimization-batch-i-2026-10-05.md)。本轮为主代理普通复核，未获得独立子代理复核。
++
+ 2026-10-05 第八批已交付显式 `tactics_v1` 战术远征：护卫、晴雨共享窗口、技能机三选一、
+ 三键岗位配置和 schema 4 存档。350 项测试通过，32 局完整流程无异常/阻塞；
+ 4,400 场同预算对照仍未证明护卫能稳定反制突进，28/32 局仍需 R31 排名收官。
+diff --git a/docs/22-system-interactions-and-playstyles.md b/docs/22-system-interactions-and-playstyles.md
+index 64e4177..f7293c5 100644
+--- a/docs/22-system-interactions-and-playstyles.md
++++ b/docs/22-system-interactions-and-playstyles.md
+@@ -7,6 +7,10 @@
+ [第八批报告](../reports/system-optimization-batch-h-2026-10-05.md)。反突进强度及自然终局目标仍未通过，
+ 下文其余候选保持未实施；不能把这一子集视为整个设计批次放行。
+ 
++第九批已确定**保留进化**，并在新开的 `tactics_v2` 战术远征中增加九尾日照、拉普拉斯降雨的
++入场天气特性，见 [当前决策与合同](24-evolution-builds-and-opening-abilities.md)。训练尚未实现，
++“最终形态池 + 独立升星”不再作为当前实施主线；天气阵容的强度读数仍未达到成熟平衡目标。
++
+ 本轮只讨论现有 84 只宝可梦，不扩二世代，不新增永久战力，不修改现行对局。
+ 下文中的新装备、教学、天赋、训练、天气切换是评审时的候选设计；实际入口与边界以上述合同为准。
+ 所有新数值均需独立实验；现有基线读数与候选验收目标在下文分别标明。
+@@ -322,7 +326,7 @@ C：保留阶段基础天气，再允许有限的全场天气覆盖。推荐 A 
+ | 路线 | 优点 | 代价 | 判断 |
+ |---|---|---|---|
+ | A：28 左右最终形态 + 三星 | 追卡目标直接，重复终形态有用 | 重做池子、费用、供给、进化石、搭档开局、存档与 AI | 保留为独立原型，不在本轮混入 |
+-| B：保留进化 + 持有实例训练 | 保留宝可梦成长体验，普通/终形态都能继续投入 | 需清楚区分形态和练度，控制叠加预算 | 当前推荐 |
++| B：保留进化 + 持有实例训练 | 保留宝可梦成长体验，普通/终形态都能继续投入 | 需清楚区分形态和练度，控制叠加预算 | 已选主线；保留进化已定，训练尚未实现 |
+ | C：只增加全局属性或装备掉落 | 改动小 | 没有解决角色持续成长，容易变成整体膨胀 | 不作为主方案 |
+ 
+ 推荐训练原型：实例练度 0/1/2，第一阶段候选 R8 开放，第二阶段候选 R14 开放。
+diff --git a/docs/23-tactical-expedition.md b/docs/23-tactical-expedition.md
+index e5785e9..eea531f 100644
+--- a/docs/23-tactical-expedition.md
++++ b/docs/23-tactical-expedition.md
+@@ -4,10 +4,14 @@
+ 的 D03、D06、D08、D14、D15 子集。[本批结果](../reports/system-optimization-batch-h-2026-10-05.md)
+ 分别记录功能通过、数值未达标和后续工作；不代表四个设计批次全部交付。
+ 
++第九批：**新开战术远征已使用 `tactics_v2`**，额外加入九尾日照、拉普拉斯降雨的入场天气。
++已有 `tactics_v1` 存档继续本节原合同；下文的单一天气手名额和每队一次限制均指教学，
++不会限制固定物种特性。入场相抵、教学共存及版本边界见 [24 号合同](24-evolution-builds-and-opening-abilities.md)。
++
+ ## 1. 入口与资源
+ 
+ 设备模拟页 `/device` 首页选择「战术远征 · 护卫与天气」，选择主搭档后出发。
+-它沿用远征的种族值预算、搭档、经济、卡池和行囊，新增显式规则 `tactics_v1`。
++它沿用远征的种族值预算、搭档、经济、卡池和行囊；第八批使用 `tactics_v1`，当前新开局使用 `tactics_v2`。
+ 经典和原远征仍为 `base_v1`，已有对局不会自动升级。
+ 
+ 野怪轮结算后，原本的一台技能机变为三选一；数量不增加。候选先写入存档：
+diff --git a/sim/combat.py b/sim/combat.py
+index 1486e82..9af77fa 100644
+--- a/sim/combat.py
++++ b/sim/combat.py
+@@ -45,6 +45,7 @@ import combo as combo_mod    # S10 组合技 A：默认 COMBOS_ON=False（docs/0
+ import synergy  # S3 羁绊：默认 SYNERGIES_ON=False，零随机、零事件流变更
+ import status as status_mod   # S12 状态/Buff：默认 STATUS_ON=False（docs/06）
+ import weather as weather_mod  # S11 天气：默认无天气（docs/05）
++import abilities as abilities_mod
+ import items as items_mod     # S5 装备：comp 元素可带 (Piece, item) 二元组（docs/07）
+ import profiles as profiles_mod  # R1 单体档案（docs/13 §5）：有理由的覆盖项
+ import skills as skills_mod      # 通用/专属两级技能（2026-10-04 用户裁定）
+@@ -266,6 +267,7 @@ class Battle:
+         for unit in self.units:
+             self._emit_state(unit, 0.0)
+         self._opening_partner_traits()
++        self._opening_abilities()
+ 
+     def _validate_learning(self, comp, learned):
+         if learned is None:
+@@ -743,6 +745,28 @@ class Battle:
+         self.events.append((t, "tactical_effect", unit.idx, unit.idx,
+                             "weather_request", payload))
+ 
++    def _opening_abilities(self):
++        if not tactics_mod.entry_abilities_enabled(self.ruleset):
++            return
++        for unit in self.units:
++            ability = abilities_mod.for_species(unit.piece.species_id, self.ruleset)
++            if not unit.alive or ability is None:
++                continue
++            request = self._weather_control.request_entry(
++                unit.team, unit.idx, unit.pos, ability["weather"], ability["id"])
++            payload = {"reason": "entry", "requests": [request], "remaining": 0,
++                       "source_kind": "ability", "ability_id": ability["id"],
++                       "source_pos": unit.pos, "target_pos": unit.pos,
++                       "cast_index": None, "weather": ability["weather"],
++                       "old_weather": self.weather_name, "new_weather": ability["weather"],
++                       "base_weather": self.base_weather_name,
++                       "effective_at": 0.0, "expires_at": WEATHER_WINDOW_SECONDS}
++            self.events.append((0.0, "tactical_effect", unit.idx, unit.idx,
++                                "weather_request", payload))
++        # All opening abilities contend together, including same-team conflicts.
++        # Neither traversal order nor later calls to run() can repeat them.
++        self.flush_tactics(0.0)
++
+     def flush_tactics(self, t):
+         """Advance weather before tick actions; direct-strike callers may use it.
+ 
+diff --git a/sim/tactics.py b/sim/tactics.py
+index d515f14..ba302d0 100644
+--- a/sim/tactics.py
++++ b/sim/tactics.py
+@@ -1,21 +1,27 @@
+ """Explicit, versioned opt-in for bounded tactical expedition mechanics.
+ 
+ Stat allocation and battle rules are independent: ``budget_v1`` is a stat mode,
+-whereas ``tactics_v1`` opts a new match into guard and weather teaching.
++whereas ``tactics_v1`` opts a match into guard and weather teaching and
++``tactics_v2`` additionally enables species-bound opening weather abilities.
+ """
+ 
+ BASE_RULESET = "base_v1"
+ TACTICS_RULESET = "tactics_v1"
++CURRENT_TACTICS_RULESET = "tactics_v2"
+ 
+ 
+ def validate_ruleset(value):
+-    if not isinstance(value, str) or value not in (BASE_RULESET, TACTICS_RULESET):
++    if not isinstance(value, str) or value not in (BASE_RULESET, TACTICS_RULESET, CURRENT_TACTICS_RULESET):
+         raise ValueError("unknown battle ruleset")
+     return value
+ 
+ 
+ def enabled(value):
+-    return validate_ruleset(value) == TACTICS_RULESET
++    return validate_ruleset(value) in (TACTICS_RULESET, CURRENT_TACTICS_RULESET)
++
++
++def entry_abilities_enabled(value):
++    return validate_ruleset(value) == CURRENT_TACTICS_RULESET
+ 
+ 
+ def validate_team(value, count, ruleset=BASE_RULESET):
+@@ -35,7 +41,7 @@ def validate_team(value, count, ruleset=BASE_RULESET):
+         if selection is None:
+             continue
+         if not active:
+-            raise ValueError("tactical selections require tactics_v1")
++            raise ValueError("tactical selections require a tactical ruleset")
+         if not isinstance(selection, dict) or set(selection) != fields:
+             raise ValueError("invalid " + kind + " selection")
+         if any(type(index) is not int or not 0 <= index < count
+diff --git a/sim/weather_control.py b/sim/weather_control.py
+index 2920711..b28dbc6 100644
+--- a/sim/weather_control.py
++++ b/sim/weather_control.py
+@@ -29,6 +29,20 @@ class WeatherController:
+         self._pending.setdefault(tick, []).append(row)
+         return dict(row)
+ 
++    def request_entry(self, team, source, source_pos, weather, ability_id):
++        """Queue deployment abilities together, before the first action.
++
++        The separate queue bucket preserves the timing and payload of existing
++        teaching requests, including all tactical-v1 event goldens.
++        """
++        if weather not in ("sun", "rain") or not isinstance(ability_id, str):
++            raise ValueError("invalid opening weather ability")
++        row = {"team": team, "source": source, "source_pos": tuple(source_pos),
++               "weather": weather, "requested_at": 0.0, "cast_index": None,
++               "effective_at": 0.0, "source_kind": "ability", "ability_id": ability_id}
++        self._pending.setdefault(-1, []).append(row)
++        return dict(row)
++
+     def _transition(self, kind, t, requests, reason, old_weather,
+                     previous_expires_at=None):
+         return {"kind": kind, "time": t, "requests": [dict(r) for r in requests],
+diff --git a/tests/test_tactical_device.py b/tests/test_tactical_device.py
+index 64fd0a6..e9ea66e 100644
+--- a/tests/test_tactical_device.py
++++ b/tests/test_tactical_device.py
+@@ -42,7 +42,7 @@ class TacticalDeviceContracts(unittest.TestCase):
+         self.choose("喷火龙")
+         self.choose("出发")
+         self.choose("确认")
+-        self.assertEqual(self.device.state["ruleset"], "tactics_v1")
++        self.assertEqual(self.device.state["ruleset"], "tactics_v2")
+         self.assertEqual(self.device.page, "prep")
+         return demo.SESSIONS[self.device.sid]
+ 
+@@ -197,6 +197,36 @@ class TacticalDeviceContracts(unittest.TestCase):
+         self.assertIsNone(session.tactical[0]["weather"])
+         self.assertEqual(water.technique, "rain_dance")
+ 
++    def test_opening_traits_three_key_detail_learning_move_and_resume(self):
++        session = self.tactical()
++        self.add_piece(session, 38, (0, 3))
++        self.add_piece(session, 131)
++        session.player.inventory.techniques['sunny_day'] = 1
++        self.save_fixture(session)
++        self.assertEqual(self.state['screen']['scene']['entry_weather']['weather'], 'sun')
++        self.open_piece('九尾')
++        self.assertEqual(self.state['screen']['focus']['piece']['ability']['name'], '日照')
++        for _ in range(5):
++            self.click('B')
++        detail = self.long('C')
++        pages = [''.join(detail['screen']['detail'])]
++        for _ in range(detail['screen']['detail_total']-1):
++            pages.append(''.join(self.click('B')['screen']['detail']))
++        self.assertIn('不占教学槽', ''.join(pages))
++        self.long('B'); self.long('B'); self.long('B'); self.long('B')
++        self.learn('晴天', '九尾')
++        nine = session.player.grid[(0, 3)]
++        self.assertEqual(nine.technique, 'sunny_day')
++        self.assertEqual(session.player.inventory.techniques['sunny_day'], 0)
++        self.open_piece('拉普拉斯', '备战席')
++        self.choose('移动 / 交换'); self.choose('战场第一行')
++        self.choose('5 · 空位')
++        self.assertTrue(self.device.state['entry_weather']['conflict'])
++        self.choose('保存 / 返回主页'); self.choose('返回主页')
++        self.choose('继续存档')
++        self.assertTrue(self.device.state['entry_weather']['conflict'])
++        self.assertEqual(demo.SESSIONS[session.sid].player.grid[(0, 3)].technique, 'sunny_day')
++
+     def test_pending_reward_resume_skip_and_stale_held_confirmation(self):
+         session = self.tactical()
+         self.add_piece(session, 7, (0, 3), "guard")
+@@ -264,6 +294,8 @@ class TacticalDeviceContracts(unittest.TestCase):
+         snapshots = [copy.deepcopy(self.state)]
+         session = self.tactical()
+         self.add_piece(session, 7, (0, 3), "guard")
++        self.add_piece(session, 38, (1, 3), "sunny_day")
++        self.add_piece(session, 131, (1, 4))
+         session.begin_round(6)
+         session._grant_technique_choice(session.player, 5)
+         self.save_fixture(session)
+@@ -298,6 +330,12 @@ for(const state of screens){view=state;drawing=[];draw();
+    assert.ok(drawing.some(d=>d.kind==='rect'&&d.y===130&&d.w===40),'own board disappeared');
+    assert.ok(drawing.some(d=>d.kind==='text'&&d.s==='护'),'guard marker absent');
+  }
++ if(state.screen.scene?.entry_weather?.you?.length){
++   if(['prep','piece_tactics','guard_targets'].includes(state.screen.page)){
++     assert.ok(drawing.some(d=>d.kind==='text'&&d.s==='日'),'opening sun badge absent');
++     assert.ok(drawing.some(d=>d.kind==='text'&&d.s==='雨'),'opening rain badge absent');
++   }
++ }
+  if(state.screen.page==='reward_options')assert.ok(drawing.filter(d=>d.kind==='rect'&&d.w===226).length>=4,'missing choice cards');
+ }
+ '''
+diff --git a/tests/test_tactical_presentation.py b/tests/test_tactical_presentation.py
+index a44decc..847bbe4 100644
+--- a/tests/test_tactical_presentation.py
++++ b/tests/test_tactical_presentation.py
+@@ -181,5 +181,71 @@ class TacticalPresentation(unittest.TestCase):
+         self.assertIsNone(view.weather_name)
+ 
+ 
++class OpeningWeatherPresentation(unittest.TestCase):
++    @classmethod
++    def setUpClass(cls):
++        cls.assets = renderer.Front(), renderer.Palettes(), renderer.Font16()
++
++    def battle(self, conflict=False, sid=38):
++        battle = Battle([PIECES[sid]], [PIECES[131 if conflict else 9]], random.Random(42),
++                        ruleset='tactics_v2', weather_name='hail',
++                        positions_a=[(2, 2)], positions_b=[(2, 1)],
++                        learned_b=[None if conflict else 'rain_dance'],
++                        tactics_b=None if conflict else {'weather': {'source': 0}})
++        for u in battle.units:
++            u.hp = u.max_hp = 10000
++            u.energy = 80
++            battle._emit_state(u, 0.)
++        if not conflict:
++            with patch.object(battle.rng, 'randrange', return_value=0):
++                battle._strike(battle.units[1], battle.units[0], 2.1)
++            battle.flush_tactics(2.2)
++        battle.flush_tactics(10.2)
++        battle.events.append((10.3, 'end', None))
++        return battle
++
++    def test_opening_weather_precedes_cast_and_later_override_is_causal(self):
++        for sid, weather in ((38, 'sun'), (131, 'rain')):
++            battle = self.battle(sid=sid)
++            before = copy.deepcopy(battle.events)
++            anim = renderer.BattleAnimation([], [], 42, *self.assets, battle=battle)
++            start = next(e for e in anim.timeline.events if e[1] == 'tactical_effect' and e[4] == 'weather_start')
++            self.assertEqual(start[0], 0.)
++            view = anim._presentation_view()
++            view._ensure(0.)
++            self.assertEqual(view.weather_name, weather)
++            self.assertIn(PIECES[sid].name+'带来', view.msg[1])
++            override = [e for e in anim.timeline.events if e[1] == 'tactical_effect' and e[4] == 'weather_start'][1]
++            view._ensure(override[0]-.001)
++            self.assertEqual(view.weather_name, weather)
++            view._ensure(override[0])
++            self.assertEqual(view.weather_name, 'rain')
++            frame = anim.frame(override[0]+.1)
++            self.assertEqual(frame.size, (240, 320))
++            view._ensure(anim.timeline.duration)
++            self.assertEqual(view.weather_name, 'hail')
++            view._ensure(0.)  # Backward seek reconstructs opening state.
++            self.assertEqual(view.weather_name, weather)
++            self.assertEqual(battle.events, before)
++
++    def test_opening_conflict_never_briefly_displays_either_override(self):
++        battle = self.battle(conflict=True)
++        anim = renderer.BattleAnimation([], [], 42, *self.assets, battle=battle)
++        self.assertFalse(any(e[1] == 'tactical_effect' and e[4] == 'weather_start' for e in anim.timeline.events))
++        for t in (0., .1, 5.):
++            view = anim._presentation_view()
++            view._ensure(t)
++            self.assertEqual(view.weather_name, 'hail')
++        view._ensure(0.)
++        self.assertIn('晴雨冲突', view.msg[1])
++
++    def test_opening_message_glyphs_have_real_pixels(self):
++        from render_mockups import UI_GLYPHS
++        font = self.assets[2]
++        for ch in set('九尾带来晴天拉普拉斯带来雨天'):
++            if ch not in UI_GLYPHS:
++                self.assertIsNotNone(font.text(ch).getbbox(), f'missing device glyph {ch}')
++
++
+ if __name__ == '__main__':
+     unittest.main()
+diff --git a/tests/test_tactical_session.py b/tests/test_tactical_session.py
+index 1d23b39..4c3a3b5 100644
+--- a/tests/test_tactical_session.py
++++ b/tests/test_tactical_session.py
+@@ -71,7 +71,7 @@ class TacticalSessionContracts(unittest.TestCase):
+ 
+     def test_real_reward_learning_guard_and_battle_preserve_machine_and_pool(self):
+         reward = self.reach_reward()
+-        self.assertEqual(self.state.ruleset, 'tactics_v1')
++        self.assertEqual(self.state.ruleset, 'tactics_v2')
+         self.assertEqual(len(reward['options']), 3)
+         self.assertIn('guard', reward['options'])
+         self.assertEqual(sum(self.state.player.inventory.techniques.values()), 0)
+diff --git a/tools/acceptance/demo.py b/tools/acceptance/demo.py
+index c6268e2..76aa27d 100644
+--- a/tools/acceptance/demo.py
++++ b/tools/acceptance/demo.py
+@@ -56,6 +56,7 @@ import economy  # noqa: E402
+ import items as items_mod  # noqa: E402
+ import techniques as techniques_mod  # noqa: E402
+ import tactics as tactics_mod  # noqa: E402
++import abilities as abilities_mod  # noqa: E402
+ import rng as rng_mod  # noqa: E402
+ import shop as shop_mod  # noqa: E402
+ import synergy as syn_mod  # noqa: E402
+@@ -240,6 +241,8 @@ def _fmt_event(anim, e: tuple) -> str:
+         if effect == 'guard':
+             return f"<b>{name(e[2])} · 护卫</b> 替 {name(e[3])} 承受本次突进主命中（本场次数已用完）"
+         if effect == 'weather_request':
++            if info.get('source_kind') == 'ability':
++                return f"<b>{name(e[2])} · 入场特性</b> 申请 {weather_label(info['new_weather'])}（入场统一裁定）"
+             return f"{name(e[2])} 申请 {weather_label(info['new_weather'])}（下一战斗步统一裁定）"
+         if effect == 'weather_start':
+             return f"<b>全场天气：{weather_label(info['old_weather'])} → {weather_label(info['new_weather'])}</b>（双方共享）"
+@@ -660,15 +663,15 @@ class Session:
+         if tactics_mod.enabled(self.ruleset):
+             self.opponent_tactics = copy.deepcopy(self.battle_tactics(src))
+         return {"name": name, "hp": src.hp, "level": src.level,
+-                "rows": [[_piece_view(o.piece, o.item) if o else None for o in row]
++                "rows": [[_piece_view(o.piece, o.item, self.ruleset) if o else None for o in row]
+                          for row in self._enemy_rows(src.board)],
+-                "bench": [_piece_view(o.piece, o.item)
++                "bench": [_piece_view(o.piece, o.item, self.ruleset)
+                           for o in src.bench[:GRID_COLS]]}
+ 
+     def _pve_view(self, r: int):
+         wave_ids = PVE_WAVES[min(r // 5 - 1, len(PVE_WAVES) - 1)]
+         label = PVE_LABELS[min(r // 5 - 1, len(PVE_LABELS) - 1)]
+-        row = [_piece_view(make_piece(sid, self.templates))
++        row = [_piece_view(make_piece(sid, self.templates), ruleset=self.ruleset)
+                for sid in wave_ids]
+         rows = self._enemy_rows(row)
+         return {"name": f"野怪轮 · {label}", "hp": None, "level": None,
+@@ -938,7 +941,7 @@ class Session:
+ 
+     def _eliminate(self, seat) -> None:
+         if isinstance(seat, PlayerSeat):
+-            self.final_team = [_owned_view(o) for o in seat.board]
++            self.final_team = [_owned_view(o, self.ruleset) for o in seat.board]
+             self.eliminated_round = self.round_no
+         seat.alive = False
+         seat.rank = len(self._alive()) + 1
+@@ -992,7 +995,7 @@ def _hex(rgb) -> str:
+     return "#{:02x}{:02x}{:02x}".format(*rgb)
+ 
+ 
+-def _piece_view(piece, item=None):
++def _piece_view(piece, item=None, ruleset=tactics_mod.BASE_RULESET):
+     from data import pokedex
+     from render_mockups import TYPE_COLORS
+     dex = pokedex()
+@@ -1017,13 +1020,14 @@ def _piece_view(piece, item=None):
+                               descriptions.get(skill["arch"], "") if skill else "能量满时释放属性招式")
+                               if mv else "当前形态没有可释放的属性招式，仅进行普通攻击",
+         "move": (mv.get("name_zh") or mv["name"]) if mv else "—",
++        "ability": abilities_mod.for_species(piece.species_id, ruleset),
+         "item": item,
+         "item_name": items_mod.FINISHED[item]["name"] if item else None,
+     }
+ 
+ 
+-def _owned_view(owned):
+-    return {**_piece_view(owned.piece, owned.item), 'uid': owned.uid,
++def _owned_view(owned, ruleset=tactics_mod.BASE_RULESET):
++    return {**_piece_view(owned.piece, owned.item, ruleset), 'uid': owned.uid,
+             'technique': techniques_mod.view(owned.technique)}
+ 
+ 
+@@ -1088,6 +1092,41 @@ def _synergy_view(sess) -> list:
+     return out
+ 
+ 
++def _entry_weather_view(sess):
++    """Forecast deployed opening traits from the current preparation snapshot.
++
++    Teaching casts happen later and cannot be predicted here. Bench traits are
++    deliberately excluded; PVE uses the same frozen opponent rows as scouting.
++    """
++    if not tactics_mod.entry_abilities_enabled(sess.ruleset):
++        return None
++    you = []
++    for owned in sess.player.board:
++        ability = abilities_mod.for_species(owned.piece.species_id, sess.ruleset)
++        if ability:
++            you.append({**ability, 'unit_name': owned.piece.name, 'uid': owned.uid})
++    opponent = []
++    for cells in (sess.opp_view or {}).get('rows', []):
++        for piece in cells:
++            ability = abilities_mod.for_species(piece['sid'], sess.ruleset) if piece else None
++            if ability:
++                opponent.append({**ability, 'unit_name': piece['name'], 'uid': piece.get('uid')})
++    sources = you + opponent
++    requested = {source['weather'] for source in sources}
++    conflict = len(requested) > 1
++    base = weather_for_round(sess.round_no)
++    result = next(iter(requested)) if len(requested) == 1 else base
++    label = {'sun': '晴天', 'rain': '雨天'}.get(result, weather_mod.WEATHERS[result]['label'] if result else '平静天气')
++    if conflict:
++        note = f'入场晴雨相抵，恢复{label}；所有入场次数消耗，之后教学仍可争夺。'
++    elif sources:
++        note = f"入场{label} {sources[0]['duration']:g}秒，双方共享；后续教学可覆盖。"
++    else:
++        note = '当前上场队伍没有天气特性，沿用本轮基础天气。'
++    return {'you': you, 'opponent': opponent, 'conflict': conflict,
++            'weather': result, 'zh': label, 'note': note}
++
++
+ def state_json(sess) -> dict:
+     sess.ensure_unit_ids()
+     p = sess.player
+@@ -1100,7 +1139,7 @@ def state_json(sess) -> dict:
+     for o in p.all_pieces():
+         copies[o.piece.species_id] = copies.get(o.piece.species_id, 0) + 1
+     for (r, c), o in p.grid.items():
+-        v = _piece_view(o.piece, o.item)
++        v = _piece_view(o.piece, o.item, sess.ruleset)
+         v.update(uid=o.uid, technique=techniques_mod.view(o.technique))
+         v['item_effect'] = _item_effect(o.item, stat_mode) if o.item else None
+         v["copies"] = copies.get(o.piece.species_id, 1)
+@@ -1108,7 +1147,7 @@ def state_json(sess) -> dict:
+         board_rows[r][c] = v
+     bench = []
+     for o in p.bench:
+-        v = _piece_view(o.piece, o.item)
++        v = _piece_view(o.piece, o.item, sess.ruleset)
+         v.update(uid=o.uid, technique=techniques_mod.view(o.technique))
+         v['item_effect'] = _item_effect(o.item, stat_mode) if o.item else None
+         v["copies"] = copies.get(o.piece.species_id, 1)
+@@ -1120,7 +1159,7 @@ def state_json(sess) -> dict:
+         if sid is None:
+             shop.append(None)
+         else:
+-            v = _piece_view(p.templates[sid])
++            v = _piece_view(p.templates[sid], ruleset=sess.ruleset)
+             v["price"] = p.templates[sid].tier
+             shop.append(v)
+     comps = [{"key": k, "name": items_mod.COMPONENT_NAMES[k], "n": n}
+@@ -1157,6 +1196,7 @@ def state_json(sess) -> dict:
+         "weather": {"key": wkey,
+                     "zh": weather_mod.WEATHERS[weather]["label"] if weather else "无",
+                     "note": WEATHER_NOTE[weather]},
++        "entry_weather": _entry_weather_view(sess),
+         "shop": shop,
+         "board": board_rows,
+         "bench": bench,
+@@ -1183,7 +1223,7 @@ def state_json(sess) -> dict:
+         "profile_warning": getattr(sess, "profile_warning", None),
+         "player_result": ({"rank": p.rank, "round": sess.eliminated_round or sess.round_no,
+                            "team": sess.final_team if sess.final_team is not None else
+-                           [_owned_view(o) for o in p.board]}
++                           [_owned_view(o, sess.ruleset) for o in p.board]}
+                           if not p.alive or sess.phase == "over" else None),
+         "stats": {"battles": sess.player_battles,
+                   "frames": sess.player_frames_total},
+@@ -1458,7 +1498,7 @@ def _new_session(seed: int, params=None) -> Session:
+     from expedition import configure, deploy_starter
+     params = params or {}
+     tactical = params.get('mode') == 'tactics'
+-    sess = Session(seed, tactics_mod.TACTICS_RULESET if tactical else tactics_mod.BASE_RULESET)
++    sess = Session(seed, tactics_mod.CURRENT_TACTICS_RULESET if tactical else tactics_mod.BASE_RULESET)
+     configure(sess, {**params, 'mode': 'expedition'} if tactical else params)
+     sess.begin_round(1)
+     deploy_starter(sess)
+@@ -1912,6 +1952,7 @@ function render(){
+     `<span class="hudchip">Lv${y.level} <span class="muted">(${y.xp}/${y.xp_next??'满'})</span> 人口 <b>${y.on_board}/${y.pop}</b></span>`,
+     `<span class="hudchip">第 <b>${S.round}</b>/${S.max_rounds} 轮</span>`,
+     `<span class="hudchip">${w.zh==='无'?'🌤':w.key==='sun'?'☀️':w.key==='rain'?'🌧️':w.key==='sand'?'🌪️':w.key==='hail'?'❄️':'🌤'} ${w.zh}<span class="muted">（${w.note}）</span></span>`,
++    S.entry_weather?`<span class="hudchip">${S.entry_weather.note}</span>`:'',
+     y.streak?`<span class="hudchip">${y.streak>0?'🔥 连胜':'💤 连败'} <b>${Math.abs(y.streak)}</b></span>`:'',
+     `<span class="hudchip muted">${S.phase==='prep'?'准备阶段（不限时）':S.phase==='battle'?'结算阶段':'终局'}</span>`,
+     y.alive?'':`<span class="hudchip" style="color:#8a2f27">已淘汰（第 ${y.rank} 名）</span>`
+@@ -1987,7 +2028,7 @@ function renderInfo(){
+   const v=findPiece(selLoc);
+   if(!v){selLoc=null;return renderInfo();}
+   el.className='';
+-  el.innerHTML=`<b>${v.name}</b> · ${v.tier} 费 · ${v.types.join('/')} · ${v.role} · 射程 ${v.range} · 招式「${v.move}」${v.copies>=2?` · 同种已有 ${v.copies} 只（3 只自动进化）`:''}${v.item?` · 装备「${v.item_name}」`:''}<p><b>${v.skill_name}</b>：${v.skill_description}</p>${v.technique?`<p>教学「${v.technique.name}」：${v.technique.description}</p>`:''}${v.item_effect?`<p>${v.item_name}：${v.item_effect}</p>`:''}
++  el.innerHTML=`<b>${v.name}</b> · ${v.tier} 费 · ${v.types.join('/')} · ${v.role} · 射程 ${v.range} · 招式「${v.move}」${v.copies>=2?` · 同种已有 ${v.copies} 只（3 只自动进化）`:''}${v.item?` · 装备「${v.item_name}」`:''}<p><b>${v.skill_name}</b>：${v.skill_description}</p>${v.ability?`<p>特性「${v.ability.name}」：${v.ability.description}</p>`:''}${v.technique?`<p>教学「${v.technique.name}」：${v.technique.description}</p>`:''}${v.item_effect?`<p>${v.item_name}：${v.item_effect}</p>`:''}
+   <div class="btns"><button onclick="api('sell',{loc:selLoc}).then(()=>{selLoc=null})">卖出（+${v.sell} 金）</button>
+   ${v.item?`<button onclick="api('unequip',{loc:selLoc})">卸下装备</button>`:''}</div>`;
+ }
+diff --git a/tools/acceptance/device_controls.py b/tools/acceptance/device_controls.py
+index 6d1cc50..8de3ee9 100644
+--- a/tools/acceptance/device_controls.py
++++ b/tools/acceptance/device_controls.py
+@@ -31,11 +31,13 @@ def owned_rows(state):
+ 
+ def piece_detail(piece):
+     learned = piece.get("technique") or {}
++    ability = piece.get("ability") or {}
+     return "\n".join(filter(None, [piece.get("name"), piece.get("role"),
+         " / ".join(piece.get("types", [])), f"射程 {piece.get('range', 1)} · {piece.get('tier', 1)} 金",
+         piece.get("skill_name"), piece.get("skill_description"),
+         f"装备：{piece.get('item_name') or '无'}", piece.get("item_effect"), f"已学：{learned.get('name', '无')}",
+-        learned.get("description")]))
++        learned.get("description"),
++        f"特性：{ability['name']}" if ability else None, ability.get("description")]))
+ 
+ 
+ @dataclass
+@@ -104,7 +106,7 @@ class Device:
+         return [r for r in self.state.get("rewards", []) if r.get("status") == "pending"]
+ 
+     def _is_tactical(self):
+-        return self.state.get("ruleset") == "tactics_v1"
++        return self.state.get("ruleset") in ("tactics_v1", "tactics_v2")
+ 
+     def _validate_learning(self, species, technique):
+         from techniques import validate_learning
+@@ -192,7 +194,7 @@ class Device:
+         you = state.get("you", {})
+         if page == "home":
+             return [row("启程 · 远征", "expedition", detail="选择主搭档、招式机器与开局装备。"),
+-                    row("战术远征 · 护卫与天气", "tactics", detail="沿用远征行囊。在野怪轮获取护卫、晴天与求雨教学，选择队友分工。"),
++                    row("战术远征 · 护卫与天气", "tactics", detail="九尾日照、拉普拉斯降雨在上场时自动触发。野怪轮获取护卫、晴天与求雨教学，选择队友分工。"),
+                     row("继续存档", "resume", subtitle="继续已保存的这一局" if self.sid else "尚无存档编号", disabled=not self.sid),
+                     row("经典对局", "classic", detail="从商店组建队伍，八位训练家同场竞技。"),
+                     row("挑战与图鉴", "collection")]
+@@ -233,7 +235,8 @@ class Device:
+         if page == "prep":
+             return [row("商店", "open", page="shop"), row("棋盘与备战", "open", page="board_rows"),
+                     row("仓库与教学" + (f" · {len(self._pending_rewards())} 待领" if self._pending_rewards() else ""), "open", page="inventory"), row("羁绊", "open", page="synergies"),
+-                    row("侦察与排名", "open", page="scout"), row("开战", "battle_confirm"),
++                    row("侦察与排名", "open", page="scout"),
++                    row("开战", "battle_confirm", detail=(state.get("entry_weather") or {}).get("note", "")),
+                     row("保存 / 返回主页", "open", page="system")]
+         if page == "shop":
+             entries = [row(p["name"] if p else "空货架", "buy", subtitle=f"{p.get('price', p['tier'])} 金" if p else "已售出",
+@@ -606,6 +609,7 @@ class Device:
+         screen["scene"] = {
+             "opponent": {"name": opponent.get("name", "等待配对"), "rows": opponent.get("rows", [])},
+             "weather": self.state.get("weather", {}),
++            "entry_weather": self.state.get("entry_weather"),
+             "synergies": self.state.get("synergies", []),
+             "loadout_partner": self.loadout.get("partner"),
+             "loadout_mode": self.context.get("mode", "expedition"),
+diff --git a/tools/acceptance/device_renderer.js b/tools/acceptance/device_renderer.js
+index e7aa777..2484d0a 100644
+--- a/tools/acceptance/device_renderer.js
++++ b/tools/acceptance/device_renderer.js
+@@ -103,6 +103,7 @@ function cell(p,c,y,{enemy=false,bench=false,active=false,source=false}={}){
+     sprite(p,x+3,y+(bench?0:2),bench?30:34);
+     if(p.item)rect(x+3,y+3,3,3,C.gold);
+     if(p.technique)rect(x+8,y+3,3,3,'#527d98');
++    if(enemy&&p.ability&&!bench){box(x+2,y+24,10,12,C.paper,'#87703f');text(p.ability.weather==='rain'?'雨':'日',x+3,y+33,8,'#87703f',true);}
+   }else{rect(x+19,y+Math.floor(h/2),2,2,bench?'#aeb694':enemy?'#b4a57e':'#97a981');}
+   if(source){rect(x+1,y+1,10,10,C.ink);text('起',x+2,y+9,8,C.white);}
+   if(active){box(x+1,y+1,38,h-2,'transparent',C.ink);corner(x+1,y+1,37,h-3,C.white);rect(x+16,y+h-4,8,3,C.gold);}
+@@ -111,7 +112,9 @@ function formation(s){
+   hud(s);const opp=s.scene?.opponent||{};
+   rect(0,27,240,18,C.ink);label(opp.name?`对手 · ${opp.name}`:'等待配对',6,39,140,10,C.paper);
+   const weather=s.scene?.weather?.zh&&s.scene.weather.zh!=='无'?s.scene.weather.zh:'晴朗';
+-  label(s.ruleset==='tactics_v1'?`共用 · ${weather}`:weather,s.ruleset==='tactics_v1'?151:190,39,s.ruleset==='tactics_v1'?83:44,10,'#d8cf99');
++  const tactical=['tactics_v1','tactics_v2'].includes(s.ruleset),entry=s.scene?.entry_weather;
++  const opening=entry&&(entry.you?.length||entry.opponent?.length);
++  label(opening?`入场 · ${entry.conflict?'晴雨相抵':entry.zh}`:tactical?`共用 · ${weather}`:weather,tactical?151:190,39,tactical?83:44,10,'#d8cf99');
+   for(let r=0;r<2;r++)for(let c=0;c<6;c++)cell(opp.rows?.[r]?.[c],c,45+r*40,{enemy:true});
+   rect(0,125,240,5,C.ink);for(let x=4;x<240;x+=10)rect(x,127,4,1,C.gold);
+   const selectingRows=s.page==='board_rows'||s.page==='move_rows';
+@@ -126,13 +129,14 @@ function formation(s){
+   if(!(s.bench||[]).some(Boolean))center('备 战 席',0,235,240,10,C.muted);
+ }
+ function tacticsOverlay(s){
+-  if(s.ruleset!=='tactics_v1')return;
++  if(!['tactics_v1','tactics_v2'].includes(s.ruleset))return;
+   const located=new Map();
+   (s.board||[]).forEach((cells,r)=>cells.forEach((p,c)=>{if(p)located.set(p.uid,{x:c*40,y:130+r*40,p});}));
+   const saved=s.scene?.tactical||{},preview=s.tactical_preview;
+   const guard=preview?.guard||saved.guard,weather=preview?.weather||saved.weather;
+   const color=preview?.guard&&preview.valid===false?C.red:'#536f86';
+-  const mark=(at,glyph,tint,offset=28)=>{if(!at)return;box(at.x+offset,at.y+2,10,12,C.paper,tint);text(glyph,at.x+offset+1,at.y+11,8,tint,true);};
++  const mark=(at,glyph,tint,offset=28,yOffset=2)=>{if(!at)return;box(at.x+offset,at.y+yOffset,10,12,C.paper,tint);text(glyph,at.x+offset+1,at.y+yOffset+9,8,tint,true);};
++  for(const at of located.values())if(at.p.ability)mark(at,at.p.ability.weather==='rain'?'雨':'日','#87703f',2,24);
+   if(guard){
+     const source=located.get(guard.uid),target=located.get(guard.target_uid);
+     if(source&&target){
+@@ -200,11 +204,11 @@ function piece(s){
+   if(!p){list(s,60);return;}
+   box(8,60,224,104,C.white);rect(9,61,68,102,'#dbe1c6');sprite(p,15,71,56);
+   center(s.focus.loc?.startsWith('b')?'备战中':'已上场',9,150,68,10,C.muted);
+-  label(p.role||'队伍成员',85,78,138,12,C.ink,true);label((p.types||[]).join(' / '),85,96,138,11,C.muted);
++  label(p.role||'队伍成员',85,78,138,12,C.ink,true);label((p.types||[]).join(' / ')+(p.ability?` · ${p.ability.name}`:''),85,96,138,11,C.muted);
+   label(p.skill_name,85,116,138,12,C.ink,true);
+   label(`装备 · ${p.item_name||'无'}`,85,136,138,10,C.muted);label(`招式 · ${p.technique?.name||'未学习'}`,85,153,138,10,C.muted);
+   partyStrip(s,169);
+-  const names=['移动 / 交换','装备道具','卸下装备','学习招式','卖出',s.ruleset==='tactics_v1'?'战术配置':'查看详情'];
++  const names=['移动 / 交换','装备道具','卸下装备','学习招式','卖出',['tactics_v1','tactics_v2'].includes(s.ruleset)?'战术配置':'查看详情'];
+   (s.choices||[]).forEach((r,i)=>{const x=8+i%2*114,y=209+Math.floor(i/2)*27,on=s.selected===i;box(x,y,110,24,on?C.ink:C.white);icon(['board','item','item','technique','coin','dex'][i],x+6,y+8,on?C.paper:C.muted);label(names[i],x+22,y+16,83,11,r.disabled?C.muted:on?C.paper:C.ink);});
+ }
+ function tactical(s){
+diff --git a/tools/acceptance/session_save.py b/tools/acceptance/session_save.py
+index c9eb3f8..bd0d1a5 100644
+--- a/tools/acceptance/session_save.py
++++ b/tools/acceptance/session_save.py
+@@ -20,6 +20,7 @@ BOT_STATS = ("gold_curve", "pop_curve", "synergy_curve", "synergy_formed_round",
+              "synergy_formed_type", "refreshes", "item_crafts", "item_equips",
+              "stone_triggers", "craft_stats")
+ LEGACY_BASE_FINGERPRINT = '2f9426505cad1addbab7b5db1e9f5a673a72ec0937a1ed4cf916926c04d015ad'
++LEGACY_TACTICS_FINGERPRINT = 'f05ad20bf84e27917c269487469914f042cc03bde53176a2c4b845b092bb343c'
+ 
+ 
+ class UnknownRulesError(UnsupportedVersionError, ValueError):
+@@ -135,6 +136,8 @@ class SessionCodec:
+         supported = {rules_fingerprint()}
+         if ruleset == tactics.BASE_RULESET:
+             supported.add(LEGACY_BASE_FINGERPRINT)
++        if ruleset in (tactics.BASE_RULESET, tactics.TACTICS_RULESET):
++            supported.add(LEGACY_TACTICS_FINGERPRINT)
+         if fingerprint not in supported:
+             raise UnknownRulesError('无法识别此存档的规则指纹；需要对应版本继续，原存档未修改')
+         state = demo.Session(integer(data["seed"], -(2 ** 63), 2 ** 63 - 1, "seed"), ruleset=ruleset)
+@@ -329,10 +332,11 @@ class SessionCodec:
+                 (b if a is state.player else a for a, b in state.pairs or [] if state.player in (a, b)), None)
+             if src is not None and state.opponent_comp is not None:
+                 comp = state.opponent_comp
+-                views = [demo._piece_view(o[0], o[1]) if isinstance(o, tuple) else demo._piece_view(o) for o in comp]
++                views = [demo._piece_view(o[0], o[1], ruleset) if isinstance(o, tuple)
++                         else demo._piece_view(o, ruleset=ruleset) for o in comp]
+                 state.opp_view = {"name": (f"幽灵（{src.name} 镜像）" if state.ghost_seat is state.player else src.name),
+                                   "hp": src.hp, "level": src.level, "rows": state._enemy_rows(views),
+-                                  "bench": [demo._piece_view(o.piece, o.item) for o in src.bench]}
++                                  "bench": [demo._piece_view(o.piece, o.item, ruleset) for o in src.bench]}
+         log = sequence(data["log"], 240, "log")
+         if any(not isinstance(line, str) or len(line) > 1000 for line in log):
+             raise ValueError("战报文本无效")
+@@ -341,7 +345,7 @@ class SessionCodec:
+             setattr(state, key, integer(data[key], 0, 1000000, key))
+         state.eliminated_round = (integer(data["eliminated_round"], 1, state.round_no, "eliminated_round")
+                                   if data["eliminated_round"] is not None else None)
+-        state.final_team = ([demo._piece_view(p[0], p[1]) if isinstance(p, tuple) else demo._piece_view(p)
++        state.final_team = ([demo._piece_view(p[0], p[1], ruleset) if isinstance(p, tuple) else demo._piece_view(p, ruleset=ruleset)
+                              for p in [piece(o, owned=False) for o in sequence(data["final_team"], 9, "final_team")]]
+                             if data["final_team"] is not None else None)
+         for record, view in zip(data['final_team'] or [], state.final_team or []):
+diff --git a/tools/acceptance/tactical_run_probe.py b/tools/acceptance/tactical_run_probe.py
+index e3fd5a0..cfc245a 100644
+--- a/tools/acceptance/tactical_run_probe.py
++++ b/tools/acceptance/tactical_run_probe.py
+@@ -158,7 +158,7 @@ def invariant(session):
+         assert all(row['status'] != 'pending' for row in session.rewards)
+ 
+ 
+-def game(seed, personality):
++def game(seed, personality, ruleset):
+     row = {'seed': seed, 'personality': personality, 'status': 'running', 'current_round': 1,
+            'battle_count': 0, 'player_battle_count': 0, 'tactical_events': Counter(),
+            'player_battle_tactical_events': Counter(), 'actions': Counter(),
+@@ -166,7 +166,7 @@ def game(seed, personality):
+            'invalidated_configuration_notices': [], 'guard_configured_rounds': 0,
+            'weather_configured_rounds': 0, 'checkpoints': [], 'rounds': []}
+     CONTEXT['row'] = row
+-    session = demo.Session(seed, ruleset='tactics_v1')
++    session = demo.Session(seed, ruleset=ruleset)
+     session.sid = f'{seed:012x}'
+     session.run_id = hashlib.sha256(f'tactics-smoke:{seed}'.encode()).hexdigest()[:32]
+     # Identical new-account expedition loadout, with the usual paid starter.
+@@ -235,6 +235,8 @@ def main(argv=None):
+     parser.add_argument('--games', type=int, default=32, help='Independent games, 1–4096 (default: 32).')
+     parser.add_argument('--seed-base', type=int, default=2026100500,
+                         help='First nonnegative signed-64-bit seed; subsequent games use consecutive seeds.')
++    parser.add_argument('--ruleset', choices=('tactics_v1', 'tactics_v2'), default='tactics_v2',
++                        help='Explicit battle version; defaults to the current tactical mode.')
+     parser.add_argument('--output', type=Path, default=ROOT / '.build/tactics/full-run-probe.json',
+                         help='Evidence JSON path; a game save directory is never allowed.')
+     args = parser.parse_args(argv)
+@@ -251,7 +253,7 @@ def main(argv=None):
+     with patch.object(demo, 'SESSIONS', {}), patch.object(demo, 'Battle', ObservedBattle), \
+             patch.object(demo, '_render_battle_frames', side_effect=headless):
+         for index in range(args.games):
+-            games.append(game(args.seed_base + index, sorted(PERSONALITIES)[index % 4]))
++            games.append(game(args.seed_base + index, sorted(PERSONALITIES)[index % 4], args.ruleset))
+             if index % 4 == 3:
+                 print(f'Completed {index + 1}/{args.games}', flush=True)
+     completed = [row for row in games if row['status'] == 'complete']
+@@ -280,7 +282,7 @@ def main(argv=None):
+                'final_pending': sum(row['final_pending'] for row in completed),
+                'table_rounds_mean': statistics.mean(row['table_rounds'] for row in completed) if completed else None,
+                'player_rank_counts': dict(Counter(row['player_rank'] for row in completed))}
+-    payload = {'method': __doc__, 'ruleset': 'tactics_v1', 'rules_fingerprint': rules_fingerprint(),
++    payload = {'method': __doc__, 'ruleset': args.ruleset, 'rules_fingerprint': rules_fingerprint(),
+                'script_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                'seed_base': args.seed_base, 'summary': summary, 'games': games,
+                'limits': ['L2 pilot is not a human player.', 'Sample validates whole-run workflow, not balance.',
+diff --git a/tools/mockups/render_battle_gif.py b/tools/mockups/render_battle_gif.py
+index 9259649..5f4072a 100644
+--- a/tools/mockups/render_battle_gif.py
++++ b/tools/mockups/render_battle_gif.py
+@@ -730,6 +730,8 @@ class BattleAnimation:
+                 label = {None: '无天气', 'sun': '晴天', 'rain': '雨天', 'sand': '沙暴', 'hail': '冰雹'}[self.weather_name]
+                 reason = ('晴雨冲突，恢复' if effect == 'weather_conflict' else
+                           '天气结束，恢复' if effect == 'weather_end' else '全场天气变为')
++                if effect == 'weather_start' and any(r.get('source_kind') == 'ability' for r in payload.get('requests', [])):
++                    reason = self.by_idx[source].piece.name + '带来'
+                 self.msg = (t, reason + label)
+         elif kind == "end":
+             self.result = ev[2]
+diff --git a/docs/24-evolution-builds-and-opening-abilities.md b/docs/24-evolution-builds-and-opening-abilities.md
+new file mode 100644
+index 0000000..5b28e2c
+--- /dev/null
++++ b/docs/24-evolution-builds-and-opening-abilities.md
+@@ -0,0 +1,94 @@
++# 24 · 进化决策、构筑现状与入场天气特性
++
++2026-10-05；基线 `6e33a02`。本轮确定进化主线，并在新开的战术远征中增加
++`tactics_v2` 入场天气特性。功能验收与强度读数分别见
++[第九批报告](../reports/system-optimization-batch-i-2026-10-05.md)。二世代仍不在本轮范围。
++
++## 1. 进化主线：保留
++
++**保留各形态入池、三合一进化和通信进化石。** 不将现行游戏改为只抽最终形态的升星游戏。
++13 号文档的“最终形态池 + 独立升星”从当前实施主线撤下；若未来比较，必须另开独立规则原型。
++
++当前合同不变：
++
++- 普通进化链收集三只同图鉴号，目标形态池有余量时合并；勇基拉、豪力、鬼斯通继续走进化石。
++- 直接买到与合并得到的同一形态，没有独立星级区别。重复最终形态可以另上场或卖出，不能自动升星。
++- 进化保留一份 UID、装备和兼容教学；多余或不兼容教学返还。物种固定特性由新形态重新查询，不复制材料的触发次数。
++- 三合一会减少人口及羁绊计数；当前仍自动合并，暂缓进化及合成预览尚未实施。
++- 通信进化石目前永久占唯一装备槽；消耗后释放槽位是另一个待验证提案，本轮没有修改。
++
++后续成长采用 [D09 的持有实例训练方向](22-system-interactions-and-playstyles.md#d09--进化训练与后期成长)。
++**训练、转训、退款账和锁定形态尚未实现。** 必须先验证实际付费本金、进化补差价、材料退款及卖出守恒，
++再讨论每条形态路线的技能强化，不能把方案写成已交付功能。
++
++进化需要带来职责变化，而非只增加总面板。本轮的实际例子是六尾没有日照，进化到九尾才获得入场天气。
++合并后先留在备战席仍不触发；部署到战场后，在下次战斗自动使用。
++
++## 2. 当前能组队，但构筑深度尚未成熟
++
++已有经济、人口、形态、两级原生技能、搭档特性、属性羁绊、装备、独立教学、站位与共享天气。
++这些环节能够组成“承伤 → 启动 → 输出/干扰”的计划。示例均来自实际解算器，不将候选天赋或封疗装备计入现有玩法。
++
++| 方向 | 核心与联动 | 可破坏的环节 |
++|---|---|---|
++| 花园续航 | 卡比兽睡觉/剩饭承伤，妙蛙花按实际伤害治疗，水系羁绊持续回复 | 突进绕前排、集火和群伤；针对治疗的专用反制仍不足 |
++| 电流法阵 | 主搭档雷丘前两次有效普攻回能，聚光镜起手能量，后排连续施法 | 回能范围、队友站位、雷丘生存；普通招募雷丘没有搭档回能 |
++| 双翼突进 | 暴鲤龙、格斗单位突破，胡地收割，居合斩补一轮扩散伤害 | 实际可达距离、落点与控制；当前护卫尚未成为稳定反制 |
++| 幽影控场 | 耿鬼偷取射程内高能量目标，隆隆岩控制，喷火龙搭档首次技能接力 | 对手突进及启动顺序；前后排互换有收益，也会恶化其他对局 |
++| 日照控场 | 九尾入场晴天，喷火龙起手能量与搭档接力，妙蛙花草伤转治疗 | 八秒启动期限、失去耿鬼偷能、对手水/火/草分布及改天气 |
++| 降雨续航 | 拉普拉斯入场雨天，呆壳兽水招，卡比兽和妙蛙花承担续航 | 雨天也帮助敌方水招；拉普拉斯自身原生冰招不获雨天增幅 |
++
++本轮冻结的日照控场名单：九尾、妙蛙花、喷火龙、雷丘、隆隆岩、胡地；
++降雨续航名单：卡比兽、拉普拉斯、妙蛙花、呆壳兽、隆隆岩、妙蛙草。
++每队六人口、15 金棋子、三件装备、一份教学。完整装备、搭档及站位在
++[固定阵容实验](../reports/evidence/abilities-2026-10-05/replacement-ablation.json)中。
++
++正式 100 种子对照：日照控场对突进由 11% 到 27%，仍非优势对局；降雨续航对原花园 66% 到 65%，
++对突进 15% 到 17%。前后版本只开关入场特性，其余完全相同。降雨续航本身的强度不能归功于降雨。
++两支天气队相遇，晴雨入场相抵，结果与旧规则一致。这些读数不证明全池平衡。
++
++剩余深度缺口：机制型羁绊、局内天赋/海克斯、终形态继续投入、治疗/启动的有效反制、
++按对手调整的 AI、商店转型支持和自然终局节奏。当前多数普通物种仍复用通用技能，
++不能因为有多种属性和装备就认为已经达到成熟构筑游戏的丰富度。
++
++## 3. 已实现的固定物种特性
++
++用户选择了“入场自动制造短时天气”。本作先加入两项固定特性，不要求主搭档身份或技能机学习。
++它们是本作的物种设定，不声称照搬原作特性分配。
++
++| 物种 | 特性 | 自动效果 |
++|---|---|---|
++| 九尾（38） | 日照 | 战斗入场制造全场晴天，持续 8 秒，每场一次 |
++| 拉普拉斯（131） | 降雨 | 战斗入场制造全场雨天，持续 8 秒，每场一次 |
++
++普通招募副本也有特性；备战席不触发；普通攻击和原生大招照常执行。
++不占教学槽、不扣技能机，所以拉普拉斯仍可学习冲浪/护卫，九尾仍可学习晴天来延长窗口。
++主搭档的专属特性与物种固定特性分别裁定；增加天气功能位不会使普通棋子获得主搭档回能。
++
++裁决顺序与边界：
++
++1. 完成实际部署和初始状态，收集所有存活单位的入场天气请求。开场齐射与第一次攻击之前，统一在 `t=0` 裁定。
++2. 同刻同种天气只形成一段八秒窗口；多个副本或双方都使用同种天气，不叠加时长。
++3. 同刻晴雨相抵，恢复本轮基础天气，所有入场机会均已使用。己方同时上九尾和拉普拉斯也会相抵，不比较人数或席位。
++4. 双方共享同一有效天气。晴天火/草招式 ×1.20、水招式 ×0.80；雨天水招式 ×1.20、火招式 ×0.80。
++   看实际招式属性：冰招式不因使用者是水属性而享受雨天加成，电招式也没有额外雨天增幅；无属性普攻不变。
++5. 后续晴天/求雨教学仍按 [教学合同](23-tactical-expedition.md)工作：选中的棋子首次原生大招后申请，下一模拟步生效。
++   入场特性没有用掉教学的机会。新天气覆盖旧天气，同天气只延后结束点，不能追溯增强发起教学的那次技能。
++6. 到期回到本轮基础天气，不恢复之前的入场天气；来源阵亡不撤销已经生效的窗口。不在每次施法或重新播放时重复入场触发。
++
++## 4. 展示、保存与扩展
++
++- 新开「战术远征 · 护卫与天气」使用 `tactics_v2`；经典及原远征仍为 `base_v1`，已有 `tactics_v1` 对局继续旧规则。
++- 三键备战页显示实际部署后的入场天气预告和冲突。己方及已揭晓的对手有天气角标；装备/教学标记保留。
++  棋子详情解释特性，开战菜单可以长按查看冲突说明；不增加第四个按键或专门的特性开关。
++- 商店、备战、战场、对手及结算视图按该局规则显示特性。读档重建冻结对手视图，不能拿备战单位或未来教学预测入场天气。
++- 存档仍是 schema 4。特性来源于物种与规则版本，不保存可重复继承的“剩余次数”；每次新 Battle 独立使用一次。
++  已知旧规则指纹允许恢复但不启用新特性，伪装新规则的旧指纹拒绝导入。
++- `sim/abilities.py` 维护物种→特性注册表，`WeatherController` 统一裁定天气，`Battle` 只负责收集来源。
++  以后增加同类天气物种只需注册及数据/展示/战斗回归，不需增加新的 Battle 物种判断。
++  其他触发类型（受击、退场、首次技能等）仍需要独立效果合同，当前并非全种类通用特性框架。
++
++验收：369 项测试、九项统一检查通过；32 局全流程无异常/阻塞；
++固定阵容初稿及替换方案各 2,000 场对照，换边失败均为零。旧 schema 3 和含九尾/拉普拉斯的
++`tactics_v1` schema 4 样本重放状态、事件哈希一致。新增三键路径覆盖详情、学习、移动、冲突、返回和恢复。
++真机 GPIO、性能、真人体验及所有构筑强度仍未验收。本轮子代理因 GLM 账号支持问题未能运行，复核为主代理普通复核。
+diff --git a/sim/abilities.py b/sim/abilities.py
+new file mode 100644
+index 0000000..267b98b
+--- /dev/null
++++ b/sim/abilities.py
+@@ -0,0 +1,34 @@
++"""Fixed species abilities for the explicit tactical-v2 rules.
++
++These are game-specific traits, separate from partner identity and teaching.
++Adding a species row does not require a new Battle allowlist or a learning slot.
++"""
++from copy import deepcopy
++
++from tactics import BASE_RULESET, entry_abilities_enabled
++from weather_control import WEATHER_WINDOW_SECONDS
++
++
++_ABILITIES = {
++    38: {"id": "drought", "name": "日照", "weather": "sun"},
++    131: {"id": "drizzle", "name": "降雨", "weather": "rain"},
++}
++
++
++def for_species(species_id, ruleset=BASE_RULESET):
++    if not entry_abilities_enabled(ruleset):
++        return None
++    if type(species_id) is not int or species_id not in _ABILITIES:
++        return None
++    record = deepcopy(_ABILITIES[species_id])
++    weather = "晴天" if record["weather"] == "sun" else "雨天"
++    record.update(species=species_id, trigger="battle_start", uses=1,
++                  duration=WEATHER_WINDOW_SECONDS, custom=True,
++                  description=f"本作固定特性：上场时自动制造{WEATHER_WINDOW_SECONDS:g}秒全场{weather}，"
++                  "不占教学槽；同刻晴雨相抵，双方共享天气，后续教学可覆盖，每场一次。")
++    return record
++
++
++def catalog(ruleset=BASE_RULESET):
++    return [view for species in sorted(_ABILITIES)
++            if (view := for_species(species, ruleset)) is not None]
+diff --git a/tests/fixtures/tactics-v1-schema4-session.json b/tests/fixtures/tactics-v1-schema4-session.json
+new file mode 100644
+index 0000000..97306e3
+--- /dev/null
++++ b/tests/fixtures/tactics-v1-schema4-session.json
+@@ -0,0 +1,2607 @@
++{
++  "schema": 4,
++  "generated_from_commit": "6e33a020866232b3beaab373a5128fc18438d2b1",
++  "scope": "Fixed legal-pool tactical-v1 starting roster with Ninetales and Lapras, level-4 fixture; real move/lock/battle/next and all bot fights, production layout=back. Only PNG omitted. Not an acquisition or balance sample. No disk save/profile IO.",
++  "initial": {
++    "rules": "f05ad20bf84e27917c269487469914f042cc03bde53176a2c4b845b092bb343c",
++    "seed": 9102027,
++    "round": 1,
++    "ruleset": "tactics_v1",
++    "tactical": [
++      {
++        "guard": null,
++        "weather": null
++      },
++      {
++        "guard": null,
++        "weather": null
++      },
++      {
++        "guard": null,
++        "weather": null
++      },
++      {
++        "guard": null,
++        "weather": null
++      },
++      {
++        "guard": null,
++        "weather": null
++      },
++      {
++        "guard": null,
++        "weather": null
++      },
++      {
++        "guard": null,
++        "weather": null
++      },
++      {
++        "guard": null,
++        "weather": null
++      }
++    ],
++    "rewards": [],
++    "next_unit_id": 32,
++    "expedition_state": {
++      "run_id": "b0020000000000000000000000000000",
++      "loadout": {
++        "partner": 6,
++        "technique": null,
++        "item": null
++      },
++      "discoveries": {
++        "seen": [
++          4,
++          25,
++          37,
++          38,
++          56,
++          58,
++          111,
++          116,
++          131,
++          147
++        ],
++        "fielded": [],
++        "won": []
++      }
++    },
++    "phase": "prep",
++    "seats": [
++      {
++        "gold": 0,
++        "hp": 100,
++        "level": 4,
++        "xp": 0,
++        "streak": 0,
++        "alive": true,
++        "rank": null,
++        "last_damage": 0,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 0,
++        "shop": [
++          58,
++          58,
++          147,
++          111
++        ],
++        "board": [
++          {
++            "species": 38,
++            "item": null,
++            "uid": "u00000029",
++            "technique": null,
++            "sources": [
++              38
++            ],
++            "invested": 3
++          },
++          {
++            "species": 4,
++            "item": null,
++            "uid": "u00000030",
++            "technique": null,
++            "sources": [
++              4
++            ],
++            "invested": 1
++          },
++          {
++            "species": 131,
++            "item": null,
++            "uid": "u00000031",
++            "technique": null,
++            "sources": [
++              131
++            ],
++            "invested": 3
++          }
++        ],
++        "bench": [],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 2,
++        "grid": [
++          [
++            0,
++            2,
++            {
++              "species": 4,
++              "item": null,
++              "uid": "u00000030",
++              "technique": null,
++              "sources": [
++                4
++              ],
++              "invested": 1
++            }
++          ],
++          [
++            0,
++            3,
++            {
++              "species": 131,
++              "item": null,
++              "uid": "u00000031",
++              "technique": null,
++              "sources": [
++                131
++              ],
++              "invested": 3
++            }
++          ],
++          [
++            1,
++            2,
++            {
++              "species": 38,
++              "item": null,
++              "uid": "u00000029",
++              "technique": null,
++              "sources": [
++                38
++              ],
++              "invested": 3
++            }
++          ]
++        ],
++        "refresh_j": 0,
++        "shop_locked": false
++      },
++      {
++        "gold": 3,
++        "hp": 100,
++        "level": 2,
++        "xp": 0,
++        "streak": 0,
++        "alive": true,
++        "rank": null,
++        "last_damage": 0,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 1,
++        "shop": [
++          null,
++          null,
++          null,
++          null
++        ],
++        "board": [
++          {
++            "species": 116,
++            "item": null,
++            "uid": "u00000001",
++            "technique": null,
++            "sources": [
++              116
++            ],
++            "invested": 1
++          },
++          {
++            "species": 1,
++            "item": null,
++            "uid": "u00000002",
++            "technique": null,
++            "sources": [
++              1
++            ],
++            "invested": 1
++          },
++          {
++            "species": 56,
++            "item": null,
++            "uid": "u00000003",
++            "technique": null,
++            "sources": [
++              56
++            ],
++            "invested": 1
++          },
++          {
++            "species": 58,
++            "item": null,
++            "uid": "u00000004",
++            "technique": null,
++            "sources": [
++              58
++            ],
++            "invested": 1
++          }
++        ],
++        "bench": [],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 3,
++        "ability": 1,
++        "personality": "copycat",
++        "target_types": [],
++        "stats": {
++          "gold_curve": [
++            3
++          ],
++          "pop_curve": [
++            4
++          ],
++          "synergy_curve": [
++            [
++              "FIGHTING",
++              1
++            ]
++          ],
++          "synergy_formed_round": null,
++          "synergy_formed_type": null,
++          "refreshes": 0,
++          "item_crafts": 0,
++          "item_equips": 0,
++          "stone_triggers": 0,
++          "craft_stats": {
++            "calls": 1,
++            "made": {},
++            "no_pair": {
++              "lucky_egg": 1,
++              "choice_band": 1,
++              "focus_lens": 1,
++              "sash": 1,
++              "leftovers": 1,
++              "bright_powder": 1,
++              "swift_feather": 1,
++              "scarf_fire": 1,
++              "scarf_water": 1,
++              "scarf_electric": 1,
++              "weather_stone": 1
++            },
++            "gated": {},
++            "shadow": {}
++          }
++        }
++      },
++      {
++        "gold": 3,
++        "hp": 100,
++        "level": 2,
++        "xp": 0,
++        "streak": 0,
++        "alive": true,
++        "rank": null,
++        "last_damage": 0,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 2,
++        "shop": [
++          null,
++          null,
++          null,
++          null
++        ],
++        "board": [
++          {
++            "species": 116,
++            "item": null,
++            "uid": "u00000005",
++            "technique": null,
++            "sources": [
++              116
++            ],
++            "invested": 1
++          },
++          {
++            "species": 37,
++            "item": null,
++            "uid": "u00000006",
++            "technique": null,
++            "sources": [
++              37
++            ],
++            "invested": 1
++          },
++          {
++            "species": 25,
++            "item": null,
++            "uid": "u00000007",
++            "technique": null,
++            "sources": [
++              25
++            ],
++            "invested": 1
++          },
++          {
++            "species": 56,
++            "item": null,
++            "uid": "u00000008",
++            "technique": null,
++            "sources": [
++              56
++            ],
++            "invested": 1
++          }
++        ],
++        "bench": [],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 0,
++        "ability": 1,
++        "personality": "balanced",
++        "target_types": [],
++        "stats": {
++          "gold_curve": [
++            3
++          ],
++          "pop_curve": [
++            4
++          ],
++          "synergy_curve": [
++            [
++              "ELECTRIC",
++              1
++            ]
++          ],
++          "synergy_formed_round": null,
++          "synergy_formed_type": null,
++          "refreshes": 0,
++          "item_crafts": 0,
++          "item_equips": 0,
++          "stone_triggers": 0,
++          "craft_stats": {
++            "calls": 1,
++            "made": {},
++            "no_pair": {
++              "lucky_egg": 1,
++              "choice_band": 1,
++              "focus_lens": 1,
++              "sash": 1,
++              "leftovers": 1,
++              "bright_powder": 1,
++              "swift_feather": 1,
++              "scarf_fire": 1,
++              "scarf_water": 1,
++              "scarf_electric": 1,
++              "weather_stone": 1
++            },
++            "gated": {},
++            "shadow": {}
++          }
++        }
++      },
++      {
++        "gold": 3,
++        "hp": 100,
++        "level": 2,
++        "xp": 0,
++        "streak": 0,
++        "alive": true,
++        "rank": null,
++        "last_damage": 0,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 3,
++        "shop": [
++          null,
++          null,
++          null,
++          null
++        ],
++        "board": [
++          {
++            "species": 43,
++            "item": null,
++            "uid": "u00000009",
++            "technique": null,
++            "sources": [
++              43
++            ],
++            "invested": 1
++          },
++          {
++            "species": 37,
++            "item": null,
++            "uid": "u00000010",
++            "technique": null,
++            "sources": [
++              37
++            ],
++            "invested": 1
++          },
++          {
++            "species": 60,
++            "item": null,
++            "uid": "u00000011",
++            "technique": null,
++            "sources": [
++              60
++            ],
++            "invested": 1
++          },
++          {
++            "species": 79,
++            "item": null,
++            "uid": "u00000012",
++            "technique": null,
++            "sources": [
++              79
++            ],
++            "invested": 1
++          }
++        ],
++        "bench": [],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 1,
++        "ability": 1,
++        "personality": "roller",
++        "target_types": [],
++        "stats": {
++          "gold_curve": [
++            3
++          ],
++          "pop_curve": [
++            4
++          ],
++          "synergy_curve": [
++            [
++              "WATER",
++              2
++            ]
++          ],
++          "synergy_formed_round": null,
++          "synergy_formed_type": null,
++          "refreshes": 0,
++          "item_crafts": 0,
++          "item_equips": 0,
++          "stone_triggers": 0,
++          "craft_stats": {
++            "calls": 1,
++            "made": {},
++            "no_pair": {
++              "lucky_egg": 1,
++              "choice_band": 1,
++              "swift_feather": 1,
++              "focus_lens": 1,
++              "sash": 1,
++              "scarf_fire": 1,
++              "scarf_water": 1,
++              "scarf_electric": 1,
++              "leftovers": 1,
++              "bright_powder": 1,
++              "weather_stone": 1
++            },
++            "gated": {},
++            "shadow": {}
++          }
++        }
++      },
++      {
++        "gold": 3,
++        "hp": 100,
++        "level": 2,
++        "xp": 0,
++        "streak": 0,
++        "alive": true,
++        "rank": null,
++        "last_damage": 0,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 4,
++        "shop": [
++          null,
++          null,
++          null,
++          null
++        ],
++        "board": [
++          {
++            "species": 92,
++            "item": null,
++            "uid": "u00000013",
++            "technique": null,
++            "sources": [
++              92
++            ],
++            "invested": 1
++          },
++          {
++            "species": 120,
++            "item": null,
++            "uid": "u00000014",
++            "technique": null,
++            "sources": [
++              120
++            ],
++            "invested": 1
++          },
++          {
++            "species": 1,
++            "item": null,
++            "uid": "u00000015",
++            "technique": null,
++            "sources": [
++              1
++            ],
++            "invested": 1
++          },
++          {
++            "species": 66,
++            "item": null,
++            "uid": "u00000016",
++            "technique": null,
++            "sources": [
++              66
++            ],
++            "invested": 1
++          }
++        ],
++        "bench": [],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 6,
++        "ability": 2,
++        "personality": "saver",
++        "target_types": [],
++        "stats": {
++          "gold_curve": [
++            3
++          ],
++          "pop_curve": [
++            4
++          ],
++          "synergy_curve": [
++            [
++              "POISON",
++              2
++            ]
++          ],
++          "synergy_formed_round": null,
++          "synergy_formed_type": null,
++          "refreshes": 0,
++          "item_crafts": 0,
++          "item_equips": 0,
++          "stone_triggers": 0,
++          "craft_stats": {
++            "calls": 1,
++            "made": {},
++            "no_pair": {
++              "lucky_egg": 1,
++              "choice_band": 1,
++              "focus_lens": 1,
++              "sash": 1,
++              "leftovers": 1,
++              "bright_powder": 1,
++              "swift_feather": 1,
++              "scarf_fire": 1,
++              "scarf_water": 1,
++              "scarf_electric": 1,
++              "weather_stone": 1
++            },
++            "gated": {},
++            "shadow": {}
++          }
++        }
++      },
++      {
++        "gold": 3,
++        "hp": 100,
++        "level": 2,
++        "xp": 0,
++        "streak": 0,
++        "alive": true,
++        "rank": null,
++        "last_damage": 0,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 5,
++        "shop": [
++          null,
++          null,
++          null,
++          null
++        ],
++        "board": [
++          {
++            "species": 116,
++            "item": null,
++            "uid": "u00000017",
++            "technique": null,
++            "sources": [
++              116
++            ],
++            "invested": 1
++          },
++          {
++            "species": 116,
++            "item": null,
++            "uid": "u00000018",
++            "technique": null,
++            "sources": [
++              116
++            ],
++            "invested": 1
++          },
++          {
++            "species": 10,
++            "item": null,
++            "uid": "u00000019",
++            "technique": null,
++            "sources": [
++              10
++            ],
++            "invested": 1
++          },
++          {
++            "species": 29,
++            "item": null,
++            "uid": "u00000020",
++            "technique": null,
++            "sources": [
++              29
++            ],
++            "invested": 1
++          }
++        ],
++        "bench": [],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 7,
++        "ability": 2,
++        "personality": "balanced",
++        "target_types": [],
++        "stats": {
++          "gold_curve": [
++            3
++          ],
++          "pop_curve": [
++            4
++          ],
++          "synergy_curve": [
++            [
++              "WATER",
++              2
++            ]
++          ],
++          "synergy_formed_round": null,
++          "synergy_formed_type": null,
++          "refreshes": 0,
++          "item_crafts": 0,
++          "item_equips": 0,
++          "stone_triggers": 0,
++          "craft_stats": {
++            "calls": 1,
++            "made": {},
++            "no_pair": {
++              "lucky_egg": 1,
++              "choice_band": 1,
++              "focus_lens": 1,
++              "sash": 1,
++              "leftovers": 1,
++              "bright_powder": 1,
++              "swift_feather": 1,
++              "scarf_fire": 1,
++              "scarf_water": 1,
++              "scarf_electric": 1,
++              "weather_stone": 1
++            },
++            "gated": {},
++            "shadow": {}
++          }
++        }
++      },
++      {
++        "gold": 3,
++        "hp": 100,
++        "level": 2,
++        "xp": 0,
++        "streak": 0,
++        "alive": true,
++        "rank": null,
++        "last_damage": 0,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 6,
++        "shop": [
++          null,
++          null,
++          null,
++          null
++        ],
++        "board": [
++          {
++            "species": 4,
++            "item": null,
++            "uid": "u00000021",
++            "technique": null,
++            "sources": [
++              4
++            ],
++            "invested": 1
++          },
++          {
++            "species": 21,
++            "item": null,
++            "uid": "u00000022",
++            "technique": null,
++            "sources": [
++              21
++            ],
++            "invested": 1
++          },
++          {
++            "species": 19,
++            "item": null,
++            "uid": "u00000023",
++            "technique": null,
++            "sources": [
++              19
++            ],
++            "invested": 1
++          },
++          {
++            "species": 29,
++            "item": null,
++            "uid": "u00000024",
++            "technique": null,
++            "sources": [
++              29
++            ],
++            "invested": 1
++          }
++        ],
++        "bench": [],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 4,
++        "ability": 2,
++        "personality": "copycat",
++        "target_types": [],
++        "stats": {
++          "gold_curve": [
++            3
++          ],
++          "pop_curve": [
++            4
++          ],
++          "synergy_curve": [
++            [
++              "NORMAL",
++              2
++            ]
++          ],
++          "synergy_formed_round": null,
++          "synergy_formed_type": null,
++          "refreshes": 0,
++          "item_crafts": 0,
++          "item_equips": 0,
++          "stone_triggers": 0,
++          "craft_stats": {
++            "calls": 1,
++            "made": {},
++            "no_pair": {
++              "lucky_egg": 1,
++              "choice_band": 1,
++              "focus_lens": 1,
++              "sash": 1,
++              "leftovers": 1,
++              "bright_powder": 1,
++              "swift_feather": 1,
++              "scarf_fire": 1,
++              "scarf_water": 1,
++              "scarf_electric": 1,
++              "weather_stone": 1
++            },
++            "gated": {},
++            "shadow": {}
++          }
++        }
++      },
++      {
++        "gold": 3,
++        "hp": 100,
++        "level": 2,
++        "xp": 0,
++        "streak": 0,
++        "alive": true,
++        "rank": null,
++        "last_damage": 0,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 7,
++        "shop": [
++          null,
++          null,
++          null,
++          null
++        ],
++        "board": [
++          {
++            "species": 120,
++            "item": null,
++            "uid": "u00000025",
++            "technique": null,
++            "sources": [
++              120
++            ],
++            "invested": 1
++          },
++          {
++            "species": 25,
++            "item": null,
++            "uid": "u00000026",
++            "technique": null,
++            "sources": [
++              25
++            ],
++            "invested": 1
++          },
++          {
++            "species": 58,
++            "item": null,
++            "uid": "u00000027",
++            "technique": null,
++            "sources": [
++              58
++            ],
++            "invested": 1
++          },
++          {
++            "species": 29,
++            "item": null,
++            "uid": "u00000028",
++            "technique": null,
++            "sources": [
++              29
++            ],
++            "invested": 1
++          }
++        ],
++        "bench": [],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 5,
++        "ability": 3,
++        "personality": "roller",
++        "target_types": [],
++        "stats": {
++          "gold_curve": [
++            3
++          ],
++          "pop_curve": [
++            4
++          ],
++          "synergy_curve": [
++            [
++              "ELECTRIC",
++              1
++            ]
++          ],
++          "synergy_formed_round": null,
++          "synergy_formed_type": null,
++          "refreshes": 0,
++          "item_crafts": 0,
++          "item_equips": 0,
++          "stone_triggers": 0,
++          "craft_stats": {
++            "calls": 1,
++            "made": {},
++            "no_pair": {
++              "lucky_egg": 1,
++              "choice_band": 1,
++              "swift_feather": 1,
++              "focus_lens": 1,
++              "sash": 1,
++              "scarf_fire": 1,
++              "scarf_water": 1,
++              "scarf_electric": 1,
++              "leftovers": 1,
++              "bright_powder": 1,
++              "weather_stone": 1
++            },
++            "gated": {},
++            "shadow": {}
++          }
++        }
++      }
++    ],
++    "pool": {
++      "1": 20,
++      "4": 20,
++      "7": 22,
++      "10": 21,
++      "11": 22,
++      "13": 22,
++      "14": 22,
++      "16": 22,
++      "17": 22,
++      "21": 21,
++      "19": 21,
++      "25": 20,
++      "29": 19,
++      "32": 22,
++      "37": 20,
++      "41": 22,
++      "43": 21,
++      "54": 22,
++      "56": 20,
++      "58": 18,
++      "60": 21,
++      "63": 22,
++      "66": 21,
++      "69": 22,
++      "74": 22,
++      "79": 21,
++      "81": 22,
++      "92": 21,
++      "111": 21,
++      "116": 18,
++      "120": 20,
++      "129": 22,
++      "133": 22,
++      "147": 21,
++      "2": 18,
++      "5": 18,
++      "8": 18,
++      "12": 18,
++      "15": 18,
++      "18": 18,
++      "22": 18,
++      "20": 18,
++      "26": 18,
++      "30": 18,
++      "31": 18,
++      "33": 18,
++      "34": 18,
++      "42": 18,
++      "44": 18,
++      "45": 18,
++      "57": 18,
++      "61": 18,
++      "64": 18,
++      "65": 18,
++      "67": 18,
++      "70": 18,
++      "71": 18,
++      "75": 18,
++      "76": 18,
++      "80": 18,
++      "82": 18,
++      "93": 18,
++      "95": 18,
++      "112": 18,
++      "117": 18,
++      "148": 18,
++      "3": 12,
++      "6": 12,
++      "9": 12,
++      "38": 11,
++      "55": 12,
++      "59": 12,
++      "62": 12,
++      "68": 12,
++      "94": 12,
++      "121": 12,
++      "123": 12,
++      "130": 12,
++      "131": 11,
++      "134": 12,
++      "135": 12,
++      "136": 12,
++      "143": 12,
++      "149": 12
++    },
++    "pairs": [
++      [
++        2,
++        0
++      ],
++      [
++        4,
++        6
++      ],
++      [
++        3,
++        1
++      ],
++      [
++        7,
++        5
++      ]
++    ],
++    "ghost_seat": null,
++    "ghost_source": null,
++    "opponent_comp": [
++      {
++        "species": 116,
++        "item": null
++      },
++      {
++        "species": 37,
++        "item": null
++      },
++      {
++        "species": 25,
++        "item": null
++      },
++      {
++        "species": 56,
++        "item": null
++      }
++    ],
++    "opponent_learned": [
++      null,
++      null,
++      null,
++      null
++    ],
++    "opponent_tactics": {
++      "guard": null,
++      "weather": null
++    },
++    "log": [
++      "R1｜主搭档：小火龙（-1 金）；进化后保留搭档特性"
++    ],
++    "last_battle": null,
++    "player_battles": 0,
++    "player_frames_total": 0,
++    "eliminated_round": null,
++    "final_team": null
++  },
++  "commands": [
++    {
++      "cmd": "move",
++      "from": "g1,2",
++      "to": "g1,3"
++    },
++    {
++      "cmd": "lock"
++    },
++    {
++      "cmd": "end_prep"
++    },
++    {
++      "cmd": "next"
++    }
++  ],
++  "expected_after": {
++    "rules": "f05ad20bf84e27917c269487469914f042cc03bde53176a2c4b845b092bb343c",
++    "seed": 9102027,
++    "round": 2,
++    "ruleset": "tactics_v1",
++    "tactical": [
++      {
++        "guard": null,
++        "weather": null
++      },
++      {
++        "guard": null,
++        "weather": null
++      },
++      {
++        "guard": null,
++        "weather": null
++      },
++      {
++        "guard": null,
++        "weather": null
++      },
++      {
++        "guard": null,
++        "weather": null
++      },
++      {
++        "guard": null,
++        "weather": null
++      },
++      {
++        "guard": null,
++        "weather": null
++      },
++      {
++        "guard": null,
++        "weather": null
++      }
++    ],
++    "rewards": [],
++    "next_unit_id": 42,
++    "expedition_state": {
++      "run_id": "b0020000000000000000000000000000",
++      "loadout": {
++        "partner": 6,
++        "technique": null,
++        "item": null
++      },
++      "discoveries": {
++        "seen": [
++          4,
++          25,
++          37,
++          38,
++          56,
++          58,
++          111,
++          116,
++          131,
++          147
++        ],
++        "fielded": [
++          4,
++          38,
++          131
++        ],
++        "won": [
++          4,
++          38,
++          131
++        ]
++      }
++    },
++    "phase": "prep",
++    "seats": [
++      {
++        "gold": 5,
++        "hp": 100,
++        "level": 4,
++        "xp": 2,
++        "streak": 1,
++        "alive": true,
++        "rank": null,
++        "last_damage": 0,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 0,
++        "shop": [
++          58,
++          58,
++          147,
++          111
++        ],
++        "board": [
++          {
++            "species": 38,
++            "item": null,
++            "uid": "u00000029",
++            "technique": null,
++            "sources": [
++              38
++            ],
++            "invested": 3
++          },
++          {
++            "species": 4,
++            "item": null,
++            "uid": "u00000030",
++            "technique": null,
++            "sources": [
++              4
++            ],
++            "invested": 1
++          },
++          {
++            "species": 131,
++            "item": null,
++            "uid": "u00000031",
++            "technique": null,
++            "sources": [
++              131
++            ],
++            "invested": 3
++          }
++        ],
++        "bench": [],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 3,
++        "grid": [
++          [
++            0,
++            2,
++            {
++              "species": 4,
++              "item": null,
++              "uid": "u00000030",
++              "technique": null,
++              "sources": [
++                4
++              ],
++              "invested": 1
++            }
++          ],
++          [
++            0,
++            3,
++            {
++              "species": 131,
++              "item": null,
++              "uid": "u00000031",
++              "technique": null,
++              "sources": [
++                131
++              ],
++              "invested": 3
++            }
++          ],
++          [
++            1,
++            3,
++            {
++              "species": 38,
++              "item": null,
++              "uid": "u00000029",
++              "technique": null,
++              "sources": [
++                38
++              ],
++              "invested": 3
++            }
++          ]
++        ],
++        "refresh_j": 0,
++        "shop_locked": true
++      },
++      {
++        "gold": 3,
++        "hp": 96,
++        "level": 3,
++        "xp": 0,
++        "streak": -1,
++        "alive": true,
++        "rank": null,
++        "last_damage": 4,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 1,
++        "shop": [
++          null,
++          81,
++          37,
++          29
++        ],
++        "board": [
++          {
++            "species": 116,
++            "item": null,
++            "uid": "u00000001",
++            "technique": null,
++            "sources": [
++              116
++            ],
++            "invested": 1
++          },
++          {
++            "species": 116,
++            "item": null,
++            "uid": "u00000032",
++            "technique": null,
++            "sources": [
++              116
++            ],
++            "invested": 1
++          },
++          {
++            "species": 1,
++            "item": null,
++            "uid": "u00000002",
++            "technique": null,
++            "sources": [
++              1
++            ],
++            "invested": 1
++          },
++          {
++            "species": 56,
++            "item": null,
++            "uid": "u00000003",
++            "technique": null,
++            "sources": [
++              56
++            ],
++            "invested": 1
++          },
++          {
++            "species": 58,
++            "item": null,
++            "uid": "u00000004",
++            "technique": null,
++            "sources": [
++              58
++            ],
++            "invested": 1
++          }
++        ],
++        "bench": [],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 6,
++        "ability": 1,
++        "personality": "copycat",
++        "target_types": [],
++        "stats": {
++          "gold_curve": [
++            3,
++            3
++          ],
++          "pop_curve": [
++            4,
++            5
++          ],
++          "synergy_curve": [
++            [
++              "FIGHTING",
++              1
++            ],
++            [
++              "WATER",
++              2
++            ]
++          ],
++          "synergy_formed_round": null,
++          "synergy_formed_type": null,
++          "refreshes": 0,
++          "item_crafts": 0,
++          "item_equips": 0,
++          "stone_triggers": 0,
++          "craft_stats": {
++            "calls": 2,
++            "made": {},
++            "no_pair": {
++              "lucky_egg": 2,
++              "choice_band": 2,
++              "focus_lens": 2,
++              "sash": 2,
++              "leftovers": 2,
++              "bright_powder": 2,
++              "swift_feather": 2,
++              "scarf_fire": 2,
++              "scarf_water": 2,
++              "scarf_electric": 2,
++              "weather_stone": 2
++            },
++            "gated": {},
++            "shadow": {}
++          }
++        }
++      },
++      {
++        "gold": 6,
++        "hp": 95,
++        "level": 2,
++        "xp": 2,
++        "streak": -1,
++        "alive": true,
++        "rank": null,
++        "last_damage": 5,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 2,
++        "shop": [
++          133,
++          13,
++          null,
++          null
++        ],
++        "board": [
++          {
++            "species": 37,
++            "item": null,
++            "uid": "u00000006",
++            "technique": null,
++            "sources": [
++              37
++            ],
++            "invested": 1
++          },
++          {
++            "species": 25,
++            "item": null,
++            "uid": "u00000007",
++            "technique": null,
++            "sources": [
++              25
++            ],
++            "invested": 1
++          },
++          {
++            "species": 56,
++            "item": null,
++            "uid": "u00000008",
++            "technique": null,
++            "sources": [
++              56
++            ],
++            "invested": 1
++          },
++          {
++            "species": 66,
++            "item": null,
++            "uid": "u00000033",
++            "technique": null,
++            "sources": [
++              66
++            ],
++            "invested": 1
++          }
++        ],
++        "bench": [
++          {
++            "species": 37,
++            "item": null,
++            "uid": "u00000034",
++            "technique": null,
++            "sources": [
++              37
++            ],
++            "invested": 1
++          },
++          {
++            "species": 116,
++            "item": null,
++            "uid": "u00000005",
++            "technique": null,
++            "sources": [
++              116
++            ],
++            "invested": 1
++          }
++        ],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 5,
++        "ability": 1,
++        "personality": "balanced",
++        "target_types": [],
++        "stats": {
++          "gold_curve": [
++            3,
++            6
++          ],
++          "pop_curve": [
++            4,
++            4
++          ],
++          "synergy_curve": [
++            [
++              "ELECTRIC",
++              1
++            ],
++            [
++              "FIGHTING",
++              2
++            ]
++          ],
++          "synergy_formed_round": null,
++          "synergy_formed_type": null,
++          "refreshes": 0,
++          "item_crafts": 0,
++          "item_equips": 0,
++          "stone_triggers": 0,
++          "craft_stats": {
++            "calls": 2,
++            "made": {},
++            "no_pair": {
++              "lucky_egg": 2,
++              "choice_band": 2,
++              "focus_lens": 2,
++              "sash": 2,
++              "leftovers": 2,
++              "bright_powder": 2,
++              "swift_feather": 2,
++              "scarf_fire": 2,
++              "scarf_water": 2,
++              "scarf_electric": 2,
++              "weather_stone": 2
++            },
++            "gated": {},
++            "shadow": {}
++          }
++        }
++      },
++      {
++        "gold": 6,
++        "hp": 100,
++        "level": 2,
++        "xp": 2,
++        "streak": 1,
++        "alive": true,
++        "rank": null,
++        "last_damage": 0,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 3,
++        "shop": [
++          11,
++          21,
++          null,
++          null
++        ],
++        "board": [
++          {
++            "species": 43,
++            "item": null,
++            "uid": "u00000009",
++            "technique": null,
++            "sources": [
++              43
++            ],
++            "invested": 1
++          },
++          {
++            "species": 4,
++            "item": null,
++            "uid": "u00000035",
++            "technique": null,
++            "sources": [
++              4
++            ],
++            "invested": 1
++          },
++          {
++            "species": 79,
++            "item": null,
++            "uid": "u00000012",
++            "technique": null,
++            "sources": [
++              79
++            ],
++            "invested": 1
++          },
++          {
++            "species": 79,
++            "item": null,
++            "uid": "u00000036",
++            "technique": null,
++            "sources": [
++              79
++            ],
++            "invested": 1
++          }
++        ],
++        "bench": [
++          {
++            "species": 60,
++            "item": null,
++            "uid": "u00000011",
++            "technique": null,
++            "sources": [
++              60
++            ],
++            "invested": 1
++          },
++          {
++            "species": 37,
++            "item": null,
++            "uid": "u00000010",
++            "technique": null,
++            "sources": [
++              37
++            ],
++            "invested": 1
++          }
++        ],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 0,
++        "ability": 1,
++        "personality": "roller",
++        "target_types": [],
++        "stats": {
++          "gold_curve": [
++            3,
++            6
++          ],
++          "pop_curve": [
++            4,
++            4
++          ],
++          "synergy_curve": [
++            [
++              "WATER",
++              2
++            ],
++            [
++              "PSYCHIC",
++              2
++            ]
++          ],
++          "synergy_formed_round": null,
++          "synergy_formed_type": null,
++          "refreshes": 0,
++          "item_crafts": 0,
++          "item_equips": 0,
++          "stone_triggers": 0,
++          "craft_stats": {
++            "calls": 2,
++            "made": {},
++            "no_pair": {
++              "lucky_egg": 2,
++              "choice_band": 2,
++              "swift_feather": 2,
++              "focus_lens": 2,
++              "sash": 2,
++              "scarf_fire": 2,
++              "scarf_water": 2,
++              "scarf_electric": 2,
++              "leftovers": 2,
++              "bright_powder": 2,
++              "weather_stone": 2
++            },
++            "gated": {},
++            "shadow": {}
++          }
++        }
++      },
++      {
++        "gold": 7,
++        "hp": 100,
++        "level": 2,
++        "xp": 2,
++        "streak": 1,
++        "alive": true,
++        "rank": null,
++        "last_damage": 0,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 4,
++        "shop": [
++          63,
++          null,
++          74,
++          79
++        ],
++        "board": [
++          {
++            "species": 92,
++            "item": null,
++            "uid": "u00000013",
++            "technique": null,
++            "sources": [
++              92
++            ],
++            "invested": 1
++          },
++          {
++            "species": 120,
++            "item": null,
++            "uid": "u00000014",
++            "technique": null,
++            "sources": [
++              120
++            ],
++            "invested": 1
++          },
++          {
++            "species": 1,
++            "item": null,
++            "uid": "u00000015",
++            "technique": null,
++            "sources": [
++              1
++            ],
++            "invested": 1
++          },
++          {
++            "species": 32,
++            "item": null,
++            "uid": "u00000037",
++            "technique": null,
++            "sources": [
++              32
++            ],
++            "invested": 1
++          }
++        ],
++        "bench": [
++          {
++            "species": 66,
++            "item": null,
++            "uid": "u00000016",
++            "technique": null,
++            "sources": [
++              66
++            ],
++            "invested": 1
++          }
++        ],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 7,
++        "ability": 2,
++        "personality": "saver",
++        "target_types": [
++          "POISON"
++        ],
++        "stats": {
++          "gold_curve": [
++            3,
++            7
++          ],
++          "pop_curve": [
++            4,
++            4
++          ],
++          "synergy_curve": [
++            [
++              "POISON",
++              2
++            ],
++            [
++              "POISON",
++              3
++            ]
++          ],
++          "synergy_formed_round": null,
++          "synergy_formed_type": null,
++          "refreshes": 0,
++          "item_crafts": 0,
++          "item_equips": 0,
++          "stone_triggers": 0,
++          "craft_stats": {
++            "calls": 2,
++            "made": {},
++            "no_pair": {
++              "lucky_egg": 2,
++              "choice_band": 2,
++              "focus_lens": 2,
++              "sash": 2,
++              "leftovers": 2,
++              "bright_powder": 2,
++              "swift_feather": 2,
++              "scarf_fire": 2,
++              "scarf_water": 2,
++              "scarf_electric": 2,
++              "weather_stone": 2
++            },
++            "gated": {},
++            "shadow": {}
++          }
++        }
++      },
++      {
++        "gold": 8,
++        "hp": 97,
++        "level": 2,
++        "xp": 2,
++        "streak": -1,
++        "alive": true,
++        "rank": null,
++        "last_damage": 3,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 5,
++        "shop": [
++          14,
++          81,
++          147,
++          147
++        ],
++        "board": [
++          {
++            "species": 116,
++            "item": null,
++            "uid": "u00000017",
++            "technique": null,
++            "sources": [
++              116
++            ],
++            "invested": 1
++          },
++          {
++            "species": 116,
++            "item": null,
++            "uid": "u00000018",
++            "technique": null,
++            "sources": [
++              116
++            ],
++            "invested": 1
++          },
++          {
++            "species": 10,
++            "item": null,
++            "uid": "u00000019",
++            "technique": null,
++            "sources": [
++              10
++            ],
++            "invested": 1
++          },
++          {
++            "species": 29,
++            "item": null,
++            "uid": "u00000020",
++            "technique": null,
++            "sources": [
++              29
++            ],
++            "invested": 1
++          }
++        ],
++        "bench": [],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 2,
++        "ability": 2,
++        "personality": "balanced",
++        "target_types": [
++          "WATER"
++        ],
++        "stats": {
++          "gold_curve": [
++            3,
++            8
++          ],
++          "pop_curve": [
++            4,
++            4
++          ],
++          "synergy_curve": [
++            [
++              "WATER",
++              2
++            ],
++            [
++              "WATER",
++              2
++            ]
++          ],
++          "synergy_formed_round": null,
++          "synergy_formed_type": null,
++          "refreshes": 0,
++          "item_crafts": 0,
++          "item_equips": 0,
++          "stone_triggers": 0,
++          "craft_stats": {
++            "calls": 2,
++            "made": {},
++            "no_pair": {
++              "lucky_egg": 2,
++              "choice_band": 2,
++              "focus_lens": 2,
++              "sash": 2,
++              "leftovers": 2,
++              "bright_powder": 2,
++              "swift_feather": 2,
++              "scarf_fire": 2,
++              "scarf_water": 2,
++              "scarf_electric": 2,
++              "weather_stone": 2
++            },
++            "gated": {},
++            "shadow": {}
++          }
++        }
++      },
++      {
++        "gold": 4,
++        "hp": 95,
++        "level": 3,
++        "xp": 0,
++        "streak": -1,
++        "alive": true,
++        "rank": null,
++        "last_damage": 5,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 6,
++        "shop": [
++          11,
++          54,
++          54,
++          129
++        ],
++        "board": [
++          {
++            "species": 4,
++            "item": null,
++            "uid": "u00000021",
++            "technique": null,
++            "sources": [
++              4
++            ],
++            "invested": 1
++          },
++          {
++            "species": 21,
++            "item": null,
++            "uid": "u00000022",
++            "technique": null,
++            "sources": [
++              21
++            ],
++            "invested": 1
++          },
++          {
++            "species": 19,
++            "item": null,
++            "uid": "u00000023",
++            "technique": null,
++            "sources": [
++              19
++            ],
++            "invested": 1
++          },
++          {
++            "species": 29,
++            "item": null,
++            "uid": "u00000024",
++            "technique": null,
++            "sources": [
++              29
++            ],
++            "invested": 1
++          }
++        ],
++        "bench": [],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 1,
++        "ability": 2,
++        "personality": "copycat",
++        "target_types": [
++          "NORMAL"
++        ],
++        "stats": {
++          "gold_curve": [
++            3,
++            4
++          ],
++          "pop_curve": [
++            4,
++            4
++          ],
++          "synergy_curve": [
++            [
++              "NORMAL",
++              2
++            ],
++            [
++              "NORMAL",
++              2
++            ]
++          ],
++          "synergy_formed_round": null,
++          "synergy_formed_type": null,
++          "refreshes": 0,
++          "item_crafts": 0,
++          "item_equips": 0,
++          "stone_triggers": 0,
++          "craft_stats": {
++            "calls": 2,
++            "made": {},
++            "no_pair": {
++              "lucky_egg": 2,
++              "choice_band": 2,
++              "focus_lens": 2,
++              "sash": 2,
++              "leftovers": 2,
++              "bright_powder": 2,
++              "swift_feather": 2,
++              "scarf_fire": 2,
++              "scarf_water": 2,
++              "scarf_electric": 2,
++              "weather_stone": 2
++            },
++            "gated": {},
++            "shadow": {}
++          }
++        }
++      },
++      {
++        "gold": 4,
++        "hp": 100,
++        "level": 2,
++        "xp": 2,
++        "streak": 1,
++        "alive": true,
++        "rank": null,
++        "last_damage": 0,
++        "combines": 0,
++        "stone_used": false,
++        "item_drops": 0,
++        "seat": 7,
++        "shop": [
++          null,
++          null,
++          null,
++          null
++        ],
++        "board": [
++          {
++            "species": 92,
++            "item": null,
++            "uid": "u00000038",
++            "technique": null,
++            "sources": [
++              92
++            ],
++            "invested": 1
++          },
++          {
++            "species": 120,
++            "item": null,
++            "uid": "u00000025",
++            "technique": null,
++            "sources": [
++              120
++            ],
++            "invested": 1
++          },
++          {
++            "species": 7,
++            "item": null,
++            "uid": "u00000039",
++            "technique": null,
++            "sources": [
++              7
++            ],
++            "invested": 1
++          },
++          {
++            "species": 69,
++            "item": null,
++            "uid": "u00000040",
++            "technique": null,
++            "sources": [
++              69
++            ],
++            "invested": 1
++          }
++        ],
++        "bench": [
++          {
++            "species": 29,
++            "item": null,
++            "uid": "u00000028",
++            "technique": null,
++            "sources": [
++              29
++            ],
++            "invested": 1
++          },
++          {
++            "species": 58,
++            "item": null,
++            "uid": "u00000027",
++            "technique": null,
++            "sources": [
++              58
++            ],
++            "invested": 1
++          },
++          {
++            "species": 25,
++            "item": null,
++            "uid": "u00000026",
++            "technique": null,
++            "sources": [
++              25
++            ],
++            "invested": 1
++          },
++          {
++            "species": 10,
++            "item": null,
++            "uid": "u00000041",
++            "technique": null,
++            "sources": [
++              10
++            ],
++            "invested": 1
++          }
++        ],
++        "components": {
++          "band": 0,
++          "hardstone": 0,
++          "magnet": 0,
++          "shoes": 0,
++          "bell": 0,
++          "charcoal": 0,
++          "mysticwater": 0,
++          "spark": 0
++        },
++        "finished": [],
++        "techniques": {
++          "cut": 0,
++          "surf": 0,
++          "rest": 0,
++          "guard": 0,
++          "sunny_day": 0,
++          "rain_dance": 0
++        },
++        "last_opponent": 4,
++        "ability": 3,
++        "personality": "roller",
++        "target_types": [],
++        "stats": {
++          "gold_curve": [
++            3,
++            4
++          ],
++          "pop_curve": [
++            4,
++            4
++          ],
++          "synergy_curve": [
++            [
++              "ELECTRIC",
++              1
++            ],
++            [
++              "POISON",
++              2
++            ]
++          ],
++          "synergy_formed_round": null,
++          "synergy_formed_type": null,
++          "refreshes": 0,
++          "item_crafts": 0,
++          "item_equips": 0,
++          "stone_triggers": 0,
++          "craft_stats": {
++            "calls": 2,
++            "made": {},
++            "no_pair": {
++              "lucky_egg": 2,
++              "choice_band": 2,
++              "swift_feather": 2,
++              "focus_lens": 2,
++              "sash": 2,
++              "scarf_fire": 2,
++              "scarf_water": 2,
++              "scarf_electric": 2,
++              "leftovers": 2,
++              "bright_powder": 2,
++              "weather_stone": 2
++            },
++            "gated": {},
++            "shadow": {}
++          }
++        }
++      }
++    ],
++    "pool": {
++      "1": 20,
++      "4": 19,
++      "7": 21,
++      "10": 20,
++      "11": 20,
++      "13": 21,
++      "14": 21,
++      "16": 22,
++      "17": 22,
++      "21": 20,
++      "19": 21,
++      "25": 20,
++      "29": 18,
++      "32": 21,
++      "37": 18,
++      "41": 22,
++      "43": 21,
++      "54": 20,
++      "56": 20,
++      "58": 18,
++      "60": 21,
++      "63": 21,
++      "66": 20,
++      "69": 21,
++      "74": 21,
++      "79": 19,
++      "81": 20,
++      "92": 20,
++      "111": 21,
++      "116": 17,
++      "120": 20,
++      "129": 21,
++      "133": 21,
++      "147": 19,
++      "2": 18,
++      "5": 18,
++      "8": 18,
++      "12": 18,
++      "15": 18,
++      "18": 18,
++      "22": 18,
++      "20": 18,
++      "26": 18,
++      "30": 18,
++      "31": 18,
++      "33": 18,
++      "34": 18,
++      "42": 18,
++      "44": 18,
++      "45": 18,
++      "57": 18,
++      "61": 18,
++      "64": 18,
++      "65": 18,
++      "67": 18,
++      "70": 18,
++      "71": 18,
++      "75": 18,
++      "76": 18,
++      "80": 18,
++      "82": 18,
++      "93": 18,
++      "95": 18,
++      "112": 18,
++      "117": 18,
++      "148": 18,
++      "3": 12,
++      "6": 12,
++      "9": 12,
++      "38": 11,
++      "55": 12,
++      "59": 12,
++      "62": 12,
++      "68": 12,
++      "94": 12,
++      "121": 12,
++      "123": 12,
++      "130": 12,
++      "131": 11,
++      "134": 12,
++      "135": 12,
++      "136": 12,
++      "143": 12,
++      "149": 12
++    },
++    "pairs": [
++      [
++        5,
++        2
++      ],
++      [
++        6,
++        1
++      ],
++      [
++        3,
++        0
++      ],
++      [
++        4,
++        7
++      ]
++    ],
++    "ghost_seat": null,
++    "ghost_source": null,
++    "opponent_comp": [
++      {
++        "species": 43,
++        "item": null
++      },
++      {
++        "species": 4,
++        "item": null
++      },
++      {
++        "species": 79,
++        "item": null
++      },
++      {
++        "species": 79,
++        "item": null
++      }
++    ],
++    "opponent_learned": [
++      null,
++      null,
++      null,
++      null
++    ],
++    "opponent_tactics": {
++      "guard": null,
++      "weather": null
++    },
++    "log": [
++      "R1｜主搭档：小火龙（-1 金）；进化后保留搭档特性",
++      "R1｜vs 2·平衡型L1：你 胜（己方存活 3）｜你不掉血",
++      "R1｜4·攒钱型L2 胜（存活 3）",
++      "R1｜3·梭哈型L1 胜（存活 2）",
++      "R1｜7·梭哈型L3 胜（存活 1）"
++    ],
++    "last_battle": null,
++    "player_battles": 1,
++    "player_frames_total": 0,
++    "eliminated_round": null,
++    "final_team": null
++  },
++  "expected_battles": [
++    {
++      "events_sha256": "503a3da7ccc78ff75ecb99baa2af3fd74fe8911ec8c0a1b8a659ca03dc5e3f05",
++      "event_count": 86,
++      "winner": 0,
++      "survivors": {
++        "0": 3,
++        "1": 0
++      },
++      "duration": 7.39999999999999
++    }
++  ]
++}
+diff --git a/tests/test_weather_abilities.py b/tests/test_weather_abilities.py
+new file mode 100644
+index 0000000..e043f34
+--- /dev/null
++++ b/tests/test_weather_abilities.py
+@@ -0,0 +1,297 @@
++"""Opening weather traits: shared timing, teaching coexistence and version isolation."""
++import copy
++import hashlib
++import json
++from pathlib import Path
++import random
++import sys
++import unittest
++from unittest.mock import patch
++
++ROOT = Path(__file__).resolve().parents[1]
++sys.path[:0] = [str(ROOT/'sim'), str(ROOT/'tools/acceptance'), str(ROOT)]
++import abilities
++import demo
++import tactics
++from combat import Battle
++from roster import build_roster
++from session_save import SessionCodec, LEGACY_TACTICS_FINGERPRINT, UnknownRulesError
++from test_tactical_combat import effects, strike
++
++PIECES = {p.species_id: p for rows in build_roster().values() for p in rows}
++
++
++def fight(a=(38,), b=(9,), ruleset=tactics.CURRENT_TACTICS_RULESET, **options):
++    options.setdefault('positions_a', [(2+i, 2) for i in range(len(a))])
++    options.setdefault('positions_b', [(2+i, 1) for i in range(len(b))])
++    return Battle([PIECES[s] for s in a], [PIECES[s] for s in b], random.Random(741),
++                  ruleset=ruleset, layout='back', **options)
++
++
++class OpeningWeatherContracts(unittest.TestCase):
++    def test_catalog_is_fixed_species_current_version_and_returns_fresh_data(self):
++        self.assertEqual([r['species'] for r in abilities.catalog('tactics_v2')], [38, 131])
++        for version in ('base_v1', 'tactics_v1'):
++            self.assertEqual(abilities.catalog(version), [])
++            for sid in (38, 131):
++                self.assertIsNone(abilities.for_species(sid, version))
++        self.assertIsNone(abilities.for_species(37, 'tactics_v2'))
++        self.assertIsNone(abilities.for_species(6, 'tactics_v2'))
++        self.assertIsNone(abilities.for_species(True, 'tactics_v2'))
++        first = abilities.for_species(38, 'tactics_v2')
++        first['weather'] = 'rain'
++        self.assertEqual(abilities.for_species(38, 'tactics_v2')['weather'], 'sun')
++        with self.assertRaises(ValueError):
++            abilities.catalog('bogus')
++
++    def test_each_species_triggers_without_partner_learning_or_configuration(self):
++        for sid, weather in ((38, 'sun'), (131, 'rain')):
++            battle = fight((sid,))
++            self.assertEqual(battle.weather_name, weather)
++            request, = effects(battle, 'weather_request')
++            start, = effects(battle, 'weather_start')
++            self.assertEqual(request[0], 0.)
++            self.assertEqual(start[0], 0.)
++            self.assertEqual(request[5]['source_kind'], 'ability')
++            self.assertIsNone(request[5]['cast_index'])
++            self.assertEqual(start[5]['expires_at'], 8.)
++            self.assertTrue(all(len(e) == 6 for e in battle.events if e[1] == 'tactical_effect'))
++            self.assertIsNone(battle.units[0].technique)
++            before = copy.deepcopy(battle.events)
++            battle.flush_tactics(0.)
++            battle.flush_tactics(0.)
++            self.assertEqual(battle.events, before)
++
++    def test_same_weather_duplicates_across_teams_never_stack_and_expire_to_base(self):
++        battle = fight((38, 38), (38,), weather_name='hail')
++        self.assertEqual(len(effects(battle, 'weather_request')), 3)
++        start, = effects(battle, 'weather_start')
++        self.assertEqual(len(start[5]['requests']), 3)
++        self.assertEqual(start[5]['expires_at'], 8.)
++        battle.flush_tactics(7.99)
++        self.assertEqual(battle.weather_name, 'sun')
++        battle.flush_tactics(8.)
++        self.assertEqual(battle.weather_name, 'hail')
++        self.assertEqual(len(effects(battle, 'weather_end')), 1)
++        battle.flush_tactics(16.)
++        self.assertEqual(len(effects(battle, 'weather_start')), 1)
++
++    def test_opposite_weather_is_symmetric_and_same_team_can_conflict(self):
++        for a, b in (((38,), (131,)), ((131,), (38,)), ((38, 131), (9,)), ((131, 38), (9,))):
++            battle = fight(a, b, weather_name='sand')
++            self.assertEqual(battle.weather_name, 'sand')
++            conflict, = effects(battle, 'weather_conflict')
++            self.assertEqual(conflict[0], 0.)
++            self.assertEqual({r['weather'] for r in conflict[5]['requests']}, {'sun', 'rain'})
++            self.assertIsNone(conflict[5]['expires_at'])
++            self.assertFalse(effects(battle, 'weather_start'))
++            battle.flush_tactics(8.)
++            self.assertFalse(effects(battle, 'weather_end'))
++
++    def test_weather_survives_source_death_and_cannot_retrigger(self):
++        battle = fight()
++        battle.units[0].hp = 0
++        battle.flush_tactics(1.)
++        self.assertEqual(battle.weather_name, 'sun')
++        battle.flush_tactics(8.)
++        self.assertIsNone(battle.weather_name)
++        battle.run()
++        self.assertEqual(len(effects(battle, 'weather_request')), 1)
++
++    def test_native_teaching_cast_can_override_opening_weather_and_does_not_rewind_it(self):
++        battle = fight((38,), (9,), weather_name='hail', learned_b=['rain_dance'],
++                       tactics_b={'weather': {'source': 0}})
++        a, b = battle.units
++        for unit in battle.units:
++            unit.max_hp = unit.hp = 10000
++        strike(battle, b, a, 2.1)
++        self.assertEqual(battle.weather_name, 'sun')
++        self.assertEqual(b.technique, 'rain_dance')
++        battle.flush_tactics(2.2)
++        self.assertEqual(battle.weather_name, 'rain')
++        self.assertEqual(effects(battle, 'weather_start')[-1][5]['reason'], 'overridden')
++        battle.flush_tactics(10.2)
++        self.assertEqual(battle.weather_name, 'hail')
++        # Native casts remain ordinary after the one weather teaching opportunity.
++        strike(battle, b, a, 11.)
++        self.assertEqual(len(effects(battle, 'weather_request')), 2)
++
++    def test_own_teaching_is_independent_and_can_extend_its_weather_window(self):
++        battle = fight(learned_a=['sunny_day'], tactics_a={'weather': {'source': 0}})
++        a, b = battle.units
++        b.max_hp = b.hp = 10000
++        strike(battle, a, b, .1)
++        battle.flush_tactics(.2)
++        start = effects(battle, 'weather_start')[-1]
++        self.assertEqual(start[5]['reason'], 'extended')
++        self.assertEqual(start[5]['expires_at'], 8.2)
++        self.assertNotIn('source_kind', start[5]['requests'][0])
++        self.assertEqual(a.technique, 'sunny_day')
++        battle.flush_tactics(8.)
++        self.assertEqual(battle.weather_name, 'sun')
++        battle.flush_tactics(8.2)
++        self.assertIsNone(battle.weather_name)
++
++    def test_opening_conflict_consumes_traits_but_leaves_later_teaching_available(self):
++        battle = fight((38,), (131,), learned_b=['rain_dance'],
++                       tactics_b={'weather': {'source': 0}})
++        a, b = battle.units
++        a.hp = a.max_hp = 10000
++        strike(battle, b, a, .1)
++        battle.flush_tactics(.2)
++        self.assertEqual(battle.weather_name, 'rain')
++        self.assertEqual(len(effects(battle, 'weather_conflict')), 1)
++        self.assertEqual(len(effects(battle, 'weather_start')), 1)
++
++    def test_shared_sun_changes_both_sides_native_fire_damage_before_first_cast(self):
++        def damages(version):
++            battle = fight((38, 6), (6,), ruleset=version)
++            for u in battle.units:
++                u.hp = u.max_hp = 10000
++            _, ally, enemy = battle.units
++            strike(battle, ally, enemy, .1)
++            ally_damage = 10000-enemy.hp
++            ally.hp = 10000
++            strike(battle, enemy, ally, .1)
++            enemy_damage = 10000-ally.hp
++            return ally_damage, enemy_damage, battle
++        old = damages('tactics_v1')
++        new = damages('tactics_v2')
++        for baseline, boosted in zip(old[:2], new[:2]):
++            self.assertGreater(boosted, baseline)
++            self.assertAlmostEqual(boosted/baseline, 1.2, delta=.03)
++        battle = new[2]
++        battle.flush_tactics(8.)
++        ally, enemy = battle.units[1:]
++        enemy.hp = 10000
++        strike(battle, ally, enemy, 8.1)
++        self.assertEqual(10000-enemy.hp, old[0])
++
++    def test_trait_dispatch_never_draws_rng_or_changes_unrelated_teams(self):
++        old, new = fight(ruleset='tactics_v1'), fight(ruleset='tactics_v2')
++        self.assertEqual(old.rng.getstate(), new.rng.getstate())
++        old, new = fight((6,), ruleset='tactics_v1'), fight((6,), ruleset='tactics_v2')
++        left, right = old.run(), new.run()
++        self.assertEqual({k: v for k, v in left.items() if k != 'units'},
++                         {k: v for k, v in right.items() if k != 'units'})
++        self.assertEqual(old.events, new.events)
++        self.assertEqual(old.rng.getstate(), new.rng.getstate())
++
++
++class OpeningSessionContracts(unittest.TestCase):
++    def session(self):
++        session = demo.Session(42, ruleset='tactics_v2')
++        session.run_id = 'b0030000000000000000000000000000'
++        session.expedition = {'partner': 6, 'technique': None, 'item': None}
++        session.begin_round(6)
++        session.player.level = 7
++        return session
++
++    def add(self, session, sid, pos=None, technique=None):
++        session.pool.take(sid)
++        owned = demo.shop_mod.OwnedPiece(session.templates[sid], session.templates[sid].tier)
++        owned.technique = technique
++        if pos is None:
++            session.player.bench.append(owned)
++        else:
++            session.player.grid[pos] = owned
++        session.ensure_unit_ids()
++        return owned
++
++    def test_forecast_tracks_deployed_sources_and_teaching_is_separate(self):
++        session = self.session()
++        self.add(session, 131)
++        ninetales = self.add(session, 38, (0, 2), 'sunny_day')
++        state = demo.state_json(session)
++        self.assertEqual(state['entry_weather']['weather'], 'sun')
++        self.assertEqual([s['species'] for s in state['entry_weather']['you']], [38])
++        self.assertEqual(state['board'][0][2]['ability']['name'], '日照')
++        self.assertEqual(state['board'][0][2]['technique']['id'], 'sunny_day')
++        self.assertEqual(session.player.inventory.techniques['sunny_day'], 0)
++        lapras = session.player.bench.pop()
++        session.player.grid[(0, 3)] = lapras
++        self.assertTrue(demo.state_json(session)['entry_weather']['conflict'])
++        del session.player.grid[(0, 2)]
++        session.player.bench.append(ninetales)
++        self.assertEqual(demo.state_json(session)['entry_weather']['weather'], 'rain')
++
++    def test_evolution_unlocks_trait_only_on_deployment_and_keeps_learning(self):
++        session = self.session()
++        first = self.add(session, 37, technique='sunny_day')
++        self.add(session, 37)
++        self.add(session, 37)
++        self.assertIsNone(abilities.for_species(first.piece.species_id, session.ruleset))
++        logs = demo.try_combine([], session.player.bench, session.pool, session.templates,
++                                session.player.inventory)
++        self.assertTrue(logs)
++        evolved, = session.player.bench
++        self.assertEqual((evolved.piece.species_id, evolved.uid, evolved.technique),
++                         (38, first.uid, 'sunny_day'))
++        self.assertFalse(demo.state_json(session)['entry_weather']['you'])
++        session.player.bench.clear()
++        session.player.grid[(0, 2)] = evolved
++        self.assertEqual(demo.state_json(session)['entry_weather']['weather'], 'sun')
++
++    def test_resume_rebuilds_traits_for_frozen_opponent_and_preserves_battle_events(self):
++        session = self.session()
++        self.add(session, 38, (0, 2))
++        foe = next(b if a is session.player else a for a, b in session.pairs if session.player in (a, b))
++        session.pool.take(131)
++        foe.board.append(demo.shop_mod.OwnedPiece(session.templates[131], 3))
++        foe.level = 7
++        session.opp_view = session._opponent_view()
++        codec = SessionCodec()
++        payload = codec.encode(session)
++        saved = codec.decode(copy.deepcopy(payload), 4)
++        self.assertEqual(codec.encode(saved), payload)
++        self.assertEqual(demo.state_json(saved)['entry_weather'], demo.state_json(session)['entry_weather'])
++        self.assertTrue(demo.state_json(saved)['entry_weather']['conflict'])
++        opponent = [p for cells in saved.opp_view['rows'] for p in cells if p and p['sid'] == 131]
++        self.assertEqual(opponent[0]['ability']['name'], '降雨')
++        def events(s):
++            options = s.battle_options(s.player)
++            options['learned_b'] = s.opponent_learned
++            options['tactics_b'] = s.opponent_tactics
++            battle = demo.Battle(s.player.battle_comp(), s.opponent_comp, random.Random(42), layout='back',
++                                positions_a=s.player.battle_positions(), **options)
++            battle.run()
++            return battle.events
++        self.assertEqual(events(saved), events(session))
++
++    def test_real_tactics_v1_schema4_save_replays_identically_without_traits(self):
++        fixture = json.loads((ROOT/'tests/fixtures/tactics-v1-schema4-session.json').read_text())
++        self.assertEqual(fixture['initial']['rules'], LEGACY_TACTICS_FINGERPRINT)
++        codec = SessionCodec()
++        session = codec.decode(fixture['initial'], 4)
++        self.assertEqual(session.ruleset, 'tactics_v1')
++        self.assertIsNone(demo.state_json(session)['entry_weather'])
++        self.assertTrue(all(not p.get('ability') for cells in demo.state_json(session)['board'] for p in cells if p))
++        battles = []
++        def render(a, b, rng, weather, path, positions_a=None, hud_snapshot=None, **options):
++            battle = demo.Battle(a, b, rng, layout='back', weather_name=weather, positions_a=positions_a, **options)
++            result = battle.run()
++            battles.append({'events_sha256': hashlib.sha256(json.dumps(battle.events, ensure_ascii=False,
++                           separators=(',', ':')).encode()).hexdigest(), 'event_count': len(battle.events),
++                           'winner': result['winner'], 'survivors': {str(k): v for k, v in result['survivors'].items()},
++                           'duration': result['duration']})
++            self.assertFalse(any(e[1] == 'tactical_effect' and e[5].get('source_kind') == 'ability' for e in battle.events))
++            return {'n': 0, 'winner': result['winner'], 'survivors': result['survivors'], 'duration': result['duration'], 'events': []}
++        with patch.object(demo, 'SESSIONS', {session.sid: session}), patch.object(demo, '_render_battle_frames', side_effect=render):
++            for command in fixture['commands']:
++                result = demo._apply_action({'sid': session.sid, **command})
++                self.assertTrue(result['ok'], result)
++        actual = codec.encode(session)
++        actual['rules'] = LEGACY_TACTICS_FINGERPRINT
++        self.assertEqual(actual, fixture['expected_after'])
++        self.assertEqual(battles, fixture['expected_battles'])
++
++    def test_old_fingerprint_cannot_enable_new_traits(self):
++        fixture = json.loads((ROOT/'tests/fixtures/tactics-v1-schema4-session.json').read_text())
++        forged = copy.deepcopy(fixture['initial'])
++        forged['ruleset'] = 'tactics_v2'
++        with self.assertRaises(UnknownRulesError):
++            SessionCodec().decode(forged, 4)
++
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/tools/acceptance/weather_ability_probe.py b/tools/acceptance/weather_ability_probe.py
+new file mode 100644
+index 0000000..46da30c
+--- /dev/null
++++ b/tools/acceptance/weather_ability_probe.py
+@@ -0,0 +1,138 @@
++#!/usr/bin/env python3
++"""Paired tactical-v1/v2 ablation of opening weather with unchanged fixed squads.
++
++Every squad costs 15 gold, has six units, three ordinary equipped items, one
++learning slot and one partner. Side-swaps verify symmetry and are not additional
++independent trials. No acquisition, all-roster balance or human-play claim.
++"""
++import argparse
++from collections import Counter
++from dataclasses import asdict, replace
++import hashlib
++import json
++from pathlib import Path
++import random
++import statistics
++import sys
++
++ROOT = Path(__file__).resolve().parents[2]
++sys.path[:0] = [str(ROOT/'sim'), str(ROOT/'tools/acceptance'), str(ROOT)]
++from combat import Battle
++from experiment_build_diversity import Build, BUILDS, PIECES, rotate, side_fingerprint, team_metrics
++from session_save import rules_fingerprint
++import build_rules
++import weather
++
++SUN = Build('sun', '日照接力', (38, 6, 3, 26, 76, 2),
++            ((1, 3), (2, 3), (4, 3), (3, 3), (2, 2), (5, 2)),
++            (None, 'focus_lens', None, 'swift_feather', 'sash', None), 26,
++            (None, None, 'cut', None, None, None),
++            '九尾先开晴天，雷丘接力与能量装备让火草技能赶上八秒窗口。')
++RAIN = Build('rain', '降雨水阵', (131, 9, 80, 26, 76, 143),
++             ((3, 2), (2, 2), (4, 3), (3, 3), (1, 2), (4, 2)),
++             ('focus_lens', None, None, 'swift_feather', None, 'sash'), 26,
++             (None, 'surf', None, None, None, None),
++             '拉普拉斯入场降雨，雷丘接力、起手能量与三水羁绊支持前排技能。')
++SUN_CONTROL = replace(BUILDS[3], key='sun_control', name='日照控场', species=(38, 3, 6, 26, 76, 65),
++                      plan='用九尾替换耿鬼，保留喷火龙能量装备与首次技能接力；失去偷能，换开场火草窗口。')
++RAIN_GARDEN = replace(BUILDS[0], key='rain_garden', name='降雨续航', species=(143, 131, 3, 80, 76, 2),
++                     plan='用拉普拉斯替换水箭龟，保留睡觉、剩饭和妙蛙花治疗；降雨强化呆壳兽水招，原生冰招不获雨增幅。')
++
++
++def battle_for(a, b, seed, ruleset, swapped=False):
++    if swapped:
++        a, b = b, a
++    comp = lambda build: [(PIECES[s], item) if item else PIECES[s]
++                          for s, item in zip(build.species, build.items)]
++    battle = Battle(comp(a), comp(b), random.Random(seed), ruleset=ruleset, stat_mode='budget_v1',
++                    positions_a=list(a.positions), positions_b=rotate(b.positions),
++                    team_options=[{'partner': x.partner} for x in (a, b)],
++                    learned_a=list(a.learned), learned_b=list(b.learned))
++    result = battle.run()
++    return battle, result
++
++
++def window_metrics(battle, team):
++    indices = {u.idx for u in battle.units if u.team == team}
++    current, expiry = battle.base_weather_name, None
++    windows, buffed, nerfed, casts, first = 0, 0, 0, 0, None
++    for event in battle.events:
++        if event[1] == 'tactical_effect' and event[4] in ('weather_start', 'weather_end', 'weather_conflict'):
++            current, expiry = event[5]['new_weather'], event[5]['expires_at']
++            windows += int(event[4] == 'weather_start')
++        elif event[1] == 'cast' and event[2] in indices:
++            casts += 1
++            move = build_rules.resolve_cast(battle.units[event[2]].piece, battle.stat_mode)
++            multiplier = weather.damage_mult(move, current)
++            in_window = expiry is not None and event[0] < expiry
++            buffed += int(in_window and multiplier > 1.)
++            nerfed += int(in_window and multiplier < 1.)
++            first = event[0] if first is None else first
++    return {'casts': casts, 'window_buffed_casts': buffed, 'window_nerfed_casts': nerfed,
++            'weather_windows': windows, 'first_cast': first}
++
++
++def arm(a, b, seeds, ruleset):
++    outcomes = Counter()
++    failures, durations, metrics, casts = [], [], [], []
++    for seed in seeds:
++        battle, result = battle_for(a, b, seed, ruleset)
++        reverse, swapped = battle_for(a, b, seed, ruleset, True)
++        if (side_fingerprint(battle, 0, True) != side_fingerprint(reverse, 1)
++                or side_fingerprint(battle, 1, True) != side_fingerprint(reverse, 0)
++                or result['duration'] != swapped['duration']
++                or swapped['winner'] != (None if result['winner'] is None else 1-result['winner'])):
++            failures.append(seed)
++        outcomes['draw' if result['winner'] is None else 'a' if result['winner'] == 0 else 'b'] += 1
++        durations.append(result['duration'])
++        metrics.append(team_metrics(battle, 0))
++        casts.append(window_metrics(battle, 0))
++    average = lambda rows: {k: round(statistics.mean(r[k] for r in rows if r[k] is not None), 3)
++                           if any(r[k] is not None for r in rows) else None for k in rows[0]}
++    return {'a': a.key, 'b': b.key, 'ruleset': ruleset, 'trials': len(seeds),
++            'games_including_swaps': len(seeds)*2, 'wins': outcomes['a'], 'losses': outcomes['b'],
++            'draws': outcomes['draw'], 'score': (outcomes['a']+.5*outcomes['draw'])/len(seeds),
++            'duration_median': round(statistics.median(durations), 2),
++            'side_swap_failures': failures, 'a_metrics': average(metrics), 'a_windows': average(casts)}
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--seeds', type=int, default=100)
++    parser.add_argument('--start-seed', type=int, default=202610051000)
++    parser.add_argument('--variant', choices=('initial', 'replacements'), default='initial')
++    parser.add_argument('--output', type=Path, required=True)
++    args = parser.parse_args()
++    if args.seeds < 1:
++        parser.error('--seeds must be positive')
++    sun, rain = (SUN, RAIN) if args.variant == 'initial' else (SUN_CONTROL, RAIN_GARDEN)
++    squads = [sun, rain, BUILDS[0], BUILDS[2]]
++    assert all(b.cost == 15 and len(b.species) == 6 and sum(i is not None for i in b.items) == 3
++               and sum(t is not None for t in b.learned) == 1 for b in squads)
++    seeds = range(args.start_seed, args.start_seed+args.seeds)
++    pairings = [(sun, BUILDS[0]), (sun, BUILDS[2]), (rain, BUILDS[0]), (rain, BUILDS[2]), (sun, rain)]
++    arms = [arm(a, b, seeds, version) for a, b in pairings for version in ('tactics_v1', 'tactics_v2')]
++    comparisons = [{'a': arms[i]['a'], 'b': arms[i]['b'],
++                    'v1_score': arms[i]['score'], 'v2_score': arms[i+1]['score'],
++                    'v2_minus_v1_pp': round((arms[i+1]['score']-arms[i]['score'])*100, 1),
++                    'v2_window_buffed_casts': arms[i+1]['a_windows']['window_buffed_casts']}
++                   for i in range(0, len(arms), 2)]
++    payload = {'schema': 1, 'method': __doc__, 'rules_fingerprint': rules_fingerprint(),
++               'variant': args.variant,
++               'script_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
++               'seed_range': [args.start_seed, args.start_seed+args.seeds-1],
++               'builds': [dict(asdict(b), cost=b.cost) for b in squads], 'arms': arms,
++               'comparisons': comparisons, 'games': sum(a['games_including_swaps'] for a in arms),
++               'side_swap_failures': sum(len(a['side_swap_failures']) for a in arms),
++               'limits': ['Fixed authored squads, not the live recruitment economy.',
++                          'Same seeds and every resource held fixed across v1/v2.',
++                          'Swaps validate symmetry; they do not double sample size.',
++                          'No inferential claim from a 100-seed prototype sample.']}
++    args.output.parent.mkdir(parents=True, exist_ok=True)
++    args.output.write_text(json.dumps(payload, ensure_ascii=False, indent=2)+'\n')
++    print(json.dumps({k: payload[k] for k in ('games', 'side_swap_failures', 'comparisons')}, ensure_ascii=False, indent=2))
++    return bool(payload['side_swap_failures'])
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())
+diff --git a/tools/acceptance/weather_ability_visual_probe.py b/tools/acceptance/weather_ability_visual_probe.py
+new file mode 100644
+index 0000000..b4833dc
+--- /dev/null
++++ b/tools/acceptance/weather_ability_visual_probe.py
+@@ -0,0 +1,72 @@
++#!/usr/bin/env python3
++"""Actual battle-renderer evidence for opening weather, coverage and conflict.
++
++Directed high-HP fixtures verify readable native frames; they do not measure
++full-run pacing, balance, human experience or physical ESP32 performance.
++"""
++import argparse
++import hashlib
++import importlib.util
++import json
++from pathlib import Path
++import sys
++
++ROOT = Path(__file__).resolve().parents[2]
++sys.path[:0] = [str(ROOT), str(ROOT/'tools/acceptance'), str(ROOT/'sim')]
++
++from PIL import Image
++from tactical_visual_probe import panel, label_font
++from PIL import ImageFont
++from session_save import rules_fingerprint
++
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--out', type=Path, required=True)
++    args = parser.parse_args()
++    args.out.mkdir(parents=True, exist_ok=True)
++    spec = importlib.util.spec_from_file_location('opening_presentation_fixture', ROOT/'tests/test_tactical_presentation.py')
++    fixture = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(fixture)
++    fixture.OpeningWeatherPresentation.setUpClass()
++    check = fixture.OpeningWeatherPresentation()
++    battles = {'sun': check.battle(), 'rain': check.battle(sid=131), 'conflict': check.battle(conflict=True)}
++    animations = {key: fixture.renderer.BattleAnimation([], [], 42, *check.assets, battle=battle)
++                  for key, battle in battles.items()}
++    fonts = tuple(ImageFont.truetype(label_font(), size) for size in (24, 18, 14))
++    override = next(e[0] for e in animations['sun'].timeline.events
++                    if e[1] == 'tactical_effect' and e[4] == 'weather_start' and e[5]['new_weather'] == 'rain')
++    shots = [('sun', 'sun', '01 / 九尾入场日照', '上场即制造八秒全场晴天，不占教学槽', 1.),
++             ('rain', 'rain', '02 / 拉普拉斯入场降雨', '普通招募也可触发，双方共用雨天窗口', 1.),
++             ('override', 'sun', '03 / 后续求雨覆盖', '水箭龟首次大招后，求雨覆盖入场日照', override+.3),
++             ('conflict', 'conflict', '04 / 入场晴雨相抵', '九尾与拉普拉斯同时入场，恢复基础冰雹', 1.)]
++    panels, frames = [], []
++    for name, key, title, note, t in shots:
++        frame = animations[key].frame(t)
++        frame.convert('RGB').save(args.out/f'{name}.png')
++        panels.append(panel(frame, title, note, t, fonts))
++        frames.append({'name': name, 'fixture': key, 'presentation_time': t,
++                       'native_frame': f'{name}.png', 'size': list(frame.size)})
++    width, height = panels[0].size
++    contact = Image.new('RGB', (width*2, height*2), '#f3f0e7')
++    for index, image in enumerate(panels):
++        contact.paste(image, ((index%2)*width, (index//2)*height))
++    contact.save(args.out/'weather-abilities.png')
++    for key in animations:
++        animation = animations[key]
++        stills = [animation.frame(n/10).convert('RGB') for n in range(106)]
++        stills[0].save(args.out/f'{key}.gif', save_all=True, append_images=stills[1:],
++                       duration=100, loop=0, disposal=2)
++    payload = {'method': __doc__, 'ruleset': 'tactics_v2', 'rules_fingerprint': rules_fingerprint(),
++               'script_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), 'frames': frames,
++               'fixtures': {key: {'raw_events_sha256': hashlib.sha256(json.dumps(battle.events,ensure_ascii=False,
++                            separators=(',', ':')).encode()).hexdigest(),
++                                 'tactical_events': [e for e in battle.events if e[1] == 'tactical_effect']}
++                            for key, battle in battles.items()}}
++    (args.out/'visual.json').write_text(json.dumps(payload, ensure_ascii=False, indent=2)+'\n')
++    print(json.dumps({'frames': len(frames), 'gifs': len(animations), 'contact_sheet': str(args.out/'weather-abilities.png')}))
++
++
++if __name__ == '__main__':
++    main()

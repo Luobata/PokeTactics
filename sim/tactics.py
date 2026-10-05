@@ -1,21 +1,27 @@
 """Explicit, versioned opt-in for bounded tactical expedition mechanics.
 
 Stat allocation and battle rules are independent: ``budget_v1`` is a stat mode,
-whereas ``tactics_v1`` opts a new match into guard and weather teaching.
+whereas ``tactics_v1`` opts a match into guard and weather teaching and
+``tactics_v2`` additionally enables species-bound opening weather abilities.
 """
 
 BASE_RULESET = "base_v1"
 TACTICS_RULESET = "tactics_v1"
+CURRENT_TACTICS_RULESET = "tactics_v2"
 
 
 def validate_ruleset(value):
-    if not isinstance(value, str) or value not in (BASE_RULESET, TACTICS_RULESET):
+    if not isinstance(value, str) or value not in (BASE_RULESET, TACTICS_RULESET, CURRENT_TACTICS_RULESET):
         raise ValueError("unknown battle ruleset")
     return value
 
 
 def enabled(value):
-    return validate_ruleset(value) == TACTICS_RULESET
+    return validate_ruleset(value) in (TACTICS_RULESET, CURRENT_TACTICS_RULESET)
+
+
+def entry_abilities_enabled(value):
+    return validate_ruleset(value) == CURRENT_TACTICS_RULESET
 
 
 def validate_team(value, count, ruleset=BASE_RULESET):
@@ -35,7 +41,7 @@ def validate_team(value, count, ruleset=BASE_RULESET):
         if selection is None:
             continue
         if not active:
-            raise ValueError("tactical selections require tactics_v1")
+            raise ValueError("tactical selections require a tactical ruleset")
         if not isinstance(selection, dict) or set(selection) != fields:
             raise ValueError("invalid " + kind + " selection")
         if any(type(index) is not int or not 0 <= index < count

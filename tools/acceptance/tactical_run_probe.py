@@ -158,7 +158,7 @@ def invariant(session):
         assert all(row['status'] != 'pending' for row in session.rewards)
 
 
-def game(seed, personality):
+def game(seed, personality, ruleset):
     row = {'seed': seed, 'personality': personality, 'status': 'running', 'current_round': 1,
            'battle_count': 0, 'player_battle_count': 0, 'tactical_events': Counter(),
            'player_battle_tactical_events': Counter(), 'actions': Counter(),
@@ -166,7 +166,7 @@ def game(seed, personality):
            'invalidated_configuration_notices': [], 'guard_configured_rounds': 0,
            'weather_configured_rounds': 0, 'checkpoints': [], 'rounds': []}
     CONTEXT['row'] = row
-    session = demo.Session(seed, ruleset='tactics_v1')
+    session = demo.Session(seed, ruleset=ruleset)
     session.sid = f'{seed:012x}'
     session.run_id = hashlib.sha256(f'tactics-smoke:{seed}'.encode()).hexdigest()[:32]
     # Identical new-account expedition loadout, with the usual paid starter.
@@ -235,6 +235,8 @@ def main(argv=None):
     parser.add_argument('--games', type=int, default=32, help='Independent games, 1–4096 (default: 32).')
     parser.add_argument('--seed-base', type=int, default=2026100500,
                         help='First nonnegative signed-64-bit seed; subsequent games use consecutive seeds.')
+    parser.add_argument('--ruleset', choices=('tactics_v1', 'tactics_v2'), default='tactics_v2',
+                        help='Explicit battle version; defaults to the current tactical mode.')
     parser.add_argument('--output', type=Path, default=ROOT / '.build/tactics/full-run-probe.json',
                         help='Evidence JSON path; a game save directory is never allowed.')
     args = parser.parse_args(argv)
@@ -251,7 +253,7 @@ def main(argv=None):
     with patch.object(demo, 'SESSIONS', {}), patch.object(demo, 'Battle', ObservedBattle), \
             patch.object(demo, '_render_battle_frames', side_effect=headless):
         for index in range(args.games):
-            games.append(game(args.seed_base + index, sorted(PERSONALITIES)[index % 4]))
+            games.append(game(args.seed_base + index, sorted(PERSONALITIES)[index % 4], args.ruleset))
             if index % 4 == 3:
                 print(f'Completed {index + 1}/{args.games}', flush=True)
     completed = [row for row in games if row['status'] == 'complete']
@@ -280,7 +282,7 @@ def main(argv=None):
                'final_pending': sum(row['final_pending'] for row in completed),
                'table_rounds_mean': statistics.mean(row['table_rounds'] for row in completed) if completed else None,
                'player_rank_counts': dict(Counter(row['player_rank'] for row in completed))}
-    payload = {'method': __doc__, 'ruleset': 'tactics_v1', 'rules_fingerprint': rules_fingerprint(),
+    payload = {'method': __doc__, 'ruleset': args.ruleset, 'rules_fingerprint': rules_fingerprint(),
                'script_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                'seed_base': args.seed_base, 'summary': summary, 'games': games,
                'limits': ['L2 pilot is not a human player.', 'Sample validates whole-run workflow, not balance.',

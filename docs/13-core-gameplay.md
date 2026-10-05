@@ -4,6 +4,8 @@
 > 不代表现行代码已实现。当前 84 池、进化、搭档及教学的联动复核与替代方案见
 > [22 · 系统联动与玩法方案评审](22-system-interactions-and-playstyles.md)。护卫与晴雨的可试玩子集见
 > [23 · 战术远征合同](23-tactical-expedition.md)，其余推荐仍待实施，旧档不自动切换新规则。
+> 2026-10-05 主线决策已确定保留进化；最终形态池与独立升星不再作为当前实施主线。
+> 当前决策及入场特性见 [24 · 进化、构筑与入场特性](24-evolution-builds-and-opening-abilities.md)。
 
 状态：**v2（已吸收 Codex 交叉评审，2026-09-15）**。评审原文见
 [reports/design-review-codex-2026-09-15.md](../reports/design-review-codex-2026-09-15.md)——

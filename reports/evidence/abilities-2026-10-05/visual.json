@@ -1,0 +1,600 @@
+{
+  "method": "Actual battle-renderer evidence for opening weather, coverage and conflict.\n\nDirected high-HP fixtures verify readable native frames; they do not measure\nfull-run pacing, balance, human experience or physical ESP32 performance.\n",
+  "ruleset": "tactics_v2",
+  "rules_fingerprint": "b39cb3c1756b71d4a26a1f79b613683ee6852bdad66709fc1cd1138d66cde23f",
+  "script_sha256": "a23cf1de7e5f372728439d657b80b5a97dcc53f23235b9631cf0eb32c81c73f7",
+  "frames": [
+    {
+      "name": "sun",
+      "fixture": "sun",
+      "presentation_time": 1.0,
+      "native_frame": "sun.png",
+      "size": [
+        240,
+        320
+      ]
+    },
+    {
+      "name": "rain",
+      "fixture": "rain",
+      "presentation_time": 1.0,
+      "native_frame": "rain.png",
+      "size": [
+        240,
+        320
+      ]
+    },
+    {
+      "name": "override",
+      "fixture": "sun",
+      "presentation_time": 3.25,
+      "native_frame": "override.png",
+      "size": [
+        240,
+        320
+      ]
+    },
+    {
+      "name": "conflict",
+      "fixture": "conflict",
+      "presentation_time": 1.0,
+      "native_frame": "conflict.png",
+      "size": [
+        240,
+        320
+      ]
+    }
+  ],
+  "fixtures": {
+    "sun": {
+      "raw_events_sha256": "50a2ae25f5242b6070728b18f5924f96b0f1a627303b2974301f9ac8173ee332",
+      "tactical_events": [
+        [
+          0.0,
+          "tactical_effect",
+          0,
+          0,
+          "weather_request",
+          {
+            "reason": "entry",
+            "requests": [
+              {
+                "team": 0,
+                "source": 0,
+                "source_pos": [
+                  2,
+                  2
+                ],
+                "weather": "sun",
+                "requested_at": 0.0,
+                "cast_index": null,
+                "effective_at": 0.0,
+                "source_kind": "ability",
+                "ability_id": "drought"
+              }
+            ],
+            "remaining": 0,
+            "source_kind": "ability",
+            "ability_id": "drought",
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "cast_index": null,
+            "weather": "sun",
+            "old_weather": "hail",
+            "new_weather": "sun",
+            "base_weather": "hail",
+            "effective_at": 0.0,
+            "expires_at": 8.0
+          }
+        ],
+        [
+          0.0,
+          "tactical_effect",
+          0,
+          0,
+          "weather_start",
+          {
+            "old_weather": "hail",
+            "new_weather": "sun",
+            "base_weather": "hail",
+            "expires_at": 8.0,
+            "previous_expires_at": null,
+            "reason": "requested",
+            "requests": [
+              {
+                "team": 0,
+                "source": 0,
+                "source_pos": [
+                  2,
+                  2
+                ],
+                "weather": "sun",
+                "requested_at": 0.0,
+                "cast_index": null,
+                "effective_at": 0.0,
+                "source_kind": "ability",
+                "ability_id": "drought"
+              }
+            ],
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ]
+          }
+        ],
+        [
+          2.1,
+          "tactical_effect",
+          1,
+          1,
+          "weather_request",
+          {
+            "reason": "queued",
+            "requests": [
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 2.1,
+                "cast_index": 8,
+                "effective_at": 2.2
+              }
+            ],
+            "remaining": 0,
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "cast_index": 8,
+            "weather": "rain",
+            "old_weather": "sun",
+            "new_weather": "rain",
+            "base_weather": "hail",
+            "effective_at": 2.2,
+            "expires_at": 10.2
+          }
+        ],
+        [
+          2.2,
+          "tactical_effect",
+          1,
+          1,
+          "weather_start",
+          {
+            "old_weather": "sun",
+            "new_weather": "rain",
+            "base_weather": "hail",
+            "expires_at": 10.2,
+            "previous_expires_at": 8.0,
+            "reason": "overridden",
+            "requests": [
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 2.1,
+                "cast_index": 8,
+                "effective_at": 2.2
+              }
+            ],
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              1
+            ]
+          }
+        ],
+        [
+          10.2,
+          "tactical_effect",
+          1,
+          1,
+          "weather_end",
+          {
+            "old_weather": "rain",
+            "new_weather": "hail",
+            "base_weather": "hail",
+            "expires_at": null,
+            "previous_expires_at": 10.2,
+            "reason": "expired",
+            "requests": [
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 2.1,
+                "cast_index": 8,
+                "effective_at": 2.2
+              }
+            ],
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              1
+            ]
+          }
+        ]
+      ]
+    },
+    "rain": {
+      "raw_events_sha256": "c7170ef7db5d8ed59b2bcd48922d3abfa611e037de6a0a4bb4891ea29d9694d7",
+      "tactical_events": [
+        [
+          0.0,
+          "tactical_effect",
+          0,
+          0,
+          "weather_request",
+          {
+            "reason": "entry",
+            "requests": [
+              {
+                "team": 0,
+                "source": 0,
+                "source_pos": [
+                  2,
+                  2
+                ],
+                "weather": "rain",
+                "requested_at": 0.0,
+                "cast_index": null,
+                "effective_at": 0.0,
+                "source_kind": "ability",
+                "ability_id": "drizzle"
+              }
+            ],
+            "remaining": 0,
+            "source_kind": "ability",
+            "ability_id": "drizzle",
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "cast_index": null,
+            "weather": "rain",
+            "old_weather": "hail",
+            "new_weather": "rain",
+            "base_weather": "hail",
+            "effective_at": 0.0,
+            "expires_at": 8.0
+          }
+        ],
+        [
+          0.0,
+          "tactical_effect",
+          0,
+          0,
+          "weather_start",
+          {
+            "old_weather": "hail",
+            "new_weather": "rain",
+            "base_weather": "hail",
+            "expires_at": 8.0,
+            "previous_expires_at": null,
+            "reason": "requested",
+            "requests": [
+              {
+                "team": 0,
+                "source": 0,
+                "source_pos": [
+                  2,
+                  2
+                ],
+                "weather": "rain",
+                "requested_at": 0.0,
+                "cast_index": null,
+                "effective_at": 0.0,
+                "source_kind": "ability",
+                "ability_id": "drizzle"
+              }
+            ],
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ]
+          }
+        ],
+        [
+          2.1,
+          "tactical_effect",
+          1,
+          1,
+          "weather_request",
+          {
+            "reason": "queued",
+            "requests": [
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 2.1,
+                "cast_index": 8,
+                "effective_at": 2.2
+              }
+            ],
+            "remaining": 0,
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "cast_index": 8,
+            "weather": "rain",
+            "old_weather": "rain",
+            "new_weather": "rain",
+            "base_weather": "hail",
+            "effective_at": 2.2,
+            "expires_at": 10.2
+          }
+        ],
+        [
+          2.2,
+          "tactical_effect",
+          1,
+          1,
+          "weather_start",
+          {
+            "old_weather": "rain",
+            "new_weather": "rain",
+            "base_weather": "hail",
+            "expires_at": 10.2,
+            "previous_expires_at": 8.0,
+            "reason": "extended",
+            "requests": [
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 2.1,
+                "cast_index": 8,
+                "effective_at": 2.2
+              }
+            ],
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              1
+            ]
+          }
+        ],
+        [
+          10.2,
+          "tactical_effect",
+          1,
+          1,
+          "weather_end",
+          {
+            "old_weather": "rain",
+            "new_weather": "hail",
+            "base_weather": "hail",
+            "expires_at": null,
+            "previous_expires_at": 10.2,
+            "reason": "expired",
+            "requests": [
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 2.1,
+                "cast_index": 8,
+                "effective_at": 2.2
+              }
+            ],
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              1
+            ]
+          }
+        ]
+      ]
+    },
+    "conflict": {
+      "raw_events_sha256": "e6d9f8fd4b28b502c81531bcc2b9a49fd0cb427557592f9c6e7915f3cc81f404",
+      "tactical_events": [
+        [
+          0.0,
+          "tactical_effect",
+          0,
+          0,
+          "weather_request",
+          {
+            "reason": "entry",
+            "requests": [
+              {
+                "team": 0,
+                "source": 0,
+                "source_pos": [
+                  2,
+                  2
+                ],
+                "weather": "sun",
+                "requested_at": 0.0,
+                "cast_index": null,
+                "effective_at": 0.0,
+                "source_kind": "ability",
+                "ability_id": "drought"
+              }
+            ],
+            "remaining": 0,
+            "source_kind": "ability",
+            "ability_id": "drought",
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ],
+            "cast_index": null,
+            "weather": "sun",
+            "old_weather": "hail",
+            "new_weather": "sun",
+            "base_weather": "hail",
+            "effective_at": 0.0,
+            "expires_at": 8.0
+          }
+        ],
+        [
+          0.0,
+          "tactical_effect",
+          1,
+          1,
+          "weather_request",
+          {
+            "reason": "entry",
+            "requests": [
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 0.0,
+                "cast_index": null,
+                "effective_at": 0.0,
+                "source_kind": "ability",
+                "ability_id": "drizzle"
+              }
+            ],
+            "remaining": 0,
+            "source_kind": "ability",
+            "ability_id": "drizzle",
+            "source_pos": [
+              2,
+              1
+            ],
+            "target_pos": [
+              2,
+              1
+            ],
+            "cast_index": null,
+            "weather": "rain",
+            "old_weather": "hail",
+            "new_weather": "rain",
+            "base_weather": "hail",
+            "effective_at": 0.0,
+            "expires_at": 8.0
+          }
+        ],
+        [
+          0.0,
+          "tactical_effect",
+          0,
+          0,
+          "weather_conflict",
+          {
+            "old_weather": "hail",
+            "new_weather": "hail",
+            "base_weather": "hail",
+            "expires_at": null,
+            "previous_expires_at": null,
+            "reason": "conflict",
+            "requests": [
+              {
+                "team": 0,
+                "source": 0,
+                "source_pos": [
+                  2,
+                  2
+                ],
+                "weather": "sun",
+                "requested_at": 0.0,
+                "cast_index": null,
+                "effective_at": 0.0,
+                "source_kind": "ability",
+                "ability_id": "drought"
+              },
+              {
+                "team": 1,
+                "source": 1,
+                "source_pos": [
+                  2,
+                  1
+                ],
+                "weather": "rain",
+                "requested_at": 0.0,
+                "cast_index": null,
+                "effective_at": 0.0,
+                "source_kind": "ability",
+                "ability_id": "drizzle"
+              }
+            ],
+            "source_pos": [
+              2,
+              2
+            ],
+            "target_pos": [
+              2,
+              2
+            ]
+          }
+        ]
+      ]
+    }
+  }
+}

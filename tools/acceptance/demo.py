@@ -56,6 +56,7 @@ import economy  # noqa: E402
 import items as items_mod  # noqa: E402
 import techniques as techniques_mod  # noqa: E402
 import tactics as tactics_mod  # noqa: E402
+import abilities as abilities_mod  # noqa: E402
 import rng as rng_mod  # noqa: E402
 import shop as shop_mod  # noqa: E402
 import synergy as syn_mod  # noqa: E402
@@ -240,6 +241,8 @@ def _fmt_event(anim, e: tuple) -> str:
         if effect == 'guard':
             return f"<b>{name(e[2])} · 护卫</b> 替 {name(e[3])} 承受本次突进主命中（本场次数已用完）"
         if effect == 'weather_request':
+            if info.get('source_kind') == 'ability':
+                return f"<b>{name(e[2])} · 入场特性</b> 申请 {weather_label(info['new_weather'])}（入场统一裁定）"
             return f"{name(e[2])} 申请 {weather_label(info['new_weather'])}（下一战斗步统一裁定）"
         if effect == 'weather_start':
             return f"<b>全场天气：{weather_label(info['old_weather'])} → {weather_label(info['new_weather'])}</b>（双方共享）"
@@ -660,15 +663,15 @@ class Session:
         if tactics_mod.enabled(self.ruleset):
             self.opponent_tactics = copy.deepcopy(self.battle_tactics(src))
         return {"name": name, "hp": src.hp, "level": src.level,
-                "rows": [[_piece_view(o.piece, o.item) if o else None for o in row]
+                "rows": [[_piece_view(o.piece, o.item, self.ruleset) if o else None for o in row]
                          for row in self._enemy_rows(src.board)],
-                "bench": [_piece_view(o.piece, o.item)
+                "bench": [_piece_view(o.piece, o.item, self.ruleset)
                           for o in src.bench[:GRID_COLS]]}
 
     def _pve_view(self, r: int):
         wave_ids = PVE_WAVES[min(r // 5 - 1, len(PVE_WAVES) - 1)]
         label = PVE_LABELS[min(r // 5 - 1, len(PVE_LABELS) - 1)]
-        row = [_piece_view(make_piece(sid, self.templates))
+        row = [_piece_view(make_piece(sid, self.templates), ruleset=self.ruleset)
                for sid in wave_ids]
         rows = self._enemy_rows(row)
         return {"name": f"野怪轮 · {label}", "hp": None, "level": None,
@@ -938,7 +941,7 @@ class Session:
 
     def _eliminate(self, seat) -> None:
         if isinstance(seat, PlayerSeat):
-            self.final_team = [_owned_view(o) for o in seat.board]
+            self.final_team = [_owned_view(o, self.ruleset) for o in seat.board]
             self.eliminated_round = self.round_no
         seat.alive = False
         seat.rank = len(self._alive()) + 1
@@ -992,7 +995,7 @@ def _hex(rgb) -> str:
     return "#{:02x}{:02x}{:02x}".format(*rgb)
 
 
-def _piece_view(piece, item=None):
+def _piece_view(piece, item=None, ruleset=tactics_mod.BASE_RULESET):
     from data import pokedex
     from render_mockups import TYPE_COLORS
     dex = pokedex()
@@ -1017,13 +1020,14 @@ def _piece_view(piece, item=None):
                               descriptions.get(skill["arch"], "") if skill else "能量满时释放属性招式")
                               if mv else "当前形态没有可释放的属性招式，仅进行普通攻击",
         "move": (mv.get("name_zh") or mv["name"]) if mv else "—",
+        "ability": abilities_mod.for_species(piece.species_id, ruleset),
         "item": item,
         "item_name": items_mod.FINISHED[item]["name"] if item else None,
     }
 
 
-def _owned_view(owned):
-    return {**_piece_view(owned.piece, owned.item), 'uid': owned.uid,
+def _owned_view(owned, ruleset=tactics_mod.BASE_RULESET):
+    return {**_piece_view(owned.piece, owned.item, ruleset), 'uid': owned.uid,
             'technique': techniques_mod.view(owned.technique)}
 
 
@@ -1088,6 +1092,41 @@ def _synergy_view(sess) -> list:
     return out
 
 
+def _entry_weather_view(sess):
+    """Forecast deployed opening traits from the current preparation snapshot.
+
+    Teaching casts happen later and cannot be predicted here. Bench traits are
+    deliberately excluded; PVE uses the same frozen opponent rows as scouting.
+    """
+    if not tactics_mod.entry_abilities_enabled(sess.ruleset):
+        return None
+    you = []
+    for owned in sess.player.board:
+        ability = abilities_mod.for_species(owned.piece.species_id, sess.ruleset)
+        if ability:
+            you.append({**ability, 'unit_name': owned.piece.name, 'uid': owned.uid})
+    opponent = []
+    for cells in (sess.opp_view or {}).get('rows', []):
+        for piece in cells:
+            ability = abilities_mod.for_species(piece['sid'], sess.ruleset) if piece else None
+            if ability:
+                opponent.append({**ability, 'unit_name': piece['name'], 'uid': piece.get('uid')})
+    sources = you + opponent
+    requested = {source['weather'] for source in sources}
+    conflict = len(requested) > 1
+    base = weather_for_round(sess.round_no)
+    result = next(iter(requested)) if len(requested) == 1 else base
+    label = {'sun': '晴天', 'rain': '雨天'}.get(result, weather_mod.WEATHERS[result]['label'] if result else '平静天气')
+    if conflict:
+        note = f'入场晴雨相抵，恢复{label}；所有入场次数消耗，之后教学仍可争夺。'
+    elif sources:
+        note = f"入场{label} {sources[0]['duration']:g}秒，双方共享；后续教学可覆盖。"
+    else:
+        note = '当前上场队伍没有天气特性，沿用本轮基础天气。'
+    return {'you': you, 'opponent': opponent, 'conflict': conflict,
+            'weather': result, 'zh': label, 'note': note}
+
+
 def state_json(sess) -> dict:
     sess.ensure_unit_ids()
     p = sess.player
@@ -1100,7 +1139,7 @@ def state_json(sess) -> dict:
     for o in p.all_pieces():
         copies[o.piece.species_id] = copies.get(o.piece.species_id, 0) + 1
     for (r, c), o in p.grid.items():
-        v = _piece_view(o.piece, o.item)
+        v = _piece_view(o.piece, o.item, sess.ruleset)
         v.update(uid=o.uid, technique=techniques_mod.view(o.technique))
         v['item_effect'] = _item_effect(o.item, stat_mode) if o.item else None
         v["copies"] = copies.get(o.piece.species_id, 1)
@@ -1108,7 +1147,7 @@ def state_json(sess) -> dict:
         board_rows[r][c] = v
     bench = []
     for o in p.bench:
-        v = _piece_view(o.piece, o.item)
+        v = _piece_view(o.piece, o.item, sess.ruleset)
         v.update(uid=o.uid, technique=techniques_mod.view(o.technique))
         v['item_effect'] = _item_effect(o.item, stat_mode) if o.item else None
         v["copies"] = copies.get(o.piece.species_id, 1)
@@ -1120,7 +1159,7 @@ def state_json(sess) -> dict:
         if sid is None:
             shop.append(None)
         else:
-            v = _piece_view(p.templates[sid])
+            v = _piece_view(p.templates[sid], ruleset=sess.ruleset)
             v["price"] = p.templates[sid].tier
             shop.append(v)
     comps = [{"key": k, "name": items_mod.COMPONENT_NAMES[k], "n": n}
@@ -1157,6 +1196,7 @@ def state_json(sess) -> dict:
         "weather": {"key": wkey,
                     "zh": weather_mod.WEATHERS[weather]["label"] if weather else "无",
                     "note": WEATHER_NOTE[weather]},
+        "entry_weather": _entry_weather_view(sess),
         "shop": shop,
         "board": board_rows,
         "bench": bench,
@@ -1183,7 +1223,7 @@ def state_json(sess) -> dict:
         "profile_warning": getattr(sess, "profile_warning", None),
         "player_result": ({"rank": p.rank, "round": sess.eliminated_round or sess.round_no,
                            "team": sess.final_team if sess.final_team is not None else
-                           [_owned_view(o) for o in p.board]}
+                           [_owned_view(o, sess.ruleset) for o in p.board]}
                           if not p.alive or sess.phase == "over" else None),
         "stats": {"battles": sess.player_battles,
                   "frames": sess.player_frames_total},
@@ -1458,7 +1498,7 @@ def _new_session(seed: int, params=None) -> Session:
     from expedition import configure, deploy_starter
     params = params or {}
     tactical = params.get('mode') == 'tactics'
-    sess = Session(seed, tactics_mod.TACTICS_RULESET if tactical else tactics_mod.BASE_RULESET)
+    sess = Session(seed, tactics_mod.CURRENT_TACTICS_RULESET if tactical else tactics_mod.BASE_RULESET)
     configure(sess, {**params, 'mode': 'expedition'} if tactical else params)
     sess.begin_round(1)
     deploy_starter(sess)
@@ -1912,6 +1952,7 @@ function render(){
     `<span class="hudchip">Lv${y.level} <span class="muted">(${y.xp}/${y.xp_next??'满'})</span> 人口 <b>${y.on_board}/${y.pop}</b></span>`,
     `<span class="hudchip">第 <b>${S.round}</b>/${S.max_rounds} 轮</span>`,
     `<span class="hudchip">${w.zh==='无'?'🌤':w.key==='sun'?'☀️':w.key==='rain'?'🌧️':w.key==='sand'?'🌪️':w.key==='hail'?'❄️':'🌤'} ${w.zh}<span class="muted">（${w.note}）</span></span>`,
+    S.entry_weather?`<span class="hudchip">${S.entry_weather.note}</span>`:'',
     y.streak?`<span class="hudchip">${y.streak>0?'🔥 连胜':'💤 连败'} <b>${Math.abs(y.streak)}</b></span>`:'',
     `<span class="hudchip muted">${S.phase==='prep'?'准备阶段（不限时）':S.phase==='battle'?'结算阶段':'终局'}</span>`,
     y.alive?'':`<span class="hudchip" style="color:#8a2f27">已淘汰（第 ${y.rank} 名）</span>`
@@ -1987,7 +2028,7 @@ function renderInfo(){
   const v=findPiece(selLoc);
   if(!v){selLoc=null;return renderInfo();}
   el.className='';
-  el.innerHTML=`<b>${v.name}</b> · ${v.tier} 费 · ${v.types.join('/')} · ${v.role} · 射程 ${v.range} · 招式「${v.move}」${v.copies>=2?` · 同种已有 ${v.copies} 只（3 只自动进化）`:''}${v.item?` · 装备「${v.item_name}」`:''}<p><b>${v.skill_name}</b>：${v.skill_description}</p>${v.technique?`<p>教学「${v.technique.name}」：${v.technique.description}</p>`:''}${v.item_effect?`<p>${v.item_name}：${v.item_effect}</p>`:''}
+  el.innerHTML=`<b>${v.name}</b> · ${v.tier} 费 · ${v.types.join('/')} · ${v.role} · 射程 ${v.range} · 招式「${v.move}」${v.copies>=2?` · 同种已有 ${v.copies} 只（3 只自动进化）`:''}${v.item?` · 装备「${v.item_name}」`:''}<p><b>${v.skill_name}</b>：${v.skill_description}</p>${v.ability?`<p>特性「${v.ability.name}」：${v.ability.description}</p>`:''}${v.technique?`<p>教学「${v.technique.name}」：${v.technique.description}</p>`:''}${v.item_effect?`<p>${v.item_name}：${v.item_effect}</p>`:''}
   <div class="btns"><button onclick="api('sell',{loc:selLoc}).then(()=>{selLoc=null})">卖出（+${v.sell} 金）</button>
   ${v.item?`<button onclick="api('unequip',{loc:selLoc})">卸下装备</button>`:''}</div>`;
 }

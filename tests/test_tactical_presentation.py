@@ -181,5 +181,71 @@ class TacticalPresentation(unittest.TestCase):
         self.assertIsNone(view.weather_name)
 
 
+class OpeningWeatherPresentation(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.assets = renderer.Front(), renderer.Palettes(), renderer.Font16()
+
+    def battle(self, conflict=False, sid=38):
+        battle = Battle([PIECES[sid]], [PIECES[131 if conflict else 9]], random.Random(42),
+                        ruleset='tactics_v2', weather_name='hail',
+                        positions_a=[(2, 2)], positions_b=[(2, 1)],
+                        learned_b=[None if conflict else 'rain_dance'],
+                        tactics_b=None if conflict else {'weather': {'source': 0}})
+        for u in battle.units:
+            u.hp = u.max_hp = 10000
+            u.energy = 80
+            battle._emit_state(u, 0.)
+        if not conflict:
+            with patch.object(battle.rng, 'randrange', return_value=0):
+                battle._strike(battle.units[1], battle.units[0], 2.1)
+            battle.flush_tactics(2.2)
+        battle.flush_tactics(10.2)
+        battle.events.append((10.3, 'end', None))
+        return battle
+
+    def test_opening_weather_precedes_cast_and_later_override_is_causal(self):
+        for sid, weather in ((38, 'sun'), (131, 'rain')):
+            battle = self.battle(sid=sid)
+            before = copy.deepcopy(battle.events)
+            anim = renderer.BattleAnimation([], [], 42, *self.assets, battle=battle)
+            start = next(e for e in anim.timeline.events if e[1] == 'tactical_effect' and e[4] == 'weather_start')
+            self.assertEqual(start[0], 0.)
+            view = anim._presentation_view()
+            view._ensure(0.)
+            self.assertEqual(view.weather_name, weather)
+            self.assertIn(PIECES[sid].name+'带来', view.msg[1])
+            override = [e for e in anim.timeline.events if e[1] == 'tactical_effect' and e[4] == 'weather_start'][1]
+            view._ensure(override[0]-.001)
+            self.assertEqual(view.weather_name, weather)
+            view._ensure(override[0])
+            self.assertEqual(view.weather_name, 'rain')
+            frame = anim.frame(override[0]+.1)
+            self.assertEqual(frame.size, (240, 320))
+            view._ensure(anim.timeline.duration)
+            self.assertEqual(view.weather_name, 'hail')
+            view._ensure(0.)  # Backward seek reconstructs opening state.
+            self.assertEqual(view.weather_name, weather)
+            self.assertEqual(battle.events, before)
+
+    def test_opening_conflict_never_briefly_displays_either_override(self):
+        battle = self.battle(conflict=True)
+        anim = renderer.BattleAnimation([], [], 42, *self.assets, battle=battle)
+        self.assertFalse(any(e[1] == 'tactical_effect' and e[4] == 'weather_start' for e in anim.timeline.events))
+        for t in (0., .1, 5.):
+            view = anim._presentation_view()
+            view._ensure(t)
+            self.assertEqual(view.weather_name, 'hail')
+        view._ensure(0.)
+        self.assertIn('晴雨冲突', view.msg[1])
+
+    def test_opening_message_glyphs_have_real_pixels(self):
+        from render_mockups import UI_GLYPHS
+        font = self.assets[2]
+        for ch in set('九尾带来晴天拉普拉斯带来雨天'):
+            if ch not in UI_GLYPHS:
+                self.assertIsNotNone(font.text(ch).getbbox(), f'missing device glyph {ch}')
+
+
 if __name__ == '__main__':
     unittest.main()
