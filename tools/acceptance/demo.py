@@ -57,6 +57,7 @@ import items as items_mod  # noqa: E402
 import techniques as techniques_mod  # noqa: E402
 import tactics as tactics_mod  # noqa: E402
 import abilities as abilities_mod  # noqa: E402
+import arena as arena_mod  # noqa: E402
 import pacing
 import rng as rng_mod  # noqa: E402
 import shop as shop_mod  # noqa: E402
@@ -126,18 +127,19 @@ def _assets():
 _SPRITES: dict = {}
 
 
-def sprite_png(species_id: int):
+def sprite_png(species_id: int, shiny=False):
     """/demo/sprite/<id>.png：40/48/56px 源图直接出 PNG（Web 端 CSS 缩放）。"""
-    if species_id in _SPRITES:
-        return _SPRITES[species_id]
+    key = (species_id, bool(shiny))
+    if key in _SPRITES:
+        return _SPRITES[key]
     from data import pokedex
     if not (1 <= species_id <= 65535) or species_id not in pokedex().species:
         return None
     front, pal, _ = _assets()
     buf = io.BytesIO()
-    front.image(species_id, pal).save(buf, "PNG")
-    _SPRITES[species_id] = buf.getvalue()
-    return _SPRITES[species_id]
+    front.image(species_id, pal, shiny=bool(shiny)).save(buf, "PNG")
+    _SPRITES[key] = buf.getvalue()
+    return _SPRITES[key]
 
 
 # ---------------------------------------------------------------- 渲染包装
@@ -184,7 +186,7 @@ def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
             "survivors": res["survivors"], "duration": round(duration, 1),
             "simulation_duration": round(t_end, 1), "clock": "presentation-v1",
             "events": [{"t": round(e[0], 2), "text": _fmt_event(anim, e)}
-                       for e in anim.presentation_events if e[1] != "unit_state"]}
+                       for e in anim.presentation_events if e[1] not in ('unit_state', 'skill_effect')]}
     (out_dir / "meta.json").write_text(json.dumps(meta, ensure_ascii=False))
     return meta
 
@@ -197,14 +199,17 @@ def _move_zh(name: str) -> str:
     global _MOVES_ZH
     if _MOVES_ZH is None:
         from data import pokedex
-        _MOVES_ZH = {m["name"]: (m.get("name_zh") or m["name"])
+        _MOVES_ZH = {m["name"]: (m.get("name_zh") or {'cross_chop': '十字劈'}.get(m['name'], m['name']))
                      for m in pokedex().moves.values()}
     return _MOVES_ZH.get(name, name)
 
 
 def _fmt_event(anim, e: tuple) -> str:
     t, kind = e[0], e[1]
-    name = lambda i: anim.by_idx[i].piece.name  # noqa: E731
+    def name(i):
+        unit = anim.by_idx[i]
+        side = ('我方·' if unit.team == 0 else '敌方·') if getattr(anim, 'is_arena', False) else ''
+        return side + unit.piece.name
     if kind == "deploy":
         return f"<b>{name(e[2])}</b> 落位 {e[3]}"
     if kind == "move":
@@ -226,6 +231,8 @@ def _fmt_event(anim, e: tuple) -> str:
         return f"<b>⚡ {e[4]}（{TYPE_ZH.get(e[3], e[3])}系齐射）</b>"
     if kind == "regen":
         return f"{name(e[2])} 回复 +{e[3]}"
+    if kind == 'arena_heal':
+        return f"<b>{name(e[2])} · 团队回复</b> → {name(e[3])}（+{e[4]} 生命）"
     if kind == "partner_effect":
         label = {"shell_guard": "并肩坚壳", "bloom": "共生花园",
                  "wing_rally": "振翼鼓舞", "relay": "接力电流",
@@ -329,10 +336,16 @@ class PlayerSeat:
 class Session:
     def __init__(self, seed: int, ruleset=tactics_mod.BASE_RULESET) -> None:
         self.ruleset = tactics_mod.validate_ruleset(ruleset)
+        self.is_arena = self.ruleset == 'arena_v1'
+        self.bench_capacity = 8 if self.is_arena else BENCH_CAP
+        self.shop_slots = 5 if self.is_arena else SHOP_SLOTS_UI
         self.sid = uuid.uuid4().hex[:12]
         self.seed = seed
-        self.templates = build_templates()
+        self.templates = arena_mod.build_templates() if self.is_arena else build_templates()
         self.pool = shop_mod.SharedPool(self.templates)
+        if self.is_arena:
+            self.pool.arena = True
+            self.pool.remaining = arena_mod.pool_caps()
         self.player = PlayerSeat(self.pool, self.templates)
         pers = assign_personalities(7, rng_mod.derive(self.seed, 0, "pers"))
         self.bots = [Bot(i + 1, LINEUP[7][i], pers[i], self.pool, self.templates)
@@ -358,14 +371,22 @@ class Session:
         self.run_id = uuid.uuid4().hex
         self.expedition = None
         self.discoveries = {"seen": [], "fielded": [], "won": []}
+        self.arena_augments_pending = []
         for seat in self.seats:
             seat.inventory.ruleset = self.ruleset
             seat.inventory.techniques = dict.fromkeys(techniques_mod.ids_for(self.ruleset), 0)
+            if self.is_arena:
+                seat.shop.slots = [None] * self.shop_slots
+                seat.shop.slot_count = self.shop_slots
+                seat.bench_capacity = self.bench_capacity
+                arena_mod.init_seat(seat)
 
     def battle_options(self, a=None, b=None):
         learned = {key: [o.technique for o in seat.board]
                    for key, seat in (("learned_a", a), ("learned_b", b)) if seat is not None}
         learned = {k: v for k, v in learned.items() if any(v)}
+        if self.is_arena:
+            return {**learned, **arena_mod.battle_options(self, a, b)}
         if tactics_mod.enabled(self.ruleset):
             learned.update(ruleset=self.ruleset,
                            tactics_a=self.battle_tactics(a), tactics_b=self.battle_tactics(b))
@@ -622,6 +643,8 @@ class Session:
             if b.alive:
                 b.decide(r, self.seats,
                          rng_mod.derive(self.seed, r, "bots", b.seat))
+        if self.is_arena:
+            arena_mod.begin_round(self)
         self.teach_bots()
         # 配对：复用 match 规则（无重复对手优先 + 奇数打幽灵），
         # pair 子流每轮现派生，prep 期算好供 UI 展示对手快照（battle 时原样使用）
@@ -648,6 +671,10 @@ class Session:
     def _enemy_rows(self, board: list):
         """与 team1 的 back 部署一致：team0 坐标旋转 180°。"""
         rows = [[None] * GRID_COLS for _ in range(2)]
+        if self.is_arena:
+            for entry, (col, row) in zip(board, arena_mod.positions_for(board, 1)):
+                rows[row][col] = entry
+            return rows
         for i, owned in enumerate(board[:2 * GRID_COLS]):
             rows[i // GRID_COLS][GRID_COLS - 1 - i % GRID_COLS] = owned
         return rows
@@ -681,8 +708,10 @@ class Session:
                           for o in src.bench[:GRID_COLS]]}
 
     def _pve_view(self, r: int):
-        wave_ids = PVE_WAVES[min(r // 5 - 1, len(PVE_WAVES) - 1)]
-        label = PVE_LABELS[min(r // 5 - 1, len(PVE_LABELS) - 1)]
+        waves = arena_mod.PVE_WAVES if self.is_arena else PVE_WAVES
+        labels = arena_mod.PVE_LABELS if self.is_arena else PVE_LABELS
+        wave_ids = waves[min(r // 5 - 1, len(waves) - 1)]
+        label = labels[min(r // 5 - 1, len(labels) - 1)]
         row = [_piece_view(make_piece(sid, self.templates), ruleset=self.ruleset)
                for sid in wave_ids]
         rows = self._enemy_rows(row)
@@ -693,6 +722,8 @@ class Session:
     def end_prep(self) -> None:
         if self.phase != "prep":
             raise DemoError("当前不是准备阶段（先看完战斗再进下一轮）")
+        if self.is_arena and self.player.alive and self.arena_augments_pending:
+            raise DemoError('请先选择本轮海克斯强化，再开始战斗')
         if self.player.alive and any(row['seat'] == 0 and row['status'] == 'pending' for row in self.rewards):
             raise DemoError('还有待领取技能机，请先领取或明确放弃本次奖励')
         self.refresh_tactics()
@@ -814,11 +845,13 @@ class Session:
                 ghost_positions = ([(GRID_COLS - 1 - c, 3 - row)
                                     for c, row in p.battle_positions()]
                                    if self.ghost_src is p else None)
+                options = self.battle_options(odd, self.ghost_src)
+                if ghost_positions is not None or not self.is_arena:
+                    options['positions_b'] = ghost_positions
                 res = Battle(odd.battle_comp(), self.ghost_src.battle_comp(),
                              rng_mod.derive(self.seed, r, "battle", battle_i),
                              layout="back", weather_name=weather,
-                             positions_b=ghost_positions,
-                             **self.battle_options(odd, self.ghost_src)).run()
+                             **options).run()
             else:   # 空场打幽灵：不战而败（保底掉血，Battle 空队会崩所以不走解算）
                 res = {"winner": 1,
                        "survivors": {0: 0, 1: len(self.ghost_src.battle_comp())}}
@@ -835,7 +868,8 @@ class Session:
         return events
 
     def _resolve_pve(self, r, weather):
-        wave_ids = PVE_WAVES[min(r // 5 - 1, len(PVE_WAVES) - 1)]
+        waves = arena_mod.PVE_WAVES if self.is_arena else PVE_WAVES
+        wave_ids = waves[min(r // 5 - 1, len(waves) - 1)]
         wave = [make_piece(sid, self.templates) for sid in wave_ids]
         events = []
         battle_i = 0
@@ -916,6 +950,8 @@ class Session:
         out_dir = ROOT / ".build" / "demo" / self.sid / f"r{r}"
         t0 = time.time()
         battle_options = self.battle_options(me, opp)
+        if self.is_arena:
+            battle_options['positions_b'] = arena_mod.positions_for(comp_b, 1)
         if opp is not None and self.opponent_learned is not None:
             battle_options.pop("learned_b", None)
             if any(self.opponent_learned):
@@ -1020,7 +1056,7 @@ def _piece_view(piece, item=None, ruleset=tactics_mod.BASE_RULESET):
     descriptions = GENERIC_DESCRIPTIONS
     from profiles import effective_range
     distance = effective_range(piece)
-    return {
+    view = {
         "sid": piece.species_id, "name": piece.name, "tier": piece.tier,
         "types": [TYPE_ZH.get(t, t) for t in piece.types],
         "colors": [_hex(TYPE_COLORS.get(t, (120, 120, 120)))
@@ -1031,11 +1067,19 @@ def _piece_view(piece, item=None, ruleset=tactics_mod.BASE_RULESET):
         "skill_description": (profile["ult"].get("note", descriptions.get(skill["arch"], skill["name"])) if profile and profile.get("ult") else
                               descriptions.get(skill["arch"], "") if skill else "能量满时释放属性招式")
                               if mv else "当前形态没有可释放的属性招式，仅进行普通攻击",
-        "move": (mv.get("name_zh") or mv["name"]) if mv else "—",
+        "move": _move_zh(mv['name']) if mv else "—",
         "ability": abilities_mod.for_species(piece.species_id, ruleset),
         "item": item,
         "item_name": items_mod.FINISHED[item]["name"] if item else None,
     }
+    if ruleset == 'arena_v1':
+        role = getattr(piece, 'role_key', 'attack')
+        view.update(star=getattr(piece, 'star', 1), shiny=getattr(piece, 'shiny', False),
+                    role_key=role, role_name=arena_mod.ROLE_NAMES[role],
+                    role_description=arena_mod.ROLE_DESCRIPTIONS[role],
+                    learnable=[t['id'] for t in arena_mod.technique_catalog()
+                               if techniques_mod.compatible_species(piece.species_id, t['id'])])
+    return view
 
 
 def _owned_view(owned, ruleset=tactics_mod.BASE_RULESET):
@@ -1233,7 +1277,7 @@ def _evolution_view(sess, owned):
 def state_json(sess) -> dict:
     sess.ensure_unit_ids()
     p = sess.player
-    stat_mode = 'budget_v1' if sess.expedition else 'legacy'
+    stat_mode = 'budget_v1' if sess.expedition or sess.is_arena else 'legacy'
     from render_mockups import TYPE_COLORS
     weather = weather_for_round(sess.round_no)
     wkey = weather or ""
@@ -1261,7 +1305,7 @@ def state_json(sess) -> dict:
             v['evolution'] = _evolution_view(sess, o)
         bench.append(v)
     shop = []
-    for i in range(SHOP_SLOTS_UI):
+    for i in range(sess.shop_slots):
         sid = p.shop.slots[i]
         if sid is None:
             shop.append(None)
@@ -1298,7 +1342,7 @@ def state_json(sess) -> dict:
                 "xp": p.xp, "xp_next": xp_next, "pop": p.pop(),
                 "on_board": len(p.grid), "streak": p.streak,
                 "alive": p.alive, "rank": p.rank, "combines": p.combines,
-                "stone_used": p.stone_used, "bench_cap": BENCH_CAP,
+                "stone_used": p.stone_used, "bench_cap": sess.bench_capacity,
                 "refresh_cost": economy.REFRESH_COST,
                 "shop_locked": p.shop_locked,
                 "xp_cost": economy.XP_BUY_COST},
@@ -1343,6 +1387,29 @@ def state_json(sess) -> dict:
                   "frames": sess.player_frames_total},
         "type_colors": {t: _hex(c) for t, c in TYPE_COLORS.items()},
     }
+    if sess.is_arena:
+        def augments_of(seat):
+            return [arena_mod.augment_view(a['id'] if isinstance(a, dict) else a)
+                    for a in seat.arena_augments_selected]
+        st['arena'] = {'version': 'arena_v1', 'shop_slots': sess.shop_slots,
+                       'bench_capacity': sess.bench_capacity,
+                       'catalog': [{**_piece_view(piece, ruleset=sess.ruleset),
+                                    'cost': piece.tier,
+                                    'pool_remaining': sess.pool.remaining[sid],
+                                    'pool_total': arena_mod.pool_cap(sid)}
+                                   for sid, piece in sess.templates.items()]}
+        st['augments'] = {'pending': copy.deepcopy(sess.arena_augments_pending),
+                          'selected': augments_of(p)}
+        st['techniques'] = [{**t, 'eligible': [o.uid for o in p.all_pieces()
+                                             if techniques_mod.compatible_species(o.piece.species_id, t['id'])]}
+                            for t in arena_mod.technique_catalog()]
+        st['scouting'] = [{'seat': seat.seat, 'name': seat.name, 'human': seat is p,
+                           'hp': max(0, seat.hp), 'level': seat.level, 'gold': seat.gold,
+                           'board': [_owned_view(o, sess.ruleset) for o in seat.board],
+                           'bench': [_owned_view(o, sess.ruleset) for o in seat.bench],
+                           'augments': augments_of(seat)} for seat in sess.seats]
+        for i, standing in enumerate(st['standings']):
+            standing['seat'] = i
     if sess.phase == "over":
         st["over"] = {"ranking": [
             {"name": e.name, "rank": e.rank, "is_you": e is p,
@@ -1363,7 +1430,7 @@ def _guard_prep(sess) -> None:
 def act_buy(sess, i: int, evolution='auto'):
     _guard_prep(sess)
     p = sess.player
-    if not (0 <= i < SHOP_SLOTS_UI) or p.shop.slots[i] is None:
+    if not (0 <= i < sess.shop_slots) or p.shop.slots[i] is None:
         raise DemoError("这个商店格是空的")
     price = p.shop.price(i)
     if p.gold < price:
@@ -1381,8 +1448,8 @@ def act_buy(sess, i: int, evolution='auto'):
     bench.append(shop_mod.OwnedPiece(p.templates[p.shop.slots[i]], price))
     if evolution == 'auto':
         try_combine(board, bench, pool, sess.templates, inventory, respect_locks=choices)
-    if len(bench) > BENCH_CAP:
-        raise DemoError(f"备战席已满（{BENCH_CAP} 格）：先上场、卖出或购买可立即合成的第三只")
+    if len(bench) > sess.bench_capacity:
+        raise DemoError(f"备战席已满（{sess.bench_capacity} 格）：先上场、卖出或购买可立即合成的第三只")
     owned = p.shop.buy(i)
     p.gold -= price
     p.bench.append(owned)
@@ -1442,7 +1509,7 @@ def act_sell(sess, loc: str):
     owned, where, key = sess.locate(loc)
     if owned.item is not None and owned.item != "evo_stone":
         p.inventory.finished.append(owned.item)   # 卖棋自动卸回仓库（无惩罚）
-    if owned.technique is not None:
+    if owned.technique is not None and not sess.is_arena:
         p.inventory.techniques[owned.technique] += 1
         owned.technique = None
     gold = shop_mod.sell_owned(owned, sess.pool)
@@ -1489,8 +1556,8 @@ def act_move(sess, frm: str, to: str):
     try:
         if to.startswith("b"):
             ti = int(to[1:])
-            if not (0 <= ti < BENCH_CAP):
-                raise DemoError(f"备战只有 {BENCH_CAP} 格")
+            if not (0 <= ti < sess.bench_capacity):
+                raise DemoError(f"备战只有 {sess.bench_capacity} 格")
             dst_where, dst_key = "bench", ti
         else:
             m = to[1:].split(",")
@@ -1662,10 +1729,13 @@ def _new_session(seed: int, params=None) -> Session:
     from expedition import configure, deploy_starter
     params = params or {}
     tactical = params.get('mode') == 'tactics'
-    sess = Session(seed, tactics_mod.CURRENT_TACTICS_RULESET if tactical else tactics_mod.BASE_RULESET)
-    configure(sess, {**params, 'mode': 'expedition'} if tactical else params)
+    arena = params.get('mode') == 'arena'
+    sess = Session(seed, 'arena_v1' if arena else tactics_mod.CURRENT_TACTICS_RULESET if tactical else tactics_mod.BASE_RULESET)
+    if not arena:
+        configure(sess, {**params, 'mode': 'expedition'} if tactical else params)
     sess.begin_round(1)
-    deploy_starter(sess)
+    if not arena:
+        deploy_starter(sess)
     sess.observe()
     if len(SESSIONS) >= MAX_SESSIONS:
         oldest = next(iter(SESSIONS))
@@ -1735,8 +1805,23 @@ def _apply_action(params: dict):
             elif cmd == "unequip":
                 msg = act_unequip(sess, params.get("loc", ""))
             elif cmd == "learn":
-                msg = act_learn(sess, params.get("uid", ""), params.get("technique", ""),
-                                replace=params.get("replace") == "1")
+                if sess.is_arena:
+                    _guard_prep(sess)
+                    try:
+                        msg = arena_mod.learn(sess, params.get('loc', ''), params.get('technique', ''))
+                    except ValueError as exc:
+                        raise DemoError(str(exc)) from exc
+                else:
+                    msg = act_learn(sess, params.get("uid", ""), params.get("technique", ""),
+                                    replace=params.get("replace") == "1")
+            elif cmd == 'claim_augment':
+                _guard_prep(sess)
+                if not sess.is_arena:
+                    raise DemoError('当前规则不支持海克斯强化')
+                try:
+                    msg = arena_mod.claim_augment(sess, params.get('id', ''), params.get('choice', ''))
+                except ValueError as exc:
+                    raise DemoError(str(exc)) from exc
             elif cmd == 'claim_reward':
                 msg = act_claim_reward(sess, params.get('reward_id', ''), params.get('choice', ''))
             elif cmd == 'set_guard':

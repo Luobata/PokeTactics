@@ -54,6 +54,7 @@ import stat_budget
 import build_rules
 import techniques as techniques_mod
 import tactics as tactics_mod
+import arena as arena_mod
 from weather_control import WeatherController, WEATHER_WINDOW_SECONDS
 
 TICK = 0.1  # 解算步长（秒）
@@ -148,6 +149,8 @@ class Unit:
         self.item_sash_used = False # 披带一次/场
         self.needle_used = False
         self.healing_blocks = []  # Bounded: at most one entry per enemy needle.
+        self.arena_dr = 0.0
+        self.arena_heal_mult = 1.0
 
     @property
     def alive(self) -> bool:
@@ -185,13 +188,27 @@ class Battle:
                  layout: str = "random", weather_name=None,
                  positions_a=None, positions_b=None, team_options=None,
                  stat_mode: str = "legacy", learned_a=None, learned_b=None,
-                 ruleset=tactics_mod.BASE_RULESET, tactics_a=None, tactics_b=None) -> None:
+                 ruleset=tactics_mod.BASE_RULESET, tactics_a=None, tactics_b=None,
+                 arena_teams=None) -> None:
         # S11 天气按 Battle 实例持有（2026-09-14 修订：原 set_active 全局写
         # 在验收后台多线程下会交叉污染——/anim 与 /demo 并行时互改对方天气；
         # damage_mult 由 _final_damage 显式传 self.weather_name）
         self.weather_name = weather_name
         self.base_weather_name = weather_name
         self.ruleset = tactics_mod.validate_ruleset(ruleset)
+        self._arena_on = self.ruleset == arena_mod.RULESET
+        if arena_teams is not None and not self._arena_on:
+            raise ValueError('arena augments require arena_v1')
+        if arena_teams is None:
+            arena_teams = ([], [])
+        if (not isinstance(arena_teams, (list, tuple)) or len(arena_teams) != 2
+                or any(not isinstance(row, (list, tuple)) for row in arena_teams)):
+            raise ValueError('arena_teams must contain two augment lists')
+        for row in arena_teams:
+            if (any(not isinstance(key, str) or key not in arena_mod.AUGMENTS for key in row)
+                    or len(set(row)) != len(row) or len(row) > 3):
+                raise ValueError('unknown, repeated, or excessive arena augments')
+        self.arena_teams = tuple(tuple(sorted(row)) for row in arena_teams)
         self._tactics_on = tactics_mod.enabled(self.ruleset)
         if self._tactics_on and weather_name not in weather_mod.WEATHERS:
             raise ValueError("unknown base weather")
@@ -265,11 +282,65 @@ class Battle:
             synergy.apply([u for u in self.units if u.team == 0], plain_a)
             synergy.apply([u for u in self.units if u.team == 1], plain_b)
         status_mod.init_battle(self)  # S12：状态容器（默认无操作）
+        if self._arena_on:
+            self._apply_arena_stats()
         self.duration = 0.0
         for unit in self.units:
             self._emit_state(unit, 0.0)
         self._opening_partner_traits()
         self._opening_abilities()
+
+    def _apply_arena_stats(self):
+        for unit in self.units:
+            piece = unit.piece
+            if piece.species_id not in arena_mod.ROSTER:
+                raise ValueError('species is outside the arena pool')
+            star = getattr(piece, 'star', 1)
+            role = arena_mod.ROSTER[piece.species_id][1]
+            if type(star) is not int or not 1 <= star <= 3:
+                raise ValueError('arena star must be 1, 2, or 3')
+            if getattr(piece, 'role_key', role) != role:
+                raise ValueError('arena role must match the species')
+            unit.arena_role = role
+            augments = self.arena_teams[unit.team]
+            hp_mult = (1., 1.6, 2.5)[star - 1]
+            atk_mult = hp_mult * {'attack': 1.12, 'defense': .85, 'support': .8}[role]
+            if role == 'defense':
+                hp_mult *= 1.25
+                unit.arena_dr = .18
+            if 'sharp_focus' in augments:
+                atk_mult *= 1.12
+            if 'vitality' in augments:
+                hp_mult *= 1.15
+            if 'iron_wall' in augments:
+                unit.arena_dr = 1 - (1 - unit.arena_dr) * .92
+            if 'quick_step' in augments:
+                unit.attack_interval /= 1.12
+            if 'mana_flow' in augments:
+                unit.energy = min(ENERGY_MAX, unit.energy + 20)
+            if 'first_aid' in augments:
+                unit.arena_heal_mult = 1.3
+            unit.max_hp = max(1, int(unit.max_hp * hp_mult))
+            unit.hp = unit.max_hp
+            unit.attack = max(1, int(unit.attack * atk_mult))
+            unit.sp_attack = max(1, int(unit.sp_attack * atk_mult))
+
+    def _arena_support(self, t):
+        for healer in sorted(self.units, key=lambda u: u.initiative):
+            if (not healer.alive or healer.arena_role != 'support'
+                    or status_mod.stunned(healer, t)):
+                continue
+            candidates = [u for u in self.units if u.alive and u.team == healer.team
+                          and u.hp < u.max_hp]
+            if not candidates:
+                continue
+            target = min(candidates, key=lambda u: (
+                u.hp / u.max_hp, self._local_pos(u.pos, healer.team), u.local_idx))
+            amount = max(1, int(target.max_hp * .08 * healer.arena_heal_mult))
+            healed = self._heal(target, amount, t)
+            if healed:
+                self.events.append((t, 'arena_heal', healer.idx, target.idx,
+                                    healed, healer.piece.species_id))
 
     def _validate_learning(self, comp, learned):
         if learned is None:
@@ -349,6 +420,9 @@ class Battle:
             chosen = ((guard["source"], guard["target"]) if guard else (),
                       (weather["source"],) if weather else ())
             return tuple(entries), local, loadout, learning, chosen
+        if self._arena_on:
+            stars = tuple(getattr((e[0] if isinstance(e, tuple) else e), 'star', 1) for e in comp)
+            return tuple(entries), local, loadout, learning, stars, self.arena_teams[team]
         if any(learning):
             return tuple(entries), local, loadout, learning
         return tuple(entries), local, loadout
@@ -381,6 +455,7 @@ class Battle:
         regen_units = [u for u in self.units
                        if u.synergy_heal > 0 or u.item_heal > 0]
         next_regen = 1.0
+        next_support = 4.0
         while t <= MAX_BATTLE_SECONDS:
             self.duration = t
             alive_teams = {u.team for u in self.units if u.alive}
@@ -396,6 +471,9 @@ class Battle:
                         self._heal(u, max(1, int(u.max_hp * (
                             u.synergy_heal + u.item_heal))), t)
                 next_regen += 1.0
+            if self._arena_on and t + 1e-9 >= next_support:
+                self._arena_support(t)
+                next_support += 4.0
             status_mod.tick(self, t)  # S12：DOT/到期（默认无操作）
             t += TICK
         return self._result()
@@ -1047,7 +1125,8 @@ class Battle:
                 dmg = int(dmg * (1.0 + u.item_type_dmg[move["type"]]))
             if target.synergy_ult_cap is not None:
                 dmg = min(dmg, int(target.max_hp * target.synergy_ult_cap))
-        return int(dmg * (1.0 - target.synergy_dr) * (1.0 - target.item_dr))
+        return int(dmg * (1.0 - target.synergy_dr) * (1.0 - target.item_dr)
+                   * (1.0 - target.arena_dr))
 
     def _result(self) -> dict:
         alive = [u for u in self.units if u.alive]

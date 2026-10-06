@@ -1,0 +1,32 @@
+............................. [ 23%]
+.................................... [ 53%]
+.........................................................        [100%]
+=============================== warnings summary ===============================
+tests/test_arena_visuals.py: 2 warnings
+tests/test_replay_contracts.py: 2 warnings
+tests/test_signature_presentation.py: 20 warnings
+tests/test_tactical_presentation.py: 7 warnings
+tests/test_counter_presentation.py: 4 warnings
+tests/test_animation_timeline.py: 53 warnings
+  /Users/bytedance/luobata/PokeTactics/tools/mockups/character_rigs.py:321: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    opaque = [pixel[:3] for pixel in cel.getdata() if pixel[3]]
+
+tests/test_signature_presentation.py::SignaturePresentationContracts::test_basic_projectiles_consume_species_attachment_points
+tests/test_signature_presentation.py::SignaturePresentationContracts::test_basic_projectiles_consume_species_attachment_points
+tests/test_signature_presentation.py::SignaturePresentationContracts::test_energy_return_uses_logged_caster_position_before_same_tick_push
+tests/test_signature_presentation.py::SignaturePresentationContracts::test_real_effects_are_visible_only_at_their_owned_impact
+tests/test_signature_presentation.py::SignaturePresentationContracts::test_real_effects_are_visible_only_at_their_owned_impact
+tests/test_signature_presentation.py::SignaturePresentationContracts::test_real_effects_are_visible_only_at_their_owned_impact
+tests/test_signature_presentation.py::SignaturePresentationContracts::test_real_effects_are_visible_only_at_their_owned_impact
+tests/test_counter_presentation.py::CounterPresentation::test_natural_energy_mixed_team_rewind_speed_and_no_future_badge
+tests/test_counter_presentation.py::CounterPresentation::test_natural_energy_mixed_team_rewind_speed_and_no_future_badge
+  /Users/bytedance/luobata/PokeTactics/tools/mockups/character_rigs.py:308: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    color = max((pixel for pixel in cel.getdata() if pixel[3]),
+
+tests/test_tactical_presentation.py::TacticalPresentation::test_weather_rewind_speed_and_skip_preserve_pixels_and_simulation
+tests/test_tactical_presentation.py::OpeningWeatherPresentation::test_opening_weather_precedes_cast_and_later_override_is_causal
+  /Users/bytedance/luobata/PokeTactics/tools/mockups/render_battle_gif.py:172: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    floor.putdata([replacements.get(pixel, pixel) for pixel in floor.getdata()])
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+122 passed, 99 warnings, 87 subtests passed in 9.03s

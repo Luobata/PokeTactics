@@ -129,7 +129,8 @@ PVE_BONUS_DROPS = 2
 def catalog(ruleset=tactics.BASE_RULESET):
     active = tactics.counters_enabled(ruleset)
     return {key: spec for key, spec in FINISHED.items()
-            if key != "healing_needle" or active}
+            if (key != "healing_needle" or active or ruleset == 'arena_v1')
+            and (key != "evo_stone" or ruleset != 'arena_v1')}
 
 
 def _pair_lookup(ruleset=tactics.BASE_RULESET) -> Dict[Tuple[str, str], str]:

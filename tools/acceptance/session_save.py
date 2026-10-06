@@ -23,6 +23,7 @@ LEGACY_BASE_FINGERPRINT = '2f9426505cad1addbab7b5db1e9f5a673a72ec0937a1ed4cf9169
 LEGACY_TACTICS_FINGERPRINT = 'f05ad20bf84e27917c269487469914f042cc03bde53176a2c4b845b092bb343c'
 LEGACY_ABILITIES_FINGERPRINT = 'b39cb3c1756b71d4a26a1f79b613683ee6852bdad66709fc1cd1138d66cde23f'
 LEGACY_COUNTER_PACING_FINGERPRINT = '2a469a66cce17970c78393f495305f55cb52c6a92e2264a164e6861095ac5fbb'
+PRE_ARENA_FINGERPRINT = '6e763935b92f008c231a81a7b5742c0db2062d7ef42bc43f34cbf8f479d994da'
 
 
 class UnknownRulesError(UnsupportedVersionError, ValueError):
@@ -49,18 +50,26 @@ def sequence(value, maximum, label):
     return value
 
 
-def owned_record(owned, evolution_choices=False):
+def owned_record(owned, evolution_choices=False, arena=False):
     record = {"species": owned.piece.species_id, "item": owned.item,
             "uid": owned.uid, "technique": owned.technique,
             "sources": list(owned.sources), "invested": owned.invested}
     if evolution_choices:
         record['evolution_locked'] = owned.evolution_locked
+    if arena:
+        record['star'] = owned.piece.star
     return record
 
 
-def comp_record(comp):
-    return [{"species": p[0].species_id, "item": p[1]} if isinstance(p, tuple)
-            else {"species": p.species_id, "item": None} for p in comp]
+def comp_record(comp, arena=False):
+    records = []
+    for value in comp:
+        p, item = value if isinstance(value, tuple) else (value, None)
+        row = {"species": p.species_id, "item": item}
+        if arena:
+            row['star'] = getattr(p, 'star', 1)
+        records.append(row)
+    return records
 
 
 class SessionCodec:
@@ -70,19 +79,20 @@ class SessionCodec:
     def encode(self, state):
         import tactics
         choices = tactics.evolution_choices_enabled(state.ruleset)
+        is_arena = state.ruleset == 'arena_v1'
         state.ensure_unit_ids()
         seats = []
         for seat in state.seats:
             data = {key: getattr(seat, key) for key in COMMON}
             data.update({"seat": seat.seat, "shop": list(seat.shop.slots),
-                         "board": [owned_record(o, choices) for o in seat.board],
-                         "bench": [owned_record(o, choices) for o in seat.bench],
+                         "board": [owned_record(o, choices, is_arena) for o in seat.board],
+                         "bench": [owned_record(o, choices, is_arena) for o in seat.bench],
                          "components": dict(seat.inventory.components),
                          "finished": list(seat.inventory.finished),
                          "techniques": dict(seat.inventory.techniques),
                          "last_opponent": getattr(getattr(seat, "_last_opp", None), "seat", None)})
             if seat.seat == 0:
-                data.update({"grid": [[r, c, owned_record(seat.grid[(r, c)], choices)]
+                data.update({"grid": [[r, c, owned_record(seat.grid[(r, c)], choices, is_arena)]
                                       for r, c in sorted(seat.grid)],
                              "refresh_j": seat.refresh_j, "shop_locked": seat.shop_locked})
             else:
@@ -105,15 +115,24 @@ class SessionCodec:
                 "pairs": [[a.seat, b.seat] for a, b in state.pairs] if state.pairs is not None else None,
                 "ghost_seat": getattr(state.ghost_seat, "seat", None),
                 "ghost_source": getattr(state.ghost_src, "seat", None),
-                "opponent_comp": comp_record(state.opponent_comp) if state.opponent_comp is not None else None,
+                "opponent_comp": comp_record(state.opponent_comp, is_arena) if state.opponent_comp is not None else None,
                 "opponent_learned": state.opponent_learned,
                 "opponent_tactics": copy.deepcopy(state.opponent_tactics),
                 "log": list(state.log), "last_battle": summary,
                 "player_battles": state.player_battles, "player_frames_total": state.player_frames_total,
                 "eliminated_round": state.eliminated_round,
                 "final_team": [{"species": o["sid"], "item": o.get("item"),
+                                **({'star': o['star']} if is_arena else {}),
                                 "technique": (o.get('technique') or {}).get('id')}
                                for o in state.final_team] if state.final_team is not None else None}
+        if is_arena:
+            payload['arena'] = {
+                'pending': [{"id": row['id'], "round": row['round'],
+                             "options": [o['id'] for o in row['options']]}
+                            for row in state.arena_augments_pending],
+                'selected': [[a['id'] if isinstance(a, dict) else a
+                              for a in seat.arena_augments_selected] for seat in state.seats],
+            }
         # Normalize tuple-based metric curves and integer-keyed survivor maps;
         # the shared runtime deliberately accepts strict, portable JSON only.
         return json.loads(json.dumps(payload, ensure_ascii=False, allow_nan=False))
@@ -148,7 +167,10 @@ class SessionCodec:
         if ruleset in (tactics.BASE_RULESET, tactics.TACTICS_RULESET, tactics.ABILITIES_RULESET):
             supported.add(LEGACY_ABILITIES_FINGERPRINT)
         choices = tactics.evolution_choices_enabled(ruleset)
-        if not choices:
+        is_arena = ruleset == 'arena_v1'
+        if not is_arena:
+            supported.add(PRE_ARENA_FINGERPRINT)
+        if not choices and not is_arena:
             supported.add(LEGACY_COUNTER_PACING_FINGERPRINT)
         if fingerprint not in supported:
             raise UnknownRulesError('无法识别此存档的规则指纹；需要对应版本继续，原存档未修改')
@@ -168,6 +190,13 @@ class SessionCodec:
             if item is not None and item not in demo.items_mod.catalog(ruleset):
                 raise ValueError("未知装备")
             template = state.templates[sid]
+            if is_arena:
+                star = integer(record.get('star'), 1, 3, 'star')
+                template = copy.copy(template)
+                template.star = star
+                template.shiny = star == 3
+            elif 'star' in record:
+                raise ValueError('旧规则不能包含竞技升星记录')
             if not owned:
                 return (template, item) if item else template
             sources = sequence(record["sources"], 128, "sources")
@@ -176,6 +205,8 @@ class SessionCodec:
             for source in sources:
                 if type(source) is not int or source not in state.templates:
                     raise ValueError("棋子来源账本无效")
+            if is_arena and (len(sources) != 3 ** (star - 1) or any(source != sid for source in sources)):
+                raise ValueError('竞技星级与卡池来源不一致')
             investment = integer(record["invested"], 1, sum(state.templates[s].tier for s in sources), "invested")
             result = demo.shop_mod.OwnedPiece(template, investment)
             result.sources, result.item = list(sources), item
@@ -225,7 +256,7 @@ class SessionCodec:
             xp_limit = demo.economy.xp_to_next(seat.level)
             if xp_limit and seat.xp >= xp_limit:
                 raise ValueError("等级与经验不一致")
-            seat.bench = [piece(o) for o in sequence(record["bench"], demo.BENCH_CAP, "bench")]
+            seat.bench = [piece(o) for o in sequence(record["bench"], 8 if is_arena else demo.BENCH_CAP, "bench")]
             if seat.seat == 0:
                 seat.grid = {}
                 for row, col, owned in sequence(record["grid"], seat.pop(), "grid"):
@@ -235,7 +266,7 @@ class SessionCodec:
                     seat.grid[pos] = piece(owned)
                 normalized_board = [{**o, 'uid': o.get('uid'), 'technique': o.get('technique')}
                                     for o in record['board']]
-                if [owned_record(o, choices) for o in seat.board] != normalized_board:
+                if [owned_record(o, choices, is_arena) for o in seat.board] != normalized_board:
                     raise ValueError("棋盘格位与棋子顺序不一致")
                 seat.refresh_j = integer(record["refresh_j"], 0, 1000000, "refresh_j")
                 if type(record["shop_locked"]) is not bool:
@@ -278,8 +309,9 @@ class SessionCodec:
                         integer(value, 0, 1000000, "craft_count")
                 for key in BOT_STATS:
                     setattr(seat, key, copy.deepcopy(stats[key]))
-            slots = sequence(record["shop"], demo.SHOP_SLOTS_UI, "shop")
-            if len(slots) != demo.SHOP_SLOTS_UI:
+            shop_slots = 5 if is_arena else demo.SHOP_SLOTS_UI
+            slots = sequence(record["shop"], shop_slots, "shop")
+            if len(slots) != shop_slots:
                 raise ValueError("商店格数不一致")
             for sid in slots:
                 if sid is not None:
@@ -308,8 +340,9 @@ class SessionCodec:
         if set(data["pool"]) != {str(s) for s in state.templates}:
             raise ValueError("卡池种类与当前版本不一致")
         for sid, template in state.templates.items():
-            count = integer(data["pool"][str(sid)], 0, demo.shop_mod.POOL_COPIES[template.tier], "pool")
-            if count + held[sid] != demo.shop_mod.POOL_COPIES[template.tier]:
+            cap = demo.arena_mod.pool_cap(sid) if is_arena else demo.shop_mod.POOL_COPIES[template.tier]
+            count = integer(data["pool"][str(sid)], 0, cap, "pool")
+            if count + held[sid] != cap:
                 raise ValueError("卡池守恒校验失败")
             state.pool.remaining[sid] = count
 
@@ -423,9 +456,51 @@ class SessionCodec:
             raise ValueError('缺少棋子编号计数器')
         state.next_unit_id = integer(data.get('next_unit_id', minimum), minimum, 99999999, 'next_unit_id')
         state.ensure_unit_ids()
+        if is_arena:
+            self._decode_arena(state, data)
+        elif 'arena' in data:
+            raise ValueError('旧规则不能包含竞技强化记录')
         if schema_version >= 4:
             self._decode_tactics(state, data)
         return state
+
+    def _decode_arena(self, state, data):
+        import arena
+        raw = data.get('arena')
+        if not isinstance(raw, dict) or set(raw) != {'pending', 'selected'}:
+            raise ValueError('竞技强化存档结构无效')
+        milestones = (1, 7, 13)
+        available = sum(r <= state.round_no for r in milestones)
+        rows = sequence(raw['selected'], 8, 'selected augments')
+        if len(rows) != 8:
+            raise ValueError('竞技强化需要完整八个席位')
+        for seat, selected in zip(state.seats, rows):
+            keys = sequence(selected, available, 'selected augment ids')
+            if any(not isinstance(key, str) or key not in arena.AUGMENTS for key in keys) or len(keys) != len(set(keys)):
+                raise ValueError('竞技强化未知或重复')
+            seat.arena_augments_selected = [arena.augment_view(key) for key in keys]
+        pending = sequence(raw['pending'], 1, 'pending augments')
+        rebuilt = []
+        for row in pending:
+            if not isinstance(row, dict) or set(row) != {'id', 'round', 'options'}:
+                raise ValueError('待选竞技强化字段无效')
+            round_no = integer(row['round'], 1, state.round_no, 'augment round')
+            if (round_no not in milestones or round_no != state.round_no or row['id'] != f'augment-r{round_no}'
+                    or state.phase != 'prep' or not state.player.alive):
+                raise ValueError('待选竞技强化生命周期无效')
+            keys = sequence(row['options'], 3, 'augment options')
+            used = {a['id'] for a in state.player.arena_augments_selected}
+            if (len(keys) != 3 or any(not isinstance(key, str) or key not in arena.AUGMENTS or key in used for key in keys)
+                    or len(keys) != len(set(keys))):
+                raise ValueError('竞技强化候选无效')
+            rebuilt.append({'id': row['id'], 'round': round_no,
+                            'options': [arena.augment_view(key) for key in keys]})
+        if state.player.alive and len(state.player.arena_augments_selected) + len(pending) != available:
+            raise ValueError('竞技强化领取进度无效')
+        for seat in state.bots:
+            if seat.alive and len(seat.arena_augments_selected) != available:
+                raise ValueError('机器人竞技强化领取进度无效')
+        state.arena_augments_pending = rebuilt
 
     def _decode_tactics(self, state, data):
         import demo

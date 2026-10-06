@@ -1,0 +1,689 @@
+[
+  {
+    "seed": 7,
+    "rounds": [
+      {
+        "round": 1,
+        "hp": 95,
+        "alive": 8,
+        "augments": 1,
+        "pve": false
+      },
+      {
+        "round": 2,
+        "hp": 95,
+        "alive": 8,
+        "augments": 1,
+        "pve": false
+      },
+      {
+        "round": 3,
+        "hp": 95,
+        "alive": 8,
+        "augments": 1,
+        "pve": false
+      },
+      {
+        "round": 4,
+        "hp": 88,
+        "alive": 8,
+        "augments": 1,
+        "pve": false
+      },
+      {
+        "round": 5,
+        "hp": 88,
+        "alive": 8,
+        "augments": 1,
+        "pve": true
+      },
+      {
+        "round": 6,
+        "hp": 88,
+        "alive": 8,
+        "augments": 1,
+        "pve": false
+      },
+      {
+        "round": 7,
+        "hp": 88,
+        "alive": 8,
+        "augments": 2,
+        "pve": false
+      },
+      {
+        "round": 8,
+        "hp": 83,
+        "alive": 8,
+        "augments": 2,
+        "pve": false
+      },
+      {
+        "round": 9,
+        "hp": 76,
+        "alive": 8,
+        "augments": 2,
+        "pve": false
+      },
+      {
+        "round": 10,
+        "hp": 76,
+        "alive": 8,
+        "augments": 2,
+        "pve": true
+      },
+      {
+        "round": 11,
+        "hp": 76,
+        "alive": 8,
+        "augments": 2,
+        "pve": false
+      },
+      {
+        "round": 12,
+        "hp": 66,
+        "alive": 8,
+        "augments": 2,
+        "pve": false
+      },
+      {
+        "round": 13,
+        "hp": 54,
+        "alive": 8,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 14,
+        "hp": 40,
+        "alive": 8,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 15,
+        "hp": 40,
+        "alive": 8,
+        "augments": 3,
+        "pve": true
+      },
+      {
+        "round": 16,
+        "hp": 22,
+        "alive": 8,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 17,
+        "hp": 12,
+        "alive": 7,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 18,
+        "hp": 0,
+        "alive": 6,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 19,
+        "hp": 0,
+        "alive": 6,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 20,
+        "hp": 0,
+        "alive": 6,
+        "augments": 3,
+        "pve": true
+      },
+      {
+        "round": 21,
+        "hp": 0,
+        "alive": 5,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 22,
+        "hp": 0,
+        "alive": 4,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 23,
+        "hp": 0,
+        "alive": 3,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 24,
+        "hp": 0,
+        "alive": 2,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 25,
+        "hp": 0,
+        "alive": 2,
+        "augments": 3,
+        "pve": true
+      },
+      {
+        "round": 26,
+        "hp": 0,
+        "alive": 2,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 27,
+        "hp": 0,
+        "alive": 1,
+        "augments": 3,
+        "pve": false
+      }
+    ],
+    "player_rank": 7,
+    "ranking": [
+      [
+        0,
+        7
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        7,
+        8
+      ]
+    ]
+  },
+  {
+    "seed": 42,
+    "rounds": [
+      {
+        "round": 1,
+        "hp": 95,
+        "alive": 8,
+        "augments": 1,
+        "pve": false
+      },
+      {
+        "round": 2,
+        "hp": 90,
+        "alive": 8,
+        "augments": 1,
+        "pve": false
+      },
+      {
+        "round": 3,
+        "hp": 90,
+        "alive": 8,
+        "augments": 1,
+        "pve": false
+      },
+      {
+        "round": 4,
+        "hp": 86,
+        "alive": 8,
+        "augments": 1,
+        "pve": false
+      },
+      {
+        "round": 5,
+        "hp": 86,
+        "alive": 8,
+        "augments": 1,
+        "pve": true
+      },
+      {
+        "round": 6,
+        "hp": 82,
+        "alive": 8,
+        "augments": 1,
+        "pve": false
+      },
+      {
+        "round": 7,
+        "hp": 82,
+        "alive": 8,
+        "augments": 2,
+        "pve": false
+      },
+      {
+        "round": 8,
+        "hp": 76,
+        "alive": 8,
+        "augments": 2,
+        "pve": false
+      },
+      {
+        "round": 9,
+        "hp": 70,
+        "alive": 8,
+        "augments": 2,
+        "pve": false
+      },
+      {
+        "round": 10,
+        "hp": 70,
+        "alive": 8,
+        "augments": 2,
+        "pve": true
+      },
+      {
+        "round": 11,
+        "hp": 58,
+        "alive": 8,
+        "augments": 2,
+        "pve": false
+      },
+      {
+        "round": 12,
+        "hp": 42,
+        "alive": 8,
+        "augments": 2,
+        "pve": false
+      },
+      {
+        "round": 13,
+        "hp": 28,
+        "alive": 8,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 14,
+        "hp": 12,
+        "alive": 8,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 15,
+        "hp": 12,
+        "alive": 8,
+        "augments": 3,
+        "pve": true
+      },
+      {
+        "round": 16,
+        "hp": 8,
+        "alive": 8,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 17,
+        "hp": 0,
+        "alive": 7,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 18,
+        "hp": 0,
+        "alive": 7,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 19,
+        "hp": 0,
+        "alive": 7,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 20,
+        "hp": 0,
+        "alive": 7,
+        "augments": 3,
+        "pve": true
+      },
+      {
+        "round": 21,
+        "hp": 0,
+        "alive": 4,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 22,
+        "hp": 0,
+        "alive": 3,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 23,
+        "hp": 0,
+        "alive": 3,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 24,
+        "hp": 0,
+        "alive": 3,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 25,
+        "hp": 0,
+        "alive": 3,
+        "augments": 3,
+        "pve": true
+      },
+      {
+        "round": 26,
+        "hp": 0,
+        "alive": 2,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 27,
+        "hp": 0,
+        "alive": 1,
+        "augments": 3,
+        "pve": false
+      }
+    ],
+    "player_rank": 8,
+    "ranking": [
+      [
+        0,
+        8
+      ],
+      [
+        1,
+        7
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        4,
+        6
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        7,
+        5
+      ]
+    ]
+  },
+  {
+    "seed": 20261006,
+    "rounds": [
+      {
+        "round": 1,
+        "hp": 100,
+        "alive": 8,
+        "augments": 1,
+        "pve": false
+      },
+      {
+        "round": 2,
+        "hp": 95,
+        "alive": 8,
+        "augments": 1,
+        "pve": false
+      },
+      {
+        "round": 3,
+        "hp": 89,
+        "alive": 8,
+        "augments": 1,
+        "pve": false
+      },
+      {
+        "round": 4,
+        "hp": 84,
+        "alive": 8,
+        "augments": 1,
+        "pve": false
+      },
+      {
+        "round": 5,
+        "hp": 84,
+        "alive": 8,
+        "augments": 1,
+        "pve": true
+      },
+      {
+        "round": 6,
+        "hp": 79,
+        "alive": 8,
+        "augments": 1,
+        "pve": false
+      },
+      {
+        "round": 7,
+        "hp": 75,
+        "alive": 8,
+        "augments": 2,
+        "pve": false
+      },
+      {
+        "round": 8,
+        "hp": 71,
+        "alive": 8,
+        "augments": 2,
+        "pve": false
+      },
+      {
+        "round": 9,
+        "hp": 65,
+        "alive": 8,
+        "augments": 2,
+        "pve": false
+      },
+      {
+        "round": 10,
+        "hp": 65,
+        "alive": 8,
+        "augments": 2,
+        "pve": true
+      },
+      {
+        "round": 11,
+        "hp": 65,
+        "alive": 8,
+        "augments": 2,
+        "pve": false
+      },
+      {
+        "round": 12,
+        "hp": 53,
+        "alive": 8,
+        "augments": 2,
+        "pve": false
+      },
+      {
+        "round": 13,
+        "hp": 39,
+        "alive": 8,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 14,
+        "hp": 27,
+        "alive": 8,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 15,
+        "hp": 27,
+        "alive": 8,
+        "augments": 3,
+        "pve": true
+      },
+      {
+        "round": 16,
+        "hp": 17,
+        "alive": 8,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 17,
+        "hp": 5,
+        "alive": 8,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 18,
+        "hp": 0,
+        "alive": 6,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 19,
+        "hp": 0,
+        "alive": 6,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 20,
+        "hp": 0,
+        "alive": 6,
+        "augments": 3,
+        "pve": true
+      },
+      {
+        "round": 21,
+        "hp": 0,
+        "alive": 5,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 22,
+        "hp": 0,
+        "alive": 4,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 23,
+        "hp": 0,
+        "alive": 2,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 24,
+        "hp": 0,
+        "alive": 2,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 25,
+        "hp": 0,
+        "alive": 2,
+        "augments": 3,
+        "pve": true
+      },
+      {
+        "round": 26,
+        "hp": 0,
+        "alive": 2,
+        "augments": 3,
+        "pve": false
+      },
+      {
+        "round": 27,
+        "hp": 0,
+        "alive": 1,
+        "augments": 3,
+        "pve": false
+      }
+    ],
+    "player_rank": 8,
+    "ranking": [
+      [
+        0,
+        8
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        5,
+        7
+      ],
+      [
+        6,
+        6
+      ],
+      [
+        7,
+        1
+      ]
+    ]
+  }
+]

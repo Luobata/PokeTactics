@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#202c29" />
+    <meta
+      name="description"
+      content="PokeTactics 宝可梦自走棋试玩。招募精灵、构筑羁绊、自由布阵，与七位训练家一决胜负。"
+    />
+    <title>PokeTactics — 精灵战术实验室</title>
+    <link rel="stylesheet" href="/play/assets/play.css" />
+    <script src="/play/assets/play.js" defer></script>
+  </head>
+  <body>
+    <svg
+      class="icon-library"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <symbol id="i-ball" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M3 12h6m6 0h6" />
+        <circle cx="12" cy="12" r="3" />
+      </symbol>
+      <symbol id="i-grid" viewBox="0 0 24 24">
+        <rect x="4" y="4" width="6" height="6" rx="1" />
+        <rect x="14" y="4" width="6" height="6" rx="1" />
+        <rect x="4" y="14" width="6" height="6" rx="1" />
+        <rect x="14" y="14" width="6" height="6" rx="1" />
+      </symbol>
+      <symbol id="i-book" viewBox="0 0 24 24">
+        <path
+          d="M12 5v15M12 5C8 2 4 4 3 5v14c3-2 6-2 9 1 3-3 6-3 9-1V5c-3-2-6-2-9 0Z"
+        />
+      </symbol>
+      <symbol id="i-volume" viewBox="0 0 24 24">
+        <path
+          d="m11 4-6 5H2v6h3l6 5V4Zm5 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"
+        />
+      </symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24">
+        <path
+          d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"
+        />
+      </symbol>
+      <symbol id="i-coin" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v10m3-8c-4-4-9 3-3 3s1 7-3 3" />
+      </symbol>
+      <symbol id="i-users" viewBox="0 0 24 24">
+        <path
+          d="M3 20v-2a5 5 0 0 1 10 0v2m3-8a5 5 0 0 1 5 5v3M15 4a4 4 0 0 1 0 8"
+        />
+        <circle cx="8" cy="7" r="4" />
+      </symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24">
+        <path
+          d="M20 7v5h-5M4 17v-5h5M5.1 7a8 8 0 0 1 13.2-2L20 7M4 17l1.7 2A8 8 0 0 0 19 17"
+        />
+      </symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24">
+        <rect x="5" y="10" width="14" height="11" rx="2" />
+        <path d="M8 10V6a4 4 0 0 1 8 0v4m-4 5v2" />
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24">
+        <path d="M4 12h16m-6-6 6 6-6 6" />
+      </symbol>
+      <symbol id="i-swords" viewBox="0 0 24 24">
+        <path
+          d="m3 3 6 2 10 10-4 4L5 9 3 3Zm18 0-6 2-4 4m-3 5-3 3m9-9 3-3M3 21l4-4m10 0 4 4M3 15l6 6m6-18 6 6"
+        />
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4" />
+        <path
+          d="M12 1v2m0 18v2M1 12h2m18 0h2M4.2 4.2l1.4 1.4m12.8 12.8 1.4 1.4M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"
+        />
+      </symbol>
+      <symbol id="i-download" viewBox="0 0 24 24">
+        <path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4" />
+      </symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24">
+        <path d="m9 5 7 7-7 7" />
+      </symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24">
+        <path d="M12 4v16M4 12h16" />
+      </symbol>
+    </svg>
+
+    <nav class="rail" aria-label="主要导航">
+      <a class="rail-brand" href="/play" aria-label="PokeTactics 首页"
+        ><svg><use href="#i-ball" /></svg
+      ></a>
+      <div class="rail-links">
+        <a
+          class="rail-link active"
+          href="/play"
+          aria-label="游戏试玩"
+          aria-current="page"
+          ><svg><use href="#i-grid" /></svg><span>试玩</span></a
+        >
+        <button class="rail-link" id="help-button" aria-label="打开玩法指南">
+          <svg><use href="#i-book" /></svg><span>指南</span>
+        </button>
+      </div>
+      <div class="rail-bottom">
+        <button
+          class="rail-link"
+          id="sound-button"
+          aria-label="开启游戏音效"
+          aria-pressed="false"
+        >
+          <svg><use href="#i-volume" /></svg><span>音效</span>
+        </button>
+        <div class="rail-version">V.01</div>
+      </div>
+    </nav>
+
+    <div class="app">
+      <header class="topbar">
+        <a href="/play" class="wordmark"
+          >POKÉ<span>TACTICS</span><span class="beta">试玩版</span></a
+        >
+        <div class="topbar-right">
+          <span class="local-badge"><i></i> 单人冒险 · 7 位 AI 对手</span
+          ><button
+            id="mobile-help-button"
+            class="icon-button mobile-help-button"
+            title="玩法指南"
+            aria-label="打开玩法指南"
+          >
+            <svg><use href="#i-book" /></svg></button
+          ><button
+            id="backup-button"
+            class="icon-button"
+            title="下载当前对局存档"
+            aria-label="下载当前对局存档"
+          >
+            <svg><use href="#i-download" /></svg></button
+          ><button id="new-button" class="text-button">
+            <svg><use href="#i-refresh" /></svg> 新的冒险
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="page-heading">
+          <div>
+            <div class="eyebrow">YOUR NEXT GREAT ADVENTURE</div>
+            <h1>小精灵，大策略<span class="title-dot">.</span></h1>
+            <p>招募你的伙伴，让每一次相遇成为制胜的一步。</p>
+          </div>
+          <div class="round-card">
+            <div class="round-icon">
+              <svg><use href="#i-swords" /></svg>
+            </div>
+            <div>
+              <span class="round-label">ROUND <b id="round-number">01</b></span
+              ><span class="phase" id="phase-label">准备阶段</span>
+            </div>
+            <span class="phase-dot"></span>
+          </div>
+        </section>
+
+        <div class="game-layout">
+          <aside class="left-column">
+            <section class="trainer-card" aria-label="训练家状态">
+              <div class="trainer-identity">
+                <div class="player-avatar">
+                  <img
+                    src="/demo/sprite/25.png"
+                    alt="皮卡丘"
+                    width="56"
+                    height="56"
+                  />
+                </div>
+                <div>
+                  <span class="mini-label">TRAINER</span>
+                  <h2>新叶训练家</h2>
+                  <span class="player-badge">就是你</span>
+                </div>
+              </div>
+              <div class="health-row">
+                <span
+                  ><svg class="icon"><use href="#i-heart" /></svg> 生命值</span
+                ><strong><span id="hp">—</span><small> / 100</small></strong>
+              </div>
+              <div class="health-track"><i id="hp-fill"></i></div>
+              <div class="trainer-stats">
+                <div>
+                  <svg class="icon coin-icon"><use href="#i-coin" /></svg
+                  ><strong id="gold">—</strong><span>金币</span>
+                </div>
+                <div>
+                  <svg class="icon"><use href="#i-users" /></svg
+                  ><strong id="pop">—</strong><span>上场 / 容量</span>
+                </div>
+              </div>
+              <div class="level-line">
+                <span>训练家 <b id="level">Lv.1</b></span
+                ><span id="xp-text">0 / 2 XP</span>
+              </div>
+              <div class="xp-track"><i id="xp-fill"></i></div>
+              <button id="levelup-button" class="upgrade-button">
+                <svg><use href="#i-plus" /></svg> 购买经验 <span>4 金币</span>
+              </button>
+            </section>
+
+            <section class="side-section synergies">
+              <div class="section-heading">
+                <h2>属性羁绊</h2>
+                <span class="tiny-label">SYNERGIES</span>
+              </div>
+              <div id="synergy-list">
+                <p class="empty-copy">上场精灵，点亮你的第一组羁绊。</p>
+              </div>
+              <p class="section-note">不同精灵的同属性可触发加成。</p>
+            </section>
+
+            <section class="side-section unit-section">
+              <div class="section-heading">
+                <h2>精灵情报</h2>
+                <span class="tiny-label">POKÉDEX</span>
+              </div>
+              <div id="unit-detail">
+                <div class="empty-detail">
+                  <svg><use href="#i-ball" /></svg>
+                  <p>点击一只精灵<br />了解它的战斗风格</p>
+                </div>
+              </div>
+            </section>
+          </aside>
+
+          <section class="center-column" aria-label="游戏棋盘和商店">
+            <div class="arena">
+              <header class="arena-header">
+                <div>
+                  <span class="map-marker"></span>
+                  <h2 id="stage-title">常青森林</h2>
+                  <span class="map-subtitle">VIRIDIAN FOREST</span>
+                </div>
+                <div class="weather-pill" title="本轮天气效果">
+                  <svg><use href="#i-sun" /></svg
+                  ><span id="weather-label">晴朗</span>
+                </div>
+              </header>
+              <div class="board-scene">
+                <svg
+                  class="forest-art"
+                  viewBox="0 0 680 436"
+                  preserveAspectRatio="xMidYMid slice"
+                  aria-hidden="true"
+                >
+                  <defs>
+                    <pattern
+                      id="grass"
+                      width="42"
+                      height="38"
+                      patternUnits="userSpaceOnUse"
+                    >
+                      <rect width="42" height="38" fill="#95b675" />
+                      <path
+                        d="m8 9 2-4 2 4m22 20 2-4 2 4"
+                        stroke="#7d9f5e"
+                        stroke-width="2"
+                        fill="none"
+                      />
+                      <rect x="25" y="8" width="3" height="2" fill="#afc58a" />
+                    </pattern>
+                    <g id="pine">
+                      <ellipse
+                        cx="0"
+                        cy="37"
+                        rx="28"
+                        ry="9"
+                        fill="#466c42"
+                        opacity=".3"
+                      />
+                      <path d="M-5 19h10v23H-5Z" fill="#6c6d42" />
+                      <path
+                        d="m0-31 23 31h-9l17 25H-31l17-25h-9Z"
+                        fill="#385b42"
+                      />
+                      <path d="m0-31 0 56H-31l17-25h-9Z" fill="#42694b" />
+                      <path d="m0-19 14 19H8l11 17H-3V-19Z" fill="#537952" />
+                      <path d="m-8-7 8-13 3 4-5 9Z" fill="#6d8d5b" />
+                    </g>
+                    <g id="bush">
+                      <ellipse
+                        cy="9"
+                        rx="23"
+                        ry="7"
+                        fill="#527445"
+                        opacity=".3"
+                      />
+                      <path
+                        d="M-25 6V-5h7v-9h15v-5h13v6h12v9h6V8Z"
+                        fill="#628650"
+                      />
+                      <path
+                        d="M-17-4v-6h14v-5h11v7h12v5H3v8H-9v-9Z"
+                        fill="#7b9b5c"
+                      />
+                      <rect x="11" y="-3" width="3" height="4" fill="#e7d987" />
+                    </g>
+                    <g id="rock">
+                      <ellipse
+                        cy="11"
+                        rx="18"
+                        ry="5"
+                        fill="#587348"
+                        opacity=".3"
+                      />
+                      <path
+                        d="m-17 7 4-15 13-6 12 5 7 15-12 6h-19Z"
+                        fill="#969e81"
+                      />
+                      <path d="m-13-8 13-6 12 5-5 7-13 2Z" fill="#bbc0a0" />
+                      <path d="m7-2 5-7 7 15-12 6Z" fill="#7e8973" />
+                    </g>
+                    <g id="flower">
+                      <rect x="-1" y="-2" width="2" height="9" fill="#5c8950" />
+                      <path
+                        d="M-4-6h3v-3h3v3h3v4H2v3h-3v-3h-3Z"
+                        fill="#f1e9b5"
+                      />
+                      <rect x="-1" y="-5" width="3" height="3" fill="#d8ad59" />
+                    </g>
+                  </defs>
+                  <rect width="680" height="436" fill="url(#grass)" />
+                  <path
+                    d="M0 139h62v-27h60v-22h45V47h42V0M510 436v-52h75v-25h95"
+                    stroke="#c9c698"
+                    stroke-width="33"
+                    fill="none"
+                  />
+                  <path
+                    d="M0 139h62v-27h60v-22h45V47h42V0M510 436v-52h75v-25h95"
+                    stroke="#d6cfa6"
+                    stroke-width="22"
+                    fill="none"
+                  />
+                  <path
+                    d="M590 47h90v110h-39v-12h-37v-16h-28V73h14Z"
+                    fill="#738f66"
+                  />
+                  <path
+                    d="M598 54h82v91h-32v-14h-39v-17h-25V78h14Z"
+                    fill="#75b8b0"
+                  />
+                  <path
+                    d="M604 63h76v68h-27v-12h-38v-16h-23V84h12Z"
+                    fill="#8ccac1"
+                  />
+                  <path
+                    d="M620 76h27m-38 19h32m12 17h24"
+                    stroke="#bce0cb"
+                    stroke-width="3"
+                  />
+                  <path
+                    d="M650 140h14v-8h10v-9"
+                    stroke="#779c61"
+                    stroke-width="4"
+                    fill="none"
+                  />
+                  <use href="#pine" x="39" y="14" />
+                  <use href="#pine" x="85" y="28" />
+                  <use href="#pine" x="130" y="6" />
+                  <use href="#pine" x="16" y="70" />
+                  <use href="#pine" x="59" y="77" />
+                  <use href="#pine" x="538" y="16" />
+                  <use href="#pine" x="583" y="5" />
+                  <use href="#pine" x="662" y="12" />
+                  <use href="#bush" x="577" y="48" />
+                  <use href="#pine" x="22" y="220" />
+                  <use href="#pine" x="8" y="288" />
+                  <use href="#pine" x="46" y="301" />
+                  <use href="#pine" x="30" y="373" />
+                  <use href="#pine" x="81" y="395" />
+                  <use href="#pine" x="655" y="229" />
+                  <use href="#pine" x="683" y="268" />
+                  <use href="#pine" x="637" y="309" />
+                  <use href="#pine" x="667" y="382" />
+                  <use href="#pine" x="609" y="403" />
+                  <use href="#bush" x="142" y="396" />
+                  <use href="#bush" x="307" y="21" />
+                  <use href="#bush" x="442" y="412" />
+                  <use href="#bush" x="74" y="203" />
+                  <use href="#rock" x="564" y="322" />
+                  <use href="#rock" x="95" y="281" />
+                  <use href="#rock" x="458" y="47" />
+                  <use href="#flower" x="113" y="186" />
+                  <use href="#flower" x="122" y="194" />
+                  <use href="#flower" x="561" y="179" />
+                  <use href="#flower" x="551" y="189" />
+                  <use href="#flower" x="397" y="392" />
+                  <use href="#flower" x="407" y="400" />
+                  <path
+                    d="M179 59h328v8H179ZM145 384h359v5H145Z"
+                    fill="#d3d2a3"
+                    opacity=".7"
+                  />
+                </svg>
+                <div class="opponent-tag">
+                  <i></i><span id="opponent-kind">野生遭遇</span
+                  ><span class="opponent-separator">/</span
+                  ><b id="opponent-name">等待对手</b>
+                </div>
+                <div class="battlefield">
+                  <div class="team-banner enemy-banner">
+                    敌方 · <span id="enemy-team-name">当轮对手</span>
+                  </div>
+                  <div
+                    id="enemy-board"
+                    class="board-grid enemy-grid"
+                    aria-label="敌方阵容"
+                  ></div>
+                  <div class="board-divider">
+                    <span></span><b>VS</b><span></span>
+                  </div>
+                  <div class="team-banner ally-banner">我方 · 新叶训练家</div>
+                  <div
+                    id="ally-board"
+                    class="board-grid ally-grid"
+                    aria-label="我方阵容"
+                  ></div>
+                </div>
+                <div class="field-caption">
+                  <span><i></i> 我方部署区</span
+                  ><span>防守在前 · 攻击与辅助在后</span>
+                </div>
+                <div class="map-coordinate">01 / VIRIDIAN</div>
+              </div>
+              <div class="bench-area">
+                <div class="bench-heading">
+                  <h3>备战席 <span>BENCH</span></h3>
+                  <button id="deploy-button">
+                    一键上场 <svg><use href="#i-arrow" /></svg>
+                  </button>
+                </div>
+                <div id="bench" class="bench-grid" aria-label="备战席"></div>
+              </div>
+            </div>
+
+            <div class="tutorial-hint">
+              <span class="hint-spark">✦</span>
+              <p id="tutorial-hint">
+                冒险从一次相遇开始。点击商店中的精灵，把它招募到备战席。
+              </p>
+              <span class="hint-step">TRAINER TIP</span>
+            </div>
+
+            <section class="shop-section" aria-label="精灵商店">
+              <div class="shop-heading">
+                <div>
+                  <h2>
+                    寻找新伙伴 <span id="shop-count" class="shop-count">5</span>
+                  </h2>
+                  <p id="pool-summary">
+                    18 种进化精灵 · 三合一升星 · 九张成就三星闪光
+                  </p>
+                </div>
+                <div class="shop-controls">
+                  <button
+                    id="lock-button"
+                    class="icon-button"
+                    title="锁定商店"
+                    aria-label="锁定商店"
+                  >
+                    <svg><use href="#i-lock" /></svg></button
+                  ><button id="refresh-button" class="refresh-button">
+                    <svg><use href="#i-refresh" /></svg> 刷新
+                    <span
+                      >2 <svg><use href="#i-coin" /></svg
+                    ></span>
+                  </button>
+                </div>
+              </div>
+              <div id="shop" class="shop-grid"></div>
+            </section>
+            <section class="preparation-section" aria-label="战前准备系统">
+              <div class="preparation-heading">
+                <div>
+                  <span class="eyebrow">BUILD YOUR STRATEGY</span>
+                  <h2>战前准备</h2>
+                </div>
+                <button id="catalog-button" class="text-button">
+                  精灵图鉴 ↗
+                </button>
+              </div>
+              <div class="system-tabs" role="tablist" aria-label="战前系统">
+                <button
+                  id="augments-tab"
+                  role="tab"
+                  aria-selected="true"
+                  aria-controls="augments-panel"
+                  data-system="augments"
+                >
+                  海克斯强化 <span id="augments-count">0</span>
+                </button>
+                <button
+                  id="techniques-tab"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="techniques-panel"
+                  data-system="techniques"
+                >
+                  技能学习 <span id="techniques-count">0</span>
+                </button>
+                <button
+                  id="items-tab"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="items-panel"
+                  data-system="items"
+                >
+                  道具装备 <span id="items-count">0</span>
+                </button>
+              </div>
+              <div
+                id="augments-panel"
+                class="system-panel"
+                role="tabpanel"
+                aria-labelledby="augments-tab"
+              >
+                <div id="augments"></div>
+              </div>
+              <div
+                id="techniques-panel"
+                class="system-panel"
+                role="tabpanel"
+                aria-labelledby="techniques-tab"
+                hidden
+              >
+                <div id="techniques"></div>
+              </div>
+              <div
+                id="items-panel"
+                class="system-panel"
+                role="tabpanel"
+                aria-labelledby="items-tab"
+                hidden
+              >
+                <p class="section-note">
+                  选中装备，再点击一只精灵。装备和技能可以同时携带。
+                </p>
+                <div id="inventory"></div>
+              </div>
+            </section>
+            <div class="bottom-actions">
+              <p>
+                <span class="shortcut">↗</span>
+                拖动精灵布阵，或点击精灵再点击空格
+              </p>
+              <button id="fight-button" class="fight-button">
+                <svg><use href="#i-swords" /></svg><span>开始战斗</span
+                ><svg><use href="#i-arrow" /></svg>
+              </button>
+            </div>
+          </section>
+
+          <aside class="right-column">
+            <section class="side-section lobby">
+              <div class="section-heading">
+                <h2>训练家们</h2>
+                <span class="lobby-count"><i></i> 8</span>
+              </div>
+              <div class="lobby-subtitle">点击任意训练家，侦察公开阵容。</div>
+              <div id="standings" class="standings"></div>
+            </section>
+            <section class="field-notes">
+              <span class="mini-label">FIELD NOTES / 01</span>
+              <div class="notes-illustration">
+                <img
+                  src="/demo/sprite/1.png"
+                  alt="妙蛙种子"
+                  width="68"
+                  height="68"
+                /><span>✦</span
+                ><svg viewBox="0 0 64 64" aria-hidden="true">
+                  <path
+                    d="M10 53C15 37 49 42 51 9 21 11 14 20 19 37m-9 16 26-30"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  />
+                </svg>
+              </div>
+              <h3>让每个伙伴各司其职。</h3>
+              <p>
+                攻击型输出，防守型消耗，辅助型回复。先搭一套互相照应的阵容，再决定追星或升级。
+              </p>
+              <span class="notes-footer">慢慢来，准备阶段不限时。</span>
+            </section>
+            <section class="side-section journal">
+              <div class="section-heading">
+                <h2>冒险记录</h2>
+                <span class="tiny-label">JOURNAL</span>
+              </div>
+              <div id="battle-log" class="journal-list">
+                <p class="empty-copy">新的故事，等你写下。</p>
+              </div>
+            </section>
+          </aside>
+        </div>
+
+        <footer class="page-footer">
+          <span
+            ><svg><use href="#i-ball" /></svg> POKÉTACTICS
+            <i>·</i> 为每一种阵容，留一种可能。</span
+          ><span id="save-status" role="status">正在连接冒险…</span
+          ><button id="resume-button" class="footer-resume">继续存档</button>
+        </footer>
+      </main>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <dialog id="help-dialog" class="modal help-modal">
+      <button id="help-close" class="modal-close" aria-label="关闭玩法指南">
+        ×</button
+      ><span class="eyebrow">A TRAINER’S HANDBOOK</span>
+      <h2>你的第一场冒险</h2>
+      <p class="modal-intro">一场自动战斗，一份由你决定的策略。</p>
+      <div class="guide-steps">
+        <div>
+          <b>01</b>
+          <section>
+            <h3>招募伙伴</h3>
+            <p>点击商店卡片购买精灵。金币每轮获得；留存金币还可以获得利息。</p>
+          </section>
+        </div>
+        <div>
+          <b>02</b>
+          <section>
+            <h3>排兵布阵</h3>
+            <p>
+              从备战席拖动精灵到棋盘，或依次点击精灵和目标格。蓝色下半场是我方，红色上半场是敌方。防守型放前排，攻击与辅助放后排；上场数量受训练家等级限制。
+            </p>
+          </section>
+        </div>
+        <div>
+          <b>03</b>
+          <section>
+            <h3>升星与羁绊</h3>
+            <p>
+              商店只出现 18
+              种进化形态。三只同种一星合成二星，三只二星合成三星闪光，形态保持一致。三星累计需要九张。八位玩家争夺共享池；不同精灵的相同属性可以触发羁绊。
+            </p>
+          </section>
+        </div>
+        <div>
+          <b>04</b>
+          <section>
+            <h3>构筑与对战</h3>
+            <p>
+              在「战前准备」里选海克斯、学技能、合成和装备道具。点击训练家可侦察阵容。准备好后开始自动战斗，失败会扣除生命，与七位训练家竞争到最终排名。
+            </p>
+          </section>
+        </div>
+      </div>
+      <div class="guide-note">
+        操作会自动保存。下次打开页面，可以继续这场冒险。
+      </div>
+    </dialog>
+
+    <dialog id="new-dialog" class="modal confirm-modal">
+      <span class="eyebrow">A FRESH START</span>
+      <h2>开启新的冒险？</h2>
+      <p>
+        新对局将从第 1
+        轮开始，页面会记录新的进度。想保留这场冒险，可以先下载存档。
+      </p>
+      <div class="modal-actions">
+        <button id="new-cancel" class="secondary-button">继续当前冒险</button
+        ><button id="new-confirm" class="primary-button">
+          从头开始 <svg><use href="#i-arrow" /></svg>
+        </button>
+      </div>
+    </dialog>
+
+    <dialog id="battle-dialog" class="modal battle-modal">
+      <button id="battle-close" class="modal-close" aria-label="收起战斗回放">
+        ×
+      </button>
+      <div class="battle-modal-heading">
+        <span class="eyebrow">LET YOUR TEAM SHINE</span>
+        <h2 id="battle-title">战斗时刻</h2>
+        <p id="battle-subtitle"></p>
+      </div>
+      <div class="battle-playback">
+        <div class="battle-screen">
+          <div class="combat-team-key">
+            <span>▲ 敌方 · 红</span><span>● 我方 · 蓝</span>
+          </div>
+          <div
+            id="battle-verdict"
+            class="battle-verdict"
+            aria-live="polite"
+            hidden
+          >
+            <div class="verdict-symbol"></div>
+            <strong></strong>
+            <p></p>
+          </div>
+          <canvas
+            id="battle-canvas"
+            width="240"
+            height="320"
+            aria-label="战斗动画回放"
+          ></canvas
+          ><span id="battle-status" role="status">战斗画面载入中…</span>
+        </div>
+        <div class="battle-report">
+          <div id="battle-result" class="battle-result"></div>
+          <h3>战场实况</h3>
+          <div id="battle-events" class="battle-events"></div>
+        </div>
+      </div>
+      <div class="playback-controls">
+        <button id="battle-pause" class="secondary-button">暂停</button
+        ><label class="speed-control"
+          >速度
+          <select id="battle-speed">
+            <option value="0.5">0.5×</option>
+            <option value="1" selected>1×</option>
+            <option value="2">2×</option>
+            <option value="4">4×</option>
+          </select></label
+        ><button id="battle-skip" class="text-button">查看战果</button
+        ><button id="battle-next" class="primary-button">
+          下一轮 <svg><use href="#i-arrow" /></svg>
+        </button>
+      </div>
+    </dialog>
+
+    <dialog id="scout-dialog" class="modal scout-modal">
+      <button id="scout-close" class="modal-close" aria-label="关闭侦察">
+        ×</button
+      ><span class="eyebrow">KNOW YOUR OPPONENT</span>
+      <h2>训练家侦察</h2>
+      <p class="modal-intro">
+        阵容、星级、装备与强化公开可见；准备阶段可随时查看。
+      </p>
+      <div id="scout-tabs" class="scout-tabs"></div>
+      <div id="scout-content"></div>
+    </dialog>
+    <dialog id="catalog-dialog" class="modal catalog-modal">
+      <button id="catalog-close" class="modal-close" aria-label="关闭精灵图鉴">
+        ×</button
+      ><span class="eyebrow">A SMALL POOL, MORE POSSIBILITIES</span>
+      <h2>精灵图鉴</h2>
+      <p id="catalog-description" class="modal-intro"></p>
+      <div class="catalog-filters" role="group" aria-label="精灵角色筛选">
+        <button data-role-filter="all" aria-pressed="true">全部</button
+        ><button data-role-filter="attack" aria-pressed="false">攻击型</button
+        ><button data-role-filter="defense" aria-pressed="false">防守型</button
+        ><button data-role-filter="support" aria-pressed="false">辅助型</button>
+      </div>
+      <div id="catalog-grid" class="catalog-grid"></div>
+    </dialog>
+
+    <dialog id="result-dialog" class="modal result-modal">
+      <button id="result-close" class="modal-close" aria-label="关闭排名">
+        ×
+      </button>
+      <div class="result-medal">
+        <svg><use href="#i-ball" /></svg>
+      </div>
+      <span class="eyebrow">EVERY ADVENTURE TELLS A STORY</span>
+      <h2 id="result-title">冒险完成</h2>
+      <p id="result-description"></p>
+      <div id="result-ranking"></div>
+      <button id="result-new" class="primary-button">
+        再来一场 <svg><use href="#i-arrow" /></svg>
+      </button>
+    </dialog>
+    <noscript
+      ><p class="noscript">
+        试玩需要 JavaScript。请在浏览器中开启 JavaScript 后刷新页面。
+      </p></noscript
+    >
+  </body>
+</html>

@@ -109,7 +109,8 @@ def power(owned: OwnedPiece, target_types=()) -> int:
     R1 单体档案（docs/13 §5）：建档棋子按档案价值乘数加价——
     溅射/斩杀/坦度原语是 BST 表达不了的强度，不加价 bot 会贱卖主角。
     """
-    return _species_power(owned.piece.species_id)
+    value = _species_power(owned.piece.species_id)
+    return int(value * (1, 1.6, 2.5)[getattr(owned.piece, 'star', 1) - 1])
 
 
 class Bot:
@@ -163,6 +164,9 @@ class Bot:
                    if o.piece.species_id == species_id)
 
     def _has_combine_progress(self, species_id: int) -> bool:
+        if getattr(self.pool, 'arena', False):
+            stars = [o.piece.star for o in self.all_pieces() if o.piece.species_id == species_id]
+            return any(stars.count(star) >= 2 for star in (1, 2))
         return _can_combine(species_id) and self.count_species(species_id) >= 2
 
     def pop(self) -> int:
@@ -451,7 +455,7 @@ class Bot:
                 self.board.remove(owned)
 
         if self.ability == 0:  # L0：满了随机卖
-            while len(self.bench) > BENCH_SIZE:
+            while len(self.bench) > getattr(self, 'bench_capacity', BENCH_SIZE):
                 do_sell(self.bench[rng.randrange(len(self.bench))])
             return
 
@@ -462,10 +466,10 @@ class Bot:
             unprotected = not self._has_combine_progress(owned.piece.species_id)
             return (off_target, unprotected, -power(owned, self.target_types))
 
-        limit = BENCH_SIZE   # L1/L2 都守 6 格硬上限（设备裁定）；差别在卖谁：
+        limit = getattr(self, 'bench_capacity', BENCH_SIZE)   # L1/L2 都守 6 格硬上限（设备裁定）；差别在卖谁：
         while len(self.bench) > limit:   # L2 按偏离羁绊优先卖，L1 只看战力
             do_sell(max(self.bench, key=sell_rank))
-        while len(self.bench) > BENCH_SIZE:  # 硬上限兜底
+        while len(self.bench) > getattr(self, 'bench_capacity', BENCH_SIZE):  # 硬上限兜底
             do_sell(max(self.bench, key=lambda o: -power(o, self.target_types)))
 
     # ---- 买棋 + 刷新 ----
@@ -481,7 +485,7 @@ class Bot:
         copies = self.count_species(sid)
         in_target = bool(set(piece.types) & set(self.target_types))
         valuable = in_target or score >= 400
-        if _can_combine(sid):
+        if getattr(self.pool, 'arena', False) or _can_combine(sid):
             if copies == 1:
                 score += 600 if valuable else 250    # 第 2 只：3 合 1 进度
             elif copies >= 2:
@@ -543,7 +547,7 @@ class Bot:
 
     def _buy_pass(self, round_no: int, rng: random.Random, reserve: int) -> bool:
         bought = False
-        for slot in range(shop_mod.SHOP_SLOTS):
+        for slot in range(len(self.shop.slots)):
             sid = self.shop.slots[slot]
             if sid is None:
                 continue
@@ -557,7 +561,7 @@ class Bot:
                     BUY_THRESHOLD if self.ability >= 2 else 0)
             if not want:
                 continue
-            if len(self.bench) >= BENCH_SIZE:
+            if len(self.bench) >= getattr(self, 'bench_capacity', BENCH_SIZE):
                 # 备战满：新货价值（含羁绊/复制加成）高于最弱存货才换仓；
                 # 换仓保护有 3 合 1 进度的复制件
                 def victim_rank(o: OwnedPiece) -> tuple:

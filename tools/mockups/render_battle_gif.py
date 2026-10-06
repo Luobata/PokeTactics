@@ -35,6 +35,7 @@ ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT / "sim"))
 from decoders import AssetError, Front, Font16, Palettes  # noqa: E402
+import arena_vfx
 from render_mockups import (  # noqa: E402
     H, W, CELL, BOARD_X, BOARD_Y, BOARD_FOOT, INK, PAPER, FRAME, NIGHT, ENERGY, HP_RED, HP_LOW,
     TYPE_COLORS, TIER_COLORS, UI_GLYPHS, GRASS_A, GRASS_B, SAND_A, SAND_B,
@@ -517,7 +518,7 @@ class BattleAnimation:
                              **(hud_snapshot or {})}
         self.move_type = {m["name"]: m["type"] for m in pokedex().moves.values()}
         # 显示层汉化：事件流契约不变（cast 事件仍存英文名），渲染/面板翻译
-        self.move_zh = {m["name"]: (m.get("name_zh") or m["name"])
+        self.move_zh = {m["name"]: (m.get("name_zh") or {'cross_chop': '十字劈'}.get(m['name'],m['name']))
                         for m in pokedex().moves.values()}
         b = battle or Battle(comp_a, comp_b, random.Random(seed + 1),
                              weather_name=weather_name)
@@ -531,6 +532,7 @@ class BattleAnimation:
         # replace Unit.hp, Unit.healing_blocks, or a future simulator decision.
         self.healing_blocks = []
         self.units = {u.idx: AnimUnit(u) for u in b.units}
+        self.is_arena = getattr(b, 'ruleset', None) == 'arena_v1'
         self.by_idx = {u.idx: u for u in b.units}
         self.events = b.events
         self.authoritative_states = any(ev[1] == "unit_state" for ev in self.events)
@@ -690,6 +692,8 @@ class BattleAnimation:
             if not self.authoritative_states:
                 au.set_hp(t, min(au.u.max_hp, au.hp + ev[3]))
             self.floats.append((t, *au.render_px(t), f"+{ev[3]}", STATUS_GREEN))
+        elif kind == 'arena_heal':
+            self.msg = (t, f'{self.by_idx[ev[2]].piece.name}回复{self.by_idx[ev[3]].piece.name}')
         elif kind == "sash":
             if not self.authoritative_states:
                 self.units[ev[2]].set_hp(t, 1)
@@ -778,10 +782,10 @@ class BattleAnimation:
             window = next((w for w in self.timeline.cutin_windows if w[0] <= T < w[1]), None)
             selected = None if window is None else next((c for c in self.cutins
                 if abs(self._cast_release(c)-window[0]) < 1e-8), None)
-            if show_cutins and selected:
+            if show_cutins and selected and not self.is_arena:
                 # A narrow portrait banner preserves the board and target meters.
                 self._draw_cast_portrait(img, selected, T)
-        elif show_cutins and release and not signature_active:
+        elif show_cutins and release and not signature_active and not self.is_arena:
             content = self._cutin_frame(release, T)
             img.alpha_composite(content, (0, self._board_shake(T)))
         return img
@@ -843,6 +847,8 @@ class BattleAnimation:
             timing = self._timing(ev)
             ranged_cast = timing and timing.kind == 'cast' and timing.release < timing.impact
             if ev[1] not in ("attack", "cast") or (ev[1] == 'cast' and not ranged_cast):
+                continue
+            if self.is_arena:
                 continue
             if timing and timing.secondary:
                 continue
@@ -917,6 +923,8 @@ class BattleAnimation:
     def _draw_signatures(self, img, T, budget):
         for c in self._active_casts(T):
             sid = self.units[c[2]].u.piece.species_id
+            if self.is_arena and sid not in SUPPORTED_SPECIES:
+                continue  # The arena's individual material track owns this cast.
             if not c[0] <= T < c[1] + .6:
                 continue
             a = self._event_position(c[2], min(T,self._cast_release(c))) if self._is_presentation else self._event_position(c[2], c[0])
@@ -1097,6 +1105,8 @@ class BattleAnimation:
         budget.take(len(weather), minimum=len(weather))
         fx = Image.new("RGBA", (W, H))
         # 先分配命中/消散/蓄力，再把剩余预算给尘土与旧星闪。
+        if self.is_arena:
+            self._draw_arena_fx(fx, T, budget)
         self._draw_board_fx(fx, T, budget, poses)
         self._draw_tactical_outcomes(fx, T, budget)
         for t, x, y in self.dusts:
@@ -1110,6 +1120,18 @@ class BattleAnimation:
         for au in shown:
             if poses[au.u.idx] is not None:
                 self._draw_unit(img, au, T, poses[au.u.idx], budget)
+        if self.is_arena:
+            for au in shown:
+                if poses[au.u.idx] is None:
+                    continue
+                x,y=poses[au.u.idx][:2]
+                x,y=round(x)+BCELL//2,round(y)+BCELL-4
+                color=(67,158,248,255) if au.u.team == 0 else (237,82,99,255)
+                draw.ellipse((x-17,y-9,x+17,y+3),outline=color,width=2)
+                if au.u.team == 0:
+                    draw.ellipse((x-19,y-5,x-13,y+1),fill=color,outline=PAPER)
+                else:
+                    draw.polygon(((x-16,y-6),(x-12,y+2),(x-20,y+2)),fill=color,outline=PAPER)
         # All solid VFX are excluded from actual opaque sprite pixels. Outer
         # rings remain visible, even when several signatures overlap a unit.
         protected = Image.new("L", img.size)
@@ -1359,31 +1381,32 @@ class BattleAnimation:
         return min(6, squash)
 
     @lru_cache(maxsize=1024)
-    def _board_sprite(self, species_id, tier, squash=0):
+    def _board_sprite(self, species_id, tier, squash=0, shiny=False):
         box = board_sprite_size(tier)
-        source = self.front.image(species_id, self.pal)
+        source = self.front.image(species_id, self.pal, shiny=shiny)
         # 每个动作相位直接从源图 BOX + 量化，避免多次重采样损失细节。
-        sprite = scale_sprite(source, self.pal.for_species(species_id), (box, box - squash))
+        sprite = scale_sprite(source, self.pal.for_species(species_id, shiny=shiny), (box, box - squash))
         if sprite.getbbox() is None:
             raise AssetError(f"species {species_id}: board sprite has no visible pixels after scaling")
         return sprite
 
     def _sprite_placement(self, au, T, pose):
         sprite = self._board_sprite(au.u.piece.species_id, au.u.piece.tier,
-                                    self._sprite_squash(au, T))
+                                    self._sprite_squash(au, T), getattr(au.u.piece, 'shiny', False))
         if not au.dying(T):
             status = "freeze" if "freeze" in au.statuses else (
                 "poison" if "poison" in au.statuses and effect_frame(T) % 2 == 0 else None)
             if status:
                 sprite = self._status_sprite(au.u.piece.species_id, au.u.piece.tier,
-                                             self._sprite_squash(au,T), status)
+                                             self._sprite_squash(au,T), status, getattr(au.u.piece, 'shiny', False))
         authored = au.u.piece.species_id in species_motion
         if authored:
             motion = self._authored_motion(au,T)
             status = 'freeze' if 'freeze' in au.statuses and not au.dying(T) else (
                 'poison' if 'poison' in au.statuses and effect_frame(T)%2 == 0 and not au.dying(T) else None)
             sprite = self._authored_sprite(au.u.piece.species_id,au.u.piece.tier,status,
-                motion.state,motion.index,motion.frame,motion.hit,motion.direction[0]>=0,motion.action_kind)
+                motion.state,motion.index,motion.frame,motion.hit,motion.direction[0]>=0,motion.action_kind,
+                getattr(au.u.piece, 'shiny', False))
         elif not au.dying(T) and "freeze" not in au.statuses:
             gait = self._gait(au)
             phase = int((T + 1e-9) / (gait.period / 2)) % 2
@@ -1414,8 +1437,8 @@ class BattleAnimation:
         return pose
 
     @lru_cache(maxsize=4096)
-    def _authored_sprite(self, sid, tier, status, state, index, frame, hit, right, action_kind=None):
-        sprite = self._status_sprite(sid,tier,0,status) if status else self._board_sprite(sid,tier)
+    def _authored_sprite(self, sid, tier, status, state, index, frame, hit, right, action_kind=None, shiny=False):
+        sprite = self._status_sprite(sid,tier,0,status,shiny) if status else self._board_sprite(sid,tier,shiny=shiny)
         return transform(sprite,sid,Pose(state,index,frame,(1 if right else -1,0),hit,action_kind=action_kind))
 
     def _rig_anchor(self, au, T, name):
@@ -1428,8 +1451,8 @@ class BattleAnimation:
         return (x+point[0],y+point[1]) if point is not None else None
 
     @lru_cache(maxsize=1024)
-    def _status_sprite(self, species_id, tier, squash, status):
-        sprite = self._board_sprite(species_id, tier, squash).copy()
+    def _status_sprite(self, species_id, tier, squash, status, shiny=False):
+        sprite = self._board_sprite(species_id, tier, squash, shiny).copy()
         tint, amount = ((255, 255, 255), 60) if status == "freeze" else (STATUS_PURPLE, 15)
         colors = self.pal.for_species(species_id)
         replacements = {tuple(c): tuple((v * (100 - amount) + target * amount + 50) // 100
@@ -1604,7 +1627,8 @@ class BattleAnimation:
     def _draw_board_fx(self, img, T, budget, poses):
         """统一棋盘粒子预算；线框原语与实体粒子分开计数。"""
         draw = ImageDraw.Draw(img)
-        self._draw_impact_preview(img, T)
+        if not self.is_arena:
+            self._draw_impact_preview(img, T)
         self._draw_projectiles(img, T, budget)
         self._draw_signatures(img, T, budget)
         if self._is_presentation:
@@ -1622,6 +1646,8 @@ class BattleAnimation:
                         self._draw_echo(img,sprite,x+(BCELL-sprite.width)//2,
                                         y+BOARD_FOOT-sprite.getbbox()[3],STATUS_PURPLE,112)
         for ev in self._recent_hits(T):
+            if self.is_arena:
+                continue
             phase = effect_frame(T - ev[0] - self._attack_delay(ev))
             attacker, target = self.units[ev[2]], self.units[ev[3]]
             tx, ty = target.render_px(T)
@@ -1682,6 +1708,60 @@ class BattleAnimation:
                 yy = round(y + BCELL - 20 - phase * 20 - (i % 2) * 3)
                 light(draw, xx, yy, color)
                 draw.point((xx, yy), fill=PAPER)
+    def _draw_arena_fx(self, img, T, budget):
+        events = self.timeline.recent_events(T, 2.) if self._is_presentation else self.events[:self._cursor]
+        tracks=[]
+        for ev in events:
+            if ev[1] not in ('attack','cast','arena_heal'):
+                continue
+            if ev[1] == 'arena_heal':
+                if 0 <= T-ev[0] < .8:
+                    tracks.append((ev[0],ev,'heal',(T-ev[0])/.8))
+                continue
+            timing=self._timing(ev)
+            if timing and timing.secondary:
+                continue
+            start=ev[0]
+            impact=timing.impact if timing else start+self._attack_delay(ev)
+            release=timing.release if timing else start+self._attack_preparation(ev[2],start)
+            if not start <= T < impact+.35:
+                continue
+            if T < release:
+                phase,p='windup',(T-start)/max(.05,release-start)
+            elif T < impact:
+                phase,p='flight',(T-release)/max(.05,impact-release)
+            elif T < impact+.18:
+                phase,p='impact',(T-impact)/.18
+            else:
+                phase,p='aftermath',(T-impact-.18)/.17
+            tracks.append((start,ev,phase,p))
+        tracks=sorted(tracks,key=lambda row:(-row[0],row[1][2]))[:3]
+        self._arena_label = None
+        for start,ev,phase,p in reversed(tracks):
+            if not budget.take(8,minimum=8):
+                continue
+            a=self._event_position(ev[2],start)
+            b=self._event_position(ev[3],start)
+            a=(a[0]+BCELL//2,a[1]+14)
+            b=(b[0]+BCELL//2,b[1]+14)
+            source=self.units[ev[2]].u
+            if phase == 'heal':
+                arena_vfx.draw_heal(img,a,b,p)
+                label=f'团队回复 +{ev[4]}'
+            elif ev[1] == 'attack':
+                arena_vfx.draw_attack(img,source.piece.species_id,a,b,phase,p,source.team)
+                label=arena_vfx.EFFECTS[source.piece.species_id][0]
+            else:
+                # Cast material tracks remain authored; the guide names both endpoints.
+                d=ImageDraw.Draw(img)
+                color=(82,187,255,180) if source.team == 0 else (255,110,125,180)
+                d.line((*a,*b),fill=color,width=1)
+                d.ellipse((b[0]-16,b[1]-16,b[0]+16,b[1]+16),outline=color,width=1)
+                if source.piece.species_id not in SUPPORTED_SPECIES:
+                    arena_vfx.draw_attack(img,source.piece.species_id,a,b,phase,p,source.team)
+                label=self.move_zh.get(ev[4],ev[4])
+            self._arena_label=(ev,label)
+
     def _draw_telegraph(self, img: Image, cells: list, color) -> None:
         """④ 范围预警钩子：AoE 招式命中前 1 帧对格子集合画半透明高亮。
 
@@ -1772,6 +1852,20 @@ class BattleAnimation:
         y0 = BY + BROWS * BCELL + 4
         # 固定日志外框填满原有底部留白；消息出现/消退条件完全不变。
         pixel_window(img, (1, y0, 238, H - 2))
+        if self.is_arena and getattr(self,'_arena_label',None):
+            ev,label=self._arena_label
+            source,target=self.by_idx[ev[2]],self.by_idx[ev[3]]
+            side=lambda unit: '我' if unit.team == 0 else '敌'
+            left=f'{side(source)}·{source.piece.name}'
+            right=f'{side(target)}·{target.piece.name}'
+            draw_text(img,(7,y0+4),left,self.font,INK)
+            arrow_x=10+text_width(left)
+            d=ImageDraw.Draw(img)
+            d.line((arrow_x,y0+12,arrow_x+14,y0+12),fill=INK,width=1)
+            d.line(((arrow_x+10,y0+9),(arrow_x+14,y0+12),(arrow_x+10,y0+15)),fill=INK,width=1)
+            draw_text(img,(arrow_x+20,y0+4),right,self.font,INK)
+            draw_text(img,(10,y0+24),label,self.font,STATUS_GREEN if ev[1]=='arena_heal' else INK)
+            return
         draw_text(img, (10, y0 + 4), "战斗记录", self.font, INK)
         draw_pixel_text(img, (186, y0 + 8), f"{T:04.1f}", INK)
         draw = ImageDraw.Draw(img)
@@ -1798,7 +1892,7 @@ class BattleAnimation:
         panel = Image.new('RGBA', (232, 48), NIGHT + (255,))
         draw = ImageDraw.Draw(panel)
         draw.rectangle((0, 0, 231, 47), outline=color, width=2)
-        body = self.front.image(sid, self.pal)
+        body = self.front.image(sid, self.pal, shiny=getattr(self.by_idx[c[2]].piece, 'shiny', False))
         body = body.crop(body.getbbox())
         scale = min(42/body.width, 42/body.height)
         body = body.resize((round(body.width*scale), round(body.height*scale)), Image.Resampling.NEAREST)

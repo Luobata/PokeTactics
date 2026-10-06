@@ -59,6 +59,8 @@ ul{margin:6px 0;padding-left:20px}li{margin:3px 0}
 <header><h1>PokeTactics · 验收后台</h1>
 <a href="/anim?seed=7">动画验收台 →</a><p>双端同源验收入口：帧由本地渲染器产出（现为 Python 参考实现，M4 换 C 内核），浏览器只回放。动画即事件流（宪法 2.6）。</p></header>
 
+<div class="launch"><a href="/play"><button class="primary">进入全新游戏试玩 · 从第 1 轮开始 →</button></a></div>
+
 <h2>动画与美术<span class="badge todo">可目视验收</span></h2>
 <div class="launch">
 <a href="/animation-lab"><button class="primary">核心角色动作样片与资源验收</button></a>
@@ -655,7 +657,18 @@ class Handler(SimpleHTTPRequestHandler):
         requested = (ROOT / urllib.parse.unquote(parsed.path).lstrip("/")).resolve()
         if requested == demo_mod.SAVE_ROOT.resolve() or demo_mod.SAVE_ROOT.resolve() in requested.parents:
             return self.send_error(403, "Use the backup export endpoint")
-        if parsed.path == "/":
+        if parsed.path in ("/play", "/play/"):
+            self._play_asset("play.html", "text/html; charset=utf-8")
+        elif parsed.path.startswith("/play/assets/"):
+            assets = {
+                "/play/assets/play.css": ("play.css", "text/css; charset=utf-8"),
+                "/play/assets/play.js": ("play.js", "text/javascript; charset=utf-8"),
+            }
+            asset = assets.get(parsed.path)
+            if asset is None:
+                return self.send_error(404)
+            self._play_asset(*asset)
+        elif parsed.path == "/":
             body = INDEX_HTML.encode()
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -930,7 +943,7 @@ class Handler(SimpleHTTPRequestHandler):
             self.wfile.write(raw)
         elif parsed.path.startswith("/demo/sprite/"):
             m = re.match(r"^/demo/sprite/(\d+)\.png$", parsed.path)
-            data = demo_mod.sprite_png(int(m.group(1))) if m else None
+            data = demo_mod.sprite_png(int(m.group(1)), shiny=qs.get("shiny", ["0"])[0] == "1") if m else None
             if data is None:
                 return self.send_error(404)
             self.send_response(200)
@@ -949,6 +962,20 @@ class Handler(SimpleHTTPRequestHandler):
             super().do_GET()
         else:
             super().do_GET()
+
+    def _play_asset(self, filename: str, content_type: str) -> None:
+        """Serve only the fixed trial-page files; opening the page creates no session."""
+        try:
+            body = (Path(__file__).resolve().parent / filename).read_bytes()
+        except OSError:
+            return self.send_error(503, "The trial page is temporarily unavailable")
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.end_headers()
+        self.wfile.write(body)
 
 
 def main() -> None:

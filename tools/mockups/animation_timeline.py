@@ -261,6 +261,19 @@ class AnimationTimeline:
                 state_ready[idx] = max(state_ready[idx], at)
             elif kind == 'skill_effect' and effect_action is not None:
                 emit(ev, effect_action.impact)
+            elif kind == 'arena_heal':
+                # This source-target link follows the patient's authoritative
+                # regen/state packet. It must land at the same visual instant.
+                patient = ev[3]
+                belongs = packet is not None and patient in (packet.attacker, packet.target)
+                at = (packet.impact if belongs else
+                      max(t + last_shift[patient], state_ready[patient]))
+                emit(ev, at)
+                # Reserve the healer through its delayed patient feedback, so
+                # a later lethal hit cannot visually kill it before this heal.
+                healer = ev[2]
+                state_ready[healer] = max(state_ready[healer], at)
+                last_shift[healer] = max(last_shift[healer], at - t)
             elif kind == 'tactical_effect' and len(ev) == 6:
                 payload, effect = ev[5], ev[4]
                 if effect in ('weather_start', 'weather_end', 'weather_conflict'):

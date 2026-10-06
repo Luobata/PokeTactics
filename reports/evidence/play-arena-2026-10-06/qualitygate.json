@@ -1,0 +1,396 @@
+{
+  "mode": "local",
+  "execution_lane": "combined",
+  "independent_lanes": [],
+  "run_id": "4493dae8ddf2fd9ecc21f263",
+  "timeout_budget_sec": 180,
+  "timeout_budget_source": "argument",
+  "timeout_elapsed_sec": 0.997,
+  "gate": "pass",
+  "raw_gate": "pass",
+  "block_merge": false,
+  "execution_complete": true,
+  "incomplete_engines": [],
+  "blocking_execution_complete": true,
+  "blocking_incomplete_engines": [],
+  "advisory_incomplete_engines": [],
+  "mutation_status": "not_applicable",
+  "validation_lanes": {
+    "production_compile": {
+      "status": "not_applicable",
+      "finding_count": 0,
+      "affected_scope_count": 0
+    },
+    "go_rules": {
+      "status": "completed",
+      "checked_files": 0,
+      "finding_count": 0
+    },
+    "ut_compile": {
+      "status": "not_applicable",
+      "finding_count": 0,
+      "affected_scope_count": 0,
+      "blocked_scope_count": 0
+    },
+    "ut_rules": {
+      "status": "not_applicable",
+      "finding_count": 0,
+      "reason": "no changed *_test.go files"
+    }
+  },
+  "quality_confidence": "full",
+  "effective_rules_snapshot": {},
+  "runtime_incidents": [],
+  "external_execution": {
+    "selected": [],
+    "provided": [],
+    "missing": []
+  },
+  "actionable_block_findings": 0,
+  "deferred_block_findings": 0,
+  "finding_policy": {
+    "schema_version": "qualitygate.finding-policy.v1",
+    "policy_hash": "4f53cda18c2baa0c",
+    "counts": {
+      "blocking_findings": 0,
+      "advisory_findings": 0,
+      "shadow_findings": 0,
+      "deferred_findings": 0,
+      "waived_findings": 0,
+      "repair_candidates": 0
+    },
+    "blocking_findings": [],
+    "advisory_findings": [],
+    "shadow_findings": [],
+    "deferred_findings": [],
+    "waived_findings": [],
+    "repair_candidates": []
+  },
+  "mr_suppressed_local_autofix_findings": 0,
+  "generated_file_findings_excluded": 0,
+  "decision": {
+    "source": "qualitygate.gate.orchestrator",
+    "scope": "final_quality_gate_decision",
+    "gate": "pass",
+    "raw_gate": "pass",
+    "block_merge": false,
+    "execution_complete": true,
+    "incomplete_engines": [],
+    "blocking_execution_complete": true,
+    "blocking_incomplete_engines": [],
+    "advisory_incomplete_engines": [],
+    "mutation_status": "not_applicable",
+    "validation_lanes": {
+      "production_compile": {
+        "status": "not_applicable",
+        "finding_count": 0,
+        "affected_scope_count": 0
+      },
+      "go_rules": {
+        "status": "completed",
+        "checked_files": 0,
+        "finding_count": 0
+      },
+      "ut_compile": {
+        "status": "not_applicable",
+        "finding_count": 0,
+        "affected_scope_count": 0,
+        "blocked_scope_count": 0
+      },
+      "ut_rules": {
+        "status": "not_applicable",
+        "finding_count": 0,
+        "reason": "no changed *_test.go files"
+      }
+    },
+    "quality_confidence": "full",
+    "runtime_incidents": [],
+    "actionable_block_findings": 0,
+    "deferred_block_findings": 0,
+    "engine_results_are_raw_signals": true
+  },
+  "timing_ms": 997.2,
+  "cache": {
+    "hit": false,
+    "key": "4493dae8ddf2fd9ecc21f263",
+    "ttl_sec": 0,
+    "stored": false
+  },
+  "static_checkpoint": {
+    "schema_version": 1,
+    "fingerprint": "3c849986e243d8e90c88b4df2dab1e00600d1a57fbf1b205f449494c7b2bd9fe",
+    "reusable": true,
+    "reused": false
+  },
+  "plan": {
+    "mode": "local",
+    "policy": {
+      "description": "本地/自愈内循环:只跑快检查,外部 skill 不阻塞开发反馈",
+      "ast": true,
+      "semantic": "triage_only",
+      "external": false,
+      "aggregate": false,
+      "consensus_boost": false,
+      "timeout_sec": 2,
+      "cache_ttl_sec": 0,
+      "block_policy": "ast_block_only"
+    },
+    "changed_paths": [
+      "sim/arena.py",
+      "sim/combat.py",
+      "sim/bots.py",
+      "sim/items.py",
+      "sim/pacing.py",
+      "sim/shop.py",
+      "sim/tactics.py",
+      "tools/acceptance/demo.py",
+      "tools/acceptance/server.py",
+      "tools/acceptance/session_save.py",
+      "tools/acceptance/play.js",
+      "tools/acceptance/play.css",
+      "tools/acceptance/play.html",
+      "tools/mockups/arena_vfx.py",
+      "tools/mockups/render_battle_gif.py",
+      "tools/mockups/animation_timeline.py",
+      "tests/test_arena_combat.py",
+      "tests/test_arena_rules.py",
+      "tests/test_arena_visuals.py",
+      "tests/test_play_page.py"
+    ],
+    "go_files": [],
+    "compile_files": [],
+    "semantic_files": [],
+    "static_files": [
+      "sim/arena.py",
+      "sim/combat.py",
+      "sim/bots.py",
+      "sim/items.py",
+      "sim/pacing.py",
+      "sim/shop.py",
+      "sim/tactics.py",
+      "tools/acceptance/demo.py",
+      "tools/acceptance/server.py",
+      "tools/acceptance/session_save.py",
+      "tools/acceptance/play.js",
+      "tools/acceptance/play.css",
+      "tools/acceptance/play.html",
+      "tools/mockups/arena_vfx.py",
+      "tools/mockups/render_battle_gif.py",
+      "tools/mockups/animation_timeline.py",
+      "tests/test_arena_combat.py",
+      "tests/test_arena_rules.py",
+      "tests/test_arena_visuals.py",
+      "tests/test_play_page.py"
+    ],
+    "generated_files": [],
+    "static_exempt_files": [],
+    "static_skipped_test_files": [],
+    "high_risk": false,
+    "risk_reasons": {
+      "features": [],
+      "feature_hit": false,
+      "path_hit": false
+    },
+    "checks": {
+      "static": "run",
+      "go_compile": "skip",
+      "ast": "skip",
+      "script_rules": "run",
+      "semantic": "skip",
+      "external_selected": [],
+      "external_skipped": [
+        {
+          "engine": "bits",
+          "reason": "mode=local,外部 skill 不进内循环"
+        },
+        {
+          "engine": "aime",
+          "reason": "mode=local,外部 skill 不进内循环"
+        }
+      ],
+      "signals_selected": [],
+      "mutation_gate": "skip"
+    },
+    "test_files": [],
+    "triage": []
+  },
+  "static": {
+    "files": 1,
+    "findings": 0,
+    "results": [
+      {
+        "mode": "STATIC",
+        "checked_files": 20,
+        "compile_precheck_required": false,
+        "skipped_files": [],
+        "skip_policy": "reliably identified generated files (known suffix or standard generated header) are excluded from source-quality validation; Go test files (*_test.go) skip AST/script rules; the deterministic MR gate compiles production packages with go build, while test-binary compilation and UT effectiveness are delegated to the independent UT lane",
+        "engines": [
+          {
+            "engine": "script_rules",
+            "status": "skipped",
+            "reason": "no script rule matched the changed paths",
+            "findings": [],
+            "raw_findings": 0,
+            "matched_rules": 0,
+            "workdir": "/Users/bytedance/luobata/PokeTactics"
+          }
+        ],
+        "summary": {
+          "total_findings": 0,
+          "block_count": 0,
+          "warn_count": 0,
+          "native_static_policy": "QualityGate-owned production Go package compile precheck, AST rules, and matching script-backed rules",
+          "script_rules_policy": "script-backed rules run only when their path_globs match the changed files"
+        },
+        "timing_ms": 15.2,
+        "findings": [],
+        "compile_timeout_sec": 90,
+        "compile_timeout_source": "mode_default",
+        "engine_gate": "pass",
+        "engine_block_merge": false,
+        "decision_scope": "raw_engine_signal_not_final_gate_decision"
+      }
+    ]
+  },
+  "ast": {
+    "files": 1,
+    "findings": 0,
+    "results": [
+      {
+        "mode": "STATIC",
+        "checked_files": 20,
+        "compile_precheck_required": false,
+        "skipped_files": [],
+        "skip_policy": "reliably identified generated files (known suffix or standard generated header) are excluded from source-quality validation; Go test files (*_test.go) skip AST/script rules; the deterministic MR gate compiles production packages with go build, while test-binary compilation and UT effectiveness are delegated to the independent UT lane",
+        "engines": [
+          {
+            "engine": "script_rules",
+            "status": "skipped",
+            "reason": "no script rule matched the changed paths",
+            "findings": [],
+            "raw_findings": 0,
+            "matched_rules": 0,
+            "workdir": "/Users/bytedance/luobata/PokeTactics"
+          }
+        ],
+        "summary": {
+          "total_findings": 0,
+          "block_count": 0,
+          "warn_count": 0,
+          "native_static_policy": "QualityGate-owned production Go package compile precheck, AST rules, and matching script-backed rules",
+          "script_rules_policy": "script-backed rules run only when their path_globs match the changed files"
+        },
+        "timing_ms": 15.2,
+        "findings": [],
+        "compile_timeout_sec": 90,
+        "compile_timeout_source": "mode_default",
+        "engine_gate": "pass",
+        "engine_block_merge": false,
+        "decision_scope": "raw_engine_signal_not_final_gate_decision"
+      }
+    ]
+  },
+  "mutation_gate": {
+    "status": "not_applicable",
+    "quality_confidence": "full",
+    "findings": 0,
+    "result": {
+      "engine": "ut_mutation_gate",
+      "status": "skipped",
+      "reason": "no changed *_test.go files",
+      "lifecycle_status": "not_applicable",
+      "triggered": false,
+      "findings": []
+    }
+  },
+  "semantic_prompts": [],
+  "semantic_selection_funnel": {},
+  "aggregate": null,
+  "gate_summary": {
+    "run_id": "4493dae8ddf2fd9ecc21f263",
+    "mode": "local",
+    "cache_schema_version": 6,
+    "gate": "pass",
+    "feedback_enabled": false,
+    "feedback_recorded": 0,
+    "counts": {
+      "fixed_by_agent": 0,
+      "open_block": 0,
+      "deferred_block": 0,
+      "open_warn": 0,
+      "not_actioned": 0
+    },
+    "items": []
+  },
+  "findings": [],
+  "feedback": {
+    "recorded": 0,
+    "finding_ids": []
+  },
+  "previous_findings_recorded": false,
+  "repair_session_id": "",
+  "parent_run_id": "",
+  "repair_context": {},
+  "next_action": "本地快检查通过。",
+  "repair_guard": {
+    "schema_version": "qualitygate.repair-guard.v1",
+    "allow_repair": true,
+    "round": 0,
+    "hard_max_rounds": 5,
+    "stagnant_rounds": 0,
+    "meaningful_progress": true,
+    "current_finding_fingerprints": [],
+    "previous_finding_fingerprints": [],
+    "observed_diff_files": [
+      "README.md",
+      "sim/bots.py",
+      "sim/combat.py",
+      "sim/items.py",
+      "sim/pacing.py",
+      "sim/shop.py",
+      "sim/tactics.py",
+      "tools/acceptance/demo.py",
+      "tools/acceptance/server.py",
+      "tools/acceptance/session_save.py",
+      "tools/mockups/animation_timeline.py",
+      "tools/mockups/render_battle_gif.py"
+    ],
+    "observed_suppressions": [
+      "tools/acceptance/demo.py:import arena as arena_mod  # noqa: E402"
+    ],
+    "observed_removed_assertions": [],
+    "new_diff_files": [],
+    "suppression_inserted": false,
+    "test_assertions_removed": false,
+    "diff_scope_expanded": false,
+    "stop_reasons": [],
+    "next_action": "continue only within the bounded repair policy"
+  },
+  "agent_action": {
+    "schema_version": "qualitygate.agent-action.v1",
+    "state": "local_checks_passed",
+    "next_action": "finalize_semantic_and_tests",
+    "task_complete": false,
+    "actionable_block_count": 0,
+    "repair_round": 0,
+    "stop_reasons": [],
+    "repair_findings": [],
+    "required_validation": [
+      "format",
+      "diff_check",
+      "compile",
+      "focused_tests"
+    ],
+    "completion_requires": "current-fingerprint semantic result consumed and relevant validation passed; local PASS alone is insufficient"
+  },
+  "upload": {
+    "auto": {
+      "enabled": true,
+      "spawned": true,
+      "command": "/Users/bytedance/.pyenv/versions/3.12.0/bin/python3 -m qualitygate.cli upload /Users/bytedance/luobata/PokeTactics --run-id 4493dae8ddf2fd9ecc21f263"
+    }
+  },
+  "ledger": {
+    "run_dir": "/Users/bytedance/luobata/PokeTactics/.qualitygate/runs/2026-10-06/4493dae8ddf2fd9ecc21f263"
+  }
+}

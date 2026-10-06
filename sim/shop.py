@@ -151,7 +151,7 @@ class Shop:
             if sid is not None:
                 self.pool.put(sid)
         self.slots = [draw_slot(rng, level, self.pool, self.templates)
-                      for _ in range(SHOP_SLOTS)]
+                      for _ in range(getattr(self, 'slot_count', SHOP_SLOTS))]
 
     def buy(self, slot: int) -> OwnedPiece:
         """买走一格（池张数在抽取时已预留，此处只清格；扣钱由 bot 负责）。"""
@@ -170,7 +170,7 @@ class Shop:
         for sid in self.slots:
             if sid is not None:
                 self.pool.put(sid)
-        self.slots = [None] * SHOP_SLOTS
+        self.slots = [None] * getattr(self, 'slot_count', SHOP_SLOTS)
 
 
 def sell_owned(owned: OwnedPiece, pool: SharedPool) -> int:
@@ -195,6 +195,9 @@ def try_combine(board: List[OwnedPiece], bench: List[OwnedPiece],
     未提供 inventory 且有多件装备时暂不合成，避免丢失无处存放的装备。
     返回日志（无进化则空表）。
     """
+    if getattr(pool, 'arena', False):
+        from arena import combine
+        return combine(board, bench, inventory, single=single, only_species=only_species)
     dex = pokedex()
     logs: List[str] = []
     merged = True

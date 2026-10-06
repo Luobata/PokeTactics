@@ -16,7 +16,7 @@ LEGACY_RULESETS = frozenset({
     "tactics_v3",
 })
 NATURAL_END_RULESET = "tactics_v4"
-KNOWN_RULESETS = LEGACY_RULESETS | {NATURAL_END_RULESET, 'tactics_v5'}
+KNOWN_RULESETS = LEGACY_RULESETS | {NATURAL_END_RULESET, 'tactics_v5', 'arena_v1'}
 
 NATURAL_CHAMPION = "natural_champion"
 FORCED_RANKING = "forced_ranking"
@@ -73,7 +73,7 @@ def validate_ruleset(value):
 
 
 def enabled(value):
-    return validate_ruleset(value) in (NATURAL_END_RULESET, 'tactics_v5')
+    return validate_ruleset(value) in (NATURAL_END_RULESET, 'tactics_v5', 'arena_v1')
 
 
 def policy_for(value):
