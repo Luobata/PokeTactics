@@ -197,6 +197,10 @@ class Battle:
         self.base_weather_name = weather_name
         self.ruleset = tactics_mod.validate_ruleset(ruleset)
         self._arena_on = self.ruleset == arena_mod.RULESET
+        self.cols = COLS
+        self.rows = 6 if self._arena_on else ROWS
+        self.rows_ally = tuple(range(self.rows // 2, self.rows))
+        self.rows_enemy = tuple(range(self.rows // 2))
         if arena_teams is not None and not self._arena_on:
             raise ValueError('arena augments require arena_v1')
         if arena_teams is None:
@@ -253,7 +257,7 @@ class Battle:
         self._team_order = team_order
         plans = {}
         for team in team_order:
-            cells = [(c, r) for r in ROWS_ALLY for c in range(COLS)]
+            cells = [(c, r) for r in self.rows_ally for c in range(self.cols)]
             if positions[team] is not None:
                 spots = [self._local_pos(p, team) for p in positions[team]]
             elif layout == "random":
@@ -371,24 +375,22 @@ class Battle:
                     raise ValueError("selected weather source must know weather teaching")
                 self._weather_sources[team] = source
 
-    @staticmethod
-    def _local_pos(pos, team):
-        return tuple(pos) if team == 0 else (COLS - 1 - pos[0], ROWS - 1 - pos[1])
+    def _local_pos(self, pos, team):
+        return tuple(pos) if team == 0 else (self.cols - 1 - pos[0], self.rows - 1 - pos[1])
 
-    @staticmethod
-    def _validate_positions(comp, positions, team):
-        if len(comp) > COLS * 2:
-            raise ValueError("a team cannot deploy more than 12 units")
+    def _validate_positions(self, comp, positions, team):
+        if len(comp) > self.cols * (self.rows // 2):
+            raise ValueError(f'a team cannot deploy more than {self.cols * (self.rows // 2)} units')
         if positions is None:
             return
         if len(positions) != len(comp):
             raise ValueError("positions must match the team's unit count")
-        rows = ROWS_ALLY if team == 0 else ROWS_ENEMY
+        rows = self.rows_ally if team == 0 else self.rows_enemy
         cells = []
         for pos in positions:
             if (not isinstance(pos, (tuple, list)) or len(pos) != 2
                     or any(type(n) is not int for n in pos)
-                    or not 0 <= pos[0] < COLS or pos[1] not in rows):
+                    or not 0 <= pos[0] < self.cols or pos[1] not in rows):
                 raise ValueError("positions must be integer cells in the team's own rows")
             cells.append(tuple(pos))
         if len(set(cells)) != len(cells):
@@ -565,7 +567,7 @@ class Battle:
             c, r = pos
             for dc, dr in self._directions(u.team):
                 nxt = (c + dc, r + dr)
-                if not (0 <= nxt[0] < COLS and 0 <= nxt[1] < ROWS):
+                if not (0 <= nxt[0] < self.cols and 0 <= nxt[1] < self.rows):
                     continue
                 if nxt in seen or (nxt in occupied and nxt != goal):
                     continue
@@ -957,10 +959,10 @@ class Battle:
                               and _manhattan(target_pos, enemy.pos) <= 1),
                              key=lambda enemy: self._target_key(unit, enemy))
             for victim in victims[:2]:
-                damage = self._move_damage(unit, victim, {
-                    "name": "冲浪", "type": "WATER", "power": 35})
+                move = {"name": "surf" if self._arena_on else "冲浪", "type": "WATER", "power": 35}
+                damage = self._move_damage(unit, victim, move)
                 self._partner_event(unit, victim, "surf", t, damage=damage)
-                self._land_hit(unit, victim, damage, t)
+                self._land_hit(unit, victim, damage, t, move=move, cast=self._arena_on)
 
     def _partner_after_basic(self, unit, target, t):
         if unit.partner_id == 26 and unit.partner_trait_uses < 2:
@@ -976,10 +978,13 @@ class Battle:
                           and _manhattan(target.pos, enemy.pos) <= 1),
                          key=lambda enemy: self._target_key(unit, enemy), default=None)
             if victim is not None:
-                move = {"name": "居合斩", "type": "NORMAL", "power": 35}
+                move = {"name": "cut" if self._arena_on else "居合斩", "type": "NORMAL", "power": 35}
                 damage = self._move_damage(unit, victim, move)
                 self._partner_event(unit, victim, "cut", t, damage=damage)
-                self._land_hit(unit, victim, damage, t)
+                self._land_hit(unit, victim, damage, t, move=move, cast=self._arena_on)
+        if self._arena_on:
+            from arena_teaching import after_basic
+            after_basic(self, unit, target, t)
 
     @contextmanager
     def _skill_effect(self, caster, target, effect, t, cast_index, **details):
@@ -1079,7 +1084,7 @@ class Battle:
         occupied = {o.pos for o in self.units if o.alive}
         for dc, dr in self._directions(team):
             nxt = (pos[0] + dc, pos[1] + dr)
-            if (0 <= nxt[0] < COLS and 0 <= nxt[1] < ROWS
+            if (0 <= nxt[0] < self.cols and 0 <= nxt[1] < self.rows
                     and nxt not in occupied and nxt != avoid):
                 return nxt
         return None
@@ -1095,7 +1100,7 @@ class Battle:
             return None
         nxt = (target.pos[0] + step[0], target.pos[1] + step[1])
         occupied = {o.pos for o in self.units if o.alive and o is not target}
-        if (0 <= nxt[0] < COLS and 0 <= nxt[1] < ROWS and nxt not in occupied):
+        if (0 <= nxt[0] < self.cols and 0 <= nxt[1] < self.rows and nxt not in occupied):
             return nxt
         return None
 

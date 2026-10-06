@@ -13,6 +13,16 @@ _TYPE_REQUIREMENTS = {
     'guard': None,
     'sunny_day': frozenset({'FIRE', 'GRASS'}),
     'rain_dance': frozenset({'WATER', 'ELECTRIC'}),
+    'thunderbolt': frozenset({'ELECTRIC', 'PSYCHIC', 'NORMAL'}),
+    'ice_beam': frozenset({'WATER', 'ICE', 'PSYCHIC'}),
+    'toxic': frozenset({'POISON', 'BUG', 'GRASS'}),
+    'earthquake': frozenset({'GROUND', 'ROCK', 'FIGHTING'}),
+}
+_ARENA = {
+    'thunderbolt': {'name': '十万伏特', 'description': '首次成功普攻后，追加一次 35 威力电属性单体攻击；可按电属性规则触发麻痹，地面免疫。每场一次。', 'partners': []},
+    'ice_beam': {'name': '冰冻光束', 'description': '首次成功普攻后，追加一次 35 威力冰属性单体攻击；可按冰属性规则触发冰冻。每场一次。', 'partners': []},
+    'toxic': {'name': '污泥弹', 'description': '首次成功普攻后，追加一次 25 威力毒属性单体攻击；35% 概率中毒，毒与钢属性免疫中毒。每场一次。', 'partners': []},
+    'earthquake': {'name': '地震', 'description': '首次成功普攻后，以目标为中心震击目标和至多两只相邻敌人，分别结算 30 威力地面伤害；飞行免疫。每场一次。', 'partners': []},
 }
 _TACTICAL = {
     'guard': {'name': '护卫', 'description': '准备期指定相邻队友；替其承受一次实际突进后的主命中，每队一名护卫，每场一次。', 'partners': []},
@@ -22,17 +32,23 @@ _TACTICAL = {
 _COMPATIBILITY = {'cut': '草、火、虫、一般、格斗或钢属性可学',
                   'surf': '水属性可学', 'rest': '所有宝可梦可学',
                   'guard': '所有宝可梦可学', 'sunny_day': '火或草属性可学',
-                  'rain_dance': '水或电属性可学'}
+                  'rain_dance': '水或电属性可学',
+                  'thunderbolt': '电、超能或一般属性可学',
+                  'ice_beam': '水、冰或超能属性可学',
+                  'toxic': '毒、虫或草属性可学',
+                  'earthquake': '地面、岩或格斗属性可学'}
 
 
 def ids_for(ruleset=BASE_RULESET):
     validate_ruleset(ruleset)
+    if ruleset == 'arena_v1':
+        return TECHNIQUE_IDS + tuple(_ARENA)
     return TECHNIQUE_IDS + tuple(_TACTICAL) if enabled(ruleset) else TECHNIQUE_IDS
 
 
 def catalog(ruleset=BASE_RULESET):
     ids = ids_for(ruleset)
-    rows = techniques_catalog() + [{'id': key, **deepcopy(value)} for key, value in _TACTICAL.items()]
+    rows = techniques_catalog() + [{'id': key, **deepcopy(value)} for key, value in {**_TACTICAL, **_ARENA}.items()]
     return [{**row, 'learn_types': sorted(_TYPE_REQUIREMENTS[row['id']] or []),
              'compatibility': _COMPATIBILITY[row['id']]}
             for row in rows if row['id'] in ids]
@@ -63,4 +79,5 @@ def view(technique):
     if technique is None:
         return None
     from tactics import TACTICS_RULESET
-    return next(dict(row) for row in catalog(TACTICS_RULESET) if row['id'] == technique)
+    ruleset = 'arena_v1' if technique in _ARENA else TACTICS_RULESET
+    return next(dict(row) for row in catalog(ruleset) if row['id'] == technique)

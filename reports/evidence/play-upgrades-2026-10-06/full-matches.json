@@ -1,0 +1,860 @@
+[
+  {
+    "seed": 7,
+    "rounds": [
+      {
+        "round": 1,
+        "hp": 95,
+        "alive": 8,
+        "augments": 1,
+        "pve": false,
+        "loot_records": 8,
+        "loot": "loss"
+      },
+      {
+        "round": 2,
+        "hp": 92,
+        "alive": 8,
+        "augments": 1,
+        "pve": false,
+        "loot_records": 16,
+        "loot": "loss"
+      },
+      {
+        "round": 3,
+        "hp": 88,
+        "alive": 8,
+        "augments": 1,
+        "pve": false,
+        "loot_records": 24,
+        "loot": "loss"
+      },
+      {
+        "round": 4,
+        "hp": 81,
+        "alive": 8,
+        "augments": 1,
+        "pve": false,
+        "loot_records": 32,
+        "loot": "loss"
+      },
+      {
+        "round": 5,
+        "hp": 81,
+        "alive": 8,
+        "augments": 1,
+        "pve": true,
+        "loot_records": 40,
+        "loot": "win"
+      },
+      {
+        "round": 6,
+        "hp": 81,
+        "alive": 8,
+        "augments": 1,
+        "pve": false,
+        "loot_records": 48,
+        "loot": "win"
+      },
+      {
+        "round": 7,
+        "hp": 81,
+        "alive": 8,
+        "augments": 2,
+        "pve": false,
+        "loot_records": 56,
+        "loot": "win"
+      },
+      {
+        "round": 8,
+        "hp": 81,
+        "alive": 8,
+        "augments": 2,
+        "pve": false,
+        "loot_records": 64,
+        "loot": "win"
+      },
+      {
+        "round": 9,
+        "hp": 76,
+        "alive": 8,
+        "augments": 2,
+        "pve": false,
+        "loot_records": 72,
+        "loot": "loss"
+      },
+      {
+        "round": 10,
+        "hp": 76,
+        "alive": 8,
+        "augments": 2,
+        "pve": true,
+        "loot_records": 80,
+        "loot": "win"
+      },
+      {
+        "round": 11,
+        "hp": 76,
+        "alive": 8,
+        "augments": 2,
+        "pve": false,
+        "loot_records": 88,
+        "loot": "win"
+      },
+      {
+        "round": 12,
+        "hp": 64,
+        "alive": 8,
+        "augments": 2,
+        "pve": false,
+        "loot_records": 96,
+        "loot": "loss"
+      },
+      {
+        "round": 13,
+        "hp": 50,
+        "alive": 8,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 104,
+        "loot": "loss"
+      },
+      {
+        "round": 14,
+        "hp": 38,
+        "alive": 8,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 112,
+        "loot": "loss"
+      },
+      {
+        "round": 15,
+        "hp": 38,
+        "alive": 8,
+        "augments": 3,
+        "pve": true,
+        "loot_records": 120,
+        "loot": "win"
+      },
+      {
+        "round": 16,
+        "hp": 24,
+        "alive": 8,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 128,
+        "loot": "loss"
+      },
+      {
+        "round": 17,
+        "hp": 6,
+        "alive": 8,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 136,
+        "loot": "loss"
+      },
+      {
+        "round": 18,
+        "hp": 0,
+        "alive": 7,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 144,
+        "loot": "loss"
+      },
+      {
+        "round": 19,
+        "hp": 0,
+        "alive": 6,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 151,
+        "loot": null
+      },
+      {
+        "round": 20,
+        "hp": 0,
+        "alive": 6,
+        "augments": 3,
+        "pve": true,
+        "loot_records": 157,
+        "loot": null
+      },
+      {
+        "round": 21,
+        "hp": 0,
+        "alive": 5,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 163,
+        "loot": null
+      },
+      {
+        "round": 22,
+        "hp": 0,
+        "alive": 3,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 168,
+        "loot": null
+      },
+      {
+        "round": 23,
+        "hp": 0,
+        "alive": 3,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 171,
+        "loot": null
+      },
+      {
+        "round": 24,
+        "hp": 0,
+        "alive": 3,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 174,
+        "loot": null
+      },
+      {
+        "round": 25,
+        "hp": 0,
+        "alive": 3,
+        "augments": 3,
+        "pve": true,
+        "loot_records": 177,
+        "loot": null
+      },
+      {
+        "round": 26,
+        "hp": 0,
+        "alive": 3,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 180,
+        "loot": null
+      },
+      {
+        "round": 27,
+        "hp": 0,
+        "alive": 1,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 183,
+        "loot": null
+      }
+    ],
+    "player_rank": 8,
+    "ranking": [
+      [
+        0,
+        8
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        4,
+        7
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        6,
+        2
+      ],
+      [
+        7,
+        6
+      ]
+    ]
+  },
+  {
+    "seed": 42,
+    "rounds": [
+      {
+        "round": 1,
+        "hp": 95,
+        "alive": 8,
+        "augments": 1,
+        "pve": false,
+        "loot_records": 8,
+        "loot": "loss"
+      },
+      {
+        "round": 2,
+        "hp": 89,
+        "alive": 8,
+        "augments": 1,
+        "pve": false,
+        "loot_records": 16,
+        "loot": "loss"
+      },
+      {
+        "round": 3,
+        "hp": 85,
+        "alive": 8,
+        "augments": 1,
+        "pve": false,
+        "loot_records": 24,
+        "loot": "loss"
+      },
+      {
+        "round": 4,
+        "hp": 81,
+        "alive": 8,
+        "augments": 1,
+        "pve": false,
+        "loot_records": 32,
+        "loot": "loss"
+      },
+      {
+        "round": 5,
+        "hp": 81,
+        "alive": 8,
+        "augments": 1,
+        "pve": true,
+        "loot_records": 40,
+        "loot": "win"
+      },
+      {
+        "round": 6,
+        "hp": 81,
+        "alive": 8,
+        "augments": 1,
+        "pve": false,
+        "loot_records": 48,
+        "loot": "win"
+      },
+      {
+        "round": 7,
+        "hp": 81,
+        "alive": 8,
+        "augments": 2,
+        "pve": false,
+        "loot_records": 56,
+        "loot": "win"
+      },
+      {
+        "round": 8,
+        "hp": 81,
+        "alive": 8,
+        "augments": 2,
+        "pve": false,
+        "loot_records": 64,
+        "loot": "win"
+      },
+      {
+        "round": 9,
+        "hp": 74,
+        "alive": 8,
+        "augments": 2,
+        "pve": false,
+        "loot_records": 72,
+        "loot": "loss"
+      },
+      {
+        "round": 10,
+        "hp": 74,
+        "alive": 8,
+        "augments": 2,
+        "pve": true,
+        "loot_records": 80,
+        "loot": "win"
+      },
+      {
+        "round": 11,
+        "hp": 74,
+        "alive": 8,
+        "augments": 2,
+        "pve": false,
+        "loot_records": 88,
+        "loot": "win"
+      },
+      {
+        "round": 12,
+        "hp": 74,
+        "alive": 8,
+        "augments": 2,
+        "pve": false,
+        "loot_records": 96,
+        "loot": "win"
+      },
+      {
+        "round": 13,
+        "hp": 64,
+        "alive": 8,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 104,
+        "loot": "loss"
+      },
+      {
+        "round": 14,
+        "hp": 64,
+        "alive": 8,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 112,
+        "loot": "win"
+      },
+      {
+        "round": 15,
+        "hp": 64,
+        "alive": 8,
+        "augments": 3,
+        "pve": true,
+        "loot_records": 120,
+        "loot": "win"
+      },
+      {
+        "round": 16,
+        "hp": 52,
+        "alive": 7,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 128,
+        "loot": "loss"
+      },
+      {
+        "round": 17,
+        "hp": 38,
+        "alive": 7,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 135,
+        "loot": "loss"
+      },
+      {
+        "round": 18,
+        "hp": 24,
+        "alive": 7,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 142,
+        "loot": "loss"
+      },
+      {
+        "round": 19,
+        "hp": 8,
+        "alive": 7,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 149,
+        "loot": "loss"
+      },
+      {
+        "round": 20,
+        "hp": 8,
+        "alive": 7,
+        "augments": 3,
+        "pve": true,
+        "loot_records": 156,
+        "loot": "win"
+      },
+      {
+        "round": 21,
+        "hp": 0,
+        "alive": 6,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 163,
+        "loot": "loss"
+      },
+      {
+        "round": 22,
+        "hp": 0,
+        "alive": 5,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 169,
+        "loot": null
+      },
+      {
+        "round": 23,
+        "hp": 0,
+        "alive": 3,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 174,
+        "loot": null
+      },
+      {
+        "round": 24,
+        "hp": 0,
+        "alive": 2,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 177,
+        "loot": null
+      },
+      {
+        "round": 25,
+        "hp": 0,
+        "alive": 2,
+        "augments": 3,
+        "pve": true,
+        "loot_records": 179,
+        "loot": null
+      },
+      {
+        "round": 26,
+        "hp": 0,
+        "alive": 2,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 181,
+        "loot": null
+      },
+      {
+        "round": 27,
+        "hp": 0,
+        "alive": 1,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 183,
+        "loot": null
+      }
+    ],
+    "player_rank": 7,
+    "ranking": [
+      [
+        0,
+        7
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        4,
+        6
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        6,
+        8
+      ],
+      [
+        7,
+        3
+      ]
+    ]
+  },
+  {
+    "seed": 20261006,
+    "rounds": [
+      {
+        "round": 1,
+        "hp": 100,
+        "alive": 8,
+        "augments": 1,
+        "pve": false,
+        "loot_records": 8,
+        "loot": "win"
+      },
+      {
+        "round": 2,
+        "hp": 96,
+        "alive": 8,
+        "augments": 1,
+        "pve": false,
+        "loot_records": 16,
+        "loot": "loss"
+      },
+      {
+        "round": 3,
+        "hp": 90,
+        "alive": 8,
+        "augments": 1,
+        "pve": false,
+        "loot_records": 24,
+        "loot": "loss"
+      },
+      {
+        "round": 4,
+        "hp": 83,
+        "alive": 8,
+        "augments": 1,
+        "pve": false,
+        "loot_records": 32,
+        "loot": "loss"
+      },
+      {
+        "round": 5,
+        "hp": 83,
+        "alive": 8,
+        "augments": 1,
+        "pve": true,
+        "loot_records": 40,
+        "loot": "win"
+      },
+      {
+        "round": 6,
+        "hp": 83,
+        "alive": 8,
+        "augments": 1,
+        "pve": false,
+        "loot_records": 48,
+        "loot": "win"
+      },
+      {
+        "round": 7,
+        "hp": 83,
+        "alive": 8,
+        "augments": 2,
+        "pve": false,
+        "loot_records": 56,
+        "loot": "win"
+      },
+      {
+        "round": 8,
+        "hp": 79,
+        "alive": 8,
+        "augments": 2,
+        "pve": false,
+        "loot_records": 64,
+        "loot": "loss"
+      },
+      {
+        "round": 9,
+        "hp": 79,
+        "alive": 8,
+        "augments": 2,
+        "pve": false,
+        "loot_records": 72,
+        "loot": "win"
+      },
+      {
+        "round": 10,
+        "hp": 79,
+        "alive": 8,
+        "augments": 2,
+        "pve": true,
+        "loot_records": 80,
+        "loot": "win"
+      },
+      {
+        "round": 11,
+        "hp": 65,
+        "alive": 8,
+        "augments": 2,
+        "pve": false,
+        "loot_records": 88,
+        "loot": "loss"
+      },
+      {
+        "round": 12,
+        "hp": 49,
+        "alive": 8,
+        "augments": 2,
+        "pve": false,
+        "loot_records": 96,
+        "loot": "loss"
+      },
+      {
+        "round": 13,
+        "hp": 35,
+        "alive": 8,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 104,
+        "loot": "loss"
+      },
+      {
+        "round": 14,
+        "hp": 21,
+        "alive": 8,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 112,
+        "loot": "loss"
+      },
+      {
+        "round": 15,
+        "hp": 21,
+        "alive": 8,
+        "augments": 3,
+        "pve": true,
+        "loot_records": 120,
+        "loot": "win"
+      },
+      {
+        "round": 16,
+        "hp": 5,
+        "alive": 8,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 128,
+        "loot": "loss"
+      },
+      {
+        "round": 17,
+        "hp": 0,
+        "alive": 7,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 136,
+        "loot": "loss"
+      },
+      {
+        "round": 18,
+        "hp": 0,
+        "alive": 7,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 143,
+        "loot": null
+      },
+      {
+        "round": 19,
+        "hp": 0,
+        "alive": 7,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 150,
+        "loot": null
+      },
+      {
+        "round": 20,
+        "hp": 0,
+        "alive": 7,
+        "augments": 3,
+        "pve": true,
+        "loot_records": 157,
+        "loot": null
+      },
+      {
+        "round": 21,
+        "hp": 0,
+        "alive": 6,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 164,
+        "loot": null
+      },
+      {
+        "round": 22,
+        "hp": 0,
+        "alive": 5,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 170,
+        "loot": null
+      },
+      {
+        "round": 23,
+        "hp": 0,
+        "alive": 4,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 175,
+        "loot": null
+      },
+      {
+        "round": 24,
+        "hp": 0,
+        "alive": 3,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 179,
+        "loot": null
+      },
+      {
+        "round": 25,
+        "hp": 0,
+        "alive": 3,
+        "augments": 3,
+        "pve": true,
+        "loot_records": 182,
+        "loot": null
+      },
+      {
+        "round": 26,
+        "hp": 0,
+        "alive": 2,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 185,
+        "loot": null
+      },
+      {
+        "round": 27,
+        "hp": 0,
+        "alive": 2,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 187,
+        "loot": null
+      },
+      {
+        "round": 28,
+        "hp": 0,
+        "alive": 1,
+        "augments": 3,
+        "pve": false,
+        "loot_records": 189,
+        "loot": null
+      }
+    ],
+    "player_rank": 8,
+    "ranking": [
+      [
+        0,
+        8
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        5,
+        5
+      ],
+      [
+        6,
+        7
+      ],
+      [
+        7,
+        4
+      ]
+    ]
+  }
+]

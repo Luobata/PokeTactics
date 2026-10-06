@@ -126,6 +126,10 @@ def learn(session, loc, key):
     if owned.technique == key:
         raise ValueError('已经学会这个技能')
     cost = catalog[key]['cost']
+    if session.player.inventory.techniques[key] > 0:
+        session.player.inventory.techniques[key] -= 1
+        owned.technique = key
+        return f'{owned.piece.name}学会{catalog[key]["name"]}（消耗1台技能机，替换不返还旧技能）'
     if session.player.gold < cost:
         raise ValueError(f'学习需要 {cost} 金币')
     session.player.gold -= cost
@@ -151,12 +155,13 @@ def positions_for(comp, team):
             entry = entry[0]
         p = entry if isinstance(entry, dict) else getattr(entry, 'piece', entry)
         role = p.get('role_key', 'attack') if isinstance(p, dict) else getattr(p, 'role_key', 'attack')
-        ranged = p.get('ranged', False) if isinstance(p, dict) else p.distance > 1
-        rows = (0, 1) if role == 'defense' or role == 'attack' and not ranged else (1, 0)
+        from profiles import effective_range
+        ranged = p.get('ranged', False) if isinstance(p, dict) else effective_range(p) > 1
+        rows = (2, 1, 0) if role == 'support' else (1, 2, 0) if role == 'attack' and ranged else (0, 1, 2)
         pos = next((r, c) for r in rows for c in (2, 3, 1, 4, 0, 5) if (r, c) not in occupied)
         occupied.add(pos)
         r, c = pos
-        positions.append((c, r + 2) if team == 0 else (5 - c, 1 - r))
+        positions.append((c, r + 3) if team == 0 else (5 - c, 2 - r))
     return positions
 
 

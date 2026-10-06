@@ -427,8 +427,8 @@
                   ></div>
                 </div>
                 <div class="field-caption">
-                  <span><i></i> 我方部署区</span
-                  ><span>防守在前 · 攻击与辅助在后</span>
+                  <span><i></i> 我方三排部署区</span
+                  ><span>近战前排 · 远程中排 · 辅助后排</span>
                 </div>
                 <div class="map-coordinate">01 / VIRIDIAN</div>
               </div>
@@ -480,6 +480,7 @@
               <div id="shop" class="shop-grid"></div>
             </section>
             <section class="preparation-section" aria-label="战前准备系统">
+              <div id="round-loot" class="round-loot" hidden></div>
               <div class="preparation-heading">
                 <div>
                   <span class="eyebrow">BUILD YOUR STRATEGY</span>
@@ -714,6 +715,7 @@
         </div>
         <div class="battle-report">
           <div id="battle-result" class="battle-result"></div>
+          <div id="battle-rewards" class="battle-rewards" hidden></div>
           <h3>战场实况</h3>
           <div id="battle-events" class="battle-events"></div>
         </div>
@@ -781,5 +783,6 @@
         试玩需要 JavaScript。请在浏览器中开启 JavaScript 后刷新页面。
       </p></noscript
     >
+    <span id="merge-status" class="sr-only" role="status" aria-live="polite"></span>
   </body>
 </html>

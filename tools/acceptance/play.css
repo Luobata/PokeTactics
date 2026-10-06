@@ -755,7 +755,7 @@ main {
 .board-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(2, 53px);
+  grid-template-rows: repeat(3, 53px);
   gap: 3px;
 }
 .tile {
@@ -1942,7 +1942,7 @@ dialog::backdrop {
     height: 414px;
   }
   .board-grid {
-    grid-template-rows: repeat(2, 63px);
+    grid-template-rows: repeat(3, 63px);
   }
   .battlefield {
     max-width: 510px;
@@ -1985,7 +1985,7 @@ dialog::backdrop {
     height: 340px;
   }
   .board-grid {
-    grid-template-rows: repeat(2, 50px);
+    grid-template-rows: repeat(3, 50px);
   }
   .shop-grid {
     gap: 7px;
@@ -2096,7 +2096,7 @@ dialog::backdrop {
     height: 357px;
   }
   .board-grid {
-    grid-template-rows: repeat(2, 54px);
+    grid-template-rows: repeat(3, 54px);
   }
   .board-scene {
     padding-left: 40px;
@@ -2300,7 +2300,7 @@ dialog::backdrop {
     padding: 22px 39px;
   }
   .board-grid {
-    grid-template-rows: repeat(2, 55px);
+    grid-template-rows: repeat(3, 55px);
   }
   .shop-art {
     height: 90px;
@@ -2496,7 +2496,7 @@ dialog::backdrop {
     padding: 19px 25px 18px;
   }
   .board-grid {
-    grid-template-rows: repeat(2, 48px);
+    grid-template-rows: repeat(3, 48px);
     gap: 3px;
   }
   .tile img {
@@ -2835,7 +2835,8 @@ dialog::backdrop {
 
 /* Arena rules: team identity and a visible preparation workbench. */
 .board-scene {
-  min-height: 390px;
+  min-height: 500px;
+  height: auto;
 }
 .battlefield {
   transform: none;
@@ -3399,7 +3400,7 @@ dialog::backdrop {
 }
 @media (max-width: 760px) {
   .board-scene {
-    min-height: 380px;
+    min-height: 474px;
     padding-left: 20px;
     padding-right: 20px;
   }
@@ -3421,10 +3422,10 @@ dialog::backdrop {
 }
 @media (max-width: 520px) {
   .board-scene {
-    min-height: 332px;
+    min-height: 434px;
   }
   .board-grid {
-    grid-template-rows: repeat(2, 48px);
+    grid-template-rows: repeat(3, 48px);
   }
   .tile img {
     width: 45px;
@@ -3504,3 +3505,36 @@ dialog::backdrop {
     transition: none;
   }
 }
+
+/* Round loot and the three-card merge ceremony. */
+.round-loot { margin-bottom: 18px; padding: 14px; background: #e9efd8; border: 1px solid #bccfa2; border-left: 3px solid #64845a; border-radius: 5px; }
+.loot-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 12px; }
+.loot-heading span, .battle-rewards > p { font-size: 11px; color: #637256; }
+.loot-cards { display: flex; flex-wrap: wrap; gap: 8px; }
+.loot-card { display: flex; align-items: center; gap: 10px; min-width: 160px; flex: 1; padding: 10px 12px; border: 1px solid #cad4b7; border-radius: 4px; background: #f6f8eb; }
+.loot-card strong { display: block; font-size: 12px; }
+.loot-card small { display: block; margin-top: 4px; color: #6a775b; font-size: 10px; }
+.loot-icon { display: grid; place-items: center; width: 32px; height: 32px; background: #dbe4c6; border: 1px solid #c2cda9; color: #587545; font-size: 25px; flex-shrink: 0; }
+.loot-card.technique .loot-icon { color: #416588; background: #dae8ed; border-color: #bbd2dc; }
+.loot-card.item .loot-icon { color: #9b752e; background: #eee4c2; border-color: #d8c994; }
+.battle-rewards { margin: 15px 0 18px; }
+.battle-rewards > h3 { margin-bottom: 6px; }
+.battle-rewards > p { margin-bottom: 10px; line-height: 1.5; }
+.technique-card.stocked { border-left: 3px solid #789960; background: #f2f7e6; }
+.merge-stage { position: fixed; z-index: 150; pointer-events: none; width: 0; height: 0; color: #fff4a4; }
+.merge-source { position: absolute; top: -30px; left: -30px; width: 60px; height: 60px; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 0 5px #fff0a3); animation: merge-gather .5s cubic-bezier(.2,.8,.25,1) var(--delay) both; }
+.merge-ring { position: absolute; inset: -35px; width: 70px; height: 70px; border: 3px solid #ffe7a0; border-radius: 50%; box-shadow: 0 0 16px #fae29a; opacity: 0; animation: merge-burst .75s ease-out .42s both; }
+.merge-ring.second { animation-delay: .56s; border-style: dashed; }
+.merge-flash { position: absolute; top: -42px; left: -35px; font-size: 70px; line-height: 1; text-shadow: 0 0 12px #ffffde; animation: merge-star .7s ease-out .42s both; }
+.merge-label { position: absolute; left: -85px; top: 30px; width: 170px; text-align: center; font-weight: 800; font-size: 17px; color: #624e17; background: #fff3b3; border: 1px solid #d9b955; border-radius: 4px; padding: 6px 8px; box-shadow: 0 3px 12px #2b3c4330; animation: merge-label 1.15s ease-out .35s both; }
+.merge-shiny .merge-ring { border-color: #e6ffff; box-shadow: -4px 0 15px #7df3ee, 4px 0 15px #ffb3ce; }
+.merge-shiny .merge-label { background: #e6f9f6; border-color: #97d5db; color: #305c68; }
+.unit-upgrade { animation: merge-unit 1.2s ease-out both; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+@keyframes merge-gather { 0% { transform: translate(var(--dx),var(--dy)) scale(.8); opacity: .9; } 85% { opacity: 1; } 100% { transform: translate(0,0) scale(.2); opacity: 0; } }
+@keyframes merge-burst { 0% { transform: scale(.35); opacity: 0; } 15% { opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
+@keyframes merge-star { 0% { transform: scale(.05) rotate(-40deg); opacity: 0; } 28% { transform: scale(1.2) rotate(5deg); opacity: 1; } 100% { transform: scale(1.4) rotate(25deg); opacity: 0; } }
+@keyframes merge-label { 0% { transform: translateY(8px); opacity: 0; } 15%, 78% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-8px); opacity: 0; } }
+@keyframes merge-unit { 35% { filter: brightness(1); } 50% { filter: brightness(1.8) drop-shadow(0 0 8px #fff0a0); } 65% { filter: brightness(1); } }
+@media (max-width: 520px) { .loot-heading { align-items: start; flex-direction: column; gap: 4px; } .loot-card { min-width: 135px; padding: 9px; } }
+@media (prefers-reduced-motion: reduce) { .merge-source, .merge-ring, .merge-flash { display: none; animation: none; } .unit-upgrade, .merge-label { animation: none; } }

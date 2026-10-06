@@ -180,7 +180,8 @@ def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
         anim.playback_frame(T).convert("RGB").save(out_dir / f"{n}.png")
         n += 1
         T += FPS_DT
-    meta = {"n": n, "dt": FPS_DT, "winner": winner, "event_version": 2,
+    meta = {"n": n, "dt": FPS_DT, "width": anim.width, "height": anim.height,
+            "battle_rows": anim.battle_rows, "winner": winner, "event_version": 2,
             "hud": hud_snapshot,
             "deployments": [list(e) for e in anim.events if e[1] == "deploy"],
             "survivors": res["survivors"], "duration": round(duration, 1),
@@ -291,6 +292,7 @@ class PlayerSeat:
         self.level, self.xp = 1, 0
         self.streak = 0
         self.grid = {}                      # (row, col) -> OwnedPiece
+        self.grid_rows = 2
         self.bench = []
         self.shop = shop_mod.Shop(pool, templates)
         self.pool = pool
@@ -308,7 +310,8 @@ class PlayerSeat:
     @property
     def board(self) -> list:
         """上场列表（次序即 Battle 阵型：头=后排）。"""
-        return [self.grid[pos] for pos in _GRID_ORDER if pos in self.grid]
+        return [self.grid[(r, c)] for r in reversed(range(self.grid_rows))
+                for c in range(GRID_COLS) if (r, c) in self.grid]
 
     def all_pieces(self) -> list:
         return self.board + self.bench
@@ -326,7 +329,8 @@ class PlayerSeat:
 
     def battle_positions(self) -> list:
         """与 battle_comp 同序；UI (row, col) → 战斗 (col, row)。"""
-        return [(c, r + 2) for r, c in _GRID_ORDER if (r, c) in self.grid]
+        return [(c, r + self.grid_rows) for r in reversed(range(self.grid_rows))
+                for c in range(GRID_COLS) if (r, c) in self.grid]
 
     def counter_vs(self, opp_board) -> None:  # 人类无自动对位（占位，配对代码统一调用）
         return None
@@ -347,6 +351,8 @@ class Session:
             self.pool.arena = True
             self.pool.remaining = arena_mod.pool_caps()
         self.player = PlayerSeat(self.pool, self.templates)
+        self.grid_rows = 3 if self.is_arena else 2
+        self.player.grid_rows = self.grid_rows
         pers = assign_personalities(7, rng_mod.derive(self.seed, 0, "pers"))
         self.bots = [Bot(i + 1, LINEUP[7][i], pers[i], self.pool, self.templates)
                      for i in range(7)]
@@ -372,6 +378,8 @@ class Session:
         self.expedition = None
         self.discoveries = {"seen": [], "fielded": [], "won": []}
         self.arena_augments_pending = []
+        self.arena_loot = []
+        self.arena_loot_start = 1
         for seat in self.seats:
             seat.inventory.ruleset = self.ruleset
             seat.inventory.techniques = dict.fromkeys(techniques_mod.ids_for(self.ruleset), 0)
@@ -604,7 +612,7 @@ class Session:
                 return p.bench[i], "bench", i
             m = loc[1:].split(",")
             r, c = int(m[0]), int(m[1])
-            if not (0 <= r <= 1 and 0 <= c < GRID_COLS):
+            if not (0 <= r < self.grid_rows and 0 <= c < GRID_COLS):
                 raise DemoError("格子坐标越界")
             if (r, c) not in p.grid:
                 raise DemoError("这个格子是空的")
@@ -643,9 +651,9 @@ class Session:
             if b.alive:
                 b.decide(r, self.seats,
                          rng_mod.derive(self.seed, r, "bots", b.seat))
+        self.teach_bots()
         if self.is_arena:
             arena_mod.begin_round(self)
-        self.teach_bots()
         # 配对：复用 match 规则（无重复对手优先 + 奇数打幽灵），
         # pair 子流每轮现派生，prep 期算好供 UI 展示对手快照（battle 时原样使用）
         self.pairs = None
@@ -670,7 +678,7 @@ class Session:
 
     def _enemy_rows(self, board: list):
         """与 team1 的 back 部署一致：team0 坐标旋转 180°。"""
-        rows = [[None] * GRID_COLS for _ in range(2)]
+        rows = [[None] * GRID_COLS for _ in range(self.grid_rows)]
         if self.is_arena:
             for entry, (col, row) in zip(board, arena_mod.positions_for(board, 1)):
                 rows[row][col] = entry
@@ -759,6 +767,22 @@ class Session:
                       layout="back", weather_name=weather,
                       **self.battle_options(a, b)).run()
 
+    def _grant_arena_loot(self, seat, result):
+        """Settle each real seat once; loading and playback never issue resources."""
+        if not self.is_arena:
+            return
+        from arena_rewards import roll_rewards, grant_rewards, reward_view
+        reward_id = f'{self.run_id}:r{self.round_no}:s{seat.seat}:loot'
+        if any(row['id'] == reward_id for row in self.arena_loot):
+            return
+        grants = roll_rewards(rng_mod.derive(self.seed, self.round_no, 'pve', 12000 + seat.seat), result)
+        grant_rewards(seat, grants)
+        self.arena_loot.append({'id': reward_id, 'round': self.round_no,
+                               'seat': seat.seat, 'result': result, 'grants': grants})
+        if seat is self.player:
+            names = '、'.join(reward_view(grant)['name'] for grant in grants)
+            self._say(f'回合奖励已入仓：{names}（胜利2份，失败或平局1份）')
+
     def _resolve_pvp(self, r, weather):
         events = []
         battle_i = 0
@@ -766,6 +790,7 @@ class Session:
         for a, b in self.pairs:
             dmg = {id(a): 0, id(b): 0}
             note = ""
+            winner = None
             if a.battle_comp() and b.battle_comp():
                 if p not in (a, b) and isinstance(a, Bot):
                     a.counter_vs(b.board)
@@ -777,6 +802,7 @@ class Session:
                     me, opp = (a, b) if a is p else (b, a)
                     meta = self._fight_rendered(r, battle_i, me, opp, weather)
                     w, surv = meta["winner"], meta["survivors"]
+                    winner = (0 if a is p else 1) if w == 0 else (1 if a is p else 0) if w == 1 else None
                     if w == 0:
                         dmg[id(opp)] = self._loss_damage(r, surv[0])
                         note = f"你 胜（己方存活 {surv[0]}）"
@@ -794,6 +820,7 @@ class Session:
                               + (f"｜你 -{my}" if my else "｜你不掉血"))
                 else:
                     res = self._fight(r, battle_i, a, b, weather)
+                    winner = res['winner']
                     if res["winner"] == 0:
                         dmg[id(b)] = self._loss_damage(r, res["survivors"][0])
                         note = f"{a.name} 胜（存活 {res['survivors'][0]}）"
@@ -811,12 +838,14 @@ class Session:
                 battle_i += 1
             else:
                 if a.battle_comp():
+                    winner = 0
                     dmg[id(b)] = self._loss_damage(r, len(a.battle_comp()))
                     self._streak(a, True), self._streak(b, False)
                     note = f"{a.name} 不战而胜"
                     if a is p:
                         self.observe(won=[o.piece.species_id for o in p.board])
                 elif b.battle_comp():
+                    winner = 1
                     dmg[id(a)] = self._loss_damage(r, len(b.battle_comp()))
                     self._streak(b, True), self._streak(a, False)
                     note = f"{b.name} 不战而胜"
@@ -829,6 +858,11 @@ class Session:
                     my = dmg[id(p)]
                     self._say(f"vs {opp.name}：{note}"
                               + (f"｜你 -{my}" if my else "｜你不掉血"))
+                    self.last_battle = {'round': r, 'n': 0, 'events': [], 'opp_name': opp.name,
+                                        'winner': None if winner is None else (0 if (a if winner == 0 else b) is p else 1),
+                                        'headline': note}
+            self._grant_arena_loot(a, 'draw' if winner is None else 'win' if winner == 0 else 'loss')
+            self._grant_arena_loot(b, 'draw' if winner is None else 'win' if winner == 1 else 'loss')
             events.append((a, dmg[id(a)], note))
             events.append((b, dmg[id(b)], ""))
         if self.ghost_seat is not None:   # 奇数席打幽灵（败方照常掉血）
@@ -842,7 +876,7 @@ class Session:
                     for seat in (odd, self.ghost_src):
                         if isinstance(seat, Bot):
                             self._configure_bot_tactics(seat)
-                ghost_positions = ([(GRID_COLS - 1 - c, 3 - row)
+                ghost_positions = ([(GRID_COLS - 1 - c, self.grid_rows * 2 - 1 - row)
                                     for c, row in p.battle_positions()]
                                    if self.ghost_src is p else None)
                 options = self.battle_options(odd, self.ghost_src)
@@ -856,14 +890,15 @@ class Session:
                 res = {"winner": 1,
                        "survivors": {0: 0, 1: len(self.ghost_src.battle_comp())}}
             dmg = 0
-            if res["winner"] == 1:
+            if res["winner"] == 1 or self.is_arena and res['winner'] is None:
                 dmg = self._loss_damage(r, res["survivors"][1])
                 self._streak(odd, False)
             else:
                 self._streak(odd, True)
             if odd is p:
                 self._say(f"幽灵战（{self.ghost_src.name} 镜像）："
-                          + (f"败 -{dmg}" if dmg else "胜"))
+                          + (f"平局 -{dmg}" if self.is_arena and res['winner'] is None else f"败 -{dmg}" if dmg else "胜"))
+            self._grant_arena_loot(odd, 'draw' if res['winner'] is None else 'win' if res['winner'] == 0 else 'loss')
             events.append((odd, dmg, "幽灵战"))
         return events
 
@@ -883,10 +918,13 @@ class Session:
                     res = {"winner": meta["winner"],
                            "survivors": meta["survivors"]}
                 else:
+                    options = self.battle_options(e)
+                    if self.is_arena:
+                        options['positions_b'] = arena_mod.positions_for(wave, 1)
                     res = Battle(e.battle_comp(), list(wave),
                                  rng_mod.derive(self.seed, r, "battle", battle_i),
                                  layout="back", weather_name=weather,
-                                 **self.battle_options(e)).run()
+                                 **options).run()
                 battle_i += 1
                 if res["winner"] == 0:
                     gold = rng_mod.derive(self.seed, r, "pve", i).randint(*PVE_GOLD)
@@ -900,10 +938,14 @@ class Session:
                                   f"{res['survivors'][1]}）")
                     events.append((e, dmg, "野怪败"))
             else:
+                res = {'winner': 1, 'survivors': {0: 0, 1: len(wave)}}
                 dmg = self._loss_damage(r, len(wave))
                 if e is p:
                     self._say(f"野怪轮不战而败 -{dmg}（场上没有棋子！）")
                 events.append((e, dmg, "野怪空场"))
+            self._grant_arena_loot(e, 'draw' if res['winner'] is None else 'win' if res['winner'] == 0 else 'loss')
+        if self.is_arena:
+            return events
         # S5 组件掉落：人头保底 + 血量加权加发（pve 子流掉落段，同 match）
         comps = sorted(items_mod.COMPONENT_ORDER)
         for i, e in enumerate(alive):
@@ -1064,6 +1106,7 @@ def _piece_view(piece, item=None, ruleset=tactics_mod.BASE_RULESET):
         "ranged": distance > 1, "range": distance,
         "role": profile["role"] if profile else ("远程输出" if distance > 1 else "近战"),
         "skill_name": (skill["name"] if skill else "属性招式") if mv else "普通攻击",
+        "skill_type": TYPE_ZH.get(mv['type'], mv['type']) if mv else '一般',
         "skill_description": (profile["ult"].get("note", descriptions.get(skill["arch"], skill["name"])) if profile and profile.get("ult") else
                               descriptions.get(skill["arch"], "") if skill else "能量满时释放属性招式")
                               if mv else "当前形态没有可释放的属性招式，仅进行普通攻击",
@@ -1075,6 +1118,7 @@ def _piece_view(piece, item=None, ruleset=tactics_mod.BASE_RULESET):
     if ruleset == 'arena_v1':
         role = getattr(piece, 'role_key', 'attack')
         view.update(star=getattr(piece, 'star', 1), shiny=getattr(piece, 'shiny', False),
+                    attack_style='远程' if distance > 1 else '近战',
                     role_key=role, role_name=arena_mod.ROLE_NAMES[role],
                     role_description=arena_mod.ROLE_DESCRIPTIONS[role],
                     learnable=[t['id'] for t in arena_mod.technique_catalog()
@@ -1281,7 +1325,7 @@ def state_json(sess) -> dict:
     from render_mockups import TYPE_COLORS
     weather = weather_for_round(sess.round_no)
     wkey = weather or ""
-    board_rows = [[None] * GRID_COLS for _ in range(2)]
+    board_rows = [[None] * GRID_COLS for _ in range(sess.grid_rows)]
     copies = {}
     for o in p.all_pieces():
         copies[o.piece.species_id] = copies.get(o.piece.species_id, 0) + 1
@@ -1388,11 +1432,12 @@ def state_json(sess) -> dict:
         "type_colors": {t: _hex(c) for t, c in TYPE_COLORS.items()},
     }
     if sess.is_arena:
+        from arena_rewards import reward_view
         def augments_of(seat):
             return [arena_mod.augment_view(a['id'] if isinstance(a, dict) else a)
                     for a in seat.arena_augments_selected]
         st['arena'] = {'version': 'arena_v1', 'shop_slots': sess.shop_slots,
-                       'bench_capacity': sess.bench_capacity,
+                       'bench_capacity': sess.bench_capacity, 'deployment_rows': sess.grid_rows,
                        'catalog': [{**_piece_view(piece, ruleset=sess.ruleset),
                                     'cost': piece.tier,
                                     'pool_remaining': sess.pool.remaining[sid],
@@ -1400,7 +1445,9 @@ def state_json(sess) -> dict:
                                    for sid, piece in sess.templates.items()]}
         st['augments'] = {'pending': copy.deepcopy(sess.arena_augments_pending),
                           'selected': augments_of(p)}
-        st['techniques'] = [{**t, 'eligible': [o.uid for o in p.all_pieces()
+        st['round_rewards'] = [{**row, 'grants': [reward_view(grant) for grant in row['grants']]}
+                               for row in sess.arena_loot if row['seat'] == 0]
+        st['techniques'] = [{**t, 'count': p.inventory.techniques[t['id']], 'eligible': [o.uid for o in p.all_pieces()
                                              if techniques_mod.compatible_species(o.piece.species_id, t['id'])]}
                             for t in arena_mod.technique_catalog()]
         st['scouting'] = [{'seat': seat.seat, 'name': seat.name, 'human': seat is p,
@@ -1562,8 +1609,8 @@ def act_move(sess, frm: str, to: str):
         else:
             m = to[1:].split(",")
             rr, cc = int(m[0]), int(m[1])
-            if not (0 <= rr <= 1 and 0 <= cc < GRID_COLS):
-                raise DemoError("目标格越界（棋盘 6 列 × 2 行）")
+            if not (0 <= rr < sess.grid_rows and 0 <= cc < GRID_COLS):
+                raise DemoError(f"目标格越界（棋盘 6 列 × {sess.grid_rows} 行）")
             dst_where, dst_key = "grid", (rr, cc)
     except (IndexError, ValueError):
         raise DemoError(f"无法识别的位置 {to!r}")

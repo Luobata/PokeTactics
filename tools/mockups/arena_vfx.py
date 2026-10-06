@@ -264,3 +264,149 @@ def draw_heal(image, source, target, progress):
         d.line((x-3,y,x+3,y),fill=WHITE,width=2)
         d.line((x,y-3,x,y+3),fill=WHITE,width=2)
     _ring(d,bx,by,12+p*8,color,2)
+
+
+ELEMENT_COLORS = {
+    'FIRE': (255, 110, 41), 'WATER': (82, 195, 251), 'ELECTRIC': (255, 222, 66),
+    'GRASS': (130, 219, 80), 'POISON': (195, 112, 216), 'PSYCHIC': (255, 139, 213),
+    'ICE': (161, 243, 255), 'GROUND': (210, 168, 103), 'ROCK': (174, 150, 119),
+    'FIGHTING': (244, 166, 105), 'NORMAL': (247, 226, 167), 'BUG': (186, 211, 81),
+    'FLYING': (184, 221, 251), 'GHOST': (150, 126, 235), 'DRAGON': (132, 166, 255),
+    'STEEL': (205, 229, 239), 'DARK': (126, 121, 169),
+}
+
+
+def draw_skill(image, species_id, move_type, source, target, phase, progress, team=0, move_name=''):
+    """Actual move material with a readable charge, route, contact and residue."""
+    if phase not in ('windup', 'flight', 'impact', 'aftermath'):
+        raise ValueError('unknown skill phase')
+    p = min(1., max(0., progress))
+    ax, ay = source
+    bx, by = target
+    dx, dy = bx - ax, by - ay
+    length = math.hypot(dx, dy) or 1.
+    nx, ny = -dy / length, dx / length
+    fade = 1 - p if phase == 'aftermath' else 1.
+    color = (*ELEMENT_COLORS.get(move_type, ELEMENT_COLORS['NORMAL']), round(240 * fade))
+    white = (255, 252, 231, round(245 * fade))
+    d = ImageDraw.Draw(image)
+    k = p if phase == 'flight' else 0. if phase == 'windup' else 1.
+    x, y = ax + dx * k, ay + dy * k
+    radius = 7 + (p * 6 if phase == 'windup' else p * 14 if phase == 'impact' else 3)
+    variant = species_id % 4
+    travel = phase == 'flight'
+    hit = phase in ('impact', 'aftermath')
+    if phase == 'windup':
+        _ring(d, ax, ay, radius + 3, color, 1)
+        for i in range(3):
+            angle = i * math.tau / 3 + p * 3
+            d.rectangle((ax + math.cos(angle) * radius - 1, ay + math.sin(angle) * radius - 1,
+                         ax + math.cos(angle) * radius + 1, ay + math.sin(angle) * radius + 1), fill=white)
+    points = [(ax + dx * j / 12 * k + nx * math.sin(j * 1.7 + p * 7) * 3,
+               ay + dy * j / 12 * k + ny * math.sin(j * 1.7 + p * 7) * 3) for j in range(13)]
+    if move_type == 'FIRE':
+        if travel:
+            d.line(points, fill=color, width=5)
+        for i in range(5 if hit else 3):
+            angle = i * 1.9 + p * 5 + variant
+            xx, yy = x + math.cos(angle) * radius * .6, y + math.sin(angle) * radius * .6
+            d.polygon(((xx - 5, yy + 5), (xx - 2, yy - 3), (xx + 3, yy - 11),
+                       (xx + 6, yy + 4), (xx, yy + 8)), fill=color)
+            d.polygon(((xx - 2, yy + 4), (xx + 2, yy - 4), (xx + 3, yy + 5)), fill=white)
+        if hit:
+            for i in range(7):
+                angle = i * math.tau / 7
+                xx, yy = bx + math.cos(angle) * radius, by + math.sin(angle) * radius - p * 9
+                d.rectangle((xx, yy, xx + 2, yy + 2), fill=color)
+    elif move_type == 'WATER':
+        if travel:
+            for off in (-3, 0, 3):
+                d.line([(xx + nx * off, yy + ny * off) for xx, yy in points], fill=color, width=2)
+        for i in range(3):
+            r = radius + i * 4
+            d.ellipse((x - r, y - r * .45, x + r, y + r * .45), outline=color, width=2)
+        for i in range(6):
+            angle = i * math.tau / 6 + p
+            xx, yy = x + math.cos(angle) * radius, y + math.sin(angle) * radius * .8
+            d.ellipse((xx - 2, yy - 3, xx + 2, yy + 2), fill=color, outline=white)
+    elif move_type == 'ELECTRIC':
+        route = points if travel else [(x - radius, y), (x - 3, y - 8), (x + 1, y + 5), (x + radius, y - 3)]
+        d.line(route, fill=color, width=4)
+        d.line(route, fill=white, width=1)
+        for i in range(4):
+            angle = i * math.pi / 2 + variant * .3
+            tip = (x + math.cos(angle) * (radius + 8), y + math.sin(angle) * (radius + 8))
+            d.line(((x, y), (x + math.cos(angle + .4) * 8, y + math.sin(angle + .4) * 8), tip), fill=color, width=2)
+    elif move_type == 'GRASS':
+        if travel:
+            d.line(points, fill=(81, 142, 66, 240), width=2)
+        for i in range(5):
+            angle = i * math.tau / 5 + p * 3
+            xx, yy = x + math.cos(angle) * radius * .7, y + math.sin(angle) * radius * .7
+            d.polygon(((xx - 6, yy + 2), (xx - 2, yy - 5), (xx + 6, yy - 3), (xx + 2, yy + 4)), fill=color, outline=white)
+            d.line((xx - 4, yy + 1, xx + 4, yy - 2), fill=(62, 128, 50, round(240 * fade)), width=1)
+    elif move_type in ('POISON', 'GHOST', 'DARK'):
+        for i in range(5):
+            angle = i * 1.7 + p * 2
+            xx, yy = x + math.cos(angle) * radius * .7, y + math.sin(angle) * radius * .6
+            r = 3 + i % 3
+            d.ellipse((xx - r, yy - r, xx + r, yy + r), fill=(*color[:3], round(120 * fade)), outline=color)
+        if move_type == 'POISON':
+            for i in range(4):
+                xx, yy = x + (i - 1.5) * 7, y + p * 9 + i % 2 * 3
+                d.polygon(((xx, yy - 4), (xx - 2, yy + 2), (xx + 2, yy + 2)), fill=color)
+        else:
+            d.arc((x - radius, y - radius, x + radius, y + radius), 20, 280, fill=color, width=3)
+            d.line((x - 5, y - 3, x - 2, y - 1), fill=white, width=2)
+            d.line((x + 5, y - 3, x + 2, y - 1), fill=white, width=2)
+    elif move_type == 'PSYCHIC':
+        for i in range(3):
+            r = radius + i * 4
+            d.ellipse((x - r, y - r * .5, x + r, y + r * .5), outline=color, width=1 + i % 2)
+        _star(d, x, y, radius * .7, white, 4, p * 3)
+    elif move_type in ('GROUND', 'ROCK'):
+        if move_type == 'GROUND':
+            d.line(points if travel else [(x - radius, y + 7), (x - 7, y), (x - 2, y + 4),
+                                          (x + 5, y - 2), (x + radius, y + 6)], fill=(94, 73, 57, round(245 * fade)), width=3)
+        else:
+            poly = [(x + math.cos(i * math.pi / 3 + p) * 9, y + math.sin(i * math.pi / 3 + p) * 9) for i in range(6)]
+            d.polygon(poly, fill=color, outline=white)
+            d.line((poly[0], (x, y), poly[2]), fill=(94, 73, 57, round(240 * fade)), width=2)
+        for i in range(6):
+            xx = x + (i - 2.5) * 6
+            yy = y - math.sin((i + 1) * .8) * (radius + 3)
+            d.polygon(((xx, yy - 3), (xx + 3, yy + 2), (xx - 3, yy + 3)), fill=color)
+    elif move_type == 'ICE':
+        if travel:
+            d.line((ax, ay, x, y), fill=color, width=2)
+        for i in range(4 if hit else 2):
+            angle = i * math.pi / 2 + p * .7
+            xx, yy = x + math.cos(angle) * radius * .7, y + math.sin(angle) * radius * .7
+            d.polygon(((xx, yy - 10), (xx + 4, yy), (xx, yy + 7), (xx - 4, yy)), fill=color, outline=white)
+        if hit:
+            for i in range(6):
+                angle = i * math.pi / 3
+                d.line((x, y, x + math.cos(angle) * radius, y + math.sin(angle) * radius), fill=white, width=1)
+    elif move_type in ('FIGHTING', 'STEEL'):
+        for i in range(3):
+            off = (i - 1) * 6
+            d.arc((x - radius + off, y - radius, x + radius + off, y + radius), 215, 340, fill=color, width=3)
+        d.line((x - 9, y + 9, x + 10, y - 10), fill=white, width=2)
+        if move_type == 'STEEL':
+            d.line((x - 9, y - 9, x + 10, y + 10), fill=color, width=2)
+        else:
+            _star(d, x, y, radius * .6, color, 6, p)
+    elif move_type in ('FLYING', 'BUG', 'DRAGON'):
+        for i in range(4):
+            off = (i - 1.5) * 6
+            if move_type == 'FLYING':
+                d.arc((x - radius, y + off - 5, x + radius, y + off + 8), 170, 345, fill=color, width=2)
+            elif move_type == 'BUG':
+                d.polygon(((x, y + off), (x - 10, y + off - 7), (x - 5, y + off + 5)), fill=color, outline=white)
+                d.polygon(((x, y + off), (x + 10, y + off - 7), (x + 5, y + off + 5)), fill=color, outline=white)
+            else:
+                _star(d, x + off, y + math.sin(p * 5 + i) * 6, 6 + i % 2 * 3, color, 4, p + i)
+    else:
+        for i in range(3):
+            _ring(d, x, y, radius + i * 4, color, 1)
+        _star(d, x, y, radius * .45, white, 5, p)

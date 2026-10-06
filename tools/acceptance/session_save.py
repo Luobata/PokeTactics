@@ -24,6 +24,7 @@ LEGACY_TACTICS_FINGERPRINT = 'f05ad20bf84e27917c269487469914f042cc03bde53176a2c4
 LEGACY_ABILITIES_FINGERPRINT = 'b39cb3c1756b71d4a26a1f79b613683ee6852bdad66709fc1cd1138d66cde23f'
 LEGACY_COUNTER_PACING_FINGERPRINT = '2a469a66cce17970c78393f495305f55cb52c6a92e2264a164e6861095ac5fbb'
 PRE_ARENA_FINGERPRINT = '6e763935b92f008c231a81a7b5742c0db2062d7ef42bc43f34cbf8f479d994da'
+TWO_ROW_ARENA_FINGERPRINT = '3ec245248bf2a189a298cc195136acf8916fc98c73bbc932e9c486dd683fb68c'
 
 
 class UnknownRulesError(UnsupportedVersionError, ValueError):
@@ -74,7 +75,7 @@ def comp_record(comp, arena=False):
 
 class SessionCodec:
     game_id = "poketactics"
-    schema_version = 4
+    schema_version = 5
 
     def encode(self, state):
         import tactics
@@ -132,13 +133,15 @@ class SessionCodec:
                             for row in state.arena_augments_pending],
                 'selected': [[a['id'] if isinstance(a, dict) else a
                               for a in seat.arena_augments_selected] for seat in state.seats],
+                'loot': copy.deepcopy(state.arena_loot),
+                'loot_start': state.arena_loot_start,
             }
         # Normalize tuple-based metric curves and integer-keyed survivor maps;
         # the shared runtime deliberately accepts strict, portable JSON only.
         return json.loads(json.dumps(payload, ensure_ascii=False, allow_nan=False))
 
     def decode(self, payload, schema_version):
-        if type(schema_version) is not int or schema_version not in (1, 2, 3, 4):
+        if type(schema_version) is not int or schema_version not in (1, 2, 3, 4, 5):
             raise ValueError("不支持的 PokeTactics 存档版本")
         if schema_version >= 2 and "expedition_state" not in payload:
             raise ValueError("远征存档缺少永久对局编号")
@@ -159,7 +162,7 @@ class SessionCodec:
         if schema_version < 4 and data.get('ruleset', tactics.BASE_RULESET) != tactics.BASE_RULESET:
             raise UnknownRulesError('旧存档版本不能包含新战术规则')
         fingerprint = data.get('rules')
-        supported = {rules_fingerprint()}
+        supported = {rules_fingerprint(), TWO_ROW_ARENA_FINGERPRINT}
         if ruleset == tactics.BASE_RULESET:
             supported.add(LEGACY_BASE_FINGERPRINT)
         if ruleset in (tactics.BASE_RULESET, tactics.TACTICS_RULESET):
@@ -168,6 +171,7 @@ class SessionCodec:
             supported.add(LEGACY_ABILITIES_FINGERPRINT)
         choices = tactics.evolution_choices_enabled(ruleset)
         is_arena = ruleset == 'arena_v1'
+        migrating_arena = is_arena and fingerprint == TWO_ROW_ARENA_FINGERPRINT
         if not is_arena:
             supported.add(PRE_ARENA_FINGERPRINT)
         if not choices and not is_arena:
@@ -260,7 +264,10 @@ class SessionCodec:
             if seat.seat == 0:
                 seat.grid = {}
                 for row, col, owned in sequence(record["grid"], seat.pop(), "grid"):
-                    pos = (integer(row, 0, 1, "row"), integer(col, 0, 5, "col"))
+                    row = integer(row, 0, 1 if migrating_arena else state.grid_rows - 1, 'row')
+                    if migrating_arena and row == 1:
+                        row = 2
+                    pos = (row, integer(col, 0, 5, "col"))
                     if pos in seat.grid:
                         raise ValueError("重复的棋盘格位")
                     seat.grid[pos] = piece(owned)
@@ -330,6 +337,8 @@ class SessionCodec:
                 raise ValueError("仓库含未知装备")
             seat.inventory.finished = list(finished)
             machines = record.get('techniques', dict.fromkeys(techniques.ids_for(ruleset), 0))
+            if migrating_arena and isinstance(machines, dict) and set(machines) == {'cut', 'surf', 'rest'}:
+                machines = {**dict.fromkeys(techniques.ids_for(ruleset), 0), **machines}
             if schema_version >= 3 and 'techniques' not in record:
                 raise ValueError('缺少技能机仓库')
             if not isinstance(machines, dict) or set(machines) != set(techniques.ids_for(ruleset)):
@@ -457,17 +466,18 @@ class SessionCodec:
         state.next_unit_id = integer(data.get('next_unit_id', minimum), minimum, 99999999, 'next_unit_id')
         state.ensure_unit_ids()
         if is_arena:
-            self._decode_arena(state, data)
+            self._decode_arena(state, data, migrating_arena)
         elif 'arena' in data:
             raise ValueError('旧规则不能包含竞技强化记录')
         if schema_version >= 4:
             self._decode_tactics(state, data)
         return state
 
-    def _decode_arena(self, state, data):
+    def _decode_arena(self, state, data, migrating=False):
         import arena
         raw = data.get('arena')
-        if not isinstance(raw, dict) or set(raw) != {'pending', 'selected'}:
+        fields = {'pending', 'selected'} if migrating else {'pending', 'selected', 'loot', 'loot_start'}
+        if not isinstance(raw, dict) or set(raw) != fields:
             raise ValueError('竞技强化存档结构无效')
         milestones = (1, 7, 13)
         available = sum(r <= state.round_no for r in milestones)
@@ -501,6 +511,37 @@ class SessionCodec:
             if seat.alive and len(seat.arena_augments_selected) != available:
                 raise ValueError('机器人竞技强化领取进度无效')
         state.arena_augments_pending = rebuilt
+        if migrating:
+            state.arena_loot_start = state.round_no + (state.phase != 'prep')
+            state.save_warning = '已升级为三排战场，原后排保留在第三排；新回合开始发放战利品。'
+        else:
+            self._decode_arena_loot(state, raw)
+
+    def _decode_arena_loot(self, state, raw):
+        from arena_rewards import reward_view
+        state.arena_loot_start = integer(raw['loot_start'], 1, state.round_no + 1, 'loot start')
+        ledger = sequence(raw['loot'], 8 * state.round_no, 'round loot')
+        ids = set()
+        for row in ledger:
+            if not isinstance(row, dict) or set(row) != {'id', 'round', 'seat', 'result', 'grants'}:
+                raise ValueError('回合奖励记录字段无效')
+            round_no = integer(row['round'], state.arena_loot_start, state.round_no, 'loot round')
+            seat_id = integer(row['seat'], 0, 7, 'loot seat')
+            if row['id'] != f'{state.run_id}:r{round_no}:s{seat_id}:loot' or row['id'] in ids:
+                raise ValueError('回合奖励编号无效或重复')
+            if round_no == state.round_no and state.phase == 'prep':
+                raise ValueError('准备阶段不能提前发放本轮奖励')
+            ids.add(row['id'])
+            if row['result'] not in ('win', 'loss', 'draw'):
+                raise ValueError('回合奖励胜负无效')
+            grants = sequence(row['grants'], 2, 'loot grants')
+            if len(grants) != (2 if row['result'] == 'win' else 1):
+                raise ValueError('回合奖励数量与胜负不一致')
+            for grant in grants:
+                if not isinstance(grant, dict) or set(grant) != {'kind', 'key'}:
+                    raise ValueError('奖励物品字段无效')
+                reward_view(grant)
+        state.arena_loot = copy.deepcopy(ledger)
 
     def _decode_tactics(self, state, data):
         import demo

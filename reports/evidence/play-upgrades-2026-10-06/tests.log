@@ -1,0 +1,66 @@
+.................... [  4%]
+................................ [ 11%]
+................................................ [ 21%]
+........................................... [ 30%]
+................................................................ [ 44%]
+.......................... [ 49%]
+................................. [ 56%]
+................................................................................. [ 73%]
+................................................................................... [ 91%]
+.......................................           [100%]
+=============================== warnings summary ===============================
+tests/test_animation_authoring.py: 590 warnings
+tests/test_animation_preview.py: 195 warnings
+tests/test_animation_timeline.py: 53 warnings
+tests/test_arena_visuals.py: 2 warnings
+tests/test_character_rigs.py: 58 warnings
+tests/test_counter_presentation.py: 4 warnings
+tests/test_fallback_animation.py: 529 warnings
+tests/test_move_effects.py: 17 warnings
+tests/test_replay_contracts.py: 2 warnings
+tests/test_signature_presentation.py: 20 warnings
+tests/test_tactical_presentation.py: 7 warnings
+  /Users/bytedance/luobata/PokeTactics/tools/mockups/character_rigs.py:321: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    opaque = [pixel[:3] for pixel in cel.getdata() if pixel[3]]
+
+tests/test_animation_authoring.py: 24 warnings
+tests/test_character_rigs.py: 21 warnings
+tests/test_counter_presentation.py: 2 warnings
+tests/test_fallback_animation.py: 6 warnings
+tests/test_move_effects.py: 4 warnings
+tests/test_signature_presentation.py: 7 warnings
+  /Users/bytedance/luobata/PokeTactics/tools/mockups/character_rigs.py:308: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    color = max((pixel for pixel in cel.getdata() if pixel[3]),
+
+tests/test_animation_authoring.py::AnimationAuthoringContracts::test_all_84_species_six_actions_use_real_events_and_rewind_identically
+tests/test_animation_authoring.py::AnimationAuthoringContracts::test_all_84_species_six_actions_use_real_events_and_rewind_identically
+tests/test_animation_authoring.py::AnimationAuthoringContracts::test_all_84_species_six_actions_use_real_events_and_rewind_identically
+tests/test_animation_preview.py::AnimationPreviewContracts::test_failed_render_preserves_existing_cache_and_cleans_partial_frames
+tests/test_animation_preview.py::AnimationPreviewContracts::test_failed_render_preserves_existing_cache_and_cleans_partial_frames
+tests/test_animation_preview.py::AnimationPreviewContracts::test_failed_render_preserves_existing_cache_and_cleans_partial_frames
+tests/test_animation_preview.py::AnimationPreviewContracts::test_failed_render_preserves_existing_cache_and_cleans_partial_frames
+  /Users/bytedance/luobata/PokeTactics/tools/mockups/motion.py:465: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    bright = max((c for c in cel.getdata() if c[3]), key=lambda c: sum(c[:3]))
+
+tests/test_character_rigs.py::CharacterRigTests::test_source_palette_alpha_and_input_are_preserved
+tests/test_character_rigs.py::CharacterRigTests::test_source_palette_alpha_and_input_are_preserved
+tests/test_character_rigs.py::CharacterRigTests::test_source_palette_alpha_and_input_are_preserved
+  /Users/bytedance/luobata/PokeTactics/tests/test_character_rigs.py:95: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    colors={pixel[:3] for pixel in source.getdata() if pixel[3]}
+
+tests/test_character_rigs.py::CharacterRigTests::test_source_palette_alpha_and_input_are_preserved
+tests/test_character_rigs.py::CharacterRigTests::test_source_palette_alpha_and_input_are_preserved
+tests/test_character_rigs.py::CharacterRigTests::test_source_palette_alpha_and_input_are_preserved
+tests/test_character_rigs.py::CharacterRigTests::test_source_palette_alpha_and_input_are_preserved
+tests/test_character_rigs.py::CharacterRigTests::test_source_palette_alpha_and_input_are_preserved
+tests/test_character_rigs.py::CharacterRigTests::test_source_palette_alpha_and_input_are_preserved
+  /Users/bytedance/luobata/PokeTactics/tests/test_character_rigs.py:98: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    self.assertLessEqual({pixel[:3] for pixel in image.getdata() if pixel[3]},colors)
+
+tests/test_tactical_presentation.py::TacticalPresentation::test_weather_rewind_speed_and_skip_preserve_pixels_and_simulation
+tests/test_tactical_presentation.py::OpeningWeatherPresentation::test_opening_weather_precedes_cast_and_later_override_is_causal
+  /Users/bytedance/luobata/PokeTactics/tools/mockups/render_battle_gif.py:172: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    floor.putdata([replacements.get(pixel, pixel) for pixel in floor.getdata()])
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+469 passed, 1559 warnings, 1249 subtests passed in 63.15s (0:01:03)

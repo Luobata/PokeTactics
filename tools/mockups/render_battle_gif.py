@@ -159,13 +159,13 @@ def draw_weather_text(img, xy, text, font):
 
 
 @lru_cache(maxsize=5)
-def board_floor(weather_name):
+def board_floor(weather_name, visual_rows=BROWS):
     """只缓存地砖；按色板查表替换，不乘整幅图，也不染精灵/UI。"""
-    floor = Image.new("RGBA", (BCOLS * BCELL, BROWS * BCELL))
-    for cy in range(BROWS):
+    floor = Image.new("RGBA", (BCOLS * BCELL, visual_rows * BCELL))
+    for cy in range(visual_rows):
         for cx in range(BCOLS):
             draw_floor_tile(floor, cx * BCELL, cy * BCELL, BCELL, cx, cy,
-                            enemy=cy in ENEMY_ROWS, bench=cy in BENCH_ROWS)
+                            enemy=1 <= cy < visual_rows // 2, bench=cy in (0, visual_rows - 1))
     if weather_name in WEATHER_PALETTES:
         replacements = {src + (255,): dst + (255,) for src, dst in
                         zip(FLOOR_COLORS, WEATHER_PALETTES[weather_name])}
@@ -173,10 +173,10 @@ def board_floor(weather_name):
     return floor
 
 
-def weather_particles(weather_name, T):
+def weather_particles(weather_name, T, visual_rows=BROWS):
     """八粒上限；位置仅由帧号和序号决定，回卷、随机种子均不影响相位。"""
     frame = effect_frame(T)
-    width, height = BCOLS * BCELL, BROWS * BCELL
+    width, height = BCOLS * BCELL, visual_rows * BCELL
     particles = []
     for i in range(8 if weather_name in WEATHER_PALETTES else 0):
         if weather_name == "rain":
@@ -533,6 +533,13 @@ class BattleAnimation:
         self.healing_blocks = []
         self.units = {u.idx: AnimUnit(u) for u in b.units}
         self.is_arena = getattr(b, 'ruleset', None) == 'arena_v1'
+        self.battle_rows = getattr(b, 'rows', 4)
+        self.visual_rows = self.battle_rows + 2
+        self.width = W
+        self.height = H + (self.battle_rows - 4) * BCELL
+        from build_rules import resolve_cast
+        self._native_moves = {u.idx: (resolve_cast(u.piece, getattr(b, 'stat_mode', 'legacy')) or {}).get('name')
+                              for u in b.units}
         self.by_idx = {u.idx: u for u in b.units}
         self.events = b.events
         self.authoritative_states = any(ev[1] == "unit_state" for ev in self.events)
@@ -675,7 +682,8 @@ class BattleAnimation:
             impact = timing.impact if timing else start + length
             release = timing.release if timing else impact
             self.cutins.append((start, impact, ci, ti,
-                                move, eff, dmg, au.u.piece.types[0], release))
+                                move, eff, dmg,
+                                self.move_type.get(move, au.u.piece.types[0]) if self.is_arena else au.u.piece.types[0], release))
             au.recoil_t = release
             tgt = self.units[ti]
             if dmg:
@@ -769,7 +777,7 @@ class BattleAnimation:
     # ---- 帧渲染（只读已发生状态）----
     def frame(self, T: float, show_cutins=True) -> Image.Image:
         self._ensure(T)
-        img = Image.new("RGBA", (W, H), (18, 18, 20, 255))
+        img = Image.new("RGBA", (self.width, self.height), (18, 18, 20, 255))
         self._draw_board(img, T)
         release = next((c for c in self.cutins if c[1] <= T < c[1] + .2
                         and skill_profile(self.units[c[2]].u.piece.species_id)["tier"] == "generic"), None)
@@ -923,7 +931,7 @@ class BattleAnimation:
     def _draw_signatures(self, img, T, budget):
         for c in self._active_casts(T):
             sid = self.units[c[2]].u.piece.species_id
-            if self.is_arena and sid not in SUPPORTED_SPECIES:
+            if self.is_arena and (sid not in SUPPORTED_SPECIES or c[4] != self._native_moves[c[2]]):
                 continue  # The arena's individual material track owns this cast.
             if not c[0] <= T < c[1] + .6:
                 continue
@@ -954,7 +962,7 @@ class BattleAnimation:
                           for dx, dy in ((-28, 0), (28, 0), (0, 34), (0, -30))]
             def overlap(point):
                 x, y = point
-                score = 10000 if not 12 <= x < W - 12 or not BY + 12 <= y < BY + BROWS * BCELL - 12 else 0
+                score = 10000 if not 12 <= x < self.width - 12 or not BY + 12 <= y < BY + self.visual_rows * BCELL - 12 else 0
                 for unit in self.units.values():
                     if unit.visible(T):
                         ux, uy = unit.render_px(T)
@@ -1088,11 +1096,11 @@ class BattleAnimation:
     def _render_board(self, img: Image, T: float) -> None:
         # C-sym 分区（自上而下）：敌备战 1 行 / 敌战场 2 行 / 我战场 2 行 /
         # 我备战 1 行；备战行用观战格底色（bench=True），不落战斗单位。
-        img.paste(board_floor(self.weather_name), (BX, BY))
-        draw_divider(img, BX, BY + 3 * BCELL, BCOLS * BCELL)
+        img.paste(board_floor(self.weather_name, self.visual_rows), (BX, BY))
+        draw_divider(img, BX, BY + (self.visual_rows // 2) * BCELL, BCOLS * BCELL)
         draw = ImageDraw.Draw(img)
         draw.line((BX, BY - 1, BX + BCOLS * BCELL - 1, BY - 1), fill=INK)
-        draw.line((BX, BY + BROWS * BCELL, BX + BCOLS * BCELL - 1, BY + BROWS * BCELL), fill=INK)
+        draw.line((BX, BY + self.visual_rows * BCELL, BX + BCOLS * BCELL - 1, BY + self.visual_rows * BCELL), fill=INK)
         self._draw_ground_scars(img, T)
         shown = sorted((au for au in self.units.values() if au.visible(T)),
                        key=lambda a: a.render_px(T)[1])
@@ -1101,9 +1109,9 @@ class BattleAnimation:
         in_cutin = any(c[0] <= T < c[1] + .2 for c in self.cutins)
         budget = ParticleBudget(PARTICLE_LIMIT - 13 if in_cutin else PARTICLE_LIMIT)
         # 天气预算独立固定为八粒，也从整盘预算扣除。
-        weather = weather_particles(self.weather_name, T)
+        weather = weather_particles(self.weather_name, T, self.visual_rows)
         budget.take(len(weather), minimum=len(weather))
-        fx = Image.new("RGBA", (W, H))
+        fx = Image.new("RGBA", (self.width, self.height))
         # 先分配命中/消散/蓄力，再把剩余预算给尘土与旧星闪。
         if self.is_arena:
             self._draw_arena_fx(fx, T, budget)
@@ -1162,7 +1170,7 @@ class BattleAnimation:
                                    "visible_units": len(shown)}
         shake = self._board_shake(T)
         if shake:
-            board = img.crop((BX, BY, BX + BCOLS * BCELL, BY + BROWS * BCELL))
+            board = img.crop((BX, BY, BX + BCOLS * BCELL, BY + self.visual_rows * BCELL))
             # 裁切平移；边缘延用原地砖，不把另一端内容卷进来。
             img.paste(board.crop((0, max(0, -shake), board.width,
                                   board.height - max(0, shake))),
@@ -1204,26 +1212,26 @@ class BattleAnimation:
             alpha = 20  # 20 / 255 = 7.84%，仅落点首帧。
         else:
             return
-        flash = Image.new("RGBA", (BCOLS * BCELL, BROWS * BCELL), (255, 255, 255, alpha))
+        flash = Image.new("RGBA", (BCOLS * BCELL, self.visual_rows * BCELL), (255, 255, 255, alpha))
         img.alpha_composite(flash, (BX, BY))
 
     def _draw_opening(self, img, T):
         phase = effect_frame(T)
         if not 0 <= phase < effect_frame(OPENING_LIFE):
             return
-        center = BY + BROWS * BCELL // 2
+        center = BY + self.visual_rows * BCELL // 2
         draw = ImageDraw.Draw(img)
         # 双侧速度线扫向中场，横幅贯穿 240px；文字使用原生 16px 字库。
         for i in range(8):
             y = center - 48 + i * 13
             length = 32 + (i % 3) * 12 + phase * 8
-            for start, end in ((0, length), (W - 1, W - 1 - length)):
+            for start, end in ((0, length), (self.width - 1, self.width - 1 - length)):
                 draw.line((start, y, end, y), fill=INK, width=4)
                 draw.line((start, y, end, y), fill=PAPER, width=2)
-        pixel_window(img, (0, center - 22, W - 1, center + 22), dark=True)
-        draw.line((1, center - 18, W - 2, center - 18), fill=FULL_GOLD, width=2)
-        draw.line((1, center + 18, W - 2, center + 18), fill=FULL_GOLD, width=2)
-        draw_text(img, ((W - text_width("开战！")) // 2, center - 8),
+        pixel_window(img, (0, center - 22, self.width - 1, center + 22), dark=True)
+        draw.line((1, center - 18, self.width - 2, center - 18), fill=FULL_GOLD, width=2)
+        draw.line((1, center + 18, self.width - 2, center + 18), fill=FULL_GOLD, width=2)
+        draw_text(img, ((self.width - text_width("开战！")) // 2, center - 8),
                   "开战！", self.font, PAPER)
 
     def _recent_hits(self, T):
@@ -1656,7 +1664,7 @@ class BattleAnimation:
                 tx, ty = pose[:2]
             ax, ay = attacker.render_px(T)
             direction = math.atan2(ty - ay, tx - ax)
-            cx = max(18, min(W - 19, round(tx) + BCELL // 2))
+            cx = max(18, min(self.width - 19, round(tx) + BCELL // 2))
             cy = round(ty) + BCELL - 30
             sid = attacker.u.piece.species_id
             if self._is_presentation and sid in SUPPORTED_SPECIES:
@@ -1712,7 +1720,11 @@ class BattleAnimation:
         events = self.timeline.recent_events(T, 2.) if self._is_presentation else self.events[:self._cursor]
         tracks=[]
         for ev in events:
-            if ev[1] not in ('attack','cast','arena_heal'):
+            if ev[1] not in ('attack','cast','arena_heal','partner_effect'):
+                continue
+            if ev[1] == 'partner_effect':
+                if ev[5] == 'rest' and 0 <= T-ev[0] < .8:
+                    tracks.append((ev[0],ev,'heal',(T-ev[0])/.8))
                 continue
             if ev[1] == 'arena_heal':
                 if 0 <= T-ev[0] < .8:
@@ -1747,18 +1759,13 @@ class BattleAnimation:
             source=self.units[ev[2]].u
             if phase == 'heal':
                 arena_vfx.draw_heal(img,a,b,p)
-                label=f'团队回复 +{ev[4]}'
+                label=f'睡觉回复 +{ev[6]["amount"]}' if ev[1] == 'partner_effect' else f'团队回复 +{ev[4]}'
             elif ev[1] == 'attack':
                 arena_vfx.draw_attack(img,source.piece.species_id,a,b,phase,p,source.team)
                 label=arena_vfx.EFFECTS[source.piece.species_id][0]
             else:
-                # Cast material tracks remain authored; the guide names both endpoints.
-                d=ImageDraw.Draw(img)
-                color=(82,187,255,180) if source.team == 0 else (255,110,125,180)
-                d.line((*a,*b),fill=color,width=1)
-                d.ellipse((b[0]-16,b[1]-16,b[0]+16,b[1]+16),outline=color,width=1)
-                if source.piece.species_id not in SUPPORTED_SPECIES:
-                    arena_vfx.draw_attack(img,source.piece.species_id,a,b,phase,p,source.team)
+                arena_vfx.draw_skill(img,source.piece.species_id,
+                    self.move_type.get(ev[4], 'NORMAL'),a,b,phase,p,source.team,ev[4])
                 label=self.move_zh.get(ev[4],ev[4])
             self._arena_label=(ev,label)
 
@@ -1782,7 +1789,7 @@ class BattleAnimation:
                 ux, uy = au.render_px(T)
                 sprite = self.front.image(au.u.piece.species_id, self.pal)
                 bounds = sprite.getbbox()
-                left = max(0, min(W - sprite.width, int(ux + (BCELL - sprite.width) / 2)))
+                left = max(0, min(self.width - sprite.width, int(ux + (BCELL - sprite.width) / 2)))
                 bottom = uy + BCELL - 16
                 silhouettes.append((left + bounds[0], bottom - bounds[3] + bounds[1],
                                     left + bounds[2], uy + BCELL))
@@ -1792,7 +1799,7 @@ class BattleAnimation:
                 continue
             # Basic digits are 7px tall; skill digits are exactly 1px taller.
             scale = 1 if color in DOT_COLORS.values() or color == (255, 255, 255) else 8 / 7
-            fx = max(6, min(W - len(text) * 6 * scale - 6, x + 6))
+            fx = max(6, min(self.width - len(text) * 6 * scale - 6, x + 6))
             rise = number_rise(age, FLOAT_LIFE)
             fy = max(32, y - 6 - rise)
             if age > FLOAT_LIFE - 0.2 and int(age * 10) % 2 == 1:
@@ -1806,8 +1813,8 @@ class BattleAnimation:
                            (0, -height - 3), (0, height + 3), (-width - 3, -height - 3),
                            (-2 * width - 6, 0), (2 * width + 6, 0),
                            (-2 * width - 6, -height - 3), (2 * width + 6, -height - 3)):
-                nx = int(max(6, min(W - width + 2, fx + dx)))
-                ny = int(max(BY + 7, min(BY + BROWS * BCELL - height, fy + dy)))
+                nx = int(max(6, min(self.width - width + 2, fx + dx)))
+                ny = int(max(BY + 7, min(BY + self.visual_rows * BCELL - height, fy + dy)))
                 rect = (nx - 4, ny - 4, nx - 4 + width, ny - 4 + height)
                 overlap = sum(max(0, min(rect[2], r[2]) - max(rect[0], r[0]))
                               * max(0, min(rect[3], r[3]) - max(rect[1], r[1]))
@@ -1849,9 +1856,9 @@ class BattleAnimation:
         t0, text = self.msg
         if self.weather_name in WEATHER_MESSAGES and not self.tactical_effects and 0 <= T <= 1.8:
             t0, text = 0.0, WEATHER_MESSAGES[self.weather_name]
-        y0 = BY + BROWS * BCELL + 4
+        y0 = BY + self.visual_rows * BCELL + 4
         # 固定日志外框填满原有底部留白；消息出现/消退条件完全不变。
-        pixel_window(img, (1, y0, 238, H - 2))
+        pixel_window(img, (1, y0, 238, self.height - 2))
         if self.is_arena and getattr(self,'_arena_label',None):
             ev,label=self._arena_label
             source,target=self.by_idx[ev[2]],self.by_idx[ev[3]]
@@ -1869,19 +1876,19 @@ class BattleAnimation:
         draw_text(img, (10, y0 + 4), "战斗记录", self.font, INK)
         draw_pixel_text(img, (186, y0 + 8), f"{T:04.1f}", INK)
         draw = ImageDraw.Draw(img)
-        draw.line((11, y0 + 20, W - 12, y0 + 20), fill=FRAME)
+        draw.line((11, y0 + 20, self.width - 12, y0 + 20), fill=FRAME)
         if not text or T < t0 - 0.2 or T > t0 + 1.8:
             draw_text(img, (10, y0 + 24), "自动战斗中……", self.font, INK)
             return
         # 40px 棋盘后日志只有 48px：按原消息寿命分页，一次完整显示一行。
-        lines = wrap_text(text, W - 36)
+        lines = wrap_text(text, self.width - 36)
         line = lines[min(len(lines) - 1, max(0, int((T - t0) / 0.6)))]
         if self.weather_name in WEATHER_MESSAGES and not self.tactical_effects and 0 <= T <= 1.8:
             draw_weather_text(img, (10, y0 + 24), line, self.font)
         else:
             draw_text(img, (10, y0 + 24), line, self.font, HP_RED if "拔群" in line else INK)
         if int(T * 4) % 2 == 0:
-            cx, cy = W - 18, H - 10
+            cx, cy = self.width - 18, self.height - 10
             draw.polygon(((cx - 3, cy - 3), (cx + 3, cy - 3), (cx, cy)), fill=INK)
 
 
@@ -1899,12 +1906,12 @@ class BattleAnimation:
         panel.alpha_composite(body, (4+(44-body.width)//2, 3+(42-body.height)//2))
         draw_text(panel, (54, 6), self.by_idx[c[2]].piece.name, self.font, PAPER)
         draw_text(panel, (54, 25), skill_profile(sid)['name'][:10], self.font, color)
-        img.alpha_composite(panel, (4, H-51))
+        img.alpha_composite(panel, (4, self.height-51))
 
     def _cutin_frame(self, c: tuple, T: float) -> Image.Image:
         _, _, ci, ti, move, eff, dmg, mtype = c[:8]
         caster, target = self.by_idx[ci], self.by_idx[ti]
-        img = Image.new("RGBA", (W, H), NIGHT + (255,))
+        img = Image.new("RGBA", (self.width, self.height), NIGHT + (255,))
         draw_cutin_stage(img, self.font, mtype)
         draw_cutin_sprites(img, self.front, self.pal,
                            caster.piece.species_id, target.piece.species_id)
