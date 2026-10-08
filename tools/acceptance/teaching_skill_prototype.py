@@ -78,17 +78,21 @@ class PrototypeBattle(Battle):
             self.prototype_teaching[unit.idx] = key
         self.parameters = {key: dict(machines[key]["candidate_parameters"]) for key in (COUNTER, TEMPO)}
 
-    def _land_hit(self, attacker, target, damage, t, move=None, primary=False, cast=False):
+    def _land_hit(self, attacker, target, damage, t, move=None, primary=False, cast=False,
+                  *, direct=True, basic_enhancement=None):
         index, hp = len(self.events), target.hp
         adjacent = abs(attacker.pos[0] - target.pos[0]) + abs(attacker.pos[1] - target.pos[1]) == 1
-        super()._land_hit(attacker, target, damage, t, move=move, primary=primary, cast=cast)
-        lost = max(0, max(0, hp) - max(0, target.hp))
+        actual_hp = super()._land_hit(attacker, target, damage, t, move=move,
+                                     primary=primary, cast=cast, direct=direct,
+                                     basic_enhancement=basic_enhancement)
+        lost = actual_hp if self._arena_on else max(0, max(0, hp) - max(0, target.hp))
         if not self.effects_enabled or not primary or not lost or not attacker.alive or not target.alive:
-            return
+            return actual_hp
         if adjacent and self.prototype_teaching.get(target.idx) == COUNTER and not target.technique_used:
             self._reaction_queue.append((COUNTER, target, attacker, index, t))
         if cast and self.prototype_teaching.get(attacker.idx) == TEMPO and not attacker.technique_used:
             self._reaction_queue.append((TEMPO, attacker, target, index, t))
+        return actual_hp
 
     def _strike(self, u, target, t):
         previous, self._reaction_queue = self._reaction_queue, []

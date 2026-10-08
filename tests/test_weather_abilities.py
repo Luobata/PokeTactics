@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT/'sim'), str(ROOT/'tools/acceptance'), str(ROOT)]
 import abilities
 import demo
+from bots import PERSONALITIES
 import tactics
 from combat import Battle
 from roster import build_roster
@@ -282,7 +283,19 @@ class OpeningSessionContracts(unittest.TestCase):
                 self.assertTrue(result['ok'], result)
         actual = codec.encode(session)
         actual['rules'] = LEGACY_TACTICS_FINGERPRINT
-        self.assertEqual(actual, fixture['expected_after'])
+        expected = copy.deepcopy(fixture['expected_after'])
+        initial = fixture['initial']
+        opponent_seat = next(b if a == 0 else a for a, b in initial['pairs'] if 0 in (a, b))
+        opponent = next(seat for seat in initial['seats'] if seat['seat'] == opponent_seat)
+        opponent_name = f"{opponent_seat}·{PERSONALITIES[opponent['personality']]['label'][:3]}L{opponent['ability']}"
+        # Extend only the new report ledger, independently of the live session.
+        # Frozen outcomes and the original opponent record remain the oracle.
+        expected['battle_history'] = [{
+            'round': initial['round'] + index, 'winner': result['winner'],
+            'duration': result['duration'], 'pve': False, 'ghost': False,
+            'opp_name': opponent_name, 'statistics': None,
+        } for index, result in enumerate(fixture['expected_battles'])]
+        self.assertEqual(actual, expected)
         self.assertEqual(battles, fixture['expected_battles'])
 
     def test_old_fingerprint_cannot_enable_new_traits(self):

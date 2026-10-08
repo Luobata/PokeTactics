@@ -10,6 +10,7 @@
     />
     <title>PokeTactics — 精灵战术实验室</title>
     <link rel="stylesheet" href="/play/assets/play.css" />
+    <link rel="stylesheet" href="/play/assets/battle.css" />
     <script src="/play/assets/play.js" defer></script>
   </head>
   <body>
@@ -89,7 +90,7 @@
     </svg>
 
     <nav class="rail" aria-label="主要导航">
-      <a class="rail-brand" href="/play" aria-label="PokeTactics 首页"
+      <a class="rail-brand" href="/" aria-label="PokeTactics 营地首页"
         ><svg><use href="#i-ball" /></svg
       ></a>
       <div class="rail-links">
@@ -119,7 +120,7 @@
 
     <div class="app">
       <header class="topbar">
-        <a href="/play" class="wordmark"
+        <a href="/" class="wordmark"
           >POKÉ<span>TACTICS</span><span class="beta">试玩版</span></a
         >
         <div class="topbar-right">
@@ -138,8 +139,8 @@
             aria-label="下载当前对局存档"
           >
             <svg><use href="#i-download" /></svg></button
-          ><button id="new-button" class="text-button">
-            <svg><use href="#i-refresh" /></svg> 新的冒险
+          ><button id="new-button" class="text-button" data-restart>
+            <svg><use href="#i-refresh" /></svg> 重开一局
           </button>
         </div>
       </header>
@@ -209,13 +210,14 @@
 
             <section class="side-section synergies">
               <div class="section-heading">
-                <h2>属性羁绊</h2>
+                <h2>队伍羁绊</h2>
                 <span class="tiny-label">SYNERGIES</span>
               </div>
               <div id="synergy-list">
                 <p class="empty-copy">上场精灵，点亮你的第一组羁绊。</p>
               </div>
-              <p class="section-note">不同精灵的同属性可触发加成。</p>
+              <p id="bond-note" class="section-note">上场的不同物种计数；同种不同星级只记一次。</p>
+              <a class="bond-directory-link" href="/pokedex?tab=bonds">属性与战术羁绊目录 ↗</a>
             </section>
 
             <section class="side-section unit-section">
@@ -245,6 +247,13 @@
                   ><span id="weather-label">晴朗</span>
                 </div>
               </header>
+              <div class="scout-entry-bar">
+                <p>准备时侦察阵容，开战前调整站位。</p>
+                <button id="scout-resume" class="scout-resume" type="button" data-scout-resume hidden>继续侦察 →</button>
+                <button class="scout-entry" data-scout-overview aria-haspopup="dialog">
+                  <svg aria-hidden="true"><use href="#i-users" /></svg>全场阵容 <span>↗</span>
+                </button>
+              </div>
               <div class="board-scene">
                 <svg
                   class="forest-art"
@@ -458,7 +467,7 @@
                     寻找新伙伴 <span id="shop-count" class="shop-count">5</span>
                   </h2>
                   <p id="pool-summary">
-                    18 种进化精灵 · 三合一升星 · 九张成就三星闪光
+                    48 种竞技精灵 · 两代伙伴 · 三合一升星 · 三星闪光
                   </p>
                 </div>
                 <div class="shop-controls">
@@ -490,6 +499,12 @@
                   精灵图鉴 ↗
                 </button>
               </div>
+              <section id="component-choices" class="component-choices" aria-label="定向组件补给" hidden></section>
+              <details class="combination-check" id="combination-check">
+                <summary>联动检查 <span id="combination-count">基础战法与额外强化</span></summary>
+                <div id="combinations"></div>
+                <a href="/pokedex?tab=builds">查看搭配参考 ↗</a>
+              </details>
               <div class="system-tabs" role="tablist" aria-label="战前系统">
                 <button
                   id="augments-tab"
@@ -546,6 +561,7 @@
                 <p class="section-note">
                   选中装备，再点击一只精灵。装备和技能可以同时携带。
                 </p>
+                <p class="section-note"><a id="item-recipes-entry" href="/pokedex?tab=items&amp;view=recipes">查看装备合成图 ↗</a></p>
                 <div id="inventory"></div>
               </div>
             </section>
@@ -554,12 +570,26 @@
                 <span class="shortcut">↗</span>
                 拖动精灵布阵，或点击精灵再点击空格
               </p>
-              <button id="fight-button" class="fight-button">
-                <svg><use href="#i-swords" /></svg><span>开始战斗</span
-                ><svg><use href="#i-arrow" /></svg>
-              </button>
+              <div class="match-actions">
+                <button id="restart-button" class="secondary-button restart-button" data-restart>
+                  <svg><use href="#i-refresh" /></svg> 重开一局
+                </button>
+                <button id="fight-button" class="fight-button">
+                  <svg><use href="#i-swords" /></svg><span>开始战斗</span
+                  ><svg><use href="#i-arrow" /></svg>
+                </button>
+              </div>
             </div>
           </section>
+
+    <dialog id="scout-dialog" class="modal scout-modal" aria-labelledby="scout-title" aria-describedby="scout-timing">
+      <span class="eyebrow">KNOW YOUR OPPONENT</span>
+      <div class="scout-workspace-tools"><button type="button" data-scout-return>← 返回我方阵容</button><button id="scout-close" class="modal-close" type="button" aria-label="关闭侦察">×</button><span id="scout-workspace-note"></span></div>
+      <h2 id="scout-title">全场阵容</h2>
+      <p id="scout-timing" class="modal-intro"></p>
+      <div id="scout-tabs" class="scout-tabs" role="group" aria-label="侦察训练家"></div>
+      <div id="scout-content"></div>
+    </dialog>
 
           <aside class="right-column">
             <section class="side-section lobby">
@@ -567,7 +597,8 @@
                 <h2>训练家们</h2>
                 <span class="lobby-count"><i></i> 8</span>
               </div>
-              <div class="lobby-subtitle">点击任意训练家，侦察公开阵容。</div>
+              <div class="lobby-subtitle">阵容与站位公开可见，点击训练家侦察。</div>
+              <button class="scout-lobby-entry" data-scout-overview aria-haspopup="dialog">查看全场阵容 <span>→</span></button>
               <div id="standings" class="standings"></div>
             </section>
             <section class="field-notes">
@@ -599,6 +630,11 @@
                 <h2>冒险记录</h2>
                 <span class="tiny-label">JOURNAL</span>
               </div>
+              <div class="battle-history-heading">
+                <h3>本局战报</h3><span id="battle-history-count">0 场</span>
+              </div>
+              <p class="battle-history-note">每场结算后保留，可随时回看。</p>
+              <div id="battle-history" class="battle-history" aria-label="本局已结束回合战报"></div>
               <div id="battle-log" class="journal-list">
                 <p class="empty-copy">新的故事，等你写下。</p>
               </div>
@@ -647,7 +683,7 @@
             <h3>升星与羁绊</h3>
             <p>
               商店只出现 18
-              种进化形态。三只同种一星合成二星，三只二星合成三星闪光，形态保持一致。三星累计需要九张。八位玩家争夺共享池；不同精灵的相同属性可以触发羁绊。
+              种竞技精灵。三只同种一星合成二星，三只二星合成三星闪光，形态保持一致。三星累计需要九张；升星保留幸存主卡的特性选择，其他卡的选择不会覆盖它。八位玩家争夺共享池；不同精灵的相同属性可以触发羁绊。
             </p>
           </section>
         </div>
@@ -656,19 +692,20 @@
           <section>
             <h3>构筑与对战</h3>
             <p>
-              在「战前准备」里选海克斯、学技能、合成和装备道具。点击训练家可侦察阵容。准备好后开始自动战斗，失败会扣除生命，与七位训练家竞争到最终排名。
+              在「战前准备」里选海克斯、学技能、合成和装备道具。每只精灵都有专属原生技能，能量充满自动释放；另可学习一项技能，替换学习技能会保留原生技能。点击训练家可侦察阵容。准备好后开始自动战斗，失败会扣除生命，与七位训练家竞争到最终排名。
             </p>
           </section>
         </div>
       </div>
       <div class="guide-note">
         操作会自动保存。下次打开页面，可以继续这场冒险。
+        <a href="/guide">打开完整玩法指南 →</a>
       </div>
     </dialog>
 
     <dialog id="new-dialog" class="modal confirm-modal">
       <span class="eyebrow">A FRESH START</span>
-      <h2>开启新的冒险？</h2>
+      <h2>重开一局？</h2>
       <p>
         新对局将从第 1
         轮开始，页面会记录新的进度。想保留这场冒险，可以先下载存档。
@@ -676,84 +713,82 @@
       <div class="modal-actions">
         <button id="new-cancel" class="secondary-button">继续当前冒险</button
         ><button id="new-confirm" class="primary-button">
-          从头开始 <svg><use href="#i-arrow" /></svg>
+          确认重开 <svg><use href="#i-arrow" /></svg>
         </button>
       </div>
     </dialog>
 
-    <dialog id="battle-dialog" class="modal battle-modal">
-      <button id="battle-close" class="modal-close" aria-label="收起战斗回放">
-        ×
-      </button>
-      <div class="battle-modal-heading">
-        <span class="eyebrow">LET YOUR TEAM SHINE</span>
-        <h2 id="battle-title">战斗时刻</h2>
+    <dialog id="battle-dialog" class="modal battle-modal" aria-labelledby="battle-title" aria-describedby="battle-subtitle">
+      <button id="battle-close" class="modal-close" aria-label="收起战斗回放">×</button>
+      <header class="battle-modal-heading">
+        <div><span class="eyebrow">POKÉTACTICS · BATTLE ARENA</span><h2 id="battle-title">战斗时刻</h2></div>
         <p id="battle-subtitle"></p>
-      </div>
+      </header>
       <div class="battle-playback">
-        <div class="battle-screen">
-          <div class="combat-team-key">
-            <span>▲ 敌方 · 红</span><span>● 我方 · 蓝</span>
+        <div class="battle-arena-column">
+          <div class="battle-scoreboard" aria-label="本轮双方战况">
+            <section class="arena-team friendly">
+              <div class="arena-team-heading"><span class="arena-team-mark" aria-hidden="true">●</span><strong id="battle-friendly-name">新叶训练家</strong><span class="arena-team-side">我方</span></div>
+              <div class="arena-team-health"><span class="arena-team-hp"><i id="battle-friendly-hp-bar"></i></span><span id="battle-friendly-alive">— / —</span><small>存活</small></div>
+              <div id="battle-friendly-roster" class="arena-roster" aria-label="我方上阵精灵"></div>
+            </section>
+            <div class="arena-round"><span id="battle-round-label">第 1 轮</span><strong id="battle-clock">00:00.0</strong><small id="battle-playback-state">准备开战</small></div>
+            <section class="arena-team enemy">
+              <div class="arena-team-heading"><span class="arena-team-side">敌方</span><strong id="battle-enemy-name">当轮对手</strong><span class="arena-team-mark" aria-hidden="true">▲</span></div>
+              <div class="arena-team-health"><small>存活</small><span id="battle-enemy-alive">— / —</span><span class="arena-team-hp"><i id="battle-enemy-hp-bar"></i></span></div>
+              <div id="battle-enemy-roster" class="arena-roster" aria-label="敌方上阵精灵"></div>
+            </section>
           </div>
-          <div
-            id="battle-verdict"
-            class="battle-verdict"
-            aria-live="polite"
-            hidden
-          >
-            <div class="verdict-symbol"></div>
-            <strong></strong>
-            <p></p>
+          <div class="battle-screen" aria-busy="true">
+            <canvas id="battle-canvas" width="960" height="640" aria-label="战斗动画回放：蓝色圆标为我方，红色三角标为敌方"></canvas>
+            <div id="battle-loading" class="battle-loading" role="status"><span class="arena-loading-dot" aria-hidden="true"></span><span id="battle-loading-copy">正在准备战场…</span><button id="battle-retry" type="button" hidden>重试画面</button></div>
+            <div id="battle-verdict" class="battle-verdict" aria-live="polite" hidden><div class="verdict-symbol" aria-hidden="true"></div><div><strong></strong><p></p></div></div>
           </div>
-          <canvas
-            id="battle-canvas"
-            width="240"
-            height="320"
-            aria-label="战斗动画回放"
-          ></canvas
-          ><span id="battle-status" role="status">战斗画面载入中…</span>
+          <div class="arena-caption"><span id="battle-current-event">双方伙伴，即将登场。</span><span id="battle-status" role="status">战斗画面载入中…</span></div>
+          <div class="battle-transport">
+            <div class="battle-timeline"><span id="battle-current-time">00:00</span><input id="battle-seek" type="range" min="0" max="0" value="0" step="1" aria-label="战斗回放时间轴" aria-valuetext="0 秒" disabled><span id="battle-total-time">00:00</span></div>
+            <div class="playback-controls">
+              <button id="battle-pause" class="secondary-button">暂停</button><button id="battle-replay" class="text-button" title="从头重播本轮战斗">↺ 从头重播</button>
+              <label class="speed-control" for="battle-speed">速度 <select id="battle-speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
+              <button id="battle-skip" class="text-button">查看战果 →</button>
+            </div>
+          </div>
         </div>
-        <div class="battle-report">
-          <div id="battle-result" class="battle-result"></div>
-          <div id="battle-rewards" class="battle-rewards" hidden></div>
-          <h3>战场实况</h3>
-          <div id="battle-events" class="battle-events"></div>
-        </div>
+        <aside class="battle-report" aria-label="本轮战报">
+          <div class="battle-report-heading"><span class="eyebrow">ROUND JOURNAL</span><button id="battle-report-toggle" type="button" aria-expanded="true" aria-controls="battle-report-body">收起战报 <span aria-hidden="true">−</span></button></div>
+          <div id="battle-report-body">
+            <div id="battle-result" class="battle-result">回放结束后显示战果</div>
+            <div class="battle-report-tabs" role="tablist" aria-label="战报内容"><button id="battle-events-tab" type="button" role="tab" aria-selected="true" aria-controls="battle-events-panel" data-battle-tab="events">战场实况</button><button id="battle-statistics-tab" type="button" role="tab" aria-selected="false" aria-controls="battle-statistics-panel" data-battle-tab="statistics" tabindex="-1">战斗统计</button><button id="battle-rewards-tab" type="button" role="tab" aria-selected="false" aria-controls="battle-rewards-panel" data-battle-tab="rewards" tabindex="-1">奖励 · 联动</button></div>
+            <section id="battle-events-panel" class="battle-report-panel" role="tabpanel" aria-labelledby="battle-events-tab"><div class="battle-panel-intro"><h3>战场实况</h3><span>随回放同步</span></div><div id="battle-events" class="battle-events"></div></section>
+            <section id="battle-statistics-panel" class="battle-report-panel" role="tabpanel" aria-labelledby="battle-statistics-tab" hidden><section id="battle-statistics" class="combat-statistics" aria-label="本场战斗统计"></section></section>
+            <section id="battle-rewards-panel" class="battle-report-panel" role="tabpanel" aria-labelledby="battle-rewards-tab" hidden><p id="battle-rewards-pending" class="battle-report-pending">完成回放后，查看本轮奖励与联动收益。</p><div id="battle-rewards" class="battle-rewards" hidden></div><div id="battle-combinations" class="battle-combinations" hidden></div></section>
+          </div>
+        </aside>
       </div>
-      <div class="playback-controls">
-        <button id="battle-pause" class="secondary-button">暂停</button
-        ><label class="speed-control"
-          >速度
-          <select id="battle-speed">
-            <option value="0.5">0.5×</option>
-            <option value="1" selected>1×</option>
-            <option value="2">2×</option>
-            <option value="4">4×</option>
-          </select></label
-        ><button id="battle-skip" class="text-button">查看战果</button
-        ><button id="battle-next" class="primary-button">
-          下一轮 <svg><use href="#i-arrow" /></svg>
-        </button>
-      </div>
+      <footer class="battle-footer-actions"><span class="battle-footer-note"><i aria-hidden="true"></i>蓝色圆标 · 我方　 /　 红色三角 · 敌方</span><button class="text-button" data-scout-overview aria-haspopup="dialog">全场阵容</button><button id="battle-restart" class="text-button" data-restart>重开一局</button><button id="battle-next" class="primary-button">下一轮 <svg><use href="#i-arrow" /></svg></button></footer>
     </dialog>
 
-    <dialog id="scout-dialog" class="modal scout-modal">
-      <button id="scout-close" class="modal-close" aria-label="关闭侦察">
-        ×</button
-      ><span class="eyebrow">KNOW YOUR OPPONENT</span>
-      <h2>训练家侦察</h2>
-      <p class="modal-intro">
-        阵容、星级、装备与强化公开可见；准备阶段可随时查看。
-      </p>
-      <div id="scout-tabs" class="scout-tabs"></div>
-      <div id="scout-content"></div>
+    <dialog id="history-report-dialog" class="modal history-report-modal" aria-labelledby="history-report-title" aria-describedby="history-report-subtitle">
+      <button id="history-report-close" class="modal-close" aria-label="关闭历史战报">×</button>
+      <span class="eyebrow">BATTLE JOURNAL</span>
+      <h2 id="history-report-title">回合战报</h2>
+      <p id="history-report-subtitle" class="modal-intro"></p>
+      <div class="history-report-tools">
+        <span id="history-report-result" class="history-result"></span>
+        <label for="history-report-round">查看回合 <select id="history-report-round"></select></label>
+      </div>
+      <section id="history-statistics" class="combat-statistics" aria-label="历史战斗统计"></section>
+      <div id="history-combinations" class="battle-combinations" aria-label="历史双方联动收益"></div>
+      <p class="history-readonly-note">历史战报只供回看，关闭后继续当前回合。</p>
     </dialog>
+
     <dialog id="catalog-dialog" class="modal catalog-modal">
       <button id="catalog-close" class="modal-close" aria-label="关闭精灵图鉴">
         ×</button
       ><span class="eyebrow">A SMALL POOL, MORE POSSIBILITIES</span>
       <h2>精灵图鉴</h2>
       <p id="catalog-description" class="modal-intro"></p>
+      <p class="modal-intro"><a href="/pokedex">完整精灵图鉴 →</a> · <a href="/pokedex?tab=bonds">羁绊目录 →</a> · <a href="/pokedex?tab=items">道具目录 →</a> · <a href="/pokedex?tab=items&amp;view=recipes">装备合成图 →</a> · <a href="/pokedex?tab=augments">海克斯目录 →</a></p>
       <div class="catalog-filters" role="group" aria-label="精灵角色筛选">
         <button data-role-filter="all" aria-pressed="true">全部</button
         ><button data-role-filter="attack" aria-pressed="false">攻击型</button
@@ -775,7 +810,7 @@
       <p id="result-description"></p>
       <div id="result-ranking"></div>
       <button id="result-new" class="primary-button">
-        再来一场 <svg><use href="#i-arrow" /></svg>
+        重开一局 <svg><use href="#i-arrow" /></svg>
       </button>
     </dialog>
     <noscript

@@ -5,3 +5,5 @@ __pycache__/
 .build/
 .qualitygate/
 midscene_run/
+reports/
+tests/

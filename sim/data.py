@@ -89,10 +89,22 @@ class Pokedex:
     def __init__(self) -> None:
         mons = _load("pokemon")["entries"]
         self.species: Dict[int, dict] = {m["id"]: m for m in mons}
+        # Supplemental arena species must not change classic family/roster scope.
+        self.arena_species: Dict[int, dict] = {
+            m["id"]: m for m in _load("pokemon_gen2")["entries"]}
         self.moves: Dict[int, dict] = {m["id"]: m for m in _load("moves")["entries"]}
         tc = _load("typechart")
         self.types: List[str] = tc["types"]
         self._mult = tc["multipliers"]
+
+    def species_record(self, species_id: int) -> dict:
+        """Resolve classic or supplemental arena data, preserving classic overrides."""
+        if species_id in self.species:
+            return self.species[species_id]
+        return self.arena_species[species_id]
+
+    def has_species(self, species_id: int) -> bool:
+        return species_id in self.species or species_id in self.arena_species
 
     def multiplier(self, atk_type: str, def_types: Tuple[str, ...]) -> float:
         """攻击属性对防守方属性组合的总倍率（乘法叠加，如电打水/飞行=4x）。
@@ -111,7 +123,7 @@ class Pokedex:
         return move["type"] in SPECIAL_TYPES
 
     def bst(self, species_id: int) -> int:
-        b = self.species[species_id]["base"]
+        b = self.species_record(species_id)["base"]
         return b["hp"] + b["attack"] + b["defense"] + b["speed"] + \
             b["special_attack"] + b["special_defense"]
 
@@ -149,8 +161,9 @@ class Pokedex:
 
     def signature_move(self, species_id: int) -> Optional[dict]:
         """选招式：升级学会的本系招中威力最高且命>=80 的；否则任意威力招。"""
-        learn = self.species[species_id].get("level_up", [])
-        types = set(self.species[species_id]["types"])
+        species = self.species_record(species_id)
+        learn = species.get("level_up", [])
+        types = set(species["types"])
         damaging = [self.moves[mid] for _, mid in learn
                     if mid in self.moves and self.moves[mid].get("power")]
         stab = [m for m in damaging if m["type"] in types and (m.get("accuracy") or 0) >= 80]

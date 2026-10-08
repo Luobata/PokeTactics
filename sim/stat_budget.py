@@ -51,7 +51,7 @@ def normalize(base, tier):
 
 
 def allocation(species_id, tier):
-    return normalize(pokedex().species[species_id]["base"], tier)
+    return normalize(pokedex().species_record(species_id)["base"], tier)
 
 
 def unit_stats(piece):

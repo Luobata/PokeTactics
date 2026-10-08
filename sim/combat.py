@@ -33,7 +33,7 @@ base_v1 不生成此类事件，也不接受新教学或有效战术配置。
 """
 
 import random
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from data import (ATTACK_INTERVAL_MULT, BASIC_POWER, ENERGY_MAX,
                   ENERGY_PER_ATTACK, ENERGY_PER_HIT_TAKEN, MAX_BATTLE_SECONDS,
                   MOVE_TICK, SPEED_TO_ATTACK_INTERVAL, STAB_BONUS,
@@ -58,6 +58,8 @@ import arena as arena_mod
 from weather_control import WeatherController, WEATHER_WINDOW_SECONDS
 
 TICK = 0.1  # 解算步长（秒）
+_BATTLE_STAT_FIELDS = ('damage_dealt', 'healing_done', 'self_healing',
+                       'damage_taken', 'shield_absorbed')
 # ---- C-sym 棋盘（docs/10 §1.3/§1.5，2026-09-14 sim 联动落地）----
 # 6 列 × 4 行对称战场：行 0-1 敌方战场、行 2-3 己方战场（旧版 7×6 的
 # 3+3 纵深收成 2+2）。双方各 1 条备战行是准备页/渲染层概念，不进战斗
@@ -75,7 +77,7 @@ class Unit:
     def __init__(self, piece: Piece, team: int, pos: tuple,
                  stat_mode: str = "legacy") -> None:
         dex = pokedex()
-        base = dex.species[piece.species_id]["base"]
+        base = dex.species_record(piece.species_id)["base"]
         lv = piece.level
         self.piece = piece
         self.team = team
@@ -130,6 +132,11 @@ class Unit:
         self.target_idx = None  # 目标滞回：锁定到死亡为止，防最近目标切换震荡
         # 战报统计
         self.damage_dealt = 0
+        self.healing_done = 0
+        self.self_healing = 0
+        self.damage_taken = 0
+        self.shield_absorbed = 0
+        self.self_damage = 0  # Explicit item cost, outside opposing damage statistics.
         self.casts = 0
         # ---- S3 羁绊结算维度（sim/synergy.apply 开战时写入，默认中性值）----
         self.synergy_dmg = 0.0       # 造成伤害加成（比例）
@@ -151,6 +158,58 @@ class Unit:
         self.healing_blocks = []  # Bounded: at most one entry per enemy needle.
         self.arena_dr = 0.0
         self.arena_heal_mult = 1.0
+        self.shield = 0
+        self.shield_until = 0.0
+        self.shield_source_idx = None
+        self.shield_cast_index = None
+        self.shield_source_key = None
+        self.shield_source_kind = None
+        # Continuous shield cycles survive stronger refreshes. Absorption is
+        # snapshotted before depletion/death clears the slot and its ownership.
+        self.shield_id = None
+        self.shield_cycle_absorbed = 0
+        self.shield_feedback_absorbed = 0
+        self.shield_feedback_used = False
+        self.shield_ward_used = False
+        self.ward_charge_until = 0.
+        self.ward_charge_context = None
+        self.contagion_counts = {}
+        self.contagion_used_targets = set()
+        self.bond_tiers = {}
+        self.erosion_counts = {}
+        self.erosion_used_targets = set()
+        self.tempo_target_idx = None
+        self.tempo_stacks = 0
+        self.tempo_until = 0.
+        self.offense_buff_fraction = 0.
+        self.offense_buff_until = 0.
+        self.offense_buff_source_idx = None
+        self.offense_buff_cast_index = None
+        self.bond_inspiration_fraction = 0.
+        self.bond_inspiration_until = 0.
+        self.bond_inspiration_source_idx = None
+        self.bond_inspiration_cast_index = None
+        self.trait_weaken_fraction = 0.
+        self.trait_weaken_until = 0.
+        self.trait_weaken_source_idx = None
+        self.trait_guts_fraction = 0.
+        self.trait_guts_until = 0.
+        self.taunt_source_idx = None
+        self.taunt_cast_index = None
+        self.taunt_until = 0.
+        self.taunt_ready_at = 0.
+        self.thorns_left = 0
+        self.thorns_until = 0.
+        self.thorns_cast_index = None
+        self.combo_uses = {}
+        self.combo_ready_at = {}
+        self.root_until = 0.
+        self.vulnerable_until = 0.
+        self.rock_hits = 0
+        self.rock_ready_at = 0.
+        self.wet_until = 0.
+        self.wet_source_idx = None
+        self.wet_cast_index = None
 
     @property
     def alive(self) -> bool:
@@ -197,6 +256,8 @@ class Battle:
         self.base_weather_name = weather_name
         self.ruleset = tactics_mod.validate_ruleset(ruleset)
         self._arena_on = self.ruleset == arena_mod.RULESET
+        if self._arena_on:
+            self.weather_name = self.base_weather_name = None
         self.cols = COLS
         self.rows = 6 if self._arena_on else ROWS
         self.rows_ally = tuple(range(self.rows // 2, self.rows))
@@ -237,7 +298,8 @@ class Battle:
         self.dex = pokedex()
         self.units: list = []
         self.events: list = []
-        self.event_version = 2
+        self._stat_effect_source = None
+        self.event_version = 3 if self._arena_on else 2
         self._dead = set()
         comps = (comp_a, comp_b)
         self.learned = tuple(self._validate_learning(comp, learned)
@@ -282,15 +344,25 @@ class Battle:
         plain_a = [e[0] if isinstance(e, tuple) else e for e in comp_a]
         plain_b = [e[0] if isinstance(e, tuple) else e for e in comp_b]
         self._plain_comps = (plain_a, plain_b)  # S10 齐射计数用（deploy 后不变）
-        if synergy.synergies_on():  # S3：按场上当前形态一次性结算（无随机）
+        if not self._arena_on and synergy.synergies_on():  # Classic S3 contract.
             synergy.apply([u for u in self.units if u.team == 0], plain_a)
             synergy.apply([u for u in self.units if u.team == 1], plain_b)
         status_mod.init_battle(self)  # S12：状态容器（默认无操作）
         if self._arena_on:
             self._apply_arena_stats()
+            from arena_bonds import apply as apply_bonds
+            for team, comp in enumerate(self._plain_comps):
+                apply_bonds([u for u in self.units if u.team == team], comp,
+                            enabled=synergy.synergies_on())
         self.duration = 0.0
+        if self._arena_on:
+            from arena_weather import init as init_arena_weather
+            init_arena_weather(self)
         for unit in self.units:
             self._emit_state(unit, 0.0)
+        if self._arena_on:
+            from arena_traits import opening
+            opening(self)
         self._opening_partner_traits()
         self._opening_abilities()
 
@@ -305,7 +377,11 @@ class Battle:
                 raise ValueError('arena star must be 1, 2, or 3')
             if getattr(piece, 'role_key', role) != role:
                 raise ValueError('arena role must match the species')
+            from arena_traits import validate_choice
+            validate_choice(piece.species_id, getattr(piece, 'arena_trait_key', None))
             unit.arena_role = role
+            from arena_skills import skill_of
+            unit.ult_arch = skill_of(piece.species_id)['arch']
             augments = self.arena_teams[unit.team]
             hp_mult = (1., 1.6, 2.5)[star - 1]
             atk_mult = hp_mult * {'attack': 1.12, 'defense': .85, 'support': .8}[role]
@@ -330,21 +406,21 @@ class Battle:
             unit.sp_attack = max(1, int(unit.sp_attack * atk_mult))
 
     def _arena_support(self, t):
+        """Support identity sustains energy, not universal periodic healing.
+
+        Called once per second in arena only. Stunned and dead units cannot
+        prepare a skill; full energy is held until a useful native target exists.
+        """
+        if not self._arena_on:
+            return
         for healer in sorted(self.units, key=lambda u: u.initiative):
             if (not healer.alive or healer.arena_role != 'support'
                     or status_mod.stunned(healer, t)):
                 continue
-            candidates = [u for u in self.units if u.alive and u.team == healer.team
-                          and u.hp < u.max_hp]
-            if not candidates:
-                continue
-            target = min(candidates, key=lambda u: (
-                u.hp / u.max_hp, self._local_pos(u.pos, healer.team), u.local_idx))
-            amount = max(1, int(target.max_hp * .08 * healer.arena_heal_mult))
-            healed = self._heal(target, amount, t)
-            if healed:
-                self.events.append((t, 'arena_heal', healer.idx, target.idx,
-                                    healed, healer.piece.species_id))
+            gained = min(4, ENERGY_MAX - healer.energy)
+            if gained > 0:
+                healer.energy += gained
+                self._emit_state(healer, t)
 
     def _validate_learning(self, comp, learned):
         if learned is None:
@@ -424,7 +500,13 @@ class Battle:
             return tuple(entries), local, loadout, learning, chosen
         if self._arena_on:
             stars = tuple(getattr((e[0] if isinstance(e, tuple) else e), 'star', 1) for e in comp)
-            return tuple(entries), local, loadout, learning, stars, self.arena_teams[team]
+            from arena_traits import validate_choice
+            choices = tuple(validate_choice((e[0] if isinstance(e, tuple) else e).species_id,
+                                             getattr((e[0] if isinstance(e, tuple) else e),
+                                                     'arena_trait_key', None)) for e in comp)
+            # Preserve pre-choice arena ordering exactly when all choices default.
+            key = tuple(entries), local, loadout, learning, stars, self.arena_teams[team]
+            return (*key, choices) if any(choices) else key
         if any(learning):
             return tuple(entries), local, loadout, learning
         return tuple(entries), local, loadout
@@ -451,19 +533,37 @@ class Battle:
     # ---- 主循环 ----
     def run(self) -> dict:
         t = 0.0
-        if combo_mod.combos_on():   # S10 齐射：deploy 后 t=0 的开场组合招
+        if not self._arena_on and combo_mod.combos_on():  # Classic opening volley.
             self._opening_volley()
         # S3 持续羁绊（水之治疗等）+ S5 剩饭：每 1s 一跳；v1 不入事件流
         regen_units = [u for u in self.units
                        if u.synergy_heal > 0 or u.item_heal > 0]
         next_regen = 1.0
-        next_support = 4.0
+        next_support = 1.0
         while t <= MAX_BATTLE_SECONDS:
             self.duration = t
             alive_teams = {u.team for u in self.units if u.alive}
             if len(alive_teams) <= 1:
                 break
             self.flush_tactics(t)
+            if self._arena_on:
+                from arena_combinations import expire
+                for unit in self.units:
+                    expire(self, unit, t)
+                from arena_offense import expire as expire_offense
+                for unit in self.units:
+                    expire_offense(self, unit, t)
+                from arena_fields import expire as expire_fields
+                expire_fields(self, t)
+                from arena_skills import expire as expire_identities
+                expire_identities(self, t)
+                from arena_interactions import expire as expire_interactions
+                expire_interactions(self, t)
+                from arena_traits import weather_tick
+                weather_tick(self, t)
+                from arena_traits import expire as expire_traits
+                for unit in self.units:
+                    expire_traits(self, unit, t)
             for u in sorted(self.units, key=lambda x: (x.next_act, x.initiative)):
                 if u.alive and t + 1e-9 >= u.next_act:
                     self._act(u, t)
@@ -471,11 +571,11 @@ class Battle:
                 for u in regen_units:
                     if u.alive and u.hp < u.max_hp:
                         self._heal(u, max(1, int(u.max_hp * (
-                            u.synergy_heal + u.item_heal))), t)
+                            u.synergy_heal + u.item_heal))), t, source=u)
                 next_regen += 1.0
             if self._arena_on and t + 1e-9 >= next_support:
                 self._arena_support(t)
-                next_support += 4.0
+                next_support += 1.0
             status_mod.tick(self, t)  # S12：DOT/到期（默认无操作）
             t += TICK
         return self._result()
@@ -488,28 +588,59 @@ class Battle:
                 and u.hp <= u.max_hp / 2):
             u.technique_used = True
             self._partner_heal(u, u, .25, t, "rest")
-            u.next_act = t + u.attack_interval * status_mod.speed_mult(u)
+            u.next_act = t + self._action_interval(u, t)
             return
-        target = self._target(u)
+        if self._arena_on and u.energy >= ENERGY_MAX:
+            from arena_skills import cast, skill_of
+            if skill_of(u.piece.species_id)['targeting'] in ('ally', 'self'):
+                if cast(self, u, None, t):
+                    u.next_act = t + self._action_interval(u, t)
+                    return
+        target = self._target(u, t)
         if target is None:
             return
         dist = _manhattan(u.pos, target.pos)
         if dist <= u.range:
             self._strike(u, target, t)
-            u.next_act = t + u.attack_interval * status_mod.speed_mult(u)
+            u.next_act = t + self._action_interval(u, t)
         else:
-            self._step_toward(u, target.pos)
-            self.events.append((t, "move", u.idx, u.pos))
+            if self._arena_on:
+                from arena_fields import move_unit
+                origin = u.pos
+                self._step_toward(u, target.pos)
+                destination, u.pos = u.pos, origin
+                move_unit(self, u, destination, t)
+            else:
+                self._step_toward(u, target.pos)
+                self.events.append((t, "move", u.idx, u.pos))
             step = MOVE_TICK * (melee_move_mult() if u.range == 1 else 1.0) \
                 * u.move_mult                      # R1 档案移速（卡比兽 0.85）
             u.next_act = t + step
 
-    def _target(self, u: Unit):
+    def _action_interval(self, u: Unit, t):
+        interval = u.attack_interval * status_mod.speed_mult(u)
+        if self._arena_on:
+            from arena_offense import tempo_multiplier
+            interval /= tempo_multiplier(self, u, t)
+            from arena_traits import action_multiplier
+            interval /= action_multiplier(self, u, t)
+        return interval
+
+    def _target(self, u: Unit, t=None):
         """目标滞回：命中或锁定中的敌人死了才换目标。
 
         无滞回时「最近敌人」在两个等距目标间来回翻转，近战会原地震荡
         （实验证据见 reports/effectiveness-experiment-2026-09-13.md）。
         """
+        now = self.duration if t is None else t
+        if self._arena_on and u.taunt_source_idx is not None:
+            source = self.units[u.taunt_source_idx]
+            if source.alive and u.taunt_until > now + 1e-9:
+                u.target_idx = source.idx
+                return source
+            if u.target_idx == source.idx:
+                u.target_idx = None
+            u.taunt_source_idx, u.taunt_until = None, 0.
         cur = self.units[u.target_idx] if u.target_idx is not None else None
         if cur is not None and cur.alive and cur.team != u.team:
             return cur
@@ -590,12 +721,28 @@ class Battle:
         return self._final_damage(unit, target, move, int(raw * fraction))
 
     def _strike(self, u: Unit, target: Unit, t: float) -> None:
+        if self._arena_on and not u.alive:
+            return
+        if (self._arena_on and u.taunt_source_idx is not None
+                and u.taunt_until > t + 1e-9):
+            forced = self.units[u.taunt_source_idx]
+            if forced.alive:
+                target, u.target_idx = forced, forced.idx
         if self._tactics_on:
             self.flush_tactics(t)
             if not u.alive:
                 return
         start_pos = u.pos
-        move = build_rules.resolve_cast(u.piece, self.stat_mode) if u.energy >= ENERGY_MAX else None
+        if self._arena_on and u.energy >= ENERGY_MAX:
+            from arena_skills import cast
+            if cast(self, u, target, t):
+                return
+        if self._arena_on and (target is None or target.team == u.team):
+            return
+        # Native support can hold full energy while still using a basic attack.
+        # An idle native action must not fall through to a classic replacement.
+        move = (build_rules.resolve_cast(u.piece, self.stat_mode)
+                if not self._arena_on and u.energy >= ENERGY_MAX else None)
         if move and build_rules.energy_targeting(u.piece, self.stat_mode):
             # Retarget only the cast. Basic attacks retain their normal lock;
             # a nearby Normal shield can still absorb the Ghost cast for zero.
@@ -641,11 +788,20 @@ class Battle:
         if (self._tactics_on and move and u.pos != start_pos
                 and u.ult_arch in ("charge", profiles_mod.ARCH_BLINK)):
             target, guard_payload = self._intercept(u, target, t, start_pos)
-        if target.item_dodge > 0 and self.rng.random() < target.item_dodge:
-            if guard_payload is not None:
-                guard_payload["result_event_index"] = len(self.events)
-            self.events.append((t, "miss", u.idx, target.idx))
-            return
+        if self._arena_on and move is None:
+            from arena_offense import before_basic
+            before_basic(self, u, target, t)
+        if target.item_dodge > 0:
+            dodge_roll = self.rng.random()
+            saved = False
+            if self._arena_on and dodge_roll < target.item_dodge:
+                from arena_traits import prevent_dodge
+                saved = prevent_dodge(self, u, target, dodge_roll, t)
+            if dodge_roll < target.item_dodge and not saved:
+                if guard_payload is not None:
+                    guard_payload["result_event_index"] = len(self.events)
+                self.events.append((t, "miss", u.idx, target.idx))
+                return
         if move:
             # Geometry is fixed before damage/death/displacement changes occupancy.
             cast_target_pos = target.pos
@@ -671,7 +827,7 @@ class Battle:
                     self._land_hit(u, victim, self._move_damage(
                         u, victim, move, profiles_mod.SIDE_HIT_FRAC), t)
             if dmg > 0 and u.ult_arch == profiles_mod.ARCH_SLAM and u.alive:
-                self._heal(u, int(u.max_hp * profiles_mod.SLAM_SELF_HEAL), t)
+                self._heal(u, int(u.max_hp * profiles_mod.SLAM_SELF_HEAL), t, source=u)
             if dmg > 0 and u.ult_arch == profiles_mod.ARCH_LINE:
                 for victim in line_victims:
                     side_damage = self._move_damage(u, victim, move, profiles_mod.LINE_SIDE_FRAC)
@@ -696,7 +852,7 @@ class Battle:
                     with self._skill_effect(u, patient, "heal", t, cast_index,
                                             amount=self._healing_amount(patient, healed, t)[0],
                                             origin_idx=target.idx):
-                        self._heal(patient, healed, t)
+                        self._heal(patient, healed, t, source=u)
             if dmg > 0 and u.ult_arch == profiles_mod.ARCH_CHAIN:
                 previous, struck = target, {target.idx}
                 for hop, fraction in enumerate(profiles_mod.CHAIN_FRACS, 1):
@@ -760,7 +916,7 @@ class Battle:
                 u.temp_dr = 0.35
                 u.temp_dr_until = t + 3.0
             if u.ult_arch == "mend" and u.alive:
-                self._heal(u, int(u.max_hp * 0.20), t)
+                self._heal(u, int(u.max_hp * 0.20), t, source=u)
             self._partner_after_cast(u, target, t, cast_target_pos, dmg > 0)
             self._request_weather(u, t, cast_index)
             if guard_payload is not None:
@@ -778,9 +934,34 @@ class Battle:
             if dmg > 0:
                 u.energy = min(ENERGY_MAX, u.energy + int(
                     ENERGY_PER_ATTACK * (1.0 + u.synergy_energy + u.item_energy)))
-            self._land_hit(u, target, dmg, t, primary=True)
+            enhancement = None
+            if self._arena_on:
+                from arena_combinations import prepare_basic, settle_basic
+                dmg, enhancement = prepare_basic(self, u, target, dmg, t)
+            if self._arena_on:
+                from arena_actions import action as arena_action
+                action_boundary = arena_action(self, u, t, None)
+            else:
+                action_boundary = nullcontext()
+            with action_boundary:
+                action_index = len(self.events)
+                if enhancement is None:
+                    # Classic hit overrides retain their original call signature.
+                    actual_hp = self._land_hit(u, target, dmg, t, primary=True)
+                else:
+                    actual_hp = self._land_hit(u, target, dmg, t, primary=True,
+                                               basic_enhancement=enhancement)
+                if self._arena_on:
+                    settle_basic(self, u, target, t, action_index, enhancement)
+                    from arena_offense import after_basic
+                    after_basic(self, u, target, t, action_index, actual_hp)
+                    from arena_equipment import after_basic as equipment_after_basic
+                    equipment_after_basic(self, u, target, t, action_index, actual_hp)
             if dmg > 0:
-                self._partner_after_basic(u, target, t)
+                if self._arena_on:
+                    self._partner_after_basic(u, target, t, actual_hp=actual_hp)
+                else:
+                    self._partner_after_basic(u, target, t)
 
     def _intercept(self, attacker, target, t, start_pos):
         """Redirect one legal displaced cast, before any accuracy/dodge roll.
@@ -855,6 +1036,9 @@ class Battle:
         to call more than once or between strikes at the same timestamp. New
         weather never changes damage from the cast that requested it.
         """
+        if self._arena_on:
+            from arena_weather import advance
+            return advance(self, t)
         if self._weather_control is None:
             return []
         emitted = []
@@ -873,13 +1057,44 @@ class Battle:
         self.weather_name = self._weather_control.weather_name
         return emitted
 
-    def _land_hit(self, attacker, target, damage, t, move=None, primary=False, cast=False):
+    def _land_hit(self, attacker, target, damage, t, move=None, primary=False, cast=False,
+                  *, direct=True, basic_enhancement=None):
         """Resolve a damage packet and emit its authoritative post-hit state.
 
         Only primary attacks/casts grant defender energy and apply statuses. A
         prelaunched combo may arrive after its sender/target died; no resurrection
         or repeat death is possible, and the attack still records that launched shot.
         """
+        if self._arena_on and direct and getattr(attacker, 'item_key', None) == 'life_orb':
+            import arena_actions
+            if arena_actions.current(attacker) is None:
+                with arena_actions.action(self, attacker, t, move):
+                    return Battle._land_hit(self, attacker, target, damage, t, move, primary, cast,
+                                            direct=direct, basic_enhancement=basic_enhancement)
+        action_index = len(self.events)
+        shield_packets, trait_context, protection, life_context = [], None, None, None
+        hp_before = max(0, target.hp)
+        shield_before = target.shield if target.shield_until > t + 1e-9 else 0
+        absorbed_before = target.shield_absorbed
+        sturdy_before = False
+        sash_before = target.item_sash and not target.item_sash_used
+        hp_damage = damage
+        if self._arena_on:
+            import arena_traits
+            from arena_combinations import consume, emit_packets
+            sturdy_before = direct and arena_traits.sturdy_ready(self, target, t)
+            from arena_actions import prepare_hit as prepare_action_hit
+            damage, life_context = prepare_action_hit(self, attacker, target, damage, direct, move)
+            damage, trait_context = arena_traits.prepare_hit(
+                self, attacker, target, damage, t, move, direct)
+            if not direct:
+                damage, protection = arena_traits.protect_indirect(
+                    self, target, damage, t, attacker)
+            hp_damage, shield_packets = consume(self, target, damage, t,
+                                                action_index, attacker.idx)
+            if direct:
+                hp_damage, protection = arena_traits.protect_lethal(
+                    self, target, hp_damage, t, direct)
         if primary and damage > 0 and target.alive:
             target.energy = min(ENERGY_MAX, target.energy + int(
                 ENERGY_PER_HIT_TAKEN * (1.0 + target.synergy_energy + target.item_energy)))
@@ -890,10 +1105,30 @@ class Battle:
         else:
             self.events.append((t, "attack", attacker.idx, target.idx, damage,
                                 attacker.energy, target.energy))
-        hp_before = max(0, target.hp)
-        target.hp -= damage
+        target.hp -= hp_damage
         self._death_check(target, t)
-        attacker.damage_dealt += max(0, hp_before - target.hp)
+        actual_hp = max(0, hp_before - target.hp)
+        if self._arena_on and basic_enhancement is not None:
+            # Attribute ward -> trait stages from this one settlement. Each
+            # uses the same shield/survival snapshot; neither counts the other.
+            baseline = basic_enhancement['baseline_damage']
+            ward_damage = (life_context['baseline_damage'] if life_context else
+                           trait_context['baseline_damage'] if trait_context else damage)
+            if trait_context and trait_context['weakened']:
+                baseline = int(baseline * (1. - trait_context['weaken_fraction']))
+                if life_context:
+                    ward_damage = int(ward_damage * (1. - trait_context['weaken_fraction']))
+            survival_ready = sturdy_before or sash_before
+            basic_enhancement.update(
+                baseline_actual=arena_traits.settled_hp(baseline, hp_before, shield_before, survival_ready),
+                baseline_absorbed=min(baseline, shield_before),
+                settled_ward_actual=arena_traits.settled_hp(ward_damage, hp_before, shield_before, survival_ready),
+                settled_ward_absorbed=min(ward_damage, shield_before),
+                settled_actual=actual_hp,
+                settled_absorbed=target.shield_absorbed - absorbed_before)
+        self._record_hp_loss(attacker, target, actual_hp)
+        if self._arena_on:
+            emit_packets(self, target, t, shield_packets)
         self._emit_state(attacker, t)
         self._emit_state(target, t)
         if cast and primary and hp_before > target.hp:
@@ -905,6 +1140,25 @@ class Battle:
             target.partner_trait_uses += 1
             for mate in self._partner_mates(target, wounded=True)[:2]:
                 self._partner_heal(target, mate, .15, t, "share_lunch")
+        if self._arena_on and primary:
+            from arena_skills import on_primary_damage
+            on_primary_damage(self, target, attacker, actual_hp, t, action_index)
+        if self._arena_on and direct:
+            from arena_bonds import after_direct_damage
+            after_direct_damage(self, target, hp_before, t, action_index)
+        if self._arena_on:
+            from arena_actions import settle_hit as settle_action_hit
+            settle_action_hit(self, attacker, target, life_context, trait_context, t, action_index,
+                              actual_hp, target.shield_absorbed - absorbed_before,
+                              hp_before, shield_before, sturdy_before, sash_before)
+            arena_traits.settle_hit(self, attacker, target, trait_context, t, action_index,
+                                    actual_hp, target.shield_absorbed - absorbed_before,
+                                    hp_before, shield_before, sturdy_before, sash_before)
+            arena_traits.emit_protection(self, target, protection, t, action_index)
+            if direct:
+                arena_traits.after_direct_hit(self, attacker, target, actual_hp, t,
+                                             action_index, move, basic=primary and not cast)
+        return actual_hp
 
     def _partner_mates(self, unit, wounded=False):
         mates = [mate for mate in self.units if mate is not unit and mate.alive
@@ -923,7 +1177,7 @@ class Battle:
         if amount > 0 and target.alive:
             self._partner_event(unit, target, effect, t,
                                 amount=self._healing_amount(target, amount, t)[0])
-            self._heal(target, amount, t)
+            self._heal(target, amount, t, source=unit)
 
     def _partner_energy(self, unit, target, amount, t, effect):
         gained = min(ENERGY_MAX - target.energy, amount)
@@ -944,6 +1198,8 @@ class Battle:
                                         reduction=.20, duration=6.0)
 
     def _partner_after_cast(self, unit, target, t, target_pos, caused_damage):
+        if self._arena_on and not unit.alive:
+            return
         if unit.partner_trait_uses == 0 and unit.partner_id in (3, 6):
             unit.partner_trait_uses = 1
             if unit.partner_id == 3:
@@ -952,7 +1208,8 @@ class Battle:
             elif unit.partner_id == 6:
                 for mate in self._partner_mates(unit)[:2]:
                     self._partner_energy(unit, mate, 18, t, "wing_rally")
-        if unit.technique == "surf" and not unit.technique_used and caused_damage:
+        if (not self._arena_on and unit.technique == "surf"
+                and not unit.technique_used and caused_damage):
             unit.technique_used = True
             victims = sorted((enemy for enemy in self.units if enemy.alive
                               and enemy.team != unit.team and enemy is not target
@@ -964,7 +1221,9 @@ class Battle:
                 self._partner_event(unit, victim, "surf", t, damage=damage)
                 self._land_hit(unit, victim, damage, t, move=move, cast=self._arena_on)
 
-    def _partner_after_basic(self, unit, target, t):
+    def _partner_after_basic(self, unit, target, t, actual_hp=None):
+        if self._arena_on and not unit.alive:
+            return
         if unit.partner_id == 26 and unit.partner_trait_uses < 2:
             unit.partner_trait_uses += 1
             mate = min(self._partner_mates(unit), key=lambda candidate: (
@@ -984,7 +1243,7 @@ class Battle:
                 self._land_hit(unit, victim, damage, t, move=move, cast=self._arena_on)
         if self._arena_on:
             from arena_teaching import after_basic
-            after_basic(self, unit, target, t)
+            after_basic(self, unit, target, t, actual_hp=actual_hp)
 
     @contextmanager
     def _skill_effect(self, caster, target, effect, t, cast_index, **details):
@@ -1002,7 +1261,12 @@ class Battle:
         marker_index = len(self.events)
         self.events.append((t, "skill_effect", caster.idx, target.idx,
                             caster.ult_arch, effect, payload))
-        yield
+        previous_source = self._stat_effect_source
+        self._stat_effect_source = caster
+        try:
+            yield
+        finally:
+            self._stat_effect_source = previous_source
         payload["event_count"] = len(self.events) - marker_index - 1
         if not payload["event_count"]:
             self.events.pop()
@@ -1030,7 +1294,17 @@ class Battle:
         return [entry[2] for entry in sorted(candidates, key=lambda entry: entry[:2])[:2]]
 
     def _emit_state(self, unit, t):
-        self.events.append((t, "unit_state", unit.idx, unit.hp, unit.energy))
+        event = (t, "unit_state", unit.idx, unit.hp, unit.energy)
+        if self._arena_on:
+            from arena_traits import for_species
+            from arena_weather import active
+            trait = for_species(unit.piece.species_id, getattr(unit.piece, 'arena_trait_key', None))
+            event += (unit.shield, unit.shield_until, {
+                'wet_until': unit.wet_until, 'wet_source_idx': unit.wet_source_idx,
+                'arena_weather': active(self, t),
+                'arena_weather_until': self.arena_weather_until,
+                'arena_trait_key': trait['id'] if trait else None})
+        self.events.append(event)
 
     def _apply_healing_needle(self, unit, target, t):
         if (not tactics_mod.counters_enabled(self.ruleset)
@@ -1053,19 +1327,59 @@ class Battle:
         healed = int(possible * (1.0 - strongest['fraction'])) if strongest else possible
         return healed, possible - healed, strongest
 
-    def _heal(self, unit, amount, t):
-        healed, blocked, source = self._healing_amount(unit, amount, t)
+    def _heal(self, unit, amount, t, source=None):
+        """Restore real missing HP and credit its caster without new events.
+
+        Native heal helpers already enter _skill_effect with their caster;
+        passive/partner callers pass a source explicitly. Direct anonymous
+        regeneration retains the patient's own attribution.
+        """
+        healer = source if source is not None else self._stat_effect_source or unit
+        healed, blocked, blocker = self._healing_amount(unit, amount, t)
         if blocked:
-            self.events.append((t, 'tactical_effect', source['source'], unit.idx,
+            self.events.append((t, 'tactical_effect', blocker['source'], unit.idx,
                                 'healing_prevented',
                                 {'amount': blocked, 'healed': healed,
-                                 'fraction': source['fraction'], 'expires_at': source['expires_at'],
+                                 'fraction': blocker['fraction'], 'expires_at': blocker['expires_at'],
                                  'target_pos': unit.pos, 'reason': 'actual_missing_hp'}))
         if healed > 0:
             unit.hp += healed
+            healer.healing_done += healed
+            if healer is unit:
+                healer.self_healing += healed
             self.events.append((t, "regen", unit.idx, healed))
             self._emit_state(unit, t)
         return healed
+
+    def _record_hp_loss(self, source, target, amount):
+        """Account only settled HP loss; shield consumption is separate."""
+        actual = max(0, amount)
+        target.damage_taken += actual
+        if source is not None:
+            source.damage_dealt += actual
+
+    def statistics(self):
+        """Return a detached JSON snapshot, including every deployed unit.
+
+        Damage counts actual HP lost, including DOT/terrain and excluding
+        overkill, shields and sash prevention. healing_done includes all HP
+        restored by a unit; self_healing is its self-targeted subset. Absorbed
+        shields belong to the protected unit. Reading never alters events/RNG.
+        """
+        units = []
+        for unit in self.units:
+            piece = unit.piece
+            units.append({
+                'idx': unit.idx, 'team': unit.team, 'sid': piece.species_id,
+                'name': piece.name, 'star': getattr(piece, 'star', 1),
+                'role': getattr(unit, 'arena_role', getattr(piece, 'role_key', None)),
+                'item': getattr(unit, 'item_key', None),
+                **{key: getattr(unit, key) for key in _BATTLE_STAT_FIELDS},
+            })
+        totals = [{'team': team, **{key: sum(row[key] for row in units if row['team'] == team)
+                                  for key in _BATTLE_STAT_FIELDS}}
+                  for team in (0, 1)]
+        return {'version': 1, 'units': units, 'totals': totals}
 
     def _death_check(self, target: Unit, t: float) -> None:
         if target.idx in self._dead:
@@ -1077,6 +1391,11 @@ class Battle:
             self.events.append((t, "sash", target.idx))
         if target.hp <= 0:
             target.hp = 0
+            if self._arena_on:
+                from arena_combinations import clear
+                clear(target)
+                from arena_interactions import clear as clear_wet
+                clear_wet(target)
             self._dead.add(target.idx)
             self.events.append((t, "die", target.idx))
 
@@ -1110,8 +1429,17 @@ class Battle:
         事件流里的 attack/cast 伤害即此处的最终落地值（渲染契约：
         数字与掉血一致）。羁绊全中性时与旧实现逐点等价。
         """
-        dmg = int(dmg * weather_mod.damage_mult(
-            move, self.weather_name))  # S11 天气乘区（实例级，默认 1.0）
+        if self._arena_on:
+            from arena_weather import damage_multiplier as arena_weather_multiplier
+            dmg = int(dmg * arena_weather_multiplier(self, move, self.duration))
+        else:
+            dmg = int(dmg * weather_mod.damage_mult(
+                move, self.weather_name))  # Classic S11 weather remains independent.
+        if self._arena_on:
+            from arena_offense import damage_multiplier
+            dmg = int(dmg * damage_multiplier(self, u, self.duration))
+        if self._arena_on and target.vulnerable_until > self.duration:
+            dmg = int(dmg * 1.12)
         # 通用技能「铁壁」：临时受伤减免（bulwark 施法后 3s；
         # 到期判定用本 tick 的 self.duration，_strike 同拍一致）
         temporary_dr = target.temp_dr if target.temp_dr_until >= self.duration else 0.0

@@ -89,17 +89,21 @@ _KIND_ZH = {"burn": "灼伤", "poison": "中毒", "para": "麻痹", "freeze": "�
 class _UnitState:
     """每单位状态容器（init_battle 挂到 unit._st；STATUS_ON=False 时不创建）。"""
 
-    __slots__ = ("debuff", "expire", "next_dot", "dot_ticks", "para_next",
-                 "stun_until", "ctrl_until", "atk_delta", "buffs",
-                 "sd_stacks", "sd_deltas")
+    __slots__ = ("debuff", "debuff_source_idx", "expire", "next_dot", "dot_ticks", "para_next",
+                 "stun_until", "flinch_until", "ctrl_until", "atk_delta", "buffs",
+                 "sd_stacks", "sd_deltas", "debuff_source_epoch", "debuff_spreadable")
 
     def __init__(self) -> None:
         self.debuff = None      # 当前减益 kind（每单位同时 1 个；flinch 不占槽）
+        self.debuff_source_idx = None  # Latest successful applier owns future DOT.
+        self.debuff_source_epoch = 0  # A different owner/status never inherits DOT progress.
+        self.debuff_spreadable = True
         self.expire = 0.0       # 减益到期时刻
         self.next_dot = 0.0     # 下一跳 DOT 时刻
         self.dot_ticks = 0      # 已跳数（中毒斜坡用）
         self.para_next = 0.0    # 麻痹下一次周期停顿时刻
         self.stun_until = -1.0  # 眩晕闸：冰冻/睡眠/畏缩/麻痹停顿共用
+        self.flinch_until = -1.0  # 独立短畏缩截止；净化主要异常时保留
         self.ctrl_until = -1.0  # 控制递减窗口截止（窗口内控制类全免）
         self.atk_delta = 0      # 灼伤物攻减量（到期回退用）
         self.buffs = {}         # 全队增益 name -> {"stat","delta"}（到期时刻在队槽）
@@ -141,11 +145,24 @@ def tick(battle, t: float) -> None:
             if st.debuff == "poison":
                 rate += DEBUFFS["poison"]["ramp"] * (st.dot_ticks - 1)
             dmg = max(1, int(u.max_hp * rate))
-            u.hp -= dmg
-            stats["dot_damage"] += dmg
+            hp_damage, packets, protection = dmg, [], None
+            source = (battle.units[st.debuff_source_idx]
+                      if st.debuff_source_idx is not None else None)
+            if battle._arena_on:
+                from arena_combinations import consume, emit_packets, clear
+                from arena_traits import protect_indirect, emit_protection
+                dmg, protection = protect_indirect(battle, u, dmg, t, source)
+                hp_damage, packets = consume(battle, u, dmg, t, len(battle.events))
+            hp_before = max(0, u.hp)
+            u.hp -= hp_damage
+            battle._record_hp_loss(source, u, min(hp_before, hp_damage))
+            stats["dot_damage"] += hp_damage
+            dot_action_index = len(battle.events)
             battle.events.append((t, "status", u.idx, st.debuff, "tick", dmg))
             if u.hp <= 0:        # DOT 致死：补发既有语义的 die 事件
                 u.hp = 0
+                if battle._arena_on:
+                    clear(u)
                 stats["dot_kills"] += 1
                 _reset_unit(u, st)
                 # DOT intentionally bypasses the direct-hit sash; still share
@@ -153,14 +170,29 @@ def tick(battle, t: float) -> None:
                 if u.idx not in battle._dead:
                     battle._dead.add(u.idx)
                     battle.events.append((t, "die", u.idx))
+                if battle._arena_on:
+                    emit_packets(battle, u, t, packets)
                 battle._emit_state(u, t)
                 continue
+            if battle._arena_on:
+                emit_packets(battle, u, t, packets)
+                emit_protection(battle, u, protection, t, dot_action_index)
             battle._emit_state(u, t)
+            if battle._arena_on:
+                from arena_offense import after_dot
+                after_dot(battle, source, u, st.debuff, t,
+                          max(0, hp_before - u.hp), dot_action_index)
+                from arena_bonds import after_dot as after_bond_dot
+                after_bond_dot(battle, source, u, st.debuff, t,
+                               max(0, hp_before - u.hp), dot_action_index)
         # 2) 减益到期（回退面板修正）
         if st.debuff is not None and t + _EPS >= st.expire:
             kind = st.debuff
             _revert_debuff(u, st)
             battle.events.append((t, "status", u.idx, kind, "expire", 0))
+            if battle._arena_on:
+                from arena_traits import expire
+                expire(battle, u, t)
         # 3) 麻痹周期停顿（docs §1：每 3s 停 0.4s；受眩晕闸 0.2s 重试粒度影响，
         #    实际停顿约 0.4~0.6s，见报告注）
         if st.debuff == "para" and t + _EPS >= st.para_next:
@@ -199,8 +231,45 @@ def apply_flinch(battle, unit, t: float) -> bool:
     if st.stun_until + _EPS >= until:
         return False
     st.stun_until = until
+    st.flinch_until = max(st.flinch_until, until)
     battle.status_stats["applied"][FLINCH_KIND] += 1
     battle.events.append((t, "status", unit.idx, FLINCH_KIND, "apply", 0))
+    return True
+
+
+def apply_debuff(battle, unit, kind, t, source=None, *, non_spreading=False):
+    """Deterministic native effect with the same immunity/slot/control guards."""
+    st = getattr(unit, '_st', None)
+    if not STATUS_ON or st is None or not unit.alive or kind not in DEBUFF_BY_SRC.values():
+        return False
+    reason = ('immune' if set(IMMUNE_TYPES.get(kind, ())) & set(unit.piece.types) else
+              'dr' if kind in CONTROL_KINDS and t + _EPS < st.ctrl_until else
+              'slot' if st.debuff is not None and st.debuff != kind else None)
+    if reason:
+        battle.status_stats['blocked'][(kind, reason)] += 1
+        return False
+    _apply_debuff(battle, unit, kind, t, source=source, non_spreading=non_spreading)
+    battle._emit_state(unit, t)
+    return True
+
+
+def cleanse(battle, unit, t, kinds=None):
+    """Remove one major status, preserving buffs, short flinch and DR window."""
+    st = getattr(unit, '_st', None)
+    if not STATUS_ON or st is None or not unit.alive or st.debuff is None:
+        return False
+    kind = st.debuff
+    if kinds is not None and kind not in kinds:
+        return False
+    _revert_debuff(unit, st)
+    if kind in CONTROL_KINDS:
+        st.stun_until = max(t, st.flinch_until)
+    st.expire, st.next_dot, st.dot_ticks, st.para_next = t, 0., 0, 0.
+    battle.events.append((t, 'status', unit.idx, kind, 'expire', 0))
+    battle._emit_state(unit, t)
+    if battle._arena_on:
+        from arena_traits import expire
+        expire(battle, unit, t)
     return True
 
 
@@ -224,24 +293,33 @@ def on_hit(battle, attacker, target, move, t: float, damage=None) -> None:
     # 自身的施加（唤醒与再催眠同击可并发，连控由递减窗口兜底）
     if st.debuff == "sleep":
         st.debuff = None
+        st.debuff_source_idx = None
         st.stun_until = t
         stats["woke"] += 1
         battle.events.append((t, "status", target.idx, "sleep", "expire", 0))
+        if battle._arena_on:
+            from arena_traits import expire
+            expire(battle, target, t)
+    if battle._arena_on:
+        from arena_traits import sheer_force_applies
+        if sheer_force_applies(battle, attacker, move):
+            return
     # 招式属性减益掷骰（免疫/递减/占槽检查在掷骰前，不消耗 rng）
     kind = DEBUFF_BY_SRC.get(move["type"]) if move is not None else None
     if kind is not None:
-        _maybe_apply(battle, target, kind, t)
+        _maybe_apply(battle, target, kind, t, source=attacker)
     # 畏缩：任意命中的受击调味。不占减益槽、不触发递减，但窗口期内免（防与冰冻叠加连控）
     if t + _EPS >= st.ctrl_until and \
             battle.rng.random() < DEBUFFS[FLINCH_KIND]["chance"]:
         st.stun_until = max(st.stun_until, t + DEBUFFS[FLINCH_KIND]["dur"])
+        st.flinch_until = max(st.flinch_until, t + DEBUFFS[FLINCH_KIND]["dur"])
         stats["applied"][FLINCH_KIND] += 1
         battle.events.append((t, "status", target.idx, FLINCH_KIND, "apply", 0))
 
 
 # ---------------------------------------------------------------- 内部结算 --
 
-def _maybe_apply(battle, unit, kind: str, t: float) -> None:
+def _maybe_apply(battle, unit, kind: str, t: float, source=None) -> None:
     """按几率表施加减益：免疫 → 递减 → 占槽 三道闸后才掷骰。"""
     st = unit._st
     stats = battle.status_stats
@@ -256,13 +334,22 @@ def _maybe_apply(battle, unit, kind: str, t: float) -> None:
         stats["blocked"][(kind, "slot")] += 1   # 每单位 1 减益：异种顶不掉
         return
     if battle.rng.random() < DEBUFFS[kind]["chance"]:
-        _apply_debuff(battle, unit, kind, t)
+        _apply_debuff(battle, unit, kind, t, source=source)
 
 
-def _apply_debuff(battle, unit, kind: str, t: float) -> None:
+def _apply_debuff(battle, unit, kind: str, t: float, source=None, *, non_spreading=False) -> None:
     """挂上/刷新减益：面板修正只在 None→kind 转换时结算一次（刷新不重复叠）。"""
     st = unit._st
+    previous_kind = st.debuff
     spec = DEBUFFS[kind]
+    if source is None:
+        source = battle._stat_effect_source
+    source_idx = source.idx if source is not None else None
+    if battle._arena_on:
+        if st.debuff != kind or st.debuff_source_idx != source_idx:
+            st.debuff_source_epoch += 1
+        st.debuff_spreadable = not non_spreading
+    st.debuff_source_idx = source_idx
     battle.status_stats["applied"][kind] += 1
     if st.debuff != kind:
         st.debuff = kind
@@ -281,6 +368,11 @@ def _apply_debuff(battle, unit, kind: str, t: float) -> None:
     if kind in CONTROL_KINDS:
         st.ctrl_until = t + DR_WINDOW
     battle.events.append((t, "status", unit.idx, kind, "apply", 0))
+    if battle._arena_on and previous_kind is None:
+        from arena_equipment import after_debuff
+        after_debuff(battle, source, unit, kind, t)
+        from arena_traits import after_debuff as trait_after_debuff
+        trait_after_debuff(battle, source, unit, kind, t)
 
 
 def _revert_debuff(unit, st: _UnitState) -> None:
@@ -289,12 +381,14 @@ def _revert_debuff(unit, st: _UnitState) -> None:
         unit.attack += st.atk_delta
         st.atk_delta = 0
     st.debuff = None
+    st.debuff_source_idx = None
 
 
 def _reset_unit(unit, st: _UnitState) -> None:
     """死亡清状态：面板修正回退、容器复位（不发事件）。"""
     _revert_debuff(unit, st)
     st.stun_until = -1.0
+    st.flinch_until = -1.0
     st.ctrl_until = -1.0
     st.buffs.clear()
 

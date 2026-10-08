@@ -1,0 +1,76 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>战斗预览 · PokeTactics</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eeecdf;color:#29362e;font:14px/1.6 "PingFang SC",system-ui,sans-serif}a{color:#426646}main{max-width:1480px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;gap:16px;align-items:end;border-bottom:1px solid #bdc6b4;padding-bottom:18px;margin-bottom:20px}h1{font-size:28px;margin:3px 0}h2{font-size:15px;margin:0 0 10px}.eyebrow{font:11px ui-monospace,monospace;letter-spacing:2px;color:#627158}p{margin:6px 0}.muted{color:#6c7869}.mode-links{display:flex;gap:8px;flex-wrap:wrap}.mode-links a{border:1px solid #adb7a0;border-radius:5px;padding:6px 12px;text-decoration:none;background:#f8f8ef}.mode-links a[aria-current]{background:#38543e;color:#fff}.layout{display:grid;grid-template-columns:200px minmax(0,1fr);gap:22px;align-items:start}.settings{background:#f8f8ef;border:1px solid #c1cab8;padding:16px;border-radius:8px}label{display:block;font-size:12px;margin:12px 0 5px}select,input,button{font:inherit;color:inherit;background:#fffdf5;border:1px solid #a7b29c;border-radius:5px;padding:8px;max-width:100%;min-height:40px}select,input{width:100%}button{cursor:pointer}button:hover{background:#e0e7d6}button.primary{background:#38543e;color:white}button:disabled{opacity:.5;cursor:default}#reload{width:100%;margin-top:12px}.stage{min-width:0}.screen{width:100%;max-width:960px;margin:auto;background:#172d25;border:6px solid #294536;border-radius:10px;overflow:hidden;box-shadow:0 8px 20px #20372322}canvas{display:block;width:100%;height:auto;aspect-ratio:3/2}body[data-mode=classic] .screen{max-width:480px}body[data-mode=classic] canvas{image-rendering:pixelated;aspect-ratio:3/4}.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}.controls button{min-width:62px}#scrub{accent-color:#456a42;padding:0;flex:1;min-width:130px}.caption{font-size:12px;color:#64735e;overflow-wrap:anywhere}#meta{margin:12px 0}#clock-state{min-height:26px}.events{margin-top:22px;background:#f8f8ef;border:1px solid #c1cab8;border-radius:8px;padding:16px}#ev{height:235px;overflow:auto;overscroll-behavior:contain}.ev{font-size:12px;padding:2px 8px;color:#8a9285}.ev.past{color:#465641}.ev.now{background:#e2edd6;color:#233e25;border-left:3px solid #688447}.fx{display:flex;gap:6px;flex-wrap:wrap}.fx button{font-size:12px;padding:4px 8px;min-height:34px}.note{font-size:12px;color:#65735f;margin-top:16px}.badge{font-size:11px;letter-spacing:0;background:#dce7d0;color:#38543e;padding:3px 7px;border-radius:4px}#retry{margin-left:10px}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #c88d35;outline-offset:2px}@media(max-width:760px){main{padding:16px}header{display:block}h1{font-size:23px}.mode-links{margin-top:12px}.layout{grid-template-columns:1fr;gap:14px}.settings{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}.settings label{margin:0}.settings .note{grid-column:1/-1;margin:0}.settings h2{grid-column:1/-1}.settings #reload{margin:0;align-self:end}.screen{border-width:3px}.ev{font-size:11px}.controls{gap:5px}.controls button{min-width:54px;padding:7px}.events{padding:10px}}
+</style></head><body data-mode="__MODE__"><main>
+<header><div><div class="eyebrow">BATTLE / PRESENTATION <span class="badge">__MODELABEL__</span></div>
+<h1>战斗预览</h1><p class="muted" id="scene-title">__SCENLABEL__</p><a href="/tools">← 调试工具</a> · <a href="/scenarios?mode=__MODE__">场景库</a> · <a href="/animation-editor?mode=__MODE__">单体动作编辑器</a></div>
+<div class="mode-links"><a href="/anim?mode=arena&seed=__SEED__" __ARENA_CURRENT__>竞技试玩</a><a href="/anim?mode=classic&seed=__SEED__" __CLASSIC_CURRENT__>经典 / 设备</a></div></header>
+<div class="layout"><aside class="settings"><h2>场景控制</h2>
+<div><label for="seedin">战斗种子</label><input id="seedin" type="number" value="__SEED__" min="0" max="4294967295"></div>
+<button id="reload" class="primary">载入场景</button>
+<div><label for="speed">播放倍速</label><select id="speed"><option value="0.5">0.5 ×</option><option value="1" selected>1 ×</option><option value="2">2 ×</option><option value="4">4 ×</option></select></div>
+<div id="synergy-control" __SYNHIDDEN__><label for="synergy">经典羁绊</label><select id="synergy"><option value="1">开启</option><option value="0">关闭</option></select></div>
+<p class="note">__MODENOTE__</p><p class="note">空格播放 / 暂停，左右键逐帧。切到后台自动暂停。预览独立运行，可重复检查同一场景。</p></aside>
+<section class="stage" aria-label="战斗回放"><div class="screen"><canvas id="cv" width="__WIDTH__" height="__HEIGHT__" aria-label="战斗动画"></canvas></div>
+<div class="controls"><button id="prev" disabled>上帧</button><button id="play" disabled>播放</button><button id="next" disabled>下帧</button><input aria-label="战斗进度" type="range" id="scrub" min="0" max="0" value="0" disabled><button id="save" disabled>保存 PNG</button></div>
+<p id="clock-state" role="status">正在生成场景帧…</p><button id="retry" hidden>重试载入</button>
+<p class="caption" id="meta"></p><div class="fx" id="fxjumps"></div>
+<section class="events"><h2>事件记录 <span class="muted">/ 与命中帧同步</span></h2><div id="ev"></div></section>
+</section></div></main>
+<script src="/tools/acceptance/animation_player.js"></script><script>
+const seed=__SEED__, mode='__MODE__', scenario='__SCEN__', syn=__SYN__;
+const $=id=>document.getElementById(id), cv=$('cv');
+const prepareQuery=new URLSearchParams({seed:String(seed),mode,synergy:String(syn)});
+if(scenario)prepareQuery.set('scenario',scenario);
+$('synergy').value=String(syn);
+let result=null, events=[], lastEvent=-1, requestNumber=0;
+const player=new PokeAnimation.PreviewPlayer({canvases:[cv],onFrame({frame,time,n}){
+  $('scrub').value=frame;
+  let active=-1;
+  for(let i=0;i<events.length;i++)if(events[i].t<=time+1e-9)active=i;
+  if(active!==lastEvent){
+    for(let i=0;i<events.length;i++)$('ev'+i).className=i===active?'ev now':i<active?'ev past':'ev';
+    if(active>=0){const row=$('ev'+active), box=$('ev');box.scrollTop=Math.max(0,row.offsetTop-box.offsetTop-60);}
+    lastEvent=active;
+  }
+},onState(state){
+  const ready=!!result;
+  $('play').textContent=state.wanted?'暂停':'播放';
+  $('clock-state').textContent=state.error?'帧加载失败，可重试。':
+    (state.status==='loading'?'正在载入帧… ':state.status==='buffering'?'缓冲中 · ':state.status==='playing'?'播放中 · ':'已暂停 · ')+
+    ((state.frame||0)*(result?.dt||.05)).toFixed(2)+'s / '+(((result?.n||1)-1)*(result?.dt||.05)).toFixed(2)+'s';
+  $('retry').hidden=!state.error;
+  ['play','prev','next','scrub','save'].forEach(id=>$(id).disabled=!ready);
+}});
+async function load(){
+  const serial=++requestNumber;player.cancel();result=null;
+  ['play','prev','next','scrub','save'].forEach(id=>$(id).disabled=true);
+  $('clock-state').textContent='正在生成场景帧…首次约需数十秒';$('retry').hidden=true;
+  try{
+    const response=await fetch('/api/prepare?'+prepareQuery);
+    const meta=await response.json();
+    if(!response.ok||meta.ok===false)throw Error(meta.error||'场景载入失败');
+    if(serial!==requestNumber)return;
+    result=meta;events=meta.events;lastEvent=-1;
+    $('scrub').max=meta.n-1;
+    $('meta').textContent=meta.na+' / '+meta.nb+' · '+meta.width+' × '+meta.height+' · '+meta.n+' 帧 · '+meta.render_revision;
+    $('ev').innerHTML=events.map((e,i)=>'<div class="ev" id="ev'+i+'">['+e.t.toFixed(2)+'] '+e.text+'</div>').join('');
+    $('fxjumps').replaceChildren();
+    for(const [time,label] of meta.fx||[]){const button=document.createElement('button');button.textContent=label+' · '+time+'s';button.onclick=()=>player.seek(Math.round(Number(time)/meta.dt));$('fxjumps').append(button);}
+    await player.load({...meta,clip_start:0,frames:Array.from({length:meta.n},(_,i)=>'/frame/'+meta.key+'/'+i+'.png')},{autoplay:false});
+  }catch(error){if(serial===requestNumber){result=null;$('clock-state').textContent=error.message;$('retry').hidden=false;}}
+}
+$('retry').onclick=()=>result?player.retry():load();
+$('play').onclick=()=>player.getState().wanted?player.pause():player.play();
+$('prev').onclick=()=>player.step(-1);$('next').onclick=()=>player.step(1);
+$('scrub').oninput=()=>player.seek(Number($('scrub').value));
+$('speed').onchange=()=>player.setSpeed(Number($('speed').value));
+$('reload').onclick=()=>{const q=new URLSearchParams(prepareQuery);q.set('seed',$('seedin').value);q.set('synergy',$('synergy').value);location.href='/anim?'+q;};
+$('save').onclick=()=>{if(!result)return;const a=document.createElement('a');a.download='poketactics_'+mode+'_seed'+seed+'_f'+player.getState().frame+'.png';a.href=cv.toDataURL();a.click();};
+document.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA|BUTTON/.test(e.target.tagName)||!result)return;if(e.code==='Space'){e.preventDefault();$('play').click();}if(e.code==='ArrowLeft'){e.preventDefault();player.step(-1);}if(e.code==='ArrowRight'){e.preventDefault();player.step(1);}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)player.pause();});
+window.addEventListener('pagehide',()=>{requestNumber++;player.cancel();});
+load();
+</script></body></html>

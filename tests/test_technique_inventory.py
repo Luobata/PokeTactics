@@ -173,12 +173,14 @@ class TechniqueInventoryContracts(unittest.TestCase):
         s.opponent_learned = ['rest'] * len(s.opponent_comp)
         for unit in source.board:
             unit.technique = None
+        # Snapshot the preparation state before invoking the render helper;
+        # only end_prep commits a completed round into battle history.
+        encoded = self.codec.encode(s)
         with patch.object(demo, '_render_battle_frames', return_value={
                 'n': 0, 'winner': None, 'survivors': {0: 1, 1: 1}, 'duration': 10, 'events': []}) as render:
             s._fight_rendered(1, 0, s.player, source, None)
         self.assertEqual(render.call_args.kwargs['learned_b'], s.opponent_learned)
         self.assertEqual(own.uid, s.player.board[0].uid)
-        encoded = self.codec.encode(s)
         self.assertEqual(self.codec.encode(self.codec.decode(encoded, 3)), encoded)
 
 

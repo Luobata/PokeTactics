@@ -29,6 +29,10 @@ sys.path.insert(0, str(ROOT / "tools" / "mockups"))
 sys.path.insert(0, str(ROOT / "sim"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))   # Web 可玩 Demo（demo.py）
 
+from presentation_modes import normalize_mode, mode_info
+from arena_scenarios import SCENARIOS as ARENA_SCENARIOS
+
+import portal  # noqa: E402
 import demo as demo_mod  # noqa: E402  /demo 页 + /api/demo/* 动作（只加挂接）
 
 FPS_DT = 0.05
@@ -36,296 +40,146 @@ META_REV = "r5-presentation-20fps"  # 统一演出时钟；改轴后禁止沿用
 _LOCK = demo_mod._LOCK  # One rule-state lock shared by /anim and /demo.
 _CACHE = {}  # seed -> (key, meta)
 
-INDEX_HTML = """<!doctype html><html lang="zh-CN">
+INDEX_HTML = """<!doctype html><html lang="zh-CN"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>验收后台 · PokeTactics</title>
-<style>
-*{box-sizing:border-box}body{margin:0;background:#f2efe5;color:#29302b;font:14px/1.6 ui-monospace,"PingFang SC",monospace}
-main{max-width:1080px;margin:auto;padding:24px}header{border-bottom:2px solid #29302b;padding-bottom:16px;margin-bottom:24px}
-h1{font-size:22px;margin:0 0 6px}h2{font-size:16px;margin:28px 0 10px}p{margin:6px 0;color:#555e54}a{color:#355c3d}
-button{font:inherit;color:inherit;background:#fffdf5;border:1px solid #899081;border-radius:3px;padding:8px 14px;cursor:pointer;min-height:40px}
-button:hover{background:#e2e8d8}button.primary{background:#355c3d;color:white;border-color:#355c3d}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px}
-.card{display:block;background:#fffdf5;border:1px solid #899081;border-radius:6px;padding:8px;text-decoration:none;color:#29302b}
-.card:hover{background:#e2e8d8}.card img{width:100%;image-rendering:pixelated;border:1px solid #363e35;border-radius:3px;background:#363e35}
-.card span{display:block;font-size:12px;margin-top:6px;color:#555e54}
-.badge{font-size:12px;border:1px solid;border-radius:3px;padding:1px 6px;margin-left:8px;vertical-align:2px}
-.todo{color:#8a5a17;border-color:#c99b4a;background:#f7ecd2}.ok{color:#355c3d;border-color:#7fa383;background:#e5efe0}
-ul{margin:6px 0;padding-left:20px}li{margin:3px 0}
-.note{border-left:3px solid #a5b195;padding-left:12px;margin-top:20px}
-.small{font-size:12px}details{margin-top:16px}
-.launch{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
-</style></head><body><main>
-<header><h1>PokeTactics · 验收后台</h1>
-<a href="/anim?seed=7">动画验收台 →</a><p>双端同源验收入口：帧由本地渲染器产出（现为 Python 参考实现，M4 换 C 内核），浏览器只回放。动画即事件流（宪法 2.6）。</p></header>
-
-<div class="launch"><a href="/play"><button class="primary">进入全新游戏试玩 · 从第 1 轮开始 →</button></a></div>
-
-<h2>动画与美术<span class="badge todo">可目视验收</span></h2>
-<div class="launch">
-<a href="/animation-lab"><button class="primary">核心角色动作样片与资源验收</button></a>
-<a href="/anim?seed=7"><button class="primary">打开动画验收台（seed=7）</button></a>
-<a href="/anim?seed=11"><button>seed=11 · 12.7s 长战</button></a>
-</div>
-<details open><summary>验收点清单</summary><ul>
-<li>精灵无白色剪影、颜色饱满（雷丘橙 / 暴鲤龙蓝 / 隆隆岩灰）</li>
-<li>原生尺寸入格（精灵可上溢格子）、前排遮后排</li>
-<li>攻击三段：预备后拉 → 突进 + 挥击弧光 → 恢复；受击方击退</li>
-<li>移动有步行摆动 + 脚下灰尘 + 行进朝向镜像，不是图片平移</li>
-<li>大招抬手多帧（下蹲 → 上顶 + 底座光环脉冲）→ 特写切镜 → 后坐</li>
-<li>按属性特效：电=锯齿闪电、草=环绕、水=抛物水珠……</li>
-<li>右侧事件流与画面逐条对齐（同种子 → 同事件流 → 同画面）</li>
-</ul></details>
-
-<h2>系统控制台<span class="badge ok">每系统一页</span></h2>
-<div class="launch">
-<a href="/anim?seed=11"><button>动画验收台（战斗回放）</button></a>
-<a href="/roster"><button>棋子库（84 只 · 排序筛选）</button></a>
-<a href="/match"><button>单局模拟（8 bot 锦标赛）</button></a>
-<a href="/experiments"><button>实验台（8 个对照实验）</button></a>
-<a href="/synergy"><button>羁绊表（17 系）</button></a>
-<a href="/scenarios"><button>场景动画库（分场景带动画）</button></a>
-</div>
-
-<h2>静态设计稿<span class="badge ok">已上稿</span></h2>
+<title>验收入口 · PokeTactics</title><style>
+body{margin:0;background:#eeecdf;color:#29362e;font:14px/1.7 "PingFang SC",system-ui,sans-serif}main{max-width:1000px;padding:28px;margin:auto}a{color:#416345}h1{font-size:27px}h2{font-size:18px;margin-top:30px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.card{background:#fafbf2;border:1px solid #bdc8ad;padding:16px;border-radius:7px;text-decoration:none}.card b{display:block;font-size:17px}.card span{color:#67745e}li{margin:5px 0}.note{padding:14px;border-left:3px solid #678453;background:#e0e8d5}
+</style></head><body><main><header><a href="/tools">← 调试工具</a><h1>竞技试玩 · 预览与验收</h1>
+<p>试玩、战斗预览、动作实验室、动画编辑器和新导出样片共享渲染器与当前角色目录。</p>
+<p id="coverage" class="note">正在读取当前渲染版本与动作覆盖…</p></header>
 <div class="grid">
-<a class="card" href="/mockups/prep_hd6x.png" target="_blank"><img src="/mockups/prep_hd6x.png"><span>准备页 · 方案C（HD 1440×1920）</span></a>
-<a class="card" href="/mockups/battle_hd6x.png" target="_blank"><img src="/mockups/battle_hd6x.png"><span>战斗页（HD）</span></a>
-<a class="card" href="/mockups/cutin_hd6x.png" target="_blank"><img src="/mockups/cutin_hd6x.png"><span>大招特写（HD）</span></a>
-<a class="card" href="/mockups/battle_storyboard.png" target="_blank"><img src="/mockups/battle_storyboard.png"><span>动画分镜图（六格）</span></a>
+<a class="card" href="/anim?mode=arena&seed=7"><b>战斗预览</b><span>960 × 640 · 真实战斗事件、暂停与逐帧</span></a>
+<a class="card" href="/scenarios?mode=arena"><b>竞技场景库</b><span>分件动作、岩钉击退、异常追击、治疗防守</span></a>
+<a class="card" href="/animation-lab?mode=arena"><b>动作实验室 / 靶场</b><span>当前 48 种精灵，六类动作实时样片</span></a>
+<a class="card" href="/animation-editor?mode=arena"><b>动画编辑器</b><span>默认 / 调参对照，真实命中帧与生命快照</span></a>
 </div>
-
+<h2>检查重点</h2><ul><li>角色、原生技能和资源与试玩一致，一二世代共 48 种。</li>
+<li>怪力四臂、雷丘耳尾、巨钳螳螂双钳双翼，以及御三家已有分件动作；其余角色的覆盖按目录实际标注。</li>
+<li>施法、弹道、命中、治疗与退场跟随真实事件，拖动回卷不改变伤害和模拟结果。</li>
+<li>动画参数只影响表现；独立预览不创建游戏局、不写入试玩存档。</li></ul>
+<h2>经典 / 设备工具</h2><p>保留 84 种经典角色与 240 × 320 设备演出，用于经典规则和设备回归。</p>
+<p><a href="/anim?mode=classic&seed=7">经典战斗</a> · <a href="/animation-editor?mode=classic">经典编辑器</a> · <a href="/scenarios?mode=classic">经典场景</a> · <a href="/device">设备面板</a></p>
+<h2>使用说明与历史素材</h2><p><a href="/reference?path=docs/34-unified-preview-tools.md">预览工具与样片生成说明</a> · <a href="/mockups/battle_storyboard.png">早期设备分镜（历史参考）</a></p>
 <h2>验证报告</h2><ul id="reports">加载中…</ul>
-<p class="small note">确定性自检在 sim/prototype.py 常驻；本服务仅本地验收用，不读写真机数据。</p>
-<script>fetch('/api/reports').then(r=>r.json()).then(fs=>{
-document.getElementById('reports').innerHTML=fs.map(f=>'<li><a href="/reports/'+f+'">'+f+'</a></li>').join('');});</script>
+<script>fetch('/api/animation/characters?mode=arena').then(r=>r.json()).then(m=>{if(!m.ok)throw Error();document.getElementById('coverage').textContent=Object.keys(m.characters).length+' 种精灵 · '+m.width+' × '+m.height+' · '+m.render_revision;}).catch(()=>{document.getElementById('coverage').textContent='目录加载失败，请刷新重试。';});
+fetch('/api/reports').then(r=>r.json()).then(files=>{const list=document.getElementById('reports');list.replaceChildren();for(const file of files.reverse()){const li=document.createElement('li'),a=document.createElement('a');a.href='/reference?path='+encodeURIComponent('reports/'+file);a.textContent=file;li.append(a);list.append(li);}});</script>
 </main></body></html>"""
 
 
-PLAYER_HTML = """<!doctype html><html lang="zh-CN">
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>动画验收台 · seed=__SEED__</title>
-<style>
-*{box-sizing:border-box}body{margin:0;background:#f2efe5;color:#29302b;font:14px/1.6 ui-monospace,"PingFang SC",monospace}
-main{max-width:1180px;margin:auto;padding:24px}header{border-bottom:2px solid #29302b;padding-bottom:12px;margin-bottom:20px}
-.tabs{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
-.tabs a{text-decoration:none;color:inherit;border:1px solid #899081;border-radius:4px 4px 0 0;
-padding:4px 12px;font-size:13px;background:#e9e4d3}
-.tabs a.on{background:#355c3d;color:#fff;border-color:#355c3d;font-weight:600}
-.tabs a:hover:not(.on){background:#dfe5d4}
-h1{font-size:20px;margin:0 0 4px}p{margin:6px 0;color:#555e54}a{color:#355c3d}
-.layout{display:grid;grid-template-columns:230px auto minmax(250px,340px);gap:28px;align-items:start}
-label{display:block;font-size:12px;margin:14px 0 4px}
-select,input,button{font:inherit;color:inherit;background:#fffdf5;border:1px solid #899081;border-radius:3px;padding:8px;width:100%}
-button{cursor:pointer;min-height:40px}button:hover{background:#e2e8d8}button.primary{background:#355c3d;color:white;border-color:#355c3d}
-.stage{display:flex;flex-direction:column;align-items:center;gap:12px}
-.shell{padding:16px;background:#363e35;border:1px solid #232923;border-radius:9px}
-.screen{width:480px;max-width:100%}canvas{display:block;width:100%;image-rendering:pixelated;border-radius:2px}
-.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:360px}
-.keys button{font-size:16px;font-weight:700}
-.controls{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:480px}.controls button{flex:1;width:auto}
-input[type=range]{padding:0;accent-color:#355c3d}
-.status{font-size:12px;min-height:36px;word-break:break-all;width:100%;max-width:480px;color:#555e54}
-.small{font-size:12px}.note{border-left:3px solid #a5b195;padding-left:12px;margin-top:16px}
-details{margin-top:16px}.kbd{background:#e6e0cf;border:1px solid #b9b3a0;border-radius:3px;padding:0 5px;font-size:12px}
-#evpanel{background:#fffdf5;border:1px solid #899081;border-radius:6px;padding:8px;max-height:760px;overflow-y:auto}
-#evpanel h2{font-size:13px;margin:2px 4px 8px;color:#555e54}
-#evpanel div.ev{padding:1px 6px;border-radius:3px;white-space:nowrap;color:#8b938a;font-size:12px}
-#evpanel div.ev.past{color:#3d453f}#evpanel div.ev.now{background:#e5efe0;color:#28432c;font-weight:600}
-#evpanel div.ev b{color:#29302b}
-@media(max-width:980px){.layout{grid-template-columns:1fr}.stage{order:1}#evpanel{order:2;max-height:300px}.settings{order:3}}
-</style></head><body><main>
-<header><h1>战斗动画验收台 · seed=__SEED__ <span class="muted" id="scenlabel" data-l="__SCENLABEL__" data-s="__SCEN__"></span></h1><a href="/">← 返回验收清单</a> · <a href="__SYNLINK__"><button style="display:inline-block;width:auto;min-height:0;padding:4px 10px;font-size:12px">__SYNBTN__</button></a><div class="tabs" id="tabs"></div></header>
-<div class="layout">
-<aside class="settings">
-<label for="seed">战斗种子</label><input id="seedin" type="number" value="__SEED__" min="1" max="99999">
-<button id="reload" class="primary">载入场景</button>
-<label for="speed">播放倍速</label><select id="speed"><option value="0.5">0.5x</option><option value="1" selected>1x（20fps）</option><option value="2">2x</option><option value="4">4x</option></select>
-<label for="zoom">像素缩放</label><select id="zoom"><option value="480" selected>2 倍 · 480×640</option><option value="240">1 倍 · 240×320</option></select>
-<p class="small"><span class="kbd">空格</span> 播放/暂停，<span class="kbd">←</span> <span class="kbd">→</span> 单步。标签页隐藏自动停钟（PokeWalk 预览纪律）。</p>
-<details open><summary>验收点</summary><ul class="small" style="padding-left:16px">
-<li>精灵无白剪影、颜色饱满</li><li>原生尺寸入格、前排遮后排</li>
-<li>攻击三段 + 挥击弧、受击击退</li><li>步行摆动 + 灰尘 + 朝向</li>
-<li>抬手多帧 + 光环 → 切镜 → 后坐</li><li>按属性特效、事件流对齐</li>
-</ul></details>
-<p class="small note">帧缓存按 seed + 渲染器源码哈希键控；改渲染代码后刷新自动重算。</p>
-</aside>
-<section class="stage">
-<div class="shell"><div class="screen"><canvas id="cv" width="240" height="320"></canvas></div></div>
-<div class="keys"><button id="prev">|◀ 退</button><button id="play">⏯ 播放</button><button id="next">进 ▶|</button></div>
-<input type="range" id="scrub" min="0" max="0" value="0" style="max-width:480px">
-<div class="controls" id="fxjumps" style="max-width:480px"></div>
-<div class="controls"><button id="step">单步 0.05s</button><button id="save">保存 PNG</button></div>
-<p class="small" id="clock-state" role="status">正在载入场景…</p>
-<p class="status" id="meta" role="status">帧生成中…（首次约数秒）</p>
-</section>
-<div id="evpanel"><h2>事件流（与画面逐条对照）</h2><div id="ev"></div></div>
-</div>
-</main>
-<script>
-const seed=__SEED__, DT=__DT__, syn=__SYN__;
-const scen=document.getElementById('scenlabel');
-const scenS=scen.dataset.s;
-if(scen.dataset.l)scen.textContent=' · '+scen.dataset.l;
-const TAB_SEEDS=[3,7,11,42,100,777];
-(function(){const el=document.getElementById('tabs');
-el.innerHTML=TAB_SEEDS.map(n=>'<a href="/anim?seed='+n+'&synergy='+syn+(scenS?'&scenario='+scenS:'')+'" class="'+(n===seed?'on':'')+'">seed '+n+'</a>').join('')
-+(TAB_SEEDS.includes(seed)?'':'<a class="on">seed '+seed+'</a>');})();
-let frames=[], n=0, cur=0, playing=false, timer=null, events=[];
-const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
-const scrub=document.getElementById('scrub');
-function clock(text){document.getElementById('clock-state').textContent=text;}
-const prepareQuery=new URLSearchParams({seed:String(seed),synergy:String(syn)});
-if(scenS)prepareQuery.set('scenario',scenS);
-fetch('/api/prepare?'+prepareQuery).then(r=>{
-  if(!r.ok)throw new Error('场景载入失败（HTTP '+r.status+'）');
-  return r.json();
-}).then(m=>{
-  n=m.n; events=m.events;
-  document.getElementById('meta').textContent=
-    m.na+' vs '+m.nb+' · '+m.n+' 帧 @20fps · '+(m.n*DT).toFixed(1)+'s · 胜者='+(m.result===null?'平':('AB'[m.result]??m.result))+' · '+m.casts+' 次大招 · 构建 '+m.key;
-  scrub.max=n-1;
-  let loaded=0;
-  for(let i=0;i<n;i++){const im=new Image();im.onload=()=>{frames[i]=im;
-    if(i===0)show(0);  // 首帧到达立即上屏
-    if(++loaded===n){clock('就绪 · '+n+' 帧已加载');show(cur);}};im.src='/frame/'+m.key+'/'+i+'.png';}
-  document.getElementById('ev').innerHTML=events.map((e,i)=>'<div class="ev" id="ev'+i+'">['+e.t.toFixed(2)+'] '+e.text+'</div>').join('');
-  const jf=document.getElementById('fxjumps');
-  jf.innerHTML=(m.fx||[]).map(f=>'<button data-t="'+f[0]+'">'+f[1]+' · '+f[0]+'s</button>').join('');
-  jf.querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();show(Math.round(parseFloat(b.dataset.t)/DT));});
-
-}).catch(e=>{clock('载入失败：'+e);});
-function show(i){cur=Math.max(0,Math.min(n-1,i));if(frames[cur])ctx.drawImage(frames[cur],0,0);
-scrub.value=cur;clock('第 '+cur+' / '+(n-1)+' 帧 · '+(cur*DT).toFixed(2)+'s');
-let last=-1;for(let j=0;j<events.length;j++){const el=document.getElementById('ev'+j);
-if(el){el.className=(events[j].t<=cur*DT+1e-9)?'ev past':'ev';if(events[j].t<=cur*DT+1e-9)last=j;}}
-if(last>=0){const el=document.getElementById('ev'+last);el.className='ev now';el.scrollIntoView({block:'nearest'});}}
-function tick(){show(cur+1);if(cur>=n-1)stop();}
-function play(){if(playing)return stop();if(cur>=n-1)show(0);playing=true;clock('播放中 '+(cur*DT).toFixed(2)+'s');
-timer=setInterval(tick, DT*1000/parseFloat(document.getElementById('speed').value));}
-function stop(){playing=false;clearInterval(timer);}
-document.getElementById('play').onclick=play;
-document.getElementById('prev').onclick=()=>{stop();show(cur-1);};
-document.getElementById('next').onclick=()=>{stop();show(cur+1);};
-document.getElementById('step').onclick=()=>{stop();show(cur+1);};
-document.getElementById('speed').onchange=()=>{if(playing){stop();play();}};
-document.getElementById('zoom').onchange=e=>{document.querySelector('.screen').style.width=e.target.value+'px';};
-document.getElementById('scrub').oninput=()=>{stop();show(+scrub.value);};
-document.getElementById('save').onclick=()=>{const a=document.createElement('a');
-a.download='poketactics_seed'+seed+'_f'+cur+'.png';a.href=cv.toDataURL();a.click();};
-document.getElementById('reload').onclick=()=>{const q=new URLSearchParams(prepareQuery);q.set('seed',document.getElementById('seedin').value);location.href='/anim?'+q;};
-if(window.innerHeight<760){document.querySelector('.screen').style.width='240px';
-  document.getElementById('zoom').value='240';}  // 低视口自动 1x
-document.addEventListener('keydown',e=>{
-if(e.target.tagName==='INPUT')return;
-if(e.code==='Space'){e.preventDefault();play();}
-if(e.code==='ArrowLeft'){stop();show(cur-1);}
-if(e.code==='ArrowRight'){stop();show(cur+1);}});
-document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});  // 隐藏停钟
-</script></body></html>"""
+PLAYER_HTML = (Path(__file__).parent / 'battle_preview.html').read_text()
 
 
-def render_battle(seed: int, synergy: bool = False, scenario: str = None) -> dict:
-    """跑一场战斗并渲染全部帧（缓存；synergy=羁绊；scenario=场景库预设）."""
-    import data
-    import status as status_mod
-    import synergy as syn
+def _cached_battle(directory):
+    """Only complete published frame sets are replayable; retry repairs missing frames."""
+    try:
+        meta = json.loads((directory / 'meta.json').read_text())
+        count = meta['n']
+        if type(count) is not int or not 0 < count <= 12000:
+            return None
+        if all((directory / f'{i}.png').is_file() and (directory / f'{i}.png').stat().st_size
+               for i in range(count)):
+            return meta
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    return None
+
+
+def render_battle(seed: int, synergy: bool = False, scenario: str = None,
+                  mode: str = 'arena') -> dict:
+    """Render a save-free encounter with the shared trial/authoring renderer."""
+    from presentation_modes import normalize_mode, mode_info, make_renderer
+    from animation_preview import source_revision
+    from arena_scenarios import SCENARIOS as ARENA_SCENARIOS, make_scene
     from decoders import Front, Font16, Palettes
     from render_battle_gif import BattleAnimation
-    from roster import build_roster
+    import status as status_mod
+    import synergy as syn
+    import combo as combo_mod
+    import shutil
+    import tempfile
 
-    sim_files = ["sim/combat.py", "sim/synergy.py", "sim/roster.py",
-                 "sim/status.py", "sim/weather.py", "sim/data.py", "sim/combo.py",
-                 "sim/items.py", "sim/profiles.py", "sim/skills.py", "data/moves.json",
-                 "data/pokemon.json", "data/typechart.json"]
-    h = hashlib.sha256(str(FPS_DT).encode())
-    for renderer in sorted((ROOT / "tools/mockups").glob("*.py")):
-        h.update(renderer.name.encode())
-        h.update(renderer.read_bytes())
-    for rel in sim_files:  # sim 状态也进缓存键：否则 sim 改动会静默吃旧帧
-        h.update(rel.encode())
-        h.update((ROOT / rel).read_bytes())
-    src_hash = h.hexdigest()[:10]
-    key = (f"s{seed}{'sy' if synergy else ''}"
-           f"{'sc_' + scenario if scenario else ''}_{META_REV}_{src_hash}")
-    out_dir = ROOT / ".build" / "acceptance" / key
-    meta_path = out_dir / "meta.json"
-    if not meta_path.exists():
-        with _LOCK:
-            if not meta_path.exists():
-                import combo as combo_mod
-                prev_syn = syn.SYNERGIES_ON
-                prev_status = status_mod.STATUS_ON
-                prev_combo = combo_mod.COMBOS_ON
-                try:
-                    syn.SYNERGIES_ON = synergy  # 仅在锁内翻转，渲染完还原
-                    front, pal, font = Front(), Palettes(), Font16()
-                    roster = build_roster()
-
-                    def find(name):
-                        return next(p for ps in roster.values() for p in ps if p.name == name)
-
-                    sc = SCENARIOS.get(scenario) if scenario else None
-                    if sc:
-                        comp_a = [find(n) for n in sc["a"]]
-                        comp_b = [find(n) for n in sc["b"]]
-                        weather = sc.get("weather")
-                        status_mod.STATUS_ON = bool(sc.get("status"))
-                        combo_mod.COMBOS_ON = bool(sc.get("combo"))
-                    else:
-                        comp_a = [find(n) for n in ("雷丘", "妙蛙花", "隆隆岩", "怪力", "水伊布")]
-                        comp_b = [find(n) for n in ("暴鲤龙", "喷火龙", "胡地", "大比鸟", "霸王花")]
-                        weather = None
-                        combo_mod.COMBOS_ON = False
-                    anim = BattleAnimation(comp_a, comp_b, seed, front, pal, font,
-                                           weather_name=weather)
-                    t_end = max(e[0] for e in anim.events)
-                    result = next((e[2] for e in reversed(anim.events)
-                                   if e[1] == "end"), None)
-                    n_casts = sum(1 for e in anim.events if e[1] == "cast")
-                    duration = anim.presentation_duration
-                    out_dir.mkdir(parents=True, exist_ok=True)
-                    frames_meta = []
-                    for i in range(round(duration / FPS_DT) + 1):
-                        T = round(i * FPS_DT, 8)
-                        anim.playback_frame(T).convert("RGB").save(out_dir / f"{i}.png")
-                        frames_meta.append(round(T, 2))
-                    events = []
-                    for e in anim.presentation_events:
-                        if e[1] == "unit_state":
-                            continue
-                        events.append({"t": round(e[0], 2),
-                                       "text": _fmt_event(anim, e)})
-                    fx_moments = [("0.2", "开战演出")]
-                    first_atk = next((e[0] for e in anim.presentation_events
-                                      if e[1] == "attack"), None)
-                    if first_atk is not None:
-                        fx_moments.append((round(first_atk, 2), "普攻命中"))
-                    fx_moments += [(round(e[0], 2), f"大招落点{j + 1}")
-                                   for j, e in enumerate(e for e in anim.presentation_events
-                                                         if e[1] == "cast")]
-                    first_die = next((e[0] for e in anim.presentation_events
-                                      if e[1] == "die"), None)
-                    if first_die is not None:
-                        fx_moments.append((round(first_die + 0.1, 2), "濒死演出"))
-                    meta = {"key": key, "n": len(frames_meta), "times": frames_meta,
-                            "clock": "presentation-v1", "fps": 20, "dt": FPS_DT,
-                            "presentation_duration": duration, "simulation_duration": t_end,
-                            "events": events, "result": result, "casts": n_casts,
-                            "synergy": synergy, "fx": fx_moments,
-                            "scenario": scenario,
-                            "scenario_label": (SCENARIOS.get(scenario) or {}).get("label", ""),
-                            "weather": weather,
-                            "na": " ".join(p.name for p in comp_a),
-                            "nb": " ".join(p.name for p in comp_b)}
-                    pending_meta = meta_path.with_suffix(".tmp")
-                    pending_meta.write_text(json.dumps(meta, ensure_ascii=False))
-                    pending_meta.replace(meta_path)  # Cache readers only see complete JSON.
-                finally:
-                    syn.SYNERGIES_ON = prev_syn
-                    status_mod.STATUS_ON = prev_status
-                    combo_mod.COMBOS_ON = prev_combo
-    return json.loads(meta_path.read_text())
+    mode = normalize_mode(mode)
+    scenarios = ARENA_SCENARIOS if mode == 'arena' else SCENARIOS
+    if scenario and scenario not in scenarios:
+        raise ValueError('所选场景不属于当前模式，请重新选择')
+    if type(seed) is not int or not 0 <= seed <= 2**32 - 1:
+        raise ValueError('种子必须为 0–4294967295 的整数')
+    # Metadata also contains the shared event formatter and combination names.
+    # Their changes must invalidate cached logs even when pixel frames are unchanged.
+    event_sources = ''.join((Path(__file__).parent / name).read_text()
+                            for name in ('demo.py', 'combination_view.py'))
+    digest = hashlib.sha256((source_revision() + Path(__file__).read_text() + event_sources
+                             + repr(FPS_DT)).encode()).hexdigest()[:12]
+    key = f"{mode}_s{seed}_{int(synergy) if mode == 'classic' else 0}_{scenario or 'default'}_{digest}"
+    out_dir = ROOT / '.build' / 'acceptance' / key
+    meta_path = out_dir / 'meta.json'
+    with _LOCK:
+        cached = _cached_battle(out_dir)
+        if cached:
+            return cached
+        previous = syn.SYNERGIES_ON, status_mod.STATUS_ON, combo_mod.COMBOS_ON
+        temporary = None
+        try:
+            if mode == 'arena':
+                anim = make_scene(seed, scenario)
+                weather = None
+            else:
+                from roster import build_roster
+                roster = build_roster()
+                names = {p.name: p for ps in roster.values() for p in ps}
+                sc = SCENARIOS.get(scenario) or {}
+                a = sc.get('a', ('雷丘', '妙蛙花', '隆隆岩', '怪力', '水伊布'))
+                b = sc.get('b', ('暴鲤龙', '喷火龙', '胡地', '大比鸟', '霸王花'))
+                weather = sc.get('weather')
+                syn.SYNERGIES_ON = synergy
+                status_mod.STATUS_ON = bool(sc.get('status')) if scenario else previous[1]
+                combo_mod.COMBOS_ON = bool(sc.get('combo'))
+                anim = BattleAnimation([names[n] for n in a], [names[n] for n in b],
+                                       seed, Front(), Palettes(), Font16(), weather_name=weather)
+            renderer = make_renderer(anim, mode)
+            duration = anim.presentation_duration
+            out_dir.parent.mkdir(parents=True, exist_ok=True)
+            temporary = Path(tempfile.mkdtemp(prefix='.pending-', dir=out_dir.parent))
+            times = [round(i * FPS_DT, 8) for i in range(round(duration / FPS_DT) + 1)]
+            for i, moment in enumerate(times):
+                renderer.frame(moment).convert('RGB').save(temporary / f'{i}.png', compress_level=2)
+            fmt = demo_mod._fmt_event if mode == 'arena' else _fmt_event
+            events = [{'t': round(e[0], 2), 'text': fmt(anim, e)}
+                      for e in anim.presentation_events if e[1] != 'unit_state']
+            events = [e for e in events if e['text']]
+            fx = [('0.2', '开战演出')]
+            first_attack = min((a for a in anim.timeline.actions if a.kind == 'attack'),
+                               key=lambda a: a.impact, default=None)
+            if first_attack:
+                fx += [(round(first_attack.start, 2), '普攻蓄力'),
+                       (round(first_attack.impact, 2), '普攻命中')]
+            casts = sorted((a for a in anim.timeline.actions if a.kind == 'cast' and not a.secondary),
+                           key=lambda a: a.impact)
+            fx += [(round(a.impact, 2), f'技能命中 {j+1}') for j, a in enumerate(casts[:10])]
+            first_die = next((e[0] for e in anim.presentation_events if e[1] == 'die'), None)
+            if first_die is not None:
+                fx.append((round(first_die + .1, 2), '退场演出'))
+            meta = {**mode_info(mode), 'key': key, 'n': len(times), 'times': times,
+                    'clock': 'presentation-v1', 'fps': 20, 'dt': FPS_DT,
+                    'presentation_duration': duration,
+                    'simulation_duration': max(e[0] for e in anim.events),
+                    'events': events, 'result': next(e[2] for e in reversed(anim.events) if e[1] == 'end'),
+                    'casts': sum(e[1] == 'cast' for e in anim.events),
+                    'synergy': synergy if mode == 'classic' else None, 'fx': fx,
+                    'scenario': scenario, 'scenario_label': (scenarios.get(scenario) or {}).get('label', ''),
+                    'weather': weather,
+                    'na': ' '.join(u.piece.name for u in anim.by_idx.values() if u.team == 0),
+                    'nb': ' '.join(u.piece.name for u in anim.by_idx.values() if u.team == 1)}
+            (temporary / 'meta.json').write_text(json.dumps(meta, ensure_ascii=False))
+            if out_dir.exists():
+                shutil.rmtree(out_dir)
+            temporary.replace(out_dir)
+            temporary = None
+            return meta
+        finally:
+            syn.SYNERGIES_ON, status_mod.STATUS_ON, combo_mod.COMBOS_ON = previous
+            if temporary and temporary.exists():
+                shutil.rmtree(temporary)
 
 
 _MOVES_ZH = None
@@ -395,10 +249,7 @@ pre{background:#fffdf5;border:1px solid #899081;border-radius:4px;padding:10px;f
 .tabs a.on{background:#355c3d;color:#fff;border-color:#355c3d;font-weight:600}
 """
 
-NAV = ('<div class="tabs"><a href="/">总览</a><a href="/anim?seed=11">动画验收台</a>'
-       '<a href="/roster">棋子库</a><a href="/match">单局模拟</a>'
-       '<a href="/experiments">实验台</a><a href="/synergy">羁绊表</a>'
-       '<a href="/scenarios">场景动画库</a><a href="/items">装备</a></div>')
+NAV = ""  # Global portal navigation replaces the older per-console tabs.
 
 SCEN_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
              "<title>场景动画库 · PokeTactics</title><style>" + CONSOLE_CSS + "</style>"
@@ -410,7 +261,7 @@ SCEN_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
 
 ITEMS_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
               "<title>装备与道具 · PokeTactics</title><style>" + CONSOLE_CSS + "</style>"
-              "<main><header><h1>装备与道具（S5 v1）</h1>" + NAV + "</header>"
+              "<main><header><h1>经典规则 · 装备与道具（S5 v1）</h1>" + NAV + "</header>"
               "<h2>组件（野怪轮掉落 · 血量加权）</h2><div id=comps>加载中…</div>"
               "<h2>成品（两组件合成 · 每单位 1 格）</h2><div id=fin>加载中…</div>"
               "<p class=muted>装备默认关（experiment_items 开/关对照）；"
@@ -425,8 +276,8 @@ ITEMS_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
 
 ROSTER_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
                "<title>棋子库 · PokeTactics</title><style>" + CONSOLE_CSS + "</style>"
-               "<main><header><h1>棋子库</h1>" + NAV + "</header>"
-               "<p>84 只池 · BST 定档（S2）。点列头排序。</p>"
+               "<main><header><h1>经典规则 · 棋子库</h1>" + NAV + "</header>"
+               "<p>经典规则 84 只池 · BST 定档（S2）。点列头排序。当前竞技试玩的 18 种精灵请查看 <a href=/pokedex>竞技图鉴</a>。</p>"
                "<label>筛选 <input id=q placeholder=中文名/属性/招式… style=width:280px></label>"
                "<div id=out>加载中…</div></main>"
                "<script>fetch('/api/roster').then(r=>r.json()).then(rows=>{"
@@ -464,12 +315,12 @@ EXP_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
             "tiering:'BST 档位同质化',synergy:'羁绊开/关',weather:'四天气',status:'状态/Buff',"
             "balance:'ICE/BUG 平衡',match:'M2 四条验收(50局)'};"
             "fetch('/api/experiments').then(r=>r.json()).then(names=>"
-            "fetch('/api/scenarios').then(r=>r.json()).then(scs=>{"
+            "fetch('/api/scenarios?mode=classic').then(r=>r.json()).then(scs=>{"
             "const byExp={};scs.forEach(x=>{(byExp[x.exp]=byExp[x.exp]||[]).push(x)});"
             "document.getElementById('cards').innerHTML=names.map(n=>"
             "'<div class=card><b>'+n+'</b><br><span class=muted>'+(EXPS[n]||'')+'</span>"
             "<button onclick=run(this) data-n='+n+'>运行</button>"
-            "+((byExp[n]||[]).map(x=>'<br><a href=\'/anim?seed=7&scenario='+x.key+'\'>▶ '+x.label+'</a>').join(''))"
+            "+((byExp[n]||[]).map(x=>'<br><a href=\'/anim?mode=classic&seed=7&scenario='+x.key+'\'>▶ '+x.label+'</a>').join(''))"
             "+'</div>').join('');});});"
             "function run(b){document.getElementById('out').textContent='运行中…（最长 60s）';"
             "fetch('/api/experiment?name='+b.dataset.n).then(r=>r.text())"
@@ -477,7 +328,7 @@ EXP_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
 
 SYN_HTML = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
             "<title>羁绊表 · PokeTactics</title><style>" + CONSOLE_CSS + "</style>"
-            "<main><header><h1>17 系羁绊表（S3，默认开）</h1>" + NAV + "</header>"
+            "<main><header><h1>经典规则 · 17 系羁绊表（S3，默认开）</h1>" + NAV + "</header>"
             "<div id=out>加载中…</div></main>"
             "<script>fetch('/api/synergy').then(r=>r.json()).then(t=>{"
             "document.getElementById('out').innerHTML='<table><tr><th>属性</th><th>(2)</th><th>(4)</th><th>(6)</th></tr>'+"
@@ -657,77 +508,108 @@ class Handler(SimpleHTTPRequestHandler):
         requested = (ROOT / urllib.parse.unquote(parsed.path).lstrip("/")).resolve()
         if requested == demo_mod.SAVE_ROOT.resolve() or demo_mod.SAVE_ROOT.resolve() in requested.parents:
             return self.send_error(403, "Use the backup export endpoint")
-        if parsed.path in ("/play", "/play/"):
+        if parsed.path.rstrip('/') in ('', '/pokedex', '/guide', '/tools'):
+            self._play_asset("hub.html", "text/html; charset=utf-8")
+        elif parsed.path == "/api/portal/catalog":
+            with _LOCK:
+                self._json(portal.catalog_view(demo_mod))
+        elif parsed.path == "/reference":
+            relative = qs.get('path', [''])[0]
+            document = (ROOT / relative).resolve()
+            libraries = ((ROOT / 'docs').resolve(), (ROOT / 'reports').resolve())
+            if document.suffix != '.md' or not document.is_file() or not any(
+                    library in document.parents for library in libraries):
+                return self.send_error(404, "Document not found")
+            relative = document.relative_to(ROOT).as_posix()
+            self._html(portal.document_view(relative, document.read_text()))
+        elif parsed.path.startswith("/hub/assets/"):
+            assets = {"/hub/assets/hub.css": ("hub.css", "text/css; charset=utf-8"),
+                      "/hub/assets/hub.js": ("hub.js", "text/javascript; charset=utf-8"),
+                      "/hub/assets/portal.css": ("portal.css", "text/css; charset=utf-8")}
+            asset = assets.get(parsed.path)
+            if asset is None:
+                return self.send_error(404)
+            self._play_asset(*asset)
+        elif parsed.path in ("/play", "/play/"):
             self._play_asset("play.html", "text/html; charset=utf-8")
         elif parsed.path.startswith("/play/assets/"):
             assets = {
                 "/play/assets/play.css": ("play.css", "text/css; charset=utf-8"),
                 "/play/assets/play.js": ("play.js", "text/javascript; charset=utf-8"),
+                "/play/assets/battle.css": ("battle.css", "text/css; charset=utf-8"),
             }
             asset = assets.get(parsed.path)
             if asset is None:
                 return self.send_error(404)
             self._play_asset(*asset)
-        elif parsed.path == "/":
+        elif parsed.path == "/acceptance":
             body = INDEX_HTML.encode()
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+            self._html(body)
         elif parsed.path == "/animation-lab":
-            self.path = "/tools/acceptance/animation_lab.html"
-            return super().do_GET()
+            self._play_asset("animation_lab.html", "text/html; charset=utf-8")
         elif parsed.path == "/animation-editor":
-            self.path = "/tools/acceptance/animation_editor.html"
-            return super().do_GET()
+            self._play_asset("animation_editor.html", "text/html; charset=utf-8")
         elif parsed.path == "/api/animation/characters":
             from character_catalog import character_catalog
-            with _LOCK:
-                self._json({"ok": True, "characters": character_catalog()})
+            try:
+                mode = normalize_mode(qs.get('mode', ['arena'])[0])
+                with _LOCK:
+                    self._json({'ok': True, **mode_info(mode),
+                                'characters': character_catalog(mode=mode)})
+            except ValueError as exc:
+                self._json({'ok': False, 'error': str(exc)}, 400)
         elif parsed.path == "/anim":
-            seed = int(qs.get("seed", ["7"])[0])
-            syn_on = qs.get("synergy", ["1"])[0] == "1"  # 2026-09-14 起 S3 默认开
-            scenario = qs.get("scenario", [""])[0] or None
-            body = (PLAYER_HTML.replace("__SEED__", str(seed))
-                    .replace("__SYN__", "1" if syn_on else "0")
-                    .replace("__SYNLINK__",
-                             f"/anim?seed={seed}&synergy={0 if syn_on else 1}"
-                             + (f"&scenario={scenario}" if scenario else ""))
-                    .replace("__SYNBTN__",
-                             "羁绊：开（点击关闭）" if syn_on else "羁绊：关（点击开启）")
-                    .replace("__SCEN__", scenario or "")
-                    .replace("__SCENLABEL__",
-                             (SCENARIOS.get(scenario) or {}).get("label", ""))
-                    .replace("__DT__", str(FPS_DT))).encode()
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+            try:
+                mode = normalize_mode(qs.get('mode', ['arena'])[0])
+                seed = int(qs.get('seed', ['7'])[0])
+                if not 0 <= seed <= 2**32 - 1:
+                    raise ValueError('种子必须为 0–4294967295 的整数')
+                syn_on = qs.get('synergy', ['1'])[0] == '1'
+                scenario = qs.get('scenario', [''])[0] or None
+                scenarios = ARENA_SCENARIOS if mode == 'arena' else SCENARIOS
+                if scenario and scenario not in scenarios:
+                    raise ValueError('所选场景不属于当前模式，请从场景库重新选择')
+            except ValueError as exc:
+                return self._txt(str(exc), 400)
+            info = mode_info(mode)
+            values = {'SEED': str(seed), 'MODE': mode, 'MODELABEL': info['label'],
+                      'WIDTH': str(info['width']), 'HEIGHT': str(info['height']),
+                      'SYN': '1' if syn_on else '0', 'SCEN': scenario or '',
+                      'SCENLABEL': (scenarios.get(scenario) or {}).get('label', '竞技综合场景' if mode == 'arena' else '经典综合场景'),
+                      'ARENA_CURRENT': 'aria-current="page"' if mode == 'arena' else '',
+                      'CLASSIC_CURRENT': 'aria-current="page"' if mode == 'classic' else '',
+                      'SYNHIDDEN': 'hidden' if mode == 'arena' else '',
+                      'MODENOTE': ('48 种竞技精灵 · 每方三行站位。与试玩共享原生技能、属性特效和分件动作。' if mode == 'arena' else
+                                   '经典 84 种角色 · 240 × 320 设备画面，保留经典羁绊与动画契约。')}
+            body = PLAYER_HTML
+            for key, value in values.items():
+                body = body.replace('__' + key + '__', value)
+            self._html(body)
         elif parsed.path == "/scenarios":
+            try:
+                mode = normalize_mode(qs.get('mode', ['arena'])[0])
+            except ValueError as exc:
+                return self._txt(str(exc), 400)
+            scenes = ARENA_SCENARIOS if mode == 'arena' else SCENARIOS
             cards = []
-            for k, sc in SCENARIOS.items():
-                cards.append(
-                    f'<div class="card"><b>{sc["label"]}</b>'
-                    f'<br><span class="muted">{sc["exp"]} 实验 · '
-                    f'{"天气:" + (sc.get("weather") or "无")}'
-                    f'{" · 状态开" if sc.get("status") else ""}</span>'
-                    f'<a href="/anim?seed={SCENARIO_SEED_DEFAULT}&scenario={k}">'
-                    f'<button class="primary">播放动画</button></a></div>')
-            body = (SCEN_HTML.replace("__CARDS__", "\n".join(cards))).encode()
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+            for key, scene in scenes.items():
+                description = scene.get('description', scene['exp'] + ' 经典规则实验')
+                cards.append(f'<div class="card"><b>{scene["label"]}</b>'
+                             f'<p class="muted">{description}</p>'
+                             f'<a href="/anim?mode={mode}&seed={SCENARIO_SEED_DEFAULT}&scenario={key}">'
+                             '<button class="primary">播放场景</button></a></div>')
+            body = ('<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">'
+                    '<title>场景库 · PokeTactics</title><style>' + CONSOLE_CSS +
+                    '.card{flex:1 1 260px;max-width:360px}.card p{min-height:44px}</style></head><body><main><header>'
+                    f'<h1>{mode_info(mode)["label"]} · 场景库</h1>'
+                    '<p>选择一个真实战斗场景，检查动作、属性特效与技能联动。</p>'
+                    '<a href="/scenarios?mode=arena">竞技试玩</a> · '
+                    '<a href="/scenarios?mode=classic">经典 / 设备</a> · <a href="/tools">调试工具</a></header>'
+                    '<div class="cardrow">' + ''.join(cards) + '</div></main></body></html>')
+            self._html(body)
         elif parsed.path == "/items":
             body = ITEMS_HTML.encode()
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+            self._html(body)
         elif parsed.path == "/api/items":
             import items as it
             comp_tendency = {"band": "物攻", "hardstone": "物防", "magnet": "特攻",
@@ -758,20 +640,21 @@ class Handler(SimpleHTTPRequestHandler):
             page = {"/roster": ROSTER_HTML, "/match": MATCH_HTML,
                     "/experiments": EXP_HTML, "/synergy": SYN_HTML}[parsed.path]
             body = page.encode()
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+            self._html(body)
         elif parsed.path == "/api/prepare":
-            seed = int(qs.get("seed", ["7"])[0])
-            syn_on = qs.get("synergy", ["1"])[0] == "1"
-            scenario = qs.get("scenario", [""])[0] or None
-            t0 = time.time()
-            meta = render_battle(seed, syn_on, scenario)
-            print(f"[acceptance] seed={seed} 帧渲染+缓存 "
-                  f"{time.time() - t0:.1f}s（key={meta['key']}）")
-            self._json(meta)
+            try:
+                seed = int(qs.get('seed', ['7'])[0])
+                mode = normalize_mode(qs.get('mode', ['arena'])[0])
+                syn_on = qs.get('synergy', ['1'])[0] == '1'
+                scenario = qs.get('scenario', [''])[0] or None
+                started = time.time()
+                meta = render_battle(seed, syn_on, scenario, mode=mode)
+                print(f"[acceptance] {mode} seed={seed} {time.time() - started:.1f}s key={meta['key']}")
+                self._json(meta)
+            except ValueError as exc:
+                self._json({'ok': False, 'error': str(exc)}, 400)
+            except (OSError, RuntimeError) as exc:
+                self._json({'ok': False, 'error': '场景生成失败：' + str(exc)}, 500)
         elif parsed.path == "/api/roster":
             from roster import build_roster
             from data import pokedex
@@ -779,7 +662,7 @@ class Handler(SimpleHTTPRequestHandler):
             rows = []
             for tier, pieces in sorted(build_roster().items()):
                 for pc in pieces:
-                    b = dex.species[pc.species_id]["base"]
+                    b = dex.species_record(pc.species_id)["base"]
                     mv = dex.moves.get(pc.move_id) if pc.move_id else None
                     from render_mockups import TYPE_COLORS
                     rows.append({
@@ -798,8 +681,13 @@ class Handler(SimpleHTTPRequestHandler):
                 out = run_experiment(f"__match_{seed}")
             self._txt(out)
         elif parsed.path == "/api/scenarios":
-            self._json([{"key": k, "label": v["label"], "exp": v["exp"]}
-                       for k, v in SCENARIOS.items()])
+            try:
+                mode = normalize_mode(qs.get('mode', ['arena'])[0])
+                scenes = ARENA_SCENARIOS if mode == 'arena' else SCENARIOS
+                self._json([{'key': k, 'label': v['label'], 'exp': v['exp'], 'mode': mode}
+                            for k, v in scenes.items()])
+            except ValueError as exc:
+                self._json({'ok': False, 'error': str(exc)}, 400)
         elif parsed.path == "/api/experiments":
             self._json(sorted(set(WHITELIST) - {k for k in WHITELIST if k.startswith("__")}))
         elif parsed.path == "/api/experiment":
@@ -852,52 +740,32 @@ class Handler(SimpleHTTPRequestHandler):
             self.path = "/docs/design/mockups" + parsed.path[len("/mockups"):]
             super().do_GET()
         elif parsed.path.startswith("/reports/"):
-            self.path = "/reports" + parsed.path[len("/reports"):]
-            super().do_GET()
-        elif parsed.path == "/range":
-            # R1 单体档案靶场页：profile_range.py 生成的静态查看器
-            # （manifest.json + frame-NNN.png 相对路径），经 /reports 路由服务
-            # 指向最新的靶场证据目录（range-*/per-unit-*，按 mtime）
-            ev = ROOT / "reports/evidence"
-            dirs = sorted([d for d in ev.iterdir()
-                           if d.is_dir() and (d.name.startswith("range-")
-                                              or d.name.startswith("per-unit-"))],
-                          key=lambda d: d.stat().st_mtime)
-            idx = dirs[-1] / "index.html" if dirs else None
-            if idx is not None and idx.exists():
-                self.send_response(302)
-                self.send_header("Location",
-                                 f"/reports/{idx.relative_to(ROOT / 'reports')}")
-                self.end_headers()
+            if requested.is_file() and requested.suffix == '.html' and ROOT / 'reports' in requested.parents:
+                self._html(requested.read_text())
             else:
-                self.send_response(404)
-                self.send_header("Content-Type", "text/plain; charset=utf-8")
-                msg = ("靶场页未生成：先运行 "
-                       "python3 tools/mockups/profile_range.py --species 6,65,143")
-                body = msg.encode()
-                self.send_header("Content-Length", str(len(body)))
-                self.end_headers()
-                self.wfile.write(body)
+                self.path = "/reports" + parsed.path[len("/reports"):]
+                super().do_GET()
+        elif parsed.path == "/range":
+            try:
+                mode = normalize_mode(qs.get('mode', ['arena'])[0])
+            except ValueError as exc:
+                return self._txt(str(exc), 400)
+            # The live range always follows current code and catalog; exported evidence
+            # remains reachable by its explicit dated report URL.
+            self.send_response(302)
+            self.send_header('Location', '/animation-lab?mode=' + mode)
+            self.end_headers()
         elif parsed.path == "/device":
             from device_page import page_html
             body = page_html().encode()
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Cache-Control", "no-store")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+            self._html(body)
         elif parsed.path == "/api/device/input":
             from device_controls import api_input
             self._json(api_input({k: v[0] for k, v in qs.items()}))
         elif parsed.path == "/expedition":
             from expedition_page import EXPEDITION_HTML
             body = EXPEDITION_HTML.encode()
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+            self._html(body)
         elif parsed.path == "/api/expedition/profile":
             from expedition import api_profile
             self._json(api_profile())
@@ -920,11 +788,7 @@ class Handler(SimpleHTTPRequestHandler):
         elif parsed.path == "/demo":
             # Web 可玩 Demo（tools/acceptance/demo.py 提供页面与会话引擎）
             body = demo_mod.DEMO_HTML.encode()
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+            self._html(body)
         elif parsed.path == "/api/demo/action":
             params = {k: v[0] for k, v in qs.items()}
             self._json(demo_mod.api_action(params))
@@ -963,12 +827,27 @@ class Handler(SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
+    def _html(self, page) -> None:
+        """Serve a page with consistent, route-aware global navigation."""
+        path = urllib.parse.urlparse(self.path).path
+        page = page.decode() if isinstance(page, bytes) else page
+        body = portal.wrap_page(page, path).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.end_headers()
+        self.wfile.write(body)
+
     def _play_asset(self, filename: str, content_type: str) -> None:
-        """Serve only the fixed trial-page files; opening the page creates no session."""
+        """Serve fixed local UI files; HTML pages receive the shared navigation."""
         try:
             body = (Path(__file__).resolve().parent / filename).read_bytes()
         except OSError:
-            return self.send_error(503, "The trial page is temporarily unavailable")
+            return self.send_error(503, "The page is temporarily unavailable")
+        if content_type.startswith("text/html"):
+            return self._html(body)
         self.send_response(200)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
@@ -983,7 +862,7 @@ def main() -> None:
     ap.add_argument("--port", type=int, default=8799)
     args = ap.parse_args()
     url = f"http://127.0.0.1:{args.port}/"
-    print(f"PokeTactics 验收后台：{url}（Ctrl-C 退出）")
+    print(f"PokeTactics 统一入口：{url}（Ctrl-C 退出）")
     srv = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
     try:
         srv.serve_forever()

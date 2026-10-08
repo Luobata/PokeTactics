@@ -61,8 +61,8 @@ class Piece:
                  move_id=None, distance: int = MELEE) -> None:
         dex: Pokedex = pokedex()
         self.species_id = species_id
-        self.name = dex.species[species_id]["name_zh"]
-        self.types = tuple(dex.species[species_id]["types"])
+        self.name = dex.species_record(species_id)["name_zh"]
+        self.types = tuple(dex.species_record(species_id)["types"])
         self.tier = tier
         self.level = level
         self.move_id = move_id

@@ -3,6 +3,66 @@ import items
 import techniques
 
 
+COMPONENT_CHOICE_ROUNDS = (3, 6)
+
+
+def component_choice(run_id, round_no, seat):
+    """A milestone supply is separate from ordinary, result-dependent loot."""
+    if round_no not in COMPONENT_CHOICE_ROUNDS or type(seat) is not int or not 0 <= seat < 8:
+        raise ValueError('组件补给轮次或席位无效')
+    return {'id': f'{run_id}:r{round_no}:s{seat}:component',
+            'round': round_no, 'seat': seat, 'options': list(items.COMPONENT_ORDER),
+            'status': 'pending', 'choice': None, 'closed_reason': None}
+
+
+def claim_component(seat, reward, choice):
+    """Validate before granting; a repeated identical claim is idempotent."""
+    if (not isinstance(choice, str) or choice not in items.COMPONENT_ORDER
+            or choice not in reward['options'] or reward['seat'] != seat.seat):
+        raise ValueError('请选择本次补给中的有效组件')
+    if reward['status'] != 'pending':
+        if reward['status'] == 'claimed' and reward['choice'] == choice:
+            return False
+        raise ValueError('这份组件补给已处理，不能更换领取结果')
+    grant_rewards(seat, [{'kind': 'component', 'key': choice}])
+    reward.update(status='claimed', choice=choice)
+    return True
+
+
+def bot_component_choice(seat, options, rng):
+    """Prefer a component that unlocks a recipe; break equal scores by seed."""
+    from collections import Counter
+    counts = seat.inventory.components
+
+    def craftable(pair, extra=None):
+        return all(counts[key] + (key == extra) >= amount
+                   for key, amount in Counter(pair).items())
+
+    def score(component):
+        return sum(any(craftable(pair, component) for pair in spec['pairs'] or ())
+                   and not any(craftable(pair) for pair in spec['pairs'] or ())
+                   for key, spec in items.catalog('arena_v1').items()
+                   if key not in ('lucky_egg', 'evo_stone'))
+
+    scores = {key: score(key) for key in options}
+    best = max(scores.values())
+    return rng.choice([key for key in options if scores[key] == best])
+
+
+def component_choice_view(reward):
+    """Attach recipe information without changing the persisted choice ledger."""
+    options = []
+    for component in reward['options']:
+        recipes = [{'id': key, 'name': spec['name'],
+                    'recipes': [list(pair) for pair in spec['pairs']]}
+                   for key, spec in items.catalog('arena_v1').items()
+                   if any(component in pair for pair in spec['pairs'] or ())]
+        options.append({'id': component, 'name': items.COMPONENT_NAMES[component],
+                        'recipes': [row['id'] for row in recipes],
+                        'recipe_details': recipes})
+    return {**reward, 'options': options}
+
+
 def reward_view(grant):
     if not isinstance(grant, dict) or set(grant) != {'kind', 'key'}:
         raise ValueError('奖励物品字段无效')
@@ -14,7 +74,7 @@ def reward_view(grant):
     elif kind == 'item' and key in items.catalog('arena_v1') and key not in ('lucky_egg', 'evo_stone'):
         name, description = items.FINISHED[key]['name'], '成品装备，可直接装备到精灵。'
     elif kind == 'technique' and key in techniques.ids_for('arena_v1'):
-        spec = techniques.view(key)
+        spec = techniques.view(key, 'arena_v1')
         name, description = spec['name'], spec['description']
     else:
         raise ValueError('未知回合奖励')

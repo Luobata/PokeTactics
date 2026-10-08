@@ -75,9 +75,9 @@ def skill_of(species_id: int):
         return None
     from data import pokedex
     dex = pokedex()
-    if species_id not in dex.species:
+    if not dex.has_species(species_id):
         return None
-    base = dex.species[species_id]["base"]
+    base = dex.species_record(species_id)["base"]
     ranged = (prof["range"] > 1 if prof and prof["range"] is not None else
               base["special_attack"] > base["attack"])
     pool = _ROLE_POOL[_role_of(base, ranged)]

@@ -11,6 +11,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools/acceptance'))
 import demo
+from bots import PERSONALITIES
 from session_save import SessionCodec, LEGACY_COUNTER_PACING_FINGERPRINT, UnknownRulesError
 from esp32_runtime import StorageIOError
 from test_tactical_session import fast_render
@@ -258,7 +259,19 @@ class EvolutionChoices(unittest.TestCase):
             for command in saved['commands']:
                 result = demo._apply_action({'sid': self.sid, **command}); self.assertTrue(result['ok'], result)
         actual = self.codec.encode(session); actual['rules'] = LEGACY_COUNTER_PACING_FINGERPRINT
-        self.assertEqual(actual, saved['expected_after'])
+        expected = copy.deepcopy(saved['expected_after'])
+        initial = saved['initial']
+        opponent_seat = next(b if a == 0 else a for a, b in initial['pairs'] if 0 in (a, b))
+        opponent = next(seat for seat in initial['seats'] if seat['seat'] == opponent_seat)
+        opponent_name = f"{opponent_seat}·{PERSONALITIES[opponent['personality']]['label'][:3]}L{opponent['ability']}"
+        # Extend only the new report ledger, independently of the live session.
+        # Frozen outcomes and the original opponent record remain the oracle.
+        expected['battle_history'] = [{
+            'round': initial['round'] + index, 'winner': result['winner'],
+            'duration': result['duration'], 'pve': False, 'ghost': False,
+            'opp_name': opponent_name, 'statistics': None,
+        } for index, result in enumerate(saved['expected_battles'])]
+        self.assertEqual(actual, expected)
         self.assertEqual(battles, saved['expected_battles'])
 
 

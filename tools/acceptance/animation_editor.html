@@ -10,13 +10,16 @@
 .action-matrix{width:100%;border-collapse:collapse;margin-top:16px;font-size:11px;text-align:left;grid-column:1/-1}.action-matrix caption{text-align:left;color:var(--muted);padding-bottom:8px}.action-matrix th,.action-matrix td{padding:7px 6px;border-bottom:1px solid var(--line);font-weight:normal}.action-matrix th{color:var(--muted)}
 </style>
 <link rel="stylesheet" href="/tools/acceptance/ui_theme.css">
+<link rel="stylesheet" href="/tools/acceptance/animation_preview_ui.css">
+<script src="/tools/acceptance/animation_player.js"></script>
 </head>
 <body>
-<header class="top"><div class="top-inner"><div class="brand"><span class="pixel" aria-hidden="true"></span><div><div class="eyebrow">POKETACTICS · MOTION WORKBENCH</div><strong>动作编辑工作台</strong></div></div><a href="/animation-lab">← 动画验收</a></div></header>
-<main><div class="intro"><h1>调好动作，再逐帧看一次</h1><p>默认参数与调参结果共用一段战斗事件。点击生成后，由后端渲染真实帧；修改参数不会自动发起请求。</p></div>
+<header class="top"><div class="top-inner"><div class="brand"><span class="pixel" aria-hidden="true"></span><div><div class="eyebrow">POKETACTICS · MOTION WORKBENCH</div><strong>动作编辑工作台</strong></div></div><a id="lab-link" href="/animation-lab?mode=arena">← 动画实验室</a></div></header>
+<main><div class="intro"><h1>调好动作，再逐帧看一次</h1><p>当前竞技预览与试玩共用 960 × 640 战场及分件动作。默认与调参结果使用同一段战斗事件；也可切换经典设备模式。</p></div>
 <div id="error" class="error" role="alert" hidden></div><p id="notice" class="notice" role="status" aria-live="polite">选择角色与动作，点击「生成预览」开始。</p>
 <div class="workbench">
   <aside class="panel" aria-labelledby="settings-title"><div class="panel-heading"><h2 id="settings-title">01 / 演出参数</h2><span>只影响表现</span></div><form id="settings-form" class="form-body">
+    <label class="field mode-field"><span class="field-title">渲染模式</span><select id="mode" name="mode"><option value="arena">当前竞技 · 960 × 640</option><option value="classic">经典设备 · 240 × 320</option></select></label>
     <label class="field"><span class="field-title">上场宝可梦</span><select id="species" name="species" disabled><option>正在读取上场池…</option></select></label>
     <p id="coverage-note" class="form-note">读取角色能力…</p>
     <div class="form-pair"><label class="field"><span class="field-title">动作</span><select id="kind" name="kind"><option value="cast">大招</option><option value="attack">普通攻击</option><option value="idle">待机</option><option value="move">移动</option><option value="hit">受击</option><option value="death">退场</option></select></label><label class="field"><span class="field-title">种子</span><input id="seed" name="seed" type="number" min="0" max="4294967295" step="1" value="7" required></label></div>
@@ -24,33 +27,76 @@
     <label class="field"><span class="field-title">特效尺度 <output id="effect-value" for="effect-scale">1.00</output></span><input id="effect-scale" name="effect_scale" type="range" min="0.7" max="1.3" step="any" value="1"><span class="range-ends"><span>0.70</span><span>1.30</span></span></label>
     <label class="field"><span class="field-title">粒子密度 <output id="particle-value" for="particle-density">1.00</output></span><input id="particle-density" name="particle_density" type="range" min="0.5" max="1" step="any" value="1"><span class="range-ends"><span>0.50</span><span>1.00</span></span></label>
     <label class="field"><span class="field-title">身体动作幅度 <output id="motion-value" for="motion-scale">1.00</output></span><input id="motion-scale" name="motion_scale" type="range" min="0.5" max="1.5" step="any" value="1"><span class="range-ends"><span>0.50</span><span>1.50</span></span></label>
-    <div class="form-actions"><button id="render" class="button primary full" type="submit" disabled>生成预览</button><button id="defaults" class="button full" type="button">恢复默认参数</button></div>
+    <div class="form-actions"><button id="render" class="button primary full" type="submit" disabled>生成预览</button><button id="cancel-render" class="button full" type="button" disabled>取消生成</button><button id="retry-frame" class="button full" type="button" hidden>重试画面</button><button id="defaults" class="button full" type="button">恢复默认参数</button></div>
     <div class="preset-actions"><button id="import" class="button" type="button">导入 JSON</button><button id="export" class="button" type="button" disabled>导出预设</button><input id="file" type="file" accept=".json,application/json" hidden></div><p id="export-note" class="form-note">成功生成预览后可导出。预设保存角色及表现参数，不包含种子和动作类型。</p>
   </form></aside>
   <div><div id="dirty" class="dirty">尚未应用 · 点击生成预览</div><section class="panel" aria-labelledby="preview-title"><div class="panel-heading"><h2 id="preview-title">02 / 默认与调参对照</h2><span id="result-label">等待渲染</span></div><div class="preview-pair">
-    <div class="preview-pane"><h3>默认参数<span>同角色、同动作、同种子 · 默认参数</span></h3><div class="screen-box"><canvas id="base-canvas" width="240" height="320" tabindex="0" aria-label="默认动画预览，空格播放暂停，左右逐帧"></canvas><div class="screen-empty"><span>默认帧将在生成后出现</span></div></div><p id="base-caption" class="preview-caption">240 × 320 · 原生像素</p></div>
-    <div class="preview-pane"><h3>调参结果<span>本次成功渲染的参数</span></h3><div class="screen-box"><canvas id="current-canvas" width="240" height="320" tabindex="0" aria-label="调参动画预览，空格播放暂停，左右逐帧"></canvas><div class="screen-empty"><span>调参帧将在生成后出现</span></div></div><p id="current-caption" class="preview-caption">240 × 320 · 原生像素</p></div>
+    <div class="preview-pane"><h3>默认参数<span>同角色、同动作、同种子 · 默认参数</span></h3><div class="screen-box"><canvas id="base-canvas" width="960" height="640" tabindex="0" aria-label="默认动画预览，空格播放暂停，左右逐帧"></canvas><div class="screen-empty"><span>默认帧将在生成后出现</span></div></div><p id="base-caption" class="preview-caption">960 × 640 · 当前竞技</p></div>
+    <div class="preview-pane"><h3>调参结果<span>本次成功渲染的参数</span></h3><div class="screen-box"><canvas id="current-canvas" width="960" height="640" tabindex="0" aria-label="调参动画预览，空格播放暂停，左右逐帧"></canvas><div class="screen-empty"><span>调参帧将在生成后出现</span></div></div><p id="current-caption" class="preview-caption">960 × 640 · 当前竞技</p></div>
   </div><p id="applied" class="applied">未生成预览。调整表单后仍需点击「生成预览」。</p>
   <div class="transport"><div class="transport-row"><div class="play-buttons"><button id="previous" class="button" type="button" disabled aria-label="上一帧">←</button><button id="play" class="button" type="button" disabled>播放</button><button id="next" class="button" type="button" disabled aria-label="下一帧">→</button></div><label class="speed">倍速<select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label><p id="time" class="time-readout">— / — 帧 · — s</p></div><div class="timeline"><div id="phase-rail" class="phase-rail" aria-hidden="true"><div id="rail-fill" class="rail-fill"></div></div><label for="seek" class="small">拖动检查帧</label><input id="seek" class="seek" type="range" min="0" max="1" step="1" value="0" disabled><div id="phases" class="phase-labels"></div></div><p class="keyboard-help">空格：播放 / 暂停　← →：逐帧　拖动或点击阶段：暂停定位</p></div></section>
   <section class="panel" style="margin-top:20px" aria-labelledby="character-title"><div class="panel-heading"><h2 id="character-title">角色动作与战术</h2><span id="rig-state">读取中</span></div><div class="form-body"><p id="character-skill"></p><p id="character-tactic" class="form-note"></p><p id="character-counter" class="form-note"></p><p id="character-parts" class="form-note"></p><p id="character-action" class="form-note"></p><table class="action-matrix"><caption>动作覆盖 · 通用表现与专属制作分别验收</caption><thead><tr><th scope="col">动作</th><th scope="col">当前表现</th><th scope="col">部件轨道</th><th scope="col">预览</th></tr></thead><tbody id="action-matrix"></tbody></table><p class="form-note">全上场池可预览。已接入调参的角色可编辑色板、特效、粒子和整体动作幅度；逐部件关键帧编辑仍待实现。</p></div></section>
-  <div class="evidence"><section class="panel"><h2 id="snapshot-title">03 / 本次命中记录</h2><dl class="hp-grid"><div><dt id="before-hp-label">命中前 HP</dt><dd id="hp-before">—</dd></div><div><dt id="at-hp-label">命中时 HP</dt><dd id="hp-at">—</dd></div><div><dt id="before-energy-label">命中前能量</dt><dd id="energy-before">—</dd></div><div><dt id="at-energy-label">命中时能量</dt><dd id="energy-at">—</dd></div></dl><p id="skill-outcomes" class="evidence-note"></p><p class="evidence-note">快照跟随当前观察对象。受击与退场观察所选角色；攻击与大招观察命中目标。大招样本已预充能。</p></section><section class="panel"><h2>04 / 本次渲染数据</h2><dl id="metrics" class="metrics"><div><dt>尚无结果</dt><dd>—</dd></div></dl><p class="evidence-note">PC 预览数据，不等于 ESP32 真机性能。</p></section></div>
+  <div class="evidence"><section class="panel"><h2 id="snapshot-title">03 / 本次命中记录</h2><dl class="hp-grid"><div><dt id="before-hp-label">命中前 HP</dt><dd id="hp-before">—</dd></div><div><dt id="at-hp-label">命中时 HP</dt><dd id="hp-at">—</dd></div><div><dt id="before-energy-label">命中前能量</dt><dd id="energy-before">—</dd></div><div><dt id="at-energy-label">命中时能量</dt><dd id="energy-at">—</dd></div></dl><p id="shield-snapshot" class="evidence-note" hidden></p><p id="skill-outcomes" class="evidence-note"></p><p class="evidence-note">快照跟随实际观察对象。援护观察友军，架势观察自身，地形观察中心目标；受击与退场观察所选角色。大招样本已预充能。</p></section><section class="panel"><h2>04 / 本次渲染数据</h2><dl id="metrics" class="metrics"><div><dt>尚无结果</dt><dd>—</dd></div></dl><p class="evidence-note">PC 预览数据，不等于 ESP32 真机性能。</p></section></div>
   </div>
 </div><footer class="footer">预览使用本地后端渲染；页面只播放返回的帧。导入文件先经服务器校验，再应用到表单。</footer></main>
 <script>
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
+  const {PreviewPlayer,normalizePlayback,previewMode,presetMode,requestJSON} = window.PokeAnimation;
+  const query = new URLSearchParams(location.search);
+  let mode = previewMode(query.get('mode')); $('mode').value = mode; document.body.dataset.mode = mode;
   let HEROES = [], NAMES = {};
   const DEFAULTS = {palette:'classic',effect_scale:1,particle_density:1,motion_scale:1};
   const ACTIONS = {idle:'待机',move:'移动',attack:'普通攻击',cast:'大招',hit:'受击',death:'退场'};
-  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
-  let applied = null, frame = 0, playing = false, raf = 0, lastTick = null, cursor = 0;
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || false;
+  let applied = null, frame = 0, playing = false;
+  let renderToken = 0, renderAbort = null, catalogToken = 0, catalogAbort = null;
   let formRevision = 0, rendering = false, importing = false, characters = {};
   const finite = value => typeof value === 'number' && Number.isFinite(value);
   const fmt = (value,digits=2) => finite(value) ? value.toLocaleString('zh-CN',{maximumFractionDigits:digits}) : '未提供';
   const write = (id,value) => { $(id).textContent = value; };
   function showError(message) { $('error').hidden = false; write('error',message); }
   function clearError() { $('error').hidden = true; write('error',''); }
+  let player, pendingPlayer = null, retryRender = false;
+  function makePlayer() {
+    const instance = new PreviewPlayer({canvases:[$('base-canvas'),$('current-canvas')],
+      onFrame: value => { if (instance === player) updatePlaybackFrame(value); },
+      onState: value => {
+        if (instance !== player) return;
+        playing = value.playing;
+        write('play',value.wanted ? '暂停' : '播放');
+        $('retry-frame').hidden = value.status !== 'error' && !retryRender;
+        if (value.status === 'error') showError(value.error || '画面读取失败，请重试。');
+        if (value.status === 'ready' || value.status === 'playing') document.querySelectorAll('.screen-empty').forEach(node => node.hidden = true);
+        $('seek').dataset.cachedFrames = value.cached;
+      }});
+    instance.setSpeed($('speed').value);
+    return instance;
+  }
+  player = makePlayer();
+  function cancelRender(message = '已取消生成，可以重新选择后再试。') {
+    renderToken++; renderAbort?.abort(); renderAbort = null; rendering = false;
+    pendingPlayer?.cancel(); pendingPlayer = null;
+    $('render').disabled = !HEROES.length; $('cancel-render').disabled = true; write('render','生成预览');
+    pause(); write('notice',message); updateFormState();
+  }
+  function clearPreview() {
+    player.cancel(); applied = null; frame = 0; retryRender = false;
+    $('phases').replaceChildren(); $('phase-rail').querySelectorAll('.marker').forEach(node => node.remove()); $('rail-fill').style.width = '0%';
+    $('shield-snapshot').hidden=true; write('shield-snapshot','');
+    ['hp-before','hp-at','energy-before','energy-at'].forEach(id => write(id,'—')); $('metrics').replaceChildren(); write('skill-outcomes','');
+    write('snapshot-title','03 / 等待动作快照'); write('applied','未生成预览。调整表单后仍需点击「生成预览」。');
+    const [width,height] = mode === 'arena' ? [960,640] : [240,320];
+    for (const id of ['base-canvas','current-canvas']) {
+      const canvas = $(id); canvas.width = width; canvas.height = height;
+      const context = canvas.getContext('2d'); context.fillStyle = '#17221d'; context.fillRect(0,0,width,height);
+    }
+    document.querySelectorAll('.screen-empty').forEach(node => node.hidden = false);
+    ['play','previous','next','seek'].forEach(id => $(id).disabled = true);
+    ['base-caption','current-caption'].forEach(id => write(id,`${width} × ${height} · ${mode === 'arena' ? '当前竞技' : '经典设备'}`));
+    write('result-label','等待渲染'); write('time','— / — 帧 · — s');
+  }
   function settingsCopy(settings) {
     if (!settings || typeof settings !== 'object' || !['classic','vivid'].includes(settings.palette)) throw new Error('色板必须为 classic 或 vivid。');
     const ranges = {effect_scale:[.7,1.3],particle_density:[.5,1],motion_scale:[.5,1.5]};
@@ -65,61 +111,68 @@
     const species = Number($('species').value), seed = $('seed').valueAsNumber, kind = $('kind').value;
     if (!HEROES.includes(species) || !Object.hasOwn(ACTIONS,kind)) throw new Error('请选择支持的角色与动作。');
     if (!Number.isInteger(seed) || seed < 0 || seed > 4294967295) throw new Error('种子须为 0 至 4294967295 的整数。');
-    return {species,kind,seed,settings:settingsCopy({palette:$('palette').value,effect_scale:Number($('effect-scale').value),particle_density:Number($('particle-density').value),motion_scale:Number($('motion-scale').value)})};
+    return {mode,species,kind,seed,settings:settingsCopy({palette:$('palette').value,effect_scale:Number($('effect-scale').value),particle_density:Number($('particle-density').value),motion_scale:Number($('motion-scale').value)})};
   }
   function isDirty() { try { return !applied || JSON.stringify(readForm()) !== JSON.stringify(applied.config); } catch { return true; } }
   function showCharacter() {
     const entry = characters[$('species').value];
     if (!entry) return;
-    const bodyLabels = {part_rig:'专属部件动作',authored_pose:'手编整身动作',procedural:'通用程序化动作'};
-    write('rig-state',bodyLabels[entry.capabilities.body]);
+    const bodyLabels = {web_part_rig:'竞技关节动作',part_rig:'专属部件动作',authored_pose:'手编整身动作',procedural:'通用程序化动作'};
+    write('rig-state',bodyLabels[entry.capabilities.body] || entry.capabilities.body);
     const editable = entry.capabilities.editable_controls.length > 0;
     ['palette','effect-scale','particle-density','motion-scale'].forEach(id => $(id).disabled = !editable);
     write('coverage-note',HEROES.length+' 只可选 · '+(editable ? '该角色支持参数编辑。' : '该角色使用默认表现，支持播放与逐帧检查；调参尚未接入。'));
-    $('kind').querySelector('[value=cast]').disabled = !entry.skill.can_cast;
-    if (!entry.skill.can_cast) $('kind').value = 'attack';
-    write('character-skill',entry.name+' · '+entry.role+' / '+entry.skill.description);
+    $('kind').querySelector('[value=cast]').disabled = entry.skill.can_cast === false;
+    if (entry.skill.can_cast === false && $('kind').value === 'cast') $('kind').value = 'attack';
+    write('character-skill',entry.name+' · '+entry.role+' / '+entry.skill.description+(entry.skill.presentation?.authored?' · '+entry.skill.presentation.style+' / '+entry.skill.presentation.group+' · 原版参考：'+(entry.skill.presentation.reference?.moves || []).map(move=>move.name).join(' / '):''));
     write('character-tactic','站位与用途：'+entry.skill.tactic);
     write('character-counter','应对方式：'+entry.skill.counterplay);
     write('character-parts',entry.rig.parts.length ? (entry.rig.implemented ? '已接入部件：' : '计划部件：')+entry.rig.parts.map(part => part.label || part.name).join('、') : '当前使用通用整身动作，可正常上场；尚无物种部件拆解。');
     const matrix = entry.capabilities.action_matrix || {};
-    const modeLabels = {authored_pose:'手编整身',procedural:'通用动作',shared_overlay:'共享状态表现',shared_intro:'共享开场',pending:'待制作'};
+    const modeLabels = {web_part_rig:'竞技关节',part_rig:'专属部件',authored_pose:'手编整身',procedural:'通用动作',shared_overlay:'共享状态表现',shared_intro:'共享开场',pending:'待制作',procedural_joints:'程序化关节'};
     const current = matrix[$('kind').value];
     write('character-action','当前动作：'+(entry.motion_notes[$('kind').value] || (current ? current.label+' · '+modeLabels[current.body] : '等待能力资料')));
     $('action-matrix').replaceChildren();
     Object.entries(matrix).forEach(([key,value]) => {
       const row = document.createElement('tr');
-      [value.label,modeLabels[value.body] || value.body,value.parts==='authored'?'专属轨道':'—',value.preview && value.supported ? '可逐帧检查' : '待补'].forEach(label => {
+      [value.label,modeLabels[value.body] || value.body,value.parts==='authored'?'专属轨道':value.parts==='procedural_joints'?'程序化关节':value.parts==='none'?'无':value.parts || '—',value.preview && value.supported ? '可逐帧检查' : '待补'].forEach(label => {
         const cell = document.createElement('td'); cell.textContent = label; row.append(cell);
       });
       if (value.note) row.title = value.note;
       $('action-matrix').append(row);
     });
   }
-  async function loadCharacters() {
+  async function loadCharacters(preferred = Number($('species').value) || Number(query.get('species'))) {
+    const token = ++catalogToken, requestedMode = mode;
+    catalogAbort?.abort(); catalogAbort = new AbortController();
+    characters = {}; HEROES = []; NAMES = {}; $('species').replaceChildren(); $('species').value = '';
+    write('rig-state','读取中'); write('character-skill','正在读取当前模式的角色资料…');
+    ['character-tactic','character-counter','character-parts','character-action'].forEach(id => write(id,'')); $('action-matrix').replaceChildren();
+    $('species').disabled = $('render').disabled = true;
     try {
-      const response = await fetch('/api/animation/characters',{cache:'no-store'});
-      if (!response.ok) throw new Error('角色资料暂不可用');
-      const value = await response.json();
-      if (!value.ok || !value.characters) throw new Error('角色资料格式错误');
+      const value = await requestJSON('/api/animation/characters?'+new URLSearchParams({mode:requestedMode}),{signal:catalogAbort.signal,timeout:15000});
+      if (token !== catalogToken || mode !== requestedMode) return false;
+      if (!value.characters || typeof value.characters !== 'object') throw new Error('角色资料格式错误');
       characters = value.characters; HEROES = Object.values(characters).map(entry => entry.species);
       NAMES = Object.fromEntries(Object.values(characters).map(entry => [entry.species,entry.name]));
       $('species').replaceChildren();
-      for (const [tier,label] of [['signature','专属技能'],['generic','通用技能'],['legacy','基础招式'],['none','仅普攻']]) {
-        const entries = Object.values(characters).filter(entry => entry.skill.tier === tier);
-        if (!entries.length) continue;
-        const group = document.createElement('optgroup'); group.label = label+' · '+entries.length+' 只';
-        entries.forEach(entry => { const option = document.createElement('option'); option.value = entry.species;
-          option.textContent = '#'+String(entry.species).padStart(3,'0')+' '+entry.name;
-          option.disabled = !entry.capabilities.resource_ready; group.append(option); });
-        $('species').append(group);
-      }
-      const requested = Number(new URLSearchParams(location.search).get('species'));
-      $('species').value = HEROES.includes(requested) ? requested : HEROES.includes(6) ? 6 : HEROES[0];
-      $('species').disabled = false; $('render').disabled = false; updateFormState();
-    } catch (error) { write('rig-state','资料读取失败'); write('character-skill',error.message); }
+      Object.values(characters).forEach(entry => {
+        const option = document.createElement('option'); option.value = entry.species;
+        option.textContent = '#'+String(entry.species).padStart(3,'0')+' '+entry.name+' · '+(entry.skill?.name || '普通攻击');
+        option.disabled = entry.capabilities.resource_ready === false; $('species').append(option);
+      });
+      $('species').value = HEROES.includes(preferred) ? preferred : HEROES.includes(6) ? 6 : HEROES[0];
+      $('species').disabled = false; $('render').disabled = !HEROES.length; updateFormState();
+      $('lab-link').href = '/animation-lab?'+new URLSearchParams({mode,species:$('species').value});
+      return true;
+    } catch (error) {
+      if (token !== catalogToken || error.name === 'AbortError') return false;
+      write('rig-state','资料读取失败'); write('character-skill',error.message); showError(error.message);
+      write('notice','角色目录暂不可用，点击生成预览可重新读取。'); $('render').disabled = false; return false;
+    }
   }
   function updateFormState() {
+    document.body.dataset.mode = mode; $('lab-link').href = '/animation-lab?'+new URLSearchParams({mode,species:$('species').value});
     showCharacter();
     [['effect-scale','effect-value'],['particle-density','particle-value'],['motion-scale','motion-value']].forEach(([input,output]) => write(output,fmt(Number($(input).value),4)));
     const dirty = isDirty(); $('dirty').classList.toggle('ready',!dirty);
@@ -131,85 +184,33 @@
     $('species').value = species; $('palette').value = settings.palette;
     $('effect-scale').value = settings.effect_scale; $('particle-density').value = settings.particle_density; $('motion-scale').value = settings.motion_scale;
   }
-  async function post(url,body,timeoutMs=120000) {
-    const controller = new AbortController(), timer = setTimeout(() => controller.abort(),timeoutMs);
-    try {
-      const response = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-PokeTactics-Preview':'1'},body:typeof body === 'string' ? body : JSON.stringify(body),credentials:'same-origin',signal:controller.signal});
-      let result;
-      try { result = await response.json(); } catch { throw new Error('服务器返回的内容不是有效 JSON（HTTP '+response.status+'）。'); }
-      if (!response.ok || !result || result.ok !== true) throw new Error(typeof result?.error === 'string' ? result.error : '请求失败（HTTP '+response.status+'）。');
-      return result;
-    } catch (error) {
-      if (error.name === 'AbortError') throw new Error('等待预览超时。上一次成功画面已保留，可稍后重试。');
-      if (error instanceof TypeError) throw new Error('无法连接本地预览服务。请检查服务是否启动后重试。');
-      throw error;
-    } finally { clearTimeout(timer); }
-  }
-  function frameUrl(value) {
-    if (typeof value !== 'string') throw new Error('服务器返回了无效的帧地址。');
-    const url = new URL(value,location.href);
-    if (url.origin !== location.origin || !['http:','https:'].includes(url.protocol)) throw new Error('预览只允许加载本站帧资源。');
-    return url.href;
-  }
-  function validatePreview(result) {
-    if (!Array.isArray(result.frames) || !Array.isArray(result.base_frames) || !result.frames.length || result.frames.length !== result.base_frames.length || result.frames.length > 600) throw new Error('默认与调参帧数量无效或不一致。');
-    if (!finite(result.dt) || result.dt <= 0 || result.dt > 1 || !finite(result.clip_start)) throw new Error('预览帧的时间信息无效。');
-    const phases = result.phases;
+  function validatePreview(result, expectedMode) {
+    const value = normalizePlayback(result,{mode:expectedMode});
+    const phases = value.phases;
     if (!Array.isArray(phases) || !phases.length || phases.length > 8 || phases.some((phase,i) => !phase || typeof phase.label !== 'string' || !finite(phase.at) || (i && phase.at < phases[i-1].at))) throw new Error('预览动作阶段时间无效。');
-    return {...result,settings:settingsCopy(result.settings),frames:result.frames.map(frameUrl),base_frames:result.base_frames.map(frameUrl)};
+    return {...value,settings:settingsCopy(value.settings)};
   }
-  async function loadFrames(urls,onProgress) {
-    const images = new Array(urls.length); let next = 0, done = 0, failed = false;
-    async function worker() {
-      while (!failed && next < urls.length) {
-        const index = next++;
-        try { images[index] = await new Promise((resolve,reject) => {
-          const image = new Image(); let finished = false;
-          const timer = setTimeout(() => finish(new Error('读取预览帧超时，请重试。')),30000);
-          function finish(error) { if (finished) return; finished = true; clearTimeout(timer); image.onload = image.onerror = null; error ? reject(error) : resolve(image); }
-          image.onload = () => image.naturalWidth === 240 && image.naturalHeight === 320 ? finish() : finish(new Error('服务器帧尺寸不是 240 × 320。'));
-          image.onerror = () => finish(new Error('预览帧缺失或读取失败：'+new URL(urls[index]).pathname));
-          image.src = urls[index];
-        }); } catch (error) { failed = true; throw error; }
-        if (!failed) onProgress(++done,urls.length);
-      }
-    }
-    await Promise.all(Array.from({length:Math.min(6,urls.length)},worker));
-    return images;
-  }
-  function pause() { playing = false; cancelAnimationFrame(raf); raf = 0; lastTick = null; write('play','播放'); }
-  function paint(index) {
-    if (!applied) return;
-    frame = Math.max(0,Math.min(applied.images.length-1,Math.round(index))); cursor = frame;
-    [['base-canvas',applied.baseImages],['current-canvas',applied.images]].forEach(([id,images]) => {
-      const ctx = $(id).getContext('2d'); ctx.imageSmoothingEnabled = false; ctx.clearRect(0,0,240,320); ctx.drawImage(images[frame],0,0,240,320);
-    });
-    const time = applied.result.clip_start + frame*applied.result.dt;
-    $('seek').value = frame; $('rail-fill').style.width = (applied.images.length===1 ? 100 : frame/(applied.images.length-1)*100)+'%';
-    write('time',(frame+1)+' / '+applied.images.length+' 帧 · '+fmt(time,3)+' s');
+  function pause() { player.pause(); }
+  function paint(index) { player.seek(index); }
+  function play() { player.play(); }
+  function step(delta) { player.step(delta); }
+  function updatePlaybackFrame({frame:index,time,n,result}) {
+    frame = index; $('seek').value = index; $('seek').max = n-1;
+    $('rail-fill').style.width = (n===1 ? 100 : index/(n-1)*100)+'%';
+    write('time',(index+1)+' / '+n+' 帧 · '+fmt(time,3)+' s');
+    $('seek').setAttribute('aria-valuetext',fmt(time,3)+' 秒，第 '+(index+1)+' 帧');
     document.querySelectorAll('[data-phase]').forEach(button => {
-      const phaseIndex = Number(button.dataset.phase), phases = applied.result.phases, start = phases[phaseIndex].at;
+      const phaseIndex = Number(button.dataset.phase), phases = result.phases || [], start = phases[phaseIndex]?.at;
       const end = phaseIndex+1 < phases.length ? phases[phaseIndex+1].at : Infinity;
       button.classList.toggle('current',time+1e-8 >= start && time < end);
     });
   }
-  function tick(now) {
-    if (!playing || !applied) return;
-    if (lastTick !== null) {
-      const position = cursor + (now-lastTick)/1000 * Number($('speed').value) / applied.result.dt;
-      if (position >= applied.images.length-1) { paint(applied.images.length-1); pause(); return; }
-      paint(Math.floor(position)); cursor = position;
-    }
-    lastTick = now; raf = requestAnimationFrame(tick);
-  }
-  function play() { if (!applied) return; if (frame === applied.images.length-1) paint(0); playing = true; lastTick = null; write('play','暂停'); cancelAnimationFrame(raf); raf = requestAnimationFrame(tick); }
-  function step(delta) { pause(); paint(frame+delta); }
   function showPhases() {
     $('phase-rail').querySelectorAll('.marker').forEach(node => node.remove()); $('phases').replaceChildren();
-    const total = Math.max(applied.result.dt,(applied.images.length-1)*applied.result.dt);
+    const total = Math.max(applied.result.dt,(applied.result.n-1)*applied.result.dt);
     $('phases').style.gridTemplateColumns = 'repeat('+applied.result.phases.length+',minmax(0,1fr))';
     applied.result.phases.forEach(({label,at},index) => {
-      const marker = document.createElement('span'); marker.className = 'marker'+(label==='命中'?' impact':'');
+      const marker = document.createElement('span'); marker.className = 'marker'+(['命中','生效'].includes(label)?' impact':'');
       marker.style.left = Math.max(0,Math.min(100,(at-applied.result.clip_start)/total*100))+'%'; $('phase-rail').append(marker);
       const button = document.createElement('button'), value = document.createElement('strong'); button.type = 'button'; button.dataset.phase = index;
       button.textContent = label; value.textContent = fmt(at,3)+' s'; button.append(value);
@@ -218,7 +219,7 @@
   }
   function showMetrics(value) {
     $('metrics').replaceChildren();
-    const labels = {particle_peak:'粒子峰值',signature_track_peak:'技能轨峰值',particle_limit:'粒子上限',signature_track_limit:'技能轨上限',host_frame_ms_p95:'PC 帧耗时 p95 / ms',frame_ms_p95:'帧耗时 p95 / ms',frame_ms_max:'帧耗时 max / ms',frame_ms_p50:'帧耗时 p50 / ms',render_ms:'渲染耗时 / ms',frames:'帧数',scope:'测量范围'};
+    const labels = {particle_peak:mode==='arena'?'通用粒子峰值（不含招式像素帧）':'粒子峰值',signature_track_peak:'技能轨峰值',particle_limit:mode==='arena'?'通用粒子上限':'粒子上限',signature_track_limit:'技能轨上限',host_frame_ms_p95:'PC 帧耗时 p95 / ms',frame_ms_p95:'帧耗时 p95 / ms',frame_ms_max:'帧耗时 max / ms',frame_ms_p50:'帧耗时 p50 / ms',render_ms:'渲染耗时 / ms',frames:'帧数',scope:'测量范围'};
     let count = 0;
     function visit(object,prefix='',depth=0) {
       if (!object || typeof object !== 'object' || depth > 2) return;
@@ -235,16 +236,22 @@
   function showResult() {
     const {config,result} = applied, settings = config.settings;
     document.querySelectorAll('.screen-empty').forEach(node => node.hidden = true);
-    ['play','previous','next','seek'].forEach(id => $(id).disabled = false); $('seek').max = applied.images.length-1;
-    write('result-label',NAMES[config.species]+' · '+ACTIONS[config.kind]+' · seed '+config.seed);
+    ['play','previous','next','seek'].forEach(id => $(id).disabled = false); $('seek').max = applied.result.n-1;
+    write('result-label',(config.mode==='arena'?'竞技 · ':'经典 · ')+NAMES[config.species]+' · '+ACTIONS[config.kind]+' · seed '+config.seed);
     write('applied',(characters[config.species]?.capabilities.editable_controls.length ? '已渲染：' : '默认表现（两栏一致）：')+settings.palette+' / 特效 '+fmt(settings.effect_scale,4)+' / 粒子 '+fmt(settings.particle_density,4)+' / 动作 '+fmt(settings.motion_scale,4));
-    write('base-caption','240 × 320 · '+applied.baseImages.length+' 帧'); write('current-caption','240 × 320 · '+applied.images.length+' 帧');
+    const dimensions = result.width+' × '+result.height+' · '+(result.mode==='arena'?'当前竞技':'经典设备');
+    write('base-caption',dimensions+' · '+result.n+' 帧'); write('current-caption',dimensions+' · '+result.n+' 帧');
     [['hp-before',result.target_before_impact?.hp],['hp-at',result.target_at_impact?.hp],['energy-before',result.target_before_impact?.energy],['energy-at',result.target_at_impact?.energy]].forEach(([id,value]) => write(id,fmt(value,0)));
-    const isHit = ['attack','cast','hit'].includes(config.kind);
-    write('snapshot-title','03 / '+(result.subject?.name || '角色')+' · '+(isHit ? '命中快照' : '动作快照'));
-    write('before-hp-label',(isHit?'命中前':'开始时')+' HP'); write('at-hp-label',(isHit?'命中时':'观察时')+' HP');
-    write('before-energy-label',(isHit?'命中前':'开始时')+'能量'); write('at-energy-label',(isHit?'命中时':'观察时')+'能量');
-    const labels = {side_hit:'追加伤害',heal:'治疗',energy_drain:'吸取能量',knockback:'击退',flinch:'畏缩'};
+    const assistance=config.kind==='cast' && ['ally','self','field'].includes(result.targeting || result.native_skill?.targeting);
+    const isHit = !assistance && ['attack','cast','hit'].includes(config.kind);
+    const beforeLabel=assistance?'生效前':isHit?'命中前':'开始时', atLabel=assistance?'生效时':isHit?'命中时':'观察时';
+    write('snapshot-title','03 / '+(result.subject?.name || '角色')+' · '+(assistance?'生效快照':isHit?'命中快照':'动作快照'));
+    write('before-hp-label',beforeLabel+' HP'); write('at-hp-label',atLabel+' HP');
+    write('before-energy-label',beforeLabel+'能量'); write('at-energy-label',atLabel+'能量');
+    const shieldBefore=result.target_before_impact?.shield, shieldAfter=result.target_at_impact?.shield;
+    $('shield-snapshot').hidden=!finite(shieldBefore) || !finite(shieldAfter) || !(shieldBefore>0 || shieldAfter>0);
+    write('shield-snapshot','护盾：'+fmt(shieldBefore,0)+' → '+fmt(shieldAfter,0));
+    const labels = {side_hit:'追加伤害',heal:'治疗',energy_drain:'吸取能量',knockback:'击退',flinch:'畏缩',guard:'减伤',shield:'护盾',absorb:'护盾吸收',expire:'效果到期',taunt:'嘲讽',thorns:'反击姿态',thorn_hit:'毒刺反击',place:'铺设地形',charge:'反击蓄力',empowered_basic:'强化普攻（额外部分）',vulnerability:'击退易伤',status:'施加状态',cleanse:'净化',pull:'拉近',energy:'补充能量'};
     write('skill-outcomes',(result.skill_effects || []).map(effect => {
       const value = effect.payload.damage ?? effect.payload.amount ?? effect.payload.stolen;
       return fmt(effect.at,2)+'s '+effect.target+' '+(labels[effect.effect] || effect.effect)+(finite(value) ? ' '+value : '');
@@ -253,20 +260,32 @@
   }
   async function render(event) {
     event?.preventDefault(); if (rendering) return;
+    if (!HEROES.length && !await loadCharacters()) return;
     let config; try { config = readForm(); } catch (error) { showError(error.message); return; }
-    clearError(); const revision = formRevision, resume = !reducedMotion && (!applied || playing); pause(); rendering = true; $('render').disabled = true; write('render','后端渲染中…'); updateFormState();
-    write('notice','正在生成默认与调参结果，请稍候。已有成功预览会保留，表单可以继续修改。');
+    const token = ++renderToken, revision = formRevision, resume = !reducedMotion && (!applied || player.wanted);
+    renderAbort?.abort(); renderAbort = new AbortController();
+    clearError(); retryRender = false; pause(); rendering = true; $('render').disabled = true; $('cancel-render').disabled = false;
+    write('render','后端渲染中…'); updateFormState(); write('notice','正在生成默认与调参结果…');
     try {
-      const result = validatePreview(await post('/api/animation/preview',config));
-      write('render','正在读取帧…');
-      const all = await loadFrames([...result.base_frames,...result.frames],(done,total) => write('notice','正在读取真实渲染帧 '+done+' / '+total+'…'));
-      pause();
-      applied = {config:{...config,settings:result.settings},result,baseImages:all.slice(0,result.base_frames.length),images:all.slice(result.base_frames.length)};
+      const result = validatePreview(await requestJSON('/api/animation/preview',{method:'POST',body:config,signal:renderAbort.signal}),config.mode);
+      if (token !== renderToken || config.mode !== mode) return;
+      write('render','正在读取画面…');
+      const candidate = makePlayer(); pendingPlayer = candidate;
+      await candidate.load(result,{mode:config.mode});
+      if (token !== renderToken || config.mode !== mode) { candidate.cancel(); return; }
+      candidate.setSpeed($('speed').value);
+      const previousPlayer = player; player = candidate; pendingPlayer = null; previousPlayer.cancel();
+      applied = {config:{...config,settings:result.settings},result};
       if (formRevision === revision) applyFields(config.species,result.settings);
       showResult(); write('notice',formRevision===revision ? '预览已就绪，可播放、逐帧检查或导出预设。' : '预览已就绪；生成期间的新表单改动仍未应用。');
       if (resume) play();
-    } catch (error) { showError(error.message || '预览失败，请重试。'); write('notice',applied ? '生成失败，上一次成功画面与记录已保留。' : '尚无成功预览，请检查错误后重试。'); }
-    finally { rendering = false; $('render').disabled = false; write('render','生成预览'); updateFormState(); }
+    } catch (error) {
+      if (token !== renderToken || error.name === 'AbortError') return;
+      pendingPlayer?.cancel(); pendingPlayer = null; retryRender = true; $('retry-frame').hidden = false;
+      showError(error.message || '预览失败，请重试。'); write('notice',applied ? '本次预览未完成；保留上一次成功画面，可继续播放或重试生成。' : '预览未完成，可以重试画面或重新生成。');
+    } finally {
+      if (token === renderToken) { rendering = false; $('render').disabled = !HEROES.length; $('cancel-render').disabled = true; write('render','生成预览'); updateFormState(); }
+    }
   }
   async function importFile() {
     const file = $('file').files[0]; $('file').value = ''; if (!file || importing) return;
@@ -275,38 +294,51 @@
       if (file.size > 8192) throw new Error('预设文件过大，请选择 8 KB 以内的 JSON。');
       const input = await file.text(); try { JSON.parse(input); } catch { throw new Error('预设不是有效的 JSON 文件。'); }
       write('notice','正在校验预设；当前画面保持不变。');
-      const result = await post('/api/animation/preset/validate',input,15000), preset = result.preset;
-      if (!preset || preset.schema_version !== 1 || !HEROES.includes(preset.species)) throw new Error('服务器返回的预设格式或角色无效。');
+      const parsed = JSON.parse(input), importedMode = presetMode(parsed);
+      if (!importedMode) throw new Error('预设渲染模式无效。');
+      const result = await requestJSON('/api/animation/preset/validate',{method:'POST',body:input,timeout:15000}), preset = result.preset;
+      if (!preset || preset.schema_version !== 1 || !Number.isInteger(preset.species) || presetMode(preset) !== importedMode) throw new Error('服务器返回的预设格式或模式无效。');
       const settings = settingsCopy(preset.settings);
       if (formRevision !== revision) { write('notice','预设已通过校验，但校验期间表单已修改，本次导入未应用。可重新选择文件导入。'); return; }
-      applyFields(preset.species,settings); formRevision++; write('notice','预设已校验并应用到表单。点击「生成预览」后查看效果。');
+      cancelRender(); mode = importedMode; $('mode').value = mode; clearPreview();
+      const loaded = await loadCharacters(preset.species);
+      if (formRevision !== revision || mode !== importedMode) { write('notice','角色载入期间表单已修改，本次导入未应用。可重新选择文件导入。'); return; }
+      if (!loaded) throw new Error('角色目录读取失败，请重新导入。');
+      if (!HEROES.includes(preset.species)) throw new Error('预设角色不在所选模式中。');
+      applyFields(preset.species,settings); formRevision++; write('notice','预设已校验并应用到'+(mode==='arena'?'当前竞技':'经典设备')+'表单。点击生成预览查看效果。');
     } catch (error) { showError(error.message || '预设导入失败。'); }
     finally { importing = false; $('import').disabled = false; updateFormState(); }
   }
   function exportPreset() {
     if (!applied || isDirty() || rendering || importing) { showError('请先成功生成当前参数的预览，再导出预设。'); return; }
-    const preset = {schema_version:1,species:applied.config.species,settings:settingsCopy(applied.config.settings)};
+    const preset = {schema_version:1,mode:applied.config.mode,species:applied.config.species,settings:settingsCopy(applied.config.settings)};
     const url = URL.createObjectURL(new Blob([JSON.stringify(preset,null,2)+'\n'],{type:'application/json'}));
-    const link = document.createElement('a'); link.href = url; link.download = 'animation-'+preset.species+'-preset.json'; document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url),1000);
+    const link = document.createElement('a'); link.href = url; link.download = 'animation-'+preset.mode+'-'+preset.species+'-preset.json'; document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url),1000);
     write('notice','已导出本次成功渲染的预设。');
   }
   $('settings-form').addEventListener('submit',render);
-  $('settings-form').addEventListener('input',event => { if (event.target === $('file')) return;
+  $('settings-form').addEventListener('input',event => { if (event.target === $('file') || event.target === $('mode')) return;
+    if (event.target === $('species') && rendering) cancelRender('角色已切换，正在生成的预览已取消。');
     if (event.target === $('species') && !characters[$('species').value]?.capabilities.editable_controls.length) applyFields(Number($('species').value),DEFAULTS);
     formRevision++; updateFormState(); });
   $('defaults').addEventListener('click',() => { applyFields(Number($('species').value),DEFAULTS); $('seed').value = 7; formRevision++; clearError(); updateFormState(); write('notice','默认参数已恢复；点击「生成预览」应用。'); });
   $('import').addEventListener('click',() => $('file').click()); $('file').addEventListener('change',importFile); $('export').addEventListener('click',exportPreset);
-  $('play').addEventListener('click',() => playing ? pause() : play()); $('previous').addEventListener('click',() => step(-1)); $('next').addEventListener('click',() => step(1));
-  $('seek').addEventListener('input',() => { pause(); paint(Number($('seek').value)); }); $('speed').addEventListener('change',() => { lastTick = null; });
+  $('mode').addEventListener('change',async () => {
+    cancelRender('已切换模式，请选择角色后生成预览。'); mode = previewMode($('mode').value); formRevision++;
+    characters = {}; HEROES = []; clearPreview(); clearError(); await loadCharacters(); updateFormState();
+  });
+  $('cancel-render').addEventListener('click',() => { cancelRender(); if (!applied || player.result?.key !== applied.result.key) player.cancel(); });
+  $('retry-frame').addEventListener('click',() => { clearError(); if (!retryRender && applied && player.result?.key === applied.result.key) player.retry(); else render(); });
+  $('play').addEventListener('click',() => player.wanted ? pause() : play()); $('previous').addEventListener('click',() => step(-1)); $('next').addEventListener('click',() => step(1));
+  $('seek').addEventListener('input',() => { pause(); paint(Number($('seek').value)); }); $('speed').addEventListener('change',() => player.setSpeed($('speed').value));
   document.addEventListener('keydown',event => {
     if (!applied || event.altKey || event.ctrlKey || event.metaKey || event.target.closest('input,select,textarea,button,a,[contenteditable]')) return;
-    if (event.code === 'Space') { event.preventDefault(); playing ? pause() : play(); }
+    if (event.code === 'Space') { event.preventDefault(); player.wanted ? pause() : play(); }
     else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); step(event.key === 'ArrowLeft' ? -1 : 1); }
   });
   document.addEventListener('visibilitychange',() => { if (document.hidden) pause(); });
-  const query = new URLSearchParams(location.search), species = Number(query.get('species'));
 
   if (Object.hasOwn(ACTIONS,query.get('kind'))) $('kind').value = query.get('kind');
-  updateFormState(); loadCharacters();
+  clearPreview(); updateFormState(); loadCharacters();
 })();
 </script></body></html>

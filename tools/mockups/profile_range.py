@@ -2,7 +2,8 @@
 """Standalone real-Battle training range; no acceptance server imports.
 
 scene is 'dummy', 'melee', 'ranged' (all four clips), or '<scene>/<action>'.
-action is attack/cast/move/hit. Returned frames are native 240x320 RGBA.
+action is attack/cast/move/hit. CLI defaults to the trial's 960x640 arena;
+--mode classic preserves the 240x320 device renderer and original fixtures.
 Training fixtures have padded HP and fixed deployment, never fabricated events.
 """
 import argparse
@@ -14,6 +15,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from PIL import Image, ImageDraw
+from presentation_modes import make_renderer, mode_info, normalize_mode
 
 try:
     from . import render_battle_gif as r
@@ -48,9 +50,14 @@ def _assets():
     return r.Front(), r.Palettes(), r.Font16()
 
 
-def make_scene(species_id, scene, seed, action="attack", visual_overrides=None):
+def make_scene(species_id, scene, seed, action="attack", visual_overrides=None, *, mode='classic'):
+    mode = normalize_mode(mode)
     if scene not in SCENES:
         raise ValueError(f"unknown scene {scene!r}; expected {tuple(SCENES)}")
+    if mode == 'arena':
+        from arena_preview_scene import make_preview_scene as arena_scene
+        return arena_scene(species_id, 'cast' if action == 'skill' else action, seed,
+                           visual_overrides=visual_overrides, scene=scene)
     pieces = {p.species_id: p for ps in r.build_roster().values() for p in ps}
     if species_id not in pieces:
         raise ValueError(f"species {species_id} is not in the roster")
@@ -84,20 +91,23 @@ def make_scene(species_id, scene, seed, action="attack", visual_overrides=None):
                              visual_overrides=visual_overrides)
 
 
-def make_signature_scene(species_id, seed=7, visual_overrides=None):
+def make_signature_scene(species_id, seed=7, visual_overrides=None, *, mode='classic'):
     """A precharged real skill in a layout that exposes its tactical effect.
 
     Initial HP/energy/positions are recorded inputs, including the injured ally
     for solar healing. Subsequent damage, links, healing and movement are produced
     by Battle, not by the showcase or renderer.
     """
+    if normalize_mode(mode) == 'arena':
+        from arena_preview_scene import make_preview_scene as arena_scene
+        return arena_scene(species_id, 'cast', seed, visual_overrides=visual_overrides)
     from experiment_signatures import make_signature_battle, run_fixture
     battle = run_fixture(make_signature_battle(species_id, seed))
     return r.BattleAnimation([], [], seed, *_assets(), battle=battle,
                              visual_overrides=visual_overrides)
 
 
-def make_preview_scene(species_id, kind, seed=7, visual_overrides=None):
+def make_preview_scene(species_id, kind, seed=7, visual_overrides=None, *, mode='classic', scene='dummy'):
     """Create a real action fixture for any roster species, including generic casts.
 
     Cast fixtures begin injured and fully charged against three durable water
@@ -107,6 +117,9 @@ def make_preview_scene(species_id, kind, seed=7, visual_overrides=None):
     from action_preview import PREVIEW_ACTIONS
     if kind not in PREVIEW_ACTIONS:
         raise ValueError(f"unknown preview action {kind!r}")
+    if normalize_mode(mode) == 'arena':
+        from arena_preview_scene import make_preview_scene as arena_scene
+        return arena_scene(species_id, kind, seed, visual_overrides=visual_overrides, scene=scene)
     if kind == "idle":
         pieces = {p.species_id: p for ps in r.build_roster().values() for p in ps}
         if species_id not in pieces:
@@ -121,7 +134,7 @@ def make_preview_scene(species_id, kind, seed=7, visual_overrides=None):
         return r.BattleAnimation([], [], seed, *_assets(), battle=battle,
                                  visual_overrides=visual_overrides)
     if kind != "cast":
-        return make_scene(species_id, "dummy", seed, kind, visual_overrides)
+        return make_scene(species_id, scene, seed, kind, visual_overrides)
     if species_id in r.SUPPORTED_SPECIES:
         return make_signature_scene(species_id, seed, visual_overrides)
     from data import ENERGY_MAX
@@ -148,8 +161,37 @@ def make_preview_scene(species_id, kind, seed=7, visual_overrides=None):
                              visual_overrides=visual_overrides)
 
 
-def _clip(species_id, scene, seed, action):
+def _clip(species_id, scene, seed, action, *, mode='classic'):
+    mode = normalize_mode(mode)
+    if mode == 'arena':
+        from action_preview import describe_clip
+        import arena_skills
+        anim = make_preview_scene(species_id, action, seed, mode=mode, scene=scene)
+        clip = describe_clip(anim, action)
+        start, end = clip['clip_start'], clip['clip_end']
+        dt = .05
+        times = [round(start+i*dt, 6) for i in range(math.ceil((end-start)/dt-1e-8)+1)]
+        renderer = make_renderer(anim, mode)
+        frames = [renderer.frame(t) for t in times]
+        index = clip['source_index']
+        if index is None:
+            scheduled = next(ev for ev in anim.timeline.events
+                             if ev[1] == action and ev[2] == 0
+                             and abs(ev[0]-clip['snapshot_at'])<1e-8)
+            index = anim.timeline.source_index_by_event[id(scheduled)]
+        event = anim.events[index]
+        timing = clip['action']
+        return frames, {**mode_info(mode), **clip, 'event': event, 'source_event_index': index,
+                        'sim_start': max(0., event[0]-.2), 'sim_end': event[0]+1.3,
+                        'presentation_start': times[0], 'presentation_end': times[-1],
+                        'action_timing': ({key: timing[key] for key in
+                                         ('start','release','impact','recover_end')} if timing else None),
+                        'real_events': len(anim.events), 'seed': seed,
+                        'skill': arena_skills.skill_of(species_id),
+                        'fixture': dict(anim.preview_fixture),
+                        'frame_times': times, 'frame_duration_ms': 50, 'time_domain': 'presentation'}
     anim = make_scene(species_id, scene, seed, action)
+    renderer = make_renderer(anim, mode)
     if action == "hit":
         candidates = [e for e in anim.events if e[1] == "attack" and e[3] == 0 and e[4] > 0]
     else:
@@ -173,11 +215,11 @@ def _clip(species_id, scene, seed, action):
         start, end = max(.4, onset - .2), onset + 1.3
     times = [round(start + i * r.FPS_DT, 6)
              for i in range(math.ceil((end - start) / r.FPS_DT - 1e-8) + 1)]
-    frames = [anim.playback_frame(t, show_cutins=False) for t in times]
+    frames = [renderer.frame(t,show_cutins=False) for t in times]
     source_end = event[0] + (1.3 if action in ("cast", "move") else .9)
     if action in ("attack", "hit"):
         source_end = max(source_end, event[0] + anim._attack_delay(event) + .4)
-    return frames, {"event": event, "source_event_index": source_index,
+    return frames, {**mode_info(mode), "event": event, "source_event_index": source_index,
                     "sim_start": max(0., event[0] - .2), "sim_end": source_end,
                     "presentation_start": times[0], "presentation_end": times[-1],
                     "action_timing": ({name: getattr(timing, name) for name in
@@ -185,16 +227,16 @@ def _clip(species_id, scene, seed, action):
                     "real_events": len(anim.events), "seed": seed,
                     "skill": r.skill_profile(species_id),
                     "cast_windup_seconds": r.cast_windup(species_id),
-                    "frame_times": times, "time_domain": "presentation"}
+                    "frame_times": times, "frame_duration_ms": round(r.FPS_DT*1000), "time_domain": "presentation"}
 
 
-def render_species_scene(species_id, scene, seed):
+def render_species_scene(species_id, scene, seed, *, mode='classic'):
     """Return deterministic PIL frames; scene='dummy/cast' selects one clip."""
     parts = scene.split("/")
     target, actions = parts[0], (parts[1],) if len(parts) == 2 else ACTIONS
     if len(parts) > 2 or any(a not in ACTIONS for a in actions):
         raise ValueError("scene must be dummy|melee|ranged[/attack|cast|move|hit]")
-    return [frame for action in actions for frame in _clip(species_id, target, seed, action)[0]]
+    return [frame for action in actions for frame in _clip(species_id, target, seed, action, mode=mode)[0]]
 
 
 def frame_hash(frames):
@@ -208,11 +250,19 @@ def frame_hash(frames):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--species", default="6,65,143")
+    parser.add_argument("--mode", choices=('arena','classic'), default='arena')
+    parser.add_argument("--species", default=None, help='all or comma-separated species ids')
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--seed", type=int, default=7)
     args = parser.parse_args()
-    ids = [int(s) for s in args.species.split(",")]
+    from character_catalog import character_catalog
+    catalog = character_catalog(mode=args.mode)
+    selection = args.species or ('68,212,26,9' if args.mode == 'arena' else '6,65,143')
+    ids = sorted(map(int,catalog)) if selection == 'all' else list(dict.fromkeys(map(int,selection.split(','))))
+    if not ids or any(str(sid) not in catalog for sid in ids):
+        parser.error('species must be in the selected roster')
+    info = mode_info(args.mode)
+    width,height = info['width'],info['height']
     args.out.mkdir(parents=True, exist_ok=True)
     clips, sheets = [], []
     for sid in ids:
@@ -220,8 +270,10 @@ def main():
         rows = []
         for scene in SCENES:
             for action in ACTIONS:
-                frames, meta = _clip(sid, scene, args.seed, action)
-                again = render_species_scene(sid, f"{scene}/{action}", args.seed)
+                if args.mode=='arena' and action=='cast' and scene!='dummy':
+                    continue  # Native casts share one neutral-recipient fixture.
+                frames, meta = _clip(sid, scene, args.seed, action, mode=args.mode)
+                again = render_species_scene(sid, f"{scene}/{action}", args.seed, mode=args.mode)
                 digest = frame_hash(frames)
                 if digest != frame_hash(again):
                     raise AssertionError(f"non-deterministic: {sid}/{scene}/{action}")
@@ -232,42 +284,65 @@ def main():
                     stale.unlink()
                 for i, frame in enumerate(frames):
                     frame.save(dest / f"frame-{i:03d}.png")
-                contact = Image.new("RGB", (r.W * 4, (r.H + 24) * ((len(frames) + 3) // 4)), r.PAPER)
+                contact = Image.new("RGB", (width * 4, (height + 24) * ((len(frames) + 3) // 4)), r.PAPER)
                 for i, frame in enumerate(frames):
-                    x, y = i % 4 * r.W, i // 4 * (r.H + 24)
+                    x, y = i % 4 * width, i // 4 * (height + 24)
                     contact.paste(frame.convert("RGB"), (x, y + 24))
                     ImageDraw.Draw(contact).text((x + 4, y + 4), f"{sid}/{scene}/{action} #{i}", fill=r.INK)
                 contact.save(dest / "contact.png")
                 frames[0].save(dest / "animation.gif", save_all=True,
-                               append_images=frames[1:], duration=100, loop=0)
-                row = Image.new("RGB", (r.W * len(frames), r.H + 24), r.PAPER)
+                               append_images=frames[1:], duration=meta['frame_duration_ms'], loop=0)
+                # Arena overview sheets use thumbnails from the outset. Native
+                # PNGs/GIFs and the per-clip contact sheet keep the full canvas.
+                row_width = 240 if args.mode == 'arena' else width
+                row_height = height * row_width // width
+                row = Image.new("RGB", (row_width * len(frames), row_height + 24), r.PAPER)
                 ImageDraw.Draw(row).text((4, 5), f"{sid} / {scene} / {action}", fill=r.INK)
                 for i, frame in enumerate(frames):
-                    row.paste(frame.convert("RGB"), (i * r.W, 24))
+                    thumbnail = frame.convert("RGB")
+                    if args.mode == 'arena':
+                        thumbnail = thumbnail.resize((row_width, row_height))
+                    row.paste(thumbnail, (i * row_width, 24))
                 rows.append(row)
                 # Four useful phases per clip in the compact master sheet.
-                strip = Image.new("RGB", (r.W * 4, r.H + 24), r.PAPER)
+                strip = Image.new("RGB", (width * 4, height + 24), r.PAPER)
                 ImageDraw.Draw(strip).text((4, 5), f"{sid} / {scene} / {action}", fill=r.INK)
                 for x, i in enumerate([round((len(frames) - 1) * k / 3) for k in range(4)]):
-                    strip.paste(frames[i].convert("RGB"), (x * r.W, 24))
-                sheets.append(strip)
+                    strip.paste(frames[i].convert("RGB"), (x * width, 24))
+                sheets.append(strip.resize((960,height*240//width+24)) if args.mode=='arena' else strip)
                 clips.append({"species": sid, "scene": scene, "action": action,
                               "path": rel.as_posix(), "frames": len(frames),
                               "sha256": digest, "deterministic": True, **meta})
                 print(f"PASS {sid}/{scene}/{action}: {len(frames)} frames {digest[:12]}", flush=True)
         sheet = Image.new("RGB", (max(row.width for row in rows), sum(row.height for row in rows)), r.PAPER)
         for i, row in enumerate(rows):
-            sheet.paste(row, (0, i * (r.H + 24)))
+            sheet.paste(row, (0, sum(previous.height for previous in rows[:i])))
         sheet.save(args.out / f"{sid}-all-frames.png")
-    master = Image.new("RGB", (r.W * 4 * len(ids), (r.H + 24) * 12), r.PAPER)
+    thumb_height = sheets[0].height
+    clips_per_species = len(sheets)//len(ids)
+    columns = min(4, len(ids)) if args.mode == 'arena' else len(ids)
+    species_rows = math.ceil(len(ids) / columns)
+    master = Image.new("RGB", (960 * columns, thumb_height * clips_per_species * species_rows), r.PAPER)
     for i, strip in enumerate(sheets):
-        master.paste(strip, ((i // 12) * r.W * 4, (i % 12) * (r.H + 24)))
+        species_index, clip_index = divmod(i, clips_per_species)
+        x = species_index % columns * 960
+        y = (species_index // columns * clips_per_species + clip_index) * thumb_height
+        master.paste(strip, (x, y))
     master.save(args.out / "contact-sheet.png")
-    (args.out / "index.html").write_text(PROFILE_RANGE_HTML)
-    (args.out / "manifest.json").write_text(json.dumps({"clips": clips, "fixture":
-        "Hero HP x8; target HP x12. Dummy remains stationary; hit clip enables weak touch-back. "
-        "Movement clips delay targets until 2.5s to show approach gait. "
-        "All actions and damage are emitted by sim.Battle."}, ensure_ascii=False, indent=2) + "\n")
+    html = PROFILE_RANGE_HTML.replace('width="240" height="320"',f'width="{width}" height="{height}"')
+    if args.mode == 'arena':
+        html = html.replace('width:480px;height:640px','width:min(960px,90vw);height:auto')
+        html = html.replace('image-rendering:pixelated','image-rendering:auto')
+        html = html.replace('ctx.imageSmoothingEnabled = false','ctx.imageSmoothingEnabled = true')
+        html = html.replace('10 FPS', '20 FPS').replace('四色精灵', '当前试玩精灵与关节动画')
+    (args.out / "index.html").write_text(html)
+    fixture = ("Arena HP x8. Native casts begin precharged with injured friends and pure Water recipients. "
+               "Dummy/melee/ranged ordinary clips use different real targets and deployments. "
+               "All actions and damage are emitted by sim.Battle." if args.mode=='arena' else
+               "Hero HP x8; target HP x12. Dummy remains stationary; hit clip enables weak touch-back. "
+               "Movement clips delay targets until 2.5s to show approach gait. "
+               "All actions and damage are emitted by sim.Battle.")
+    (args.out / "manifest.json").write_text(json.dumps({**info, "clips": clips, "fixture": fixture}, ensure_ascii=False, indent=2) + "\n")
     print(f"PASS {len(clips)} clips, {sum(c['frames'] for c in clips)} PNG frames; {args.out}")
 
 

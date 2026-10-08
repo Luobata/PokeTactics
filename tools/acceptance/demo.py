@@ -58,6 +58,7 @@ import techniques as techniques_mod  # noqa: E402
 import tactics as tactics_mod  # noqa: E402
 import abilities as abilities_mod  # noqa: E402
 import arena as arena_mod  # noqa: E402
+import arena_skills  # noqa: E402
 import pacing
 import rng as rng_mod  # noqa: E402
 import shop as shop_mod  # noqa: E402
@@ -72,11 +73,14 @@ from shop import (build_templates, make_piece, sell_value,  # noqa: E402
                   try_combine)
 from expedition import status as expedition_status, sync_profile  # noqa: E402
 
+REPORT_EFFECT_KEYS = ('effect_version', 'combinations', 'enemy_combinations', 'fields', 'enemy_fields')
+
 MAX_ROUNDS = 31          # 与 sim/match 相同的轮数上限（超限按 HP 排名收官）
 BENCH_CAP = 6            # 我方备战行 6 格（docs/10 §1.1 C-sym）
 SHOP_SLOTS_UI = 4        # 商店 4 格（docs/10 §1.2 裁定）
 GRID_COLS = 6            # C-sym 6 列
 FPS_DT = 0.05            # 战斗帧步长（20fps，与演出时间轴一致）
+from presentation_modes import WEB_BATTLE_REVISION, make_renderer
 
 # 我方战场 2 行的填充序（combat layout="back" 对 team0 自 combat 行 3 起密排）：
 # 列表头 = 后排（grid 行 1）→ 列表尾 = 前排（grid 行 0，贴中线）
@@ -133,7 +137,7 @@ def sprite_png(species_id: int, shiny=False):
     if key in _SPRITES:
         return _SPRITES[key]
     from data import pokedex
-    if not (1 <= species_id <= 65535) or species_id not in pokedex().species:
+    if not (1 <= species_id <= 65535) or not pokedex().has_species(species_id):
         return None
     front, pal, _ = _assets()
     buf = io.BytesIO()
@@ -162,12 +166,14 @@ def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
                             weather_name=weather_name, positions_a=positions_a,
                             **battle_options)
             self.sim_result = battle.run()
+            self.statistics = battle.statistics()
             super().__init__(a, b, 0, front, pal, font,
                              weather_name=weather_name, battle=battle,
                              hud_snapshot=hud_snapshot)
 
     front, pal, font = _assets()
     anim = _Anim(comp_a, comp_b, rng, front, pal, font)
+    renderer = make_renderer(anim, 'arena' if anim.is_arena else 'classic')
     res = anim.sim_result
     t_end = max(e[0] for e in anim.events)
     winner = res["winner"]
@@ -176,21 +182,58 @@ def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
         shutil.rmtree(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     n, T = 0, 0.0
+    team_frames = []
     while T <= duration + 1e-9:
-        anim.playback_frame(T).convert("RGB").save(out_dir / f"{n}.png")
+        frame = renderer.frame(T)
+        frame.convert("RGB").save(out_dir / f"{n}.png", compress_level=2)
+        view = anim._presentation_view()
+        team_frames.append({
+            'alive': [sum(u.die_t is None for u in view.units.values() if u.u.team == team)
+                      for team in (0, 1)],
+            'hp': [sum(u.hp for u in view.units.values() if u.u.team == team)
+                   for team in (0, 1)],
+        })
         n += 1
         T += FPS_DT
-    meta = {"n": n, "dt": FPS_DT, "width": anim.width, "height": anim.height,
-            "battle_rows": anim.battle_rows, "winner": winner, "event_version": 2,
+    meta = {"n": n, "dt": FPS_DT,
+            "width": renderer.width,
+            "height": renderer.height,
+            "presentation": renderer.revision,
+            "render_revision": renderer.revision,
+            "team_frames": team_frames,
+            "combatants": [{'idx': u.idx, 'team': u.team, 'sid': u.piece.species_id,
+                            'name': u.piece.name, 'star': getattr(u.piece, 'star', 1),
+                            'role': getattr(u.piece, 'role_key', 'attack'),
+                            'range': u.piece.distance, 'max_hp': u.max_hp}
+                           for u in anim.by_idx.values()],
+            "battle_rows": anim.battle_rows, "winner": winner, "event_version": 3 if anim.is_arena else 2,
             "hud": hud_snapshot,
             "deployments": [list(e) for e in anim.events if e[1] == "deploy"],
             "survivors": res["survivors"], "duration": round(duration, 1),
+            "statistics": anim.statistics,
             "simulation_duration": round(t_end, 1), "clock": "presentation-v1",
             "events": [{"t": round(e[0], 2), "text": _fmt_event(anim, e)}
-                       for e in anim.presentation_events if e[1] not in ('unit_state', 'skill_effect')]}
+                       for e in anim.presentation_events if e[1] != 'unit_state'
+                       and not (anim.is_arena and e[1] == 'attack' and anim._terrain_attack(e))
+                       and (e[1] != 'skill_effect' or anim.is_arena and e[5] in
+                            ('guard', 'energy_drain', 'energy', 'cleanse', 'knockback', 'pull',
+                             'shield', 'absorb', 'expire', 'taunt', 'thorns', 'thorn_hit'))]}
+    if anim.is_arena:
+        teams = {unit.idx: unit.team for unit in anim.by_idx.values()}
+        meta.update(_battle_effects(anim.events, teams))
     (out_dir / "meta.json").write_text(json.dumps(meta, ensure_ascii=False))
     return meta
 
+
+
+def _battle_effects(events, teams):
+    """Both perspectives from the same committed combat, including real zeroes."""
+    from combination_view import battle_summary, field_summary
+    return {'effect_version': 1,
+            'combinations': battle_summary(events, teams, team=0),
+            'enemy_combinations': battle_summary(events, teams, team=1),
+            'fields': field_summary(events, teams, team=0),
+            'enemy_fields': field_summary(events, teams, team=1)}
 
 _MOVES_ZH = None
 
@@ -202,11 +245,20 @@ def _move_zh(name: str) -> str:
         from data import pokedex
         _MOVES_ZH = {m["name"]: (m.get("name_zh") or {'cross_chop': '十字劈'}.get(m['name'], m['name']))
                      for m in pokedex().moves.values()}
+        _MOVES_ZH.update({'arena_' + s['id']: s['name'] for s in arena_skills.catalog()})
+        _MOVES_ZH.update({'roar': '吼叫', 'rapid_spin': '高速旋转'})
     return _MOVES_ZH.get(name, name)
 
 
 def _fmt_event(anim, e: tuple) -> str:
     t, kind = e[0], e[1]
+    def hit_text(requested):
+        actual = anim._display_damage(e, requested) if getattr(anim, 'is_arena', False) else requested
+        if requested > 0 and actual == 0:
+            return '护盾全额吸收'
+        text = f'<b>-{actual}</b>'
+        return text + (f'（护盾吸收 {requested - actual}）' if actual < requested else '')
+
     def name(i):
         unit = anim.by_idx[i]
         side = ('我方·' if unit.team == 0 else '敌方·') if getattr(anim, 'is_arena', False) else ''
@@ -216,15 +268,25 @@ def _fmt_event(anim, e: tuple) -> str:
     if kind == "move":
         return f"{name(e[2])} 移动到 {e[3]}"
     if kind == "attack":
-        return f"{name(e[2])} 普攻 {name(e[3])} <b>-{e[4]}</b>"
+        return f"{name(e[2])} 普攻 {name(e[3])} {hit_text(e[4])}"
     if kind == "miss":
         return f"{name(e[2])} 攻击 {name(e[3])} 未命中（亮粉闪避）"
     if kind == "sash":
         return f"<b>{name(e[2])} 气势披带发动</b>（保留 1 HP）"
     if kind == "cast":
+        if getattr(anim, 'is_arena', False) and e[4] == 'roar':
+            return f"<b>{name(e[2])} 施放 {_move_zh(e[4])}</b> → {name(e[3])}"
+        if (getattr(anim, 'is_arena', False) and e[4].startswith('arena_') and e[6] == 0
+                and (anim.by_idx[e[2]].team == anim.by_idx[e[3]].team
+                     or any(raw[1] == 'field_effect' and raw[2] == e[2]
+                            and raw[5] == 'place' and raw[6].get('cast_index') ==
+                            anim.timeline.source_index_by_event.get(id(e))
+                            for raw in anim.events))):
+            return f"<b>{name(e[2])} 施放 {_move_zh(e[4])}</b> → {name(e[3])}"
         eff = {0.5: "效果不佳", 2.0: "效果拔群", 4.0: "效果绝群"}.get(e[5], f"x{e[5]}")
-        tail = " 未命中" if e[6] == 0 else \
-            f" <b>-{e[6]}</b>{(' ' + eff) if e[5] != 1 else ''}"
+        immune = getattr(anim, 'is_arena', False) and e[5] == 0
+        tail = (" 属性免疫" if immune else " 未命中") if e[6] == 0 else \
+            f" {hit_text(e[6])}{(' ' + eff) if e[5] != 1 else ''}"
         return f"<b>{name(e[2])} 的 {_move_zh(e[4])}</b> → {name(e[3])}{tail}"
     if kind == "die":
         return f"<b>{name(e[2])} 倒下</b>"
@@ -232,8 +294,149 @@ def _fmt_event(anim, e: tuple) -> str:
         return f"<b>⚡ {e[4]}（{TYPE_ZH.get(e[3], e[3])}系齐射）</b>"
     if kind == "regen":
         return f"{name(e[2])} 回复 +{e[3]}"
+    if kind == 'skill_effect':
+        effect, info = e[5], e[6]
+        if effect == 'guard':
+            text = f"减伤 {info['reduction']:.0%}，持续 {info['duration']:g} 秒"
+        elif effect == 'shield':
+            text = f"护盾 {info['shield']}，持续 {info['duration']:g} 秒"
+        elif effect == 'absorb':
+            text = f"护盾吸收 {info['amount']}，剩余 {info['shield']}"
+        elif effect == 'expire':
+            text = '护盾到期'
+        elif effect == 'taunt':
+            text = f"嘲讽，持续 {info['duration']:g} 秒"
+        elif effect == 'thorns':
+            text = f"毒刺反击姿态，持续 {info['duration']:g} 秒"
+        elif effect == 'thorn_hit':
+            text = '毒刺反击'
+        elif effect == 'energy_drain':
+            text = f"能量 -{info['stolen']}" + (f"，施法者 +{info['gained']}" if info['gained'] else '')
+        elif effect == 'energy':
+            text = f"能量 +{info['amount']}"
+        elif effect == 'cleanse':
+            text = '净化异常状态'
+        elif effect == 'knockback':
+            text = '击退一格'
+        elif effect == 'pull':
+            text = '拉回友军一格'
+        else:
+            return ''
+        move_name = info.get('move_name', 'arena_' + e[4])
+        return f"<b>{name(e[2])} · {_move_zh(move_name)}</b> → {name(e[3])}（{text}）"
     if kind == 'arena_heal':
         return f"<b>{name(e[2])} · 团队回复</b> → {name(e[3])}（+{e[4]} 生命）"
+    if kind == 'combo_effect':
+        from combination_view import NAMES
+        effect, info = e[5], e[6]
+        amount = info.get('amount', 0)
+        if effect == 'energy':
+            text = f"能量 +{amount}"
+        elif effect == 'shield':
+            text = f"护盾 +{amount}，持续 {info.get('duration', 3):g} 秒"
+        elif effect == 'heal':
+            text = f"实际回复 +{amount} 生命"
+        elif effect == 'cleanse':
+            kind_name = {'sleep': '睡眠', 'para': '麻痹', 'freeze': '冰冻', 'poison': '中毒', 'burn': '灼伤'}.get(info.get('cleansed_status') or info.get('status_kind'), '异常')
+            text = f"实际净化{kind_name}"
+        elif effect == 'status':
+            kind_name = {'para': '麻痹', 'poison': '中毒'}.get(info.get('status_kind'), '异常')
+            text = f"实际施加{kind_name}" if info.get('applied') else f"{kind_name}未生效"
+        elif effect in ('guard', 'absorb_damage'):
+            text = f"本次实际避免生命损失 {amount}；不算治疗或护盾"
+            if info.get('avoided_shield_absorption', 0):
+                text += f"，另保留护盾 {info['avoided_shield_absorption']}"
+        elif effect == 'wet':
+            text = f"湿润 {info.get('duration', 4):g} 秒；另一位同队电/草主命中可消费，同一湿润只消费一次"
+        elif effect == 'weather_request':
+            label = {'rain': '雨天', 'sun': '晴天'}.get(info.get('new_weather'), '天气')
+            text = f"申请{label} {info.get('duration', 12):g} 秒；随后一拍生效，双方共享"
+        elif effect == 'weather':
+            label = {'rain': '雨天', 'sun': '晴天', None: '平静'}.get(info.get('new_weather'), '平静')
+            text = ('同一拍晴雨相抵，转为平静' if info.get('reason') == 'simultaneous_rain_sun' else
+                    label + '已存在，不续时' if info.get('reason') == 'same_weather_no_refresh' else
+                    f"全场变为{label}，持续 {info.get('duration', 0):g} 秒；双方共享")
+        elif effect == 'damage' and (info.get('recoil') or info.get('damage_scope') == 'self_cost'):
+            text = f"反噬自损 {amount} 生命，绕过护盾；不计入对抗输出或抗伤"
+        elif effect == 'accuracy':
+            text = ('雨中打雷跳过命中与亮粉闪避判定，地面免疫仍生效' if info.get('guaranteed') else
+                    '打雷未命中' if info.get('technique') == 'thunder' and info.get('hit') is False else
+                    '打雷命中判定通过' if info.get('technique') == 'thunder' else
+                    '修正一次原本会被亮粉闪避的命中；只记录命中，不额外生成攻击')
+        elif effect == 'weaken':
+            text = f"物理攻击伤害降低 {info.get('fraction', 0):.0%}，持续 {info.get('duration', 0):g} 秒"
+        elif effect == 'empowered_hit':
+            text = f"强化贡献已计入本次命中：额外生命损失 {info.get('extra_damage', amount)}"
+            if info.get('absorbed', 0):
+                text += f"，额外护盾吸收 {info['absorbed']}"
+        elif effect == 'absorb':
+            text = f"护盾吸收 {amount} 伤害"
+        elif effect == 'expire' and e[4] in ('element_wet', 'arena_weather', 'trait_chlorophyll', 'trait_swift_swim'):
+            text = ('湿润结束' if e[4] == 'element_wet' else '天气到期，恢复平静' if e[4] == 'arena_weather' else '天气加速结束')
+        elif effect == 'tempo' and e[4] in ('trait_chlorophyll', 'trait_swift_swim'):
+            text = f"天气行动速度 +{info.get('fraction', .25):.0%}；对应天气结束后撤销"
+        elif effect == 'expire':
+            text = (('连击' if e[4] == 'bond_combo' else '节拍') + '清层：'
+                    + ('普攻转火' if info.get('reason') == 'retarget' else '4秒无有效普攻')
+                    if e[4] in ('metronome', 'bond_combo') else '3秒直接攻击鼓舞结束'
+                    if e[4] in ('native_inspiration', 'bond_inspiration') else '特性效果结束' if e[4].startswith('trait_') else '护盾到期')
+        elif effect == 'spread':
+            kind_name = {'poison': '中毒', 'burn': '灼伤'}.get(info.get('status_kind'), '异常')
+            text = (f"{name(info.get('origin_idx', e[2]))}累计3次真实跳伤后传播{kind_name}，"
+                    f"持续 {info.get('duration', 0):g} 秒；传播异常不再传播")
+        elif effect == 'tempo':
+            label = '连击' if e[4] == 'bond_combo' else '节拍'
+            text = (f"{label} {info.get('stacks', 0)} 层，攻速 +{info.get('fraction', 0):.0%}，"
+                    f"{'有效生命普攻增层' if info.get('gained') else '满层普攻续期'}；普攻转火或4秒断档清层")
+            if e[4] == 'metronome' and info.get('base_fraction', 0):
+                text += (f"（连击羁绊 +{info['base_fraction']:.0%}，"
+                         f"节拍器 +{info.get('item_fraction', 0):.0%}）")
+        elif effect == 'offense_buff' and info.get('damage_scope') == 'physical':
+            text = f"物理攻击伤害 +{info.get('fraction', 0):.0%}，主要异常解除后结束；不强化特攻、DOT或地形"
+        elif effect == 'offense_buff':
+            trigger = ('本命有效援护后，' if e[4] == 'bond_inspiration' else
+                       f"本命实际回能 {info.get('native_energy_amount', 0)} 后，")
+            text = (trigger +
+                    f"直接攻击伤害 +{info.get('fraction', .25):.0%}，持续 {info.get('duration', 3):g} 秒；"
+                    '不强化毒/灼伤或岩钉')
+        elif effect == 'charge':
+            bonus = info.get('fraction', 1.)
+            boost = '伤害翻倍' if bonus == 1. else f'伤害 +{bonus:.0%}'
+            text = f"反击蓄力 {info.get('duration', 4):g} 秒，下次有效普攻{boost}"
+        elif effect == 'empowered_basic':
+            extra = info.get('extra_damage', amount)
+            text = f"强化贡献已计入本次普攻：额外生命损失 {extra}"
+            if info.get('absorbed', 0):
+                text += f"，额外护盾吸收 {info['absorbed']}"
+        elif effect == 'vulnerability':
+            text = (f"易伤：受到攻击伤害 +{info.get('fraction', .12):.0%}，"
+                    f"持续 {info.get('duration', 4):g} 秒")
+        else:
+            return ''
+        source_kind = '特性 · ' if e[4].startswith('trait_') else ''
+        return f"<b>{name(e[2])} · {source_kind}{NAMES.get(e[4], '联动')}</b> → {name(e[3])}（{text}）"
+    if kind == 'field_effect':
+        key, effect, info = e[4], e[5], e[6]
+        if key == 'rock_spikes':
+            if effect == 'place':
+                text = f"铺设岩钉 {len(info.get('cells', []))} 格，持续 6 秒"
+            elif effect == 'enter':
+                text = f"岩钉入格：生命 -{info.get('actual', 0)}"
+                if info.get('absorbed'):
+                    text += f"，护盾吸收 {info['absorbed']}"
+            elif effect == 'avoid':
+                reason = {'heavy_boots': '厚底靴免疫', 'cooldown': '入格冷却保护',
+                          'field_limit': '本场区域次数已满', 'battle_limit': '本战入格次数已满'}
+                text = '岩钉：' + reason.get(info.get('reason'), '未触发')
+            elif effect == 'clear':
+                text = f"清除敌方岩钉 {info.get('cleared_count', len(info.get('cells', [])))} 格"
+            else:
+                text = '岩钉到期'
+        else:
+            label = {'root': '定身', 'vulnerability': '易伤'}.get(key, key)
+            text = label + ('解除' if effect == 'expire' else
+                           f" {info.get('duration', 1.5 if key == 'root' else 4):g} 秒")
+        return f"<b>{name(e[2])}</b> → {name(e[3])}（{text}）"
     if kind == "partner_effect":
         label = {"shell_guard": "并肩坚壳", "bloom": "共生花园",
                  "wing_rally": "振翼鼓舞", "relay": "接力电流",
@@ -271,7 +474,8 @@ def _fmt_event(anim, e: tuple) -> str:
               "reflect": "反射壁", "lightscreen": "光墙",
               "swords": "剑舞"}.get(e[3], e[3])
         act = {"apply": "发作", "tick": "跳伤", "expire": "解除"}.get(e[4], e[4])
-        tail = f" -{e[5]}" if len(e) > 5 and e[5] else ""
+        tail = (f" {hit_text(e[5])}" if getattr(anim, 'is_arena', False) else f" -{e[5]}") \
+            if len(e) > 5 and e[5] else ""
         return f"<b>{name(e[2])}</b> {zh}·{act}{tail}"
     if kind == "end":
         return f"— 战斗结束 {'（你胜）' if e[2] == 0 else '（对方胜）' if e[2] == 1 else '（平局）'}"
@@ -324,6 +528,8 @@ class PlayerSeat:
         return economy.pop_of(self.level)
 
     def battle_comp(self) -> list:
+        if getattr(self.inventory, 'ruleset', None) == arena_mod.RULESET:
+            return arena_mod.battle_comp(self.board)
         return [o.piece if o.item is None else (o.piece, o.item)
                 for o in self.board]
 
@@ -360,6 +566,9 @@ class Session:
         self.phase = "prep"
         self.log: list = []
         self.last_battle = None
+        self.battle_history = []
+        self.scouting_history = ({'version': 1, 'from_round': 1, 'seats': [[] for _ in range(8)]}
+                                 if self.is_arena else None)
         self.pairs = None
         self.ghost_seat = None
         self.ghost_src = None
@@ -380,6 +589,8 @@ class Session:
         self.arena_augments_pending = []
         self.arena_loot = []
         self.arena_loot_start = 1
+        self.arena_component_choices = []
+        self.arena_component_choice_start = 1
         for seat in self.seats:
             seat.inventory.ruleset = self.ruleset
             seat.inventory.techniques = dict.fromkeys(techniques_mod.ids_for(self.ruleset), 0)
@@ -431,7 +642,7 @@ class Session:
                     if seat.inventory.techniques[technique] <= 0:
                         break
                     if owned.technique is None and techniques_mod.compatible_species(
-                            owned.piece.species_id, technique):
+                            owned.piece.species_id, technique, ruleset=self.ruleset):
                         owned.technique = technique
                         seat.inventory.techniques[technique] -= 1
             if tactics_mod.enabled(self.ruleset):
@@ -528,7 +739,7 @@ class Session:
         # grant as the original expedition; no free extra demonstration item.
         options = ['guard']
         compatible = [key for key in candidates if key != 'guard' and any(
-            techniques_mod.compatible_species(o.piece.species_id, key) for o in seat.all_pieces())]
+            techniques_mod.compatible_species(o.piece.species_id, key, ruleset=self.ruleset) for o in seat.all_pieces())]
         options.append(rng.choice(compatible or ['rest']))
         options.append(rng.choice([key for key in candidates if key not in options]))
         self.rewards.append({'id': reward_id, 'seat': seat.seat, 'round': round_no,
@@ -543,7 +754,7 @@ class Session:
                 continue
             def score(key):
                 eligible = [o for o in seat.board if o.technique is None and
-                            techniques_mod.compatible_species(o.piece.species_id, key)]
+                            techniques_mod.compatible_species(o.piece.species_id, key, ruleset=self.ruleset)]
                 if not eligible:
                     return (0, 0)
                 if key in ('sunny_day', 'rain_dance'):
@@ -558,6 +769,9 @@ class Session:
         for row in self.rewards:
             if row['status'] == 'pending' and (self.phase == 'over' or not self.seats[row['seat']].alive):
                 row.update(status='closed', closed_reason='terminal' if self.phase == 'over' else 'eliminated')
+        for row in self.arena_component_choices:
+            if row['status'] == 'pending' and (self.phase == 'over' or not self.seats[row['seat']].alive):
+                row.update(status='closed', closed_reason='run_finished' if self.phase == 'over' else 'eliminated')
 
     def observe(self, fielded=(), won=()):
         seen = {o.piece.species_id for o in self.player.all_pieces()}
@@ -709,11 +923,15 @@ class Session:
         self.opponent_learned = [o.technique for o in src.board]
         if tactics_mod.enabled(self.ruleset):
             self.opponent_tactics = copy.deepcopy(self.battle_tactics(src))
+        def opponent_piece(owned):
+            if self.is_arena:
+                return _owned_view(owned, self.ruleset)
+            # Classic opponent snapshots have never persisted an owned UID.
+            return _piece_view(owned.piece, owned.item, self.ruleset)
         return {"name": name, "hp": src.hp, "level": src.level,
-                "rows": [[_piece_view(o.piece, o.item, self.ruleset) if o else None for o in row]
+                "rows": [[opponent_piece(o) if o else None for o in row]
                          for row in self._enemy_rows(src.board)],
-                "bench": [_piece_view(o.piece, o.item, self.ruleset)
-                          for o in src.bench[:GRID_COLS]]}
+                "bench": [opponent_piece(o) for o in src.bench[:GRID_COLS]]}
 
     def _pve_view(self, r: int):
         waves = arena_mod.PVE_WAVES if self.is_arena else PVE_WAVES
@@ -737,7 +955,7 @@ class Session:
         self.refresh_tactics()
         r = self.round_no
         self.observe(fielded=[o.piece.species_id for o in self.player.board])
-        weather = weather_for_round(r)
+        weather = None if self.is_arena else weather_for_round(r)
         if weather is not None:
             self._say(f"天气：{weather_mod.WEATHERS[weather]['label']}"
                       f"（{WEATHER_NOTE[weather]}）")
@@ -756,16 +974,79 @@ class Session:
             self._finalize()
         self._close_terminal_rewards()
 
+        # One committed report per player round. Playback and loading only read
+        # this ledger; they must never resolve another battle or grant rewards.
+        meta = self.last_battle
+        if meta and meta.get('round') == r and not any(row['round'] == r for row in self.battle_history):
+            self.battle_history.append({
+                'round': r, 'winner': meta['winner'],
+                'duration': meta.get('duration', 0), 'pve': meta.get('pve', False),
+                'ghost': meta.get('ghost', False), 'opp_name': meta.get('opp_name', '对手'),
+                'statistics': copy.deepcopy(meta.get('statistics')),
+                **({key: copy.deepcopy(meta[key]) for key in REPORT_EFFECT_KEYS}
+                   if meta.get('effect_version') == 1 else {}),
+            })
+
+    def _record_scouting_battle(self, r, a, b, result, *, pve=False, ghost=False,
+                                source='battle', opp_name=None):
+        """Record the existing result once. Ghost sources never become participants."""
+        if not self.is_arena or result.get('statistics') is None or result.get('effect_version') != 1:
+            return
+        if self.scouting_history is None:
+            self.scouting_history = {'version': 1, 'from_round': r, 'seats': [[] for _ in range(8)]}
+        for seat, opponent, team in ((a, b, 0),) if pve or ghost else ((a, b, 0), (b, a, 1)):
+            ledger = self.scouting_history['seats'][seat.seat]
+            if any(row['round'] == r for row in ledger):
+                continue
+            winner = result['winner']
+            report = {'round': r, 'winner': None if winner is None else winner ^ team,
+                      'duration': result.get('duration', 0), 'pve': pve, 'ghost': ghost,
+                      'opp_name': opp_name if pve else opponent.name,
+                      'opp_seat': None if pve else opponent.seat, 'source': source,
+                      'statistics': copy.deepcopy(result.get('statistics'))}
+            if report['statistics'] is not None and team:
+                stats = report['statistics']
+                for row in stats['units']:
+                    row['team'] ^= 1
+                # Stable sequential idx keeps the existing statistics contract.
+                stats['units'].sort(key=lambda row: (row['team'], row['idx']))
+                for idx, row in enumerate(stats['units']):
+                    row['idx'] = idx
+                stats['totals'] = [{**row, 'team': row['team'] ^ 1}
+                                   for row in reversed(stats['totals'])]
+            if result.get('effect_version') == 1:
+                report['effect_version'] = 1
+                for ours, theirs in (('combinations', 'enemy_combinations'), ('fields', 'enemy_fields')):
+                    report[ours] = copy.deepcopy(result[theirs if team else ours])
+                    report[theirs] = copy.deepcopy(result[ours if team else theirs])
+            ledger.append(report)
+            del ledger[:-3]
+
+    def _uncontested_result(self, a, b, comp_a, comp_b, winner):
+        # Only zero counter initialization; no run, rewards or session RNG are replayed.
+        battle = Battle(comp_a, comp_b, rng_mod.derive(self.seed, self.round_no, 'battle', 0),
+                        layout='back', **self.battle_options(a, b))
+        result = {'winner': winner, 'survivors': {0: len(comp_a), 1: len(comp_b)},
+                  'duration': 0, 'statistics': battle.statistics()}
+        if self.is_arena:
+            result.update(_battle_effects([], {}))
+        return result
+
     def _fight(self, r, battle_i, a, b, weather):
         """bot 对 bot：秒算，只留结果（与 match._pvp_round 同轨）。"""
         if tactics_mod.enabled(self.ruleset):
             for seat in (a, b):
                 if isinstance(seat, Bot):
                     self._configure_bot_tactics(seat)
-        return Battle(a.battle_comp(), b.battle_comp(),
-                      rng_mod.derive(self.seed, r, "battle", battle_i),
-                      layout="back", weather_name=weather,
-                      **self.battle_options(a, b)).run()
+        battle = Battle(a.battle_comp(), b.battle_comp(),
+                        rng_mod.derive(self.seed, r, "battle", battle_i),
+                        layout="back", weather_name=weather,
+                        **self.battle_options(a, b))
+        result = battle.run()
+        if self.is_arena:
+            result['statistics'] = battle.statistics()
+            result.update(_battle_effects(battle.events, {u.idx: u.team for u in battle.units}))
+        return result
 
     def _grant_arena_loot(self, seat, result):
         """Settle each real seat once; loading and playback never issue resources."""
@@ -779,9 +1060,32 @@ class Session:
         grant_rewards(seat, grants)
         self.arena_loot.append({'id': reward_id, 'round': self.round_no,
                                'seat': seat.seat, 'result': result, 'grants': grants})
+        self._grant_arena_component_choice(seat)
         if seat is self.player:
             names = '、'.join(reward_view(grant)['name'] for grant in grants)
             self._say(f'回合奖励已入仓：{names}（胜利2份，失败或平局1份）')
+
+    def _grant_arena_component_choice(self, seat):
+        from arena_rewards import (COMPONENT_CHOICE_ROUNDS, component_choice,
+                                   bot_component_choice, claim_component)
+        if (not self.is_arena or self.round_no not in COMPONENT_CHOICE_ROUNDS
+                or self.round_no < self.arena_component_choice_start):
+            return
+        # Only committed real-seat loot proves participation in this settlement.
+        if not any(row['round'] == self.round_no and row['seat'] == seat.seat
+                   for row in self.arena_loot):
+            return
+        reward = component_choice(self.run_id, self.round_no, seat.seat)
+        if any(row['id'] == reward['id'] for row in self.arena_component_choices):
+            return
+        if seat is not self.player:
+            choice = bot_component_choice(
+                seat, reward['options'],
+                rng_mod.derive(self.seed, self.round_no, 'pve', 13000 + seat.seat))
+            claim_component(seat, reward, choice)
+        self.arena_component_choices.append(reward)
+        if seat is self.player:
+            self._say('获得阶段组件补给：下一准备阶段可从8种组件中任选1件，胜负均可领取')
 
     def _resolve_pvp(self, r, weather):
         events = []
@@ -791,6 +1095,8 @@ class Session:
             dmg = {id(a): 0, id(b): 0}
             note = ""
             winner = None
+            scout_result = None
+            scout_source = 'battle'
             if a.battle_comp() and b.battle_comp():
                 if p not in (a, b) and isinstance(a, Bot):
                     a.counter_vs(b.board)
@@ -801,6 +1107,7 @@ class Session:
                     # 索引要换算回配对席位，再记 dmg/连胜
                     me, opp = (a, b) if a is p else (b, a)
                     meta = self._fight_rendered(r, battle_i, me, opp, weather)
+                    scout_result = meta
                     w, surv = meta["winner"], meta["survivors"]
                     winner = (0 if a is p else 1) if w == 0 else (1 if a is p else 0) if w == 1 else None
                     if w == 0:
@@ -820,6 +1127,7 @@ class Session:
                               + (f"｜你 -{my}" if my else "｜你不掉血"))
                 else:
                     res = self._fight(r, battle_i, a, b, weather)
+                    scout_result = res
                     winner = res['winner']
                     if res["winner"] == 0:
                         dmg[id(b)] = self._loss_damage(r, res["survivors"][0])
@@ -858,19 +1166,28 @@ class Session:
                     my = dmg[id(p)]
                     self._say(f"vs {opp.name}：{note}"
                               + (f"｜你 -{my}" if my else "｜你不掉血"))
-                    self.last_battle = {'round': r, 'n': 0, 'events': [], 'opp_name': opp.name,
-                                        'winner': None if winner is None else (0 if (a if winner == 0 else b) is p else 1),
-                                        'headline': note}
+                    player_winner = None if winner is None else (0 if (a if winner == 0 else b) is p else 1)
+                    self._uncontested_battle(r, opp.name, p.battle_comp(), opp.battle_comp(),
+                                             player_winner, note, opp=opp)
+                    scout_result = self.last_battle
+                elif self.is_arena:
+                    scout_result = self._uncontested_result(a, b, a.battle_comp(), b.battle_comp(), winner)
+                scout_source = 'uncontested'
+            if scout_result is not None:
+                # Rendered player fights always use player as team0.
+                scout_a, scout_b = ((p, b if a is p else a) if p in (a, b) else (a, b))
+                self._record_scouting_battle(r, scout_a, scout_b, scout_result, source=scout_source)
             self._grant_arena_loot(a, 'draw' if winner is None else 'win' if winner == 0 else 'loss')
             self._grant_arena_loot(b, 'draw' if winner is None else 'win' if winner == 1 else 'loss')
             events.append((a, dmg[id(a)], note))
             events.append((b, dmg[id(b)], ""))
         if self.ghost_seat is not None:   # 奇数席打幽灵（败方照常掉血）
             odd = self.ghost_seat
+            scout_source = 'battle'
             if odd is p and p.battle_comp():
                 meta = self._fight_rendered(r, battle_i, p, self.ghost_src,
                                             weather, ghost=True)
-                res = {"winner": meta["winner"], "survivors": meta["survivors"]}
+                res = meta
             elif odd.battle_comp():
                 if tactics_mod.enabled(self.ruleset):
                     for seat in (odd, self.ghost_src):
@@ -882,13 +1199,24 @@ class Session:
                 options = self.battle_options(odd, self.ghost_src)
                 if ghost_positions is not None or not self.is_arena:
                     options['positions_b'] = ghost_positions
-                res = Battle(odd.battle_comp(), self.ghost_src.battle_comp(),
-                             rng_mod.derive(self.seed, r, "battle", battle_i),
-                             layout="back", weather_name=weather,
-                             **options).run()
+                battle = Battle(odd.battle_comp(), self.ghost_src.battle_comp(),
+                                rng_mod.derive(self.seed, r, "battle", battle_i),
+                                layout="back", weather_name=weather, **options)
+                res = battle.run()
+                if self.is_arena:
+                    res['statistics'] = battle.statistics()
+                    res.update(_battle_effects(battle.events, {u.idx: u.team for u in battle.units}))
             else:   # 空场打幽灵：不战而败（保底掉血，Battle 空队会崩所以不走解算）
                 res = {"winner": 1,
                        "survivors": {0: 0, 1: len(self.ghost_src.battle_comp())}}
+                if odd is p:
+                    self._uncontested_battle(r, self.ghost_src.name, [], self.ghost_src.battle_comp(),
+                                             1, '空场，幽灵战不战而败', ghost=True, opp=self.ghost_src)
+                    res = self.last_battle
+                elif self.is_arena:
+                    res = self._uncontested_result(odd, self.ghost_src, [], self.ghost_src.battle_comp(), 1)
+                scout_source = 'uncontested'
+            self._record_scouting_battle(r, odd, self.ghost_src, res, ghost=True, source=scout_source)
             dmg = 0
             if res["winner"] == 1 or self.is_arena and res['winner'] is None:
                 dmg = self._loss_damage(r, res["survivors"][1])
@@ -911,20 +1239,23 @@ class Session:
         p = self.player
         alive = self._alive()
         for i, e in enumerate(alive):
+            scout_source = 'battle'
             if e.battle_comp():
                 if e is p:
                     meta = self._fight_rendered(r, battle_i, e, None, weather,
                                                 wave=wave, pve=True)
-                    res = {"winner": meta["winner"],
-                           "survivors": meta["survivors"]}
+                    res = meta
                 else:
                     options = self.battle_options(e)
                     if self.is_arena:
                         options['positions_b'] = arena_mod.positions_for(wave, 1)
-                    res = Battle(e.battle_comp(), list(wave),
-                                 rng_mod.derive(self.seed, r, "battle", battle_i),
-                                 layout="back", weather_name=weather,
-                                 **options).run()
+                    battle = Battle(e.battle_comp(), list(wave),
+                                    rng_mod.derive(self.seed, r, "battle", battle_i),
+                                    layout="back", weather_name=weather, **options)
+                    res = battle.run()
+                    if self.is_arena:
+                        res['statistics'] = battle.statistics()
+                        res.update(_battle_effects(battle.events, {u.idx: u.team for u in battle.units}))
                 battle_i += 1
                 if res["winner"] == 0:
                     gold = rng_mod.derive(self.seed, r, "pve", i).randint(*PVE_GOLD)
@@ -942,7 +1273,15 @@ class Session:
                 dmg = self._loss_damage(r, len(wave))
                 if e is p:
                     self._say(f"野怪轮不战而败 -{dmg}（场上没有棋子！）")
+                    self._uncontested_battle(r, (self.opp_view or {}).get('name', '野怪'),
+                                             [], wave, 1, '场上没有棋子，野怪轮不战而败', pve=True)
+                    res = self.last_battle
+                elif self.is_arena:
+                    res = self._uncontested_result(e, None, [], wave, 1)
+                scout_source = 'uncontested'
                 events.append((e, dmg, "野怪空场"))
+            self._record_scouting_battle(r, e, None, res, pve=True, source=scout_source,
+                                         opp_name=(self.opp_view or {}).get('name', '野怪'))
             self._grant_arena_loot(e, 'draw' if res['winner'] is None else 'win' if res['winner'] == 0 else 'loss')
         if self.is_arena:
             return events
@@ -980,6 +1319,18 @@ class Session:
             f"{k}×{v}" for k, v in sorted(got.items()))
             if got else "野怪轮结束，等待下次掉落")
         return events
+
+    def _uncontested_battle(self, r, opp_name, comp_a, comp_b, winner, headline,
+                            pve=False, ghost=False, opp=None):
+        """Record an empty-side round without running combat or rendering frames."""
+        result = self._uncontested_result(self.player, opp, comp_a, comp_b, winner)
+        self.last_battle = {
+            'round': r, 'n': 0, 'events': [], 'duration': 0,
+            'survivors': {0: len(comp_a), 1: len(comp_b)}, 'winner': winner,
+            'opp_name': opp_name, 'headline': headline, 'pve': pve, 'ghost': ghost,
+            'statistics': result['statistics'],
+            **{key: result[key] for key in REPORT_EFFECT_KEYS if key in result},
+        }
 
     def _fight_rendered(self, r, battle_i, me, opp, weather, ghost=False,
                         wave=None, pve=False):
@@ -1116,19 +1467,60 @@ def _piece_view(piece, item=None, ruleset=tactics_mod.BASE_RULESET):
         "item_name": items_mod.FINISHED[item]["name"] if item else None,
     }
     if ruleset == 'arena_v1':
+        import arena_bonds
+        import arena_traits
         role = getattr(piece, 'role_key', 'attack')
+        native = arena_skills.skill_of(piece.species_id)
+        view.update(skill_name=native['name'],
+                    skill_type=TYPE_ZH.get(native['type'], native['type']),
+                    skill_description=native['description'], move=native['name'],
+                    native_skill={**native, 'type': TYPE_ZH.get(native['type'], native['type']),
+                                  'energy': arena_skills.ENERGY_MAX, 'replaceable': False})
         view.update(star=getattr(piece, 'star', 1), shiny=getattr(piece, 'shiny', False),
+                    bonds=arena_bonds.memberships(piece.species_id),
+                    trait=arena_traits.for_species(piece.species_id,
+                                                   getattr(piece, 'arena_trait_key', None)),
+                    trait_options=arena_traits.options_for(piece.species_id),
                     attack_style='远程' if distance > 1 else '近战',
                     role_key=role, role_name=arena_mod.ROLE_NAMES[role],
                     role_description=arena_mod.ROLE_DESCRIPTIONS[role],
                     learnable=[t['id'] for t in arena_mod.technique_catalog()
-                               if techniques_mod.compatible_species(piece.species_id, t['id'])])
+                               if techniques_mod.compatible_species(piece.species_id, t['id'], ruleset=ruleset)],
+                    item_effect=_item_effect(item, 'budget_v1') if item else None,
+                    stat_scope='deployment_base', stats=_deployment_stats(piece))
     return view
 
 
 def _owned_view(owned, ruleset=tactics_mod.BASE_RULESET):
-    return {**_piece_view(owned.piece, owned.item, ruleset), 'uid': owned.uid,
-            'technique': techniques_mod.view(owned.technique)}
+    piece = arena_mod.battle_piece(owned) if ruleset == arena_mod.RULESET else owned.piece
+    view = {**_piece_view(piece, owned.item, ruleset), 'uid': owned.uid,
+            'technique': techniques_mod.view(owned.technique, ruleset)}
+    return view
+
+
+_DEPLOYMENT_STATS = {}
+
+
+def _deployment_stats(piece):
+    """Base deployment values, with star/role but without gear, bonds or augments.
+
+    Reuse Unit and the simulator's deterministic arena modifier. No Battle is
+    constructed, run, or randomized for a read-only panel.
+    """
+    key = (piece.species_id, piece.star, getattr(piece, 'arena_trait_key', None))
+    if key not in _DEPLOYMENT_STATS:
+        from combat import Unit
+        import stat_budget
+        unit = Unit(piece, 0, (0, 0), stat_mode='budget_v1')
+        context = object.__new__(Battle)
+        context.units, context.arena_teams = [unit], [(), ()]
+        Battle._apply_arena_stats(context)
+        _DEPLOYMENT_STATS[key] = {'max_hp': unit.max_hp, 'atk': unit.attack,
+                                 'sp_atk': unit.sp_attack, 'defense': unit.defense,
+                                 'sp_defense': unit.sp_defense,
+                                 'speed': stat_budget.unit_stats(piece)['speed'],
+                                 'attack_interval': round(unit.attack_interval, 3)}
+    return dict(_DEPLOYMENT_STATS[key])
 
 
 def _item_effect(key: str, stat_mode='legacy') -> str:
@@ -1139,6 +1531,8 @@ def _item_effect(key: str, stat_mode='legacy') -> str:
     if override:
         return override
     spec = items_mod.FINISHED[key]
+    if spec.get('description'):
+        return spec['description']
     parts = []
     for k, v in spec.items():
         if k in ("name", "pairs"):
@@ -1172,9 +1566,14 @@ def _synergy_effect_text(effects) -> str:
     return " · ".join(parts)
 
 
-def _synergy_view(sess) -> list:
+def _synergy_view(sess, seat=None) -> list:
     from render_mockups import TYPE_COLORS
-    comp = [o.piece for o in sess.player.board]
+    comp = [o.piece for o in (sess.player if seat is None else seat).board]
+    if sess.is_arena:
+        import arena_bonds
+        return [{**row, 'type': row['id'], 'zh': row['name'],
+                 'color': _hex(TYPE_COLORS.get(row.get('element'), (145, 110, 190)))}
+                for row in arena_bonds.preparation(comp)['entries']]
     counts = syn_mod.compute(comp)
     out = []
     for t, n in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])):
@@ -1318,20 +1717,53 @@ def _evolution_view(sess, owned):
             'can_evolve': plan['auto_allowed'], 'detail': plan['detail'], 'preview': plan}
 
 
+def _scouting_rows(sess, seat) -> list:
+    """Expose deployed cells without reconfiguring bots or changing battle snapshots."""
+    if seat is sess.player:
+        rows = [[None] * GRID_COLS for _ in range(sess.grid_rows)]
+        for (r, c), owned in seat.grid.items():
+            rows[r][c] = _owned_view(owned, sess.ruleset)
+        return rows
+    return [[_owned_view(owned, sess.ruleset) if owned else None for owned in row]
+            for row in sess._enemy_rows(seat.board)]
+
+
+
+def _committed_opponent_snapshot(sess, seat, opponent):
+    if seat is not opponent or not sess.opp_view:
+        return None
+    rows = copy.deepcopy(sess.opp_view.get('rows', []))
+    return {'round': sess.round_no, 'scope': 'committed_opponent', 'rows': rows,
+            'board': [unit for row in rows for unit in row if unit],
+            'note': '本轮已锁定的上场阵容；备战、海克斯另列当前公开配置。'}
+
+def _scouting_opponent(sess):
+    """Read the committed pairing; PVE never marks a trainer as the opponent."""
+    if sess.round_no % 5 == 0:
+        return None, False
+    if sess.ghost_seat is sess.player and sess.ghost_src is not None:
+        return sess.ghost_src, True
+    for a, b in sess.pairs or []:
+        if a is sess.player:
+            return b, False
+        if b is sess.player:
+            return a, False
+    return None, False
+
+
 def state_json(sess) -> dict:
     sess.ensure_unit_ids()
     p = sess.player
     stat_mode = 'budget_v1' if sess.expedition or sess.is_arena else 'legacy'
     from render_mockups import TYPE_COLORS
-    weather = weather_for_round(sess.round_no)
+    weather = None if sess.is_arena else weather_for_round(sess.round_no)
     wkey = weather or ""
     board_rows = [[None] * GRID_COLS for _ in range(sess.grid_rows)]
     copies = {}
     for o in p.all_pieces():
         copies[o.piece.species_id] = copies.get(o.piece.species_id, 0) + 1
     for (r, c), o in p.grid.items():
-        v = _piece_view(o.piece, o.item, sess.ruleset)
-        v.update(uid=o.uid, technique=techniques_mod.view(o.technique))
+        v = _owned_view(o, sess.ruleset)
         v['item_effect'] = _item_effect(o.item, stat_mode) if o.item else None
         v["copies"] = copies.get(o.piece.species_id, 1)
         v["sell"] = sell_value(o)
@@ -1340,8 +1772,7 @@ def state_json(sess) -> dict:
         board_rows[r][c] = v
     bench = []
     for o in p.bench:
-        v = _piece_view(o.piece, o.item, sess.ruleset)
-        v.update(uid=o.uid, technique=techniques_mod.view(o.technique))
+        v = _owned_view(o, sess.ruleset)
         v['item_effect'] = _item_effect(o.item, stat_mode) if o.item else None
         v["copies"] = copies.get(o.piece.species_id, 1)
         v["sell"] = sell_value(o)
@@ -1368,8 +1799,6 @@ def state_json(sess) -> dict:
     lucky_capped = items_mod.lucky_egg_count(sess.seats) >= \
         items_mod.LUCKY_EGG_GLOBAL_CAP
     for key, spec in items_mod.catalog(sess.ruleset).items():
-        if key in p.inventory.finished:
-            continue
         pair = p.inventory.craftable(key)
         if pair is None:
             continue
@@ -1391,8 +1820,8 @@ def state_json(sess) -> dict:
                 "shop_locked": p.shop_locked,
                 "xp_cost": economy.XP_BUY_COST},
         "weather": {"key": wkey,
-                    "zh": weather_mod.WEATHERS[weather]["label"] if weather else "无",
-                    "note": WEATHER_NOTE[weather]},
+                    "zh": weather_mod.WEATHERS[weather]["label"] if weather else "平静" if sess.is_arena else "无",
+                    "note": "开场平静 · 战斗内由求雨/晴天改变，双方共享" if sess.is_arena else WEATHER_NOTE[weather]},
         "entry_weather": _entry_weather_view(sess),
         "pacing": ({"starts_at": pacing.DEFAULT_NATURAL_END_POLICY.start_round,
                     "minimum_loss": pacing.DEFAULT_NATURAL_END_POLICY.minimum_loss,
@@ -1409,7 +1838,7 @@ def state_json(sess) -> dict:
                                       for t in techniques_mod.catalog(sess.ruleset)
                                       if p.inventory.techniques[t['id']] > 0]},
         "rewards": [{**{key: row[key] for key in ('id', 'round', 'kind', 'status', 'choice', 'closed_reason')},
-                     'options': [techniques_mod.view(key) for key in row['options']]}
+                     'options': [techniques_mod.view(key, sess.ruleset) for key in row['options']]}
                     for row in sess.rewards if row['seat'] == 0],
         "tactical": copy.deepcopy(sess.tactical[0]),
         "opponent": sess.opp_view,
@@ -1419,6 +1848,7 @@ def state_json(sess) -> dict:
                       for e in sess.seats],
         "log": sess.log[-24:],
         "last_battle": sess.last_battle,
+        "battle_history": copy.deepcopy(sess.battle_history),
         "save": {"sequence": getattr(sess, "save_sequence", None),
                  "warning": getattr(sess, "save_warning", None)},
         "expedition": expedition_status(sess),
@@ -1432,11 +1862,12 @@ def state_json(sess) -> dict:
         "type_colors": {t: _hex(c) for t, c in TYPE_COLORS.items()},
     }
     if sess.is_arena:
-        from arena_rewards import reward_view
+        from arena_rewards import reward_view, component_choice_view
         def augments_of(seat):
             return [arena_mod.augment_view(a['id'] if isinstance(a, dict) else a)
                     for a in seat.arena_augments_selected]
         st['arena'] = {'version': 'arena_v1', 'shop_slots': sess.shop_slots,
+                       'combination_version': 1,
                        'bench_capacity': sess.bench_capacity, 'deployment_rows': sess.grid_rows,
                        'catalog': [{**_piece_view(piece, ruleset=sess.ruleset),
                                     'cost': piece.tier,
@@ -1445,16 +1876,39 @@ def state_json(sess) -> dict:
                                    for sid, piece in sess.templates.items()]}
         st['augments'] = {'pending': copy.deepcopy(sess.arena_augments_pending),
                           'selected': augments_of(p)}
+        from combination_view import preparation
+        st['combinations'] = preparation(sess)
+        import arena_bonds
+        st['bonds'] = arena_bonds.preparation([o.piece for o in p.board])
+        st['arena']['bond_catalog'] = arena_bonds.catalog()
+        import arena_traits
+        st['arena']['trait_catalog'] = arena_traits.catalog()
         st['round_rewards'] = [{**row, 'grants': [reward_view(grant) for grant in row['grants']]}
                                for row in sess.arena_loot if row['seat'] == 0]
+        st['component_choices'] = [component_choice_view(row)
+                                   for row in sess.arena_component_choices if row['seat'] == 0]
+        st['items']['crafting_blocked'] = ['lucky_egg'] if lucky_capped else []
         st['techniques'] = [{**t, 'count': p.inventory.techniques[t['id']], 'eligible': [o.uid for o in p.all_pieces()
-                                             if techniques_mod.compatible_species(o.piece.species_id, t['id'])]}
+                                             if techniques_mod.compatible_species(o.piece.species_id, t['id'], ruleset=sess.ruleset)]}
                             for t in arena_mod.technique_catalog()]
+        scout_opponent, scout_ghost = _scouting_opponent(sess)
         st['scouting'] = [{'seat': seat.seat, 'name': seat.name, 'human': seat is p,
                            'hp': max(0, seat.hp), 'level': seat.level, 'gold': seat.gold,
+                           'alive': seat.alive, 'rank': seat.rank,
+                           'current_opponent': seat is scout_opponent,
+                           'ghost_opponent': seat is scout_opponent and scout_ghost,
+                           'rows': _scouting_rows(sess, seat),
+                           'configuration_scope': 'current_deployment',
+                           'battle_snapshot': _committed_opponent_snapshot(sess, seat, scout_opponent),
+                           'synergies': _synergy_view(sess, seat),
+                           'bonds': arena_bonds.preparation([o.piece for o in seat.board]),
                            'board': [_owned_view(o, sess.ruleset) for o in seat.board],
                            'bench': [_owned_view(o, sess.ruleset) for o in seat.bench],
-                           'augments': augments_of(seat)} for seat in sess.seats]
+                           'augments': augments_of(seat),
+                           'recent_reports': copy.deepcopy(list(reversed(
+                               sess.scouting_history['seats'][seat.seat]))) if sess.scouting_history else [],
+                           'reports_recorded_from': sess.scouting_history['from_round'] if sess.scouting_history else None}
+                          for seat in sess.seats]
         for i, standing in enumerate(st['standings']):
             standing['seat'] = i
     if sess.phase == "over":
@@ -1736,6 +2190,23 @@ def act_learn(sess, uid: str, technique: str, replace=False):
     return f"{owned.piece.name} 学会了 {techniques_mod.view(technique)['name']}"
 
 
+def act_claim_component(sess, reward_id, choice):
+    _guard_prep(sess)
+    if not sess.is_arena:
+        raise DemoError('当前规则没有阶段组件补给')
+    reward = next((row for row in sess.arena_component_choices
+                   if row['seat'] == 0 and row['id'] == reward_id), None)
+    if reward is None:
+        raise DemoError('组件补给不存在，请重新选择')
+    from arena_rewards import claim_component
+    try:
+        granted = claim_component(sess.player, reward, choice)
+    except ValueError as exc:
+        raise DemoError(str(exc)) from exc
+    return (f'已领取 {items_mod.COMPONENT_NAMES[choice]}，可在仓库合成装备'
+            if granted else '这份组件补给已领取，不会重复入仓')
+
+
 def act_claim_reward(sess, reward_id, choice):
     _guard_prep(sess)
     if not tactics_mod.enabled(sess.ruleset):
@@ -1851,6 +2322,14 @@ def _apply_action(params: dict):
                                 params.get("loc", ""))
             elif cmd == "unequip":
                 msg = act_unequip(sess, params.get("loc", ""))
+            elif cmd == "trait":
+                _guard_prep(sess)
+                if not sess.is_arena:
+                    raise DemoError('当前规则不支持竞技特性选择')
+                try:
+                    msg = arena_mod.set_trait(sess, params.get('loc', ''), params.get('trait', ''))
+                except ValueError as exc:
+                    raise DemoError(str(exc)) from exc
             elif cmd == "learn":
                 if sess.is_arena:
                     _guard_prep(sess)
@@ -1871,6 +2350,8 @@ def _apply_action(params: dict):
                     raise DemoError(str(exc)) from exc
             elif cmd == 'claim_reward':
                 msg = act_claim_reward(sess, params.get('reward_id', ''), params.get('choice', ''))
+            elif cmd == 'claim_component':
+                msg = act_claim_component(sess, params.get('reward_id', ''), params.get('choice', ''))
             elif cmd == 'set_guard':
                 msg = act_set_tactical(sess, 'guard', params.get('uid', ''), params.get('target_uid', ''))
             elif cmd == 'set_weather':

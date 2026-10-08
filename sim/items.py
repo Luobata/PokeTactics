@@ -1,4 +1,4 @@
-"""S5 装备系统 v1：8 组件 / 12 成品 / 仓库模型 / 合成 / 装备效果施加。
+"""Shared eight-component inventory with classic and arena recipe catalogs.
 
 设计定稿见 docs/07-items.md（概念稿）、S2 §1.5（2026-09-14 修订：
 通信进化唯一通道 = 进化石）、S4 §5.2（野怪轮掉落留 S5）。落地语义
@@ -76,7 +76,7 @@ COMPONENT_NAMES: Dict[str, str] = {
     "mysticwater": "神秘水滴", "spark": "雷之石碎片",
 }
 
-# ---- 成品（12 种；docs/07 §2）----
+# ---- 成品：经典基础装备与竞技专用机制装备 ----
 # pairs：该成品的具体配方（组件对，同组件允许 ×2）；None = 任意两组件
 # （进化石兜底）。效果字段 = items.apply_to_unit 写进 Unit 的维度。
 FINISHED: Dict[str, dict] = {
@@ -110,6 +110,69 @@ FINISHED: Dict[str, dict] = {
                       "gold_per_round": 1},              # 每轮 +1 金，全场限 2
     "evo_stone":     {"name": "进化石", "pairs": None,
                       "stone": True},                    # 通信进化 catalyst（不消耗）
+    "heart_bell":    {"name": "护心铃", "pairs": (("bell", "bell"),),
+                      "arena_only": True,
+                      "description": "原生技能对其他队友的实际回复达到其最大生命的 5%，为一位队友提供 8% 最大生命护盾、持续 3 秒；携带者冷却 4 秒。护盾不叠加，自疗、被动回复和睡觉不触发。"},
+    "ward_bracer":  {"name": "守势护腕", "pairs": (("band", "shoes"),),
+                      "arena_only": True, "shield_threshold": .08,
+                      "basic_bonus": 1.0, "charge_duration": 4.,
+                      "cooldown": 4., "limit": 3,
+                      "description": "任意来源的护盾在同一连续护盾周期内实际吸收累计达到自身最大生命的 8%，蓄力 4 秒；下一次有效普攻伤害翻倍。冷却 4 秒，每战最多 3 次。更强护盾刷新不重置累计或同周期资格，过期、耗尽才开始新周期；不强化技能和反伤。"},
+    "clarity_charm": {"name": "清明坠饰", "pairs": (("bell", "charcoal"),),
+                      "arena_only": True, "shield_fraction": .08,
+                      "shield_duration": 3., "cooldown": 4., "limit": 3,
+                      "description": "原生技能成功净化其他队友的一个主要异常后，为该队友提供 8% 最大生命护盾、持续 3 秒。冷却 4 秒，每战最多 3 次。护盾不叠加，自我净化、空净化、治疗和被动效果不触发。"},
+    "contagion_orb": {"name": "扩散宝珠", "pairs": (("shoes", "charcoal"),),
+                      "arena_only": True, "dot_ticks": 3, "cooldown": 4., "limit": 2,
+                      "description": "同一存活敌人累计受到携带者归属的 3 次实际灼伤或毒伤跳伤后，向其邻格一名存活、无主要异常且不免疫的敌人传播同种异常。护盾全额吸收不计数，传播不立即造成伤害、传播产物不再传播；每原目标每战最多一次，携带者冷却 4 秒、每战最多 2 次。自身必须存活，净化、免疫和散站可反制。"},
+    "metronome":     {"name": "节拍器", "pairs": (("band", "band"),),
+                      "arena_only": True, "speed_per_stack": .15,
+                      "max_stacks": 3, "duration": 4.,
+                      "description": "对同一敌人每次实际扣除生命的普攻获得一层节拍，每层攻速提高 15%，最多 3 层。换普攻目标或 4 秒没有有效普攻清层；闪避和护盾全额吸收不增层也不续时。提高攻击与施法的行动频率，不加移速；本命技能、教学、侧击、毒伤与反伤不增层。"},
+    "heavy_boots":   {"name": "厚底靴", "pairs": (("shoes", "bell"),),
+                      "arena_only": True,
+                      "description": "免疫敌方岩钉地形的入格伤害；不免疫岩属性技能、击退或定身。占用唯一装备位。"},
+    "trap_lens":     {"name": "陷阱透镜", "pairs": (("hardstone", "charcoal"),),
+                      "arena_only": True,
+                      "description": "携带者铺设的岩钉伤害提高 25%，铺场时确定加成；单次仍不超过目标最大生命的 12%。不强化普通技能。"},
+    "drain_fang":    {"name": "汲取之牙", "pairs": (("band", "mysticwater"),),
+                      "arena_only": True, "fraction": .15, "heal_cap": .05,
+                      "cooldown": 1., "limit": 8,
+                      "description": "有效普攻后，回复本次实际生命伤害的 15%（取整，至少 1），单次不超过自身最大生命的 5%。冷却 1 秒，每战最多 8 次实际回复；满血、护盾吸收、技能和持续伤害不触发，受封疗影响。"},
+    "tide_shell":    {"name": "潮汐甲壳", "pairs": (("hardstone", "mysticwater"),),
+                      "arena_only": True, "shield_fraction": .10,
+                      "cooldown": 4., "limit": 3,
+                      "description": "被敌人成功击退后仍存活时，获得自身最大生命 10% 的护盾，持续 3 秒。如落点有岩钉，先结算岩钉伤害。冷却 4 秒，每战最多 3 次；不阻止位移、不免疫落点伤害，不覆盖更强护盾。"},
+    "dew_charm":     {"name": "甘露坠饰", "pairs": (("bell", "mysticwater"),),
+                      "arena_only": True, "heal_threshold": .05, "heal_fraction": .06,
+                      "cooldown": 4., "limit": 3,
+                      "description": "本命技能实际治疗其他队友达到其最大生命的 5% 后，为该队友 2 格内另一位生命比例最低的受伤友军回复其最大生命的 6%。排除携带者和原患者，冷却 4 秒、每战最多 3 次；回复受封疗影响，不继续触发本命援护联动。"},
+    "torrent_orb":   {"name": "涌流宝珠", "pairs": (("mysticwater", "mysticwater"),),
+                      "arena_only": True, "energy_amount": 16, "cooldown": 4., "limit": 4,
+                      "description": "本命攻击技能的主命中造成实际生命伤害后，自身回复 16 能量。冷却 4 秒，每战最多 4 次；不响应侧击、护盾吸收、普攻、教学或持续伤害。需多次施法兑现持续收益，没有开场能量。"},
+    "pulse_band":    {"name": "脉冲腕带", "pairs": (("band", "spark"),),
+                      "arena_only": True, "hits": 3, "energy_amount": 10,
+                      "cooldown": 3., "limit": 6,
+                      "description": "累计 3 次造成实际生命伤害的普攻后，自身回复 10 能量并清空计数；可跨目标累积。冷却 3 秒，每战最多 6 次；冷却或满能量时最多暂存 3 次，之后须再有效普攻才能结算，不强化每场一次的学习技能。"},
+    "relay_coil":    {"name": "接力线圈", "pairs": (("bell", "spark"),),
+                      "arena_only": True, "shield_fraction": .08,
+                      "cooldown": 4., "limit": 3,
+                      "description": "本命技能实际为其他队友回复能量后，为该队友提供其最大生命 8% 的护盾，持续 3 秒。冷却 4 秒，每战最多 3 次；满能量、自回能、装备和海克斯回能不触发，不覆盖更强护盾。"},
+    "grounding_cloak": {"name": "接地斗篷", "pairs": (("hardstone", "spark"),),
+                        "arena_only": True, "cooldown": 0., "limit": 1,
+                        "description": "每战第一次被成功施加睡眠、麻痹或冰冻时，立即净化该主要异常；保留已有短畏缩与控制保护窗口。不解除灼伤、中毒、定身或击退，不因免疫或刷新异常消耗次数。"},
+    "storm_chime":   {"name": "逐风鸣铃", "pairs": (("shoes", "spark"),),
+                      "arena_only": True, "energy_amount": 8, "cooldown": 4., "limit": 3,
+                      "description": "成功击退一个敌人且敌人仍存活时，为自身 2 格内能量最低的另一名友军回复 8 能量。如落点有岩钉，先结算岩钉伤害。冷却 4 秒，每战最多 3 次；堵路、边界、救援拉动和普通移动不触发。"},
+    "life_orb":      {"name": "生命之玉", "pairs": (("charcoal", "charcoal"),),
+                      "arena_only": True, "direct_bonus": .20, "recoil_fraction": .05,
+                      "description": "普攻、本命攻击和攻击技能机的直接伤害提高20%。完整动作实际扣除敌方生命或护盾后，自身损失5%最大生命，每动作一次；反噬绕过护盾且可致死，不触发受击反击。不增强持续伤害、岩钉或反伤。仅被强行强化的招式免本次反噬，普通攻击仍反噬。"},
+    "damp_rock":     {"name": "潮湿岩石", "pairs": (("mysticwater", "spark"),),
+                      "arena_only": True, "weather_kind": "rain", "weather_extension": 4.,
+                      "description": "携带者通过求雨成功建立的雨天从12秒延长至16秒。不会自己制造天气；同天气不续时，同时雨晴抵消，之后其他天气可覆盖。占用装备位，不能同时携带输出或启动装备。"},
+    "heat_rock":     {"name": "炽热岩石", "pairs": (("charcoal", "mysticwater"),),
+                      "arena_only": True, "weather_kind": "sun", "weather_extension": 4.,
+                      "description": "携带者通过晴天成功建立的晴天从12秒延长至16秒。不会自己制造天气；同天气不续时，同时雨晴抵消，之后其他天气可覆盖。占用装备位，不能同时携带输出或启动装备。"},
 }
 
 # 进化石的通信进化名单（S2 §1.5：勇基拉→胡地、豪力→怪力、鬼斯通→耿鬼）
@@ -130,6 +193,7 @@ def catalog(ruleset=tactics.BASE_RULESET):
     active = tactics.counters_enabled(ruleset)
     return {key: spec for key, spec in FINISHED.items()
             if (key != "healing_needle" or active or ruleset == 'arena_v1')
+            and (not spec.get('arena_only') or ruleset == 'arena_v1')
             and (key != "evo_stone" or ruleset != 'arena_v1')}
 
 
@@ -147,7 +211,8 @@ _PAIR_TABLE = _pair_lookup()
 
 def craft_result(a: str, b: str, ruleset=tactics.BASE_RULESET) -> str:
     """两组件 → 成品 key：无特定配方的对子兜底为进化石。"""
-    table = _pair_lookup(ruleset) if tactics.counters_enabled(ruleset) else _PAIR_TABLE
+    table = _pair_lookup(ruleset) if (tactics.counters_enabled(ruleset)
+                                    or ruleset == 'arena_v1') else _PAIR_TABLE
     return table.get(tuple(sorted((a, b))), "evo_stone")
 
 

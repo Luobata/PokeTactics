@@ -1,5 +1,6 @@
 """Shared action inventory and real-event clip selection for editor and checks."""
 from dataclasses import asdict
+from animation_timeline import native_targeting
 
 PREVIEW_ACTIONS = {
     'idle': '待机', 'move': '移动', 'attack': '普通攻击',
@@ -17,6 +18,7 @@ def describe_clip(anim, kind):
     if kind not in PREVIEW_ACTIONS:
         raise ValueError(f'unsupported preview action: {kind}')
     action, source_index, subject = None, None, 0
+    targeting = 'enemy'
     if kind in ('attack', 'cast', 'hit'):
         candidates = [a for a in anim.timeline.actions if not a.secondary and
                       (a.target == 0 if kind == 'hit' else a.attacker == 0 and a.kind == kind)]
@@ -25,6 +27,7 @@ def describe_clip(anim, kind):
         if action is None or (kind == 'hit' and not positive):
             raise ValueError(f'本种子没有产生真实{PREVIEW_ACTIONS[kind]}事件')
         source_index, subject = action.source_index, action.target
+        targeting = native_targeting(anim.events[source_index], anim.by_idx) if kind == 'cast' else 'enemy'
         before, at = action.impact-.001, action.impact
         if kind == 'hit':
             start, end = max(0., action.impact-.2), action.impact+.7
@@ -32,7 +35,7 @@ def describe_clip(anim, kind):
         else:
             start, end = max(0., action.start-.25), max(action.impact+.95, action.recover_end+.25)
             phases = [('开始', action.start), ('释放', action.release),
-                      ('命中', at), ('恢复结束', action.recover_end)]
+                      ('命中' if targeting == 'enemy' else '生效', at), ('恢复结束', action.recover_end)]
     elif kind in ('move', 'death'):
         event_kind = 'move' if kind == 'move' else 'die'
         events = [ev for ev in anim.timeline.events if ev[1] == event_kind and ev[2] == 0]
@@ -55,7 +58,7 @@ def describe_clip(anim, kind):
         start, end = .4, 1.6
         before, at = start, end
         phases = [('循环开始', start), ('呼吸', 1.), ('循环结束', end)]
-    return {'kind': kind, 'action': asdict(action) if action else None,
+    return {'kind': kind, 'targeting': targeting, 'action': asdict(action) if action else None,
             'source_index': source_index, 'clip_start': start, 'clip_end': end,
             'phases': [{'label': label, 'at': round(t, 6)} for label, t in phases],
             'subject': {'unit': subject, 'name': anim.by_idx[subject].piece.name},

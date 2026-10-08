@@ -127,7 +127,7 @@ def main():
     parser.add_argument("--demo", action="store_true",
                         help="also run Demo self-test with seeds 7,42 (requires existing assets/Pillow)")
     parser.add_argument("--presentation", action="store_true",
-                        help="export animation samples and validate the current art manifest")
+                        help="export current arena samples, check arena actions and validate classic device art separately")
     parser.add_argument("--balance", action="store_true",
                         help="also run experiment_match, including its replay self-check")
     parser.add_argument("--balance-games", type=positive_int, default=40)
@@ -151,9 +151,10 @@ def main():
               ("diff_check", ["git", "diff", "--check"]),
               ("persistence_restart", [python, "tools/acceptance/persistence_selftest.py"])]
     optional = [
-        ("animation_samples", args.presentation, [python, "tools/mockups/animation_showcase.py", "--out", ".build/animation-b"]),
-        ("art_export", args.presentation, [python, "tools/mockups/art_manifest.py", "--output", ".build/animation-b/art-manifest.json"]),
-        ("art_verify", args.presentation, [python, "tools/mockups/art_manifest.py", "--verify", ".build/animation-b/art-manifest.json"]),
+        ("arena_animation_samples", args.presentation, [python, "tools/mockups/animation_showcase.py", "--mode", "arena", "--out", ".build/animation-arena"]),
+        ("arena_action_contracts", args.presentation, [python, "tools/acceptance/animation_acceptance.py", "--mode", "arena", "--species", "all", "--output", ".build/animation-arena/actions.json"]),
+        ("classic_art_export", args.presentation, [python, "tools/mockups/art_manifest.py", "--output", ".build/animation-classic/art-manifest.json"]),
+        ("classic_art_verify", args.presentation, [python, "tools/mockups/art_manifest.py", "--verify", ".build/animation-classic/art-manifest.json"]),
         ("demo", args.demo, [python, "tools/acceptance/demo_selftest.py", "--seeds", "7,42"]),
         ("device_controls", args.demo, [python, "tools/acceptance/device_selftest.py"]),
         ("balance", args.balance, [python, "sim/experiment_match.py", "--games",

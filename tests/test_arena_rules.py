@@ -84,4 +84,4 @@ class ArenaRules(unittest.TestCase):
             self.assertEqual(len(row['board']),len(seat.board))
             self.assertEqual([a['id'] for a in row['augments']],[a['id'] for a in seat.arena_augments_selected])
             self.assertTrue(all(o['sid'] in arena.ROSTER for o in row['board']))
-        self.assertEqual(len(state['arena']['catalog']),18)
+        self.assertEqual(len(state['arena']['catalog']),48)

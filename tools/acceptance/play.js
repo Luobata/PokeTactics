@@ -30,7 +30,28 @@
   let toastTimer;
   let systemTab = "augments",
     roleFilter = "all",
-    scoutSeat = 1;
+    scoutSeat = null;
+  let resumeAfterScout = false, scoutUnit = null, scoutReportIndex = null, scoutReturnFocus = null;
+  let historyReport = null;
+  const statViews = {
+    battle: {team: 0, metric: "damage_dealt"},
+    history: {team: 0, metric: "damage_dealt"},
+    scout: {team: 0, metric: "damage_dealt"},
+  };
+  const statMetrics = [
+    {key: "damage_dealt", label: "输出", note: "实际造成的生命损失"},
+    {key: "healing_done", label: "治疗", note: "有效回血，包含自疗"},
+    {key: "damage_taken", label: "承伤", note: "实际承受的生命损失"},
+    {key: "shield_absorbed", label: "护盾吸收", note: "被护盾吸收的伤害"},
+  ];
+  const recordedStats = (stats) => stats?.version === 1 && Array.isArray(stats.units);
+  const statValue = (value) => typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+  const statNumber = (value) => statValue(value) == null ? "—" : value.toLocaleString("zh-CN", {maximumFractionDigits: 1});
+  const reportVerdict = (winner) => winner === 0 ? {kind: "win", label: "胜利"}
+    : winner === 1 ? {kind: "loss", label: "失利"}
+    : winner === null || winner === -1 ? {kind: "draw", label: "平局"}
+    : {kind: "unknown", label: "已结算"};
+  const battleDuration = (value) => statValue(value) == null ? "时长未记录" : `${value.toFixed(1)} 秒`;
   const roleNames = { attack: "攻击型", defense: "防守型", support: "辅助型" };
   const roleSymbols = { attack: "⚔", defense: "⬟", support: "✚" };
   const roleOf = (p) =>
@@ -39,6 +60,33 @@
   const attackStyle = (p) => p?.ranged ? "远程" : "近战";
   const spriteOf = (p) =>
     `/demo/sprite/${Number(p.sid)}.png${p.shiny ? "?shiny=1" : ""}`;
+  const nativeOf = (p) => p.native_skill || {
+    name: p.skill_name, type: p.skill_type, description: p.skill_description, tags: [],
+  };
+  const skillTags = (p) => (nativeOf(p).tags || [])
+    .map((tag) => `<span>${esc(tag)}</span>`).join("");
+  function traitSlot(p, compact = false, readonly = false) {
+    if (!Object.hasOwn(p, "trait")) return "";
+    const trait = p.trait;
+    const options = Array.isArray(p.trait_options) ? p.trait_options : [];
+    const selectable = options.length > 1;
+    const choice = !readonly && !compact && p.uid && selectable
+      ? `<div class="trait-choice"><label for="trait-choice">本局特性</label><select id="trait-choice" data-trait-choice aria-label="选择${esc(p.name)}的互斥特性" ${!canPrep() ? "disabled" : ""}>${options.map(option => `<option value="${esc(option.id)}"${option.id === trait?.id ? " selected" : ""}>${esc(option.name)}</option>`).join("")}</select><small>${canPrep() ? "准备期免费切换 · 同时只能启用一项" : "下个准备期可切换 · 当前选择已锁定"}</small><details class="trait-choice-notes"><summary>比较特性与取舍</summary>${options.map(option => `<p><strong>${esc(option.name)}</strong> ${esc(option.description)}</p>`).join("")}</details></div>` : "";
+    return `<section class="skill-slot trait-slot${trait ? "" : " pending-trait"}" aria-label="竞技特性"><div class="skill-slot-heading"><span>◎ ${readonly && selectable ? "已选特性" : selectable ? "可选特性" : "固定特性"}</span><small>自动触发 · 不占技能槽</small></div><strong>${trait ? esc(trait.name) : "尚未配置"}</strong>${compact ? "" : `<p>${trait ? esc(trait.description) : "该精灵本版尚未配置特性，不会随机获得特性。"}</p>`}${choice}</section>`;
+  }
+  function selectedTraitSkillNote(p, move, native = false) {
+    if (p.trait?.id !== "trait_sheer_force") return "";
+    const applicable = native && Number(p.sid) === 34 || ["thunderbolt", "ice_beam", "sludge_bomb", "thunder"].includes(move?.id);
+    if (!applicable) return "";
+    return `<p class="skill-trait-override"><strong>已选强行 · 覆盖基础效果</strong>此动作直接伤害提高30%，移除追加异常与畏缩。${native ? "也不再对预先中毒目标追加40%追击。" : ""}${p.item === "life_orb" ? "该动作免除生命之玉反噬，普攻仍反噬。" : ""}</p>`;
+  }
+  function skillSlots(p, { learned = true, compact = false, readonly = false } = {}) {
+    const native = nativeOf(p);
+    const nativeSlot = `<section class="skill-slot native-skill-slot" aria-label="原生技能"><div class="skill-slot-heading"><span>原生技能</span><small>固定 · 80能量，按条件施放</small></div><strong>${esc(native.name)} <small>${esc(native.type)}属性${native.behavior ? " · " + esc(native.behavior) : ""}</small></strong><div class="skill-tags">${skillTags(p)}</div>${compact ? "" : `<p>${esc(native.description)}</p>${selectedTraitSkillNote(p, native, true)}`}</section>`;
+    if (!learned) return traitSlot(p, compact, readonly) + nativeSlot;
+    const technique = p.technique;
+    return traitSlot(p, compact, readonly) + nativeSlot + `<section class="skill-slot learned-skill-slot" aria-label="学习技能"><div class="skill-slot-heading"><span>学习技能</span><small>可替换 · 每场最多一次</small></div><strong>${technique ? esc(technique.name) : "尚未学习"}</strong>${compact ? "" : `<p>${technique ? esc(technique.description) : "学习一项招式，补充队伍需要的能力。替换只改变学习位，保留原生技能。"}</p>${selectedTraitSkillNote(p, technique)}`}</section>`;
+  }
   const playback = {
     token: 0,
     timer: null,
@@ -51,6 +99,16 @@
     meta: null,
     complete: false,
     verdictShown: false,
+    intentPlaying: false,
+    buffering: false,
+    requested: null,
+    cached: new Set(),
+    loaded: new Set(),
+    failed: new Set(),
+    pending: new Map(),
+    cacheLimit: 72,
+    reportTab: "events",
+    reportTabTouched: false,
   };
 
   function toast(message, error = false) {
@@ -145,6 +203,7 @@
         return result;
       }
       if (result.state) {
+        if (["new", "resume"].includes(cmd) || state && (state.sid !== result.state.sid || state.round !== result.state.round || state.phase !== result.state.phase)) resetScout();
         state = result.state;
         if (!["state", "resume", "new"].includes(cmd))
           upgrades = ownedSnapshot(state).filter((p) =>
@@ -219,18 +278,20 @@
     setTimeout(() => {layer.remove(); target.classList.remove("unit-upgrade");}, 1500);
   }
 
-  function cell(piece, loc, enemy = false, bench = false) {
+  function cell(piece, loc, enemy = false, bench = false, enemyLoc = null) {
     const cls = bench ? "bench-slot" : "tile";
     const chosen = Boolean(loc) && selected === loc;
     const description = piece
       ? `${piece.name}，${starsOf(piece)}星${piece.shiny ? "闪光" : ""}，${roleNames[roleOf(piece)]}，${attackStyle(piece)}，${piece.types.join("、")}${piece.item_name ? "，装备" + piece.item_name : ""}`
       : "空位";
-    return `<button type="button" class="${cls}${piece ? "" : " empty"}${chosen ? " selected" : ""}${piece?.shiny ? " shiny" : ""}" ${loc ? `data-loc="${loc}"` : ""} ${piece ? `data-owned="1"${piece.uid ? ` data-uid="${esc(piece.uid)}"` : ""}` : ""} ${enemy || !canPrep() ? "disabled" : ""} ${piece && !enemy && canPrep() ? 'draggable="true"' : ""} aria-label="${esc((enemy ? "敌方" : bench ? "备战席" : "我方") + " " + description)}" ${chosen ? 'aria-pressed="true"' : ""}>${piece ? `<img src="${spriteOf(piece)}" alt="" draggable="false"><span class="unit-label">${esc(piece.name)}</span><span class="unit-stars">${"★".repeat(starsOf(piece))}</span>${piece.item ? '<span class="unit-item" title="已装备">◆</span>' : `<span class="unit-role role-${roleOf(piece)}" title="${roleNames[roleOf(piece)]}">${roleSymbols[roleOf(piece)]}</span>`}${piece.shiny ? '<span class="shiny-mark">✦</span>' : ""}` : ""}</button>`;
+    return `<button type="button" class="${cls}${piece ? "" : " empty"}${chosen ? " selected" : ""}${piece?.shiny ? " shiny" : ""}" ${loc ? `data-loc="${loc}"` : ""} ${enemy && piece && enemyLoc ? `data-enemy-loc="${enemyLoc}" aria-haspopup="dialog"` : ""} ${piece && !enemy ? `data-owned="1"${piece.uid ? ` data-uid="${esc(piece.uid)}"` : ""}` : ""} ${enemy ? !piece ? "disabled" : "" : !canPrep() ? "disabled" : ""} ${piece && !enemy && canPrep() ? 'draggable="true"' : ""} aria-label="${esc((enemy ? "敌方" : bench ? "备战席" : "我方") + " " + description)}" ${chosen ? 'aria-pressed="true"' : ""}>${piece ? `<img src="${spriteOf(piece)}" alt="" draggable="false"><span class="unit-label">${esc(piece.name)}</span><span class="unit-stars">${"★".repeat(starsOf(piece))}</span>${piece.item ? '<span class="unit-item" title="已装备">◆</span>' : `<span class="unit-role role-${roleOf(piece)}" title="${roleNames[roleOf(piece)]}">${roleSymbols[roleOf(piece)]}</span>`}${piece.shiny ? '<span class="shiny-mark">✦</span>' : ""}` : ""}</button>`;
   }
   function render() {
     const locked = busy || deploying;
-    for (const id of ["new-button", "resume-button", "backup-button"])
+    for (const id of ["new-confirm", "result-new", "resume-button", "backup-button"])
       $(id).disabled = locked || (id === "backup-button" && !sid);
+    for (const button of document.querySelectorAll("[data-restart]"))
+      button.disabled = locked;
     if (!state) {
       $("fight-button").disabled =
         $("refresh-button").disabled =
@@ -272,7 +333,7 @@
     $("opponent-kind").textContent = opp?.pve ? "野生遭遇" : "训练家对战";
     const enemies = opp?.rows || Array.from({length: 3}, () => []);
     $("enemy-board").innerHTML = Array.from({ length: (state.arena?.deployment_rows || state.board.length) * 6 }, (_, i) =>
-      cell(enemies[Math.floor(i / 6)]?.[i % 6], null, true),
+      cell(enemies[Math.floor(i / 6)]?.[i % 6], null, true, false, `g${Math.floor(i / 6)},${i % 6}`),
     ).join("");
     $("ally-board").innerHTML = state.board
       .flatMap((row, r) => row.map((p, c) => cell(p, `g${r},${c}`)))
@@ -296,7 +357,7 @@
     $("shop").innerHTML = state.shop
       .map((p, i) =>
         p
-          ? `<button type="button" class="shop-card" data-shop="${i}" style="--card-tint:${/^#[0-9a-f]{6}$/i.test(p.colors?.[0]) ? p.colors[0] + "20" : "#e9efda"}" ${!prep || y.gold < p.price ? "disabled" : ""} aria-label="招募${esc(p.name)}，${roleNames[roleOf(p)]}，${p.price}金币"><div class="shop-art"><span class="shop-tier">${p.tier} 费 · ★</span><span class="shop-role role-${roleOf(p)}">${roleNames[roleOf(p)]}</span><img src="${spriteOf(p)}" alt="" draggable="false"><span class="shop-buy-hint">+</span></div><div class="shop-info"><div class="shop-name">${esc(p.name)}<span class="shop-price">${p.price}${icon("coin")}</span></div><div class="shop-types">${p.types.map((t) => `<span class="type-tag">${esc(t)}</span>`).join("")}</div><div class="shop-move"><span>${esc(p.skill_name)}</span><span>${attackStyle(p)} ${p.range}格</span></div></div></button>`
+          ? `<button type="button" class="shop-card" data-shop="${i}" style="--card-tint:${/^#[0-9a-f]{6}$/i.test(p.colors?.[0]) ? p.colors[0] + "20" : "#e9efda"}" ${!prep || y.gold < p.price ? "disabled" : ""} aria-label="招募${esc(p.name)}，${roleNames[roleOf(p)]}，${p.price}金币"><div class="shop-art"><span class="shop-tier">${p.tier} 费 · ★</span><span class="shop-role role-${roleOf(p)}">${roleNames[roleOf(p)]}</span><img src="${spriteOf(p)}" alt="" draggable="false"><span class="shop-buy-hint">+</span></div><div class="shop-info"><div class="shop-name">${esc(p.name)}<span class="shop-price">${p.price}${icon("coin")}</span></div><div class="shop-types">${p.types.map((t) => `<span class="type-tag">${esc(t)}</span>`).join("")}</div><div class="shop-move"><span>${esc(nativeOf(p).name)}</span><span>${attackStyle(p)} ${p.range}格</span></div><div class="shop-skill-tags">${skillTags(p)}${p.trait ? `<span class="trait-shop-tag">◎ ${esc(p.trait.name)}</span>` : ""}</div></div></button>`
           : `<div class="shop-card sold"><div class="sold-content">${icon("ball")}<p>伙伴已加入</p></div></div>`,
       )
       .join("");
@@ -351,19 +412,15 @@
                     ? "伙伴已来到备战席。点击它，再点击棋盘格，或者选择「一键上场」。"
                     : "冒险从一次相遇开始。点击商店中的精灵，把它招募到备战席。"
                   : "准备阶段不限时。调整阵容、点亮羁绊，准备好了就开始战斗。";
-    $("synergy-list").innerHTML = state.synergies.length
-      ? state.synergies
-          .map(
-            (s) =>
-              `<details class="synergy-row${s.tier ? " on" : ""}"><summary><span class="type-dot" style="background:${/^#[0-9a-f]{6}$/i.test(s.color) ? s.color + "30" : "#dde6c9"}">${esc(s.zh.slice(0, 1))}</span><strong>${esc(s.zh)}</strong><small>${s.n}${s.next ? " / " + s.next : ""}</small></summary><p>${esc(s.effect || `还需 ${s.need} 种不同的${s.zh}属性精灵触发加成。`)}</p></details>`,
-          )
-          .join("")
-      : '<p class="empty-copy">上场精灵，点亮你的第一组羁绊。</p>';
+    renderBonds();
     renderDetail();
     renderInventory();
     renderSystems();
+    renderCombinations();
     renderRoundLoot();
+    renderComponentChoices();
     renderStandings();
+    renderBattleHistory();
     if ($("scout-dialog").open) renderScout();
     if ($("catalog-dialog").open) renderCatalog();
     $("battle-log").innerHTML =
@@ -378,7 +435,108 @@
         (state.save?.sequence
           ? `进度已自动保存 · 第 ${state.round} 轮`
           : "每次操作自动保存");
-    $("battle-next").disabled = locked;
+    $("battle-next").disabled = locked || ($("battle-dialog").open && playback.n > 0 && !playback.verdictShown);
+  }
+  function renderCombatStats(scope, stats) {
+    const container = $(`${scope}-statistics`);
+    if (!recordedStats(stats)) {
+      container.innerHTML = '<div class="stat-heading"><h3>战斗统计</h3><span>未记录</span></div><p class="stats-unavailable">这份旧战果未记录单位统计，无法还原输出、治疗与承伤。</p>';
+      return;
+    }
+    const view = statViews[scope];
+    const metric = statMetrics.find((entry) => entry.key === view.metric);
+    const units = stats.units.filter((unit) => Number(unit.team) === view.team)
+      .sort((a, b) => (statValue(b[view.metric]) ?? -1) - (statValue(a[view.metric]) ?? -1)
+        || Number(a.idx) - Number(b.idx));
+    const total = (stats.totals || []).find((row) => Number(row.team) === view.team);
+    const maximum = Math.max(0, ...units.map((unit) => statValue(unit[view.metric]) ?? 0));
+    const teams = scope === "scout" ? [scoutName(scoutSubject()), trainerName(scoutReport()?.opp_name) || "当场对手"] : ["我方", "敌方"];
+    const teamName = esc(teams[view.team]);
+    container.innerHTML = `<div class="stat-heading"><h3>战斗统计</h3><span>全场结算 · 含阵亡精灵</span></div>
+      <div class="stat-teams" role="group" aria-label="选择统计阵营">${[0, 1].map((team) => `<button type="button" data-stat-scope="${scope}" data-stat-team="${team}" aria-pressed="${team === view.team}">${team === 0 ? "● " : "▲ "}${esc(teams[team])}</button>`).join("")}</div>
+      <div class="stat-metrics" role="group" aria-label="选择统计指标并按数值排序">${statMetrics.map((entry) => `<button type="button" data-stat-scope="${scope}" data-stat-metric="${entry.key}" aria-pressed="${entry.key === view.metric}" title="${entry.note}"><span>${entry.label}</span><strong>${statNumber(total?.[entry.key])}</strong></button>`).join("")}</div>
+      <div class="stat-ranking-heading"><span>${teamName} · ${metric.label}排行</span><small>由高到低 · ${units.length} 位伙伴</small></div>
+      <ol class="stat-unit-list" data-stat-ranking="${view.metric}" aria-label="${teamName}${metric.label}排行">${units.map((unit, rank) => {
+        const value = statValue(unit[view.metric]);
+        const width = maximum > 0 && value != null ? Math.max(0, Math.min(100, value / maximum * 100)) : 0;
+        const role = Object.hasOwn(roleNames, unit.role) ? roleNames[unit.role] : "";
+        const selfHeal = view.metric === "healing_done" && statValue(unit.self_healing) != null
+          ? `<small class="stat-self-heal">其中自疗 ${statNumber(unit.self_healing)}</small>` : "";
+        const unitSprite = spriteOf({...unit, shiny: unit.shiny ?? starsOf(unit) === 3});
+        return `<li class="stat-unit-row" data-stat-unit="${Number(unit.idx)}"><span class="stat-rank" aria-hidden="true">${rank + 1}</span><img src="${unitSprite}" alt="" loading="lazy"><div class="stat-unit-main"><div class="stat-unit-heading"><strong>${esc(unit.name)}</strong><span class="stat-unit-stars" aria-label="${starsOf(unit)}星">${"★".repeat(starsOf(unit))}</span></div><small class="stat-unit-role">${esc(role)}${unit.item ? `${role ? " · " : ""}携带装备` : ""}</small><div class="stat-bar" aria-hidden="true"><span style="width:${width.toFixed(2)}%"></span></div></div><div class="stat-unit-value"><strong>${statNumber(value)}</strong>${selfHeal}</div></li>`;
+      }).join("") || `<li class="stats-empty-team">${teamName}没有上阵精灵。</li>`}</ol>
+      <p class="stat-accounting">输出与承伤只计实际掉血。治疗只计有效回血，包含自疗。护盾吸收单列，所有上阵精灵均计入。</p>`;
+    container.dataset.team = String(view.team);
+  }
+  function selectStatView(target) {
+    const scope = target.dataset.statScope;
+    if (!Object.hasOwn(statViews, scope) || (scope === "battle" && !playback.verdictShown)) return;
+    const view = statViews[scope];
+    let selector;
+    if (["0", "1"].includes(target.dataset.statTeam)) {
+      view.team = Number(target.dataset.statTeam);
+      selector = `[data-stat-team="${view.team}"]`;
+    } else if (statMetrics.some((metric) => metric.key === target.dataset.statMetric)) {
+      view.metric = target.dataset.statMetric;
+      selector = `[data-stat-metric="${view.metric}"]`;
+    } else return;
+    renderCombatStats(scope, (scope === "scout" ? scoutReport() : scope === "history" ? historyReport : playback.meta)?.statistics);
+    $(`${scope}-statistics`).querySelector(selector)?.focus();
+  }
+  function renderBattleHistory() {
+    const rows = Array.isArray(state?.battle_history) ? state.battle_history : [];
+    const emptyMessage = Number(state?.round) > 1 || Number(state?.stats?.battles) > 0
+      ? "旧回合未记录统计，从下一场战斗开始保留每轮战报。"
+      : "完成第一场战斗后，这里会留下每轮战报。";
+    $("battle-history-count").textContent = `${rows.length} 场`;
+    $("battle-history").innerHTML = rows.slice().reverse().map((row) => {
+      const verdict = reportVerdict(row.winner);
+      return `<button type="button" class="history-entry ${verdict.kind}" data-battle-report="${Number(row.round)}" aria-haspopup="dialog" aria-label="查看第${Number(row.round)}轮战报"><span class="history-round">${String(row.round).padStart(2, "0")}</span><span class="history-entry-main"><strong>第 ${Number(row.round)} 轮 <em>${verdict.label}</em></strong><small>${esc(trainerName(row.opp_name) || (row.pve ? "野生遭遇" : "当轮对手"))}${row.ghost ? " · 镜像对手" : ""}</small></span><span class="history-entry-end"><small>${battleDuration(row.duration)}</small><span>${recordedStats(row.statistics) ? "查看统计 →" : "统计未记录 →"}</span></span></button>`;
+    }).join("") || `<p class="empty-copy history-empty">${emptyMessage}</p>`;
+  }
+  function openHistoryReport(round) {
+    const row = (state?.battle_history || []).find((entry) => Number(entry.round) === Number(round));
+    if (!row) return;
+    historyReport = row;
+    Object.assign(statViews.history, {team: 0, metric: "damage_dealt"});
+    const verdict = reportVerdict(row.winner);
+    $("history-report-title").textContent = `第 ${row.round} 轮 · 战报`;
+    $("history-report-subtitle").textContent = `${row.pve ? "野生遭遇" : "训练家对战"} · ${trainerName(row.opp_name) || "当轮对手"}${row.ghost ? "（镜像）" : ""} · ${battleDuration(row.duration)}`;
+    $("history-report-result").textContent = verdict.label;
+    $("history-report-result").className = `history-result ${verdict.kind}`;
+    $("history-report-round").innerHTML = (state.battle_history || []).map((entry) => `<option value="${Number(entry.round)}"${Number(entry.round) === Number(row.round) ? " selected" : ""}>第 ${Number(entry.round)} 轮 · ${reportVerdict(entry.winner).label}</option>`).join("");
+    $("history-report-round").value = String(row.round);
+    renderCombatStats("history", row.statistics);
+    showCombinationSummary(row, "history");
+    if (!$("history-report-dialog").open) $("history-report-dialog").showModal();
+  }
+  function renderBonds() {
+    const entries = Array.isArray(state.bonds?.entries) ? state.bonds.entries : null;
+    if (!entries) {
+      $("synergy-list").innerHTML = (state.synergies || []).map((s) => `<details class="synergy-row${s.tier ? " on" : ""}"><summary><span class="type-dot">${esc((s.zh || s.name || "").slice(0, 1))}</span><strong>${esc(s.zh || s.name)}</strong><small>${Number(s.n)}${s.next ? " / " + Number(s.next) : ""}</small></summary><p>${esc(s.effect || `还需 ${Number(s.need)} 位伙伴。`)}</p></details>`).join("") || '<p class="empty-copy">上场精灵，点亮你的第一组羁绊。</p>';
+      $("bond-note").textContent = "旧存档按其原有规则显示属性计数；新竞技按不同物种计数。";
+      return;
+    }
+    const catalog = state.arena?.catalog || [];
+    const bench = new Set((state.bench || []).filter(Boolean).map(p => p.sid));
+    const shop = new Set((state.shop || []).filter(Boolean).map(p => p.sid));
+    const priority = sid => bench.has(sid) ? 0 : shop.has(sid) ? 1 : 2;
+    $("bond-note").textContent = state.bonds.note || "只计上场的不同物种，同种不同星级不重复，备战席不计入。";
+    const ordered = [...entries].sort((a, b) => Number(b.category === "tactic") - Number(a.category === "tactic"));
+    let previousCategory = null;
+    $("synergy-list").innerHTML = ordered.map(row => {
+      const heading = row.category !== previousCategory ? `<p class="bond-group-title">${row.category === "tactic" ? "战术羁绊 · 玩法配合" : "属性羁绊 · 成员加成"}</p>` : "";
+      previousCategory = row.category;
+      const candidates = [...(row.candidates || [])].sort((a, b) => priority(a) - priority(b) || a - b).slice(0, 4);
+      const nextTier = (row.thresholds || []).find(tier => Number(tier.count) === Number(row.next));
+      const effect = row.effect || (nextTier ? `${row.next}种档：${nextTier.effect}` : "部署不同伙伴，达到门槛后激活。");
+      const available = candidates.map(sid => { const p = catalog.find(p => p.sid === sid); return p ? `<a href="/pokedex?q=${encodeURIComponent(p.name)}"><span>${esc(p.name)}</span><small>${bench.has(sid) ? "备战席" : shop.has(sid) ? "商店" : "图鉴"}</small></a>` : ""; }).join("");
+      return `${heading}<details class="synergy-row bond-row${row.tier ? " on" : ""}"><summary><span class="type-dot${row.category === "tactic" ? " tactic" : ""}">${esc((row.name || "").slice(0, 1))}</span><strong>${esc(row.name)}</strong><small>${Number(row.n)}${row.next ? " / " + Number(row.next) : " · 满档"}</small></summary><p class="bond-tier">${row.tier ? `已激活 ${Number(row.tier)} 种档` : "尚未激活"}${row.next ? ` · 再补 ${Number(row.need)} 位不同伙伴` : ""}</p><p>${esc(effect)}</p>${available ? `<div class="bond-candidates"><span>可补伙伴</span>${available}</div>` : ""}<a class="bond-directory-link" href="/pokedex?tab=bonds&q=${encodeURIComponent(row.name)}">完整成员与门槛 ↗</a></details>`;
+    }).join("") || '<p class="empty-copy">上场精灵，点亮你的第一组羁绊。</p>';
+  }
+  function pieceBonds(p) {
+    const entries = [...(state.bonds?.entries || []), ...(state.arena?.bond_catalog || [])];
+    return (p.bonds || []).map(id => { const row = entries.find(row => row.id === id); const name = row?.name || id; return `<a href="/pokedex?tab=bonds&q=${encodeURIComponent(id)}">${esc(name)}</a>`; }).join("");
   }
   function renderDetail() {
     const p = pieceAt(selected);
@@ -388,7 +546,7 @@
       return;
     }
     $("unit-detail").innerHTML =
-      `<div class="unit-detail-card"><img src="${spriteOf(p)}" alt="${esc(p.name)}"><h3>${esc(p.name)}</h3><p class="detail-star">${"★".repeat(starsOf(p))}${p.shiny ? " · 闪光" : ""}</p><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · ${esc(p.types.join(" / "))}</p><div style="clear:both"></div><p>${esc(p.role_description || "")}</p><p><b>${esc(p.skill_name)}</b> · ${esc(p.skill_type)}属性：${esc(p.skill_description)}</p><div class="detail-stat"><span>攻击方式</span><b>${attackStyle(p)} · ${p.range} 格</b></div>${p.item ? `<p>装备：${esc(p.item_name)}</p><p>${esc(p.item_effect)}</p>` : ""}${p.technique ? `<p>已学习：${esc(p.technique.name)}</p><p>${esc(p.technique.description)}</p>` : ""}<div class="detail-actions"><button data-open-system="techniques">为它学习技能</button><button data-action="sell" class="sell-button" ${!canPrep() ? "disabled" : ""}>出售 +${p.sell} 金币</button>${p.item ? `<button data-action="unequip" ${!canPrep() ? "disabled" : ""}>卸下装备</button>` : ""}<button data-action="cancel-select">取消选择</button></div></div>`;
+      `<div class="unit-detail-card"><img src="${spriteOf(p)}" alt="${esc(p.name)}"><h3>${esc(p.name)}</h3><p class="detail-star">${"★".repeat(starsOf(p))}${p.shiny ? " · 闪光" : ""}</p><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · ${esc(p.types.join(" / "))}</p><div style="clear:both"></div><p>${esc(p.role_description || "")}</p>${skillSlots(p)}${p.bonds?.length ? `<div class="unit-bonds"><span>所属羁绊</span>${pieceBonds(p)}</div>` : ""}<div class="detail-stat"><span>攻击方式</span><b>${attackStyle(p)} · ${p.range} 格</b></div>${p.item ? `<p>装备：${esc(p.item_name)}</p><p>${esc(p.item_effect)}</p>` : ""}<div class="detail-actions"><button data-open-system="techniques">为它学习技能</button><button data-action="sell" class="sell-button" ${!canPrep() ? "disabled" : ""}>出售 +${p.sell} 金币</button>${p.item ? `<button data-action="unequip" ${!canPrep() ? "disabled" : ""}>卸下装备</button>` : ""}<button data-action="cancel-select">取消选择</button></div></div>`;
   }
   function renderInventory() {
     const items = state.items;
@@ -462,7 +620,7 @@
       : state.techniques?.inventory || [];
     $("techniques-count").textContent = `${techniques.reduce((n, t) => n + (Number(t.count) || 0), 0)} 台`;
     $("techniques").innerHTML =
-      '<p class="system-note">每只精灵可学习一项。优先消耗技能机免费学习，没有机器可花 2 金币学习；替换不返还旧技能。</p>' +
+      '<p class="system-note">每只精灵有一个固定原生位和一个学习位，两者可同时生效。学习技能每场最多触发一次；替换只改变学习位，不覆盖原生技能。优先消耗一台技能机免费学习，没有机器可花 2 金币；替换不返还旧技能。</p>' +
       techniques
         .map((t) => {
         const eligible = ownedLocations().filter(({ piece }) => piece.technique?.id !== t.id && (Array.isArray(piece.learnable)
@@ -488,38 +646,245 @@
   function rewardCards(row) {
     return `<div class="loot-cards">${(row?.grants || []).map((g) => `<div class="loot-card ${esc(g.kind)}"><span class="loot-icon" aria-hidden="true">${g.kind === "technique" ? "◎" : g.kind === "item" ? "◆" : "✧"}</span><div><strong>${esc(g.name)}</strong><small>${g.kind === "technique" ? "技能机 · 免费学习一次" : g.kind === "item" ? "成品装备 · 可直接装备" : "装备组件 · 可用于合成"}</small></div></div>`).join("")}</div>`;
   }
+  function renderCombinations() {
+    const data = state.combinations;
+    const rows = Array.isArray(data?.entries) ? data.entries : [];
+    const traits = rows.filter(row => row.source_kind === "trait");
+    const base = rows.filter(row => row.stage === "base" && row.source_kind !== "trait");
+    const upgrade = rows.filter(row => row.stage !== "base" && row.source_kind !== "trait");
+    $("combination-check").hidden = !rows.length;
+    $("combination-count").textContent = `${base.filter(row => row.status === "ready").length} 条基础配合已具备 · ${upgrade.filter(row => row.status === "ready").length} 项补强已具备`;
+    function facts(label, values, kind) {
+      if (!values?.length) return "";
+      return `<div class="combination-facts ${kind}"><strong>${label}</strong><ul>${values.map(value => `<li>${esc(value)}</li>`).join("")}</ul></div>`;
+    }
+    function group(title, entries, stage) {
+      if (!entries.length) return "";
+      return `<section class="combination-stage ${stage}"><h3>${title}</h3>${entries.map(row => {
+        const ready = row.status === "ready";
+        return `<article class="combination-row${ready ? " ready" : ""}"><div class="combination-heading"><strong>${esc(row.name)}</strong><span>${stage === "trait" ? "已选择 · 条件触发" : ready ? "配置已具备" : "尚缺配置"}</span></div><p>${esc(row.detail)}</p>${facts("已具备", row.present || row.units?.map(unit => "已上场：" + unit.name), "present")}${facts("缺组件 / 配置", row.missing, "missing")}${facts("需战斗时机 / 对手条件", row.battle_conditions, "conditions")}${facts("互斥 / 取舍", row.conflicts, "conflicts")}</article>`;
+      }).join("")}</section>`;
+    }
+    $("combinations").innerHTML = group("基础配合 · 本命与属性先配合", base, "base") + group("按战局补强 · 装备、天气与海克斯", upgrade, "upgrade") + group("个体特性 · 查看触发与取舍", traits, "trait") + `<p class="combination-note">${esc(data?.note || "配置齐全仍需战斗中的有效命中、治疗和站位条件。")}</p>`;
+  }
+  function renderComponentChoices() {
+    const container = $("component-choices");
+    const rewards = Array.isArray(state.component_choices) ? state.component_choices : [];
+    container.hidden = !rewards.length;
+    if (!rewards.length) { container.innerHTML = ""; return; }
+    const pending = rewards.filter(reward => reward.status === "pending");
+    const stock = new Map((state.items?.components || []).map(part => [part.key || part.id, Number(part.n) || 0]));
+    function craftAfter(option, item) {
+      return (item.recipes || []).some(pair => {
+        const counts = new Map(stock);
+        counts.set(option.id, (counts.get(option.id) || 0) + 1);
+        for (const part of pair) { const key = typeof part === "string" ? part : part.id; const n = counts.get(key) || 0; if (!n) return false; counts.set(key, n - 1); }
+        return pair.length === 2;
+      });
+    }
+    container.innerHTML = `<div class="component-choice-heading"><div><span class="eyebrow">COMPONENT SUPPLY</span><h3>定向组件补给</h3></div><span>${pending.length ? pending.length + " 次待领" : "已处理"}</span></div><p class="component-choice-note">第3、6轮实际结算后各一次八选一，独立于胜2份 / 败1份的随机战利品。${canPrep() ? "选择所缺材料，领取后加入仓库。" : "下一准备期可领取；当前暂不能选择。"}</p>${rewards.map(reward => {
+      if (reward.status !== "pending") { const chosen = (reward.options || []).find(option => option.id === reward.choice); return `<p class="component-choice-receipt">第 ${Number(reward.round)} 轮 · ${reward.status === "claimed" ? "已领取 " + esc(chosen?.name || reward.choice) : reward.closed_reason === "eliminated" ? "已淘汰，补给关闭" : "对局已结束，补给关闭"}</p>`; }
+      return `<div class="component-choice-round"><strong>第 ${Number(reward.round)} 轮 · 选择一件组件</strong><div class="component-choice-options">${(reward.options || []).map(option => {
+        const recipes = option.recipe_details || [];
+        const ready = recipes.filter(item => !(state.items?.crafting_blocked || []).includes(item.id) && craftAfter(option, item));
+        return `<button class="component-choice-option${ready.length ? " craft-ready" : ""}" data-component-choice="${esc(option.id)}" data-component-reward="${esc(reward.id)}" ${!canPrep() ? "disabled" : ""}><strong>${esc(option.name)}</strong><span>可合成：${recipes.map(item => esc(item.name)).join("、") || "查看合成图"}</span>${ready.length ? `<small>领取后可合成：${ready.map(item => esc(item.name)).join("、")}</small>` : '<small>补一块材料 · 再按配方合成</small>'}</button>`;
+      }).join("")}</div></div>`;
+    }).join("")}<a href="/pokedex?tab=items&view=recipes">查看完整装备合成图 ↗</a>`;
+  }
+  function combinationSide(data, fields, teamName) {
+    let content;
+    if (!data) content = '<p class="combination-note">这份战果未记录该方联动统计，不能用零值代替。</p>';
+    else {
+    const rows = Array.isArray(data.by_key) ? data.by_key : [];
+    const totals = [["total_energy", "实际回能"], ["total_shield", "新增护盾"], ["absorbed", "护盾实吸"]];
+    if (Object.hasOwn(data, "total_damage")) totals.push(["total_damage", "已结算的强化额外生命损失"], ["damage_absorbed", "强化部分被盾吸收"], ["total_charges", "反击蓄力"], ["total_vulnerable", "成功施加易伤"]);
+    if (Object.hasOwn(data, "total_spreads")) totals.push(["total_spreads", "成功异常传播"], ["total_tempo_stacks", "有效普攻增层"], ["total_offense_buffs", "直接攻击鼓舞次数"]);
+    if (Object.hasOwn(data, "total_healing")) totals.push(["total_healing", "特性 / 装备实际治疗"], ["total_mitigated", "实际避免生命损失"], ["total_cleanses", "实际净化"], ["total_statuses", "成功施加异常"], ["total_accuracy_saves", "修正闪避"], ["total_weakens", "物理压制目标"]);
+    const visible = rows.filter((row) => row.triggers || row.absorbed || row.charges);
+    function benefit(row) {
+      const metrics = [];
+      if (row.energy) metrics.push(`回能 ${Number(row.energy)}`);
+      if (row.shield) metrics.push(`新增盾 ${Number(row.shield)}`);
+      if (row.absorbed) metrics.push(`护盾实吸 ${Number(row.absorbed)}`);
+      if (row.id === "ward_bracer") metrics.push(`蓄力 ${Number(row.charges) || 0} 次`, `强化普攻 ${Number(row.triggers) || 0} 次`, `额外生命损失 ${Number(row.damage) || 0}`, `强化部分被盾吸收 ${Number(row.damage_absorbed) || 0}`);
+      if (row.vulnerable) metrics.push(`成功易伤 ${Number(row.vulnerable)} 次`);
+      if (row.spreads) metrics.push(`成功传播 ${Number(row.spreads)} 次`);
+      if (row.tempo_stacks) metrics.push(`有效普攻增层 ${Number(row.tempo_stacks)} 次（清层后可重新累计）`);
+      if (row.offense_buffs) metrics.push(row.id === "trait_guts" ? `毅力 ${Number(row.offense_buffs)} 次 · 3秒物理直接伤害+20%` : row.id === "bond_inspiration" ? `鼓舞 ${Number(row.offense_buffs)} 次 · 3秒直接攻击增益` : `鼓舞 ${Number(row.offense_buffs)} 次 · 每次3秒直接攻击+25%`);
+      if (row.healing) metrics.push(`实际治疗 ${Number(row.healing)}`);
+      if (row.cleanses) metrics.push(`实际净化 ${Number(row.cleanses)} 次`);
+      if (row.statuses) metrics.push(`成功异常 ${Number(row.statuses)} 次`);
+      if (row.mitigated || ["trait_sturdy", "trait_magic_guard"].includes(row.id)) metrics.push(`实际避免生命损失 ${Number(row.mitigated)}`);
+      if (row.accuracy_saves) metrics.push(`修正闪避 ${Number(row.accuracy_saves)} 次`);
+      if (row.weakens) metrics.push(`物理压制 ${Number(row.weakens)} 名目标`);
+      if (row.id.startsWith("trait_") && row.damage) metrics.push(`本次命中的强化额外生命损失 ${Number(row.damage)}`);
+      if (row.id.startsWith("trait_") && row.damage_absorbed) metrics.push(`强化部分被盾吸收 ${Number(row.damage_absorbed)}`);
+      return `<p class="combination-benefit"><strong>${row.id.startsWith("trait_") ? "特性 · " : ""}${esc(row.name)} · ${Number(row.triggers) || 0} 条生效记录</strong><span>${metrics.join(" · ")}</span></p>`;
+    }
+    const brief = totals.filter(([key]) => Number(data[key]) > 0).slice(0, 4);
+    content = `${brief.length ? `<div class="combination-brief">${brief.map(([key, label]) => `<span><b>${Number(data[key])}</b> ${label}</span>`).join("")}</div>` : ""}${visible.map(benefit).join("") || '<p class="combination-note">本轮未触发联动。检查真实吸盾、异常、有效治疗、击退落点与临战站位，再调整构筑。</p>'}<details class="combination-metrics"><summary>完整指标 · 含零值</summary><div class="combination-totals">${totals.map(([key, label]) => `<div><b>${Number(data[key]) || 0}</b><span>${label}</span></div>`).join("")}</div></details><details class="combination-accounting"><summary>统计口径与边界</summary><p class="combination-note">只统计实际到账。一项特性可同时产生治疗与回能等多条生效记录，记录数不等于触发机会数。强化伤害只列单次已结算命中的额外部分，不重复计入整次普攻或命中，也不生成第二次攻击；特性与装备治疗只统计真实回复，防伤单列实际避免生命损失，不算护盾或治疗；易伤、异常传播、节拍增层和鼓舞只记录真实生效次数，不推算额外伤害；连击与节拍器共享同目标层数；这里计累计增层，非当前层数，不重复计装备与羁绊。鼓舞不强化毒/灼伤或岩钉；毅力只强化物理直接伤害。盾到期与过量部分不算收益。</p></details>`;
+    }
+    if (fields) {
+      const facts = [["triggers", "岩钉触发"], ["damage", "实际生命损失"], ["absorbed", "护盾吸收"], ["avoided", "厚底靴免疫"], ["cleared", "清除格数"]];
+      content += `<details class="combination-fields"><summary>地形联动 · 入格 ${Number(fields.triggers) || 0} 次 · 实际生命损失 ${Number(fields.damage) || 0}</summary><div class="combination-totals">${facts.map(([key, label]) => `<div><b>${Number(fields[key]) || 0}</b><span>${label}</span></div>`).join("")}</div><p class="combination-note">岩钉伤害统计${esc(teamName)}铺场；免疫和清场统计${esc(teamName)}队员。只有真实入格触发，站立不反复扣血。</p></details>`;
+    } else content += '<p class="combination-note">地形联动未记录。</p>';
+    return content;
+  }
+  function showCombinationSummary(meta, scope = "battle", teams = ["我方", "敌方"]) {
+    const container = $(`${scope}-combinations`);
+    if (!container) return;
+    container.hidden = false;
+    container.innerHTML = `<h3>双方联动收益</h3><p class="combination-note">当场实际结算，按来源区分；阵容效果不能代替实战触发。</p>${teams.map((name, team) => `<details class="combination-team ${team ? "enemy" : "friendly"}"${team === 0 ? " open" : ""}><summary>${team === 0 ? "●" : "▲"} ${esc(name)}联动收益 <span>${(team === 0 ? meta?.combinations : meta?.enemy_combinations) ? "实际记录" : "未记录"}</span></summary>${combinationSide(team === 0 ? meta?.combinations : meta?.enemy_combinations, team === 0 ? meta?.fields : meta?.enemy_fields, name)}</details>`).join("")}`;
+  }
   function renderRoundLoot() {
     const rows = state.round_rewards || [];
     const latest = rows[rows.length - 1];
     $("round-loot").hidden = !latest;
     $("round-loot").innerHTML = latest ? `<div class="loot-heading"><strong>第 ${latest.round} 轮战利品</strong><span>${latest.result === "win" ? "胜利 · 2 份" : latest.result === "loss" ? "失利 · 1 份" : "平局 · 1 份"}已入仓</span></div>${rewardCards(latest)}` : "";
   }
-  function scoutPieces(pieces, label) {
+  function scoutPieces(pieces, label, owner) {
     const flat = (pieces || []).flat().filter(Boolean);
-    return `<h3>${label} · ${flat.length} 只</h3><div class="scout-unit-grid">${flat.map((p) => `<div class="scout-unit${p.shiny ? " shiny" : ""}"><img src="${spriteOf(p)}" alt="${esc(p.name)}"><div><strong>${esc(p.name)} <span class="detail-star">${"★".repeat(starsOf(p))}${p.shiny ? " ✦" : ""}</span></strong><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · ${esc(p.types.join(" / "))}</p><small>${p.item_name ? "装备 " + esc(p.item_name) : "未装备"}${p.technique ? " · " + esc(p.technique.name) : ""}</small></div></div>`).join("") || '<p class="empty-copy">暂无精灵。</p>'}</div>`;
+    const prefix = label === "备战席" ? "b" : "u";
+    return `<h3>${label} · ${flat.length} 只</h3><div class="scout-unit-grid">${flat.map((p, index) => `<button type="button" class="scout-unit${p.shiny ? " shiny" : ""}" data-scout-unit="${prefix}${index}" data-scout-owner="${Number(owner.seat)}" aria-controls="scout-unit-detail" aria-label="查看${esc(p.name)}的完整情报"><img src="${spriteOf(p)}" alt=""><span class="scout-unit-main"><strong>${esc(p.name)} <span class="detail-star">${"★".repeat(starsOf(p))}${p.shiny ? " ✦" : ""}</span></strong><span class="scout-unit-role role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} ${Number(p.range) || "—"}格 · ${esc((p.types || []).join(" / "))}</span><span class="scout-unit-loadout">${p.item_name ? "◆ " + esc(p.item_name) : "未装备"}${p.trait ? " · ◎ " + esc(p.trait.name) : ""}</span><span class="scout-unit-skills">${esc(nativeOf(p).name)}${p.technique ? " / " + esc(p.technique.name) : ""}</span><small>完整效果 →</small></span></button>`).join("") || '<p class="empty-copy">暂无精灵。</p>'}</div>`;
+  }
+  const scoutName = (p) => p?.human ? "新叶训练家" : trainerName(p?.name) || "当轮对手";
+  const scoutAlive = (p) => p.alive ?? p.hp > 0;
+  function scoutSubject() {
+    if (scoutSeat === -1) return {...state.opponent, seat: -1, current_opponent: true, board: (state.opponent?.rows || []).flat().filter(Boolean), bench: [], recent_reports: []};
+    const subject = (state?.scouting || []).find(p => p.seat === scoutSeat);
+    if (subject?.battle_snapshot?.rows) return {...subject, rows: subject.battle_snapshot.rows, board: subject.battle_snapshot.rows.flat().filter(Boolean)};
+    return subject;
+  }
+  function scoutReport() {
+    return (scoutSubject()?.recent_reports || [])[scoutReportIndex] || null;
+  }
+  function scoutBadges(p) {
+    return `${p.human ? '<span class="scout-badge own">我方</span>' : ""}${p.current_opponent ? `<span class="scout-badge rival">${p.ghost_opponent ? "本轮幽灵镜像" : "本轮对手"}</span>` : ""}${p.hp != null && !scoutAlive(p) ? `<span class="scout-badge out">已淘汰${p.rank ? " · 第" + Number(p.rank) + "名" : ""}</span>` : ""}`;
+  }
+  function scoutSynergies(p, detailed = false) {
+    const rows = p.bonds?.entries || p.synergies || [];
+    const active = rows.filter(s => s.tier);
+    if (!detailed) return active.map(s => `<span title="${esc(s.effect)}">${esc(s.name || s.zh)} ${Number(s.n)}</span>`).join("") || '<span class="inactive">暂无激活羁绊</span>';
+    return `<section class="scout-effects" aria-label="羁绊完整效果"><h3>队伍羁绊 · 当前公开配置</h3><p class="scout-section-note">${esc(p.bonds?.note || "当前公开阵容的成员计数与已激活效果。")}</p>${rows.map(row => `<details class="scout-effect${row.tier ? " active" : ""}"><summary><span>${esc(row.name || row.zh)}</span><small>${row.tier ? "已激活 " + Number(row.tier) + " 种档" : "未激活"} · ${Number(row.n)}${row.next ? " / " + Number(row.next) : ""}</small></summary><p>${esc(row.effect || "尚未达到激活门槛。")}</p>${(row.thresholds || []).map(tier => `<p class="scout-effect-tier"><strong>${Number(tier.count)}种档</strong> ${esc(tier.effect)}</p>`).join("")}</details>`).join("") || '<p class="empty-copy">暂无羁绊记录。</p>'}</section>`;
+  }
+  function scoutBoard(p, mini = false) {
+    if (!p.rows) return '<p class="empty-copy">当前数据未提供站位。</p>';
+    const direction = `<span class="scout-front">${p.human ? "▲" : "▼"} 接敌方向 · 前排在${p.human ? "上" : "下"}方</span>`;
+    return `<span class="scout-formation ${p.human ? "own" : "enemy"}${mini ? " miniature" : ""}">${p.human ? direction : ""}<span class="scout-board-rows">${p.rows.map((row, r) => `<span class="scout-board-row">${mini ? "" : `<span class="scout-row-label">${r === (p.human ? 0 : p.rows.length - 1) ? "前排" : r === (p.human ? p.rows.length - 1 : 0) ? "后排" : "中排"}</span>`}<span class="scout-board-cells">${row.map((unit, c) => {
+      const info = unit ? `${unit.name} · ${starsOf(unit)}星 · ${roleNames[roleOf(unit)]} · ${attackStyle(unit)}${unit.item_name ? " · 装备" + unit.item_name : ""}${unit.technique ? " · 学习" + unit.technique.name : ""}` : "空位";
+      const interactive = unit && !mini;
+      const tag = interactive ? "button" : "span";
+      return `<${tag} class="scout-cell${unit ? " occupied role-" + roleOf(unit) : ""}${unit?.shiny ? " shiny" : ""}" ${interactive ? `type="button" data-scout-unit="g${r},${c}" data-scout-owner="${Number(p.seat)}" aria-controls="scout-unit-detail"` : 'role="img"'} aria-label="第${r + 1}行第${c + 1}列：${esc(info)}${interactive ? "，查看完整情报" : ""}" title="${esc(info)}">${unit ? `<img src="${spriteOf(unit)}" alt=""><small>${"★".repeat(starsOf(unit))}${unit.shiny ? " ✦" : ""}</small>${unit.item_name || unit.technique ? '<i class="scout-equipped">◆</i>' : ""}` : ""}</${tag}>`;
+    }).join("")}</span></span>`).join("")}</span>${!p.human ? direction : ""}</span>`;
+  }
+  function scoutOverview(seats) {
+    const sorted = [...seats].sort((a, b) => Number(b.current_opponent || false) - Number(a.current_opponent || false) || Number(b.human) - Number(a.human) || Number(scoutAlive(b)) - Number(scoutAlive(a)) || b.hp - a.hp || a.seat - b.seat);
+    return `<div class="scout-overview-heading"><strong>${seats.filter(p => !p.human).length} 位对手 · ${seats.filter(scoutAlive).length} 位仍在场</strong><span>点开阵容，查看完整效果与最近实战</span></div><div class="scout-overview">${sorted.map(p => {
+      const units = p.board || [];
+      const counts = Object.keys(roleNames).map(role => `${roleNames[role].replace("型", "")} ${units.filter(unit => roleOf(unit) === role).length}`).join(" · ");
+      return `<button type="button" class="scout-card${p.human ? " own" : ""}${p.current_opponent ? " current" : ""}${!scoutAlive(p) ? " eliminated" : ""}" data-scout="${Number(p.seat)}" aria-label="侦察${esc(scoutName(p))}阵容"><span class="scout-card-heading"><strong>${esc(scoutName(p))}</strong><span>${Number(p.hp)} <small>HP</small></span></span><span class="scout-badges">${scoutBadges(p)}</span><span class="scout-card-stats">Lv.${Number(p.level)} · 上场 ${units.length} 只 · 备战 ${(p.bench || []).length} 只</span>${scoutBoard(p, true)}<span class="scout-lineup">${units.map(unit => `<span>${esc(unit.name)} <small>${"★".repeat(starsOf(unit))}</small></span>`).join("") || "暂无上场精灵"}</span><span class="scout-role-counts">${counts}</span><span class="scout-synergies">${scoutSynergies(p)}</span><span class="scout-card-more">详细侦察 <span>→</span></span></button>`;
+    }).join("")}</div><p class="scout-tip">八位训练家共享卡池。阵容是当前配置，最近实战来自已经结算的回合。</p>`;
+  }
+  function selectedScoutPiece() {
+    if (!scoutUnit) return null;
+    const owner = scoutUnit.source === "opponent" ? state?.opponent : scoutSubject();
+    if (!owner) return null;
+    const match = /^g([0-2]),([0-5])$/.exec(scoutUnit.loc);
+    if (match) return owner.rows?.[Number(match[1])]?.[Number(match[2])] || null;
+    const list = scoutUnit.loc[0] === "b" ? owner.bench : owner.board;
+    return (list || []).flat().filter(Boolean)[Number(scoutUnit.loc.slice(1))] || null;
+  }
+  function scoutUnitDetail() {
+    const p = selectedScoutPiece();
+    if (!p) return '<p class="scout-inspect-hint">点选站位格或下方精灵，查看特性、技能与装备的完整效果。</p>';
+    const stats = p.stat_scope === "deployment_base" ? p.stats : null;
+    const facts = [["max_hp", "生命"], ["atk", "物攻"], ["sp_atk", "特攻"], ["defense", "物防"], ["sp_defense", "特防"], ["speed", "速度"]];
+    return `<section id="scout-unit-detail" class="scout-unit-detail ${scoutSubject()?.human ? "own" : "enemy"}" aria-labelledby="scout-unit-title" tabindex="-1"><div class="scout-detail-heading"><img src="${spriteOf(p)}" alt=""><div><span class="scout-readonly">${scoutSubject()?.human ? "我方公开情报" : "敌方情报"} · 只读</span><h3 id="scout-unit-title">${esc(p.name)} <span class="detail-star">${"★".repeat(starsOf(p))}${p.shiny ? " ✦ 闪光" : ""}</span></h3><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · 射程 ${Number(p.range) || "—"} 格</p><p>${esc((p.types || []).join(" / "))}</p></div></div><p>${esc(p.role_description || "")}</p>${stats ? `<dl class="scout-base-stats">${facts.map(([key, name]) => `<div><dt>${name}</dt><dd>${statNumber(stats[key])}</dd></div>`).join("")}</dl><p class="scout-section-note">部署基础值 · 已计星级与角色；装备、羁绊、海克斯与战中增益另计，生命不是战中剩余值。</p>` : ""}${skillSlots(p, {readonly: true})}<section class="skill-slot scout-item-slot" aria-label="装备完整效果"><div class="skill-slot-heading"><span>携带装备</span><small>当前配置</small></div><strong>${p.item ? esc(p.item_name || p.item) : "未装备"}</strong><p>${p.item ? esc(p.item_effect || "这份快照未记录装备效果。") : "该精灵没有携带装备。"}</p></section></section>`;
+  }
+  function scoutAugments(p) {
+    return `<section class="scout-effects" aria-label="海克斯完整效果"><h3>海克斯强化 · 当前公开配置</h3>${(p.augments || []).map(a => `<details class="scout-effect"><summary><span>${esc(a.name || a)}</span><small>展开效果</small></summary><p>${esc(a.description || "这份快照未记录强化说明。")}</p></details>`).join("") || '<p class="empty-copy">尚未选择海克斯。</p>'}</section>`;
+  }
+  function scoutRecentReports(p) {
+    const rows = p.recent_reports || [];
+    if (!rows.length) return `<section class="scout-recent-reports"><h3>最近实战</h3><p class="scout-section-note">${p.reports_recorded_from ? `从第 ${Number(p.reports_recorded_from)} 轮开始记录，目前还没有已结算实战。` : "旧回合尚未记录该训练家的实战，从后续结算开始显示。"}</p></section>`;
+    return `<section class="scout-recent-reports"><div class="scout-position-heading"><h3>最近实战</h3><span>最多 3 场 · 已结算</span></div><p class="scout-section-note">历史数据属于当场配置，用来核对实际输出、治疗、承伤和联动。</p><div class="scout-report-list">${rows.map((row, index) => { const verdict = reportVerdict(row.winner); return `<button type="button" data-scout-report="${index}" aria-pressed="${index === scoutReportIndex}" class="scout-report-entry ${verdict.kind}"><strong>第 ${Number(row.round)} 轮 · ${verdict.label}${row.source === "uncontested" ? " · 空场结算" : ""}</strong><span>${esc(trainerName(row.opp_name) || (row.pve ? "野生遭遇" : "当场对手"))}${row.ghost ? " · 镜像" : ""} · ${battleDuration(row.duration)}</span><small>${recordedStats(row.statistics) ? "查看实战统计 →" : "统计未记录 →"}</small></button>`; }).join("")}</div>${scoutReport() ? '<section id="scout-statistics" class="combat-statistics" aria-label="所侦察训练家的当场统计"></section><div id="scout-combinations" class="battle-combinations"></div>' : ""}</section>`;
+  }
+  function clearScoutLayout() {
+    document.querySelector(".game-layout").classList.remove("scouting-open");
+    $("scout-dialog").classList.remove("docked");
+    $("scout-dialog").removeAttribute("aria-modal");
+  }
+  function closeScout() {
+    const narrow = $("scout-dialog").classList.contains("docked") && window.matchMedia("(max-width: 1199px)").matches;
+    if ($("scout-dialog").open) $("scout-dialog").close();
+    clearScoutLayout();
+    if (narrow) document.querySelector(".center-column").scrollIntoView({block: "start", behavior: "instant"});
+  }
+  function resetScout() {
+    resumeAfterScout = false;
+    scoutReturnFocus = null;
+    closeScout();
+    scoutUnit = null;
+    scoutReportIndex = null;
+    scoutSeat = null;
+    $("scout-resume").hidden = true;
+  }
+  function openScout(seat = null, {unit = null, returnFocus = null, retain = false} = {}) {
+    if (!state) return;
+    if (!retain && seat !== scoutSeat) { scoutUnit = null; scoutReportIndex = null; }
+    scoutSeat = seat;
+    if (unit) scoutUnit = unit;
+    const panel = $("scout-dialog");
+    if (!panel.open) {
+      scoutReturnFocus = returnFocus || document.activeElement;
+      resumeAfterScout = $("battle-dialog").open && playback.intentPlaying;
+      if (resumeAfterScout) stopPlayback();
+      const modal = Boolean($("battle-dialog").open || $("history-report-dialog").open || $("result-dialog").open);
+      panel.classList.toggle("docked", !modal);
+      document.querySelector(".game-layout").classList.toggle("scouting-open", !modal);
+      panel.setAttribute("aria-modal", String(modal));
+      renderScout();
+      if (modal) panel.showModal();
+      else if (typeof panel.show === "function") panel.show();
+      else panel.setAttribute("open", "");
+      $("scout-close").focus();
+      if (!modal && window.matchMedia("(max-width: 1199px)").matches) panel.scrollIntoView({block: "start", behavior: "instant"});
+    } else renderScout();
+    $("scout-resume").hidden = false;
+    if (unit) {
+      const detail = $("scout-unit-detail");
+      detail?.focus({preventScroll: true});
+      if (detail && panel.classList.contains("docked") && !window.matchMedia("(max-width: 1199px)").matches) panel.scrollTop = Math.max(0, detail.offsetTop - 92);
+      else detail?.scrollIntoView({block: panel.classList.contains("docked") ? "start" : "nearest", behavior: "instant"});
+    }
+    else panel.scrollTop = 0;
+  }
+  function openEnemyPiece(loc, returnFocus) {
+    if (!state?.opponent) return;
+    const owner = (state.scouting || []).find(p => p.current_opponent);
+    openScout(owner?.seat ?? -1, {unit: {source: "opponent", loc}, returnFocus});
   }
   function renderScout() {
     const seats = state.scouting || [];
-    $("scout-tabs").innerHTML = seats
-      .map(
-        (p) =>
-          `<button data-scout="${Number(p.seat)}" aria-pressed="${p.seat === scoutSeat}">${p.seat === 0 ? "我方" : esc(trainerName(p.name))}</button>`,
-      )
-      .join("");
-    const p = seats.find((p) => p.seat === scoutSeat);
-    $("scout-content").innerHTML = p
-      ? `<div class="scout-heading"><h3>${p.seat === 0 ? "新叶训练家 · 我方" : esc(trainerName(p.name)) + " · 对手"}</h3><p>${Number(p.hp)} HP · Lv.${Number(p.level)} · ${Number(p.gold)} 金币</p></div>${scoutPieces(p.board, "上场阵容")}${scoutPieces(p.bench, "备战席")}<h3>海克斯强化</h3><p>${(p.augments || []).map((a) => esc(a.name || a)).join(" · ") || "尚未选择"}</p>`
-      : '<p class="empty-copy">当前存档未提供侦察信息。新的竞技规则支持全部训练家侦察。</p>';
+    const p = scoutSubject();
+    $("scout-title").textContent = scoutSeat == null ? "全场阵容" : `${scoutName(p)} · 侦察`;
+    $("scout-timing").textContent = `第 ${state.round} 轮 · ${state.phase === "prep" ? "当前公开配置。准备期可边侦察边调整我方阵容。" : state.phase === "over" ? "最终公开阵容。" : "当前公开配置；回放期间无法调整部署。"} 实际触发效果请查看最近实战。`;
+    $("scout-workspace-note").textContent = $("battle-dialog").open ? "关闭侦察后返回战斗回放" : "宽屏并排布阵 · 窄屏可返回我方阵容";
+    $("scout-tabs").innerHTML = `<button type="button" data-scout-overview aria-pressed="${scoutSeat == null}">全场概览</button>` + seats.map(p => `<button type="button" data-scout="${Number(p.seat)}" aria-pressed="${p.seat === scoutSeat}">${p.human ? "我方" : esc(trainerName(p.name))}${p.current_opponent ? " · 本轮" : ""}</button>`).join("");
+    $("scout-content").innerHTML = scoutSeat == null && seats.length ? scoutOverview(seats) : p ? `<div class="scout-heading${p.human ? " own" : ""}"><h3>${esc(scoutName(p))} <span class="scout-badges">${scoutBadges(p)}</span></h3><p>${p.hp != null ? Number(p.hp) + " HP · " : ""}${p.level != null ? "Lv." + Number(p.level) + " · " : ""}${p.gold != null ? Number(p.gold) + " 金币 · " : ""}上场 ${(p.board || []).length} 只</p></div><div class="scout-position-heading"><h3>${p.battle_snapshot ? "本轮已锁定站位" : "当前实际站位"}</h3><span>点选精灵查看完整效果</span></div>${p.battle_snapshot ? `<p class="scout-section-note">第 ${Number(p.battle_snapshot.round)} 轮对手快照 · 上场装备、技能与特性按开战时记录；备战席为当前公开信息。</p>` : ""}${scoutBoard(p)}${scoutUnitDetail()}${scoutPieces(p.board, "上场精灵", p)}${scoutPieces(p.bench, "备战席", p)}${scoutSynergies(p, true)}${scoutAugments(p)}${scoutRecentReports(p)}` : '<p class="empty-copy">当前存档未提供侦察信息。新的竞技规则支持全部训练家侦察。</p>';
+    const report = scoutReport();
+    if (report) { const teams = [scoutName(p), trainerName(report.opp_name) || "当场对手"]; renderCombatStats("scout", report.statistics); showCombinationSummary(report, "scout", teams); }
+    document.querySelectorAll("[data-scout-unit]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.scoutUnit === scoutUnit?.loc)));
   }
   function renderCatalog() {
     const catalog = state.arena?.catalog || [];
     $("catalog-description").textContent =
-      `${catalog.length} 种进化精灵，攻击、防守、辅助各 6 种。八位训练家共享卡池，同种同星三合一；三星需要九张并使用闪光配色。`;
+      `${catalog.length} 种竞技精灵：${Object.keys(roleNames).map(role => roleNames[role] + " " + catalog.filter(p => roleOf(p) === role).length + " 种").join("、")}。八位训练家共享卡池，同种同星三合一；三星需要九张并使用闪光配色。`;
     $("catalog-grid").innerHTML = catalog
       .filter((p) => roleFilter === "all" || roleOf(p) === roleFilter)
       .map(
         (p) =>
-          `<article class="catalog-card"><img src="${spriteOf(p)}" alt="${esc(p.name)}"><div><h3>${esc(p.name)} <small>${Number(p.cost || p.tier)} 费</small></h3><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · ${esc(p.types.join(" / "))}</p><p>${esc(p.role_description || "")}</p><p><b>${esc(p.skill_name)}</b> · ${esc(p.skill_type)}属性<br>${esc(p.skill_description)}</p><small>共享池剩余 ${Number(p.pool_remaining)} / ${Number(p.pool_total)} 张</small></div></article>`,
+          `<article class="catalog-card"><img src="${spriteOf(p)}" alt="${esc(p.name)}"><div><h3>${esc(p.name)} <small>${Number(p.cost || p.tier)} 费</small></h3><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · ${esc(p.types.join(" / "))}</p><p>${esc(p.role_description || "")}</p>${skillSlots(p, {learned: false})}<p class="catalog-learning-note">另有独立学习位，学习不会覆盖原生技能。</p><small>共享池剩余 ${Number(p.pool_remaining)} / ${Number(p.pool_total)} 张</small></div></article>`,
       )
       .join("");
     document
@@ -584,12 +949,18 @@
       render();
     }
   }
+  function requestRestart() {
+    if (busy || deploying) return;
+    if (state) $("new-dialog").showModal();
+    else newGame();
+  }
   async function newGame() {
+    if (busy || deploying) return;
     closeBattle();
     $("result-dialog").close();
     systemTab = "augments";
     roleFilter = "all";
-    scoutSeat = 1;
+    resetScout();
     const result = await api("new", { mode: "arena" });
     if (result?.ok) {
       $("new-dialog").close();
@@ -599,7 +970,7 @@
   async function resume() {
     const slot = sid || savedSlot();
     if (!slot) {
-      toast("还没有可继续的存档。点击「新的冒险」开始。", true);
+      toast("还没有可继续的存档。点击「重开一局」开始。", true);
       return;
     }
     closeBattle();
@@ -660,200 +1031,393 @@
     if (!$("result-dialog").open) $("result-dialog").showModal();
   }
 
+  // A replay keeps a small moving window of decoded images. A long battle can
+  // have hundreds of frames; retaining them all would consume gigabytes.
+  const replayClock = (seconds, tenths = false) => {
+    const safe = Math.max(0, Number(seconds) || 0);
+    const minutes = Math.floor(safe / 60);
+    const remainder = tenths ? (safe % 60).toFixed(1).padStart(4, "0") : String(Math.floor(safe % 60)).padStart(2, "0");
+    return `${String(minutes).padStart(2, "0")}:${remainder}`;
+  };
+  function setBattleTab(tab, touched = true) {
+    if (!["events", "statistics", "rewards"].includes(tab)) return;
+    playback.reportTab = tab;
+    if (touched) playback.reportTabTouched = true;
+    for (const button of document.querySelectorAll("[data-battle-tab]")) {
+      const active = button.dataset.battleTab === tab;
+      button.setAttribute("aria-selected", String(active));
+      button.setAttribute("tabindex", active ? "0" : "-1");
+      $(`battle-${button.dataset.battleTab}-panel`).hidden = !active;
+    }
+  }
+  function updatePlaybackState() {
+    const p = playback;
+    $("battle-pause").textContent = p.intentPlaying ? "暂停" : "播放";
+    $("battle-pause").setAttribute("aria-label", p.intentPlaying ? "暂停战斗回放" : "播放战斗回放");
+    $("battle-playback-state").textContent = p.verdictShown ? "回合结束"
+      : p.buffering && p.intentPlaying ? "载入画面"
+      : p.playing ? "回放中" : p.complete ? "已暂停" : "准备开战";
+  }
   function stopPlayback() {
     clearInterval(playback.timer);
     playback.timer = null;
     playback.playing = false;
-    $("battle-pause").textContent = "播放";
+    playback.intentPlaying = false;
+    updatePlaybackState();
   }
   function closeBattle() {
     playback.token++;
     stopPlayback();
+    for (const request of playback.pending.values()) request.cancel();
+    playback.pending.clear();
+    playback.frames = [];
+    playback.cached.clear();
     if ($("battle-dialog").open) $("battle-dialog").close();
+  }
+  function pendingBattleReport() {
+    $("battle-statistics").innerHTML = '<div class="battle-report-pending"><span class="report-pending-symbol" aria-hidden="true">◷</span><strong>等伙伴们完成这一战</strong><p>回放结束后，查看双方输出、治疗、承伤与护盾吸收。</p></div>';
+    $("battle-rewards-pending").hidden = false;
+    $("battle-rewards").hidden = true;
+    $("battle-combinations").hidden = true;
+    $("battle-rewards").innerHTML = "";
+    $("battle-combinations").innerHTML = "";
+  }
+  function hideBattleDisclosure() {
+    const p = playback;
+    $("battle-verdict").hidden = true;
+    $("battle-result").textContent = "回放结束后显示战果";
+    $("battle-result").className = "battle-result";
+    $("battle-next").disabled = true;
+    if (p.verdictShown) pendingBattleReport();
+    p.verdictShown = false;
   }
   function showVerdict() {
     if (playback.verdictShown) return;
+    stopPlayback();
     playback.verdictShown = true;
     const meta = playback.meta;
-    const kind =
-      meta?.winner === 0 ? "win" : meta?.winner === 1 ? "loss" : "draw";
+    const kind = meta?.winner === 0 ? "win" : meta?.winner === 1 ? "loss" : "draw";
     const overlay = $("battle-verdict");
     overlay.className = `battle-verdict ${kind}`;
-    overlay.querySelector(".verdict-symbol").textContent =
-      kind === "win" ? "✦" : kind === "loss" ? "◇" : "＝";
-    overlay.querySelector("strong").textContent =
-      kind === "win" ? "回合胜利" : kind === "loss" ? "回合失利" : "势均力敌";
-    overlay.querySelector("p").textContent = String(
-      meta?.headline || "本轮战果已保存",
-    ).replace(/<[^>]*>/g, "");
+    overlay.querySelector(".verdict-symbol").textContent = kind === "win" ? "✦" : kind === "loss" ? "◇" : "＝";
+    overlay.querySelector("strong").textContent = kind === "win" ? "回合胜利" : kind === "loss" ? "回合失利" : "势均力敌";
+    overlay.querySelector("p").textContent = String(meta?.headline || "本轮战果已保存").replace(/<[^>]*>/g, "");
     overlay.hidden = false;
     $("battle-result").textContent = meta?.headline || "本轮战果已保存";
     $("battle-result").className = `battle-result ${kind}`;
+    $("battle-rewards-pending").hidden = true;
     const row = (state.round_rewards || []).find((r) => r.round === (meta?.round || state.round));
     $("battle-rewards").hidden = !row;
-    $("battle-rewards").innerHTML = row ? `<h3>回合奖励 · 已入仓</h3><p>${row.result === "win" ? "胜利获得 2 份" : "失败或平局获得 1 份"}，下轮可装备或学习。</p>${rewardCards(row)}` : "";
+    $("battle-rewards").innerHTML = row ? `<h3>回合奖励 · 已入仓</h3><p>${row.result === "win" ? "胜利获得 2 份" : "失败或平局获得 1 份"}，下轮可装备或学习。</p>${rewardCards(row)}` : '<p class="combination-note">这轮未记录额外奖励。</p>';
+    renderCombatStats("battle", meta?.statistics);
+    showCombinationSummary(meta);
+    $("battle-next").disabled = busy || needsResume;
+    if (!playback.reportTabTouched) setBattleTab("statistics", false);
+    updatePlaybackState();
     if (sound) tone(kind === "win");
+  }
+  function updateTeamTelemetry() {
+    const p = playback;
+    const frame = p.meta?.team_frames?.[p.current];
+    const combatants = p.meta?.combatants || [];
+    for (const [team, side] of [[0, "friendly"], [1, "enemy"]]) {
+      const initial = combatants.filter((unit) => Number(unit.team) === team);
+      const alive = statValue(frame?.alive?.[team]);
+      const health = statValue(frame?.hp?.[team]);
+      const maxHp = initial.reduce((sum, unit) => sum + (statValue(unit.max_hp) || 0), 0);
+      $(`battle-${side}-alive`).textContent = alive == null ? "— / —" : `${alive} / ${initial.length}`;
+      const bar = $(`battle-${side}-hp-bar`);
+      bar.style.width = maxHp > 0 && health != null ? `${Math.max(0, Math.min(100, health / maxHp * 100))}%` : "0%";
+      bar.parentElement.title = health == null ? "这份回放未记录队伍生命" : `剩余总生命 ${statNumber(health)} / ${statNumber(maxHp)}`;
+    }
+    $("battle-clock").textContent = replayClock(p.current * p.dt, true);
+  }
+  function updateBattleTimeline() {
+    const p = playback;
+    const total = Math.max(0, p.n - 1);
+    const seek = $("battle-seek");
+    seek.value = String(p.requested ?? p.current);
+    seek.setAttribute("aria-valuetext", `${(p.current * p.dt).toFixed(1)} 秒，共 ${(total * p.dt).toFixed(1)} 秒`);
+    seek.style.setProperty("--progress", `${total ? p.current / total * 100 : 0}%`);
+    let buffered = p.current;
+    while (buffered + 1 < p.n && p.frames[buffered + 1]?.naturalWidth) buffered++;
+    seek.style.setProperty("--buffer", `${total ? buffered / total * 100 : 0}%`);
+    $("battle-current-time").textContent = replayClock(p.current * p.dt);
+    $("battle-total-time").textContent = replayClock(total * p.dt);
+    $("battle-status").textContent = `${(p.current * p.dt).toFixed(1)} / ${(total * p.dt).toFixed(1)} 秒 · ${p.speed}×`;
+    $("battle-status").dataset.loadedFrames = String(p.loaded.size);
+    $("battle-status").dataset.cachedFrames = String(p.cached.size);
+    $("battle-status").dataset.bufferedFrames = String(buffered - p.current);
+  }
+  function updateBattleEvents() {
+    const p = playback;
+    const occurred = (p.meta?.events || []).map((event, index) => ({event, index}))
+      .filter(({event}) => Number(event.t) <= p.current * p.dt + 0.000001);
+    const last = occurred.length ? occurred[occurred.length - 1].index : -1;
+    if (last === p.lastEvent) return;
+    p.lastEvent = last;
+    const box = $("battle-events");
+    box.innerHTML = occurred.map(({event, index}, position) => `<div class="event ${position === occurred.length - 1 ? "now" : "past"}" id="play-event-${index}"><time>${Number(event.t).toFixed(1)}s</time><span>${esc(String(event.text).replace(/<[^>]*>/g, ""))}</span></div>`).join("") || '<p class="battle-events-empty">技能、命中与联动会随战斗逐条出现。</p>';
+    box.scrollTop = box.scrollHeight;
+    $("battle-current-event").textContent = occurred.length ? String(occurred[occurred.length - 1].event.text).replace(/<[^>]*>/g, "") : "双方伙伴，即将登场。";
   }
   function showFrame(index) {
     const p = playback;
-    p.current = Math.max(0, Math.min(p.n - 1, index));
-    if (p.current < p.n - 1) {
-      $("battle-verdict").hidden = true;
-      $("battle-rewards").hidden = true;
-      p.verdictShown = false;
+    const next = Math.max(0, Math.min(p.n - 1, Number(index) || 0));
+    const image = p.frames[next];
+    if (!image?.naturalWidth) return false;
+    p.current = next;
+    if (p.requested === next) p.requested = null;
+    p.complete = true;
+    p.buffering = false;
+    p.retryIndex = null;
+    if (next < p.n - 1 && p.verdictShown) hideBattleDisclosure();
+    const canvas = $("battle-canvas");
+    if (canvas.width !== image.naturalWidth || canvas.height !== image.naturalHeight) {
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
     }
-    const image = p.frames[p.current];
-    if (image?.naturalWidth) {
-      const context = $("battle-canvas").getContext("2d");
-      const canvas = $("battle-canvas");
-      if (canvas.width !== image.naturalWidth || canvas.height !== image.naturalHeight) {
-        canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
+    const context = canvas.getContext("2d");
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.imageSmoothingEnabled = String(p.meta?.presentation || "").startsWith("web-arena-");
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    $("battle-loading").hidden = true;
+    document.querySelector(".battle-screen").setAttribute("aria-busy", "false");
+    updateTeamTelemetry();
+    updateBattleTimeline();
+    updateBattleEvents();
+    updatePlaybackState();
+    if (p.n > 0 && next >= p.n - 1) showVerdict();
+    return true;
+  }
+  function setBattleLoading(message, retry = false) {
+    playback.buffering = true;
+    $("battle-loading").hidden = false;
+    $("battle-loading-copy").textContent = message;
+    $("battle-loading").className = `battle-loading${retry ? " load-error" : ""}`;
+    $("battle-retry").hidden = !retry;
+    document.querySelector(".battle-screen").setAttribute("aria-busy", String(!retry));
+    updatePlaybackState();
+  }
+  function trimReplayCache() {
+    const p = playback;
+    if (p.cached.size <= p.cacheLimit) return;
+    const center = p.requested ?? p.current;
+    const start = Math.max(0, center - 4);
+    const end = Math.min(p.n - 1, center + p.cacheLimit - 9);
+    for (const index of [...p.cached]) {
+      if (p.cached.size <= p.cacheLimit) break;
+      if ((index < start || index > end) && index !== p.current && index !== p.requested) {
+        p.cached.delete(index);
+        delete p.frames[index];
       }
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.imageSmoothingEnabled = false;
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
     }
-    $("battle-status").textContent =
-      `${(p.current * p.dt).toFixed(1)} 秒 / ${(Math.max(0, p.n - 1) * p.dt).toFixed(1)} 秒 · ${p.speed}×`;
-    let last = -1;
-    (p.meta?.events || []).forEach((event, i) => {
-      const row = $(`play-event-${i}`);
-      if (row) {
-        const past = event.t <= p.current * p.dt;
-        row.className = `event${past ? " past" : ""}`;
-        if (past) last = i;
+    const farthest = [...p.cached].sort((a, b) => Math.abs(b - center) - Math.abs(a - center));
+    while (p.cached.size > p.cacheLimit && farthest.length) {
+      const index = farthest.shift();
+      if (index === p.current || index === p.requested) continue;
+      p.cached.delete(index);
+      delete p.frames[index];
+    }
+  }
+  function startPlaybackTimer() {
+    const p = playback;
+    if (!p.intentPlaying || p.timer || !p.complete || p.requested != null || document.hidden || $("scout-dialog").open || !$("battle-dialog").open) return;
+    const end = Math.min(p.n - 1, p.current + 3);
+    for (let index = p.current + 1; index <= end; index++) {
+      if (!p.frames[index]?.naturalWidth) {
+        if (p.failed.has(index)) {
+          p.retryIndex = index;
+          setBattleLoading("一段画面暂时无法载入，可重试或查看战果。", true);
+        } else setBattleLoading("正在准备接下来的战斗画面…");
+        return;
       }
-    });
-    if (last >= 0) {
-      const row = $(`play-event-${last}`);
-      row.className = "event now";
-      const box = $("battle-events");
-      box.scrollTop = Math.max(
-        0,
-        row.offsetTop - box.offsetTop - box.clientHeight + row.offsetHeight,
-      );
     }
-    if (p.n > 0 && p.current >= p.n - 1) showVerdict();
+    p.buffering = false;
+    $("battle-loading").hidden = true;
+    document.querySelector(".battle-screen").setAttribute("aria-busy", "false");
+    p.playing = true;
+    updatePlaybackState();
+    const token = p.token;
+    p.timer = setInterval(() => {
+      if (token !== p.token || !p.intentPlaying) return;
+      const next = p.current + 1;
+      if (!showFrame(next)) {
+        clearInterval(p.timer);
+        p.timer = null;
+        p.playing = false;
+        p.requested = Math.min(p.n - 1, next);
+        if (p.failed.has(p.requested)) {
+          p.retryIndex = p.requested;
+          setBattleLoading("这一帧暂时无法载入，可重试或查看战果。", true);
+        } else setBattleLoading("正在准备接下来的战斗画面…");
+      }
+      pumpReplayFrames();
+    }, (p.dt * 1000) / p.speed);
+  }
+  function pumpReplayFrames() {
+    const p = playback;
+    if (!p.n || !$("battle-dialog").open) return;
+    const token = p.token;
+    trimReplayCache();
+    const center = p.requested ?? p.current;
+    const forward = p.cacheLimit - 9;
+    const start = Math.max(0, center - 4);
+    const end = Math.min(p.n - 1, center + forward);
+    const candidates = [center];
+    for (let index = center + 1; index <= end; index++) candidates.push(index);
+    for (let index = center - 1; index >= start; index--) candidates.push(index);
+    const wanted = new Set(candidates);
+    for (const [index, request] of [...p.pending]) {
+      if (!wanted.has(index)) request.cancel();
+    }
+    while (p.pending.size < 4) {
+      const index = candidates.find((candidate) => !p.frames[candidate]?.naturalWidth && !p.pending.has(candidate) && !p.failed.has(candidate));
+      if (index == null) break;
+      const image = new Image();
+      let done = false;
+      let timeout;
+      const request = {cancel: () => {
+        if (done) return;
+        done = true;
+        clearTimeout(timeout);
+        image.onload = null;
+        image.onerror = null;
+        image.removeAttribute?.("src");
+        if (p.pending.get(index) === request) p.pending.delete(index);
+      }};
+      const finish = (ok) => {
+        if (done) return;
+        done = true;
+        clearTimeout(timeout);
+        image.onload = null;
+        image.onerror = null;
+        if (token !== p.token || p.pending.get(index) !== request) return;
+        p.pending.delete(index);
+        if (ok && image.naturalWidth) {
+          p.frames[index] = image;
+          p.cached.add(index);
+          p.loaded.add(index);
+          if (p.requested === index) showFrame(index);
+        } else {
+          p.failed.add(index);
+          if (p.requested === index) {
+            p.retryIndex = index;
+            setBattleLoading("这一帧暂时无法载入，可重试或查看战果。", true);
+            if (p.revealOnFailure && index === p.n - 1) {
+              $("battle-status").textContent = "画面暂时无法载入，本轮战果已保存。";
+              showVerdict();
+            }
+          }
+        }
+        updateBattleTimeline();
+        startPlaybackTimer();
+        pumpReplayFrames();
+      };
+      p.pending.set(index, request);
+      timeout = setTimeout(() => finish(false), 15000);
+      image.onload = () => finish(true);
+      image.onerror = () => finish(false);
+      const revision = p.meta?.render_revision;
+      image.src = `/demo/frame/${sid}/r${p.meta.round}/${index}.png${revision ? `?v=${encodeURIComponent(revision)}` : ""}`;
+    }
+    updateBattleTimeline();
+  }
+  function requestBattleFrame(index, {resume = false, revealOnFailure = false} = {}) {
+    const p = playback;
+    if (!p.n) return;
+    stopPlayback();
+    const target = Math.max(0, Math.min(p.n - 1, Math.round(Number(index) || 0)));
+    if (target < p.n - 1) hideBattleDisclosure();
+    p.requested = target;
+    p.revealOnFailure = revealOnFailure;
+    p.intentPlaying = resume;
+    if (!showFrame(target)) {
+      if (p.failed.has(target)) {
+        p.retryIndex = target;
+        setBattleLoading("这一帧暂时无法载入，可重试或查看战果。", true);
+        if (revealOnFailure && target === p.n - 1) showVerdict();
+      } else setBattleLoading(`正在载入 ${replayClock(target * p.dt)} 的画面…`);
+    }
+    pumpReplayFrames();
+    startPlaybackTimer();
   }
   function play() {
-    if (
-      !playback.complete ||
-      !playback.n ||
-      document.hidden ||
-      !$("battle-dialog").open
-    )
-      return;
-    stopPlayback();
-    if (playback.current >= playback.n - 1) showFrame(0);
-    playback.playing = true;
-    $("battle-pause").textContent = "暂停";
-    playback.timer = setInterval(
-      () => {
-        showFrame(playback.current + 1);
-        if (playback.current >= playback.n - 1) stopPlayback();
-      },
-      (playback.dt * 1000) / playback.speed,
-    );
+    const p = playback;
+    if (!p.n || document.hidden || $("scout-dialog").open || !$("battle-dialog").open) return;
+    if (p.current >= p.n - 1 && p.requested == null) return requestBattleFrame(0, {resume: true});
+    p.intentPlaying = true;
+    startPlaybackTimer();
+    pumpReplayFrames();
+    updatePlaybackState();
   }
   function emptyBattle(message) {
     const canvas = $("battle-canvas");
-    canvas.width = 240; canvas.height = 320;
+    canvas.width = playback.meta?.width || 960;
+    canvas.height = playback.meta?.height || 640;
     const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#314737";
-    ctx.fillRect(0, 0, 240, 320);
+    ctx.fillStyle = "#192c2b";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.textAlign = "center";
-    ctx.fillStyle = "#e8efd2";
-    ctx.font = "bold 17px sans-serif";
-    ctx.fillText("本轮战果已保存", 120, 142);
-    ctx.fillStyle = "#a5b991";
-    ctx.font = "11px sans-serif";
-    ctx.fillText("点击下一轮，继续冒险", 120, 168);
+    ctx.fillStyle = "#d9e5ce";
+    ctx.font = "600 26px sans-serif";
+    ctx.fillText(playback.n ? "森林竞技场" : "本轮战果已保存", canvas.width / 2, canvas.height / 2 - 12);
+    ctx.fillStyle = "#82978f";
+    ctx.font = "15px sans-serif";
+    ctx.fillText(playback.n ? "伙伴们即将登场" : "下一轮，继续冒险", canvas.width / 2, canvas.height / 2 + 23);
     $("battle-status").textContent = message;
   }
   async function openBattle() {
     closeBattle();
-    const token = playback.token;
     const meta = state.last_battle;
     Object.assign(playback, {
-      meta,
-      frames: [],
-      current: 0,
-      n: meta?.n || 0,
-      dt: meta?.dt || 0.05,
-      complete: false,
-      verdictShown: false,
+      meta, frames: [], cached: new Set(), loaded: new Set(), failed: new Set(), pending: new Map(),
+      current: 0, requested: meta?.n ? 0 : null, n: meta?.n || 0, dt: meta?.dt || 0.05,
+      complete: false, verdictShown: false, buffering: true, intentPlaying: !!meta?.n,
+      reportTab: "events", reportTabTouched: false, lastEvent: null, retryIndex: null,
+      revealOnFailure: false, seekResume: false,
+      cacheLimit: window.matchMedia?.("(max-width: 720px)")?.matches ? 36 : 72,
     });
+    $("battle-speed").value = String(playback.speed);
     $("battle-verdict").hidden = true;
-    $("battle-rewards").hidden = true;
-    $("battle-title").textContent =
-      `第 ${meta?.round || state.round} 轮 · 战斗时刻`;
-    $("battle-subtitle").textContent = meta?.opp_name
-      ? `你的伙伴 vs ${trainerName(meta.opp_name)}`
-      : "本轮对战结算";
     $("battle-result").textContent = "回放结束后显示战果";
     $("battle-result").className = "battle-result";
-    $("battle-events").innerHTML =
-      (meta?.events || [])
-        .map(
-          (event, i) =>
-            `<div class="event" id="play-event-${i}">${Number(event.t).toFixed(1)}s · ${esc(String(event.text).replace(/<[^>]*>/g, ""))}</div>`,
-        )
-        .join("") || "<p>这轮没有可回放的战斗事件。</p>";
-    $("battle-next").textContent =
-      state.phase === "over" ? "查看最终排名 →" : "下一轮 →";
-    $("battle-pause").disabled = $("battle-skip").disabled = true;
+    pendingBattleReport();
+    Object.assign(statViews.battle, {team: 0, metric: "damage_dealt"});
+    $("battle-title").textContent = `第 ${meta?.round || state.round} 轮 · 战斗时刻`;
+    $("battle-subtitle").textContent = `${meta?.pve ? "野生遭遇" : "训练家对战"}${meta?.ghost ? " · 镜像对手" : ""} · 3 排战场`;
+    $("battle-round-label").textContent = `第 ${meta?.round || state.round} 轮`;
+    $("battle-friendly-name").textContent = "新叶训练家";
+    $("battle-enemy-name").textContent = trainerName(meta?.opp_name) || "当轮对手";
+    for (const [team, side] of [[0, "friendly"], [1, "enemy"]]) {
+      $(`battle-${side}-roster`).innerHTML = (meta?.combatants || []).filter((unit) => Number(unit.team) === team).map((unit) => `<img src="${spriteOf({...unit, shiny: starsOf(unit) === 3})}" alt="${esc(unit.name)}" title="${esc(unit.name)} · ${starsOf(unit)}星 · ${esc(roleNames[unit.role] || "")}${Number(unit.range) ? ` · ${Number(unit.range) > 1 ? "远程" : "近战"}` : ""}">`).join("");
+    }
+    $("battle-events").innerHTML = '<p class="battle-events-empty">技能、命中与联动会随战斗逐条出现。</p>';
+    $("battle-current-event").textContent = "双方伙伴，即将登场。";
+    $("battle-next").textContent = state.phase === "over" ? "查看最终排名 →" : "下一轮 →";
+    $("battle-next").disabled = !!meta?.n;
+    $("battle-pause").disabled = $("battle-skip").disabled = $("battle-replay").disabled = !meta?.n;
+    $("battle-seek").disabled = !meta?.n;
+    $("battle-seek").max = String(Math.max(0, (meta?.n || 0) - 1));
+    $("battle-report-body").hidden = false;
+    $("battle-report-toggle").setAttribute("aria-expanded", "true");
+    $("battle-report-toggle").innerHTML = '收起战报 <span aria-hidden="true">−</span>';
+    setBattleTab("events", false);
     $("battle-dialog").showModal();
-    if (!meta?.n) {
-      emptyBattle(
-        meta?.restored
-          ? "历史画面未包含在存档中，战果和奖励已恢复。"
-          : !state.you.alive
-            ? "你的冒险已结束，仍可继续观战。"
-            : "本轮没有战斗画面。",
-      );
-      showVerdict();
-      return;
-    }
-    $("battle-status").textContent = `正在准备战斗画面 · ${meta.n} 帧`;
     emptyBattle("正在准备战斗画面…");
-    let nextIndex = 0,
-      failed = 0;
-    const worker = async () => {
-      while (nextIndex < meta.n && token === playback.token) {
-        const i = nextIndex++;
-        await new Promise((resolve) => {
-          const im = new Image();
-          let done = false;
-          const timeout = setTimeout(() => finish(false), 15000);
-          const finish = (ok) => {
-            if (done) return;
-            done = true;
-            clearTimeout(timeout);
-            if (ok && token === playback.token) playback.frames[i] = im;
-            else failed++;
-            if (i === 0 && ok && token === playback.token) showFrame(0);
-            resolve();
-          };
-          im.onload = () => finish(true);
-          im.onerror = () => finish(false);
-          im.src = `/demo/frame/${sid}/r${meta.round}/${i}.png`;
-        });
-      }
-    };
-    await Promise.all(Array.from({ length: 6 }, worker));
-    if (token !== playback.token) return;
-    if (failed) {
-      stopPlayback();
-      emptyBattle(
-        `有 ${failed} 帧未能载入。收起后可重试回放，或直接进入下一轮。`,
-      );
+    updateTeamTelemetry();
+    updateBattleTimeline();
+    updatePlaybackState();
+    if (!meta?.n) {
+      $("battle-loading").hidden = true;
+      document.querySelector(".battle-screen").setAttribute("aria-busy", "false");
+      $("battle-status").textContent = meta?.restored ? "历史画面未包含在存档中，战果和奖励已恢复。"
+        : !state.you.alive ? "你的冒险已结束，仍可继续观战。" : "本轮没有战斗画面。";
       showVerdict();
       return;
     }
-    playback.complete = true;
-    $("battle-pause").disabled = $("battle-skip").disabled = false;
-    showFrame(0);
-    play();
+    setBattleLoading("正在准备战场，画面就绪后开始回放…");
+    pumpReplayFrames();
   }
   async function nextRound() {
     if (busy) return;
@@ -874,6 +1438,7 @@
     if (!target || target.disabled) return;
     if (target.dataset.shop != null && canPrep())
       await api("buy", { i: target.dataset.shop });
+    else if (target.dataset.enemyLoc) openEnemyPiece(target.dataset.enemyLoc, target);
     else if (target.dataset.loc) await chooseCell(target.dataset.loc);
     else if (target.dataset.equip && canPrep()) {
       equipItem =
@@ -893,13 +1458,34 @@
         id: target.dataset.reward,
         choice: target.dataset.augment,
       });
+    else if (target.dataset.componentChoice && canPrep())
+      await api("claim_component", {
+        reward_id: target.dataset.componentReward,
+        choice: target.dataset.componentChoice,
+      });
     else if (target.dataset.learn && canPrep()) {
       const loc = $("learn-" + target.dataset.learn).value;
       if (loc) await api("learn", { loc, technique: target.dataset.learn });
+    } else if (target.hasAttribute("data-scout-return")) {
+      closeScout();
+    } else if (target.hasAttribute("data-scout-resume")) {
+      openScout(scoutSeat, {retain: true, returnFocus: target});
+    } else if (target.hasAttribute("data-scout-overview")) {
+      openScout(null, {returnFocus: target});
     } else if (target.dataset.scout != null) {
-      scoutSeat = Number(target.dataset.scout);
+      openScout(Number(target.dataset.scout), {returnFocus: target});
+    } else if (target.dataset.scoutUnit) {
+      const seat = Number(target.dataset.scoutOwner);
+      openScout(seat, {unit: {source: "scouting", loc: target.dataset.scoutUnit}});
+    } else if (target.dataset.scoutReport != null) {
+      scoutReportIndex = Number(target.dataset.scoutReport);
+      Object.assign(statViews.scout, {team: 0, metric: "damage_dealt"});
       renderScout();
-      if (!$("scout-dialog").open) $("scout-dialog").showModal();
+      $("scout-statistics")?.scrollIntoView({block: "nearest", behavior: "instant"});
+    } else if (target.dataset.battleReport != null) {
+      openHistoryReport(target.dataset.battleReport);
+    } else if (target.dataset.statScope) {
+      selectStatView(target);
     } else if (target.dataset.roleFilter) {
       roleFilter = target.dataset.roleFilter;
       renderCatalog();
@@ -917,6 +1503,13 @@
       const result = await api("finish");
       if (result?.ok) showResults();
     }
+  });
+  document.addEventListener("change", async (event) => {
+    const target = event.target;
+    if (!target.matches?.("select[data-trait-choice]") || !selected || !canPrep()) return;
+    const p = pieceAt(selected);
+    if (!p?.trait_options?.some(option => option.id === target.value)) return;
+    await api("trait", { loc: selected, trait: target.value });
   });
   document.addEventListener("dragstart", (event) => {
     const cell = event.target.closest("[data-loc][data-owned]");
@@ -965,10 +1558,8 @@
   };
   $("deploy-button").onclick = autoDeploy;
   $("fight-button").onclick = fight;
-  $("new-button").onclick = () => {
-    if (state) $("new-dialog").showModal();
-    else newGame();
-  };
+  for (const button of document.querySelectorAll("[data-restart]"))
+    button.onclick = requestRestart;
   $("new-cancel").onclick = () => $("new-dialog").close();
   $("new-confirm").onclick = newGame;
   $("result-new").onclick = newGame;
@@ -978,7 +1569,21 @@
   $("help-button").onclick = help;
   $("mobile-help-button").onclick = help;
   $("help-close").onclick = () => $("help-dialog").close();
-  $("scout-close").onclick = () => $("scout-dialog").close();
+  $("scout-close").onclick = closeScout;
+  $("scout-dialog").addEventListener("cancel", event => { event.preventDefault(); closeScout(); });
+  $("scout-dialog").addEventListener("close", () => {
+    clearScoutLayout();
+    let returnTarget = scoutReturnFocus;
+    if (returnTarget?.isConnected === false) {
+      returnTarget = returnTarget.id ? $(returnTarget.id)
+        : returnTarget.dataset.enemyLoc ? document.querySelector(`[data-enemy-loc="${returnTarget.dataset.enemyLoc}"]`)
+        : returnTarget.dataset.scout != null ? document.querySelector(`[data-scout="${returnTarget.dataset.scout}"]`)
+        : $("scout-resume");
+    }
+    returnTarget?.focus?.();
+    if (resumeAfterScout && $("battle-dialog").open && playback.current < playback.n - 1) play();
+    resumeAfterScout = false;
+  });
   $("catalog-button").onclick = () => {
     if (!state) return;
     renderCatalog();
@@ -1016,34 +1621,66 @@
     link.download = `PokeTactics-${sid}.ptsave`;
     link.click();
   };
+  $("history-report-close").onclick = () => $("history-report-dialog").close();
+  $("history-report-round").onchange = () => openHistoryReport($("history-report-round").value);
   $("battle-close").onclick = closeBattle;
-  $("battle-dialog").addEventListener("cancel", () => {
-    playback.token++;
-    stopPlayback();
-  });
-  $("battle-pause").onclick = () =>
-    playback.playing ? stopPlayback() : play();
-  $("battle-skip").onclick = () => {
-    stopPlayback();
-    showFrame(playback.n - 1);
-  };
+  $("battle-dialog").addEventListener("cancel", closeBattle);
+  $("battle-pause").onclick = () => playback.intentPlaying ? stopPlayback() : play();
+  $("battle-skip").onclick = () => requestBattleFrame(playback.n - 1, {revealOnFailure: true});
+  $("battle-replay").onclick = () => requestBattleFrame(0, {resume: true});
   $("battle-speed").onchange = () => {
+    const running = playback.intentPlaying;
+    stopPlayback();
     playback.speed = Number($("battle-speed").value);
-    if (playback.playing) play();
-    else if (playback.complete) showFrame(playback.current);
+    updateBattleTimeline();
+    if (running) play();
   };
+  $("battle-seek").onpointerdown = () => {
+    playback.seekResume = playback.intentPlaying;
+    stopPlayback();
+  };
+  $("battle-seek").oninput = () => requestBattleFrame($("battle-seek").value);
+  $("battle-seek").onchange = () => {
+    if (playback.seekResume) play();
+    playback.seekResume = false;
+  };
+  $("battle-retry").onclick = () => {
+    const target = playback.retryIndex ?? playback.requested ?? playback.current;
+    const running = playback.intentPlaying;
+    playback.failed.delete(target);
+    playback.retryIndex = null;
+    requestBattleFrame(playback.requested ?? playback.current, {resume: running});
+  };
+  $("battle-report-toggle").onclick = () => {
+    const hidden = !$("battle-report-body").hidden;
+    $("battle-report-body").hidden = hidden;
+    $("battle-report-toggle").setAttribute("aria-expanded", String(!hidden));
+    $("battle-report-toggle").innerHTML = `${hidden ? "展开" : "收起"}战报 <span aria-hidden="true">${hidden ? "+" : "−"}</span>`;
+  };
+  for (const button of document.querySelectorAll("[data-battle-tab]")) button.onclick = () => setBattleTab(button.dataset.battleTab);
+  document.querySelector(".battle-report-tabs").addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const tabs = ["events", "statistics", "rewards"];
+    const index = tabs.indexOf(playback.reportTab);
+    const tab = event.key === "Home" ? tabs[0] : event.key === "End" ? tabs[2]
+      : tabs[(index + (event.key === "ArrowRight" ? 1 : 2)) % tabs.length];
+    setBattleTab(tab);
+    $(`battle-${tab}-tab`).focus();
+  });
   $("battle-next").onclick = nextRound;
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) stopPlayback();
   });
   document.addEventListener("keydown", (event) => {
+    if (event.code === "Escape" && $("scout-dialog").open && $("scout-dialog").classList.contains("docked")) { event.preventDefault(); closeScout(); return; }
     if (
       event.repeat ||
       event.altKey ||
       event.ctrlKey ||
       event.metaKey ||
       /INPUT|SELECT|TEXTAREA|BUTTON/.test(event.target.tagName) ||
-      document.querySelector("dialog[open]")
+      [...document.querySelectorAll("dialog[open]")].some(dialog => dialog !== $("scout-dialog") || !dialog.classList.contains("docked"))
     )
       return;
     if (event.code === "Space") {

@@ -51,7 +51,7 @@ from skill_vfx import skill_profile, cast_windup, draw_skill
 from motion import MotionSystem, Pose, species_motion, windup as motion_windup, duration as motion_duration, offsets, transform
 from pixel_vfx import (trajectory_point, projectile, impact_star, impact_rim,
                        light, debris, hit_sprite, feather_flash, number_rise, exposure_age)
-from animation_timeline import AnimationTimeline, MAX_ACTIVE_SIGNATURES
+from animation_timeline import AnimationTimeline, MAX_ACTIVE_SIGNATURES, native_targeting
 from move_effects import (SUPPORTED_SPECIES, normalize_overrides, effect_profile,
                           draw_move_effect, draw_blink_fragments, draw_skill_effect)
 from combat import Battle  # noqa: E402
@@ -437,6 +437,11 @@ class AnimUnit:
         self.hp = self.u.max_hp
         self.hp_history = [(-9.0, self.u.max_hp)]  # (t, hp) 血条滴落用
         self.energy = 0
+        self.shield = 0
+        self.shield_until = 0.
+        self.wet_until = 0.
+        self.wet_source_idx = None
+        self.arena_trait_key = None
         self.die_t = None
         self.attacks = []
         self.knockbacks = []
@@ -531,6 +536,8 @@ class BattleAnimation:
         # Presentation-only rows copied from applied tactical events.  They never
         # replace Unit.hp, Unit.healing_blocks, or a future simulator decision.
         self.healing_blocks = []
+        self.active_rock_fields = {}
+        self.field_statuses = {}
         self.units = {u.idx: AnimUnit(u) for u in b.units}
         self.is_arena = getattr(b, 'ruleset', None) == 'arena_v1'
         self.battle_rows = getattr(b, 'rows', 4)
@@ -538,8 +545,14 @@ class BattleAnimation:
         self.width = W
         self.height = H + (self.battle_rows - 4) * BCELL
         from build_rules import resolve_cast
-        self._native_moves = {u.idx: (resolve_cast(u.piece, getattr(b, 'stat_mode', 'legacy')) or {}).get('name')
-                              for u in b.units}
+        if self.is_arena:
+            import arena_skills
+            self.move_type.update({'arena_' + s['id']: s['type'] for s in arena_skills.catalog()})
+            self.move_zh.update({'arena_' + s['id']: s['name'] for s in arena_skills.catalog()})
+            self._native_moves = {u.idx: arena_skills.resolve_cast(u.piece)['name'] for u in b.units}
+        else:
+            self._native_moves = {u.idx: (resolve_cast(u.piece, getattr(b, 'stat_mode', 'legacy')) or {}).get('name')
+                                  for u in b.units}
         self.by_idx = {u.idx: u for u in b.units}
         self.events = b.events
         self.authoritative_states = any(ev[1] == "unit_state" for ev in self.events)
@@ -557,6 +570,7 @@ class BattleAnimation:
         self.msg = (0.0, "")
         self.cutins = []
         self.result = None
+        self._index_shields()
 
     def visual_config(self, sid):
         return effect_profile(sid, self.visual_overrides)
@@ -576,7 +590,8 @@ class BattleAnimation:
         """Inspectable visual HP/energy/death state; raw simulation remains untouched."""
         view = self._presentation_view()
         view._ensure(self.timeline.time(seconds, speed, skip))
-        return {idx: {"hp": unit.hp, "energy": unit.energy, "die_t": unit.die_t}
+        return {idx: {"hp": unit.hp, "energy": unit.energy, "die_t": unit.die_t,
+                      **({'shield': unit.shield, 'shield_until': unit.shield_until} if self.is_arena else {})}
                 for idx, unit in view.units.items()}
 
     def _timing(self, event):
@@ -609,15 +624,48 @@ class BattleAnimation:
         self.weather_until = None
         self.tactical_effects = []
         self.healing_blocks = []
+        self.active_rock_fields = {}
+        self.field_statuses = {}
         # The training/compatibility tools replace the event list on a copied
         # animation before resetting; detect its contract from the new stream.
         self.authoritative_states = any(ev[1] == "unit_state" for ev in self.events)
+        self._index_shields()
         for au in self.units.values():
             au.reset()
         self.dusts, self.floats, self.cutins = [], [], []
         self.msg = (0.0, "")
         self.result = None
         self._cursor, self._cur_t, self._busy_until = 0, -1.0, 0.0
+
+    def _index_shields(self):
+        raw = self.timeline.source_events if self._is_presentation else self.events
+        self._event_source_indexes = {id(ev): index for index, ev in enumerate(raw)}
+        self._absorbed_by_source = {}
+        self._terrain_attack_sources = set()
+        for index, event in enumerate(raw):
+            if event[1] == 'field_effect' and event[4:6] == ('rock_spikes', 'enter'):
+                for child in range(index + 1, min(len(raw), index + 1 + event[6]['event_count'])):
+                    if raw[child][1] == 'attack':
+                        self._terrain_attack_sources.add(child)
+        for event in raw:
+            if event[1] in ('combo_effect', 'skill_effect') and event[5] == 'absorb':
+                owner = event[6].get('action_index' if event[1] == 'skill_effect' else 'cast_index')
+                if type(owner) is int:
+                    self._absorbed_by_source[owner] = self._absorbed_by_source.get(owner, 0) + event[6]['amount']
+
+    def _display_damage(self, event, requested):
+        if not self.is_arena:
+            return requested
+        index = self.timeline.source_index_by_event.get(id(event))
+        if index is None:
+            index = self._event_source_indexes.get(id(event))
+        return max(0, requested - self._absorbed_by_source.get(index, 0))
+
+    def _terrain_attack(self, event):
+        index = self.timeline.source_index_by_event.get(id(event))
+        if index is None:
+            index = self._event_source_indexes.get(id(event))
+        return index in self._terrain_attack_sources
 
     def _ensure(self, T: float) -> None:
         if T < self._cur_t:      # 请求过去的时间（分镜抽帧）：从头重放
@@ -638,6 +686,19 @@ class BattleAnimation:
             if au.hp != ev[3]:
                 au.set_hp(t, ev[3])
             au.energy = ev[4]
+            if self.is_arena and len(ev) >= 7:
+                au.shield, au.shield_until = ev[5:7]
+                if len(ev) >= 8 and isinstance(ev[7], dict):
+                    state = ev[7]
+                    au.wet_source_idx = state.get('wet_source_idx')
+                    # The mark clears through authoritative state, like a shield.
+                    # Convert its announced deadline for labels only; never read
+                    # later expiry/consumption packets to predict its end.
+                    raw_index = self.timeline.source_index_by_event.get(id(ev)) if self._is_presentation else None
+                    raw_t = self.timeline.source_events[raw_index][0] if raw_index is not None else t
+                    au.wet_until = (t + max(0., state.get('wet_until', 0.) - raw_t)
+                                    if au.wet_source_idx is not None else 0.)
+                    au.arena_trait_key = state.get('arena_trait_key')
         elif kind == "move":
             au = self.units[ev[2]]
             blink = (self._is_presentation and id(ev) in self.timeline.blink_by_event) or (
@@ -653,6 +714,12 @@ class BattleAnimation:
         elif kind == "attack":
             atk, tgt = self.units[ev[2]], self.units[ev[3]]
             dmg = ev[4]
+            if self._terrain_attack(ev):
+                display = self._display_damage(ev, dmg)
+                if display:
+                    self.floats.append((t, *tgt.render_px(t), f'-{display}', (230, 185, 120)))
+                tgt.jitter_t = t
+                return
             if not self.authoritative_states:
                 atk.energy = ev[5] if len(ev) > 5 else min(80, atk.energy + 15)
                 tgt.set_hp(t, tgt.hp - dmg)
@@ -667,7 +734,9 @@ class BattleAnimation:
                 atk.attacks.append((t, dx / norm, dy / norm))
             tgt.knockbacks.append((impact, dx / norm, dy / norm))
             tgt.jitter_t = impact
-            self.floats.append((impact, bx, by, f"-{dmg}", (255, 255, 255)))
+            display_damage = self._display_damage(ev, dmg)
+            if display_damage:
+                self.floats.append((impact, bx, by, f"-{display_damage}", (255, 255, 255)))
         elif kind == "cast":
             ci, ti, move, eff, dmg = ev[2], ev[3], ev[4], ev[5], ev[6]
             au = self.units[ci]
@@ -684,16 +753,19 @@ class BattleAnimation:
             self.cutins.append((start, impact, ci, ti,
                                 move, eff, dmg,
                                 self.move_type.get(move, au.u.piece.types[0]) if self.is_arena else au.u.piece.types[0], release))
-            au.recoil_t = release
+            if not self.is_arena or native_targeting(ev, self.by_idx) == 'enemy':
+                au.recoil_t = release
             tgt = self.units[ti]
             if dmg:
-                self.floats.append((impact, *tgt.render_px(t),
-                                    f"-{dmg}",
-                                    (255, 90, 70) if eff > 1 else (255, 220, 60)))
+                display_damage = self._display_damage(ev, dmg)
+                if display_damage:
+                    self.floats.append((impact, *tgt.render_px(t),
+                                        f"-{display_damage}",
+                                        (255, 90, 70) if eff > 1 else (255, 220, 60)))
                 if not self.authoritative_states:
                     tgt.set_hp(t, tgt.hp - dmg)
             extra = "效果拔群！" if eff >= 2 else ("效果不佳" if 0 < eff < 1 else "")
-            label = skill["name"]
+            label = self.move_zh.get(move, move) if self.is_arena else skill["name"]
             self.msg = (impact, f"{self.by_idx[ci].piece.name}的{label}！ {extra}")
         elif kind == "regen":
             au = self.units[ev[2]]
@@ -709,6 +781,7 @@ class BattleAnimation:
             au = self.units[ev[2]]
             au.die_t = t
             au.statuses.clear()
+            au.shield, au.shield_until = 0, 0.
             au.frozen_pose = None
         elif kind == "status":
             au = self.units[ev[2]]
@@ -730,8 +803,73 @@ class BattleAnimation:
             elif action == "tick" and len(ev) > 5 and ev[5] > 0:
                 if not self.authoritative_states:
                     au.set_hp(t, au.hp - ev[5])
-                self.floats.append((t, *au.render_px(t), f"-{ev[5]}",
-                                    DOT_COLORS.get(status, STATUS_PURPLE)))
+                display_damage = self._display_damage(ev, ev[5])
+                if display_damage:
+                    self.floats.append((t, *au.render_px(t), f"-{display_damage}",
+                                        DOT_COLORS.get(status, STATUS_PURPLE)))
+        elif kind == 'field_effect':
+            source, target, key, effect, payload = ev[2:]
+            if key == 'rock_spikes':
+                fid = payload.get('field_id')
+                if effect == 'place':
+                    self.active_rock_fields[fid] = {'cells': list(payload['cells']),
+                        'team': self.by_idx[source].team}
+                    self.msg = (t, '岩钉区域已铺设')
+                elif effect in ('clear', 'expire'):
+                    field = self.active_rock_fields.get(fid)
+                    if field:
+                        removed = {tuple(cell) for cell in payload['cells']}
+                        field['cells'] = [cell for cell in field['cells'] if tuple(cell) not in removed]
+                        if not field['cells']:
+                            self.active_rock_fields.pop(fid, None)
+                    self.msg = (t, '岩钉已清除' if effect == 'clear' else '岩钉区域结束')
+                elif effect == 'avoid':
+                    self.msg = (t, '厚底靴免疫岩钉' if payload['reason'] == 'heavy_boots' else '岩钉触发受限')
+                elif effect == 'enter':
+                    self.msg = (t, f"岩钉：生命损失 {payload['actual']} / 护盾吸收 {payload['absorbed']}")
+            elif key in ('root', 'vulnerability'):
+                slot = (target, key)
+                if effect == 'apply':
+                    self.field_statuses[slot] = t
+                else:
+                    self.field_statuses.pop(slot, None)
+                self.msg = (t, ('定身' if key == 'root' else '易伤') + ('生效' if effect == 'apply' else '结束'))
+        elif kind == 'skill_effect':
+            source, target, key, effect, payload = ev[2:]
+            if effect in ('shield', 'absorb', 'energy') and payload.get('amount', 0) > 0:
+                value = payload['amount']
+                prefix = {'shield': 'S+', 'absorb': 'S', 'energy': 'E+'}[effect]
+                color = (99, 217, 242) if effect != 'energy' else (191, 142, 255)
+                position = payload.get('target_pos', self.by_idx[target].pos)
+                self.floats.append((t, *self.units[target].cell_px(position), prefix + str(value), color))
+            if effect in ('guard', 'shield', 'energy', 'taunt', 'thorns', 'cleanse'):
+                label = {'guard': '减伤', 'shield': '护盾', 'energy': '充能',
+                         'taunt': '嘲讽', 'thorns': '反击架势', 'cleanse': '净化'}[effect]
+                self.msg = (t, f'{self.by_idx[source].piece.name} → {self.by_idx[target].piece.name}：{label}')
+        elif kind == 'combo_effect':
+            source, target, key, effect, payload = ev[2:]
+            if effect in ('energy', 'shield', 'absorb') and payload.get('amount', 0) > 0:
+                value = payload['amount']
+                prefix = {'energy': 'E+', 'shield': 'S+', 'absorb': 'S'}[effect]
+                position = payload.get('target_pos', self.by_idx[target].pos)
+                self.floats.append((t, *self.units[target].cell_px(position), prefix + str(value),
+                                    (99, 217, 242) if effect != 'energy' else (191, 142, 255)))
+            if key == 'arena_weather' and effect in ('weather', 'expire'):
+                self.weather_name = payload.get('new_weather')
+                raw_index = self.timeline.source_index_by_event.get(id(ev)) if self._is_presentation else None
+                raw_t = self.timeline.source_events[raw_index][0] if raw_index is not None else t
+                self.weather_until = (t + max(0., payload.get('expires_at', 0.) - raw_t)
+                                      if self.weather_name else None)
+            if key == 'life_orb' and (payload.get('recoil') or payload.get('damage_scope') == 'self_cost'):
+                value = max(0, int(payload.get('amount', 0)))
+                if value:
+                    position = payload.get('target_pos', self.by_idx[target].pos)
+                    self.floats.append((t, *self.units[target].cell_px(position),
+                                        '自-' + str(value), (249, 146, 138)))
+                    self.units[target].recoil_t = t
+            # Empowered_basic annotates the preceding single attack. Its HP
+            # float owns the damage; never print the bonus as another hit.
+            self.msg = (t, arena_vfx.combination_label(key, effect, payload))
         elif kind == "tactical_effect" and len(ev) == 6:
             source, target, effect, payload = ev[2:]
             self.tactical_effects.append(ev)
@@ -810,7 +948,7 @@ class BattleAnimation:
     def _gait(self, au):
         sid = au.u.piece.species_id
         return gait_profile(au.u.piece, self.front.size_for_species(sid),
-                            pokedex().species[sid]["base"]["speed"])
+                            pokedex().species_record(sid)["base"]["speed"])
 
     def _attack_delay(self, ev):
         timing = self._timing(ev)
@@ -931,7 +1069,7 @@ class BattleAnimation:
     def _draw_signatures(self, img, T, budget):
         for c in self._active_casts(T):
             sid = self.units[c[2]].u.piece.species_id
-            if self.is_arena and (sid not in SUPPORTED_SPECIES or c[4] != self._native_moves[c[2]]):
+            if self.is_arena:
                 continue  # The arena's individual material track owns this cast.
             if not c[0] <= T < c[1] + .6:
                 continue
@@ -1102,6 +1240,8 @@ class BattleAnimation:
         draw.line((BX, BY - 1, BX + BCOLS * BCELL - 1, BY - 1), fill=INK)
         draw.line((BX, BY + self.visual_rows * BCELL, BX + BCOLS * BCELL - 1, BY + self.visual_rows * BCELL), fill=INK)
         self._draw_ground_scars(img, T)
+        if self.is_arena:
+            self._draw_rock_floor(img, T)
         shown = sorted((au for au in self.units.values() if au.visible(T)),
                        key=lambda a: a.render_px(T)[1])
         poses = {au.u.idx: self._unit_pose(au, T) for au in shown}
@@ -1241,6 +1381,7 @@ class BattleAnimation:
         events = self.timeline.recent_events(T) if self._is_presentation else self.events[:self._cursor]
         return [ev for ev in events
                 if ev[1] == "attack" and ev[4] > 0
+                and not self._terrain_attack(ev)
                 and not self._projectile_cancelled(ev)
                 and 0 <= effect_frame(T - ev[0] - self._attack_delay(ev)) <
                 (4 if self.units[ev[3]].u.piece.species_id in species_motion else 3)]
@@ -1334,7 +1475,7 @@ class BattleAnimation:
     @lru_cache(maxsize=151)
     def _motion_profile(self, species_id):
         size = self.front.size_for_species(species_id)
-        speed = pokedex().species[species_id]["base"]["speed"]
+        speed = pokedex().species_record(species_id)["base"]["speed"]
         weight = (size - 40) / 16
         return (species_id % 3, (species_id // 3) % 3, species_id % 2,
                 1 + 0.2 * weight, 1 - 0.2 * weight,
@@ -1393,7 +1534,7 @@ class BattleAnimation:
         box = board_sprite_size(tier)
         source = self.front.image(species_id, self.pal, shiny=shiny)
         # 每个动作相位直接从源图 BOX + 量化，避免多次重采样损失细节。
-        sprite = scale_sprite(source, self.pal.for_species(species_id, shiny=shiny), (box, box - squash))
+        sprite = scale_sprite(source, self.front.palette_for_species(species_id, self.pal, shiny=shiny), (box, box - squash))
         if sprite.getbbox() is None:
             raise AssetError(f"species {species_id}: board sprite has no visible pixels after scaling")
         return sprite
@@ -1462,7 +1603,7 @@ class BattleAnimation:
     def _status_sprite(self, species_id, tier, squash, status, shiny=False):
         sprite = self._board_sprite(species_id, tier, squash, shiny).copy()
         tint, amount = ((255, 255, 255), 60) if status == "freeze" else (STATUS_PURPLE, 15)
-        colors = self.pal.for_species(species_id)
+        colors = self.front.palette_for_species(species_id, self.pal, shiny=shiny)
         replacements = {tuple(c): tuple((v * (100 - amount) + target * amount + 50) // 100
                                         for v, target in zip(c, tint)) for c in colors}
         sprite.putdata([replacements.get(pixel[:3], pixel[:3]) + (pixel[3],)
@@ -1596,6 +1737,9 @@ class BattleAnimation:
         # HP 在头顶（精灵 alpha 最多上溢 4px）；6px 图标带在脚点前 7px。
         draw_meter(img, px_ + 3, py_ - 10, BCELL - 6, frac, c, height=4)
         draw_meter(img, px_ + 3, py_ + BOARD_FOOT + 5, BCELL - 6, au.energy / 80, ec, height=4)
+        if self.is_arena and au.shield > 0:
+            draw_meter(img, px_ + 3, py_ - 15, BCELL - 6,
+                       min(1., au.shield / max(1., u.max_hp * .15)), (99, 217, 242), height=3)
 
     def _ground_scars(self, T):
         """印记固定在落点格；从已发生的事件推导，不添加回放状态。"""
@@ -1718,9 +1862,71 @@ class BattleAnimation:
                 draw.point((xx, yy), fill=PAPER)
     def _draw_arena_fx(self, img, T, budget):
         events = self.timeline.recent_events(T, 2.) if self._is_presentation else self.events[:self._cursor]
+        draw = ImageDraw.Draw(img)
+        for (idx, key), started in self.field_statuses.items():
+            if not self.units[idx].visible(T):
+                continue
+            xy = self._event_position(idx, T)
+            x, y = xy[0] + 20, xy[1] + 18
+            if key == 'root':
+                for off in (-10, 0, 10):
+                    draw.arc((x+off-5,y-4,x+off+5,y+14),0,280,fill=(117,207,110,240),width=2)
+            else:
+                draw.line(((x-13,y-18),(x-7,y-12),(x-12,y-5)),fill=(250,156,84,255),width=3)
+                draw.line(((x+13,y-18),(x+7,y-12),(x+12,y-5)),fill=(250,156,84,255),width=3)
+        for ev in events:
+            if ev[1] != 'field_effect' or ev[4] != 'rock_spikes' or not 0 <= T-ev[0] < .65:
+                continue
+            if ev[5] in ('enter', 'avoid', 'clear'):
+                for cell in ev[6]['cells']:
+                    x, y = self.units[ev[3]].cell_px(cell)
+                    color = (109,217,237,240) if ev[5] == 'avoid' else (238,188,116,245)
+                    radius = 8 + (T-ev[0])*20
+                    draw.ellipse((x+20-radius,y+24-radius*.4,x+20+radius,y+24+radius*.4),outline=color,width=2)
+        for unit in self.units.values():
+            if unit.shield > 0 and unit.visible(T) and budget.take(3, minimum=3):
+                xy = self._event_position(unit.u.idx, T)
+                point = (xy[0] + 20, xy[1] + 14)
+                arena_vfx.draw_combination(img, 'heart_bell', 'active', point, point, .5, {})
+        offense_events = self.timeline.recent_events(T, 4.) if self._is_presentation else events
+        trait_events = self.timeline.recent_events(T, 5.1) if self._is_presentation else events
+        for idx, unit in self.units.items():
+            if not unit.visible(T):
+                continue
+            if unit.hp > 0 and unit.wet_source_idx is not None and budget.take(4, minimum=4):
+                xy = self._event_position(idx, T)
+                point = (xy[0]+20, xy[1]+14)
+                arena_vfx.draw_combination(img, 'element_wet', 'active', point, point, (T*.8)%1, {})
+            speed_weather = {'trait_chlorophyll': 'sun', 'trait_swift_swim': 'rain'}
+            if unit.hp > 0 and speed_weather.get(unit.arena_trait_key) == self.weather_name and unit.arena_trait_key in speed_weather and budget.take(4, minimum=4):
+                xy = self._event_position(idx, T)
+                point = (xy[0]+20, xy[1]+14)
+                arena_vfx.draw_combination(img, unit.arena_trait_key, 'active', point, point, (T*.8)%1, {})
+            active = arena_vfx.active_offense(offense_events, T, idx)
+            active.update(arena_vfx.active_traits(trait_events, T, idx))
+            for effect, ev in active.items():
+                if not budget.take(4, minimum=4):
+                    continue
+                xy = self._event_position(idx, T)
+                point = (xy[0]+20, xy[1]+14)
+                arena_vfx.draw_combination(img, ev[4], 'active', point, point, (T*.8)%1, ev[6])
+        guard_events = self.timeline.recent_events(T, 3.) if self._is_presentation else events
+        active_guards = {}
+        for ev in guard_events:
+            if ev[1] == 'skill_effect' and ev[5] == 'guard' and .8 <= T - ev[0] < ev[6]['duration']:
+                active_guards[ev[3]] = ev
+        for idx, ev in list(active_guards.items())[:3]:
+            if not self.units[idx].visible(T) or not budget.take(3, minimum=3):
+                continue
+            xy = self._event_position(idx, T)
+            point = (xy[0] + 20, xy[1] + 14)
+            arena_vfx.draw_native_outcome(img, 'guard', point, point,
+                                         (T - ev[0]) / ev[6]['duration'], ev[6])
         tracks=[]
         for ev in events:
             if ev[1] not in ('attack','cast','arena_heal','partner_effect'):
+                continue
+            if self._terrain_attack(ev):
                 continue
             if ev[1] == 'partner_effect':
                 if ev[5] == 'rest' and 0 <= T-ev[0] < .8:
@@ -1752,7 +1958,9 @@ class BattleAnimation:
         for start,ev,phase,p in reversed(tracks):
             if not budget.take(8,minimum=8):
                 continue
-            a=self._event_position(ev[2],start)
+            timing = self._timing(ev)
+            source_time = min(T, timing.release) if timing else start
+            a=self._event_position(ev[2],source_time)
             b=self._event_position(ev[3],start)
             a=(a[0]+BCELL//2,a[1]+14)
             b=(b[0]+BCELL//2,b[1]+14)
@@ -1764,10 +1972,71 @@ class BattleAnimation:
                 arena_vfx.draw_attack(img,source.piece.species_id,a,b,phase,p,source.team)
                 label=arena_vfx.EFFECTS[source.piece.species_id][0]
             else:
-                arena_vfx.draw_skill(img,source.piece.species_id,
-                    self.move_type.get(ev[4], 'NORMAL'),a,b,phase,p,source.team,ev[4])
+                if ev[4] == self._native_moves[ev[2]]:
+                    arena_vfx.draw_native_skill(img,source.piece.species_id,
+                        ev[4].removeprefix('arena_'),a,b,phase,p,source.team)
+                else:
+                    arena_vfx.draw_skill(img,source.piece.species_id,
+                        self.move_type.get(ev[4], 'NORMAL'),a,b,phase,p,source.team,ev[4])
                 label=self.move_zh.get(ev[4],ev[4])
             self._arena_label=(ev,label)
+        # Every link comes from an applied, explicitly cast-owned effect. Chain
+        # hops use the previous victim's recorded origin; support links use the
+        # actual patient, never a speculative nearby unit.
+        outcomes = [ev for ev in events if ev[1] == 'skill_effect'
+                    and 0 <= T - ev[0] < (.8 if ev[5] != 'side_hit' else .4)]
+        for ev in sorted(outcomes, key=lambda ev: (-ev[0], ev[2], ev[3]))[:3]:
+            if not budget.take(6, minimum=6):
+                continue
+            info, effect = ev[6], ev[5]
+            origin = self.units[info['origin_idx']].cell_px(info['origin_pos'])
+            target = self.units[ev[3]].cell_px(info['target_pos'])
+            a, b = (origin[0] + 20, origin[1] + 14), (target[0] + 20, target[1] + 14)
+            if effect == 'energy_drain':
+                a, b = b, (self.units[ev[2]].cell_px(info['caster_pos'])[0] + 20,
+                            self.units[ev[2]].cell_px(info['caster_pos'])[1] + 14)
+            elif effect in ('knockback', 'pull'):
+                destination = self.units[ev[3]].cell_px(info['destination'])
+                a, b = b, (destination[0] + 20, destination[1] + 14)
+            if effect == 'side_hit':
+                arena_vfx.draw_native_skill(img, self.by_idx[ev[2]].piece.species_id,
+                    ev[4], a, b, 'impact', (T - ev[0]) / .4, self.by_idx[ev[2]].team,
+                    element=info.get('move_type'))
+            else:
+                arena_vfx.draw_native_outcome(img, effect, a, b, (T - ev[0]) / .8, info)
+                labels = {'heal': f"回复 +{info.get('amount', 0)}", 'guard': f"减伤 {info.get('reduction', 0):.0%}",
+                          'energy': f"回能 +{info.get('amount', 0)}", 'energy_drain': f"汲能 -{info.get('stolen', 0)}",
+                          'cleanse': '净化异常', 'knockback': '击退', 'pull': '拉回友军', 'status': '中毒', 'flinch': '震击畏缩'}
+                self._arena_label = (ev, labels.get(effect, self.move_zh.get('arena_' + ev[4], ev[4])))
+        combinations = [ev for ev in events if ev[1] == 'combo_effect'
+                        and (ev[5] != 'expire' or ev[4] in ('metronome', 'native_inspiration', 'bond_combo', 'bond_inspiration', 'trait_guts', 'trait_intimidate'))
+                        and 0 <= T - ev[0] < .8]
+        for ev in sorted(combinations, key=lambda ev: (-ev[0], ev[2], ev[3]))[:3]:
+            if not budget.take(6, minimum=6):
+                continue
+            payload = ev[6]
+            source_pos = payload.get('origin_pos', payload['source_pos']) if ev[4] == 'contagion_orb' else payload['source_pos']
+            source = self.units[ev[2]].cell_px(source_pos)
+            target = self.units[ev[3]].cell_px(payload['target_pos'])
+            a, b = (source[0] + 20, source[1] + 14), (target[0] + 20, target[1] + 14)
+            arena_vfx.draw_combination(img, ev[4], ev[5], a, b, (T - ev[0]) / .8, payload)
+            self._arena_label = (ev, arena_vfx.combination_label(ev[4], ev[5], payload))
+
+    def _draw_rock_floor(self, img, T):
+        """Persistent footprint is rebuilt only from already applied events."""
+        draw = ImageDraw.Draw(img)
+        for field in self.active_rock_fields.values():
+            color = (69,161,214,255) if field['team'] == 0 else (214,94,105,255)
+            for cell in field['cells']:
+                x, y = next(iter(self.units.values())).cell_px(cell)
+                draw.rectangle((x+2,y+2,x+37,y+37),outline=color,width=2)
+                if field['team'] == 0:
+                    draw.ellipse((x+4,y+5,x+9,y+10),outline=color,width=1)
+                else:
+                    draw.polygon(((x+6,y+4),(x+10,y+10),(x+3,y+10)),outline=color)
+                for off, high in ((-10,10),(0,17),(10,8)):
+                    xx=x+20+off
+                    draw.polygon(((xx-4,y+30),(xx,y+30-high),(xx+4,y+30)),fill=(191,161,117,255),outline=(247,223,168,255))
 
     def _draw_telegraph(self, img: Image, cells: list, color) -> None:
         """④ 范围预警钩子：AoE 招式命中前 1 帧对格子集合画半透明高亮。

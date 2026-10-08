@@ -64,7 +64,7 @@ def make_piece(species_id: int, templates: Dict[int, Piece]) -> Piece:
     if species_id in templates:
         return templates[species_id]
     dex = pokedex()
-    base = dex.species[species_id]["base"]
+    base = dex.species_record(species_id)["base"]
     tier = tier_for_bst(dex.bst(species_id))
     move = dex.signature_move(species_id)
     return Piece(species_id, tier, LEVEL_BY_TIER[tier],
@@ -105,6 +105,7 @@ class OwnedPiece:
         self.item = None   # S5 装备栏：每单位 1 格（None = 空手，docs/07 §3）
         self.uid = None  # 会话分配稳定编号；移位、教学和进化沿用。
         self.technique = None
+        self.arena_trait = None  # Optional arena species ability; None keeps the default.
         self.evolution_locked = False
 
     def __repr__(self) -> str:

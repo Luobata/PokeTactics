@@ -56,7 +56,7 @@ class AnimationPreviewContracts(unittest.TestCase):
     def test_all_action_previews_include_subject_phases_and_bounded_frames(self):
         for kind in ('idle', 'move', 'hit', 'death'):
             with self.subTest(kind=kind):
-                result = preview.preview({'species': 19, 'kind': kind})
+                result = preview.preview({'mode': 'classic', 'species': 19, 'kind': kind})
                 self.assertEqual(result['subject']['unit'], 0)
                 self.assertTrue(result['phases'])
                 self.assertEqual(result['frame_sha256'], result['base_frame_sha256'])
@@ -67,8 +67,8 @@ class AnimationPreviewContracts(unittest.TestCase):
                     self.assertIsNotNone(result['target_at_impact']['die_t'])
 
     def test_visual_edit_changes_pixels_but_preserves_timing_hp_and_base(self):
-        base = preview.preview({"species": 6, "kind": "cast", "seed": 7})
-        edited = preview.preview({"species": 6, "kind": "cast", "seed": 7,
+        base = preview.preview({"mode": "classic", "species": 6, "kind": "cast", "seed": 7})
+        edited = preview.preview({"mode": "classic", "species": 6, "kind": "cast", "seed": 7,
                                   "settings": {"palette": "vivid", "effect_scale": 1.3,
                                                "motion_scale": .5, "particle_density": .5}})
         self.assertNotEqual(base["key"], edited["key"])
@@ -79,7 +79,7 @@ class AnimationPreviewContracts(unittest.TestCase):
         self.assertLessEqual(edited["metrics"]["particle_peak"], 192)
         self.assertEqual(len(edited["frames"]), len(edited["base_frames"]))
         with patch("profile_range.make_signature_scene", side_effect=AssertionError("cache miss")):
-            self.assertEqual(preview.preview({"species": 6, "kind": "cast", "seed": 7})["frame_sha256"],
+            self.assertEqual(preview.preview({"mode": "classic", "species": 6, "kind": "cast", "seed": 7})["frame_sha256"],
                              base["frame_sha256"])
 
     def test_preset_roundtrip_and_input_do_not_leak_between_instances(self):
@@ -92,12 +92,12 @@ class AnimationPreviewContracts(unittest.TestCase):
         self.assertEqual(preview.normalize_preset({**raw, "settings": {}})["settings"]["motion_scale"], 1.)
 
     def test_failed_render_preserves_existing_cache_and_cleans_partial_frames(self):
-        existing = preview.preview({"species": 65})
+        existing = preview.preview({"mode": "classic", "species": 65})
         before = sorted(p.name for p in self.root.iterdir())
         from render_battle_gif import BattleAnimation
         with patch.object(BattleAnimation, "playback_frame", side_effect=OSError("disk failure")):
             with self.assertRaises(OSError):
-                preview.preview({"species": 65, "settings": {"effect_scale": 1.2}})
+                preview.preview({"mode": "classic", "species": 65, "settings": {"effect_scale": 1.2}})
         self.assertEqual(before, sorted(p.name for p in self.root.iterdir()))
         self.assertTrue((self.root / existing["key"] / "0.png").is_file())
 
@@ -107,7 +107,7 @@ class AnimationPreviewContracts(unittest.TestCase):
 
     def test_failed_pairs_cannot_fill_cache_or_evict_the_last_success(self):
         with patch.object(preview, "MAX_CACHE_ENTRIES", 2):
-            previous = preview.preview({"species": 6, "seed": 7,
+            previous = preview.preview({"mode": "classic", "species": 6, "seed": 7,
                                         "settings": {"effect_scale": 1.2}})
             original = preview._render
             def fail_edited(request, revision):
@@ -117,7 +117,7 @@ class AnimationPreviewContracts(unittest.TestCase):
             with patch.object(preview, "_render", side_effect=fail_edited):
                 for seed in (11, 12, 13):
                     with self.assertRaises(OSError):
-                        preview.preview({"species": 6, "seed": seed, "settings": {"effect_scale": .8}})
+                        preview.preview({"mode": "classic", "species": 6, "seed": seed, "settings": {"effect_scale": .8}})
                     self.assertLessEqual(len(list(self.root.iterdir())), 2)
                     self.assertTrue((self.root / previous["key"] / "0.png").is_file())
                     self.assertTrue((self.root / previous["base_key"] / "0.png").is_file())
@@ -161,7 +161,7 @@ class AnimationPreviewHTTPContracts(unittest.TestCase):
 
     def test_character_catalog_distinguishes_real_mechanisms_and_planned_parts(self):
         from data import pokedex
-        with urllib.request.urlopen(self.url + "/api/animation/characters", timeout=10) as response:
+        with urllib.request.urlopen(self.url + "/api/animation/characters?mode=classic", timeout=10) as response:
             body = json.load(response)
         self.assertTrue(body["ok"])
         characters = body["characters"]
@@ -175,7 +175,7 @@ class AnimationPreviewHTTPContracts(unittest.TestCase):
         self.assertFalse(characters["26"]["rig"]["implemented"])
         import profiles
         with patch.object(profiles, "PROFILES_ON", False):
-            with urllib.request.urlopen(self.url + "/api/animation/characters", timeout=10) as response:
+            with urllib.request.urlopen(self.url + "/api/animation/characters?mode=classic", timeout=10) as response:
                 off = json.load(response)
         self.assertEqual(off["characters"]["26"]["role"], "通用技能")
 

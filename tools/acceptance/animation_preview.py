@@ -51,11 +51,14 @@ def _object(value, allowed, name):
 def normalize_preset(value):
     from move_effects import SUPPORTED_SPECIES, normalize_overrides, DEFAULT_VISUAL
     from character_catalog import character_catalog
-    _object(value, ("schema_version", "species", "settings"), "预设")
+    from presentation_modes import normalize_mode
+    _object(value, ("schema_version", "mode", "species", "settings"), "预设")
     if type(value.get("schema_version")) is not int or value["schema_version"] != 1:
         raise ValueError("不支持的动画预设版本")
+    # Schema 1 predates web arenas: mode-less imported presets remain classic.
+    mode = normalize_mode(value.get("mode", "classic"))
     sid = value.get("species")
-    characters = character_catalog()
+    characters = character_catalog(mode=mode)
     if type(sid) is not int or str(sid) not in characters:
         raise ValueError("请选择当前上场池中的宝可梦")
     capability = characters[str(sid)]["capabilities"]
@@ -71,26 +74,31 @@ def normalize_preset(value):
             raise ValueError(f"{key} 必须在 {low}–{high} 之间")
     if settings.get("palette", "classic") not in ("classic", "vivid"):
         raise ValueError("未知色板")
-    if sid in SUPPORTED_SPECIES:
+    if mode == "arena":
+        from web_battle import normalize_visual_overrides
+        normalized = normalize_visual_overrides({sid: settings})[sid]
+    elif sid in SUPPORTED_SPECIES:
         normalized = normalize_overrides({sid: settings})[sid]
     else:
         normalized = {**DEFAULT_VISUAL, **settings}
         if normalized != DEFAULT_VISUAL:
             raise ValueError("该角色当前支持默认动作预览，尚未接入表现参数编辑")
-    return {"schema_version": 1, "species": sid, "settings": normalized}
+    return {"schema_version": 1, "mode": mode, "species": sid, "settings": normalized}
 
 
 def normalize_preview(value):
     from action_preview import PREVIEW_ACTIONS
-    _object(value, ("species", "kind", "seed", "settings"), "预览请求")
-    preset = normalize_preset({"schema_version": 1, "species": value.get("species"),
+    _object(value, ("mode", "species", "kind", "seed", "settings"), "预览请求")
+    # New requests default to the playable arena, unlike old imported presets.
+    preset = normalize_preset({"schema_version": 1, "mode": value.get("mode", "arena"),
+                               "species": value.get("species"),
                                "settings": value.get("settings", {})})
     kind, seed = value.get("kind", "cast"), value.get("seed", 7)
     if not isinstance(kind, str) or kind not in PREVIEW_ACTIONS:
         raise ValueError("不支持的动作预览")
     if type(seed) is not int or not 0 <= seed <= 2**32-1:
         raise ValueError("种子必须为 0–4294967295 的整数")
-    return {"species": preset["species"], "kind": kind, "seed": seed,
+    return {"mode": preset["mode"], "species": preset["species"], "kind": kind, "seed": seed,
             "settings": preset["settings"]}
 
 
@@ -100,11 +108,13 @@ def source_revision():
     files += [Path(__file__)]
     files += sorted((ROOT / "esp32_runtime").glob("*.py"))
     # Packed asset provenance must invalidate the cache as well as renderer code.
-    from decoders import POKEWALK
+    from decoders import POKEWALK, GEN2_FRONT
+    files += sorted(GEN2_FRONT.rglob("*.png"))
     files += [POKEWALK / name for name in ("gen1_front.bin", "palettes.bin", "font16.bin")]
     digest = hashlib.sha256()
     for path in files:
-        digest.update(path.name.encode())
+        identity = path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
+        digest.update(str(identity).encode())
         digest.update(path.read_bytes())
     import data, status, synergy, profiles
     for module in (data, status, synergy, profiles):
@@ -135,8 +145,9 @@ def _valid_cached(directory):
 
 
 def _render(request, revision):
-    from profile_range import make_preview_scene
     from action_preview import describe_clip
+    from presentation_modes import make_renderer, mode_info
+    mode = request["mode"]
     key = _key(request, revision)
     output = CACHE_ROOT / key
     meta = _valid_cached(output)
@@ -144,9 +155,15 @@ def _render(request, revision):
         output.touch()
         return key, meta
     from move_effects import SUPPORTED_SPECIES
-    overrides = {request["species"]: request["settings"]} if request["species"] in SUPPORTED_SPECIES else None
+    overrides = ({request["species"]: request["settings"]} if mode == "arena" or
+                 request["species"] in SUPPORTED_SPECIES else None)
+    if mode == "arena":
+        from arena_preview_scene import make_preview_scene
+    else:
+        from profile_range import make_preview_scene
     anim = make_preview_scene(request["species"], request["kind"], request["seed"], visual_overrides=overrides)
     clip = describe_clip(anim, request["kind"])
+    renderer = make_renderer(anim, mode)
     start, end = clip['clip_start'], clip['clip_end']
     count = round((end-start)/DT)+1
     if not 0 < count <= MAX_CLIP_FRAMES:
@@ -155,28 +172,60 @@ def _render(request, revision):
     temporary = Path(tempfile.mkdtemp(prefix=".render-", dir=CACHE_ROOT))
     try:
         milliseconds, particle_peak, track_peak = [], 0, 0
+        particle_limit, track_limit, active_peak = 0, 0, 0
         digest = hashlib.sha256()
         for index in range(count):
             tick = time.perf_counter()
-            frame = anim.playback_frame(round(start+index*DT, 6), show_cutins=False).convert("RGB")
+            frame = renderer.frame(round(start+index*DT, 6), show_cutins=False).convert("RGB")
+            if frame.size != (renderer.width, renderer.height):
+                raise ValueError("预览画布尺寸与展示模式不一致")
             milliseconds.append((time.perf_counter()-tick)*1000)
             digest.update(frame.tobytes())
             frame.save(temporary / f"{index}.png")
-            metric = anim._presentation_view().last_frame_metrics
-            particle_peak = max(particle_peak, metric["particles"])
-            track_peak = max(track_peak, metric["signature_tracks"])
+            metric = renderer.metrics
+            particle_peak = max(particle_peak, metric.get("particles", 0))
+            track_peak = max(track_peak, metric.get("signature_tracks", 0))
+            particle_limit = max(particle_limit, metric.get("particle_limit", 192))
+            track_limit = max(track_limit, metric.get("signature_track_limit", 3))
+            active_peak = max(active_peak, metric.get("active_actions", 0))
         subject = clip['subject']['unit']
-        meta = {**clip, "n": count, "dt": DT,
-                "settings": request["settings"], "revision": revision,
+        source_action = None
+        if clip['action'] is not None:
+            event = anim.events[clip['source_index']]
+            move = event[4] if event[1] == 'cast' else None
+            source_action = {
+                'event_index': clip['source_index'], 'kind': event[1],
+                'attacker': event[2], 'target': event[3],
+                'move': move, 'move_name': anim.move_zh.get(move, move),
+                'targeting': clip.get('targeting','enemy'),
+                'native': bool(move and move == anim._native_moves.get(event[2]))}
+        native = None
+        if mode == "arena":
+            from arena_skills import skill_of
+            native = skill_of(request["species"])
+        meta = {**mode_info(mode), **clip, "n": count, "dt": DT,
+                "dimensions": {"width": renderer.width, "height": renderer.height},
+                "settings": request["settings"], "revision": revision, "source_revision": revision,
+                "native_skill": native, "source_action": source_action,
+                "selected_actor": {"unit": 0, "species": request["species"],
+                                   "name": anim.by_idx[0].piece.name},
+                "fixture": getattr(anim, "preview_fixture", None),
                 "frame_sha256": digest.hexdigest(),
                 "target_before_impact": anim.presentation_state(clip['snapshot_before'])[subject],
                 "target_at_impact": anim.presentation_state(clip['snapshot_at'])[subject],
-                "skill_effects": [{"at": ev[0], "effect": ev[5],
+                "skill_effects": [{"at": ev[0], "kind": ev[1], "arch": ev[4], "effect": ev[5],
                                    "target": anim.by_idx[ev[3]].piece.name, "payload": ev[6]}
-                                  for ev in anim.timeline.events if ev[1] == "skill_effect"
-                                  and ev[6]["cast_index"] == clip['source_index']],
+                                  for ev in anim.timeline.events
+                                  if clip['source_index'] is not None and
+                                  ev[1] in ("skill_effect", "field_effect", "combo_effect") and
+                                  len(ev) == 7 and isinstance(ev[6], dict) and
+                                  any(ev[6].get(owner) == clip['source_index']
+                                      for owner in ("cast_index", "source_cast_index", "action_index"))],
                 "metrics": {"particle_peak": particle_peak, "signature_track_peak": track_peak,
-                            "particle_limit": 192, "signature_track_limit": 3,
+                            "particle_limit": particle_limit, "signature_track_limit": track_limit,
+                            "active_action_peak": active_peak,
+                            "particle_scope": "web material decorations; authored motifs bounded by active action limit"
+                                              if mode == "arena" else "classic particle budget",
                             "host_frame_ms_p95": round(sorted(milliseconds)[int((count-1)*.95)], 3),
                             "scope": "PC isolated training scene; not ESP32 performance"}}
         meta = json.loads(json.dumps(meta, ensure_ascii=False))

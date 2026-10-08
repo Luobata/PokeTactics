@@ -223,6 +223,12 @@ class Bot:
             for o in self.all_pieces())
         behind = self._is_behind(others)   # 落后方：幸运蛋提前（追赶条款）
         priority = items_mod.craft_priority(self.pers_key, stone_ok, behind)
+        if self.inventory.ruleset == 'arena_v1':
+            from arena_equipment import CRAFT_ORDER, carrier_rank
+            ready = tuple(key for key in CRAFT_ORDER
+                          if any(o.item is None and carrier_rank(o, key) is not None
+                                 for o in self.all_pieces()))
+            priority = ready + priority
         # Only public, previously encountered opponent pieces inform this choice.
         # No future shop, seed or hidden inventory is inspected.
         opponent = getattr(self, '_last_opp', None)
@@ -230,6 +236,12 @@ class Bot:
                 and opponent is not None and self._healing_threat(opponent.board)):
             priority = ('healing_needle',) + priority
         craft_gate = self._craft_gate(round_no)
+        if self.inventory.ruleset == 'arena_v1':
+            ordinary_gate = craft_gate
+            craft_gate = lambda key: (ordinary_gate(key) and
+                (key not in CRAFT_ORDER or any(
+                    o.item is None and carrier_rank(o, key) is not None
+                    for o in self.all_pieces())))
         while True:
             lucky_ok = items_mod.lucky_egg_count(others) < \
                 items_mod.LUCKY_EGG_GLOBAL_CAP
@@ -330,6 +342,13 @@ class Bot:
         free = [o for o in self.all_pieces() if o.item is None]
         if not free:
             return None
+        if self.inventory.ruleset == 'arena_v1':
+            from arena_equipment import CRAFT_ORDER, carrier_rank
+            if key in CRAFT_ORDER:
+                eligible = [(carrier_rank(o, key), o) for o in free]
+                eligible = [(rank, o) for rank, o in eligible if rank is not None]
+                return max(eligible, key=lambda row: (
+                    row[0], dex.bst(row[1].piece.species_id)), default=(0, None))[1]
         if key == 'healing_needle':
             casters = [o for o in free if skills.resolve_cast(o.piece) is not None]
             return max(casters, key=lambda o: (
@@ -341,18 +360,18 @@ class Bot:
             return max(pool, key=lambda o: dex.bst(o.piece.species_id))
         if key == "focus_lens":
             return max(free, key=lambda o: (
-                dex.species[o.piece.species_id]["base"]["special_attack"],
+                dex.species_record(o.piece.species_id)["base"]["special_attack"],
                 dex.bst(o.piece.species_id)))
         if key in ("choice_band", "swift_feather"):
 
             def carry_rank(o: OwnedPiece) -> tuple:
                 ranged = effective_range(o.piece) > 1
                 return (ranged, dex.bst(o.piece.species_id),
-                        dex.species[o.piece.species_id]["base"]["special_attack"])
+                        dex.species_record(o.piece.species_id)["base"]["special_attack"])
             return max(free, key=carry_rank)
 
         def tank_rank(o: OwnedPiece) -> tuple:
-            b = dex.species[o.piece.species_id]["base"]
+            b = dex.species_record(o.piece.species_id)["base"]
             return (effective_range(o.piece) == 1, b["hp"] + 2 * b["defense"])
         return max(free, key=tank_rank)
 
@@ -507,7 +526,7 @@ class Bot:
     def _fits(self, piece) -> bool:
         """L1 规则经济（docs/03 §4.1「只买当前阵容族」）：
         可合成复制件 / 主属性族（板上前 2 属性）/ 明确的高档升级 才买。"""
-        if (_can_combine(piece.species_id)
+        if ((getattr(self.pool, 'arena', False) or _can_combine(piece.species_id))
                 and self.count_species(piece.species_id) >= 1):
             return True
         if not self.board:          # 空场先铺
@@ -624,13 +643,13 @@ class Bot:
         dex = pokedex()
 
         def tank_rank(o: OwnedPiece) -> int:
-            b = dex.species[o.piece.species_id]["base"]
+            b = dex.species_record(o.piece.species_id)["base"]
             return b["hp"] + 2 * b["defense"]
 
         melee = [o for o in self.board if effective_range(o.piece) == 1]
         ranged = [o for o in self.board if effective_range(o.piece) > 1]
         melee.sort(key=tank_rank)   # 坦克值高的在列表尾 = 前排
-        ranged.sort(key=lambda o: -dex.species[o.piece.species_id]
+        ranged.sort(key=lambda o: -dex.species_record(o.piece.species_id)
                     ["base"]["special_attack"])  # 主 C 在列表头 = 最后排
         self.board = ranged + melee
 
@@ -670,6 +689,9 @@ class Bot:
     # ---- 供 battle 用的 comp ----
     def battle_comp(self) -> list:
         """上场名单：带装备者传 (Piece, item_key) 二元组（S5 协议），空手传裸 Piece。"""
+        if self.inventory.ruleset == 'arena_v1':
+            import arena
+            return arena.battle_comp(self.board)
         return [o.piece if o.item is None else (o.piece, o.item)
                 for o in self.board]
 

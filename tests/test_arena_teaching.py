@@ -57,7 +57,7 @@ class ArenaTeaching(unittest.TestCase):
         self.assertEqual(s.player.inventory.techniques['thunderbolt'], 0)
         self.assertEqual(s.player.bench[0].technique, 'thunderbolt')
         with self.assertRaises(ValueError): arena.learn(s, 'b0', 'ice_beam')
-        self.assertEqual(len(techniques.ids_for('arena_v1')), 7)
+        self.assertEqual(len(techniques.ids_for('arena_v1')), 12)
         self.assertNotIn('ice_beam', techniques.ids_for('base_v1'))
 
     def test_real_battle_hook_uses_ice_machine_and_lethal_targets_get_no_extra_hit(self):

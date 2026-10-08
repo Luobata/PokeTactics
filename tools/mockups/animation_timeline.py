@@ -9,6 +9,24 @@ from bisect import bisect_right
 from dataclasses import dataclass
 import math
 
+from arena_skills import SKILLS
+
+
+def native_targeting(event, units=None):
+    """Optional arena metadata leaves classic/older casts on their enemy path."""
+    if len(event) < 5 or event[1] != 'cast' or not isinstance(event[4], str):
+        return 'enemy'
+    targeting = next((skill.get('targeting', 'enemy') for skill in SKILLS.values()
+                      if event[4] == 'arena_' + skill['id']), 'enemy')
+    # Old replays can carry the same native ID with its earlier offensive
+    # behavior. The actual team/damage tuple takes precedence over today's kit.
+    if len(event) > 6 and event[6] > 0:
+        return 'enemy'
+    if targeting in ('ally', 'self') and units is not None:
+        if units[event[2]].team != units[event[3]].team:
+            return 'enemy'
+    return targeting
+
 GRID = .05
 MOVE_DURATION = .25
 HIT_HOLD = .10
@@ -35,17 +53,43 @@ def _effect_packets(events):
     """
     owners, participants = {}, {}
     for index, ev in enumerate(events):
-        if ev[1] != 'skill_effect' or len(ev) != 7 or not isinstance(ev[6], dict):
+        if ev[1] not in ('skill_effect', 'combo_effect', 'field_effect') or len(ev) != 7 or not isinstance(ev[6], dict):
             continue
-        cast_index, count = ev[6].get('cast_index'), ev[6].get('event_count')
+        payload = ev[6]
+        cast_index, count = payload.get('cast_index'), payload.get('event_count')
+        # A shield/thorn stance belongs to its original cast for attribution,
+        # but reacts at a later incoming action. Never move that result back to
+        # the stance activation. Expiry instead follows the patient's clock.
+        action_index = payload.get('action_index')
+        incoming = (type(action_index) is int and 0 <= action_index < index
+                    and events[action_index][1] in ('attack', 'cast', 'status'))
+        reactive = incoming or ev[1] == 'skill_effect' and ev[5] in ('absorb', 'thorn_hit', 'expire')
+        if reactive:
+            cast_index = action_index
+        # A breach refers to its forced move for attribution. That move already
+        # belongs to a native/TM cast; keep the owning cast choreography.
         if (type(cast_index) is not int or type(count) is not int
-                or not 0 <= cast_index < index or count < 1
+                or not 0 <= cast_index < index or count < 0
                 or index + count >= len(events)):
             continue
         cast = events[cast_index]
-        if cast[1] != 'cast' or cast[2] != ev[2]:
+        absorb = ev[1] in ('combo_effect', 'skill_effect') and ev[5] == 'absorb'
+        if absorb:
+            if cast[1] not in ('attack', 'cast', 'status'):
+                continue
+        elif ev[1] == 'field_effect':
+            if cast[1] not in ('attack', 'cast'):
+                continue
+        elif reactive:
+            if cast[1] not in ('attack', 'cast', 'status'):
+                continue
+        elif cast[1] != 'cast' or cast[2] != ev[2]:
             continue
-        affected = participants.setdefault(cast_index, {cast[2], cast[3]})
+        affected = participants.setdefault(cast_index, {cast[2]} if cast[1] == 'status'
+                                            else {cast[2], cast[3]})
+        affected.add(ev[3])
+        if not absorb:
+            affected.add(ev[2])
         owners[index] = cast_index
         for child_index in range(index + 1, index + count + 1):
             child = events[child_index]
@@ -92,12 +136,34 @@ class AnimationTimeline:
         self.action_by_event = {}
         self.action_by_onset = {}
         self.source_times = {}
+        self.source_index_by_event = {}
+        source_indices = {id(ev): index for index, ev in enumerate(self.source_events)}
         self.cutin_windows = []
         self.blinks = []
         self.blink_by_event = {}
         self._scheduled = []
         cast_groups = {}
         effects, cast_participants = _effect_packets(self.source_events)
+        # Standalone terrain packets follow the victim's completed movement,
+        # never invent a fresh attack windup by a possibly dead field owner.
+        for index, event in enumerate(self.source_events):
+            if event[1] != 'field_effect' or event[6].get('cast_index') is not None:
+                continue
+            count = event[6].get('event_count', 0)
+            if type(count) is int and 0 < count < len(self.source_events) - index:
+                for child in range(index + 1, index + count + 1):
+                    effects[child] = index
+        # Battle-local weather transitions own a bounded list of following
+        # authoritative snapshots for all units, without belonging to a cast.
+        for index, event in enumerate(self.source_events):
+            if (len(event) != 7 or event[1] != 'combo_effect'
+                    or event[4] != 'arena_weather' or event[5] not in ('weather', 'expire')
+                    or not isinstance(event[6], dict)):
+                continue
+            count = event[6].get('event_count', 0)
+            if type(count) is int and 0 <= count < len(self.source_events) - index:
+                for child in range(index + 1, index + count + 1):
+                    effects[child] = index
         guarded_actions, guard_owners = {}, {}
         for index, event in enumerate(self.source_events):
             if len(event) != 6 or event[1] != 'tactical_effect' or event[4] != 'guard':
@@ -132,7 +198,8 @@ class AnimationTimeline:
         sequence = 0
         opening_combo = any(e[1] == 'combo' and e[0] == 0 for e in self.source_events)
         blink_candidates = {(e[0],e[2]) for e in self.source_events
-                            if e[1]=='cast' and by_idx[e[2]].piece.species_id==65}
+                            if e[1]=='cast' and by_idx[e[2]].piece.species_id==65
+                            and (not e[4].startswith('arena_') or e[4] == 'arena_psychic_blink')}
         pending_blinks = {}
 
         def emit(ev, at, timing=None):
@@ -143,6 +210,7 @@ class AnimationTimeline:
             else:
                 transformed = (grid(at), *ev[1:])
             self._scheduled.append((transformed[0], sequence, transformed))
+            self.source_index_by_event[id(transformed)] = source_indices[id(ev)]
             self.source_times[sequence] = (ev[0], transformed[0])
             if timing is not None:
                 self.action_by_event[id(transformed)] = timing
@@ -185,9 +253,18 @@ class AnimationTimeline:
                                  if kind == 'attack' else
                                  {6: .50, 65: .45, 143: .60}.get(sid, .40))
                     distance = math.dist(positions[attacker], positions[target]) * 40
-                    ranged = unit.range > 1 or (kind == 'cast' and sid in CORE_CAST_SPECIES)
+                    native_arena = kind == 'cast' and ev[4].startswith('arena_')
+                    targeting = native_targeting(ev, by_idx)
+                    if native_arena and targeting != 'enemy':
+                        category = next((skill.get('category') for skill in SKILLS.values()
+                                         if ev[4] == 'arena_' + skill['id']), None)
+                        base_prep = .50 if targeting in ('self', 'field') else \
+                                    .45 if category in ('shield', 'guard', 'protection') else .40
+                    ranged = unit.range > 1 or (kind == 'cast' and sid in CORE_CAST_SPECIES) or native_arena
                     travel = grid(min(MAX_TRAVEL, max(.15, distance / 520))) if ranged else .05
-                    if kind == 'cast' and sid in CORE_CAST_SPECIES:
+                    if targeting == 'self':
+                        travel = .15  # Stance unfurls locally, without a projectile.
+                    if kind == 'cast' and (sid in CORE_CAST_SPECIES or native_arena) and targeting != 'self':
                         # At least four native 20 Hz frames expose the material
                         # track even when two bodies occupy adjacent cells.
                         travel = max(CORE_CAST_TRAVEL, travel)
@@ -259,8 +336,33 @@ class AnimationTimeline:
                     action_ready[idx] = max(action_ready[idx], at + DEATH_DURATION)
                 emit(ev, at)
                 state_ready[idx] = max(state_ready[idx], at)
-            elif kind == 'skill_effect' and effect_action is not None:
+            elif (kind == 'combo_effect' and ev[4] == 'arena_weather'
+                  and ev[5] in ('weather', 'expire')):
+                # Arena weather is shared by every unit. Prior HP outcomes must
+                # land before this transition; its exact child states form one
+                # fence, then subsequent actions see the announced weather.
+                at = grid(max(t, weather_ready, max(state_ready.values(), default=0.)))
+                weather_ready = at
+                emit(ev, at)
+                actions_by_source[index] = ActionTiming(index, kind, ev[2], ev[3],
+                    at, at, at, at, True, positions[ev[2]], positions[ev[3]])
+                packet = None
+            elif kind in ('skill_effect', 'combo_effect', 'field_effect') and effect_action is not None:
                 emit(ev, effect_action.impact)
+            elif kind == 'field_effect':
+                patient = ev[3]
+                at = grid(max(t + last_shift[patient], state_ready[patient], weather_ready))
+                emit(ev, at)
+                actions_by_source[index] = ActionTiming(index, kind, ev[2], patient,
+                    at, at, at, at, True, positions[ev[2]], positions[patient])
+                packet = None
+            elif kind in ('combo_effect', 'skill_effect'):
+                # Unowned reactions and expiry have no cast action. Follow the
+                # patient's causal fence; shield lifetimes come from state events.
+                patient = ev[3]
+                at = max(t + last_shift[patient], state_ready[patient], weather_ready)
+                emit(ev, at)
+                packet = None
             elif kind == 'arena_heal':
                 # This source-target link follows the patient's authoritative
                 # regen/state packet. It must land at the same visual instant.
@@ -290,7 +392,8 @@ class AnimationTimeline:
                     # not the original needle source (which may already be dead).
                     patient = ev[3]
                     belongs = packet is not None and patient in (packet.attacker, packet.target)
-                    at = (packet.impact if belongs else
+                    at = (effect_action.impact if effect_action is not None else
+                          packet.impact if belongs else
                           max(t + last_shift[patient], state_ready[patient]))
                     emit(ev, at)
                 else:
@@ -309,9 +412,16 @@ class AnimationTimeline:
         self.events = [entry[2] for entry in sorted(self._scheduled)]
         # Public logs describe landed damage. The internal rendering stream starts
         # attack choreography earlier, without displaying health changes early.
-        self.public_events = sorted((
-            (self.action_by_event[id(ev)].impact, *ev[1:]) if id(ev) in self.action_by_event else ev
-            for ev in self.events), key=lambda ev: ev[0])
+        public_events = []
+        for ev in self.events:
+            public = ((self.action_by_event[id(ev)].impact, *ev[1:])
+                      if id(ev) in self.action_by_event else ev)
+            # Log tuples retain packet identity after retiming to landed damage.
+            # Terrain and shield attribution must not rely on tuple equality:
+            # an unrelated attack can occur at the same instant.
+            self.source_index_by_event[id(public)] = self.source_index_by_event[id(ev)]
+            public_events.append(public)
+        self.public_events = sorted(public_events, key=lambda ev: ev[0])
         self.event_times = [ev[0] for ev in self.events]
         self.duration = grid(max(self.event_times, default=0.) + END_HOLD)
         del self._scheduled
