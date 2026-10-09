@@ -452,6 +452,7 @@
               </div>
             </div>
 
+            <div class="side-stack">
             <div class="tutorial-hint">
               <span class="hint-spark">✦</span>
               <p id="tutorial-hint">
@@ -533,6 +534,15 @@
                 >
                   道具装备 <span id="items-count">0</span>
                 </button>
+                <button
+                  id="growth-tab"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="growth-panel"
+                  data-system="growth"
+                >
+                  挑战成长 <span id="growth-count">0</span>
+                </button>
               </div>
               <div
                 id="augments-panel"
@@ -564,7 +574,17 @@
                 <p class="section-note"><a id="item-recipes-entry" href="/pokedex?tab=items&amp;view=recipes">查看装备合成图 ↗</a></p>
                 <div id="inventory"></div>
               </div>
+              <div
+                id="growth-panel"
+                class="system-panel"
+                role="tabpanel"
+                aria-labelledby="growth-tab"
+                hidden
+              >
+                <div id="growth"></div>
+              </div>
             </section>
+            </div>
             <div class="bottom-actions">
               <p>
                 <span class="shortcut">↗</span>
@@ -591,7 +611,16 @@
       <div id="scout-content"></div>
     </dialog>
 
-          <aside class="right-column">
+          <button
+            id="lobby-toggle"
+            class="lobby-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="right-column"
+          >
+            <svg><use href="#i-users" /></svg> 对手 · 笔记
+          </button>
+          <aside class="right-column" id="right-column">
             <section class="side-section lobby">
               <div class="section-heading">
                 <h2>训练家们</h2>
@@ -633,7 +662,9 @@
               <div class="battle-history-heading">
                 <h3>本局战报</h3><span id="battle-history-count">0 场</span>
               </div>
+              <button id="last-result-button" class="last-result-entry" type="button" aria-haspopup="dialog" hidden>上轮战果 <span id="last-result-round"></span><span aria-hidden="true">→</span></button>
               <p class="battle-history-note">每场结算后保留，可随时回看。</p>
+              <div id="battle-career" class="battle-career" aria-label="同名伙伴跨轮生涯小计"></div>
               <div id="battle-history" class="battle-history" aria-label="本局已结束回合战报"></div>
               <div id="battle-log" class="journal-list">
                 <p class="empty-copy">新的故事，等你写下。</p>
@@ -760,7 +791,7 @@
             <div id="battle-result" class="battle-result">回放结束后显示战果</div>
             <div class="battle-report-tabs" role="tablist" aria-label="战报内容"><button id="battle-events-tab" type="button" role="tab" aria-selected="true" aria-controls="battle-events-panel" data-battle-tab="events">战场实况</button><button id="battle-statistics-tab" type="button" role="tab" aria-selected="false" aria-controls="battle-statistics-panel" data-battle-tab="statistics" tabindex="-1">战斗统计</button><button id="battle-rewards-tab" type="button" role="tab" aria-selected="false" aria-controls="battle-rewards-panel" data-battle-tab="rewards" tabindex="-1">奖励 · 联动</button></div>
             <section id="battle-events-panel" class="battle-report-panel" role="tabpanel" aria-labelledby="battle-events-tab"><div class="battle-panel-intro"><h3>战场实况</h3><span>随回放同步</span></div><div id="battle-events" class="battle-events"></div></section>
-            <section id="battle-statistics-panel" class="battle-report-panel" role="tabpanel" aria-labelledby="battle-statistics-tab" hidden><section id="battle-statistics" class="combat-statistics" aria-label="本场战斗统计"></section></section>
+            <section id="battle-statistics-panel" class="battle-report-panel" role="tabpanel" aria-labelledby="battle-statistics-tab" hidden><section id="battle-statistics" class="combat-statistics" aria-label="本场战斗统计"></section><section id="battle-bonds" class="bond-spark" aria-label="本场羁绊点亮" hidden></section><section id="battle-advice" class="next-advice" aria-label="下局建议" hidden></section></section>
             <section id="battle-rewards-panel" class="battle-report-panel" role="tabpanel" aria-labelledby="battle-rewards-tab" hidden><p id="battle-rewards-pending" class="battle-report-pending">完成回放后，查看本轮奖励与联动收益。</p><div id="battle-rewards" class="battle-rewards" hidden></div><div id="battle-combinations" class="battle-combinations" hidden></div></section>
           </div>
         </aside>
@@ -778,6 +809,7 @@
         <label for="history-report-round">查看回合 <select id="history-report-round"></select></label>
       </div>
       <section id="history-statistics" class="combat-statistics" aria-label="历史战斗统计"></section>
+      <section id="history-bonds" class="bond-spark" aria-label="该轮羁绊点亮" hidden></section>
       <div id="history-combinations" class="battle-combinations" aria-label="历史双方联动收益"></div>
       <p class="history-readonly-note">历史战报只供回看，关闭后继续当前回合。</p>
     </dialog>
@@ -808,6 +840,8 @@
       <span class="eyebrow">EVERY ADVENTURE TELLS A STORY</span>
       <h2 id="result-title">冒险完成</h2>
       <p id="result-description"></p>
+      <div id="result-defeat" class="result-defeat" aria-label="败因溯源"></div>
+      <section id="result-advice" class="next-advice" aria-label="下局建议" hidden></section>
       <div id="result-ranking"></div>
       <button id="result-new" class="primary-button">
         重开一局 <svg><use href="#i-arrow" /></svg>
