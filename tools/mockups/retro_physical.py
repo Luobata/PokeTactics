@@ -449,6 +449,26 @@ def _blade_cut(layer,position,colors,elapsed,scale,angle,delay=0.,duration=.16,l
     _sheet(layer,path,widths,colors)
 
 
+def _fault_mass(layer,points,heights,colors,scale,ridge=True):
+    """Filled jagged rupture: dark root, shaded rock face, bright broken edge."""
+    if len(points)<2 or max(heights)<2.:
+        return
+    snap=lambda path:[(round(x/3)*3,round(y/3)*3) for x,y in path]
+    painter=ImageDraw.Draw(layer)
+    edge=[(x,y-h) for (x,y),h in zip(points,heights)]
+    painter.polygon(snap(edge+[(x,y+3*scale) for x,y in reversed(points)]),fill=colors[0])
+    painter.polygon(snap([(x,y-h*.84) for (x,y),h in zip(points,heights)]+
+                         [(x,y+scale) for x,y in reversed(points)]),fill=colors[1])
+    painter.polygon(snap([(x,y-h*.55) for (x,y),h in zip(points,heights)]+
+                         [(x,y-h*.10) for (x,y),h in reversed(list(zip(points,heights)))]),fill=colors[2])
+    if ridge:
+        R.line(layer,edge,colors[3],3)
+        tallest=max(heights)*.8
+        for (x,y),h in zip(points,heights):
+            if h>=tallest:
+                R.line(layer,((x,y-h),(x,y-h-2*scale)),colors[4],3)
+
+
 def _ground_fault(layer,center,colors,elapsed,scale):
     if not 0<=elapsed<.28:
         return
@@ -512,7 +532,8 @@ def _material_debris(layer,key,a,b,elapsed,colors,scale,density):
     """Low hard chips, curling metal glints, sticky drops or floating leaves."""
     if not 0<=elapsed<LIFETIME:
         return
-    count=max(3,round((7 if key in ('rock_spikes','crag_citadel') else 5)*density))
+    count=max(3,round((7 if key in ('rock_spikes','crag_citadel') else
+                       6 if key=='stone_pulse' else 5)*density))
     painter=ImageDraw.Draw(layer)
     for i in range(count):
         age=elapsed-i*.011
@@ -549,13 +570,30 @@ def _material_debris(layer,key,a,b,elapsed,colors,scale,density):
             at=(b[0]+math.cos(angle)*radius,b[1]+17*scale+math.sin(angle)*radius*.25)
             x,y=(round(v/3)*3 for v in at)
             painter.rectangle((x-3,y-2,x+2,y+2),fill=colors[1 if i%2 else 3])
+        elif key=='stone_pulse':
+            # Hard grit takes one low hop off the floor, then grinds to rest;
+            # the tail flattens into settled slabs instead of blinking out.
+            hop=abs(math.sin(p*math.pi*(1.7+i%3*.35)))*(9+i%3*3)*(1-p*.55)
+            at=(b[0]+side*(9+(20+i%3*6)*(1-(1-p)**2))*scale,
+                b[1]+(22-hop)*scale)
+            x,y=(round(v/3)*3 for v in at)
+            size=max(2.5,(6-i%2)*(1-p*.18)*scale)
+            flat=1.+max(0.,p-.45)*1.2
+            if p>.55:
+                painter.rectangle((x-size*flat,y+size*.8,x+size*flat,y+size*.8+2),
+                                  fill=colors[0])
+            painter.polygon(((x-size*flat,y-size*.6),(x+size*.3*flat,y-size),
+                             (x+size*flat,y+size*.4),(x-size*.5*flat,y+size)),fill=colors[1])
+            painter.polygon(((x-size*flat,y-size*.6),(x+size*.3*flat,y-size),(x,y)),fill=colors[3])
+            if p<.5:
+                painter.rectangle((x,y-size,x+2,y-size+2),fill=colors[4])
         else:
             # Hard fragments follow a brief ballistic hop then slide low. Small
             # fist/wing impacts shed grit, not giant identical sparkling rays.
             at=(b[0]+side*(9+p*(23+i%3*7))*scale,
                 b[1]+(18-math.sin(p*math.pi)*(15+i%3*5)+p*p*10)*scale)
             x,y=(round(v/3)*3 for v in at)
-            size=max(2.,(5 if key in ('stone_pulse','rock_spikes','crag_citadel') and i%3==0 else 3)*(1-p*.5)*scale)
+            size=max(2.,(5 if key in ('rock_spikes','crag_citadel') and i%3==0 else 3)*(1-p*.5)*scale)
             painter.polygon(((x-size,y-size*.7),(x+size*.3,y-size),
                              (x+size,y+size*.4),(x-size*.4,y+size)),fill=colors[1])
             painter.polygon(((x-size,y-size*.7),(x+size*.3,y-size),(x,y)),fill=colors[3])
@@ -568,37 +606,52 @@ def _windup(layer,key,a,b,p,colors,scale,density,emitters):
         count=4 if key=='four_arm_combo' else 2
         kind='fist' if count==4 else 'pincer'
         for i,origin in enumerate(tuple(emitters)[:count] or (a,)):
-            _material_put(layer,kind,origin,colors,scale*(.23+p*.13),i)
+            _material_put(layer,kind,origin,colors,scale*(.34+p*.16),i)
         return
-    if key in ('stone_pulse','rock_spikes','crag_citadel'):
+    if key=='stone_pulse':
+        # Charge gathers low: loose rocks knock inward and down while the
+        # floor under the caster starts to split open.
+        ground=a[1]+21*scale
+        for i in range(3):
+            pos=(a[0]+(i-1)*16*(1-p*.5)*scale,
+                 ground-(13-p*6-i%2*3)*scale)
+            _material_put(layer,'rock',pos,colors,scale*(.20+p*.12+i%2*.04),i)
+        points,heights=[],[]
+        for i in range(7):
+            q=i/6
+            points.append((a[0]+(q-.5)*44*scale,ground))
+            heights.append(max(0.,(p-.3)*17*(1-abs(q-.5)*1.2)*(1+(i%2)*.55)*scale))
+        _fault_mass(layer,points,heights,colors,scale)
+        return
+    if key in ('rock_spikes','crag_citadel'):
         for i in range(3):
             pos=(a[0]+(i-1)*16*scale,a[1]+(20-p*(8+i*3))*scale)
-            _material_put(layer,'rock',pos,colors,scale*(.22+p*.13+i%2*.05),i)
+            _material_put(layer,'rock',pos,colors,scale*(.31+p*.15+i%2*.05),i)
     elif key=='root_domain':
         for side in (-1,1):
-            points=[(a[0]+side*(22-14*p*q)*scale,
+            points=[(a[0]+side*(28-18*p*q)*scale,
                      a[1]+(25-14*p*q+math.sin(q*4)*3)*scale) for q in (0,.2,.4,.6,.8,1)]
-            _vines(layer,points,colors,scale,5+p*2)
+            _vines(layer,points,colors,scale,8+p*3)
     elif key=='armor_pincer':
         for side in (-1,1):
             at=(a[0]+side*(20-p*5)*scale,a[1]-3*scale)
-            _material_put(layer,'pincer',at,colors,scale*(.30+p*.12),turn=side*(35-p*20))
+            _material_put(layer,'pincer',at,colors,scale*(.40+p*.14),turn=side*(35-p*20))
     elif key=='mud_anchor':
         for i in range(max(3,round(4*density))):
             pos=(a[0]+(i-1.5)*12*scale,a[1]+(15-p*9-i%2*4)*scale)
             _material_put(layer,'mud',pos,colors,scale*(.21+p*.13),i)
     elif key=='sweeping_kick':
-        _crescent(layer,(a[0],a[1]+12*scale),colors,scale,p*2.0,rx=21,ry=7,width=5)
+        _crescent(layer,(a[0],a[1]+12*scale),colors,scale,p*2.0,rx=25,ry=9,width=8)
         _material_put(layer,'foot',(a[0]+8*p*scale,a[1]+14*scale),colors,
-                      scale*(.20+p*.14),turn=35-p*45)
+                      scale*(.30+p*.16),turn=35-p*45)
     elif key in ('gale_cross','cliff_swoop'):
         for side in (-1,1):
             _crescent(layer,(a[0]+side*(12-p*4)*scale,a[1]),colors,scale,
-                      side*(1.0+p*.5),rx=19,ry=9,width=5)
+                      side*(1.0+p*.5),rx=23,ry=10,width=8)
     elif key in ('alert_tail','iron_fault'):
         kind='metal_tail' if key=='iron_fault' else 'tail'
         _material_put(layer,kind,(a[0]-10*p*scale,a[1]+10*scale),colors,
-                      scale*(.27+p*.10),turn=-35+p*70)
+                      scale*(.37+p*.14),turn=-35+p*70)
     elif key=='spinning_cleanup':
         for i in range(2):
             _crescent(layer,a,colors,scale,p*math.tau*2+i*math.pi,
@@ -606,10 +659,10 @@ def _windup(layer,key,a,b,p,colors,scale,density,emitters):
     else:
         ux,uy,nx,ny=_basis(a,b)
         for side in (-1,1):
-            begin=(a[0]-ux*(22+12*p)*scale+nx*side*8*scale,
-                   a[1]-uy*(22+12*p)*scale+ny*side*8*scale)
-            end=(a[0]+nx*side*6*scale,a[1]+ny*side*6*scale)
-            _sheet(layer,(begin,R.point(begin,end,.5),end),(2*scale,6*scale,2*scale),colors)
+            begin=(a[0]-ux*(30+14*p)*scale+nx*side*10*scale,
+                   a[1]-uy*(30+14*p)*scale+ny*side*10*scale)
+            end=(a[0]+nx*side*7*scale,a[1]+ny*side*7*scale)
+            _sheet(layer,(begin,R.point(begin,end,.5),end),(3*scale,9*scale,3*scale),colors)
 
 
 def _flight(layer,key,a,b,p,colors,scale,density,emitters):
@@ -623,10 +676,10 @@ def _flight(layer,key,a,b,p,colors,scale,density,emitters):
         for i,origin in enumerate(origins):
             delay=i*.055
             local=min(1.,max(0.,(p-delay)/(1-delay)))
-            q=_trail(layer,origin,b,local,colors,scale,3,
+            q=_trail(layer,origin,b,local,colors,scale,4.5,
                      bend=(i-(len(origins)-1)/2)*5*scale)
             angle=-math.degrees(math.atan2(b[1]-origin[1],b[0]-origin[0]))
-            _material_put(layer,kind,q,colors,scale*(.52 if count==4 else .60),i,turn=angle)
+            _material_put(layer,kind,q,colors,scale*(.60 if count==4 else .68),i,turn=angle)
         return
     if key in ('rock_spikes','crag_citadel'):
         count=3 if key=='rock_spikes' else 4
@@ -655,14 +708,19 @@ def _flight(layer,key,a,b,p,colors,scale,density,emitters):
             _vines(layer,points,colors,scale,8.)
         return
     if key=='stone_pulse':
-        # A filled fault travels along the floor; it does not become a levitating
-        # rock laser. The head reaches the recorded victim exactly at p=1.
-        points=[]
-        for i in range(11):
-            local=max(0.,p-.32)+min(p,.32)*i/10
+        # A low filled fault of broken strata surges along the floor; it never
+        # becomes a levitating rock laser. The head reaches the victim at p=1.
+        growth=min(1.,p/.1+.2)
+        points,heights=[],[]
+        for i in range(13):
+            local=max(0.,p-.36)+min(p,.36)*i/12
             at=R.point(a,b,local)
-            points.append((at[0]+math.sin(i*2.1)*3*scale,at[1]+20*scale))
-        _sheet(layer,points,[max(2.,7*math.sin((i+1)*math.pi/12))*scale for i in range(11)],colors,bright=False)
+            envelope=(i/12)**1.15
+            tooth=(7+13*envelope+(i%2)*(4+5*envelope)+
+                   3*math.sin(p*9+i*1.7))*growth*scale
+            points.append((at[0]+((i*5)%3-1)*3*scale,at[1]+21*scale))
+            heights.append(max(2.,tooth))
+        _fault_mass(layer,points,heights,colors,scale)
         return
     bends={'sweeping_kick':13,'cliff_swoop':-30,'alert_tail':17,'iron_fault':-11}
     q=_head(a,b,p,bends.get(key,0)*scale)
@@ -703,8 +761,40 @@ def _flight(layer,key,a,b,p,colors,scale,density,emitters):
                       rx=29,ry=11,sweep=1.65,width=7)
 
 
+def _stone_impact(layer,b,colors,elapsed,scale):
+    """Short rock blocks jolt up and settle; low fault forks branch and fade."""
+    if not 0<=elapsed<.33:
+        return
+    ground=(b[0],b[1]+21*scale)
+    for i in range(3):
+        age=elapsed-i*.014
+        if age<0:
+            continue
+        lift=math.sin(min(1.,age/.10)*math.pi*.5)
+        settle=min(1.,max(0.,(age-.10)/.16))
+        at=(ground[0]+(i-1)*14*scale,
+            ground[1]-(10+i%2*5)*lift*(1-.45*settle)*scale+settle*4*scale)
+        _material_put(layer,'rock',at,colors,
+                      scale*(.50-i%2*.07)*(1-.22*settle),i,
+                      turn=(i-1)*15*min(1.,age/.1))
+    fade=1.-max(0.,(elapsed-.12)/.21)
+    reach=(14+min(.1,elapsed)*230)*scale
+    for side in (-1,1):
+        for branch in range(2):
+            length=reach*(1-.36*branch)
+            points,heights=[],[]
+            for i in range(6):
+                q=i/5
+                points.append((ground[0]+side*q*length,
+                               ground[1]+branch*4*scale+q*3*scale))
+                heights.append(max(3.5*fade*scale,(9.5-q*3.5-branch*1.8)*
+                                   (1+(i%2)*.55)*fade*scale))
+            _fault_mass(layer,points,heights,colors,scale,ridge=branch==0)
+    _flash(layer,(b[0],b[1]+15*scale),colors,elapsed,scale,duration=.06,size=.45)
+
+
 def _falling_rocks(layer,key,b,elapsed,colors,scale):
-    count=3 if key=='stone_pulse' else 4 if key=='rock_spikes' else 6
+    count=4 if key=='rock_spikes' else 6
     for i in range(count):
         fall=.07+(i%3)*.015
         age=elapsed-i*.024
@@ -724,7 +814,7 @@ def _falling_rocks(layer,key,b,elapsed,colors,scale):
         else:
             continue
         _material_put(layer,'rock',at,colors,scale*(.40+i%3*.10)*(1-max(0.,age-fall)*3),i,turn=i*20+age*150)
-    if key in ('stone_pulse','rock_spikes'):
+    if key=='rock_spikes':
         _ground_fault(layer,b,colors,elapsed,scale)
     if key=='crag_citadel' and elapsed<.26:
         for i in range(2):
@@ -741,8 +831,8 @@ def _contact(layer,key,a,b,elapsed,colors,scale):
             age=elapsed-i*.036
             if 0<=age<.088:
                 pos=(b[0]+dx*scale,b[1]+dy*scale)
-                _material_put(layer,'fist',pos,colors,scale*(.52-age*2.4),i,turn=-math.degrees(angle))
-                _compression(layer,a,pos,colors,elapsed,scale,delay=i*.036,duration=.077,radius=17)
+                _material_put(layer,'fist',pos,colors,scale*(.60-age*2.4),i,turn=-math.degrees(angle))
+                _compression(layer,a,pos,colors,elapsed,scale,delay=i*.036,duration=.077,radius=19)
                 _flash(layer,pos,colors,elapsed,scale,i*.036,.042,.41)
     elif key=='cross_bullet':
         for i in range(2):
@@ -753,7 +843,9 @@ def _contact(layer,key,a,b,elapsed,colors,scale):
             if 0<=age<.07:
                 _material_put(layer,'pincer',pos,colors,scale*(.48-age*3),i,turn=(-35 if i==0 else 35))
             _compression(layer,a,pos,colors,elapsed,scale,delay=i*.075,duration=.072,radius=20)
-    elif key in ('stone_pulse','rock_spikes','crag_citadel'):
+    elif key=='stone_pulse':
+        _stone_impact(layer,b,colors,elapsed,scale)
+    elif key in ('rock_spikes','crag_citadel'):
         _falling_rocks(layer,key,b,elapsed,colors,scale)
         _flash(layer,(b[0],b[1]+15*scale),colors,elapsed,scale,duration=.06,size=.45)
     elif key=='sweeping_kick':
@@ -770,16 +862,16 @@ def _contact(layer,key,a,b,elapsed,colors,scale):
                 for i in range(17):
                     t=i/16
                     swing=-1.35+side*t*2.2
-                    radius=(28-12*q)*(1-t*.38)*scale
+                    radius=(31-13*q)*(1-t*.38)*scale
                     points.append((b[0]+math.cos(swing)*radius*side,
                                    b[1]+16*scale+math.sin(swing)*radius))
-                _vines(layer,points,colors,scale,9*(1-q*.5))
+                _vines(layer,points,colors,scale,13*(1-q*.45))
     elif key=='armor_pincer':
         if elapsed<.16:
             spread=21*max(0.,1-elapsed/.07)
             for side in (-1,1):
                 pos=(b[0]+side*spread*scale,b[1])
-                _material_put(layer,'pincer',pos,colors,scale*(.54-elapsed*1.2),turn=side*(28-elapsed*180))
+                _material_put(layer,'pincer',pos,colors,scale*(.62-elapsed*1.2),turn=side*(28-elapsed*180))
         _compression(layer,a,b,colors,elapsed,scale,delay=.045,duration=.095,radius=27)
         _flash(layer,b,colors,elapsed,scale,.045,.055,.54)
     elif key=='gale_cross':

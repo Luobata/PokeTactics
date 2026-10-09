@@ -78,27 +78,34 @@ def draw_skill(img, profile, source, target, age, windup, budget, variant=0, emb
     tx, ty = target
     phase = int((elapsed + 1e-9) / .1)
     flip = -1 if variant else 1
+    dark = tuple(round(c * .45) for c in color)
     if arch == 'double_strike':
         for delay, off in ((0., -5), (.15, 5)):
             if delay <= elapsed < delay + .3:
-                d.line((tx - 10, ty + off + 8 * flip, tx + 10, ty + off - 8 * flip), fill=color, width=3)
-                d.line((tx - 9, ty + off + 7 * flip, tx + 9, ty + off - 7 * flip), fill=PAPER, width=1)
+                d.line((tx - 12, ty + off + 9 * flip, tx + 12, ty + off - 9 * flip), fill=dark, width=7)
+                d.line((tx - 10, ty + off + 8 * flip, tx + 10, ty + off - 8 * flip), fill=color, width=4)
+                d.line((tx - 9, ty + off + 7 * flip, tx + 9, ty + off - 7 * flip), fill=PAPER, width=2)
     elif arch == 'charge':
         if phase < 3:
             # Three open chevrons, fading each frame; never a solid sprite copy.
             for i in budget.take(3):
                 k = max(0, 1 - (i + 1) * .12)
                 x, y = sx + (tx - sx) * k, sy + (ty - sy) * k
-                d.line((x - 7, y - 9, x, y, x - 7, y + 9), fill=color + (max(32, 160 - phase * 48 - i * 24),), width=2)
+                d.line((x - 7, y - 9, x, y, x - 7, y + 9), fill=color + (max(32, 160 - phase * 48 - i * 24),), width=3)
+        d.polygon(((tx, ty - 13), (tx + 13, ty), (tx, ty + 13), (tx - 13, ty)), fill=dark)
         d.polygon(((tx, ty - 11), (tx + 11, ty), (tx, ty + 11), (tx - 11, ty)), outline=color, width=3)
+        d.polygon(((tx, ty - 4), (tx + 4, ty), (tx, ty + 4), (tx - 4, ty)), fill=PAPER)
     elif arch == 'bulwark':
         points = [(sx + round(23 * math.cos(i * math.tau / 6)), sy + round(23 * math.sin(i * math.tau / 6))) for i in range(6)]
+        d.line(points + points[:1], fill=dark, width=5)
         d.line(points + points[:1], fill=color, width=2)
         for i in budget.take(8):
             a = i * math.tau / 8
             d.line((sx + 27 * math.cos(a), sy + 27 * math.sin(a), sx + 31 * math.cos(a), sy + 31 * math.sin(a)), fill=PAPER, width=1)
     elif arch == 'mend':
         y = sy - 23
+        d.line((sx - 5, y, sx + 5, y), fill=dark, width=5)
+        d.line((sx, y - 5, sx, y + 5), fill=dark, width=5)
         d.line((sx - 4, y, sx + 4, y), fill=PAPER, width=2)
         d.line((sx, y - 4, sx, y + 4), fill=color, width=2)
         for i in budget.take(3):
@@ -110,9 +117,15 @@ def draw_skill(img, profile, source, target, age, windup, budget, variant=0, emb
                 a,b = (sx+ox,sy+oy),(tx+ox,ty+oy)
                 projectile(img, lambda p: trajectory_point(a,b,p), exposure_age(elapsed,.3), .3,
                            profile['type'], color, budget)
+                if elapsed < .15 and budget.take(1):
+                    mx, my = sx + ox, sy + oy
+                    d.ellipse((mx - 5, my - 5, mx + 5, my + 5), fill=dark)
+                    d.ellipse((mx - 3, my - 3, mx + 3, my + 3), fill=color)
+                    d.point((mx, my), fill=PAPER)
     elif arch == 'heavy_blow':
+        d.line((tx - 10, ty + 10 * flip, tx + 10, ty - 10 * flip), fill=dark, width=9)
         d.line((tx - 9, ty + 9 * flip, tx + 9, ty - 9 * flip), fill=color, width=5)
-        d.line((tx - 8, ty + 7 * flip, tx + 8, ty - 7 * flip), fill=PAPER, width=1)
+        d.line((tx - 8, ty + 7 * flip, tx + 8, ty - 7 * flip), fill=PAPER, width=2)
     # Universal skill impact: two OUTER rings, visibly larger than basic impact.
     radius = 30 + phase * 3
     for rr in (radius, radius + 8):
@@ -123,6 +136,18 @@ def draw_skill(img, profile, source, target, age, windup, budget, variant=0, emb
                 min(10, 8+phase), direction, color, variant*31+phase//2)
     d.arc((tx - radius - 3, ty - radius - 3, tx + radius + 3, ty + radius + 3),
           30 + variant * 90 + phase * 20, 110 + variant * 90 + phase * 20, fill=PAPER, width=2)
+    if arch not in ('splash', 'blink_strike', 'slam_heal'):
+        # Generic templates only: contact debris and a short low residue arc.
+        # Signature performances keep their own authored endings untouched.
+        for i in budget.take(5):
+            a = i * math.tau / 5 + variant * .9
+            dist = contact + 5 + phase * 2
+            x, y = tx + math.cos(a) * dist, ty + math.sin(a) * dist * .7
+            d.polygon(((x - 2, y + 2), (x, y - 3), (x + 3, y + 1)), fill=color)
+            d.line((x, y - 2, x + 2, y), fill=PAPER, width=1)
+        if phase >= 3:
+            d.arc((tx - radius - 12, ty - radius // 2 - 6, tx + radius + 12, ty + radius // 2 + 6),
+                  200, 340, fill=color + (max(24, 120 - phase * 24),), width=2)
 
 # Visual contracts are keyed by species AND the actual roster move, not by type
 # or combat archetype. Repeated moves receive separately authored performances.

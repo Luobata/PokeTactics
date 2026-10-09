@@ -600,7 +600,9 @@ def draw_skill(image, species_id, move_type, source, target, phase, progress, te
     length = math.hypot(dx, dy) or 1.
     nx, ny = -dy / length, dx / length
     fade = 1 - p if phase == 'aftermath' else 1.
-    color = (*ELEMENT_COLORS.get(move_type, ELEMENT_COLORS['NORMAL']), round(240 * fade))
+    rgb = ELEMENT_COLORS.get(move_type, ELEMENT_COLORS['NORMAL'])
+    color = (*rgb, round(240 * fade))
+    dark = (*tuple(round(c * .42) for c in rgb), round(235 * fade))
     white = (255, 252, 231, round(245 * fade))
     d = ImageDraw.Draw(image)
     k = p if phase == 'flight' else 0. if phase == 'windup' else 1.
@@ -610,16 +612,40 @@ def draw_skill(image, species_id, move_type, source, target, phase, progress, te
     travel = phase == 'flight'
     hit = phase in ('impact', 'aftermath')
     if phase == 'windup':
+        _ring(d, ax, ay, radius + 3, dark, 3)
         _ring(d, ax, ay, radius + 3, color, 1)
         for i in range(3):
             angle = i * math.tau / 3 + p * 3
             d.rectangle((ax + math.cos(angle) * radius - 1, ay + math.sin(angle) * radius - 1,
                          ax + math.cos(angle) * radius + 1, ay + math.sin(angle) * radius + 1), fill=white)
+        # Charge motes spiral into the source as the windup tightens.
+        for i in range(4):
+            angle = i * math.tau / 4 + variant * .8 - p * 4.5
+            dist = (radius + 13) * (1 - p * .55)
+            xx, yy = ax + math.cos(angle) * dist, ay + math.sin(angle) * dist * .8
+            d.rectangle((xx - 1, yy - 1, xx + 1, yy + 1), fill=color if i % 2 else white)
     points = [(ax + dx * j / 12 * k + nx * math.sin(j * 1.7 + p * 7) * 3,
                ay + dy * j / 12 * k + ny * math.sin(j * 1.7 + p * 7) * 3) for j in range(13)]
+    if travel:
+        # Shared projectile volume under each element's own material: a fading
+        # wake and a dark rim / main shell / bright core head.
+        head = 5
+        for j in range(3):
+            kk = max(0., k - (j + 1) * .06)
+            wx, wy = ax + dx * kk, ay + dy * kk
+            wr = head - 1 - j
+            if wr > 0:
+                d.ellipse((wx - wr, wy - wr, wx + wr, wy + wr), fill=(*rgb, round(150 - 40 * j)))
+        d.ellipse((x - head - 2, y - head - 2, x + head + 2, y + head + 2), fill=dark)
+        d.ellipse((x - head, y - head, x + head, y + head), fill=color)
+        ux, uy = dx / length, dy / length
+        cx, cy = x + ux * 2, y + uy * 2
+        d.ellipse((cx - 2, cy - 2, cx + 2, cy + 2), fill=white)
     if move_type == 'FIRE':
         if travel:
+            d.line(points, fill=dark, width=8)
             d.line(points, fill=color, width=5)
+            d.line(points, fill=white, width=2)
         for i in range(5 if hit else 3):
             angle = i * 1.9 + p * 5 + variant
             xx, yy = x + math.cos(angle) * radius * .6, y + math.sin(angle) * radius * .6
@@ -634,6 +660,8 @@ def draw_skill(image, species_id, move_type, source, target, phase, progress, te
     elif move_type == 'WATER':
         if travel:
             for off in (-3, 0, 3):
+                d.line([(xx + nx * off, yy + ny * off) for xx, yy in points], fill=dark, width=4)
+            for off in (-3, 0, 3):
                 d.line([(xx + nx * off, yy + ny * off) for xx, yy in points], fill=color, width=2)
         for i in range(3):
             r = radius + i * 4
@@ -644,6 +672,7 @@ def draw_skill(image, species_id, move_type, source, target, phase, progress, te
             d.ellipse((xx - 2, yy - 3, xx + 2, yy + 2), fill=color, outline=white)
     elif move_type == 'ELECTRIC':
         route = points if travel else [(x - radius, y), (x - 3, y - 8), (x + 1, y + 5), (x + radius, y - 3)]
+        d.line(route, fill=dark, width=7)
         d.line(route, fill=color, width=4)
         d.line(route, fill=white, width=1)
         for i in range(4):
@@ -652,6 +681,7 @@ def draw_skill(image, species_id, move_type, source, target, phase, progress, te
             d.line(((x, y), (x + math.cos(angle + .4) * 8, y + math.sin(angle + .4) * 8), tip), fill=color, width=2)
     elif move_type == 'GRASS':
         if travel:
+            d.line(points, fill=(51, 92, 42, 240), width=5)
             d.line(points, fill=(81, 142, 66, 240), width=2)
         for i in range(5):
             angle = i * math.tau / 5 + p * 3
@@ -679,10 +709,14 @@ def draw_skill(image, species_id, move_type, source, target, phase, progress, te
         _star(d, x, y, radius * .7, white, 4, p * 3)
     elif move_type in ('GROUND', 'ROCK'):
         if move_type == 'GROUND':
-            d.line(points if travel else [(x - radius, y + 7), (x - 7, y), (x - 2, y + 4),
-                                          (x + 5, y - 2), (x + radius, y + 6)], fill=(94, 73, 57, round(245 * fade)), width=3)
+            route = points if travel else [(x - radius, y + 7), (x - 7, y), (x - 2, y + 4),
+                                           (x + 5, y - 2), (x + radius, y + 6)]
+            d.line(route, fill=dark, width=6)
+            d.line(route, fill=(94, 73, 57, round(245 * fade)), width=3)
         else:
             poly = [(x + math.cos(i * math.pi / 3 + p) * 9, y + math.sin(i * math.pi / 3 + p) * 9) for i in range(6)]
+            under = [(x + math.cos(i * math.pi / 3 + p) * 12, y + math.sin(i * math.pi / 3 + p) * 12) for i in range(6)]
+            d.polygon(under, fill=dark)
             d.polygon(poly, fill=color, outline=white)
             d.line((poly[0], (x, y), poly[2]), fill=(94, 73, 57, round(240 * fade)), width=2)
         for i in range(6):
@@ -691,6 +725,7 @@ def draw_skill(image, species_id, move_type, source, target, phase, progress, te
             d.polygon(((xx, yy - 3), (xx + 3, yy + 2), (xx - 3, yy + 3)), fill=color)
     elif move_type == 'ICE':
         if travel:
+            d.line((ax, ay, x, y), fill=dark, width=5)
             d.line((ax, ay, x, y), fill=color, width=2)
         for i in range(4 if hit else 2):
             angle = i * math.pi / 2 + p * .7
@@ -703,6 +738,7 @@ def draw_skill(image, species_id, move_type, source, target, phase, progress, te
     elif move_type in ('FIGHTING', 'STEEL'):
         for i in range(3):
             off = (i - 1) * 6
+            d.arc((x - radius + off, y - radius, x + radius + off, y + radius), 215, 340, fill=dark, width=6)
             d.arc((x - radius + off, y - radius, x + radius + off, y + radius), 215, 340, fill=color, width=3)
         d.line((x - 9, y + 9, x + 10, y - 10), fill=white, width=2)
         if move_type == 'STEEL':
@@ -713,6 +749,7 @@ def draw_skill(image, species_id, move_type, source, target, phase, progress, te
         for i in range(4):
             off = (i - 1.5) * 6
             if move_type == 'FLYING':
+                d.arc((x - radius, y + off - 5, x + radius, y + off + 8), 170, 345, fill=dark, width=4)
                 d.arc((x - radius, y + off - 5, x + radius, y + off + 8), 170, 345, fill=color, width=2)
             elif move_type == 'BUG':
                 d.polygon(((x, y + off), (x - 10, y + off - 7), (x - 5, y + off + 5)), fill=color, outline=white)
@@ -721,8 +758,17 @@ def draw_skill(image, species_id, move_type, source, target, phase, progress, te
                 _star(d, x + off, y + math.sin(p * 5 + i) * 6, 6 + i % 2 * 3, color, 4, p + i)
     else:
         for i in range(3):
-            _ring(d, x, y, radius + i * 4, color, 1)
+            _ring(d, x, y, radius + i * 4, color, 2)
         _star(d, x, y, radius * .45, white, 5, p)
+    if hit:
+        # Contact debris: dark chips with bright tips scatter from the hit
+        # point and settle during the aftermath.
+        for i in range(5):
+            angle = i * math.tau / 5 + variant * .7
+            dist = radius + 4 + p * 10
+            xx, yy = x + math.cos(angle) * dist, y + math.sin(angle) * dist * .7
+            d.polygon(((xx - 2, yy + 2), (xx, yy - 4), (xx + 3, yy + 1)), fill=dark)
+            d.line((xx, yy - 3, xx + 2, yy), fill=color, width=1)
 
 
 def draw_native_skill(img, species_id, kind, source, target, phase, progress, team=0, element=None):

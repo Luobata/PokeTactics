@@ -144,6 +144,14 @@ def _particle(kind, colors, variant=0):
         d.ellipse((x-r,y-r,x+r,y+r),fill=colors[2])
         d.ellipse((x-r+1,y-r+1,x+r-1,y+r-1),fill=colors[3])
         d.rectangle((x-1,y-2,x+1,y),fill=colors[4])
+    elif kind=='gloom_orb':
+        # CONFUSE_RAY: a weighty shadow orb, dark rim around a cold lit core.
+        d.ellipse((x-7,y-7,x+7,y+7),fill=colors[0])
+        d.ellipse((x-6,y-6,x+6,y+6),fill=colors[1])
+        d.ellipse((x-4,y-5,x+5,y+4),fill=colors[2])
+        d.ellipse((x-3,y-4,x+1,y),fill=colors[3])
+        d.rectangle((x-2,y-3,x,y-2),fill=colors[4])
+        d.arc((x-6,y-6,x+6,y+6),20,120,fill=colors[3],width=1)
     elif kind=='heal_star':
         # HealingBlueStar: a faceted, bounded four-ray star, not a HP cross.
         r=4+variant%2
@@ -324,14 +332,62 @@ def _gust(layer, center, clock, colors, scale, *, power=1):
 
 
 def _moon_rays(layer, center, clock, colors, scale, *, strength=1):
+    """MOONLIGHT: three volumetric curved shafts fall from above, staggered.
+
+    Each shaft is a tapered crescent band (dark base / main body / bright
+    core) whose head descends onto the target and compresses on landing;
+    small stardust specks trail each shaft on their own delayed clocks.
+    """
     if strength<=0:return
+    draw=ImageDraw.Draw(layer)
     for i in range(3):
         q=max(0.,min(1.,clock*1.15-i*.11))
-        x=center[0]+(i-1)*22*scale;y=center[1]+(-43+q*65)*scale
-        path=[(x-4*scale,y-17*scale),(x+2*scale,y-8*scale),(x,y)]
-        line(layer,path,colors[1],7*scale*strength)
-        line(layer,path,colors[3],4*scale*strength)
-        _speck(layer,'sparkle',(x,y),colors,scale*.55*strength,i)
+        if q<=0:continue
+        head=(center[0]+(i-1)*22*scale+(1-q)*(1-i)*7*scale,
+              center[1]+(-43+q*65)*scale)
+        # The tail shortens as the head lands: fall stretch, contact squash.
+        length=(23+13*(1-q))*scale*strength
+        lean=(1-i)*-11*scale
+        spine=[];widths=[]
+        for t in range(9):
+            s=t/8
+            spine.append((head[0]+lean*s*s,head[1]-length*s))
+            widths.append((8.5-s*6)*scale*strength)
+        def band(fraction,count):
+            # Inner layers stop progressively higher: a bright leading head
+            # with a dimming tail reads as light falling from above.
+            pts=spine[:count];ws=widths[:count]
+            left=[];right=[]
+            for idx,(cx,cy) in enumerate(pts):
+                a=pts[max(0,idx-1)];b=pts[min(len(pts)-1,idx+1)]
+                dx,dy=b[0]-a[0],b[1]-a[1]
+                dist=math.hypot(dx,dy) or 1.
+                w=ws[idx]*fraction
+                left.append((round((cx-dy/dist*w)/3)*3,round((cy+dx/dist*w)/3)*3))
+                right.append((round((cx+dy/dist*w)/3)*3,round((cy-dx/dist*w)/3)*3))
+            return left+right[::-1]
+        outer=band(1.,9)
+        draw.polygon(outer,fill=colors[1])
+        draw.line(outer+[outer[0]],fill=colors[0],width=1)
+        draw.polygon(band(.64,7),fill=colors[2])
+        draw.polygon(band(.30,5),fill=colors[3])
+        line(layer,spine[:3],colors[4],3*scale*strength)
+        # Landing glint: a diamond that swells then squashes flat at contact.
+        r=(3.5+2.5*math.sin(q*math.pi))*scale*strength
+        glint=[(head[0],head[1]-r),(head[0]+r*.62,head[1]),
+               (head[0],head[1]+r*.5),(head[0]-r*.62,head[1])]
+        glint=[(round(x/3)*3,round(y/3)*3) for x,y in glint]
+        draw.polygon(glint,fill=colors[3])
+        draw.line(glint+[glint[0]],fill=colors[1],width=1)
+        draw.point((round(head[0]/3)*3,round((head[1]-r*.34)/3)*3),fill=colors[4])
+        # Staggered stardust drifts down beside the shaft on delayed clocks.
+        for k in range(2):
+            dq=max(0.,min(1.,q-k*.18))
+            if dq<=0:continue
+            at=(head[0]+((k*2-1)*(8+i*2)+math.sin(dq*6+i*2+k*3)*5*(1-dq))*scale,
+                center[1]+(-43+dq*65-(k+1)*7)*scale)
+            _speck(layer,'sparkle',at,colors,scale*(.42-.08*k),i*2+k,
+                   max(0.,1-strength))
 
 
 def _egg_shells(layer, target, life, colors, scale, density):
@@ -356,7 +412,7 @@ def _local_material(layer, key, target, life, colors, scale, density, *, source=
     direction=math.degrees(math.atan2(target[1]-source[1],target[0]-source[0]))
     fade=max(0.,(life-.52)/.40)
     if key in ('healing_song','bliss_chorus'):
-        count=3 if key=='healing_song' else 5
+        count=4 if key=='healing_song' else 5
         for i in range(round(count*density)):
             angle=i*math.tau/count+.5;radius=(13+life*31)*scale
             pos=(target[0]+math.cos(angle)*radius,
@@ -367,6 +423,9 @@ def _local_material(layer, key, target, life, colors, scale, density, *, source=
             _ring(layer,target,colors,7+life*18,scale*.77,flatten=.48)
             if key=='bliss_chorus':
                 _ring(layer,(target[0],target[1]+10*scale),colors,6+life*18,scale*.76,flatten=.45)
+        if key=='healing_song' and life<.30:
+            # A low echo ring answers the landing note before the main ring opens.
+            _ring(layer,(target[0],target[1]+9*scale),colors,5+life*34,scale*.60,flatten=.40)
         if key=='bliss_chorus' and life<.22:
             _speck(layer,'bell',(target[0]-23*scale,target[1]-8*scale),colors,scale*.55,
                    turn=math.sin(life*16)*16)
@@ -378,6 +437,15 @@ def _local_material(layer, key, target, life, colors, scale, density, *, source=
                  target[1]+(-34+q*65)*scale)
             _speck(layer,'powder',pos,colors,scale*(.68 if i%4==0 else .48),i,
                    max(0.,(q-.58)/.40))
+        if life<.34:
+            # Contact puff: grains compress into a low cloud that spreads sideways.
+            q=life/.34
+            for i in range(round(4*density)):
+                side=-1 if i%2 else 1
+                at=(target[0]+side*(5+q*20+(i//2)*6)*scale,
+                    target[1]+(17-q*7-(i%2)*4)*scale)
+                _speck(layer,'powder',at,colors,scale*(.60-.16*q),20+i,
+                       max(0.,(q-.45)/.50))
     elif key=='moon_blessing':
         if life<.76:_moon_rays(layer,target,life,colors,scale,strength=1-max(0.,(life-.34)/.42))
         for i in range(3):
@@ -394,6 +462,16 @@ def _local_material(layer, key, target, life, colors, scale, density, *, source=
             kind='leaf' if key=='verdant_sanctuary' and i%2==0 else 'petal'
             _speck(layer,kind,pos,colors,scale*(.79 if i%3==0 else .60),i,
                    max(0.,(life-.56)/.38),turn=math.sin(life*9+i)*34+i*28)
+        if key=='aroma_garden' and life<.30:
+            # Contact bloom: a tight fast petal whirl opens into the outer swirl.
+            q=life/.30
+            for i in range(round(4*density)):
+                angle=i*math.tau/4+q*4.5
+                radius=(4+q*17)*scale
+                _speck(layer,'petal',(target[0]+math.cos(angle)*radius,
+                                      target[1]+math.sin(angle)*radius*.5-q*7*scale),
+                       colors,scale*(.56-.10*q),10+i,max(0.,(q-.60)/.40),
+                       turn=q*130+i*45)
     elif key=='star_resonance':
         gold=palette('ELECTRIC',config or {})
         for i in range(round(6*density)):
@@ -403,6 +481,13 @@ def _local_material(layer, key, target, life, colors, scale, density, *, source=
             _speck(layer,kind,pos,gold if kind=='swift_star' else colors,
                    scale*(.71 if kind=='swift_star' else .60),i,fade,turn=life*160)
     elif key=='barrier_relay':
+        if life<.26:
+            # Contact compression: two squeezed waves stack before they release.
+            q=life/.26
+            for i in range(2):
+                _psy_wave(layer,(target[0]+(i*2-1)*3*scale,target[1]-2*scale),
+                          colors,scale,5+q*12+i*2,direction,squeeze=.30+q*.26,
+                          fade=max(0.,(q-.62)/.38))
         if life<.76:
             for i in range(2):
                 _psy_wave(layer,(target[0]+(i*2-1)*life*17*scale,target[1]-life*12*scale),
@@ -430,15 +515,25 @@ def _local_material(layer, key, target, life, colors, scale, density, *, source=
                 line(layer,vertices,colors[1],6*scale);line(layer,vertices,colors[4],3*scale)
         burst(layer,target,colors,life,scale=scale*.66,density=density,count=7,seed=17)
     elif key=='moon_guard':
+        # The gloom orb lands and squashes on contact, then peels into wisps.
         if life<.85:
-            radius=math.sin(min(1.,life/.23)*math.pi/2)*(17+life*13)*scale
-            angle=life*9
-            at=(target[0]+math.cos(angle)*radius,target[1]+math.sin(angle)*radius*.7-life*11*scale)
-            _speck(layer,'orb',at,colors,scale*(.87-.28*life),0,fade)
-            for i in range(2):
-                a=angle-(i+1)*.45
-                _speck(layer,'orb',(target[0]+math.cos(a)*radius,target[1]+math.sin(a)*radius*.7-life*11*scale),
-                       colors,scale*.33,i+1,fade)
+            grow=math.sin(min(1.,life/.18)*math.pi/2)
+            wane=max(0.,(life-.45)/.40)
+            at=(target[0],target[1]-(3+11*min(1.,life/.4))*scale)
+            image=_particle('gloom_orb',colors,0).copy()
+            if life<.22:
+                q=1-life/.22
+                image=image.resize((image.width+round(3*q),max(1,image.height-round(4*q))),
+                                   Image.Resampling.NEAREST)
+            put(layer,_dissolve(image,wane),at,scale*(.58+.38*grow))
+            for i in range(3):
+                q=max(0.,min(1.,(life-.10)/.62))
+                if q<=0:continue
+                angle=math.pi/2+i*math.tau/3+q*2.6
+                radius=(6+q*31)*scale
+                _speck(layer,'orb',(target[0]+math.cos(angle)*radius,
+                                    target[1]+math.sin(angle)*radius*.55-q*13*scale),
+                       colors,scale*(.44-.12*q),i+1,fade)
     elif key=='life_pulse':
         _egg_shells(layer,target,life,colors,scale,density)
     elif key=='rescue_tongue':
@@ -532,7 +627,8 @@ def draw(layer, skill_id, source, target, phase, progress, config, *, emitters=(
         elif skill_id=='moon_guard':
             ux,uy,nx,ny=_vec(source,target)
             bend=math.sin(p*math.pi)*22*scale
-            _speck(layer,'orb',(head[0]+nx*bend,head[1]+ny*bend),colors,scale*.85,0)
+            _speck(layer,'gloom_orb',(head[0]+nx*bend,head[1]+ny*bend),colors,scale*.9,0,
+                   turn=math.sin(p*math.tau)*14)
             _stream(layer,source,target,p,colors,'orb',count=3,spread=9,scale=scale*.65,density=density)
         elif skill_id=='moon_blessing':
             _moon_rays(layer,head,p,colors,scale*.78)
@@ -774,6 +870,48 @@ def draw_screen(layer, target, progress, config, *, kind='reflect', quiet=False)
     return True
 
 
+def draw_dome(layer, target, progress, config, *, quiet=False, element='ICE'):
+    """Shield bubble: a translucent dome hugging the unit, not a planar wall.
+
+    target is actor center, normally foot_y - 34. Nonquiet progress is normalized
+    over its actual finite outcome; p>=1 draws nothing. quiet=True is the
+    persistent state: progress modulo 1 drives a slow sheen and the caller owns
+    expiry/death. element picks the tint: ICE for shield HP, STEEL for guard.
+    """
+    p=_p(progress) if not quiet else float(progress)%1.
+    if not quiet and p>=1:return True
+    scale,density=settings(config)
+    colors=palette(element,config)
+    image,d,(x,y)=cel(56)
+    strength=(.62 if quiet else (1.-max(0.,(p-.6)/.4)))
+    unfold=1. if quiet else min(1.,p/.18)
+    if strength<=0 or unfold<=0:return True
+    cy=y+2
+    box=(x-16,cy+12-round(36*unfold),x+16,cy+12)
+    # Translucent skin; the actor stays fully visible through the bubble.
+    d.ellipse(box,fill=(*colors[2],round(30*strength)))
+    # Thin dark back rim over the top, bright front lip below: readable volume.
+    d.arc(box,200,340,fill=(*colors[1],round(130*strength)),width=1)
+    d.arc(box,20,160,fill=(*colors[3],round(190*strength)),width=2)
+    d.arc(box,55,125,fill=(*colors[4],round(170*strength)),width=1)
+    # Ground ring anchors the bubble at the feet.
+    ground=(x-15,cy+8,x+15,cy+15)
+    d.ellipse(ground,outline=(*colors[2],round(110*strength)),width=1)
+    d.arc(ground,15,165,fill=(*colors[3],round(170*strength)),width=2)
+    # Travelling sheen plus deterministic twinkling facets.
+    sheen=(190+round(140*((p*1.4)%1.)))%360
+    d.arc(box,sheen,sheen+46,fill=(*colors[4],round(210*strength)),width=2)
+    for i in range(round(2*density)+1):
+        angle=i*2.1+.6
+        fx=x+round(math.cos(angle)*11)
+        fy=box[1]+8+round((cy+4-box[1]-8)*((i*.37+.2)%1.))
+        twinkle=.5+.5*math.sin(p*math.tau+i*1.9)
+        d.polygon(((fx,fy-2),(fx+2,fy),(fx,fy+2),(fx-2,fy)),
+                  outline=(*colors[3],round((110+80*twinkle)*strength)))
+    put(layer,image,target,scale*.92)
+    return True
+
+
 def _screen_kind(key):
     if key=='barrier_relay':return 'barrier'
     if key in ('aroma_garden','verdant_sanctuary','solar_relay'):
@@ -919,13 +1057,18 @@ def draw_outcome(layer, skill_id, effect, source, target, progress, config, deta
     if effect=='heal':
         draw_healing(layer,target,p,config,key=skill_id)
     elif effect in ('guard','shield'):
-        draw_screen(layer,target,p,config,kind=_screen_kind(skill_id))
+        # moon_guard's Reflect and barrier_relay's own walls are reference-pinned;
+        # every other protection unfolds as a bubble instead of a light wall.
+        if skill_id in ('moon_guard','barrier_relay'):
+            draw_screen(layer,target,p,config,kind=_screen_kind(skill_id))
+        else:
+            draw_dome(layer,target,p,config,element='STEEL' if effect=='guard' else 'ICE')
         if skill_id=='frost_shelter':
             _ring(layer,(target[0],target[1]+23*scale),colors,20+9*p,scale,flatten=.27)
         elif skill_id=='moon_blessing':
             _moon_rays(layer,(target[0],target[1]-5*scale),p,colors,scale*.70,strength=1-max(0.,(p-.55)/.45))
     elif effect=='absorb':
-        draw_screen(layer,target,min(1.,p*1.4),config,kind='barrier')
+        draw_dome(layer,target,min(1.,p*1.4),config)
         burst(layer,target,palette('ICE',config),p,scale=scale*.62,density=density,kind='shard',count=8,seed=37)
     elif effect in ('energy','energy_drain'):
         energy=palette('ELECTRIC' if skill_id=='beacon_relay' else 'PSYCHIC',config)

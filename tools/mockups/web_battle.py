@@ -4,7 +4,7 @@ The classic device renderer and simulation are deliberately independent of this
 canvas. All positions, HP, energy, effects and deaths come from BattleAnimation's
 retimed presentation stream, including when the user seeks backwards.
 """
-from bisect import bisect_right
+from bisect import bisect_left, bisect_right
 from functools import lru_cache
 import copy
 import math
@@ -22,12 +22,53 @@ import web_motion
 from animation_timeline import native_targeting
 from motion import Pose, species_motion, transform
 from move_effects import DEFAULT_VISUAL, RANGES
-from render_battle_gif import BCELL, BX, BY, VIS_ROW_OFF
+from render_battle_gif import BCELL, BX, BY, VIS_ROW_OFF, FULL_GOLD
 
 WIDTH, HEIGHT = 960, 640
 PARTICLE_LIMIT = 192
 MAX_ACTIVE_ACTIONS = 6
 EDITABLE_CONTROLS = tuple(DEFAULT_VISUAL)
+# Impact-feel layer (web-arena v14). Presentation-only and deterministic in t:
+# no state mutation, no extra hits, no timeline retiming outside the renderer.
+IMPACT_SHAKE = True
+IMPACT_HITSTOP = True
+IMPACT_ACCENTS = True
+AMBIENT_PARTICLES = True
+_HITSTOP_DWELL = .08
+_HITSTOP_BUDGET = .6
+_SHAKE_WINDOW = .25
+_SHAKE_CAP = 5
+# Event staging (v14): entrance landing feedback and KO topple. All of it is a
+# pure function of (t, event index, particle index) on the battlefield layer.
+_ENTRANCE_DROP = .35   # mirrors the shared opening drop in _unit_pose
+_ENTRANCE_SQUASH = .12
+_KO_CARD_LIFE = .5
+_TOPPLE_TIME = .28
+# Generic procedural pose: species with neither an articulated rig nor authored
+# cels still squat/lunge/breathe. Foot-anchored NEAREST scale plus an integer
+# lunge, all a pure function of (t, unit, action phase) sampled from _part_state.
+_GENERIC_BREATH = .015
+_GENERIC_SQUAT = .05
+_GENERIC_STRETCH = .05
+_GENERIC_LEAN = 3
+_GENERIC_LUNGE = 4
+# Ultimate staging (v14 P0-P2): a full-field palette performance, metronomic
+# burst salvos, a darker hitstop and a wider horizontal shake for high-power
+# native casts. "大招" caliber: a cast event whose move power >= _ULT_POWER in
+# the arena skill catalog (or pokedex data outside arena mode). Basic attacks
+# and zero-power support/terrain casts never qualify; banned-list skills only
+# receive this generic overlay, their retro_*.py files stay untouched.
+IMPACT_ULT = True
+_ULT_POWER = 65
+_ULT_DIM_PEAK = 84
+_ULT_FLASH_ALPHAS = (((255,255,255),175),((8,10,12),110),((255,255,255),80))
+_ULT_DARKEN_WINDOW = .2   # the GBA 13-frame blacken-and-restore beat
+_ULT_DARKEN_DEPTH = .12
+_ULT_BURST_BEAT = .15     # three 20fps frames between salvos
+_ULT_BURST_BATCHES = 5
+_ULT_BURST_LIFE = .5
+_ULT_HITSTOP_DWELL = .13
+_SHAKE_CAP_ULT = 9
 
 
 def _positive_heal_amount(value):
@@ -69,6 +110,26 @@ def _effect_color(rgb, palette):
         return rgb
     light = sum(rgb) / 3
     return tuple(round(min(255, max(0, light + (value-light)*1.45 + 10))) for value in rgb)
+
+
+@lru_cache(maxsize=1)
+def _ult_move_powers():
+    """Move power per castable move name, from the authoritative catalogs."""
+    powers = {}
+    import arena_skills
+    for skill in arena_skills.catalog():
+        powers['arena_'+skill['id']] = skill.get('power', 0)
+    from render_battle_gif import pokedex
+    for move in pokedex().moves.values():
+        powers[move['name']] = move.get('power', 0)
+    return powers
+
+
+def _dim_sprite(sprite, factor):
+    """Multiply sprite brightness by factor; the alpha channel is preserved."""
+    lut = [round(value*factor) for value in range(256)]
+    r, g, b, a = sprite.split()
+    return Image.merge('RGBA', (r.point(lut), g.point(lut), b.point(lut), a))
 
 
 class _ScaledDraw:
@@ -115,6 +176,61 @@ STATUS_LABELS = {
     'guard': ('护', (170, 226, 249)), 'shield': ('盾', (147, 231, 249)),
 }
 WEATHER_NAMES = {'rain': '雨天', 'sun': '晴天', 'sand': '沙暴', 'hail': '冰雹'}
+# Weather staging: a 0.5s tint pulse and a small pixel icon announce each
+# recorded weather change; both are pure functions of (t, change index).
+_WEATHER_TRANSITION = .5
+_WEATHER_ICON_LIFE = 1.
+_WEATHER_TINT_PEAK = 32
+_HUD_BAND_TOP = 592
+_WEATHER_TINTS = {'rain': (78, 104, 124), 'sun': (255, 224, 130),
+                  'sand': (210, 181, 124), 'hail': (190, 224, 235),
+                  None: (168, 178, 172)}
+_WEATHER_ICON_ART = {
+    'rain': (("...cccccc...",
+              "..cccccccc..",
+              ".cccccccccc.",
+              "..cccccccc..",
+              "...d..d..d..",
+              "..d..d..d...",
+              "...d..d..d.."),
+             {'c': (196, 208, 220), 'd': (134, 193, 215)}),
+    'sun': ((".r........r.",
+             "...ssssss...",
+             "..ssssssss..",
+             "..ssssssss..",
+             "..ssssssss..",
+             "...ssssss...",
+             ".r........r."),
+            {'s': (255, 224, 130), 'r': (255, 196, 90)}),
+    'hail': (("...cccccc...",
+              "..cccccccc..",
+              ".cccccccccc.",
+              "..cccccccc..",
+              "....h..h....",
+              "..h......h.."),
+             {'c': (206, 220, 228), 'h': (171, 225, 240)}),
+    'sand': (("..sssss.....",
+              "......ssss..",
+              ".ssssssss...",
+              "...sssss....",
+              "......sssss."),
+             {'s': (222, 192, 134)}),
+}
+
+
+@lru_cache(maxsize=8)
+def _weather_icon(name):
+    """Small cached pixel glyph announcing one weather beside the title."""
+    rows, palette = _WEATHER_ICON_ART[name]
+    cell = 2
+    icon = Image.new('RGBA', (len(rows[0])*cell, len(rows)*cell))
+    d = ImageDraw.Draw(icon)
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch in palette:
+                d.rectangle((x*cell, y*cell, x*cell+cell-1, y*cell+cell-1),
+                            fill=palette[ch])
+    return icon
 
 
 @lru_cache(maxsize=24)
@@ -326,6 +442,256 @@ class WebBattleRenderer:
         self._frame_art = {}
         self._visual_overrides = normalize_visual_overrides(getattr(anim, 'web_visual_overrides', None))
         self._particle_used = 0
+        self._impacts, self._impact_lookup = self._index_impacts()
+        self._impact_times = [hit[0] for hit in self._impacts]
+        self._ults = self._index_ults()
+        self._ult_impact_keys = frozenset(round(row[2], 3) for row in self._ults)
+        self._warp_segments = self._build_warp()
+        self._warp_starts = [segment[0] for segment in self._warp_segments]
+        self._cast_float_tiers = self._index_cast_floats()
+        self._misses = self._index_misses()
+        self._entrances = self._index_entrances()
+        self._entrance_land = {row[1]: row[0] for row in self._entrances}
+        self._ko_shows = self._index_ko_shows()
+        self._ko_by_idx = {row[1]: row for row in self._ko_shows}
+        self._result_t = next((ev[0] for ev in anim.timeline.events
+                               if ev[1] == 'end'), None)
+        self._weather_changes = self._index_weather_changes()
+
+    def _index_weather_changes(self):
+        """Announced weather transitions in presentation time, from the timeline.
+
+        Only the events the presentation view itself applies are indexed, so a
+        transition cel never reveals weather before the view shows it.
+        """
+        changes = []
+        initial = self.view._initial_weather_name
+        if initial in WEATHER_NAMES:
+            changes.append((0., initial))
+        for event in self.anim.timeline.events:
+            if (event[1] == 'combo_effect' and len(event) == 7
+                    and event[4] == 'arena_weather' and event[5] in ('weather', 'expire')):
+                changes.append((event[0], event[6].get('new_weather')))
+            elif (event[1] == 'tactical_effect' and len(event) == 6
+                    and event[4] in ('weather_start', 'weather_end', 'weather_conflict')):
+                changes.append((event[0], event[5].get('new_weather')))
+        changes.sort()
+        # A recorded change at the opening already announces the base weather.
+        if len(changes) > 1 and changes[0][0] == 0. and changes[1][0] < .05:
+            changes.pop(0)
+        return tuple(changes)
+
+    def _index_entrances(self):
+        """The first deploy of each unit lands when the opening drop ends."""
+        seen, rows = set(), []
+        for event in self.anim.timeline.events:
+            if event[1] != 'deploy' or event[2] in seen:
+                continue
+            seen.add(event[2])
+            unit = self.anim.by_idx[event[2]]
+            rows.append((max(_ENTRANCE_DROP, event[0]), event[2], tuple(event[3]),
+                         unit.team, getattr(unit.piece, 'star', 1)))
+        return tuple(rows)
+
+    def _index_ko_shows(self):
+        """Each die event owns a card, a ground crack ring and a topple direction.
+
+        The direction comes from the actual killing action's recorded cells;
+        melee-less finishes (poison ticks, fields) fall back to a faction side.
+        """
+        events = self.anim.timeline.events
+        shows = []
+        for index, event in enumerate(events):
+            if event[1] != 'die':
+                continue
+            die_t, idx = event[0], event[2]
+            pos = next((ev[3] for ev in reversed(events[:index+1])
+                        if ev[0] <= die_t and ev[1] in ('deploy', 'move')
+                        and ev[2] == idx), None)
+            if pos is None:
+                continue
+            dx = dy = 0.
+            for action, timing in self._actions:
+                if timing.target == idx and abs(timing.impact-die_t) < .2:
+                    dx = timing.target_pos[0]-timing.source_pos[0]
+                    dy = timing.target_pos[1]-timing.source_pos[1]
+            unit = self.anim.by_idx[idx]
+            if not dx and not dy:
+                dx = 1. if unit.team == 0 else -1.
+            norm = math.hypot(dx, dy) or 1.
+            shows.append((die_t, idx, tuple(pos), unit.team, dx/norm, dy/norm))
+        return tuple(shows)
+
+    def _index_cast_floats(self):
+        """Map each visible cast damage float to (element, effectiveness).
+
+        Floats are bare (t, x, y, text, color) tuples; the tier is inferred
+        from the authoritative cast event that produced the text, keyed by
+        (impact time, display text) so replay state is never sampled at draw.
+        """
+        tiers = {}
+        for event in self.anim.timeline.events:
+            if event[1] != 'cast' or len(event) < 7 or not event[6]:
+                continue
+            timing = self.anim.timeline.action_by_event.get(id(event))
+            if timing is None:
+                continue
+            display = self.view._display_damage(event, event[6])
+            if not display:
+                continue
+            piece = self.view.units[event[2]].u.piece
+            element = (self.view.move_type.get(event[4], piece.types[0])
+                       if self.view.is_arena else piece.types[0])
+            tiers[(round(timing.impact, 3), f'-{display}')] = (element, event[5])
+        return tiers
+
+    def _index_misses(self):
+        """Missed casts show MISS over the target's historical cell."""
+        misses = []
+        events = self.anim.timeline.events
+        for index, event in enumerate(events):
+            if event[1] != 'miss' or len(event) < 4:
+                continue
+            pos = next((ev[3] for ev in reversed(events[:index+1])
+                        if ev[0] <= event[0] and ev[1] in ('deploy', 'move')
+                        and ev[2] == event[3]), None)
+            if pos is not None:
+                misses.append((event[0], self.cell_point(pos)))
+        return misses
+
+    def _index_impacts(self):
+        """Weight every real attack/cast impact for the impact-feel layer.
+
+        The view is replayed to the end once so KO weighting can read die_t;
+        _ensure rewinds itself on the next frame call.
+        """
+        self.view._ensure(self.anim.timeline.duration)
+        impacts = []
+        lookup = {}
+        for event, timing in self._actions:
+            attacker = self.view.units.get(timing.attacker)
+            if attacker is None:
+                continue
+            move = event[4] if event[1] == 'cast' else ''
+            element = (self.anim.move_type.get(move, attacker.u.piece.types[0]) if move
+                       else attacker.u.piece.types[0])
+            weight = 1.6 if event[1] == 'cast' else 1.
+            target = self.view.units.get(timing.target)
+            die_t = getattr(target, 'die_t', None)
+            if die_t is not None and abs(die_t-timing.impact) < .15:
+                weight = 2.4
+            impacts.append((timing.impact, weight, timing.target_pos, element))
+            lookup[(round(timing.impact, 3), timing.target)] = weight
+        impacts.sort()
+        return tuple(impacts), lookup
+
+    def _index_ults(self):
+        """High-power casts ("大招") that own the full-field staging layer.
+
+        Caliber: cast events (never basic attacks) whose move power is at
+        least _ULT_POWER in the arena skill catalog / pokedex data. Each row
+        carries the action's own timing and cells plus a stable sequence
+        number, so every downstream pixel is a pure function of (t, seq, i).
+        """
+        powers = _ult_move_powers()
+        ults = []
+        for seq, (event, timing) in enumerate(self._actions):
+            if event[1] != 'cast' or powers.get(event[4], 0) < _ULT_POWER:
+                continue
+            attacker = self.view.units.get(timing.attacker)
+            fallback = attacker.u.piece.types[0] if attacker is not None else 'NORMAL'
+            element = self.anim.move_type.get(event[4], fallback)
+            ults.append((timing.start, timing.release, timing.impact, timing.target,
+                         tuple(timing.target_pos), element, seq))
+        ults.sort(key=lambda row: row[2])
+        return tuple(ults)
+
+    def _build_warp(self):
+        """Piecewise presentation→sim clock: brief dwells at heavy impacts.
+
+        Total presentation length stays equal to the timeline duration; normal
+        segments run at a bounded slope (≤1.05) to absorb the dwell time. Ult
+        impacts dwell longer (_ULT_HITSTOP_DWELL) than regular heavy hits; all
+        dwells share the same _HITSTOP_BUDGET and shrink proportionally when
+        it saturates.
+        """
+        duration = self.anim.timeline.duration
+        flat = ((0., 0., 1.),)
+        if not IMPACT_HITSTOP or duration <= 0:
+            return flat
+        stops = []
+        for at in sorted({hit[0] for hit in self._impacts if hit[1] >= 1.6}):
+            if at < .5 or at > duration-.5:
+                continue
+            if stops and at-stops[-1] < .3:
+                continue
+            stops.append(at)
+        if not stops:
+            return flat
+        dwells = [_ULT_HITSTOP_DWELL if IMPACT_ULT and round(at, 3) in self._ult_impact_keys
+                  else _HITSTOP_DWELL for at in stops]
+        total = sum(dwells)
+        if total > _HITSTOP_BUDGET:
+            dwells = [dwell*_HITSTOP_BUDGET/total for dwell in dwells]
+            total = _HITSTOP_BUDGET
+        slope = duration/max(1e-6, duration-total)
+        if slope > 1.05:
+            slope = 1.05
+            total = duration*(1-1/slope)
+            dwells = [dwell*total/sum(dwells) for dwell in dwells]
+        segments = []
+        pres = sim = 0.
+        for at, dwell in zip(stops, dwells):
+            if at > sim:
+                segments.append((pres, sim, slope))
+                pres += (at-sim)/slope
+                sim = at
+            segments.append((pres, sim, 0.))
+            pres += dwell
+        segments.append((pres, sim, slope))
+        return tuple(segments)
+
+    def _warp(self, seconds):
+        if len(self._warp_segments) == 1:
+            return seconds
+        index = max(0, bisect_right(self._warp_starts, seconds)-1)
+        pres, sim, slope = self._warp_segments[index]
+        return sim + (seconds-pres)*slope
+
+    def _shake_offset(self, t):
+        """Deterministic damped shake from recent impacts; capped in magnitude.
+
+        Ult impacts switch the battlefield into a wider horizontal sway (cap
+        _SHAKE_CAP_ULT, slow 9 Hz carrier, small vertical bleed); everything
+        else keeps the original _SHAKE_CAP=5 envelope.
+        """
+        if not IMPACT_SHAKE:
+            return (0, 0)
+        x = y = 0.
+        ult = False
+        start = bisect_right(self._impact_times, t-_SHAKE_WINDOW)
+        end = bisect_right(self._impact_times, t+1e-9)
+        for i in range(start, end):
+            at, weight = self._impacts[i][0], self._impacts[i][1]
+            age = t-at
+            if age < 0:
+                continue
+            phase = i*2.399
+            if IMPACT_ULT and round(at, 3) in self._ult_impact_keys:
+                ult = True
+                decay = math.exp(-age/.16)
+                x += 9.5*decay*math.cos(math.tau*9*age)
+                y += 2.2*decay*math.cos(math.tau*7*age+phase*1.7)
+            else:
+                amp = 4. if weight >= 2.4 else 2.5 if weight >= 1.6 else 1.2
+                decay = math.exp(-age/.09)
+                x += amp*decay*math.sin(math.tau*13*age+phase)
+                y += amp*decay*.6*math.cos(math.tau*11*age+phase*1.7)
+        cap = _SHAKE_CAP_ULT if ult else _SHAKE_CAP
+        mag = math.hypot(x, y)
+        if mag > cap:
+            x, y = x*cap/mag, y*cap/mag
+        return (round(x), round(y))
 
     def _index_healing_packets(self):
         """Bind actual regen source indexes to optional native/role annotations.
@@ -445,7 +811,41 @@ class WebBattleRenderer:
             else:
                 state, start, stop = 'recover', timing.impact, timing.recover_end
             return state, min(1., max(0., (t-start)/max(.001, stop-start))), right, event[1]
+        if self._result_t is not None and t >= self._result_t:
+            # Survivors celebrate on the existing windup pose loop; no new art.
+            return 'windup', (t/.9+au.u.idx*.29) % 1., right, 'attack'
         return 'idle', (t/1.6 + au.u.idx*.13) % 1., right, 'attack'
+
+    def _generic_pose(self, au, t):
+        """Whole-body squat/lunge/breath for species with no rig and no cels.
+
+        Returns (scale_x, scale_y, lunge_px) or None for species with their own
+        motion, dying units, and the entrance-squash window (the landing squash
+        owns the body there; never stack both). The phase rides the shared
+        action clock, so frozen units hold and seeks replay identical pixels.
+        """
+        sid = au.u.piece.species_id
+        if au.dying(t) or web_motion.supports(sid) or sid in species_motion:
+            return None
+        if self._entrance_squash(au.u.idx, t) < 1.:
+            return None
+        state, progress, right, _ = self._part_state(au, t)
+        if state == 'death':
+            return None
+        facing = 1 if right else -1
+        if state == 'windup':
+            q = progress*progress*(3-2*progress)
+            return 1.+.02*q, 1.-_GENERIC_SQUAT*q, facing*round(_GENERIC_LEAN*q)
+        if state == 'strike':
+            # Lunge toward the target and rebound inside the strike window.
+            q = math.sin(math.pi*min(1., progress))
+            return 1.-.02*q, 1.+_GENERIC_STRETCH*q, facing*round(_GENERIC_LUNGE*q)
+        if state == 'recover':
+            q = (1-progress)*(1-progress)
+            return 1., 1.+.02*q, facing*round(2*q)
+        # Idle breath: a 1.5% vertical scale whose phase _part_state already
+        # staggers by unit index, so the field never breathes in sync.
+        return 1., 1.+_GENERIC_BREATH*math.sin(math.tau*progress), 0
 
     @lru_cache(maxsize=1024)
     def _part_sprite(self, sid, tier, shiny, state, step, right, kind, scale=1.):
@@ -460,7 +860,9 @@ class WebBattleRenderer:
         start = bisect_right(self._native_hit_times, t-.24)
         for at, target, key in reversed(self._native_hits[start:end]):
             if target == au.u.idx and key != 'flame_storm':
-                return retro_feedback.body_cue(key, (t-at)/.24, receiving=True, motion_scale=scale)
+                weight = self._impact_lookup.get((round(at, 3), target), 1.)
+                return retro_feedback.body_cue(key, (t-at)/.24, receiving=True,
+                                               motion_scale=scale, weight=min(2., weight))
         rows = self._unit_actions.get(au.u.idx, ())
         end = bisect_right(self._unit_action_times.get(au.u.idx, ()), t)
         for event, timing in reversed(rows[max(0,end-3):end]):
@@ -473,6 +875,7 @@ class WebBattleRenderer:
         piece = au.u.piece
         sid, shiny = piece.species_id, getattr(piece, 'shiny', False)
         sprite = self._source_sprite(sid, piece.tier, shiny)
+        lunge = 0
         if web_motion.supports(sid) and not au.dying(t):
             state, progress, right, kind = self._part_state(au, t)
             sprite = self._part_sprite(sid, piece.tier, shiny, state,
@@ -489,14 +892,21 @@ class WebBattleRenderer:
                           scaled(motion.hit), motion.hit_direction, motion.action_kind)
             sprite = self._pose_sprite(sid, piece.tier, shiny, motion.state,
                 motion.index, motion.frame, motion.hit, motion.direction[0]>=0, motion.action_kind)
-        elif au.u.team == 0:
-            sprite = ImageOps.mirror(sprite)
+        else:
+            if au.u.team == 0:
+                sprite = ImageOps.mirror(sprite)
+            generic = self._generic_pose(au, t)
+            if generic is not None:
+                sx, sy, lunge = generic
+                size = (max(1, round(sprite.width*sx)), max(1, round(sprite.height*sy)))
+                if size != sprite.size:
+                    sprite = sprite.resize(size, Image.Resampling.NEAREST)
         sprite = retro_feedback.transform_body(sprite, self._body_cue(au, t))
         anchor = sprite.info.get('foot_anchor')
         if anchor is None:
             bounds = sprite.getchannel('A').getbbox() or (0, 0, *sprite.size)
             anchor = sprite.width/2, bounds[3]
-        left, top = round(x-anchor[0]), round(y-anchor[1])
+        left, top = round(x-anchor[0])+lunge, round(y-anchor[1])
         anchors = {key: (left+point[0], top+point[1])
                    for key, point in sprite.info.get('rig_anchors', {}).items()}
         return sprite, left, top, anchors
@@ -664,15 +1074,31 @@ class WebBattleRenderer:
         sprite, left, top, anchors = self._unit_art(au, x, y, t)
         self._frame_art[au.u.idx] = sprite, left, top, anchors
         if dying:
+            sprite, left, top = self._topple(sprite, left, top, x, y, au, t)
             sprite = sprite.copy()
             sprite.putalpha(sprite.getchannel('A').point(lambda value:round(value*fade)))
+        else:
+            squash = self._entrance_squash(au.u.idx, t)
+            if squash < 1.:
+                height = max(1, round(sprite.height*squash))
+                top += sprite.height-height
+                sprite = sprite.resize((sprite.width, height), Image.Resampling.NEAREST)
+            darken = self._ult_darken_factor(au.u.idx, t)
+            if darken < 1.:
+                sprite = _dim_sprite(sprite, darken)
         img.alpha_composite(sprite,(left,top))
+        if not dying and au.energy>=80:
+            self._draw_energy_halo(img,x,y,t,'freeze' in au.statuses)
         # Persistent protection comes from the replay state, never future outcomes.
+        # Shield HP is a cyan bubble; guard stance is a steel-tinted one.
         identities = self._active_identity_effects(t, au.u.idx)
         guards = 'guard' in identities
-        if not dying and (au.shield > 0 or guards):
-            retro_support.draw_screen(img, (x,y-34), (t*.8)%1,
-                self.visual_config(sid), kind='reflect' if guards else 'light_screen', quiet=True)
+        if not dying and au.shield > 0:
+            retro_support.draw_dome(img, (x,y-34), (t*.8)%1,
+                self.visual_config(sid), quiet=True)
+        elif not dying and guards:
+            retro_support.draw_dome(img, (x,y-34), (t*.8)%1,
+                self.visual_config(sid), quiet=True, element='STEEL')
         if not dying and 'thorns' in identities:
             stance = identities['thorns']
             retro_support._stance_material(img,'venom_armor',(x,y-34),
@@ -711,6 +1137,24 @@ class WebBattleRenderer:
             d = ImageDraw.Draw(img)
             phase = math.floor(t*10)%8
             _star(d,x-34+(phase%3)*7,y-45-phase*3,4,(198,235,254))
+
+    @staticmethod
+    def _energy_halo_alpha(t,frozen=False):
+        """Breath is quantized to 8 Hz steps; a pure function of the clock."""
+        if frozen:
+            return 200
+        return (130,175,220,255)[int(t*8)%4]
+
+    def _draw_energy_halo(self,img,x,y,t,frozen=False):
+        """Full-energy telegraph: pixel-thin purple/gold rings at the feet.
+
+        Drawn on the battlefield layer so the rings ride the same shake warp
+        as their unit; alpha breathes without any randomness or state.
+        """
+        alpha=self._energy_halo_alpha(t,frozen)
+        d=ImageDraw.Draw(img,'RGBA')
+        _ring(d,(x,y+1),36,(210,182,247,alpha),2,.26)
+        _ring(d,(x,y+1),30,(*FULL_GOLD,round(alpha*.72)),1,.26)
 
     def _draw_meter(self,img,au,x,y,t):
         if au.dying(t):
@@ -814,6 +1258,15 @@ class WebBattleRenderer:
         r = (18+18*p if phase == 'impact' else 16) if cast else 10+10*p
         hit = phase in ('impact','aftermath')
         if phase == 'windup':
+            # Shared charge: motes spiral into the caster as the windup
+            # tightens. Deterministic index-driven motion, density-scaled.
+            for i in self._particles(6, density):
+                angle = seed*.53 + i*2.399 - p*5.4
+                radius = (27-20*p) * (1-i*.07)
+                xx,yy = a[0]+math.cos(angle)*radius, a[1]+math.sin(angle)*radius*.78
+                shade = white if i%3 == 0 else color
+                s = 2 if i%3 == 0 else 1
+                d.rectangle((xx-s,yy-s,xx+s,yy+s),fill=shade)
             # The preparation has the same material as its release. Keep the
             # centre open so the weapon or animated limb stays visible.
             if element == 'ELECTRIC':
@@ -872,6 +1325,23 @@ class WebBattleRenderer:
                     d.arc((a[0]-radius,a[1]-radius*.65,a[0]+radius,a[1]+radius*.65),
                           110+p*100,250+p*100,fill=color,width=2)
             return
+        if phase == 'flight':
+            # Shared projectile volume: a fading wake behind a three-tier head
+            # (dark rim / main shell / bright core). Each element still draws
+            # its own material features on top; route and hit point unchanged.
+            head = 8 if cast else 5
+            dark = (*tuple(round(c*.42) for c in rgb),round(235*fade))
+            for j in self._particles(3, density):
+                kk = max(0.,k-(j+1)*.05)
+                wx,wy = a[0]+dx*kk, a[1]+dy*kk
+                wr = head-2-j*2
+                if wr > 0:
+                    d.ellipse((wx-wr,wy-wr,wx+wr,wy+wr),fill=(*rgb,round((150-40*j)*fade)))
+            d.ellipse((x-head-2,y-head-2,x+head+2,y+head+2),fill=dark)
+            d.ellipse((x-head,y-head,x+head,y+head),fill=color)
+            cx,cy = x+ux*head*.3, y+uy*head*.3
+            core = head*.42
+            d.ellipse((cx-core,cy-core,cx+core,cy+core),fill=white)
         if element == 'ELECTRIC':
             if phase == 'flight':
                 points = [(a[0]+dx*k*j/8+nx*(7 if j%2 else -5),
@@ -905,6 +1375,10 @@ class WebBattleRenderer:
                 for off in (-5,0,5):
                     route=[(a[0]+dx*k*j/10+nx*(off+math.sin(j*.9+p*7)*3),
                             a[1]+dy*k*j/10+ny*(off+math.sin(j*.9+p*7)*3)) for j in range(11)]
+                    d.line(route,fill=(*tuple(round(c*.42) for c in rgb),round(210*fade)),width=5 if cast else 4)
+                for off in (-5,0,5):
+                    route=[(a[0]+dx*k*j/10+nx*(off+math.sin(j*.9+p*7)*3),
+                            a[1]+dy*k*j/10+ny*(off+math.sin(j*.9+p*7)*3)) for j in range(11)]
                     d.line(route,fill=color,width=3)
                 d.ellipse((x-10,y-10,x+10,y+10),fill=color,outline=white,width=2)
             if hit:
@@ -929,7 +1403,9 @@ class WebBattleRenderer:
         elif element in ('GRASS','BUG'):
             if phase == 'flight':
                 curve=[(a[0]+dx*k*j/10+nx*math.sin(j*.7)*6,a[1]+dy*k*j/10+ny*math.sin(j*.7)*6) for j in range(11)]
-                d.line(curve,fill=(99,173,76,round(200*fade)),width=2)
+                d.line(curve,fill=(56,102,44,round(210*fade)),width=6 if cast else 4)
+                d.line(curve,fill=(99,173,76,round(200*fade)),width=3)
+                d.line(curve,fill=(*PAPER,round(180*fade)),width=1)
             for i in self._particles(5 if hit else 3, density):
                 ang=i*math.tau/5+p*4
                 xx,yy=x+math.cos(ang)*r*.7,y+math.sin(ang)*r*.7
@@ -974,7 +1450,9 @@ class WebBattleRenderer:
                     _star(d,x+off,y+math.sin(p*5+i)*9,9+i%2*3,color,4,p+i)
         else:
             if phase == 'flight':
+                _line(d,(x-ux*20,y-uy*20),(x,y),(*tuple(round(c*.42) for c in rgb),round(230*fade)),7 if cast else 5)
                 _line(d,(x-ux*20,y-uy*20),(x,y),color,4)
+                _line(d,(x-ux*20,y-uy*20),(x,y),white,1)
             _ring(d,(x,y),r,color,3)
             _star(d,x,y,10,white,5,p)
         if hit and phase == 'impact':
@@ -1237,9 +1715,9 @@ class WebBattleRenderer:
                 _line(d,a,tip,c,3)
                 _line(d,(tip[0]-5,tip[1]-5),(tip[0]+5,tip[1]+5),PAPER,2)
             elif effect in ('guard','shield','absorb'):
-                retro_support.draw_screen(img,b,p,
+                retro_support.draw_dome(img,b,p,
                     self.visual_config(self.view.units[source].u.piece.species_id),
-                    kind='reflect' if effect=='guard' else 'light_screen')
+                    element='STEEL' if effect=='guard' else 'ICE')
             elif effect in ('energy','energy_drain'):
                 c=(196,162,248)
                 _line(d,a,b,c,2)
@@ -1269,26 +1747,436 @@ class WebBattleRenderer:
             if not 0 <= age < .8:
                 continue
             xx,yy=self._old_point((x,y))
-            _text(d,(xx+29,yy-52-24*age/.8),text,18,color,anchor='ma',bold=True,stroke=2)
+            size,stroke,fill=18,2,color
+            if text.startswith('-'):
+                tier=self._cast_float_tiers.get((round(at,3),text))
+                if tier is None:
+                    # Basic attacks and chip damage stay quiet next to casts.
+                    size,stroke=15,1
+                else:
+                    element,eff=tier
+                    fill=arena_vfx.ELEMENT_COLORS.get(element,FULL_GOLD)
+                    size,stroke=(28,3) if eff>=2 else (24,3)
+            _text(d,(xx+29,yy-52-24*age/.8),text,size,fill,anchor='ma',bold=True,stroke=stroke)
+        for at,point in self._misses:
+            age=t-at
+            if 0 <= age < .8:
+                _text(d,(point[0]+29,point[1]-52-24*age/.8),'MISS',15,(198,208,198),
+                      anchor='ma',bold=True,stroke=1)
+
+    def _draw_impact_accents(self,img,t):
+        """Flash, ground shockwave and debris at each recent real impact."""
+        if not IMPACT_ACCENTS:
+            return
+        start=bisect_right(self._impact_times,t-.5)
+        end=bisect_right(self._impact_times,t+1e-9)
+        if start>=end:
+            return
+        layer=Image.new('RGBA',(WIDTH//3,HEIGHT//3))
+        d=ImageDraw.Draw(layer)
+        for i in range(start,end):
+            at,weight,pos,element=self._impacts[i]
+            age=t-at
+            p=age/.3
+            x0,y0=self.cell_point(pos)
+            y0-=30
+            x,y=x0/3,y0/3
+            rgb=_effect_color(arena_vfx.ELEMENT_COLORS.get(element,PAPER),'classic')
+            heavy=weight>=1.6
+            ko=weight>=2.4
+            if age<.12:
+                q=age/.12
+                r=(9 if heavy else 6)*(1+q*.6)
+                alpha=round(190*(1-q))
+                color=(255,255,255) if ko else rgb
+                d.ellipse((x-r,y-r*.9,x+r,y+r*.9),fill=(*color,alpha))
+                core=r*.45
+                d.ellipse((x-core,y-core*.9,x+core,y+core*.9),
+                          fill=(*PAPER,min(255,alpha+50)))
+            for j in range(2):
+                q=min(1.,p*1.6-j*.25)
+                if q<=0:
+                    continue
+                rr=(4+15*q)*(1.25 if heavy else 1.)
+                alpha=round(140*(1-q)*(.7 if j else 1.))
+                if alpha>0:
+                    d.ellipse((x-rr,y+7-rr*.32,x+rr,y+7+rr*.32),
+                              outline=(*rgb,alpha),width=1)
+            for j in (self._particles(6 if heavy else 4,1.) if p<1. else ()):
+                angle=(j*2.399+i*1.7)%math.tau
+                speed=70+(j*37%55)
+                vx=math.cos(angle)*speed
+                vy=-abs(math.sin(angle))*speed*.75-25
+                xx=(x0+vx*age)/3
+                yy=(y0+vy*age+450*age*age)/3
+                alpha=round(210*(1-p))
+                if alpha>0:
+                    d.rectangle((xx-1,yy-1,xx+1,yy+1),fill=(*rgb,alpha))
+            # A KO keeps a slower crack ring alive past the standard window.
+            if ko and age<.5:
+                q=age/.5
+                rr=8+30*q
+                alpha=round(170*(1-q))
+                if alpha>0:
+                    d.ellipse((x-rr,y+7-rr*.34,x+rr,y+7+rr*.34),
+                              outline=(*PAPER,alpha),width=2)
+                    for j in range(4):
+                        angle=(j*math.tau/4+i*.9)%math.tau
+                        d.line((x+math.cos(angle)*rr*.45,y+7+math.sin(angle)*rr*.15,
+                                x+math.cos(angle)*rr,y+7+math.sin(angle)*rr*.34),
+                               fill=(*rgb,alpha),width=2)
+        img.alpha_composite(layer.resize(img.size,Image.Resampling.NEAREST))
+
+    def _ult_overlay_state(self, t):
+        """(dim alpha, flash) of the ult palette performance; pure in t.
+
+        The field dims as a high-power cast winds up (Hyper Beam style), and
+        the impact frame runs a three-step white/black/white palette flicker.
+        Both cover only the field area; the HUD band is composited later.
+        """
+        dim = 0
+        flash = None
+        for start, release, impact, target, pos, element, seq in self._ults:
+            if start <= t < impact:
+                q = (t-start)/max(.001, impact-start)
+                dim = max(dim, round(_ULT_DIM_PEAK*q*q))
+            age = t-impact
+            if 0 <= age < len(_ULT_FLASH_ALPHAS)*.05:
+                flash = _ULT_FLASH_ALPHAS[int(age*20)]
+        return dim, flash
+
+    def _draw_ult_overlay(self, img, t):
+        """Full-field dim/flash for ults, drawn after the shake paste.
+
+        The overlay is translation-invariant, so it is safe to apply over the
+        shaken field; it stops at _HUD_BAND_TOP, and meters/HUD draw after it.
+        """
+        if not IMPACT_ULT:
+            return
+        dim, flash = self._ult_overlay_state(t)
+        if dim <= 0 and flash is None:
+            return
+        overlay = Image.new('RGBA', (WIDTH, _HUD_BAND_TOP))
+        d = ImageDraw.Draw(overlay)
+        if dim > 0:
+            d.rectangle((0, 0, WIDTH, _HUD_BAND_TOP), fill=(4, 8, 9, dim))
+        if flash is not None:
+            color, alpha = flash
+            d.rectangle((0, 0, WIDTH, _HUD_BAND_TOP), fill=(*color, alpha))
+        img.alpha_composite(overlay, (0, 0))
+
+    # Metronomic burst salvos: ring and cross templates alternate every
+    # _ULT_BURST_BEAT seconds, positions from a preset offset table plus
+    # jitter seeded by (action sequence, batch, particle).
+    _ULT_BURST_OFFSETS = (
+        ((0,-1),(1,0),(0,1),(-1,0),(.7,-.7),(.7,.7),(-.7,.7),(-.7,-.7)),
+        ((0,-1),(1,0),(0,1),(-1,0)),
+    )
+
+    def _draw_ult_bursts(self, img, t):
+        """Batched particle salvos after an ult hit; counts into the budget."""
+        if not IMPACT_ULT:
+            return
+        span = _ULT_BURST_BEAT*(_ULT_BURST_BATCHES-1)+_ULT_BURST_LIFE
+        rows = [row for row in self._ults if 0 <= t-row[2] < span]
+        if not rows:
+            return
+        layer = Image.new('RGBA', (WIDTH//3, HEIGHT//3))
+        d = ImageDraw.Draw(layer)
+        for start, release, impact, target, pos, element, seq in rows:
+            age = t-impact
+            x0, y0 = self.cell_point(pos)
+            y0 -= 30
+            rgb = _effect_color(arena_vfx.ELEMENT_COLORS.get(element, PAPER), 'classic')
+            for batch in range(_ULT_BURST_BATCHES):
+                bage = age-batch*_ULT_BURST_BEAT
+                if not 0 <= bage < _ULT_BURST_LIFE:
+                    continue
+                q = bage/_ULT_BURST_LIFE
+                offsets = self._ULT_BURST_OFFSETS[batch % 2]
+                reach = (26+batch*9)*(.35+.75*q)
+                # Each salvo opens with its own expanding ring (大字爆炎 beat).
+                if q < .55:
+                    rr = 10+40*q/.55+batch*5
+                    alpha = round(150*(1-q/.55))
+                    if alpha > 0:
+                        d.ellipse(((x0-rr)/3, (y0-rr*.5)/3, (x0+rr)/3, (y0+rr*.5)/3),
+                                  outline=(*rgb, alpha), width=1)
+                for i in self._particles(len(offsets), 1.):
+                    ox, oy = offsets[i % len(offsets)]
+                    jitter = random.Random(seq*131+batch*17+i*7)
+                    jx, jy = jitter.uniform(-2, 2), jitter.uniform(-1.5, 1.5)
+                    xx = x0/3+ox*reach/3+jx
+                    yy = y0/3+oy*reach*.55/3+jy-q*3
+                    alpha = round(230*(1-q))
+                    if alpha <= 0:
+                        continue
+                    s = 1 if i % 3 else 2
+                    d.rectangle((xx-s, yy-s, xx+s, yy+s), fill=(*rgb, alpha))
+                    if i % 3 == 0:
+                        d.rectangle((xx-.5, yy-.5, xx+.5, yy+.5),
+                                    fill=(*PAPER, min(255, alpha+25)))
+        img.alpha_composite(layer.resize(img.size, Image.Resampling.NEAREST))
+
+    def _ult_darken_factor(self, idx, t):
+        """Brightness multiplier for an ult target: dip near-black, pop back."""
+        if not IMPACT_ULT:
+            return 1.
+        factor = 1.
+        for start, release, impact, target, pos, element, seq in self._ults:
+            if target != idx:
+                continue
+            age = t-impact
+            if not 0 <= age < _ULT_DARKEN_WINDOW:
+                continue
+            q = age/_ULT_DARKEN_WINDOW
+            k = q/.3 if q < .3 else 1. if q < .65 else 1-(q-.65)/.35
+            factor = min(factor, 1-(1-_ULT_DARKEN_DEPTH)*max(0., min(1., k)))
+        return factor
+
+    def _entrance_squash(self, idx, t):
+        """A brief local settle as the landing drop ends; pure function of t."""
+        land = self._entrance_land.get(idx)
+        if land is None:
+            return 1.
+        age = t-land
+        if not 0 <= age < _ENTRANCE_SQUASH:
+            return 1.
+        return 1.-.06*(1-age/_ENTRANCE_SQUASH)
+
+    def _draw_entrances(self, img, t):
+        """Landing dust ring, faction flash and star motes at each opening deploy."""
+        rows = [row for row in self._entrances if 0 <= t-row[0] < .3]
+        if not rows:
+            return
+        layer = Image.new('RGBA', (WIDTH//3, HEIGHT//3))
+        d = ImageDraw.Draw(layer)
+        for land, idx, pos, team, star in rows:
+            age = t-land
+            p = age/.3
+            x0, y0 = self.cell_point(pos)
+            x, y = x0/3, (y0+2)/3
+            # Expanding dust ring dissolves within 0.3s.
+            rr = 5+24*p
+            alpha = round(150*(1-p))
+            if alpha > 0:
+                d.ellipse((x-rr, y-rr*.34, x+rr, y+rr*.34),
+                          outline=(218, 202, 149, alpha), width=2)
+            # Pixel grit kicked outward; every mote is a function of (idx, i, t).
+            for i in self._particles(5, .8):
+                angle = (i*2.399+idx*1.317) % math.tau
+                radius = 4+19*p
+                xx = x+math.cos(angle)*radius
+                yy = y+math.sin(angle)*radius*.4-p*2
+                shade = (163, 149, 107) if i % 2 else (218, 202, 149)
+                alpha = round(200*(1-p))
+                if alpha > 0:
+                    d.rectangle((xx-1, yy-1, xx+1, yy), fill=(*shade, alpha))
+            # Faction flash: a short team-coloured ring hugging the base.
+            if age < .2:
+                q = age/.2
+                color = ALLY if team == 0 else ENEMY
+                rr = 9+8*q
+                d.ellipse((x-rr, y-rr*.36, x+rr, y+rr*.36),
+                          outline=(*color, round(210*(1-q))), width=2)
+            # Three-star arrivals scatter a few gold motes.
+            if star >= 3:
+                for i in range(3):
+                    angle = i*math.tau/3+idx*.71
+                    xx = x+math.cos(angle)*(6+9*p)
+                    yy = y-2-p*7-math.sin(angle)*2
+                    alpha = round(220*(1-p))
+                    if alpha > 0:
+                        _star(d, xx, yy, 2.2, (*FULL_GOLD, alpha))
+        img.alpha_composite(layer.resize(img.size, Image.Resampling.NEAREST))
+
+    def _topple(self, sprite, left, top, x, y, au, t):
+        """The body tips around its foot anchor toward the killing blow."""
+        ko = self._ko_by_idx.get(au.u.idx)
+        if ko is None:
+            return sprite, left, top
+        k = min(1., max(0., t-au.die_t)/_TOPPLE_TIME)
+        k = 1-(1-k)*(1-k)
+        theta = -21*k if ko[4] >= 0 else 21*k
+        rotated = sprite.rotate(theta, resample=Image.Resampling.NEAREST, expand=True)
+        rad = math.radians(theta)
+        ax, ay = x-left, y-top
+        cx, cy = sprite.width/2, sprite.height/2
+        nx = rotated.width/2+(ax-cx)*math.cos(rad)+(ay-cy)*math.sin(rad)
+        ny = rotated.height/2-(ax-cx)*math.sin(rad)+(ay-cy)*math.cos(rad)
+        slide = 6*k
+        fx = x+ko[4]*slide
+        fy = y+abs(ko[5])*slide*.5+2*k
+        return rotated, round(fx-nx), round(fy-ny)
+
+    @staticmethod
+    @lru_cache(maxsize=1)
+    def _ko_card_art():
+        """Chunky pixel plaque, authored small and upscaled with NEAREST."""
+        card = Image.new('RGBA', (86, 32))
+        d = ImageDraw.Draw(card)
+        d.rounded_rectangle((1, 5, 84, 30), radius=4, fill=(16, 33, 35, 235),
+                            outline=(255, 214, 111), width=1)
+        _text(d, (43, 7), '击倒', 15, (255, 226, 130), anchor='ma', bold=True, stroke=1)
+        return card.resize((172, 64), Image.Resampling.NEAREST)
+
+    def _draw_ko_cards(self, img, t):
+        """A popping '击倒' card over each fresh KO; never reaches the HUD band."""
+        rows = [row for row in self._ko_shows if 0 <= t-row[0] < _KO_CARD_LIFE]
+        if not rows:
+            return
+        card = self._ko_card_art()
+        for die_t, idx, pos, team, dx, dy in rows:
+            age = t-die_t
+            x0, y0 = self.cell_point(pos)
+            pop = 1.+.25*max(0., 1-age/.1)
+            w, h = round(card.width*pop), round(card.height*pop)
+            frame = card.resize((w, h), Image.Resampling.NEAREST)
+            alpha = round(255*min(1., (_KO_CARD_LIFE-age)/.15))
+            if alpha < 255:
+                frame = frame.copy()
+                frame.putalpha(frame.getchannel('A').point(lambda value: value*alpha//255))
+            px = min(max(round(x0-w/2), 8), WIDTH-8-w)
+            py = max(64, round(y0-96-h))
+            img.alpha_composite(frame, (px, py))
+
+    def _draw_ambient(self,img,t):
+        """Low-density ambient motes behind the units, seeded and looped."""
+        if not AMBIENT_PARTICLES:
+            return
+        name=self.view.weather_name
+        layer=Image.new('RGBA',(WIDTH//3,HEIGHT//3))
+        d=ImageDraw.Draw(layer)
+        frame=math.floor(t*20)
+        if name=='rain':
+            # Distant drizzle sheet sits behind the units: drawn straight onto
+            # the field here, before any actor is pasted. Palette grey-blue,
+            # one step above the rain tiles; integer pixels per 20fps frame.
+            back=ImageDraw.Draw(img)
+            for i in self._particles(8,1.):
+                x=(140+i*97+frame*7)%720
+                y=(100+i*67+frame*11)%470
+                _line(back,(x,y),(x-2,y+8),(108,130,138),1)
+            # Low mist rings step through three discrete sizes, never a
+            # continuous fade, so they read as pixel animation.
+            for i in self._particles(6,.8):
+                x=(53+i*97)%320
+                y=118+(i*53)%72
+                stage=((frame+i*5)%12)//4
+                r=2+stage*2
+                alpha=(66,46,28)[stage]
+                d.ellipse((x-r,y-r*.4,x+r,y+r*.4),
+                          outline=(120,150,160,alpha),width=1)
+            # Raindrop landing ripples: seeded ground spots expanding through
+            # three fixed pixel sizes instead of a smooth alpha gradient.
+            for i in self._particles(7,.8):
+                spot=random.Random(911+i)
+                x=spot.randrange(38,282)
+                y=spot.randrange(84,178)
+                stage=((frame+i*11)%24)//3
+                if stage<3:
+                    r=1+stage*2
+                    alpha=(120,84,52)[stage]
+                    d.ellipse((x-r,y-r*.35,x+r,y+r*.35),
+                              outline=(146,174,182,alpha),width=1)
+        elif name=='sun':
+            for i in self._particles(10,.8):
+                x=(37+i*61+frame)%320
+                y=(60+(i*41)%120+frame//4)%213
+                twinkle=.5+.5*math.sin(t*2+i*1.7)
+                d.point((x,y),fill=(245,230,160,round(70+60*twinkle)))
+            # Drifting light patches on the ground, barely above the tiles.
+            for i in self._particles(4,.8):
+                spot=random.Random(311+i)
+                y=spot.randrange(96,172)
+                x=(spot.randrange(0,320)+frame//7+i*47)%320
+                rx=16+spot.randrange(0,14)
+                pulse=.5+.5*math.sin(t*.4+i*1.3)
+                d.ellipse((x-rx,y-rx*.3,x+rx,y+rx*.3),
+                          fill=(246,233,174,round(8+8*pulse)))
+        elif name=='sand':
+            for i in self._particles(8,.8):
+                x=(29+i*83+frame*3)%320
+                y=150+(i*37)%50
+                d.line((x,y,x+4,y-1),fill=(210,181,124,90),width=1)
+            # Long horizontal drifts of blown sand along the ground.
+            for i in self._particles(5,.8):
+                spot=random.Random(511+i)
+                y=spot.randrange(140,186)
+                x=(spot.randrange(0,320)+frame*2+i*61)%340-20
+                d.line((x,y,x+13,y),fill=(214,186,130,64),width=1)
+                d.line((x+4,y+1,x+9,y+1),fill=(196,166,108,44),width=1)
+        elif name!='hail':
+            for i in self._particles(8,.7):
+                x=(47+i*89)%320
+                y=150+(i*43)%45+math.sin(t*.8+i*2.1)*3
+                twinkle=.5+.5*math.sin(t*1.3+i*2.7)
+                d.point((x,y),fill=(218,202,149,round(50+50*twinkle)))
+        img.alpha_composite(layer.resize(img.size,Image.Resampling.NEAREST))
+
+    def _draw_weather_transition(self,img,t):
+        """Each recorded weather change pulses a 0.5s tint and pops a pixel icon.
+
+        The tint stops above the HUD band; the icon lives beside the title and
+        dissolves within a second. Pure function of (t, change index).
+        """
+        for change_t,name in self._weather_changes:
+            age=t-change_t
+            if not 0<=age<_WEATHER_ICON_LIFE:
+                continue
+            if age<_WEATHER_TRANSITION:
+                tint=_WEATHER_TINTS.get(name,_WEATHER_TINTS[None])
+                alpha=round(_WEATHER_TINT_PEAK*math.sin(math.pi*age/_WEATHER_TRANSITION))
+                if alpha>0:
+                    img.alpha_composite(
+                        Image.new('RGBA',(WIDTH,_HUD_BAND_TOP),(*tint,alpha)),(0,0))
+            if name in WEATHER_NAMES:
+                icon=_weather_icon(name)
+                fade=min(1.,(_WEATHER_ICON_LIFE-age)/.25)
+                if fade<1.:
+                    icon=icon.copy()
+                    icon.putalpha(icon.getchannel('A').point(lambda a:round(a*fade)))
+                img.alpha_composite(icon,(528,10))
 
     def _draw_weather(self,img,t):
         name=self.view.weather_name
+        self._draw_weather_transition(img,t)
         if name not in WEATHER_NAMES:
             return
         d=ImageDraw.Draw(img)
         _text(d,(560,16),WEATHER_NAMES[name] + (' · 双方共享' if self.anim.is_arena else ''),10,(219,219,168),anchor='la')
         frame=math.floor(t*20)
-        for i in range(12):
-            x=120+(i*61+frame*(5 if name=='sand' else 1))%718
-            y=115+(i*47+frame*(18 if name=='rain' else 5))%460
-            if name=='rain':
-                _line(d,(x,y),(x-4,y+15),(134,193,215),1)
-            elif name=='hail':
-                _star(d,x,y,3,(210,239,242))
-            elif name=='sand':
-                _line(d,(x,y),(x+7,y-2),(210,181,124),2)
-            else:
-                _star(d,x,y,2,(245,220,153))
+        if name=='rain':
+            # Foreground pass only: a sparse fast sheet in front of the units
+            # (the distant drizzle is drawn behind them in _draw_ambient).
+            # Palette grey-blue, 1px streaks, integer pixels per 20fps frame.
+            for i in self._particles(6,1.):
+                x=(120+i*131+frame*12)%718
+                y=(110+i*89+frame*19)%460
+                _line(d,(x,y),(x-4,y+14),(146,172,180),1)
+        elif name=='hail':
+            for i in self._particles(10,1.):
+                drop=random.Random(733+i)
+                top=70+drop.randrange(0,110)
+                ground=300+drop.randrange(0,220)
+                x=130+(i*67+drop.randrange(0,40))%700
+                # Frame-quantised fall: whole pixels per frame, no subpixel
+                # drift; chips kick for five frames after landing.
+                pf=(frame+i*17)%40
+                if pf<34:
+                    _star(d,x,top+pf*(ground-top)//34,3,(210,239,242))
+                elif pf<39:
+                    spread=2+(pf-34)*2
+                    _line(d,(x-spread,ground),(x-spread+2,ground-1),(210,239,242),1)
+                    _line(d,(x+spread-2,ground-1),(x+spread,ground),(190,220,228),1)
+        else:
+            for i in self._particles(12,1.):
+                x=120+(i*61+frame*(5 if name=='sand' else 1))%718
+                y=115+(i*47+frame*5)%460
+                if name=='sand':
+                    _line(d,(x,y),(x+7,y-2),(210,181,124),2)
+                else:
+                    _star(d,x,y,2,(245,220,153))
 
     def _draw_hud(self,img,t):
         d=ImageDraw.Draw(img)
@@ -1332,20 +2220,56 @@ class WebBattleRenderer:
             _line(d,(536,335),(586,335),(212,207,148),2)
 
     def frame(self,seconds):
-        t=self.anim.timeline.time(seconds)
+        """Sim-clock frame: second s shows simulation time s (authoring contract)."""
+        return self._render_frame(self.anim.timeline.time(seconds))
+
+    def frame_playback(self,seconds):
+        """Presentation-clock frame: heavy impacts hold for a short dwell."""
+        return self._render_frame(self.anim.timeline.time(self._warp(seconds)))
+
+    def presentation_time(self,t):
+        """Inverse of _warp: first playback second showing simulation time t."""
+        if len(self._warp_segments) == 1:
+            return t
+        index = max(0, bisect_left([s[1] for s in self._warp_segments], t)-1)
+        pres, sim, slope = self._warp_segments[index]
+        if slope == 0.:
+            return pres
+        return pres + (t-sim)/slope
+
+    def _render_frame(self,t):
         self.view._ensure(t)
         self._frame_art={}
         self._particle_used=0
-        img=_background(self.view.weather_name).convert('RGBA')
-        self._draw_terrain(img,t)
+        base=_background(self.view.weather_name).convert('RGBA')
+        field=base.copy()
+        self._draw_terrain(field,t)
+        self._draw_ambient(field,t)
+        self._draw_entrances(field,t)
         shown=self._shown(t)
         try:
             for _,au,x,y,pose in shown:
-                self._draw_unit(img,au,x,y,t)
-            self._draw_actions(img,t)
-            self._draw_outcomes(img,t)
-            self._draw_numbers(img,t)
-            self._draw_weather(img,t)
+                self._draw_unit(field,au,x,y,t)
+            self._draw_actions(field,t)
+            self._draw_impact_accents(field,t)
+            self._draw_ult_bursts(field,t)
+            self._draw_outcomes(field,t)
+            self._draw_numbers(field,t)
+            self._draw_ko_cards(field,t)
+            self._draw_weather(field,t)
+            # Only the battlefield shakes; readouts stay registered to the grid.
+            offset=self._shake_offset(t)
+            if offset!=(0,0):
+                img=base
+                img.paste(field,offset,field)
+                # The HUD band is never shaken: restore it byte-identically so
+                # even the wider ult sway cannot leak field pixels into it.
+                img.paste(base.crop((0,_HUD_BAND_TOP,WIDTH,HEIGHT)),(0,_HUD_BAND_TOP))
+            else:
+                img=field
+            # Full-field ult dim/flash sits above the (shaken) field but below
+            # the readouts; it is translation-invariant and stops at the band.
+            self._draw_ult_overlay(img,t)
             # Readouts are always the final field layer, protected from effects.
             for _,au,x,y,pose in shown:
                 self._draw_meter(img,au,x,y,t)

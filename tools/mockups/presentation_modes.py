@@ -1,6 +1,6 @@
 """One presentation contract for the trial, authoring tools and exported evidence."""
 
-WEB_BATTLE_REVISION = 'web-arena-v13-synergy-r1'
+WEB_BATTLE_REVISION = 'web-arena-v14-impact-r7'
 CLASSIC_REVISION = 'device-v1'
 
 
@@ -41,6 +41,15 @@ class PresentationRenderer:
     def frame(self, seconds, *, show_cutins=True):
         return (self.renderer.frame(seconds) if self.renderer else
                 self.anim.playback_frame(seconds, show_cutins=show_cutins))
+
+    def frame_playback(self, seconds, *, show_cutins=True):
+        """Audience clock: arena battles hold heavy impacts for a short dwell."""
+        return (self.renderer.frame_playback(seconds) if self.renderer else
+                self.anim.playback_frame(seconds, show_cutins=show_cutins))
+
+    def playback_time(self, t):
+        """Playback second at which simulation time t appears (warp inverse)."""
+        return self.renderer.presentation_time(t) if self.renderer else t
 
     @property
     def metrics(self):

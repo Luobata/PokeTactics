@@ -201,19 +201,32 @@ def _lightning_route(layer, source, end, colors, scale, progress):
     length = math.hypot(dx, dy) or 1.
     nx, ny = -dy/length, dx/length
     tick = round(progress*12)
+    ux, uy = dx/length, dy/length
     points = []
     for index in range(13):
-        jitter = (1 if (index+tick) % 2 else -1)*(4+index % 3)*scale
+        jitter = (1 if (index+tick) % 2 else -1)*(5+(index*5+tick) % 4)*scale
         if index in (0, 12):
             jitter = 0
         points.append((source[0]+dx*index/12+nx*jitter,
                        source[1]+dy*index/12+ny*jitter))
     points[0], points[-1] = source, end
+    # A dark outer envelope carries the hot white-yellow core. Main chains call
+    # with a larger scale than side links, so one width table reads stronger.
+    rp.line(layer, points, colors[0], 14*scale)
     rp.line(layer, points, colors[1], 9*scale)
     rp.line(layer, points, colors[3], 6*scale)
     rp.line(layer, points, colors[4], 3*scale)
+    for joint, side in ((4, 1), (8, -1)):
+        a = points[joint]
+        branch = (a, _offset(a, nx*side*13*scale+ux*7*scale,
+                             ny*side*13*scale+uy*7*scale),
+                  _offset(a, nx*side*8*scale+ux*16*scale,
+                          ny*side*8*scale+uy*16*scale))
+        rp.line(layer, branch, colors[1], 5*scale)
+        rp.line(layer, branch, colors[3], 2*scale)
     for index in (3, 8):
         _sprite(layer, 'spark', points[index], colors, scale*.19, tick+index)
+    _sprite(layer, 'spark', end, colors, scale*.24, tick+5)
 
 
 def _ribbon(brush, path, widths, color):
@@ -249,18 +262,22 @@ def _pressure_wave(layer, at, colors, age, scale, variant):
                 angle = (-.85+j/30*1.7)*math.pi+(index*.72+q*.60)
                 path.append((math.cos(angle)*radius,
                              math.sin(angle)*radius*.39+(index-.5)*8))
-            _ribbon(b, path, [2.7+math.sin(j/30*math.pi)*1.3 for j in range(31)], colors[1])
-            _ribbon(b, path[:25], 1.7, colors[2])
-            _ribbon(b, path[3:16], .8, colors[3])
+            widths = [4.1+math.sin(j/30*math.pi)*1.9 for j in range(31)]
+            _ribbon(b, path, [w+1.5 for w in widths], colors[0])
+            _ribbon(b, path, widths, colors[1])
+            _ribbon(b, path[:25], 2.5, colors[2])
+            _ribbon(b, path[3:16], 1.1, colors[3])
     elif variant == 'psychic_blink':
         # Two bowed pressure shoulders squeeze, then peel back from the actor.
         pinch = math.sin(min(1., age/.26)*math.pi)*6
         for sign in (-1, 1):
             path = [(sign*(22-pinch+math.sin(j/22*math.pi)*6+q*5),
                      -27+j/22*54) for j in range(23)]
-            _ribbon(b, path, [3.8-math.sin(j/22*math.pi)*1.4 for j in range(23)], colors[1])
-            _ribbon(b, path[2:21], 2.1, colors[2])
-            _ribbon(b, path[4:13], .9, colors[3])
+            widths = [5.6-math.sin(j/22*math.pi)*2.0 for j in range(23)]
+            _ribbon(b, path, [w+1.6 for w in widths], colors[0])
+            _ribbon(b, path, widths, colors[1])
+            _ribbon(b, path[2:21], 3.0, colors[2])
+            _ribbon(b, path[4:13], 1.2, colors[3])
         for sign in (-1, 1):
             b.line(((sign*10, -17-q*9), (sign*17, -21-q*7)), colors[3], 1)
     else:
@@ -273,9 +290,10 @@ def _pressure_wave(layer, at, colors, age, scale, variant):
                 radius = 22+index*6+q*8
                 x, y = math.cos(angle)*radius, math.sin(angle)*radius*.66
                 path.append((x+sign*(5-q*3), y+x*.20))
-            _ribbon(b, path, 3.5, colors[1])
-            _ribbon(b, path[2:23], 2.1, colors[2])
-            _ribbon(b, path[5:16], .8, colors[4])
+            _ribbon(b, path, 6.4, colors[0])
+            _ribbon(b, path, 5.0, colors[1])
+            _ribbon(b, path[2:23], 3.0, colors[2])
+            _ribbon(b, path[5:16], 1.1, colors[4])
     # The old bands stayed large up to .70s and blinked out. Break their
     # contours and steadily shrink the hard-edged residue on this same clock.
     if age > .52:
@@ -286,37 +304,69 @@ def _pressure_wave(layer, at, colors, age, scale, variant):
     rp.put(layer,image,at,scale*(.66-.24*q)*collapse)
 
 def _electric_contact(layer, at, colors, age, scale, density, thunder=False):
-    """Thunderbolt's quick narrow snaps vs. Thunder's heavy delayed column."""
+    """Spark Chain's short bent lash arcs vs. Thunder's heavy delayed column."""
     delays = (0., .055, .125) if not thunder else (0., .11, .25, .36)
     for index, delay in enumerate(delays):
         local = age-delay
         life = .15 if not thunder else .17
         if not 0 <= local < life:
             continue
-        lateral = (-14, 13, 0, -7)[index]*scale
-        height = (82 if thunder else 55)*scale
-        start = _offset(at, lateral, -height)
-        end = _offset(at, lateral*.15, 3*scale)
-        path = []
         tick = round(local*45)
-        for j in range(8):
-            q = j/7
-            zig = (11 if (j+index+tick) % 2 else -9)*scale if j not in (0, 7) else 0
-            path.append((start[0]+(end[0]-start[0])*q+zig,
-                         start[1]+(end[1]-start[1])*q))
-        # A short heavy dark envelope carries a narrow hot edge; the main
-        # discharge has physical width without a huge white target silhouette.
-        rp.line(layer, path, colors[0], (19 if thunder else 12)*scale)
-        rp.line(layer, path, colors[1], (14 if thunder else 9)*scale)
-        rp.line(layer, path, colors[3], (8 if thunder else 5)*scale)
-        rp.line(layer, path, colors[4], 3*scale)
         if thunder:
+            lateral = (-14, 13, 0, -7)[index]*scale
+            height = 82*scale
+            start = _offset(at, lateral, -height)
+            end = _offset(at, lateral*.15, 3*scale)
+            path = []
+            for j in range(8):
+                q = j/7
+                zig = (11 if (j+index+tick) % 2 else -9)*scale if j not in (0, 7) else 0
+                path.append((start[0]+(end[0]-start[0])*q+zig,
+                             start[1]+(end[1]-start[1])*q))
+            # A short heavy dark envelope carries a narrow hot edge; the main
+            # discharge has physical width without a huge white target silhouette.
+            rp.line(layer, path, colors[0], 19*scale)
+            rp.line(layer, path, colors[1], 14*scale)
+            rp.line(layer, path, colors[3], 8*scale)
+            rp.line(layer, path, colors[4], 3*scale)
             for joint, side in ((2, -1), (5, 1)):
                 a = path[joint]
                 branch = (a, _offset(a, side*15*scale, 6*scale),
                           _offset(a, side*11*scale, 16*scale))
                 rp.line(layer, branch, colors[1], 6*scale)
                 rp.line(layer, branch, colors[3], 3*scale)
+        else:
+            # The chain lands as a short solid arc that whips around the body:
+            # a bowed dark envelope with a lit mid band and a hot core, kept low
+            # and quick so it never reads as Thunder's tall sky column.
+            side = (-1, 1, -1)[index]
+            start = _offset(at, side*23*scale, -24*scale)
+            bend = _offset(at, side*31*scale, -1*scale)
+            end = _offset(at, -side*5*scale, 15*scale)
+            path = []
+            for j in range(7):
+                q = j/6
+                bx = (1-q)*(1-q)*start[0]+2*(1-q)*q*bend[0]+q*q*end[0]
+                by = (1-q)*(1-q)*start[1]+2*(1-q)*q*bend[1]+q*q*end[1]
+                snap = ((1 if (j+index+tick) % 2 else -1)*(4 if j % 2 else 3)*scale
+                        if j not in (0, 6) else 0)
+                path.append((bx-snap*side, by+snap*.4))
+            rp.line(layer, path, colors[0], 13*scale)
+            rp.line(layer, path, colors[1], 8*scale)
+            rp.line(layer, path, colors[2], 5*scale)
+            rp.line(layer, path, colors[4], 3*scale)
+            if index == 0 and local < .08:
+                # Compressed hot knot at the first touch; it shrinks in place.
+                image, draw, center = rp.cel(24)
+                b = _Brush(draw, center)
+                radius = 9-local/.08*4
+                b.poly(((0, -radius), (radius*.7, 0), (0, radius),
+                        (-radius*.7, 0)), colors[1])
+                inner = radius*.5
+                b.poly(((0, -inner), (inner*.7, 0), (0, inner),
+                        (-inner*.7, 0)), colors[4])
+                rp.put(layer, image, _offset(at, 0, 2*scale),
+                       scale*(1.-local/.08*.4))
         _discharge_rim(layer, at, colors, local, scale*(1. if thunder else .69), thunder)
     # Residue moves around the actor's contour and rises; not a spoke fan.
     for index in range(max(4, round(6*density))):
@@ -390,17 +440,17 @@ def _poison_contact(layer, at, colors, age, scale, density, *, sludge=False):
         image, draw, center = rp.cel(64)
         b = _Brush(draw, center)
         q = age/duration
-        radius=(12+q*(17 if sludge else 8))
+        radius=(12+q*(18 if sludge else 11))
         # Irregular lobes surround a clear center; a low lit wet face has depth.
         path=[]
         for j in range(37):
             angle=j/36*math.tau
             r=radius*(1+.13*math.sin(angle*5+age*13))
             path.append((math.cos(angle)*r,math.sin(angle)*r*.53))
-        _ribbon(b,path,[(4.8 if sludge else 3.5)*(1-q*.40) for _ in path],colors[0])
-        _ribbon(b,path[1:35],(3.3 if sludge else 2.2)*(1-q*.35),colors[1])
-        _ribbon(b,path[3:22],1.8,colors[2])
-        _ribbon(b,path[5:13],.8,colors[3])
+        _ribbon(b,path,[(5.4 if sludge else 4.6)*(1-q*.40) for _ in path],colors[0])
+        _ribbon(b,path[1:35],(3.8 if sludge else 3.0)*(1-q*.35),colors[1])
+        _ribbon(b,path[3:22],2.2,colors[2])
+        _ribbon(b,path[5:13],1.0,colors[3])
         for sign in (-1,1):
             x=sign*(radius-4)
             b.poly(((x-3,1),(x-4,7+q*6),(x,12+q*6),(x+3,8),(x+2,1)),colors[1])
@@ -414,14 +464,14 @@ def _poison_contact(layer, at, colors, age, scale, density, *, sludge=False):
                 x=sign*(15+local*(53+index%3*12))*scale
                 y=(-10-local*43+local*local*147)*scale
                 _sprite(layer,'sludge',_offset(at,x,y),colors,
-                        scale*(.27-local*.33),index,sign*local*70)
+                        scale*(.34-local*.40),index,sign*local*70)
         born=.10+(index%4)*.055
         local=age-born
         if 0<=local<.36:
             x=((index*17)%43-21+math.sin(local*11+index)*4)*scale
             y=(8-local*95+(index%2)*7)*scale
             _sprite(layer,'bubble',_offset(at,x,y),colors,
-                    scale*(.22+.06*math.sin(local*8)),index+round(age*35))
+                    scale*(.26+.07*math.sin(local*8)),index+round(age*35))
 
 def _water_contact(layer, source, at, colors, age, scale, density, *, narrow=False):
     retro_water.curling_splash(layer, source, at, colors, age,
@@ -485,21 +535,21 @@ def _eruption_contact(layer, at, colors, age, scale, density):
         landing = _offset(at, x, (index % 3-1)*7*scale)
         if local < 0:
             _sprite(layer, 'rock', _offset(landing, 0, local*360*scale), colors,
-                    scale*(.29+index % 2*.06), index)
+                    scale*(.36+index % 2*.07), index)
         else:
             if local < .16:
                 bounce = -math.sin(local*math.pi/.16)*8*scale
                 _sprite(layer, 'rock', _offset(landing, 0, bounce), colors,
-                        scale*((.48 if index==0 else .30)-local*.78),index)
+                        scale*((.60 if index==0 else .38)-local*.85),index)
             for chip in range(3):
                 angle = chip*math.tau/3+index*.9
                 distance = (4+local*83)*scale
                 pos = _offset(landing, math.cos(angle)*distance,
                               math.sin(angle)*distance*.5+local*local*48*scale)
-                _sprite(layer, 'chip', pos, colors, scale*(.23-local*.33), chip)
+                _sprite(layer, 'chip', pos, colors, scale*(.27-local*.36), chip)
             if local < .24:
                 _sprite(layer,'flame',_offset(landing,0,-local*30*scale),
-                        colors,scale*(.37-local*.66),round(local*40))
+                        colors,scale*(.46-local*.72),round(local*40))
 
 
 def _whirlpool_contact(layer, at, colors, age, scale, density):
@@ -539,7 +589,7 @@ def _windup(layer, key, source, target, colors, scale, density, p, emitters):
             x = math.sin(angle)*local*58*scale
             y = (-math.sin(min(1., local/.76)*math.pi)*44-7)*scale
             _sprite(layer, 'rock', _offset(source, x, y), colors,
-                    scale*(.32 if index==1 else .20+index%2*.04),index)
+                    scale*(.42 if index==1 else .27+index%2*.05),index)
     elif key == 'venom_armor':
         image, draw, center = rp.cel(48)
         b = _Brush(draw, center)
@@ -548,22 +598,22 @@ def _windup(layer, key, source, target, colors, scale, density, p, emitters):
             width=14+math.sin(p*8+index)*3
             path=[(math.cos(j/18*math.pi)*width,
                    y+math.sin(j/18*math.pi)*(4+index)) for j in range(19)]
-            _ribbon(b,path,3.7,colors[0])
-            _ribbon(b,path,2.7,colors[1])
-            _ribbon(b,path[2:14],1.5,colors[2])
-            _ribbon(b,path[4:10],.7,colors[3])
+            _ribbon(b,path,4.6,colors[0])
+            _ribbon(b,path,3.4,colors[1])
+            _ribbon(b,path[2:14],2.0,colors[2])
+            _ribbon(b,path[4:10],.9,colors[3])
         rp.put(layer,image,source,scale*.65)
     elif key == 'venom_tide':
         _sprite(layer,'sludge',_offset(source,0,-6*scale),colors,
-                scale*(.24+.16*p),step)
+                scale*(.30+.18*p),step)
         for index in (-1,1):
             _sprite(layer,'bubble',_offset(source,index*(20-p*6)*scale,
                                            (-2-p*8)*scale),colors,
-                    scale*(.16+.05*p),step+index)
+                    scale*(.20+.06*p),step+index)
     elif key == 'toxic_spines':
         for index in range(3):
             _sprite(layer, 'needle', _offset(source, 0, (index-1)*7*scale),
-                    colors, scale*(.17+.07*p), index, _heading(source, target))
+                    colors, scale*(.23+.08*p), index, _heading(source, target))
     elif key == 'charged_beacon':
         _zap_orb(layer, source, colors, scale*(.45+.40*p), p)
     elif key == 'shadow_siphon':
@@ -575,11 +625,12 @@ def _windup(layer, key, source, target, colors, scale, density, p, emitters):
                                            math.sin(a)*radius*.7), colors,
                     scale*.08, step+index)
     elif key in ('spark_chain', 'storm_conductor'):
+        # Orbiting sparks pull inward and swell as the charge is gathered.
         for index in range(3 if key == 'spark_chain' else 5):
             a = index*math.tau/5+p*2
-            _sprite(layer, 'spark', _offset(source, math.cos(a)*18*scale,
-                                          math.sin(a)*22*scale), colors,
-                    scale*.17, step+index)
+            _sprite(layer, 'spark', _offset(source, math.cos(a)*(24-7*p)*scale,
+                                          math.sin(a)*(28-8*p)*scale), colors,
+                    scale*(.15+.06*p), step+index)
     elif key == 'dragon_crosscurrent':
         for index in (-1, 1):
             _sprite(layer, 'water', _offset(source, index*11*scale,
@@ -599,7 +650,7 @@ def _flight(layer, key, source, target, colors, scale, density, p, emitters):
     at = rp.point(source, target, p)
     heading = _heading(source, target)
     if key == 'spark_chain':
-        _lightning_route(layer, source, at, colors, scale*.68, p)
+        _lightning_route(layer, source, at, colors, scale*.92, p)
     elif key == 'shadow_siphon':
         # AnimShadowBall advances, pauses briefly, then accelerates to target.
         travel = (p/.38*.46 if p < .38 else .46 if p < .62
@@ -625,7 +676,7 @@ def _flight(layer, key, source, target, colors, scale, density, p, emitters):
             center = rp.point(source, target, q)
             arc = -math.sin(q*math.pi)*(24+index % 3*6)*scale
             _sprite(layer, 'sludge', _offset(center, 0, arc), colors,
-                    scale*(.30-index*.018), index)
+                    scale*(.42-index*.024), index)
     elif key == 'storm_conductor':
         # Thunder originates above the actual target. The descending leader is
         # still above the victim until the authoritative impact phase starts.
@@ -644,7 +695,7 @@ def _flight(layer, key, source, target, colors, scale, density, p, emitters):
             q = max(0., p-index*.07)
             center = rp.point(source, target, q)
             center = _offset(center, 0, -math.sin(q*math.pi)*(26+index*7)*scale)
-            _sprite(layer,'needle',center,colors,scale*(.35-index*.035),index,
+            _sprite(layer,'needle',center,colors,scale*(.44-index*.04),index,
                     heading+math.cos(q*math.pi)*18)
     elif key == 'charged_beacon':
         _zap_orb(layer, at, colors, scale, p)
@@ -655,7 +706,7 @@ def _flight(layer, key, source, target, colors, scale, density, p, emitters):
             center = _offset(center, (index % 3-1)*math.sin(q*math.pi)*20*scale,
                              -math.sin(q*math.pi)*(64+index % 3*9)*scale)
             _sprite(layer,'rock',center,colors,
-                    scale*(.47 if index==0 else .27+index%2*.055),index)
+                    scale*(.58 if index==0 else .34+index%2*.06),index)
     elif key == 'dragon_crosscurrent':
         _beam(layer, source, at, colors, scale*.82, p, 0, density)
     elif key == 'undertow_lock':
@@ -684,19 +735,19 @@ def _contact(layer, key, source, target, colors, scale, density, age, emitters, 
     elif key == 'shadow_siphon':
         if age < .17:
             image=_tile('shadow',colors,round(age*40))
-            image=image.resize((image.width+round(age*45),
-                                max(18,image.height-round(age*60))),Image.Resampling.NEAREST)
-            rp.put(layer,image,target,local*(.61-age*1.25))
-        for index in range(max(3,round(4*density))):
+            image=image.resize((image.width+round(age*60),
+                                max(18,image.height-round(age*70))),Image.Resampling.NEAREST)
+            rp.put(layer,image,target,local*(.72-age*1.35))
+        for index in range(max(3,round(5*density))):
             born=.025+(index%3)*.045
             elapsed=age-born
             if not 0<=elapsed<.51:
                 continue
             sign=-1 if index%2 else 1
-            x=sign*(13+elapsed*42+math.sin(elapsed*9+index)*5)*local
-            y=(-7-elapsed*(32+index%3*13))*local
+            x=sign*(15+elapsed*50+math.sin(elapsed*9+index)*6)*local
+            y=(-8-elapsed*(38+index%3*15))*local
             _sprite(layer,'smoke',_offset(target,x,y),colors,
-                    local*(.38-elapsed*.38),round(age*24)+index,sign*elapsed*48)
+                    local*(.55-elapsed*1.05),round(age*24)+index,sign*elapsed*48)
     elif key in BODY_ONLY_FLIGHTS:
         _pressure_wave(layer, target, colors, age, local, key)
     elif key == 'venom_armor':
@@ -709,7 +760,7 @@ def _contact(layer, key, source, target, colors, scale, density, age, emitters, 
             if 0 <= local_age < .14:
                 recipient = _offset(target, (index-1)*9*local, (index-1)*7*local)
                 _sprite(layer, 'needle', recipient, colors,
-                        local*(.27-local_age), index, _heading(source, target))
+                        local*(.40-local_age*1.2), index, _heading(source, target))
         _poison_contact(layer, target, colors, age, local*.80, density)
     elif key == 'flame_guard':
         _fire_spread(layer, target, colors, age, local, density)

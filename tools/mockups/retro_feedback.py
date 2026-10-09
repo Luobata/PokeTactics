@@ -8,17 +8,20 @@ from PIL import Image
 PSYCHIC = frozenset(('psychic_blink', 'slow_field', 'fracture_vision'))
 
 
-def body_cue(key, progress, *, receiving=False, motion_scale=1.):
+def body_cue(key, progress, *, receiving=False, motion_scale=1., weight=1.):
     """Return scale and palette pulse; progress is relative to a real action."""
     if not 0 <= progress < 1:
         return 1., 1., None, 0.
     if receiving:
         # Hold the compressed impact pose for 55ms, then recover within 240ms.
+        # Heavier hits compress further and flash brighter, within caps.
         strength = 1. if progress < .23 else (1-progress)/.77
-        amount = strength * motion_scale
+        amount = strength * motion_scale * weight
         if key in PSYCHIC:
-            return 1+.14*amount, 1-.15*amount, (222, 169, 255), .42*strength
-        return 1+.07*amount, 1-.09*amount, (255, 247, 208), .38*strength
+            return (1+.14*amount, 1-.15*amount, (222, 169, 255),
+                    min(.55, .42*strength*weight))
+        return (1+.07*amount, 1-.09*amount, (255, 247, 208),
+                min(.5, .38*strength*weight))
     wave = math.sin(progress*math.pi)
     if key == 'psychic_blink':
         return 1-.23*wave*motion_scale, 1+.24*wave*motion_scale, (207, 155, 243), .25*wave
