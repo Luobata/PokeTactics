@@ -60,6 +60,24 @@ from weather_control import WeatherController, WEATHER_WINDOW_SECONDS
 TICK = 0.1  # 解算步长（秒）
 _BATTLE_STAT_FIELDS = ('damage_dealt', 'healing_done', 'self_healing',
                        'damage_taken', 'shield_absorbed')
+
+
+def mvp_unit_ids(rows):
+    """Per-team MVP idx set over statistics() unit rows.
+
+    Score = damage_dealt + healing_done; ties break on higher damage_dealt,
+    then lower idx. A team whose best score is 0 has no MVP. The archive codec
+    recomputes this same rule when rebuilding compact reports.
+    """
+    marked = set()
+    for team in (0, 1):
+        best = max((row for row in rows if row['team'] == team),
+                   key=lambda row: (row['damage_dealt'] + row['healing_done'],
+                                    row['damage_dealt'], -row['idx']),
+                   default=None)
+        if best is not None and best['damage_dealt'] + best['healing_done'] > 0:
+            marked.add(best['idx'])
+    return marked
 # ---- C-sym 棋盘（docs/10 §1.3/§1.5，2026-09-14 sim 联动落地）----
 # 6 列 × 4 行对称战场：行 0-1 敌方战场、行 2-3 己方战场（旧版 7×6 的
 # 3+3 纵深收成 2+2）。双方各 1 条备战行是准备页/渲染层概念，不进战斗
@@ -138,6 +156,9 @@ class Unit:
         self.shield_absorbed = 0
         self.self_damage = 0  # Explicit item cost, outside opposing damage statistics.
         self.casts = 0
+        self.kills = 0  # 击杀：造成对方最后一段实际生命损失的次数
+        self._last_damage_source = None  # 最近一次实际生命损失的来源（含 None=匿名）
+        self._kill_credited = False
         # ---- S3 羁绊结算维度（sim/synergy.apply 开战时写入，默认中性值）----
         self.synergy_dmg = 0.0       # 造成伤害加成（比例）
         self.synergy_ult_dmg = 0.0   # 大招伤害加成（比例）
@@ -248,7 +269,7 @@ class Battle:
                  positions_a=None, positions_b=None, team_options=None,
                  stat_mode: str = "legacy", learned_a=None, learned_b=None,
                  ruleset=tactics_mod.BASE_RULESET, tactics_a=None, tactics_b=None,
-                 arena_teams=None) -> None:
+                 arena_teams=None, arena_growth=None) -> None:
         # S11 天气按 Battle 实例持有（2026-09-14 修订：原 set_active 全局写
         # 在验收后台多线程下会交叉污染——/anim 与 /demo 并行时互改对方天气；
         # damage_mult 由 _final_damage 显式传 self.weather_name）
@@ -274,6 +295,19 @@ class Battle:
                     or len(set(row)) != len(row) or len(row) > 3):
                 raise ValueError('unknown, repeated, or excessive arena augments')
         self.arena_teams = tuple(tuple(sorted(row)) for row in arena_teams)
+        if arena_growth is not None and not self._arena_on:
+            raise ValueError('arena growth requires arena_v1')
+        if arena_growth is None:
+            arena_growth = ({}, {})
+        if (not isinstance(arena_growth, (list, tuple)) or len(arena_growth) != 2
+                or any(not isinstance(row, dict) for row in arena_growth)):
+            raise ValueError('arena_growth must contain two growth maps')
+        for row in arena_growth:
+            if any(key not in arena_mod.GROWTH_KEYS or type(stacks) is not int
+                   or not 0 <= stacks <= arena_mod.GROWTH_STACK_LIMIT
+                   for key, stacks in row.items()):
+                raise ValueError('unknown or excessive arena growth stacks')
+        self.arena_growth = tuple(dict(row) for row in arena_growth)
         self._tactics_on = tactics_mod.enabled(self.ruleset)
         if self._tactics_on and weather_name not in weather_mod.WEATHERS:
             raise ValueError("unknown base weather")
@@ -400,6 +434,18 @@ class Battle:
                 unit.energy = min(ENERGY_MAX, unit.energy + 20)
             if 'first_aid' in augments:
                 unit.arena_heal_mult = 1.3
+            if 'war_banner' in augments:
+                atk_mult *= 1.06
+                unit.attack_interval /= 1.06
+            if 'deep_reserves' in augments:
+                hp_mult *= 1.08
+                unit.energy = min(ENERGY_MAX, unit.energy + 10)
+            growth = self.arena_growth[unit.team]
+            atk_mult *= 1 + arena_mod.GROWTH_STAT_STEP * growth.get('growth_mark', 0)
+            hp_mult *= 1 + arena_mod.GROWTH_STAT_STEP * growth.get('growth_bulwark', 0)
+            drum = growth.get('war_drum', 0)
+            if drum:
+                unit.attack_interval /= 1 + arena_mod.WAR_DRUM_STEP * drum
             unit.max_hp = max(1, int(unit.max_hp * hp_mult))
             unit.hp = unit.max_hp
             unit.attack = max(1, int(unit.attack * atk_mult))
@@ -1357,6 +1403,24 @@ class Battle:
         target.damage_taken += actual
         if source is not None:
             source.damage_dealt += actual
+        if actual > 0:
+            # The lethal packet owns the kill: this settlement runs after the
+            # direct-hit death check and before the DOT one, so a target at
+            # zero HP here just died from this very packet (sash/sturdy saves
+            # have already restored it to a living state).
+            target._last_damage_source = source
+            if not target.alive:
+                self._credit_kill(target)
+
+    def _credit_kill(self, target):
+        """Credit the final settled HP-loss source once; recoil/self-cost and
+        anonymous packets (source=None) never count as a kill."""
+        if target._kill_credited:
+            return
+        target._kill_credited = True
+        killer = target._last_damage_source
+        if killer is not None and killer is not target and killer.team != target.team:
+            killer.kills += 1
 
     def statistics(self):
         """Return a detached JSON snapshot, including every deployed unit.
@@ -1365,6 +1429,14 @@ class Battle:
         overkill, shields and sash prevention. healing_done includes all HP
         restored by a unit; self_healing is its self-targeted subset. Absorbed
         shields belong to the protected unit. Reading never alters events/RNG.
+
+        kills credits the source of the final settled HP-loss packet: DOT and
+        rock-spike deaths belong to their applier, while recoil/self-cost and
+        anonymous (sourceless) deaths are never kills.
+
+        mvp marks one unit per team: the highest damage_dealt + healing_done
+        (ties break on higher damage_dealt, then lower idx). A team whose best
+        score is 0 has no MVP.
         """
         units = []
         for unit in self.units:
@@ -1374,8 +1446,12 @@ class Battle:
                 'name': piece.name, 'star': getattr(piece, 'star', 1),
                 'role': getattr(unit, 'arena_role', getattr(piece, 'role_key', None)),
                 'item': getattr(unit, 'item_key', None),
+                'kills': unit.kills,
                 **{key: getattr(unit, key) for key in _BATTLE_STAT_FIELDS},
             })
+        marked = mvp_unit_ids(units)
+        for row in units:
+            row['mvp'] = row['idx'] in marked
         totals = [{'team': team, **{key: sum(row[key] for row in units if row['team'] == team)
                                   for key in _BATTLE_STAT_FIELDS}}
                   for team in (0, 1)]

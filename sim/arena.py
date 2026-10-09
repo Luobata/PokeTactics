@@ -58,7 +58,34 @@ AUGMENTS = {
     'breach_momentum': {'name': '乘隙追击', 'vulnerability': .12, 'duration': 4.,
                         'cooldown': 4., 'limit': 3,
                         'description': '原生技能或吼叫成功把存活敌人击退后，使其受到的伤害提高 12%、持续 4 秒。每名推动者冷却 4 秒、每战最多 3 次。移动、救援、闪现及被边界或堵路阻止的击退不触发，当前技能不能吃到自己新施加的易伤。'},
+    'growth_mark': {'name': '成长印记',
+                    'description': '成长型：选取后每经过一轮，全队攻击与特攻提高 2%，最多叠加 5 层（+10%）。'},
+    'growth_bulwark': {'name': '积蓄力量',
+                       'description': '成长型：选取后每经过一轮，全队最大生命提高 2%，最多叠加 5 层（+10%）。'},
+    'war_drum': {'name': '战鼓催征',
+                 'description': '成长型：全队攻击速度提高 1%×当前轮数，第 12 轮起封顶（+12%）。'},
+    'xp_doctrine': {'name': '经验学说',
+                    'description': '成长型：选取后的每轮开始自动获得 1 点经验；持有满 6 轮后改为每轮 2 点。'},
+    'war_banner': {'name': '战旗高扬',
+                   'description': '全队攻击与特攻提高 6%，攻击速度提高 6%。完成竞技挑战「竞技首秀」后进入候选池。'},
+    'deep_reserves': {'name': '深厚储备',
+                      'description': '全队最大生命提高 8%，开战时获得 10 点能量。完成竞技挑战「竞技场冠军」后进入候选池。'},
 }
+# Challenge-locked candidates: an option unlock for future runs, never a
+# permanent buff. Bots always draw from the base pool; the player's pool gains
+# unlocked entries from the run-start profile snapshot (session.arena_unlocks).
+AUGMENT_LOCKS = {'war_banner': 'arena_first_finish', 'deep_reserves': 'arena_first_win'}
+AUGMENT_MILESTONES = (1, 7, 13)
+# Growth augments derive every bonus from the pick milestone index and the
+# current round, so no per-round hook or extra ledger ever reaches the save.
+GROWTH_STAT_KEYS = frozenset({'growth_mark', 'growth_bulwark'})
+GROWTH_STAT_STEP = .02
+GROWTH_STAT_CAP = 5
+WAR_DRUM_STEP = .01
+WAR_DRUM_CAP_ROUND = 12
+XP_DOCTRINE_STEP_ROUNDS = 6
+GROWTH_KEYS = frozenset({'growth_mark', 'growth_bulwark', 'war_drum', 'xp_doctrine'})
+GROWTH_STACK_LIMIT = WAR_DRUM_CAP_ROUND
 
 
 def augment_view(key):
@@ -103,17 +130,72 @@ def _keys(seat):
     return [a['id'] if isinstance(a, dict) else a for a in seat.arena_augments_selected]
 
 
+def augment_pool(session, seat):
+    """Unclaimed candidates for one seat; locked entries need the player's unlocks."""
+    locked = set(AUGMENT_LOCKS)
+    if seat is session.player:
+        locked -= set(getattr(session, 'arena_unlocks', {}).get('augments', ()))
+    return sorted(set(AUGMENTS) - set(_keys(seat)) - locked)
+
+
+def growth_stacks(seat, round_no):
+    """Live growth values; the pick milestone index fixes the elapsed rounds."""
+    stacks = {}
+    for index, key in enumerate(_keys(seat)):
+        elapsed = max(0, round_no - AUGMENT_MILESTONES[index])
+        if key in GROWTH_STAT_KEYS:
+            stacks[key] = min(GROWTH_STAT_CAP, elapsed)
+        elif key == 'war_drum':
+            stacks[key] = min(WAR_DRUM_CAP_ROUND, max(0, round_no))
+        elif key == 'xp_doctrine':
+            stacks[key] = 2 if elapsed >= XP_DOCTRINE_STEP_ROUNDS else 1
+    return stacks
+
+
+def augment_status(session, seat, key):
+    """Panel view: static augments stay verbatim; growth augments show live strength."""
+    view = augment_view(key)
+    stacks = growth_stacks(seat, session.round_no)
+    cap = int(round(GROWTH_STAT_CAP * GROWTH_STAT_STEP * 100))
+    if key in GROWTH_STAT_KEYS:
+        current = int(round(stacks[key] * GROWTH_STAT_STEP * 100))
+        view['current'] = f'当前 +{current}%（{stacks[key]}/{GROWTH_STAT_CAP} 层，上限 +{cap}%）'
+    elif key == 'war_drum':
+        view['current'] = (f'当前 +{stacks[key]}% 攻速'
+                           f'（第 {WAR_DRUM_CAP_ROUND} 轮起封顶 +{WAR_DRUM_CAP_ROUND}%）')
+    elif key == 'xp_doctrine':
+        view['current'] = f'当前每轮开始 +{stacks[key]} 经验'
+    return view
+
+
+def _grant_bonus_xp(level, xp, amount):
+    import economy
+    xp += amount
+    while True:
+        need = economy.xp_to_next(level)
+        if need is None or xp < need:
+            return level, xp
+        xp -= need
+        level += 1
+
+
 def begin_round(session):
     r = session.round_no
-    if r in (1, 7, 13):
+    # 经验学说在本轮三选一发放之前结算，本轮刚选取的从下一轮开始收益。
+    for seat in session.seats:
+        if seat.alive and 'xp_doctrine' in _keys(seat):
+            seat.level, seat.xp = _grant_bonus_xp(seat.level, seat.xp,
+                                                  growth_stacks(seat, r)['xp_doctrine'])
+    if r in AUGMENT_MILESTONES:
         for seat in session.seats:
             if not seat.alive:
                 continue
-            available = sorted(set(AUGMENTS) - set(_keys(seat)))
+            available = augment_pool(session, seat)
             rng = rng_mod.derive(session.seed, r, 'bots', 8000 + seat.seat)
             options = [augment_view(k) for k in rng.sample(available, 3)]
             if seat is session.player:
-                session.arena_augments_pending = [{'id': f'augment-r{r}', 'round': r, 'options': options}]
+                session.arena_augments_pending = [{'id': f'augment-r{r}', 'round': r, 'options': options,
+                                                   'rerolled': False}]
             else:
                 seat.arena_augments_selected.append(options[rng.randrange(3)])
     # One paid teaching per AI per round, after purchasing and deployment.
@@ -183,6 +265,23 @@ def claim_augment(session, reward_id, choice):
     return '获得海克斯：' + AUGMENTS[choice]['name']
 
 
+def reroll_augment(session, reward_id):
+    pending = session.arena_augments_pending
+    row = next((r for r in pending if r['id'] == reward_id), None)
+    if row is None or row['round'] != session.round_no:
+        raise ValueError('这次海克斯选择已经结束')
+    if row.get('rerolled'):
+        raise ValueError('本轮海克斯候选已经刷新过一次')
+    replaced = {a['id'] for a in row['options']}
+    available = sorted(set(augment_pool(session, session.player)) - replaced)
+    if len(available) < 3:
+        raise ValueError('没有足够的海克斯强化可供刷新')
+    rng = rng_mod.derive(session.seed, row['round'], 'bots', 8100 + session.player.seat)
+    row['options'] = [augment_view(k) for k in rng.sample(available, 3)]
+    row['rerolled'] = True
+    return '海克斯候选已刷新：原来的三个强化不可再选'
+
+
 def learn(session, loc, key):
     catalog = {t['id']: t for t in technique_catalog()}
     if key not in catalog:
@@ -209,6 +308,9 @@ def set_trait(session, loc, key):
     if session.ruleset != RULESET or session.phase != 'prep' or not session.player.alive:
         raise ValueError('只能在竞技准备期选择特性')
     owned, _, _ = session.locate(loc)
+    if isinstance(key, str) and key in arena_traits.TRAIT_LOCKS and key not in getattr(
+            session, 'arena_unlocks', {}).get('traits', ()):
+        raise ValueError('该特性需要先完成对应的竞技挑战解锁')
     choice = arena_traits.validate_choice(owned.piece.species_id, key)
     selected = arena_traits.for_species(owned.piece.species_id, choice)
     if selected is None:
@@ -236,7 +338,9 @@ def battle_comp(owned_pieces):
 
 def battle_options(session, a, b):
     options = {'ruleset': RULESET, 'stat_mode': 'budget_v1',
-               'arena_teams': [_keys(seat) if seat is not None else [] for seat in (a, b)]}
+               'arena_teams': [_keys(seat) if seat is not None else [] for seat in (a, b)],
+               'arena_growth': [growth_stacks(seat, session.round_no) if seat is not None else {}
+                                for seat in (a, b)]}
     if a is not None and a is not session.player:
         options['positions_a'] = positions_for(a.board, 0)
     if b is not None:
