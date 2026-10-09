@@ -59,6 +59,7 @@ import tactics as tactics_mod  # noqa: E402
 import abilities as abilities_mod  # noqa: E402
 import arena as arena_mod  # noqa: E402
 import arena_skills  # noqa: E402
+import metagame as metagame_mod  # noqa: E402
 import pacing
 import rng as rng_mod  # noqa: E402
 import shop as shop_mod  # noqa: E402
@@ -184,7 +185,7 @@ def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
     n, T = 0, 0.0
     team_frames = []
     while T <= duration + 1e-9:
-        frame = renderer.frame(T)
+        frame = renderer.frame_playback(T)
         frame.convert("RGB").save(out_dir / f"{n}.png", compress_level=2)
         view = anim._presentation_view()
         team_frames.append({
@@ -212,7 +213,7 @@ def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
             "survivors": res["survivors"], "duration": round(duration, 1),
             "statistics": anim.statistics,
             "simulation_duration": round(t_end, 1), "clock": "presentation-v1",
-            "events": [{"t": round(e[0], 2), "text": _fmt_event(anim, e)}
+            "events": [{"t": round(renderer.playback_time(e[0]), 2), "text": _fmt_event(anim, e)}
                        for e in anim.presentation_events if e[1] != 'unit_state'
                        and not (anim.is_arena and e[1] == 'attack' and anim._terrain_attack(e))
                        and (e[1] != 'skill_effect' or anim.is_arena and e[5] in
@@ -583,6 +584,10 @@ class Session:
         self.player_battles = 0
         self.final_team = None
         self.eliminated_round = None
+        # 败因溯源（docs/11 §5.4，仅竞技）：seat -> {对手席位: {'name','damage'}}；
+        # PvE 用席位键 -1；last_defeat 记每个席位最近一次掉血的来源与当轮主羁绊。
+        self.damage_taken_by = {}
+        self.last_defeat = {}
         self.run_id = uuid.uuid4().hex
         self.expedition = None
         self.discoveries = {"seen": [], "fielded": [], "won": []}
@@ -591,6 +596,12 @@ class Session:
         self.arena_loot_start = 1
         self.arena_component_choices = []
         self.arena_component_choice_start = 1
+        # Arena out-of-match growth: unlocks snapshot at run start (profile reads
+        # never leak mid-run), cumulative per-run counters for challenge sync,
+        # and challenge ids first completed during this run for the result page.
+        self.arena_unlocks = {'augments': [], 'traits': []}
+        self.arena_run = {'kills': 0, 'bonds': [], 'combos': 0, 'streak': 0}
+        self.arena_new_challenges = []
         for seat in self.seats:
             seat.inventory.ruleset = self.ruleset
             seat.inventory.techniques = dict.fromkeys(techniques_mod.ids_for(self.ruleset), 0)
@@ -785,10 +796,13 @@ class Session:
             self.discoveries[key] = sorted(set(self.discoveries[key]) | set(incoming))
 
     def progress_snapshot(self):
-        return {"run_id": self.run_id, **copy.deepcopy(self.discoveries),
-                "round": self.eliminated_round or self.round_no,
-                "finished": not self.player.alive or self.phase == "over",
-                "rank": self.player.rank}
+        snapshot = {"run_id": self.run_id, **copy.deepcopy(self.discoveries),
+                    "round": self.eliminated_round or self.round_no,
+                    "finished": not self.player.alive or self.phase == "over",
+                    "rank": self.player.rank}
+        if self.is_arena:
+            snapshot["arena"] = copy.deepcopy(self.arena_run)
+        return snapshot
 
     # ---- 工具 ----
     @property
@@ -986,6 +1000,23 @@ class Session:
                 **({key: copy.deepcopy(meta[key]) for key in REPORT_EFFECT_KEYS}
                    if meta.get('effect_version') == 1 else {}),
             })
+            if self.is_arena:
+                self._track_arena_progress(meta)
+
+    def _track_arena_progress(self, meta):
+        """Fold one committed player battle into the run's challenge counters."""
+        run = self.arena_run
+        statistics = meta.get('statistics') or {}
+        run['kills'] += sum(row.get('kills', 0) for row in statistics.get('units') or []
+                            if row.get('team') == 0)
+        combinations = meta.get('combinations') if meta.get('effect_version') == 1 else None
+        if isinstance(combinations, dict):
+            run['combos'] = max(run['combos'], combinations.get('triggers', 0))
+        import arena_bonds
+        lit = {row['id'] for row in arena_bonds.preparation(
+            [o.piece for o in self.player.board])['entries'] if row['tier']}
+        run['bonds'] = sorted(set(run['bonds']) | lit)
+        run['streak'] = max(run['streak'], max(0, self.player.streak))
 
     def _record_scouting_battle(self, r, a, b, result, *, pve=False, ghost=False,
                                 source='battle', opp_name=None):
@@ -1179,6 +1210,10 @@ class Session:
                 self._record_scouting_battle(r, scout_a, scout_b, scout_result, source=scout_source)
             self._grant_arena_loot(a, 'draw' if winner is None else 'win' if winner == 0 else 'loss')
             self._grant_arena_loot(b, 'draw' if winner is None else 'win' if winner == 1 else 'loss')
+            for loser, opponent in ((a, b), (b, a)):
+                self._record_defeat_damage(loser, opponent.seat, opponent.name,
+                                           dmg[id(loser)], r,
+                                           synergy=self._main_synergy_label(opponent))
             events.append((a, dmg[id(a)], note))
             events.append((b, dmg[id(b)], ""))
         if self.ghost_seat is not None:   # 奇数席打幽灵（败方照常掉血）
@@ -1227,11 +1262,16 @@ class Session:
                 self._say(f"幽灵战（{self.ghost_src.name} 镜像）："
                           + (f"平局 -{dmg}" if self.is_arena and res['winner'] is None else f"败 -{dmg}" if dmg else "胜"))
             self._grant_arena_loot(odd, 'draw' if res['winner'] is None else 'win' if res['winner'] == 0 else 'loss')
+            self._record_defeat_damage(odd, self.ghost_src.seat, self.ghost_src.name, dmg, r,
+                                       synergy=self._main_synergy_label(self.ghost_src),
+                                       defeat_name=f"幽灵（{self.ghost_src.name} 镜像）")
             events.append((odd, dmg, "幽灵战"))
         return events
 
     def _resolve_pve(self, r, weather):
         waves = arena_mod.PVE_WAVES if self.is_arena else PVE_WAVES
+        labels = arena_mod.PVE_LABELS if self.is_arena else PVE_LABELS
+        wave_name = f"野怪轮 · {labels[min(r // 5 - 1, len(labels) - 1)]}"
         wave_ids = waves[min(r // 5 - 1, len(waves) - 1)]
         wave = [make_piece(sid, self.templates) for sid in wave_ids]
         events = []
@@ -1268,6 +1308,7 @@ class Session:
                         self._say(f"野怪轮败 -{dmg}（存活敌棋 "
                                   f"{res['survivors'][1]}）")
                     events.append((e, dmg, "野怪败"))
+                    self._record_defeat_damage(e, -1, wave_name, dmg, r)
             else:
                 res = {'winner': 1, 'survivors': {0: 0, 1: len(wave)}}
                 dmg = self._loss_damage(r, len(wave))
@@ -1280,6 +1321,7 @@ class Session:
                     res = self._uncontested_result(e, None, [], wave, 1)
                 scout_source = 'uncontested'
                 events.append((e, dmg, "野怪空场"))
+                self._record_defeat_damage(e, -1, wave_name, dmg, r)
             self._record_scouting_battle(r, e, None, res, pve=True, source=scout_source,
                                          opp_name=(self.opp_view or {}).get('name', '野怪'))
             self._grant_arena_loot(e, 'draw' if res['winner'] is None else 'win' if res['winner'] == 0 else 'loss')
@@ -1379,6 +1421,27 @@ class Session:
             seat.streak = seat.streak + 1 if seat.streak > 0 else 1
         else:
             seat.streak = seat.streak - 1 if seat.streak < 0 else -1
+
+    def _main_synergy_label(self, seat):
+        """当轮主羁绊 = 上场阵容最高计数属性（docs/11 §5.4，synergy/arena_bonds 现成计数）。"""
+        rows = sorted(_synergy_view(self, seat), key=lambda row: (-row['n'], row['zh']))
+        top = rows[0] if rows and rows[0]['n'] else None
+        if top is None:
+            return None
+        circled = '①②③④⑤⑥⑦⑧⑨⑩'
+        n = top['n']
+        return f"{top['zh']}{circled[n - 1] if 1 <= n <= len(circled) else n}"
+
+    def _record_defeat_damage(self, seat, key, name, damage, r, synergy=None, defeat_name=None):
+        """PvP 掉血按对手席位累计（docs/11 §5.4）；同时记最近一次掉血来源。"""
+        if not self.is_arena or damage <= 0:
+            return
+        ledger = self.damage_taken_by.setdefault(seat.seat, {})
+        entry = ledger.setdefault(key, {'name': name, 'damage': 0})
+        entry['name'] = name
+        entry['damage'] += damage
+        self.last_defeat[seat.seat] = {'round': r, 'name': defeat_name or name,
+                                       'damage': damage, 'synergy': synergy}
 
     def _eliminate(self, seat) -> None:
         if isinstance(seat, PlayerSeat):
@@ -1514,6 +1577,7 @@ def _deployment_stats(piece):
         unit = Unit(piece, 0, (0, 0), stat_mode='budget_v1')
         context = object.__new__(Battle)
         context.units, context.arena_teams = [unit], [(), ()]
+        context.arena_growth = [{}, {}]
         Battle._apply_arena_stats(context)
         _DEPLOYMENT_STATS[key] = {'max_hp': unit.max_hp, 'atk': unit.attack,
                                  'sp_atk': unit.sp_attack, 'defense': unit.defense,
@@ -1751,6 +1815,61 @@ def _scouting_opponent(sess):
     return None, False
 
 
+def _defeat_view(sess):
+    """败因两行数据（docs/11 §5.4）：败于 = 淘汰轮来源；最大威胁 = 累计掉血第一名。"""
+    threats = sess.damage_taken_by.get(0) or {}
+    top = None
+    if threats:
+        _, entry = sorted(threats.items(), key=lambda kv: (-kv[1]['damage'], str(kv[0])))[0]
+        top = {'name': entry['name'], 'damage': entry['damage']}
+    defeated_by = None
+    if not sess.player.alive:
+        last = sess.last_defeat.get(0)
+        if last is not None:
+            defeated_by = {'name': last['name'], 'damage': last['damage'],
+                           'round': last['round'], 'synergy': last.get('synergy')}
+    if defeated_by is None and top is None:
+        return None
+    return {'defeated_by': defeated_by, 'top_threat': top}
+
+
+def _growth_view(sess):
+    """Arena challenge/growth panel: live profile progress plus run unlocks."""
+    import arena_traits
+    from esp32_runtime import NoSaveError
+    from expedition import store
+    # A read-only panel never creates the profile slot; only sync writes one.
+    profile_store = store()
+    try:
+        profile = profile_store.store.load().state
+    except NoSaveError:
+        profile = metagame_mod.initial_profile()
+    view = metagame_mod.view(profile)['arena']
+    challenges = [{key: row[key] for key in ('id', 'name', 'description', 'current', 'target', 'unlocked')}
+                  | {'rewards': [reward['name'] for reward in row['rewards']]}
+                  for row in view['challenges']]
+    augments = [{**arena_mod.augment_view(key), 'challenge': challenge,
+                 'unlocked': key in sess.arena_unlocks['augments']}
+                for key, challenge in sorted(arena_mod.AUGMENT_LOCKS.items())]
+    owners = {spec['id']: sid for sid, spec in arena_traits.ALTERNATIVES.items()}
+    traits = []
+    for key, challenge in sorted(arena_traits.TRAIT_LOCKS.items()):
+        sid = owners[key]
+        traits.append({**arena_traits.for_species(sid, key), 'challenge': challenge,
+                       'species_name': sess.templates[sid].name,
+                       'unlocked': key in sess.arena_unlocks['traits']})
+    names = {row['id']: row['name'] for row in view['challenges']}
+    return {'stats': view['stats'], 'challenges': challenges,
+            'augments': augments, 'traits': traits,
+            'new_this_run': [names[cid] for cid in sess.arena_new_challenges if cid in names]}
+
+
+def _annotate_trait_locks(view, sess):
+    for option in view.get('trait_options') or []:
+        if option.get('unlock_challenge'):
+            option['locked'] = option['id'] not in sess.arena_unlocks['traits']
+
+
 def state_json(sess) -> dict:
     sess.ensure_unit_ids()
     p = sess.player
@@ -1808,6 +1927,13 @@ def state_json(sess) -> dict:
         craftable.append({"key": key, "name": spec["name"],
                           "effect": _item_effect(key, stat_mode), "recipe": recipe})
     xp_next = economy.xp_to_next(p.level)
+    if sess.is_arena:
+        for row in board_rows:
+            for cell in row:
+                if cell:
+                    _annotate_trait_locks(cell, sess)
+        for cell in bench:
+            _annotate_trait_locks(cell, sess)
     st = {
         "sid": sess.sid, "seed": sess.seed, "round": sess.round_no, "ruleset": sess.ruleset,
         "phase": sess.phase, "max_rounds": MAX_ROUNDS,
@@ -1855,7 +1981,11 @@ def state_json(sess) -> dict:
         "profile_warning": getattr(sess, "profile_warning", None),
         "player_result": ({"rank": p.rank, "round": sess.eliminated_round or sess.round_no,
                            "team": sess.final_team if sess.final_team is not None else
-                           [_owned_view(o, sess.ruleset) for o in p.board]}
+                           [_owned_view(o, sess.ruleset) for o in p.board],
+                           "defeat": _defeat_view(sess),
+                           **({"new_challenges": [c['name'] for c in metagame_mod.ARENA_CHALLENGES
+                                                  if c['id'] in sess.arena_new_challenges]}
+                              if sess.is_arena else {})}
                           if not p.alive or sess.phase == "over" else None),
         "stats": {"battles": sess.player_battles,
                   "frames": sess.player_frames_total},
@@ -1864,7 +1994,7 @@ def state_json(sess) -> dict:
     if sess.is_arena:
         from arena_rewards import reward_view, component_choice_view
         def augments_of(seat):
-            return [arena_mod.augment_view(a['id'] if isinstance(a, dict) else a)
+            return [arena_mod.augment_status(sess, seat, a['id'] if isinstance(a, dict) else a)
                     for a in seat.arena_augments_selected]
         st['arena'] = {'version': 'arena_v1', 'shop_slots': sess.shop_slots,
                        'combination_version': 1,
@@ -1883,6 +2013,11 @@ def state_json(sess) -> dict:
         st['arena']['bond_catalog'] = arena_bonds.catalog()
         import arena_traits
         st['arena']['trait_catalog'] = arena_traits.catalog()
+        try:
+            st['growth'] = _growth_view(sess)
+        except Exception as exc:
+            st['growth'] = {'error': f'档案读取失败：{exc}', 'challenges': [],
+                            'augments': [], 'traits': [], 'new_this_run': []}
         st['round_rewards'] = [{**row, 'grants': [reward_view(grant) for grant in row['grants']]}
                                for row in sess.arena_loot if row['seat'] == 0]
         st['component_choices'] = [component_choice_view(row)
@@ -2249,6 +2384,16 @@ def _new_session(seed: int, params=None) -> Session:
     tactical = params.get('mode') == 'tactics'
     arena = params.get('mode') == 'arena'
     sess = Session(seed, 'arena_v1' if arena else tactics_mod.CURRENT_TACTICS_RULESET if tactical else tactics_mod.BASE_RULESET)
+    if arena:
+        # Challenge unlocks are options for the next run: snapshot once here.
+        try:
+            import metagame
+            from expedition import store
+            arena_view = metagame.view(store().load())['arena']
+            sess.arena_unlocks = {'augments': sorted(arena_view['augment_ids']),
+                                  'traits': sorted(arena_view['trait_ids'])}
+        except Exception as exc:
+            sess.profile_warning = f'档案读取失败，本局挑战解锁暂不生效：{exc}'
     if not arena:
         configure(sess, {**params, 'mode': 'expedition'} if tactical else params)
     sess.begin_round(1)
@@ -2346,6 +2491,14 @@ def _apply_action(params: dict):
                     raise DemoError('当前规则不支持海克斯强化')
                 try:
                     msg = arena_mod.claim_augment(sess, params.get('id', ''), params.get('choice', ''))
+                except ValueError as exc:
+                    raise DemoError(str(exc)) from exc
+            elif cmd == 'reroll_augment':
+                _guard_prep(sess)
+                if not sess.is_arena:
+                    raise DemoError('当前规则不支持海克斯强化')
+                try:
+                    msg = arena_mod.reroll_augment(sess, params.get('id', ''))
                 except ValueError as exc:
                     raise DemoError(str(exc)) from exc
             elif cmd == 'claim_reward':
@@ -2980,6 +3133,8 @@ function openBattle(){
   $('overlay').classList.add('show');
   const rep=[];
   rep.push(`<b>${bmeta?bmeta.headline:''}</b>`);
+  const mvp=(bmeta?.statistics?.units||[]).find(u=>u.team===0&&u.mvp);
+  if(mvp)rep.push(`<div>★ 本场MVP ${escapeText(mvp.name)}（输出 ${mvp.damage_dealt} · 击杀 ${mvp.kills||0}）</div>`);
   rep.push(...S.log.slice(-6).map(l=>`<div>${escapeText(l)}</div>`));
   if(S.phase==='over'&&S.over){rep.push('<hr><b>最终排名</b><ol style="margin:6px 0;padding-left:22px">'+S.over.ranking.map(r=>`<li class="${r.rank===1?'rank1':''}">${r.is_you?'★ ':''}${r.name}</li>`).join('')+'</ol>');}
   $('battle-report').innerHTML=rep.join('');

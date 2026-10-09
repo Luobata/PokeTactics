@@ -142,23 +142,23 @@ def render_battle(seed: int, synergy: bool = False, scenario: str = None,
             temporary = Path(tempfile.mkdtemp(prefix='.pending-', dir=out_dir.parent))
             times = [round(i * FPS_DT, 8) for i in range(round(duration / FPS_DT) + 1)]
             for i, moment in enumerate(times):
-                renderer.frame(moment).convert('RGB').save(temporary / f'{i}.png', compress_level=2)
+                renderer.frame_playback(moment).convert('RGB').save(temporary / f'{i}.png', compress_level=2)
             fmt = demo_mod._fmt_event if mode == 'arena' else _fmt_event
-            events = [{'t': round(e[0], 2), 'text': fmt(anim, e)}
+            events = [{'t': round(renderer.playback_time(e[0]), 2), 'text': fmt(anim, e)}
                       for e in anim.presentation_events if e[1] != 'unit_state']
             events = [e for e in events if e['text']]
             fx = [('0.2', '开战演出')]
             first_attack = min((a for a in anim.timeline.actions if a.kind == 'attack'),
                                key=lambda a: a.impact, default=None)
             if first_attack:
-                fx += [(round(first_attack.start, 2), '普攻蓄力'),
-                       (round(first_attack.impact, 2), '普攻命中')]
+                fx += [(round(renderer.playback_time(first_attack.start), 2), '普攻蓄力'),
+                       (round(renderer.playback_time(first_attack.impact), 2), '普攻命中')]
             casts = sorted((a for a in anim.timeline.actions if a.kind == 'cast' and not a.secondary),
                            key=lambda a: a.impact)
-            fx += [(round(a.impact, 2), f'技能命中 {j+1}') for j, a in enumerate(casts[:10])]
+            fx += [(round(renderer.playback_time(a.impact), 2), f'技能命中 {j+1}') for j, a in enumerate(casts[:10])]
             first_die = next((e[0] for e in anim.presentation_events if e[1] == 'die'), None)
             if first_die is not None:
-                fx.append((round(first_die + .1, 2), '退场演出'))
+                fx.append((round(renderer.playback_time(first_die + .1), 2), '退场演出'))
             meta = {**mode_info(mode), 'key': key, 'n': len(times), 'times': times,
                     'clock': 'presentation-v1', 'fps': 20, 'dt': FPS_DT,
                     'presentation_duration': duration,

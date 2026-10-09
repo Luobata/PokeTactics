@@ -59,6 +59,22 @@ PRE_TRAITS_GEAR_FINGERPRINT = '6fc72304a52e7df57665c33931933063ebd6ca66cc54d983e
 # Verified fixed-trait build before selectable alternatives and arena weather.
 # Only live piece snapshots gain an implicit None choice; history stays verbatim.
 PRE_ARENA_SYNERGY_FINGERPRINT = '52058d2c7f7a83950ecca4a734e4263481ba62cf0027ec4245abf22a1b4ff2f2'
+# Verified selectable-trait build before post-battle attribution (kills/MVP/
+# defeat tracking). Its ledgers stay verbatim; old reports simply lack the
+# optional kills/mvp annotations and carry no defeat ledger.
+PRE_ATTRIBUTION_FINGERPRINT = 'eac762c6145f16df3fa0a591b117ee7f0bd8612e24c14a0c1f6335d691e2400f'
+# Verified attribution build before the free augment reroll. Its record layout
+# is identical to the current build; only pending augment rows predate the
+# rerolled flag and decode as still refreshable.
+PRE_AUGMENT_REROLL_FINGERPRINT = 'f3db51a1209f530c3bcd5e94411e985a7a7dd8db372f32bc9a773745907b089c'
+# Verified reroll build before growth augments. Its record layout is identical
+# to the current build; growth strength derives from the pick milestone index
+# and current round, so no growth field ever reaches the save.
+PRE_GROWTH_AUGMENTS_FINGERPRINT = '0b4dc46957a61f488afabbff90c66c660777c918bace07f9921f22ca15bb2521'
+# Verified growth-augment build before arena challenge/growth unlocks. Its
+# record layout is identical to the current build; the additive arena meta
+# (unlock snapshot, per-run challenge counters) simply decodes as defaulted.
+PRE_ARENA_META_FINGERPRINT = 'e3a685545497d74bd49ab270a89fa6ce71d1e5247b52c358b6de7dd0e44148a0'
 PRE_SYNERGY_TECHNIQUES = frozenset({'cut', 'surf', 'rest', 'thunderbolt', 'ice_beam',
                                      'toxic', 'earthquake', 'roar', 'rapid_spin'})
 # Exact arena catalog from the frozen fixed-trait predecessor. Its fingerprint
@@ -207,7 +223,8 @@ class SessionCodec:
         if is_arena:
             payload['arena'] = {
                 'pending': [{"id": row['id'], "round": row['round'],
-                             "options": [o['id'] for o in row['options']]}
+                             "options": [o['id'] for o in row['options']],
+                             "rerolled": bool(row.get('rerolled', False))}
                             for row in state.arena_augments_pending],
                 'selected': [[a['id'] if isinstance(a, dict) else a
                               for a in seat.arena_augments_selected] for seat in state.seats],
@@ -215,12 +232,19 @@ class SessionCodec:
                 'loot_start': state.arena_loot_start,
                 'component_choices': copy.deepcopy(state.arena_component_choices),
                 'component_choice_start': state.arena_component_choice_start,
+                'meta': {'unlocks': {'augments': list(state.arena_unlocks['augments']),
+                                     'traits': list(state.arena_unlocks['traits'])},
+                         'run': copy.deepcopy(state.arena_run),
+                         'new_challenges': list(state.arena_new_challenges)},
             }
         if is_arena and state.scouting_history is not None:
             scout = copy.deepcopy(state.scouting_history)
             scout['seats'] = [[self._pack_report(row, compact_statistics=True) for row in rows]
                               for rows in scout['seats']]
             payload['scouting_history'] = scout
+        if is_arena:
+            payload['damage_taken_by'] = copy.deepcopy(state.damage_taken_by)
+            payload['last_defeat'] = copy.deepcopy(state.last_defeat)
         # Normalize tuple-based metric curves and integer-keyed survivor maps;
         # the shared runtime deliberately accepts strict, portable JSON only.
         return json.loads(json.dumps(payload, ensure_ascii=False, allow_nan=False))
@@ -254,7 +278,9 @@ class SessionCodec:
                      PRE_GEN2_FINGERPRINT, PRE_STATISTICS_FINGERPRINT,
                      PRE_SKILL_IDENTITIES_FINGERPRINT, PRE_COMBO_BRANCHES_FINGERPRINT,
                      PRE_ATTACK_BRANCHES_FINGERPRINT, PRE_ARENA_BONDS_FINGERPRINT,
-                     PRE_TRAITS_GEAR_FINGERPRINT, PRE_ARENA_SYNERGY_FINGERPRINT}
+                     PRE_TRAITS_GEAR_FINGERPRINT, PRE_ARENA_SYNERGY_FINGERPRINT,
+                     PRE_ATTRIBUTION_FINGERPRINT, PRE_AUGMENT_REROLL_FINGERPRINT,
+                     PRE_GROWTH_AUGMENTS_FINGERPRINT, PRE_ARENA_META_FINGERPRINT}
         if ruleset == tactics.BASE_RULESET:
             supported.add(LEGACY_BASE_FINGERPRINT)
         if ruleset in (tactics.BASE_RULESET, tactics.TACTICS_RULESET):
@@ -264,12 +290,21 @@ class SessionCodec:
         choices = tactics.evolution_choices_enabled(ruleset)
         is_arena = ruleset == 'arena_v1'
         pre_synergy_arena = is_arena and fingerprint == PRE_ARENA_SYNERGY_FINGERPRINT
+        # The reroll and growth predecessors share the exact current record
+        # layout; every current-format gate below accepts them. Only pending
+        # augment rows of the reroll predecessor differ (no rerolled flag),
+        # handled in _decode_arena. Growth strength is derived, never stored.
+        current_layout = fingerprint in (current_fingerprint, PRE_AUGMENT_REROLL_FINGERPRINT,
+                                         PRE_GROWTH_AUGMENTS_FINGERPRINT,
+                                         PRE_ARENA_META_FINGERPRINT)
         migrating_arena = is_arena and fingerprint == TWO_ROW_ARENA_FINGERPRINT
         migrating_expansion = (is_arena and fingerprint in supported
                                and fingerprint not in (current_fingerprint, PRE_STATISTICS_FINGERPRINT,
                                                        PRE_SKILL_IDENTITIES_FINGERPRINT, PRE_COMBO_BRANCHES_FINGERPRINT,
                                                        PRE_ATTACK_BRANCHES_FINGERPRINT, PRE_ARENA_BONDS_FINGERPRINT,
-                                                       PRE_TRAITS_GEAR_FINGERPRINT, PRE_ARENA_SYNERGY_FINGERPRINT))
+                                                       PRE_TRAITS_GEAR_FINGERPRINT, PRE_ARENA_SYNERGY_FINGERPRINT,
+                                                       PRE_ATTRIBUTION_FINGERPRINT, PRE_AUGMENT_REROLL_FINGERPRINT,
+                                                       PRE_GROWTH_AUGMENTS_FINGERPRINT, PRE_ARENA_META_FINGERPRINT))
         if not is_arena:
             supported.add(PRE_ARENA_FINGERPRINT)
         if not choices and not is_arena:
@@ -289,7 +324,7 @@ class SessionCodec:
                 if 'arena_trait' in record:
                     raise ValueError('非竞技或历史展示记录不能包含竞技特性选择')
                 return None
-            if fingerprint != current_fingerprint:
+            if not current_layout:
                 if 'arena_trait' in record:
                     raise ValueError('旧版存档不能伪造竞技特性选择')
                 return None
@@ -595,16 +630,17 @@ class SessionCodec:
                 self._validate_opponent_name(summary['opp_name'])
             if 'statistics' in summary:
                 self._validate_battle_statistics(summary['statistics'], state)
-            self._decode_report_effects(summary, state, allow_new=fingerprint == current_fingerprint)
+            self._decode_report_effects(summary, state, allow_new=current_layout)
             state.last_battle = {**copy.deepcopy(summary), "n": 0, "winner": winner, "round": summary.get('round', state.round_no), "restored": True,
                                  "headline": "已恢复战后结算，结果不会重复发放",
                                  "opp_name": summary.get('opp_name', (state.opp_view or {}).get("name", "对手")), "events": []}
         if 'battle_history' in data:
-            self._decode_battle_history(state, data['battle_history'], allow_new=fingerprint == current_fingerprint)
+            self._decode_battle_history(state, data['battle_history'], allow_new=current_layout)
         elif fingerprint in (current_fingerprint, PRE_SKILL_IDENTITIES_FINGERPRINT,
                              PRE_COMBO_BRANCHES_FINGERPRINT, PRE_ATTACK_BRANCHES_FINGERPRINT,
                              PRE_ARENA_BONDS_FINGERPRINT, PRE_TRAITS_GEAR_FINGERPRINT,
-                             PRE_ARENA_SYNERGY_FINGERPRINT):
+                             PRE_ARENA_SYNERGY_FINGERPRINT, PRE_ATTRIBUTION_FINGERPRINT,
+                             PRE_AUGMENT_REROLL_FINGERPRINT, PRE_GROWTH_AUGMENTS_FINGERPRINT):
             raise ValueError('当前存档缺少本局战报记录')
         elif summary:
             # Old builds only kept the latest result, without unit counters.
@@ -617,11 +653,20 @@ class SessionCodec:
             }]
         state.scouting_history = None
         if 'scouting_history' in data:
-            if not is_arena or fingerprint != current_fingerprint or schema_version != 5:
+            if not is_arena or not current_layout or schema_version != 5:
                 raise ValueError('旧版或非竞技存档不能包含侦察战报扩展')
             self._decode_scouting_history(state, data['scouting_history'])
         elif any(row.get('effect_version') == 1 for row in state.battle_history):
             raise ValueError('新战报存档缺少侦察记录扩展')
+        state.damage_taken_by = {}
+        state.last_defeat = {}
+        if ('damage_taken_by' in data) != ('last_defeat' in data):
+            raise ValueError('败因溯源记录字段不完整')
+        if 'damage_taken_by' in data:
+            if not is_arena or not current_layout:
+                raise ValueError('旧版或非竞技存档不能包含败因溯源记录')
+            state.damage_taken_by = self._decode_damage_taken_by(data['damage_taken_by'])
+            state.last_defeat = self._decode_last_defeat(data['last_defeat'], state.round_no)
         state.save_warning = ('已识别旧版存档，继续使用 base_v1 规则'
                               if fingerprint == LEGACY_BASE_FINGERPRINT else None)
         from expedition import decode_extension
@@ -649,8 +694,14 @@ class SessionCodec:
         state.ensure_unit_ids()
         if is_arena:
             self._decode_arena(state, data, migrating_arena,
-                               fingerprint not in (current_fingerprint, PRE_TRAITS_GEAR_FINGERPRINT,
-                                                   PRE_ARENA_SYNERGY_FINGERPRINT), pre_synergy_arena)
+                               fingerprint not in (current_fingerprint, PRE_AUGMENT_REROLL_FINGERPRINT,
+                                                   PRE_GROWTH_AUGMENTS_FINGERPRINT,
+                                                   PRE_ARENA_META_FINGERPRINT,
+                                                   PRE_TRAITS_GEAR_FINGERPRINT,
+                                                   PRE_ARENA_SYNERGY_FINGERPRINT), pre_synergy_arena,
+                               reroll_required=fingerprint in (current_fingerprint,
+                                                               PRE_GROWTH_AUGMENTS_FINGERPRINT,
+                                                               PRE_ARENA_META_FINGERPRINT))
         elif 'arena' in data:
             raise ValueError('旧规则不能包含竞技强化记录')
         if schema_version >= 4:
@@ -674,6 +725,18 @@ class SessionCodec:
         if is_arena and fingerprint == PRE_ARENA_SYNERGY_FINGERPRINT:
             state.save_warning = ('已加入可选特性与竞技天气联动；原精灵保持默认特性，阵容、装备、教学和补给账本已保留，'
                                   '历史战斗结果不会重算，新效果只在后续战斗生效。')
+        if is_arena and fingerprint == PRE_ATTRIBUTION_FINGERPRINT:
+            state.save_warning = ('已加入击杀、MVP 与败因溯源；阵容、装备、学习技能、海克斯与历史战报已保留，'
+                                  '旧战报没有击杀与 MVP 标记，败因从后续结算轮次开始累计。')
+        if is_arena and fingerprint == PRE_AUGMENT_REROLL_FINGERPRINT:
+            state.save_warning = ('已加入海克斯候选刷新；阵容、装备、学习技能、海克斯与历史账本已保留，'
+                                  '每轮待选海克斯可免费刷新一次。')
+        if is_arena and fingerprint == PRE_GROWTH_AUGMENTS_FINGERPRINT:
+            state.save_warning = ('已加入成长型海克斯；阵容、装备、学习技能、海克斯与历史账本已保留，'
+                                  '成长强度按选取轮与当前轮即时结算，旧选择不受影响。')
+        if is_arena and fingerprint == PRE_ARENA_META_FINGERPRINT:
+            state.save_warning = ('已加入竞技挑战与成长解锁；阵容、装备、学习技能、海克斯与历史账本已保留，'
+                                  '新解锁的海克斯与特性从下一局开始进入候选。')
         if migrating_expansion:
             previous = getattr(state, 'save_warning', '')
             state.save_warning = (previous + ' ' if previous else '') + '竞技池已扩为48种，新增第二世代精灵；原阵容、商店、资源与海克斯选择保留，新精灵从后续刷新进入。'
@@ -683,6 +746,52 @@ class SessionCodec:
     def _validate_opponent_name(name):
         if not isinstance(name, str) or not name or len(name) > 120:
             raise ValueError('战报对手名称无效')
+
+    @staticmethod
+    def _decode_damage_taken_by(raw):
+        """seat -> {对手席位: {'name','damage'}}；PvE 用席位键 -1。"""
+        if not isinstance(raw, dict) or len(raw) > 8:
+            raise ValueError('败因溯源记录无效')
+        result = {}
+        for seat_key, entries in raw.items():
+            if not isinstance(seat_key, str) or not re.fullmatch(r'[0-7]', seat_key):
+                raise ValueError('败因溯源席位无效')
+            if not isinstance(entries, dict) or len(entries) > 8:
+                raise ValueError('败因溯源对手列表无效')
+            ledger = {}
+            for opp_key, entry in entries.items():
+                if not isinstance(opp_key, str) or not re.fullmatch(r'-1|[0-7]', opp_key):
+                    raise ValueError('败因溯源对手席位无效')
+                if not isinstance(entry, dict) or set(entry) != {'name', 'damage'}:
+                    raise ValueError('败因溯源字段无效')
+                SessionCodec._validate_opponent_name(entry['name'])
+                ledger[int(opp_key)] = {'name': entry['name'],
+                                        'damage': integer(entry['damage'], 0, 2 ** 31 - 1,
+                                                          'damage_taken_by damage')}
+            if ledger:
+                result[int(seat_key)] = ledger
+        return result
+
+    @staticmethod
+    def _decode_last_defeat(raw, max_round):
+        if not isinstance(raw, dict) or len(raw) > 8:
+            raise ValueError('最近败因记录无效')
+        result = {}
+        for seat_key, entry in raw.items():
+            if not isinstance(seat_key, str) or not re.fullmatch(r'[0-7]', seat_key):
+                raise ValueError('最近败因席位无效')
+            if not isinstance(entry, dict) or set(entry) != {'round', 'name', 'damage', 'synergy'}:
+                raise ValueError('最近败因字段无效')
+            SessionCodec._validate_opponent_name(entry['name'])
+            synergy = entry['synergy']
+            if synergy is not None and (not isinstance(synergy, str) or not synergy or len(synergy) > 12):
+                raise ValueError('最近败因主羁绊无效')
+            result[int(seat_key)] = {
+                'round': integer(entry['round'], 1, max_round, 'last_defeat round'),
+                'name': entry['name'],
+                'damage': integer(entry['damage'], 1, 2 ** 31 - 1, 'last_defeat damage'),
+                'synergy': synergy}
+        return result
 
     @staticmethod
     def _validate_battle_statistics(statistics, state):
@@ -697,8 +806,14 @@ class SessionCodec:
         rows = sequence(statistics['units'], 24, 'battle units')
         identities = {'idx', 'team', 'sid', 'name', 'star', 'role', 'item'}
         for expected_idx, row in enumerate(rows):
-            if not isinstance(row, dict) or set(row) != fields | identities:
+            # kills/mvp are optional post-battle annotations; pre-attribution
+            # saves simply omit them.
+            if not isinstance(row, dict) or set(row) - {'kills', 'mvp'} != fields | identities:
                 raise ValueError('单位战斗统计字段无效')
+            if 'kills' in row:
+                integer(row['kills'], 0, 2 ** 31 - 1, 'battle kills')
+            if 'mvp' in row and type(row['mvp']) is not bool:
+                raise ValueError('单位 MVP 标记无效')
             if integer(row['idx'], 0, 23, 'battle idx') != expected_idx:
                 raise ValueError('单位战斗统计编号重复或顺序无效')
             integer(row['team'], 0, 1, 'battle team')
@@ -778,7 +893,7 @@ class SessionCodec:
                                'data': base64.b64encode(zlib.compress(compact)).decode('ascii')}
         if compact_statistics and packed['statistics'] is not None:
             packed['statistics'] = {'version': 1, 'units': [
-                [row['team'], row['sid'], row['star'], row['item'],
+                [row['team'], row['sid'], row['star'], row['item'], row.get('kills', 0),
                  *[row[field] for field in BATTLE_STAT_FIELDS]]
                 for row in packed['statistics']['units']]}
         return packed
@@ -895,7 +1010,7 @@ class SessionCodec:
                     units = sequence(statistics['units'], 24, 'scouting unit counts')
                     converted = []
                     for idx, unit in enumerate(units):
-                        if not isinstance(unit, list) or len(unit) != 4 + len(BATTLE_STAT_FIELDS):
+                        if not isinstance(unit, list) or len(unit) != 5 + len(BATTLE_STAT_FIELDS):
                             raise ValueError('紧凑侦察统计行长度无效')
                         team = integer(unit[0], 0, 1, 'scouting unit team')
                         sid = integer(unit[1], 1, 65535, 'scouting unit species')
@@ -903,8 +1018,16 @@ class SessionCodec:
                             raise ValueError('紧凑侦察精灵无效')
                         template = state.templates[sid]
                         converted.append({'idx': idx, 'team': team, 'sid': sid, 'name': template.name,
-                                          'star': unit[2], 'item': unit[3], 'role': template.role_key,
-                                          **dict(zip(BATTLE_STAT_FIELDS, unit[4:]))})
+                                          'star': unit[2], 'item': unit[3],
+                                          'kills': integer(unit[4], 0, 2 ** 31 - 1, 'scouting kills'),
+                                          'role': template.role_key,
+                                          **dict(zip(BATTLE_STAT_FIELDS, unit[5:]))})
+                    # MVP is a pure function of the archived counters; rebuild
+                    # it with the combat rule instead of trusting the payload.
+                    from combat import mvp_unit_ids
+                    marked = mvp_unit_ids(converted)
+                    for unit_row in converted:
+                        unit_row['mvp'] = unit_row['idx'] in marked
                     statistics = {'version': 1, 'units': converted, 'totals': [
                         {'team': team, **{field: sum(integer(unit[field], 0, 2 ** 31 - 1, 'scouting counter')
                                                     for unit in converted if unit['team'] == team)
@@ -912,6 +1035,7 @@ class SessionCodec:
                     self._validate_battle_statistics(statistics, state)
                     if row['source'] == 'uncontested' and (duration != 0 or
                             all(any(unit['team'] == team for unit in converted) for team in (0, 1)) or
+                            any(unit['kills'] for unit in converted) or
                             any(unit[field] for unit in converted for field in BATTLE_STAT_FIELDS)):
                         raise ValueError('不战而胜不能包含实战数值或完整双方')
                     row['statistics'] = statistics
@@ -934,6 +1058,7 @@ class SessionCodec:
         # effects must agree; older opposite records may legitimately be pruned.
         def unit_signature(statistics, flip=False):
             return sorted((row['team'] ^ int(flip), row['sid'], row['star'], row['item'] or '',
+                           row.get('kills', 0),
                            *[row[field] for field in BATTLE_STAT_FIELDS])
                           for row in statistics['units'])
 
@@ -1028,19 +1153,67 @@ class SessionCodec:
         if any(summary[key] != sum(row[field] for row in rows) for key, field in fields.items()):
             raise ValueError('联动统计总量不一致')
 
+    @staticmethod
+    def _decode_arena_meta(raw):
+        """Additive growth block: unlock snapshot + per-run challenge counters."""
+        import arena
+        import arena_traits
+        import metagame
+        if raw is None:
+            return {'unlocks': {'augments': [], 'traits': []},
+                    'run': {'kills': 0, 'bonds': [], 'combos': 0, 'streak': 0},
+                    'new_challenges': []}
+        if not isinstance(raw, dict) or set(raw) != {'unlocks', 'run', 'new_challenges'}:
+            raise ValueError('竞技成长存档字段无效')
+        unlocks = raw['unlocks']
+        if not isinstance(unlocks, dict) or set(unlocks) != {'augments', 'traits'}:
+            raise ValueError('竞技成长解锁字段无效')
+        augments, traits = unlocks['augments'], unlocks['traits']
+        if (not isinstance(augments, list) or len(augments) > len(arena.AUGMENT_LOCKS)
+                or any(not isinstance(key, str) or key not in arena.AUGMENT_LOCKS for key in augments)
+                or len(set(augments)) != len(augments)):
+            raise ValueError('竞技成长海克斯解锁记录无效')
+        if (not isinstance(traits, list) or len(traits) > len(arena_traits.TRAIT_LOCKS)
+                or any(not isinstance(key, str) or key not in arena_traits.TRAIT_LOCKS for key in traits)
+                or len(set(traits)) != len(traits)):
+            raise ValueError('竞技成长特性解锁记录无效')
+        run = raw['run']
+        if not isinstance(run, dict) or set(run) != {'kills', 'bonds', 'combos', 'streak'}:
+            raise ValueError('竞技成长对局统计字段无效')
+        integer(run['kills'], 0, metagame.MAX_ARENA_KILLS_PER_RUN, 'arena run kills')
+        integer(run['combos'], 0, metagame.MAX_ARENA_COMBOS_PER_BATTLE, 'arena run combos')
+        integer(run['streak'], 0, metagame.MAX_ROUNDS, 'arena run streak')
+        bonds = sequence(run['bonds'], metagame.MAX_ARENA_BONDS_PER_RUN, 'arena run bonds')
+        if (any(not isinstance(bond, str) or not re.fullmatch(r'[A-Za-z_]{1,32}', bond)
+                for bond in bonds) or len(set(bonds)) != len(bonds)):
+            raise ValueError('竞技成长羁绊记录无效')
+        challenge_ids = {challenge['id'] for challenge in metagame.ARENA_CHALLENGES}
+        new_challenges = sequence(raw['new_challenges'], len(challenge_ids), 'arena new challenges')
+        if (any(not isinstance(cid, str) or cid not in challenge_ids for cid in new_challenges)
+                or len(set(new_challenges)) != len(new_challenges)):
+            raise ValueError('竞技成长新完成挑战记录无效')
+        return {'unlocks': {'augments': sorted(augments), 'traits': sorted(traits)},
+                'run': {'kills': run['kills'], 'bonds': sorted(bonds),
+                        'combos': run['combos'], 'streak': run['streak']},
+                'new_challenges': list(new_challenges)}
+
     def _decode_arena(self, state, data, migrating=False, migrating_components=False,
-                      pre_synergy=False):
+                      pre_synergy=False, reroll_required=False):
         import arena
         raw = data.get('arena')
         fields = {'pending', 'selected'} if migrating else {'pending', 'selected', 'loot', 'loot_start'}
         component_fields = {'component_choices', 'component_choice_start'}
         if not isinstance(raw, dict):
             raise ValueError('竞技强化存档结构无效')
-        if set(raw) == fields and migrating_components:
+        # The growth meta block is additive (kills/mvp-style): predecessors
+        # simply omit it and decode with defaults; a forged block must validate.
+        meta = self._decode_arena_meta(raw.get('meta'))
+        core = set(raw) - {'meta'}
+        if core == fields and migrating_components:
             # Only a known predecessor may omit both new fields. Partial fields
             # and a current-rules snapshot are never treated as an old save.
             legacy_components = True
-        elif set(raw) == fields | component_fields:
+        elif core == fields | component_fields:
             legacy_components = False
         else:
             raise ValueError('竞技强化存档结构无效')
@@ -1057,8 +1230,15 @@ class SessionCodec:
         pending = sequence(raw['pending'], 1, 'pending augments')
         rebuilt = []
         for row in pending:
-            if not isinstance(row, dict) or set(row) != {'id', 'round', 'options'}:
+            if not isinstance(row, dict) or not {'id', 'round', 'options'} <= set(row):
                 raise ValueError('待选竞技强化字段无效')
+            if reroll_required:
+                if set(row) != {'id', 'round', 'options', 'rerolled'} or type(row['rerolled']) is not bool:
+                    raise ValueError('待选竞技强化缺少刷新标记')
+            elif set(row) != {'id', 'round', 'options'}:
+                # Older verified builds never wrote the flag; it decodes as
+                # still refreshable and must not be forged into old saves.
+                raise ValueError('旧版存档不能伪造海克斯刷新标记')
             round_no = integer(row['round'], 1, state.round_no, 'augment round')
             if (round_no not in milestones or round_no != state.round_no or row['id'] != f'augment-r{round_no}'
                     or state.phase != 'prep' or not state.player.alive):
@@ -1069,12 +1249,36 @@ class SessionCodec:
                     or len(keys) != len(set(keys))):
                 raise ValueError('竞技强化候选无效')
             rebuilt.append({'id': row['id'], 'round': round_no,
-                            'options': [arena.augment_view(key) for key in keys]})
+                            'options': [arena.augment_view(key) for key in keys],
+                            'rerolled': row.get('rerolled', False)})
         if state.player.alive and len(state.player.arena_augments_selected) + len(pending) != available:
             raise ValueError('竞技强化领取进度无效')
         for seat in state.bots:
             if seat.alive and len(seat.arena_augments_selected) != available:
                 raise ValueError('机器人竞技强化领取进度无效')
+        # Locked candidates enter only the recorded player unlocks; bots never.
+        unlocked_augments = set(meta['unlocks']['augments'])
+        for seat in state.seats:
+            keys = [a['id'] for a in seat.arena_augments_selected]
+            locked = [key for key in keys if key in arena.AUGMENT_LOCKS]
+            if seat is not state.player and locked:
+                raise ValueError('机器人不能包含挑战解锁的海克斯')
+            if any(key not in unlocked_augments for key in locked):
+                raise ValueError('挑战解锁的海克斯缺少解锁记录')
+        for row in rebuilt:
+            if any(option['id'] in arena.AUGMENT_LOCKS and option['id'] not in unlocked_augments
+                   for option in row['options']):
+                raise ValueError('待选竞技强化包含未解锁的挑战海克斯')
+        import arena_traits
+        unlocked_traits = set(meta['unlocks']['traits'])
+        for seat in state.seats:
+            for owned in seat.all_pieces():
+                trait = getattr(owned, 'arena_trait', None)
+                if trait in arena_traits.TRAIT_LOCKS and trait not in unlocked_traits:
+                    raise ValueError('挑战解锁的特性缺少解锁记录')
+        state.arena_unlocks = meta['unlocks']
+        state.arena_run = meta['run']
+        state.arena_new_challenges = meta['new_challenges']
         state.arena_augments_pending = rebuilt
         if migrating:
             state.arena_loot_start = state.round_no + (state.phase != 'prep')

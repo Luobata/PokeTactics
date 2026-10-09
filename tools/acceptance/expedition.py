@@ -68,9 +68,15 @@ def deploy_starter(session):
 def sync_profile(session):
     try:
         saved = store().load()
+        is_arena = getattr(session, 'is_arena', False)
+        before = metagame.arena_completed(saved) if is_arena else set()
         updated = metagame.apply_progress(saved, session.progress_snapshot())
         if saved != updated:
             store().save(updated)
+        if is_arena:
+            completed = metagame.arena_completed(updated) - before
+            known = set(session.arena_new_challenges)
+            session.arena_new_challenges.extend(sorted(completed - known))
         session.profile_warning = None
     except Exception as exc:
         session.profile_warning = f'对局已保存，档案同步待重试：{exc}。继续存档会重试。'

@@ -117,8 +117,11 @@ def catalog_view(demo):
                 'fixed_by_species': False, 'random_unlock': False,
                 'mutually_exclusive': True, 'choice_phase': 'prep', 'choice_cost': 0,
                 'occupies_skill_slot': False,
-                'description': '竞技特性满足条件时自动触发，不消耗能量，也不占本命或学习位。尼多王和水箭龟可在准备期免费切换各自两项互斥特性，其他已配置精灵保留固定特性。',
-                'coverage_note': f"本版覆盖{sum(bool(row.get('trait')) for row in pokemon_views)}位精灵，共{len(arena_traits.catalog())}项特性；其余精灵尚未配置，不会随机获得特性。",
+                'description': '竞技特性满足条件时自动触发，不消耗能量，也不占本命或学习位。尼多王、水箭龟可在准备期免费切换各自两项互斥特性；大竺葵的第二特性需完成竞技挑战「羁绊编织者」解锁，其他精灵保留固定特性。',
+                'coverage_note': (f"本版覆盖{covered}位精灵，共{len(arena_traits.catalog())}项特性；"
+                                  '其余精灵尚未配置，不会随机获得特性。'
+                                  if (covered := sum(bool(row.get('trait')) for row in pokemon_views)) < len(pokemon_views)
+                                  else f"本版48位竞技精灵全部拥有特性，共{len(arena_traits.catalog())}项特性；特性不会随机获得，始终跟随物种。"),
             },
             'techniques': arena.technique_catalog(),
             'items': item_views,
@@ -138,7 +141,10 @@ def catalog_view(demo):
                                         if any(key == part['id'] for pair in row['recipes'] for part in pair)]}
                            for key in items.COMPONENT_ORDER],
             'augments': [{**arena.augment_view(key), **copy.deepcopy(advice.AUGMENTS.get(key, {})),
-                          'source': '第 1、7、13 轮，从三个选项中选择一个；同一强化不能重复选择',
+                          'source': ('完成竞技挑战后进入候选池；机器人永远从基础池抽取'
+                                     if key in arena.AUGMENT_LOCKS else
+                                     '第 1、7、13 轮，从三个选项中选择一个；同一强化不能重复选择'),
+                          **({'unlock_challenge': arena.AUGMENT_LOCKS[key]} if key in arena.AUGMENT_LOCKS else {}),
                           'scope': '本局全队生效'} for key in arena.AUGMENTS],
             'technique_advice': copy.deepcopy(advice.TECHNIQUES),
             'builds': build_views}
