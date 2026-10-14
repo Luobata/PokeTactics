@@ -61,7 +61,7 @@ class StatBudgetContracts(unittest.TestCase):
         with self.assertRaises(ValueError):
             stat_budget.normalize(dict.fromkeys(stat_budget.STAT_KEYS, 0), 1)
         with self.assertRaises(ValueError):
-            stat_budget.normalize(dict.fromkeys(stat_budget.STAT_KEYS, 50), 4)
+            stat_budget.normalize(dict.fromkeys(stat_budget.STAT_KEYS, 50), 6)
 
 
 if __name__ == "__main__":

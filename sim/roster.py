@@ -34,7 +34,7 @@ CURATED_FAMILIES = [
 # S1 定稿（2026-09-13，克制实验依据）：等级拍平——进化强度只来自种族值跳变，
 # 档位只管价格/出现率。原 30/40/50 会造成「档位双重计费」（详见
 # reports/effectiveness-experiment-2026-09-13.md）。
-LEVEL_BY_TIER = {1: 45, 2: 45, 3: 45}
+LEVEL_BY_TIER = {1: 45, 2: 45, 3: 45, 4: 45, 5: 45}
 
 # S2 定稿（2026-09-13）：档位 = 形态自身 BST 分档。阈值取自 84 只池 BST 分布的
 # 自然断点（推导与读数见 docs/systems/S2-evolution-starup.md §2、

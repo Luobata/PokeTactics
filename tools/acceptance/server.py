@@ -821,6 +821,18 @@ class Handler(SimpleHTTPRequestHandler):
             m = re.match(r"^/demo/frame/([\w-]+)/r(\d+)/(\d+)\.png$", parsed.path)
             if not m:
                 return self.send_error(404)
+            directory = ROOT / ".build" / "demo" / m.group(1) / f"r{m.group(2)}"
+            frame = directory / f"{m.group(3)}.png"
+            if not frame.is_file() and not (directory / "meta.json").is_file():
+                # meta.json 最后落盘：此前回合仍在流式渲染，播放器预取会抢在
+                # 写盘前到达。短轮询等待该帧出现，避免把"还没渲染到"误判为 404；
+                # meta.json 一旦出现说明渲染结束，缺失帧是真 404，立即返回。
+                deadline = time.monotonic() + 12
+                while time.monotonic() < deadline:
+                    time.sleep(0.2)
+                    if (frame.is_file() and frame.stat().st_size) or \
+                            (directory / "meta.json").is_file():
+                        break
             self.path = (f"/.build/demo/{m.group(1)}/"
                          f"r{m.group(2)}/{m.group(3)}.png")
             super().do_GET()
@@ -863,7 +875,13 @@ def main() -> None:
     args = ap.parse_args()
     url = f"http://127.0.0.1:{args.port}/"
     print(f"PokeTactics 统一入口：{url}（Ctrl-C 退出）")
-    srv = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
+    # 开战只等权威解算，帧后台流式落盘；播放端按播放进度逐帧拉取。
+    demo_mod.DEFER_RENDER = True
+    class Server(ThreadingHTTPServer):
+        # 回放预取 + 精灵图 + API 会在瞬间开出十余条并发连接，默认 5 的
+        # listen backlog 溢出会被系统直接 RST（浏览器表现为图片载入失败）。
+        request_queue_size = 128
+    srv = Server(("127.0.0.1", args.port), Handler)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

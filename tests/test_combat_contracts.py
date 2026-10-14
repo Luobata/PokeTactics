@@ -134,6 +134,27 @@ class CombatContracts(unittest.TestCase):
         self.assertEqual(distant.hp, distant.max_hp)
         self.assertFalse(any(e[1] == "move" for e in b.events))
 
+    def test_ranged_steps_onto_firing_line_when_goal_cell_is_sealed(self):
+        # 角落目标 (0,0) 的两个邻格被封死：旧寻路以目标格为终点，判定不可达后
+        # 原地空转；新寻路以「进入射程」为终点，应继续向开火线推进。
+        b = battle((6,), (143, 143, 143), positions_a=[(3, 3)],
+                   positions_b=[(0, 0), (1, 0), (0, 1)])
+        u, sealed = b.units[:2]
+        u.target_idx = sealed.idx
+        b._act(u, 0.1)
+        self.assertNotEqual(u.pos, (3, 3))
+        self.assertLess(combat._manhattan(u.pos, sealed.pos), 6)
+        self.assertEqual(u.target_idx, sealed.idx)
+
+    def test_melee_retargets_when_locked_target_is_sealed(self):
+        # 锁定目标的全部邻格被占：不可达时改锁路径可达的最近敌人，嘲讽外不空等。
+        b = battle((68, 143), (143,) * 5, positions_a=[(0, 3), (2, 2)],
+                   positions_b=[(2, 1), (1, 1), (3, 1), (2, 0), (0, 0)])
+        u, sealed, reachable = b.units[0], b.units[1], b.units[6]
+        u.target_idx = sealed.idx
+        b._act(u, 0.1)
+        self.assertEqual((u.pos, u.target_idx), ((0, 2), reachable.idx))
+
     def test_blink_with_no_landing_cell_retains_original_target(self):
         b = battle((65,), (143, 143, 143, 143, 143),
                    positions_a=[(0, 2)], positions_b=[(0, 1), (5, 0), (4, 0), (5, 1), (1, 1)])

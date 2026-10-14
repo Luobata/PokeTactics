@@ -166,16 +166,26 @@ def _angles(sid,index,state,p,cast):
                     math.sin(p*math.tau+index*1.3)*3)
         if state=='windup':
             q=_ease(p)
+            if cast:
+                # A spell opens the guard earlier and keeps the elbows wider;
+                # a melee punch loads the same joints toward the torso.
+                return (upper_charge[index]*(.30+.58*q),
+                        elbow_charge[index]*(.22+.48*math.sin(p*math.pi)))
             return upper_charge[index]*q,elbow_charge[index]*q
         if state=='strike':
             # Four different fists lead at p=0,.25,.5,.75 in a 20Hz cast.
             order=(0,2,1,3)
             center=order.index(index)*.25+.03
-            hit=_pulse(p,center,.25 if cast else .46)
+            hit=_pulse(p,center,.22 if cast else .46)
             hold=.40*(1-p)
-            return upper_charge[index]*hold+strike_upper[index]*hit,elbow_charge[index]*hold+strike_elbow[index]*hit
+            upper_target=strike_upper[index]*(.75 if cast else 1)
+            elbow_target=strike_elbow[index]*(.82 if cast else 1)
+            return (upper_charge[index]*hold+upper_target*hit,
+                    elbow_charge[index]*hold+elbow_target*hit)
         if state=='recover':
             q=(1-_ease(p))
+            if cast:
+                return upper_charge[index]*.05*q,elbow_charge[index]*.52*q
             return (strike_upper[index]*.12+upper_charge[index]*.1)*q,elbow_charge[index]*.25*q
         if state=='hit':
             return (-1 if index<2 else 1)*8*(1-p),(-1 if index%2 else 1)*6*(1-p)
@@ -183,22 +193,28 @@ def _angles(sid,index,state,p,cast):
         if index>=2:
             angle=math.sin(p*math.tau+index*.8)*7
             if state=='windup':
-                angle=(-1 if index==2 else 1)*15*_ease(p)
+                angle=(-1 if index==2 else 1)*(10+7*_ease(p) if cast else 15*_ease(p))
             elif state=='strike':
-                angle=(-1 if index==2 else 1)*(20+13*math.sin(p*math.pi))
+                angle=(-1 if index==2 else 1)*(13+9*math.sin(p*math.pi) if cast else 20+13*math.sin(p*math.pi))
             elif state=='recover':
-                angle=(-1 if index==2 else 1)*20*(1-_ease(p))
+                angle=(-1 if index==2 else 1)*(11*(1-_ease(p)) if cast else 20*(1-_ease(p)))
             return angle,0
         sign=-1 if index==0 else 1
         if state in ('idle','walk'):
             return sign*math.sin(p*math.tau)*2,sign*math.sin(p*math.tau+.9)*3
         if state=='windup':
+            if cast:
+                return sign*(11+9*_ease(p)),-sign*(18+9*_ease(p))
             return sign*22*_ease(p),-sign*31*_ease(p)
         if state=='strike':
-            hit=_pulse(p,.10 if index==0 else .58,.42)
-            return -sign*39*hit,sign*32*hit
+            center=(.18 if index==0 else .68) if cast else (.10 if index==0 else .58)
+            hit=_pulse(p,center,.30 if cast else .42)
+            return -sign*(31 if cast else 39)*hit,sign*(26 if cast else 32)*hit
         if state=='recover':
-            return -sign*8*(1-_ease(p)),sign*9*(1-_ease(p))
+            q=1-_ease(p)
+            if cast:
+                return sign*5*q,-sign*6*q
+            return -sign*8*q,sign*9*q
         if state=='hit':
             return sign*12*(1-p),sign*9*(1-p)
     elif sid==26:
@@ -206,26 +222,25 @@ def _angles(sid,index,state,p,cast):
             if state in ('idle','walk'):
                 return math.sin(p*math.tau)*9,0
             if state=='windup':
-                return -18*_ease(p),0
+                return (-10-8*_ease(p) if cast else -18*_ease(p)),0
             if state=='strike':
-                return -18+43*math.sin(p*math.pi*.72),0
+                return -8+(27 if cast else 43)*math.sin(p*math.pi*.72),0
             if state=='recover':
-                return 15*(1-_ease(p)),0
+                return (8*(1-_ease(p)) if cast else 15*(1-_ease(p))),0
             if state=='hit':
                 return -10*(1-p),0
         sign=-1 if index==1 else 1
         if state in ('idle','walk'):
             return sign*math.sin(p*math.tau+index*.4)*5,0
         if state=='windup':
-            return sign*20*_ease(p),0
+            return (sign*(9+5*_ease(p)) if cast else sign*20*_ease(p)),0
         if state=='strike':
-            return -sign*16*math.sin(p*math.pi),0
+            return (sign*8*math.sin(p*math.pi) if cast else -sign*16*math.sin(p*math.pi)),0
         if state=='recover':
-            return -sign*5*(1-_ease(p)),0
+            return (sign*9*(1-_ease(p)) if cast else -sign*5*(1-_ease(p))),0
         if state=='hit':
             return sign*10*(1-p),0
     return 0.,0.
-
 
 def _joint_patch(source,point,radius):
     """Local original-colour shoulder/elbow overlap prevents a detached cut seam."""

@@ -151,6 +151,22 @@ SKILLS = {
     154: dict(id='verdant_sanctuary', name='清露花幕', type='GRASS', power=40, role='support',
               tags=['群体净化', '回复'],
               description='优先净化两格内至多两名带主要异常的其他友军，再各回复12%最大生命；没有异常时治疗最虚弱的受伤友军。不治疗自身，治疗受封疗影响。'),
+    # 传说档（4/5 费，同场限一）：高威力攻击技能，效果只复用既有机制件。
+    144: dict(id='glacier_beam', name='冰冻光束', type='ICE', power=75, role='attack',
+              tags=['范围', '冰炮'],
+              description='攻击主目标；主命中实际扣除生命后，对目标邻格至多两名其他敌人各造成40%冰属性伤害。侧击不再触发异常或原生联动。'),
+    145: dict(id='storm_peck', name='雷鸣啄钻', type='ELECTRIC', power=75, role='attack',
+              tags=['汲能', '干扰'],
+              description='攻击主目标；主命中实际扣除生命后，使目标失去至多12点能量。'),
+    146: dict(id='sky_blaze', name='神鸟猛击', type='FIRE', power=90, role='attack',
+              tags=['高威爆发'],
+              description='以90威力火属性攻击主目标，全池最高威力本命之一；无追加效果。'),
+    150: dict(id='mind_shatter', name='精神强念', type='PSYCHIC', power=95, role='attack',
+              tags=['高威爆发'],
+              description='以95威力超能力属性攻击主目标，全池最高威力本命；无追加效果。'),
+    151: dict(id='ancient_mind', name='原始念力', type='PSYCHIC', power=70, role='attack',
+              tags=['汲能', '干扰'],
+              description='攻击主目标；主命中实际扣除生命后，偷取目标至多10点能量，自身获得其中一半；能量上限80。'),
 
 }
 
@@ -182,6 +198,9 @@ _IDENTITIES = {
     157: ('enemy', 'area', '灼伤轰炸'), 212: ('enemy', 'combo', '破甲连击'),
     230: ('enemy', 'pierce', '双属性贯穿'), 160: ('enemy', 'root', '定身推移'),
     248: ('enemy', 'terrain', '岩钉壁垒'), 154: ('ally', 'cleanse', '群体净化'),
+    144: ('enemy', 'area', '冰系轰炸'), 145: ('enemy', 'drain', '单体汲能'),
+    146: ('enemy', 'burst', '高威爆发'), 150: ('enemy', 'burst', '高威爆发'),
+    151: ('enemy', 'drain', '汲能干扰'),
 }
 for _sid, (_targeting, _category, _behavior) in _IDENTITIES.items():
     SKILLS[_sid].update(targeting=_targeting, category=_category, behavior=_behavior)
@@ -628,7 +647,10 @@ def _cast(battle, unit, target, t):
     unit.energy, unit.casts = 0, unit.casts + 1
     damage = battle._move_damage(unit, target, move)
     cast_index = len(battle.events)
+    from arena_teaching import prepare_native_primary, settle_native_primary
+    damage, empower = prepare_native_primary(battle, unit, damage, t)
     lost_hp = battle._land_hit(unit, target, damage, t, move=move, primary=True, cast=True)
+    settle_native_primary(battle, unit, target, empower, t, cast_index)
     from arena_equipment import after_native_hit
     after_native_hit(battle, unit, target, t, cast_index, lost_hp)
     from arena_interactions import after_primary
@@ -752,6 +774,13 @@ def _cast(battle, unit, target, t):
             _knockback(battle, unit, target, t, cast_index)
         else:
             arena_fields.place_rocks(battle, unit, target, t, cast_index)
+    elif key == 'glacier_beam' and lost_hp:
+        for victim in _near_enemies(battle, unit, anchor, target):
+            _side_hit(battle, unit, victim, move, .40, t, cast_index)
+    elif key == 'storm_peck' and lost_hp:
+        _drain(battle, unit, target, 12, t, cast_index)
+    elif key == 'ancient_mind' and lost_hp:
+        _drain(battle, unit, target, 10, t, cast_index, transfer=True)
 
     guards = {'stone_pulse': .25, 'venom_tide': .20, 'twin_cannon': .20,
               'slow_field': .30, 'bull_rush': .20, 'mud_anchor': .25,

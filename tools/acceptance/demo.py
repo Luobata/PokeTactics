@@ -148,12 +148,24 @@ def sprite_png(species_id: int, shiny=False):
 
 
 # ---------------------------------------------------------------- 渲染包装
-def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
-                          positions_a=None, hud_snapshot=None, **battle_options):
-    """玩家战斗：DemoBattleAnimation（layout=back + 外部子流）解算并出全帧。
+DEFER_RENDER = False     # 验收服务器置 True：帧改后台流式渲染，end_prep 只解算
+_RENDER_THREADS = []     # 后台渲染线程登记（防 GC；测试可 join 等落帧完成）
 
-    解算与渲染同源：内部那次 Battle 就是本场的权威结果（胜者/存活数），
-    帧目录 .build/demo/<sid>/r<轮>/，返回 meta（帧数/事件流/结果）。
+
+def _run_render_job(job) -> None:
+    try:
+        job()
+    except Exception:  # noqa: BLE001 —— 落帧失败由播放端重试/战果兜底
+        import traceback
+        traceback.print_exc()
+
+
+def _prepare_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
+                           positions_a=None, hud_snapshot=None, **battle_options):
+    """玩家战斗：DemoBattleAnimation（layout=back + 外部子流）权威解算。
+
+    返回 (meta, render_job)：meta 立即可用（胜者/统计/事件流/队伍遥测）；
+    render_job() 逐帧落盘并在最后写 meta.json（= 完整帧集的发布标记）。
     """
     from render_battle_gif import AnimUnit, BattleAnimation
     from data import pokedex
@@ -179,15 +191,11 @@ def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
     t_end = max(e[0] for e in anim.events)
     winner = res["winner"]
     duration = anim.presentation_duration
-    if out_dir.exists():
-        shutil.rmtree(out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    n, T = 0, 0.0
+    # 队伍遥测与 frame_playback 同源同映射：只步进演示视图，不画帧。
     team_frames = []
+    n, T = 0, 0.0
     while T <= duration + 1e-9:
-        frame = renderer.frame_playback(T)
-        frame.convert("RGB").save(out_dir / f"{n}.png", compress_level=2)
-        view = anim._presentation_view()
+        view = renderer.step_view(T)
         team_frames.append({
             'alive': [sum(u.die_t is None for u in view.units.values() if u.u.team == team)
                       for team in (0, 1)],
@@ -205,7 +213,14 @@ def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
             "combatants": [{'idx': u.idx, 'team': u.team, 'sid': u.piece.species_id,
                             'name': u.piece.name, 'star': getattr(u.piece, 'star', 1),
                             'role': getattr(u.piece, 'role_key', 'attack'),
-                            'range': u.piece.distance, 'max_hp': u.max_hp}
+                            'range': u.piece.distance, 'max_hp': u.max_hp,
+                            'item': getattr(u, 'item_key', None),
+                            'item_name': (items_mod.FINISHED[u.item_key]['name']
+                                          if getattr(u, 'item_key', None) in items_mod.FINISHED
+                                          else None),
+                            'technique': getattr(u, 'technique', None) or None,
+                            'technique_name': (_move_zh(u.technique)
+                                               if getattr(u, 'technique', None) else None)}
                            for u in anim.by_idx.values()],
             "battle_rows": anim.battle_rows, "winner": winner, "event_version": 3 if anim.is_arena else 2,
             "hud": hud_snapshot,
@@ -222,19 +237,146 @@ def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
     if anim.is_arena:
         teams = {unit.idx: unit.team for unit in anim.by_idx.values()}
         meta.update(_battle_effects(anim.events, teams))
-    (out_dir / "meta.json").write_text(json.dumps(meta, ensure_ascii=False))
+        meta['loadout_highlights'] = _loadout_highlights(anim, teams)
+
+    def render_job() -> float:
+        t0 = time.time()
+        if out_dir.exists():
+            shutil.rmtree(out_dir)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        T = 0.0
+        for i in range(n):
+            frame = renderer.frame_playback(T)
+            frame.convert("RGB").save(out_dir / f"{i}.png", compress_level=1)
+            T += FPS_DT
+        render_s = round(time.time() - t0, 1)
+        (out_dir / "meta.json").write_text(json.dumps(
+            {**meta, "render_s": render_s}, ensure_ascii=False))
+        return render_s
+    return meta, render_job
+
+
+def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
+                          positions_a=None, hud_snapshot=None, **battle_options):
+    """同步渲染（测试/离线工具）：权威解算 + 全帧落盘一次完成。
+
+    解算与渲染同源：内部那次 Battle 就是本场的权威结果（胜者/存活数），
+    帧目录 .build/demo/<sid>/r<轮>/，返回 meta（帧数/事件流/结果）。
+    """
+    meta, job = _prepare_battle_frames(comp_a, comp_b, rng, weather_name, out_dir,
+                                       positions_a=positions_a, hud_snapshot=hud_snapshot,
+                                       **battle_options)
+    meta["render_s"] = job()
     return meta
+
+
+
+def _passive_item_estimate(key, unit, stats_row, alive_time):
+    """纯被动乘区装的贡献估算卡（无事件可精确计数，标注「估算」）。
+
+    乘区装与星级/海克斯乘法叠加，用携带者本场总伤反推乘区带来的增量；
+    剩饭按存活时长折算理论回复。数据来自结算统计，不回放、不改模拟。
+    """
+    mults = {'choice_band': .35, 'scarf_fire': .30, 'scarf_water': .30,
+             'scarf_electric': .30, 'life_orb': .20, 'focus_lens': .25,
+             'swift_feather': .25}
+    if key in mults:
+        dealt = (stats_row or {}).get('damage_dealt', 0)
+        if dealt <= 0:
+            return None
+        extra = round(dealt * (1 - 1 / (1 + mults[key])))
+        return (f'估算多打 {extra} 伤害'
+                + ('（含每动作 5% 反噬）' if key == 'life_orb' else ''))
+    if key == 'leftovers':
+        healed = round(max(0.0, alive_time) * 0.015 * unit.max_hp)
+        return f'估算回复 {healed} 生命（存活 {alive_time:.0f} 秒）' if healed > 0 else None
+    return None
+
+
+def _loadout_highlights(anim, teams):
+    """装备与技能机高光：只聚合已发生的事件，不改任何模拟数值。
+
+    披带救命与技能机施放来自 sash / cast 事件；触发型成装复用
+    combination_view.battle_summary 的口径；纯被动装备没有事件，
+    补一张效果说明卡，让结算区能直接读到每件装备做了什么。
+    """
+    highlights = []
+    sash_counts = {}
+    technique_stats = {}
+    for e in anim.events:
+        if e[1] == 'sash':
+            sash_counts[e[2]] = sash_counts.get(e[2], 0) + 1
+        elif e[1] == 'cast':
+            caster = anim.by_idx[e[2]]
+            if e[4] != getattr(caster, 'technique', None):
+                continue
+            entry = technique_stats.setdefault(e[2], {'times': set(), 'damage': 0, 'move': e[4]})
+            entry['times'].add(e[0])
+            if e[6]:
+                entry['damage'] += anim._display_damage(e, e[6])
+    for idx in sorted(sash_counts):
+        unit = anim.by_idx[idx]
+        highlights.append({'kind': 'sash', 'team': unit.team, 'unit': unit.piece.name,
+                           'name': '气势披带',
+                           'text': f'致命伤保留 1 HP（{sash_counts[idx]} 次）'})
+    for idx in sorted(technique_stats):
+        unit = anim.by_idx[idx]
+        entry = technique_stats[idx]
+        parts = [f"{len(entry['times'])} 次施放"]
+        if entry['damage']:
+            parts.append(f"共 {entry['damage']} 伤害")
+        highlights.append({'kind': 'technique', 'team': unit.team, 'unit': unit.piece.name,
+                           'name': f"{_move_zh(entry['move'])}（技能机）",
+                           'text': ' · '.join(parts)})
+    from combination_view import battle_summary, NAMES
+    stat_mode = 'budget_v1'
+    dynamic_items = set()
+    for row in battle_summary(anim.events, teams, team=0)['by_key']:
+        if row['id'] not in items_mod.FINISHED:
+            continue
+        parts = [f"{row['triggers']} 次触发"] if row['triggers'] else []
+        for field, label in (('damage', '额外伤害'), ('healing', '治疗'), ('energy', '回能'),
+                             ('shield', '护盾'), ('absorbed', '护盾吸收'), ('mitigated', '减伤')):
+            if row[field]:
+                parts.append(f"{label} +{row[field]}")
+        if row['cleanses']:
+            parts.append(f"净化 {row['cleanses']} 次")
+        if not parts:
+            continue
+        dynamic_items.add(row['id'])
+        highlights.append({'kind': 'item', 'team': 0, 'unit': '', 'name': row['name'],
+                           'text': ' · '.join(parts)})
+    if sash_counts:
+        dynamic_items.add('sash')
+    stats_by_idx = {row['idx']: row for row in (anim.statistics or {}).get('units', [])}
+    duration = max((e[0] for e in anim.events), default=0.0)
+    death_at = {}
+    for e in anim.events:
+        if e[1] == 'unit_state' and e[3] == 0 and e[2] not in death_at:
+            death_at[e[2]] = e[0]
+    for unit in sorted(anim.by_idx.values(), key=lambda u: (u.team, u.idx)):
+        key = getattr(unit, 'item_key', None)
+        if not key or key in dynamic_items or key not in items_mod.FINISHED:
+            continue
+        alive_time = duration if unit.alive else death_at.get(unit.idx, 0.0)
+        text = _passive_item_estimate(key, unit, stats_by_idx.get(unit.idx), alive_time)
+        highlights.append({'kind': 'item', 'team': unit.team, 'unit': unit.piece.name,
+                           'name': items_mod.FINISHED[key]['name'],
+                           'text': text or _item_effect(key, stat_mode)})
+    return highlights
 
 
 
 def _battle_effects(events, teams):
     """Both perspectives from the same committed combat, including real zeroes."""
-    from combination_view import battle_summary, field_summary
+    from combination_view import battle_summary, field_summary, technique_summary
     return {'effect_version': 1,
             'combinations': battle_summary(events, teams, team=0),
             'enemy_combinations': battle_summary(events, teams, team=1),
             'fields': field_summary(events, teams, team=0),
-            'enemy_fields': field_summary(events, teams, team=1)}
+            'enemy_fields': field_summary(events, teams, team=1),
+            'techniques': technique_summary(events, teams, team=0),
+            'enemy_techniques': technique_summary(events, teams, team=1)}
 
 _MOVES_ZH = None
 
@@ -248,6 +390,7 @@ def _move_zh(name: str) -> str:
                      for m in pokedex().moves.values()}
         _MOVES_ZH.update({'arena_' + s['id']: s['name'] for s in arena_skills.catalog()})
         _MOVES_ZH.update({'roar': '吼叫', 'rapid_spin': '高速旋转'})
+        _MOVES_ZH.update({t['id']: t['name'] for t in arena_mod.technique_catalog()})
     return _MOVES_ZH.get(name, name)
 
 
@@ -275,20 +418,21 @@ def _fmt_event(anim, e: tuple) -> str:
     if kind == "sash":
         return f"<b>{name(e[2])} 气势披带发动</b>（保留 1 HP）"
     if kind == "cast":
+        tm_tag = '（技能机）' if e[4] == getattr(anim.by_idx[e[2]], 'technique', None) else ''
         if getattr(anim, 'is_arena', False) and e[4] == 'roar':
-            return f"<b>{name(e[2])} 施放 {_move_zh(e[4])}</b> → {name(e[3])}"
+            return f"<b>{name(e[2])} 施放 {_move_zh(e[4])}{tm_tag}</b> → {name(e[3])}"
         if (getattr(anim, 'is_arena', False) and e[4].startswith('arena_') and e[6] == 0
                 and (anim.by_idx[e[2]].team == anim.by_idx[e[3]].team
                      or any(raw[1] == 'field_effect' and raw[2] == e[2]
                             and raw[5] == 'place' and raw[6].get('cast_index') ==
                             anim.timeline.source_index_by_event.get(id(e))
                             for raw in anim.events))):
-            return f"<b>{name(e[2])} 施放 {_move_zh(e[4])}</b> → {name(e[3])}"
+            return f"<b>{name(e[2])} 施放 {_move_zh(e[4])}{tm_tag}</b> → {name(e[3])}"
         eff = {0.5: "效果不佳", 2.0: "效果拔群", 4.0: "效果绝群"}.get(e[5], f"x{e[5]}")
         immune = getattr(anim, 'is_arena', False) and e[5] == 0
         tail = (" 属性免疫" if immune else " 未命中") if e[6] == 0 else \
             f" {hit_text(e[6])}{(' ' + eff) if e[5] != 1 else ''}"
-        return f"<b>{name(e[2])} 的 {_move_zh(e[4])}</b> → {name(e[3])}{tail}"
+        return f"<b>{name(e[2])} 的 {_move_zh(e[4])}{tm_tag}</b> → {name(e[3])}{tail}"
     if kind == "die":
         return f"<b>{name(e[2])} 倒下</b>"
     if kind == "combo":
@@ -771,7 +915,13 @@ class Session:
                 if key in ('sunny_day', 'rain_dance'):
                     types = {'FIRE', 'GRASS'} if key == 'sunny_day' else {'WATER'}
                     return (1, 2 * sum(bool(types.intersection(o.piece.types)) for o in seat.board))
-                return (1, 3 if key == 'guard' and len(seat.board) > 1 else 1)
+                if key == 'guard':
+                    return (1, 3 if len(seat.board) > 1 else 1)
+                # 通用评分：技能类别 × 携带者定位匹配度（与 bot 学习决策同一张表）。
+                match = max(arena_mod._BOT_ROLE_MATCH.get(
+                    techniques_mod.category_of(key) or '', {}).get(
+                        getattr(o.piece, 'role_key', 'attack'), 0) for o in eligible)
+                return (1, 1 + match)
             choice = max(row['options'], key=score)
             seat.inventory.techniques[choice] += 1
             row.update(status='claimed', choice=choice)
@@ -1393,14 +1543,29 @@ class Session:
                 battle_options["learned_b"] = list(self.opponent_learned)
         if opp is not None and tactics_mod.enabled(self.ruleset) and self.opponent_tactics is not None:
             battle_options['tactics_b'] = copy.deepcopy(self.opponent_tactics)
-        meta = _render_battle_frames(
-            comp_a, comp_b, rng, weather, out_dir,
-            positions_a=me.battle_positions(),
-            hud_snapshot={"hp": max(0, me.hp), "gold": me.gold,
-                          "level": me.level, "round": r},
-            **battle_options)
+        if DEFER_RENDER:
+            # 帧后台流式落盘：end_prep 只等权威解算，播放端边播边拉帧。
+            meta, job = _prepare_battle_frames(
+                comp_a, comp_b, rng, weather, out_dir,
+                positions_a=me.battle_positions(),
+                hud_snapshot={"hp": max(0, me.hp), "gold": me.gold,
+                              "level": me.level, "round": r},
+                **battle_options)
+            meta["render_s"] = None   # 落帧完成后写入 meta.json
+            worker = threading.Thread(target=_run_render_job, args=(job,),
+                                      name=f"battle-render-{self.sid}-r{r}", daemon=True)
+            _RENDER_THREADS[:] = [t for t in _RENDER_THREADS if t.is_alive()]
+            _RENDER_THREADS.append(worker)
+            worker.start()
+        else:
+            meta = _render_battle_frames(
+                comp_a, comp_b, rng, weather, out_dir,
+                positions_a=me.battle_positions(),
+                hud_snapshot={"hp": max(0, me.hp), "gold": me.gold,
+                              "level": me.level, "round": r},
+                **battle_options)
+            meta["render_s"] = round(time.time() - t0, 1)
         meta["round"] = r
-        meta["render_s"] = round(time.time() - t0, 1)
         meta["pve"] = pve
         meta["ghost"] = ghost
         meta["opp_name"] = (opp.name if opp is not None else
@@ -1870,8 +2035,54 @@ def _annotate_trait_locks(view, sess):
             option['locked'] = option['id'] not in sess.arena_unlocks['traits']
 
 
+def _restore_battle_replay(session):
+    """存档只存结算摘要；恢复时若该轮帧仍完整保留在本机磁盘，接回完整回放。
+
+    渲染目录 .build/demo/<sid>/r<round>/ 与会话同机同 sid，恢复存档后原帧通常还在；
+    meta.json 最后落盘且逐帧校验齐全才接回，否则保持 n=0 的「战果已恢复」桩。
+    结算字段（winner/statistics/奖励效果）以存档里已校验的摘要为准，磁盘 meta 只供回放。
+    """
+    battle = getattr(session, "last_battle", None)
+    if not battle or not battle.get("restored") or battle.get("n"):
+        return
+    round_no = battle.get("round")
+    sid = getattr(session, "sid", None)
+    if type(round_no) is not int or not sid:
+        return
+    directory = ROOT / ".build" / "demo" / str(sid) / f"r{round_no}"
+    try:
+        meta = json.loads((directory / "meta.json").read_text())
+    except (OSError, ValueError):
+        return
+    n = meta.get("n")
+    if type(n) is not int or not 0 < n <= 12000:
+        return
+    if meta.get("round", round_no) != round_no or meta.get("winner") != battle.get("winner"):
+        return
+    try:
+        if not all((directory / f"{i}.png").is_file() and (directory / f"{i}.png").stat().st_size
+                   for i in range(n)):
+            return
+    except OSError:
+        return
+    merged = {**meta, "round": round_no, "winner": battle.get("winner"),
+              "pve": battle.get("pve", False), "ghost": battle.get("ghost", False),
+              "opp_name": battle.get("opp_name"),
+              "headline": meta.get("headline") or battle.get("headline"),
+              "statistics": battle.get("statistics") or meta.get("statistics"),
+              "restored": True}
+    for key in ("survivors", "duration"):
+        if key in battle:
+            merged[key] = battle[key]
+    for key in REPORT_EFFECT_KEYS:
+        if key in battle:
+            merged[key] = battle[key]
+    session.last_battle = merged
+
+
 def state_json(sess) -> dict:
     sess.ensure_unit_ids()
+    _restore_battle_replay(sess)
     p = sess.player
     stat_mode = 'budget_v1' if sess.expedition or sess.is_arena else 'legacy'
     from render_mockups import TYPE_COLORS
@@ -1906,6 +2117,9 @@ def state_json(sess) -> dict:
         else:
             v = _piece_view(p.templates[sid], ruleset=sess.ruleset)
             v["price"] = p.templates[sid].tier
+            if sess.is_arena:
+                v['pool_remaining'] = sess.pool.remaining[sid]
+                v['pool_total'] = arena_mod.pool_cap(sid)
             if tactics_mod.evolution_choices_enabled(sess.ruleset):
                 v['evolution_preview'] = _evolution_preview(sess, shop_index=i)
             shop.append(v)
@@ -2071,6 +2285,9 @@ def act_buy(sess, i: int, evolution='auto'):
     price = p.shop.price(i)
     if p.gold < price:
         raise DemoError(f"金币不足（需要 {price} 金，你有 {p.gold} 金）")
+    if sess.is_arena and p.shop.slots[i] in arena_mod.LEGENDARY and \
+            arena_mod.holds_legendary(p.all_pieces()):
+        raise DemoError("传说限一：卖掉手中的传说精灵后才能再招募")
     choices = tactics_mod.evolution_choices_enabled(sess.ruleset)
     if evolution not in ('auto', 'defer') or (evolution == 'defer' and not choices):
         raise DemoError('当前规则不支持这个进化选择')

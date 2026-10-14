@@ -9,8 +9,20 @@ body[data-mode="classic"] .screen-box canvas { width: 100%; height: auto; image-
 #retry-frame { background: #f3e9d5; border-color: #b87b5f; }
 #mode { color: #355640; }
 .preview-error { color: #9b483b; border: 1px solid #d4b49b; padding: 10px 14px; background: #f9efe2; }
+.body-scope-note { margin: -6px 0 14px; color: #707f63; font-size: 11px; }
+.body-samples { display: grid; grid-template-columns: minmax(220px, 320px) minmax(0, 1fr); gap: 16px; align-items: center; margin: 4px 0 20px; padding: 14px 16px; border: 1px solid #c6d1ba; border-radius: 7px; background: #f4f7ea; }
+.body-samples h2 { margin: 0 0 6px; color: #2e4b35; font-size: 14px; }
+.body-samples p { margin: 0; color: #71816a; font-size: 11px; }
+.body-sample-buttons { display: grid; grid-template-columns: repeat(3, minmax(92px, 1fr)); gap: 9px; }
+.body-sample-buttons button { min-height: 38px; padding: 8px 9px; border: 1px solid #bfceae; border-radius: 4px; background: #fffef4; color: #4c6647; font-size: 11px; }
+.body-sample-buttons button:hover { border-color: #71945b; background: #edf4e1; }
+.body-sample-buttons button:focus-visible { outline: 3px solid #c99c4b; outline-offset: 2px; }
+body[data-view="body"] .lab-canvas-shell { box-shadow: inset 0 0 0 2px #6c875f; }
+body[data-view="body"] .lab-canvas-shell canvas, canvas[data-view="body"] { image-rendering: pixelated; }
+.view-field { min-width: 0; }
+#view-status { color: #6f7d63; }
 .lab-workspace { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
-.lab-controls { display: grid; grid-template-columns: 180px minmax(220px, 1fr) 130px 80px auto; gap: 12px; align-items: end; margin: 22px 0; }
+.lab-controls { display: grid; grid-template-columns: 152px 148px 132px minmax(180px, 1fr) 116px 70px auto; gap: 12px; align-items: end; margin: 22px 0; }
 .lab-controls label { display: block; min-width: 0; font-size: 11px; color: #718068; }
 .lab-controls select,.lab-controls input { display: block; width: 100%; min-height: 39px; margin-top: 5px; padding: 7px 9px; border: 1px solid #b9c7ab; background: #fffef6; color: #2c4234; font: inherit; }
 .lab-canvas-shell { background: #172b28; border-radius: 8px; overflow: hidden; }
@@ -35,6 +47,6 @@ body[data-mode="classic"] .lab-canvas-shell canvas { image-rendering: pixelated;
 .history-links { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 11px; }
 .history-contact { max-width: 100%; overflow: auto; }
 .history-contact img { display: block; max-width: none; image-rendering: pixelated; }
-@media(max-width:1100px) { .lab-controls { grid-template-columns: 180px minmax(180px, 1fr) 130px 80px; } .lab-controls .button { grid-column: 1/-1; justify-self: start; } .lab-workspace { grid-template-columns: minmax(0, 1fr) 260px; gap: 18px; } }
-@media(max-width:800px) { .lab-workspace { grid-template-columns: 1fr; } .lab-controls { grid-template-columns: 1fr 1fr; } .lab-controls .species-field { grid-column: 1/-1; } .lab-controls .button { grid-column: auto; width: 100%; } .lab-detail { margin-top: 8px; } }
-@media(max-width:520px) { .lab-transport { gap: 8px; } .lab-transport .time-readout { width: 100%; margin-left: 0; } .lab-controls { gap: 10px; } .lab-controls select { font-size: 11px; } }
+@media(max-width:1100px) { .lab-controls { grid-template-columns: repeat(3,minmax(0,1fr)); } .lab-controls .button { grid-column: auto; } .body-samples { grid-template-columns: 1fr; } .lab-workspace { grid-template-columns: minmax(0, 1fr) 260px; gap: 18px; } }
+@media(max-width:800px) { .lab-workspace { grid-template-columns: 1fr; } .lab-controls { grid-template-columns: 1fr 1fr; } .lab-controls .species-field { grid-column: 1/-1; } .lab-controls .button { grid-column: auto; width: 100%; } .body-sample-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lab-detail { margin-top: 8px; } }
+@media(max-width:520px) { .lab-transport { gap: 8px; } .lab-transport .time-readout { width: 100%; margin-left: 0; } .lab-controls { gap: 10px; } .lab-controls select { font-size: 11px; } .body-samples { padding: 12px; } .body-sample-buttons { grid-template-columns: 1fr; } }

@@ -88,7 +88,7 @@ def normalize_preset(value):
 
 def normalize_preview(value):
     from action_preview import PREVIEW_ACTIONS
-    _object(value, ("mode", "species", "kind", "seed", "settings"), "预览请求")
+    _object(value, ("mode", "view", "species", "kind", "seed", "settings"), "预览请求")
     # New requests default to the playable arena, unlike old imported presets.
     preset = normalize_preset({"schema_version": 1, "mode": value.get("mode", "arena"),
                                "species": value.get("species"),
@@ -98,7 +98,12 @@ def normalize_preview(value):
         raise ValueError("不支持的动作预览")
     if type(seed) is not int or not 0 <= seed <= 2**32-1:
         raise ValueError("种子必须为 0–4294967295 的整数")
-    return {"mode": preset["mode"], "species": preset["species"], "kind": kind, "seed": seed,
+    view = value.get("view", "composite")
+    if not isinstance(view, str) or view not in ("composite", "body"):
+        raise ValueError("view 必须为 composite 或 body")
+    if view == "body" and preset["mode"] != "arena":
+        raise ValueError("仅身体预览当前支持竞技模式")
+    return {"mode": preset["mode"], "view": view, "species": preset["species"], "kind": kind, "seed": seed,
             "settings": preset["settings"]}
 
 
@@ -117,8 +122,10 @@ def source_revision():
         digest.update(str(identity).encode())
         digest.update(path.read_bytes())
     import data, status, synergy, profiles
+    # Hash public policy constants, not private caches that initialize lazily.
     for module in (data, status, synergy, profiles):
         constants = {k: v for k, v in vars(module).items() if k.isupper()
+                     and not k.startswith("_")
                      and type(v) in (str, int, float, bool, type(None))}
         digest.update(json.dumps(constants, sort_keys=True).encode())
     return digest.hexdigest()
@@ -161,7 +168,8 @@ def _render(request, revision):
         from arena_preview_scene import make_preview_scene
     else:
         from profile_range import make_preview_scene
-    anim = make_preview_scene(request["species"], request["kind"], request["seed"], visual_overrides=overrides)
+    anim = make_preview_scene(request["species"], request["kind"], request["seed"],
+                              visual_overrides=overrides)
     clip = describe_clip(anim, request["kind"])
     renderer = make_renderer(anim, mode)
     start, end = clip['clip_start'], clip['clip_end']
@@ -176,7 +184,9 @@ def _render(request, revision):
         digest = hashlib.sha256()
         for index in range(count):
             tick = time.perf_counter()
-            frame = renderer.frame(round(start+index*DT, 6), show_cutins=False).convert("RGB")
+            seconds = round(start+index*DT, 6)
+            frame = (renderer.body_frame(seconds, unit_idx=0) if request["view"] == "body" else
+                     renderer.frame(seconds, show_cutins=False)).convert("RGB")
             if frame.size != (renderer.width, renderer.height):
                 raise ValueError("预览画布尺寸与展示模式不一致")
             milliseconds.append((time.perf_counter()-tick)*1000)
@@ -203,7 +213,9 @@ def _render(request, revision):
         if mode == "arena":
             from arena_skills import skill_of
             native = skill_of(request["species"])
-        meta = {**mode_info(mode), **clip, "n": count, "dt": DT,
+        meta = {**mode_info(mode), **clip, "n": count, "dt": DT, "view": request["view"],
+                "body_preview": {"unit": 0, "scale": 4, "camera": "follow_cell",
+                                 "external_effects": False} if request["view"] == "body" else None,
                 "dimensions": {"width": renderer.width, "height": renderer.height},
                 "settings": request["settings"], "revision": revision, "source_revision": revision,
                 "native_skill": native, "source_action": source_action,
@@ -271,7 +283,7 @@ def preview(value):
         except Exception:
             # A failed pair must not accumulate newly published base frames or
             # evict the last successful pair still displayed by the editor.
-            for candidate in set((base_key, key)) - existed:
+            for candidate in {base_key, key} - existed:
                 directory = CACHE_ROOT / candidate
                 if directory.is_dir() and not directory.is_symlink():
                     shutil.rmtree(directory)

@@ -79,7 +79,12 @@ def action(session, cmd, **params):
     return result
 
 
-def pilot_prep(session, pilot):
+def mirror_decision(session, pilot):
+    """Mirror one Bot.decide onto the human seat: same policy, real shared pool.
+
+    Grid rows follow session.grid_rows, so arena (3 rows) and tactical
+    (2 rows, identical to demo._GRID_ORDER) sessions share this path.
+    """
     player = session.player
     for key, value in vars(player).items():
         if key not in ('grid', 'name'):
@@ -90,8 +95,14 @@ def pilot_prep(session, pilot):
     for key, value in vars(pilot).items():
         if key not in ('grid', 'board', 'seat', 'name'):
             setattr(player, key, value)
-    player.grid = dict(zip(demo._GRID_ORDER, pilot.board))
+    player.grid = dict(zip([(r, c) for r in reversed(range(session.grid_rows))
+                            for c in range(demo.GRID_COLS)], pilot.board))
     session.ensure_unit_ids()
+
+
+def pilot_prep(session, pilot):
+    mirror_decision(session, pilot)
+    player = session.player
     notices = session.refresh_tactics()
     CONTEXT['row']['invalidated_configuration_notices'].extend(
         {'round': session.round_no, 'reason': note} for note in notices)

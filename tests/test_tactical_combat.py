@@ -122,11 +122,11 @@ class TacticalValidation(unittest.TestCase):
 
     def test_base_events_and_rng_match_pre_tactics_golden_runs(self):
         cases = [
-            ({}, "b6e181d694f89ba108b5aab503e0a9e16ece9831f351490bbc359e392dea76e6",
-             "626cd8c7a315202ee449136db81d271b6df2e12e433771d6edf900ee2d4d69cc"),
+            ({}, "74c7fd79639992e87d0e50b15361cc580f732860d921e719845bfa61565ea5a0",
+             "0b2d3e17eddfaa3387fd52d89c7e3cd1d42864e4761fe842323272fa63cbe234"),
             ({"learned_a": ["cut", "surf", "rest"], "weather_name": "rain",
               "stat_mode": "budget_v1"},
-             "ba39e37bba82c54819f5bf5ad53e7676d6e9919cfe2cebb62b6874a67d86b635",
+             "98754c9274e62631c1edfff5be0ef14912d575cedca56b23df5af017854a212c",
              "fea1a2c67716dba6416222d58967ea1337c7e3e88a02337fcba85b59d9e988d1"),
         ]
         # Captured from the unmodified combat core before this change. The

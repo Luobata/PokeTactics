@@ -549,6 +549,9 @@ class BattleAnimation:
             import arena_skills
             self.move_type.update({'arena_' + s['id']: s['type'] for s in arena_skills.catalog()})
             self.move_zh.update({'arena_' + s['id']: s['name'] for s in arena_skills.catalog()})
+            import techniques
+            self.move_zh.update({row['id']: row['name']
+                                 for row in techniques.catalog('arena_v1')})
             self._native_moves = {u.idx: arena_skills.resolve_cast(u.piece)['name'] for u in b.units}
         else:
             self._native_moves = {u.idx: (resolve_cast(u.piece, getattr(b, 'stat_mode', 'legacy')) or {}).get('name')
@@ -766,6 +769,8 @@ class BattleAnimation:
                     tgt.set_hp(t, tgt.hp - dmg)
             extra = "效果拔群！" if eff >= 2 else ("效果不佳" if 0 < eff < 1 else "")
             label = self.move_zh.get(move, move) if self.is_arena else skill["name"]
+            if self.is_arena and move == getattr(au.u, 'technique', None):
+                label += "（技能机）"
             self.msg = (impact, f"{self.by_idx[ci].piece.name}的{label}！ {extra}")
         elif kind == "regen":
             au = self.units[ev[2]]
@@ -777,6 +782,9 @@ class BattleAnimation:
         elif kind == "sash":
             if not self.authoritative_states:
                 self.units[ev[2]].set_hp(t, 1)
+            au = self.units[ev[2]]
+            self.floats.append((t, *au.render_px(t), "1HP", (255, 208, 64)))
+            self.msg = (t, f"{self.by_idx[ev[2]].piece.name}的气势披带发动！")
         elif kind == "die":
             au = self.units[ev[2]]
             au.die_t = t
@@ -812,8 +820,12 @@ class BattleAnimation:
             if key == 'rock_spikes':
                 fid = payload.get('field_id')
                 if effect == 'place':
+                    raw_index = self.timeline.source_index_by_event.get(id(ev)) if self._is_presentation else None
+                    raw_t = self.timeline.source_events[raw_index][0] if raw_index is not None else t
+                    expires = payload.get('expires_at')
                     self.active_rock_fields[fid] = {'cells': list(payload['cells']),
-                        'team': self.by_idx[source].team}
+                        'team': self.by_idx[source].team, 'placed_at': t,
+                        'expires_at': t + max(0., expires-raw_t) if expires is not None else None}
                     self.msg = (t, '岩钉区域已铺设')
                 elif effect in ('clear', 'expire'):
                     field = self.active_rock_fields.get(fid)
@@ -855,11 +867,14 @@ class BattleAnimation:
                 self.floats.append((t, *self.units[target].cell_px(position), prefix + str(value),
                                     (99, 217, 242) if effect != 'energy' else (191, 142, 255)))
             if key == 'arena_weather' and effect in ('weather', 'expire'):
-                self.weather_name = payload.get('new_weather')
-                raw_index = self.timeline.source_index_by_event.get(id(ev)) if self._is_presentation else None
-                raw_t = self.timeline.source_events[raw_index][0] if raw_index is not None else t
-                self.weather_until = (t + max(0., payload.get('expires_at', 0.) - raw_t)
-                                      if self.weather_name else None)
+                # A repeated request acknowledges the existing weather. Its
+                # differently retimed packet must not extend the displayed end.
+                if payload.get('reason') != 'same_weather_no_refresh':
+                    self.weather_name = payload.get('new_weather')
+                    raw_index = self.timeline.source_index_by_event.get(id(ev)) if self._is_presentation else None
+                    raw_t = self.timeline.source_events[raw_index][0] if raw_index is not None else t
+                    self.weather_until = (t + max(0., payload.get('expires_at', 0.) - raw_t)
+                                          if self.weather_name else None)
             if key == 'life_orb' and (payload.get('recoil') or payload.get('damage_scope') == 'self_cost'):
                 value = max(0, int(payload.get('amount', 0)))
                 if value:
@@ -1293,6 +1308,7 @@ class BattleAnimation:
         img.alpha_composite(fx)
         for x, y, width, height, color in weather:
             draw.rectangle((x, y, x + width - 1, y + height - 1), fill=color)
+        self._draw_sash_flashes(img, T)
         self._draw_floats(img, T)
         self._draw_board_flash(img, T)
         self._draw_opening(img, T)
@@ -1740,6 +1756,12 @@ class BattleAnimation:
         if self.is_arena and au.shield > 0:
             draw_meter(img, px_ + 3, py_ - 15, BCELL - 6,
                        min(1., au.shield / max(1., u.max_hp * .15)), (99, 217, 242), height=3)
+        # 装备持有者在 HP 条左端挂一枚金色菱标，双方同规则。
+        if self.is_arena and getattr(u, 'item_key', None):
+            bx, by = px_ + 1, py_ - 8
+            ImageDraw.Draw(img).polygon(
+                ((bx - 3, by), (bx, by - 3), (bx + 3, by), (bx, by + 3)),
+                fill=(255, 208, 64, 255), outline=(94, 66, 16, 255))
 
     def _ground_scars(self, T):
         """印记固定在落点格；从已发生的事件推导，不添加回放状态。"""
@@ -1978,7 +2000,16 @@ class BattleAnimation:
                 else:
                     arena_vfx.draw_skill(img,source.piece.species_id,
                         self.move_type.get(ev[4], 'NORMAL'),a,b,phase,p,source.team,ev[4])
+                    # 技能机习得的招式：施法者脚下铺一圈金色地面光环，与原生签名特效区分。
+                    if ev[4] == getattr(source, 'technique', None):
+                        rx = 16 + 12 * p
+                        ry = max(4, rx * 0.45)
+                        ImageDraw.Draw(img).ellipse(
+                            (a[0]-rx, a[1]+8-ry, a[0]+rx, a[1]+8+ry),
+                            outline=(255, 208, 64, 255), width=2)
                 label=self.move_zh.get(ev[4],ev[4])
+                if ev[1] == 'cast' and ev[4] == getattr(source, 'technique', None):
+                    label += '（技能机）'
             self._arena_label=(ev,label)
         # Every link comes from an applied, explicitly cast-owned effect. Chain
         # hops use the previous victim's recorded origin; support links use the
@@ -2049,6 +2080,24 @@ class BattleAnimation:
             x, y = BX + col * BCELL, BY + row * BCELL
             draw.rectangle((x + 1, y + 1, x + BCELL - 2, y + BCELL - 2),
                            fill=color + (90,))
+
+    def _draw_sash_flashes(self, img, T):
+        """气势披带发动的扩张金环；只从已发生的事件推导，不添加回放状态。"""
+        if not self.is_arena:
+            return
+        for ev in self.events[:self._cursor]:
+            if ev[1] != "sash":
+                continue
+            age = T - ev[0]
+            if not (0 <= age < 0.7):
+                continue
+            au = self.units[ev[2]]
+            x, y = au.render_px(T)
+            cx, cy = int(x + BCELL / 2), int(y + 14)
+            radius = 8 + 16 * (age / 0.7)
+            alpha = int(230 * (1 - age / 0.7))
+            ImageDraw.Draw(img).ellipse((cx - radius, cy - radius, cx + radius, cy + radius),
+                                        outline=(255, 208, 64, alpha), width=2)
 
     def _draw_floats(self, img: Image, T: float) -> None:
         occupied = []

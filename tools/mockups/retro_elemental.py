@@ -19,6 +19,8 @@ TYPES = {
     'toxic_spines': 'POISON', 'charged_beacon': 'ELECTRIC',
     'fracture_vision': 'PSYCHIC', 'cinder_eruption': 'FIRE',
     'dragon_crosscurrent': 'WATER', 'undertow_lock': 'WATER',
+    'glacier_beam': 'ICE', 'storm_peck': 'ELECTRIC', 'sky_blaze': 'FIRE',
+    'mind_shatter': 'PSYCHIC', 'ancient_mind': 'PSYCHIC',
 }
 SKILL_IDS = tuple(TYPES)
 BODY_ONLY_FLIGHTS = frozenset(('psychic_blink', 'slow_field', 'fracture_vision'))
@@ -156,6 +158,25 @@ def _tile(material, colors, frame=0):
     elif material == 'chip':
         b.poly(((-4, -3), (1, -5), (5, -1), (2, 4), (-3, 2)), colors[1])
         b.line(((-2, -2), (1, -3), (3, -1)), colors[3], 1)
+    elif material == 'psychic_weight':
+        # A broad filled pressure front with a narrowing wake.  Unlike rings,
+        # its volume reads as weight while it remains one moving surface.
+        path = [(4-math.sin(j/24*math.pi)*10, -24+j*2) for j in range(25)]
+        widths = [2.5+math.sin(j/24*math.pi)*10 for j in range(25)]
+        _ribbon(b, path, [w+2.4 for w in widths], colors[0])
+        _ribbon(b, path, widths, colors[1])
+        _ribbon(b, path[3:21], [w*.58 for w in widths[3:21]], colors[2])
+        _ribbon(b, path[8:17], [max(.9,w*.25) for w in widths[8:17]], colors[4])
+        b.line((path[6],path[7],path[8]), colors[3], 1)
+    elif material == 'glyph':
+        # Ancient-power fragment: an angular tablet, not a move-name emblem.
+        b.poly(((-5, -9), (3, -10), (8, -3), (6, 7), (-2, 10),
+                (-8, 4), (-7, -5)), colors[0])
+        b.poly(((-3, -7), (3, -7), (6, -2), (3, 5), (-4, 5),
+                (-6, -1)), colors[1])
+        b.poly(((0, -5), (4, -1), (0, 3), (-4, -1)), colors[2])
+        b.line(((-3, -3), (1, -1), (-2, 3)), colors[3], 1)
+        b.box((-1, -1, 1, 1), colors[4])
     return image
 
 
@@ -280,20 +301,23 @@ def _pressure_wave(layer, at, colors, age, scale, variant):
             _ribbon(b, path[4:13], 1.2, colors[3])
         for sign in (-1, 1):
             b.line(((sign*10, -17-q*9), (sign*17, -21-q*7)), colors[3], 1)
-    else:
-        # Offset compression is a distortion surface, never an eye/clock glyph.
+    elif variant == 'fracture_vision':
+        # Future Sight is two offset slices. Their straight sheared bodies
+        # deliberately differ from Confusion's lens and Psychic's weight.
         for index in range(2):
             sign = -1 if index else 1
             path = []
-            for j in range(28):
-                angle = -.22*math.pi+j/27*1.30*math.pi+index*math.pi
-                radius = 22+index*6+q*8
-                x, y = math.cos(angle)*radius, math.sin(angle)*radius*.66
-                path.append((x+sign*(5-q*3), y+x*.20))
-            _ribbon(b, path, 6.4, colors[0])
-            _ribbon(b, path, 5.0, colors[1])
-            _ribbon(b, path[2:23], 3.0, colors[2])
-            _ribbon(b, path[5:16], 1.1, colors[4])
+            for j in range(25):
+                qj = j/24
+                path.append((-27+qj*54+sign*(7-q*4),
+                             -17+qj*34+sign*(9-q*5)*math.sin(qj*math.pi)))
+            widths = [7.4*math.sin(j/24*math.pi)+1 for j in range(25)]
+            _ribbon(b, path, [w+1.8 for w in widths], colors[0])
+            _ribbon(b, path, widths, colors[1])
+            _ribbon(b, path[3:21], [w*.60 for w in widths[3:21]], colors[2])
+            _ribbon(b, path[7:17], [max(.9,w*.24) for w in widths[7:17]], colors[4])
+    else:
+        return
     # The old bands stayed large up to .70s and blinked out. Break their
     # contours and steadily shrink the hard-edged residue on this same clock.
     if age > .52:
@@ -367,7 +391,12 @@ def _electric_contact(layer, at, colors, age, scale, density, thunder=False):
                         (-inner*.7, 0)), colors[4])
                 rp.put(layer, image, _offset(at, 0, 2*scale),
                        scale*(1.-local/.08*.4))
-        _discharge_rim(layer, at, colors, local, scale*(1. if thunder else .69), thunder)
+    # Each family owns a different terminal face.  The low chain stamp and
+    # Thunder's ground plate never share the old generic crescent template.
+    if thunder:
+        _thunder_ground_face(layer, at, colors, age, scale)
+    else:
+        _chain_contact_face(layer, at, colors, age, scale*.82)
     # Residue moves around the actor's contour and rises; not a spoke fan.
     for index in range(max(4, round(6*density))):
         born = .10+(index % 3)*.05
@@ -382,20 +411,41 @@ def _electric_contact(layer, at, colors, age, scale, density, thunder=False):
                 index+round(age*45), index*43)
 
 
-def _discharge_rim(layer, at, colors, age, scale, heavy=False):
-    if not 0 <= age < .13:
+def _chain_contact_face(layer, at, colors, age, scale):
+    """Spark Chain's low triangular stamp, independent from Thunder's plate."""
+    if not 0 <= age < .12:
         return
-    image, draw, center = rp.cel(64)
+    image, draw, center = rp.cel(56)
     b = _Brush(draw, center)
-    q = age/.13
-    # Buckled crescent pressure face, briefly compressed at one hit point.
-    path = [(math.cos(-.15+j/24*math.pi*1.60)*(17+q*12),
-             math.sin(-.15+j/24*math.pi*1.60)*(8+q*7)) for j in range(25)]
-    widths = [(3.2 if heavy else 2.5)*(1-q*.55) for _ in path]
-    _ribbon(b, path, [w+1.2 for w in widths], colors[0])
-    _ribbon(b, path, widths, colors[2])
-    _ribbon(b, path[2:19], [max(.8,w*.48) for w in widths[2:19]], colors[3])
-    rp.put(layer, image, _offset(at,0,11*scale), scale*.78)
+    q = age/.12
+    spread = 17+q*10
+    path = [(-spread+abs(j-9)*1.2, -6+q*4+j*.65) for j in range(19)]
+    widths = [5.2*(1-q*.62)*math.sin(j/18*math.pi)+.7 for j in range(19)]
+    _ribbon(b, path, [w+1.5 for w in widths], colors[0])
+    _ribbon(b, path, widths, colors[1])
+    _ribbon(b, path[4:15], [w*.55 for w in widths[4:15]], colors[3])
+    b.line((path[6],path[9],path[12]), colors[4], 1)
+    rp.put(layer, image, _offset(at,0,7*scale), scale*.78)
+
+
+def _thunder_ground_face(layer, at, colors, age, scale):
+    """Thunder terminates in a wide grounded plate and crown, not a circle."""
+    if not 0 <= age < .16:
+        return
+    image, draw, center = rp.cel(72)
+    b = _Brush(draw, center)
+    q = age/.16
+    width = 30+q*13
+    path = [(-width+j*2.7, 8+math.sin(j/20*math.pi)*5-q*4)
+            for j in range(23)]
+    widths = [7.5*(1-q*.58)*math.sin(j/22*math.pi)+1 for j in range(23)]
+    _ribbon(b, path, [w+2 for w in widths], colors[0])
+    _ribbon(b, path, widths, colors[1])
+    _ribbon(b, path[3:19], [w*.62 for w in widths[3:19]], colors[2])
+    for index in range(5):
+        x = (-24+index*12)*(.72+q*.28)
+        b.line(((x,5-q*3),(x+(index-2)*2,15+q*7)),colors[3],2)
+    rp.put(layer, image, _offset(at,0,13*scale), scale*.80)
 
 
 def _charged_contact(layer, source, at, colors, age, scale, density):
@@ -431,7 +481,6 @@ def _charged_contact(layer, source, at, colors, age, scale, density):
         rp.line(layer,path,colors[0],8*scale*(1-local))
         rp.line(layer,path,colors[2],5*scale*(1-local))
         rp.line(layer,path,colors[4],3*scale)
-    _discharge_rim(layer,at,colors,age,scale*.85)
 
 def _poison_contact(layer, at, colors, age, scale, density, *, sludge=False):
     """A sticky sheet opens into heavy droplets, then separate rising bubbles."""
@@ -624,13 +673,38 @@ def _windup(layer, key, source, target, colors, scale, density, p, emitters):
             _sprite(layer, 'shadow', _offset(source, math.cos(a)*radius,
                                            math.sin(a)*radius*.7), colors,
                     scale*.08, step+index)
-    elif key in ('spark_chain', 'storm_conductor'):
-        # Orbiting sparks pull inward and swell as the charge is gathered.
-        for index in range(3 if key == 'spark_chain' else 5):
-            a = index*math.tau/5+p*2
-            _sprite(layer, 'spark', _offset(source, math.cos(a)*(24-7*p)*scale,
-                                          math.sin(a)*(28-8*p)*scale), colors,
-                    scale*(.15+.06*p), step+index)
+    elif key == 'spark_chain':
+        # Three short jagged chain links converge on the actual caster.
+        for index in range(3):
+            side = -1 if index % 2 else 1
+            start = _offset(source, side*(29-p*12)*scale,
+                            (-20+index*11+p*7)*scale)
+            middle = _offset(source, side*(12-p*7)*scale,
+                             (-13+index*10-p*5)*scale)
+            end = _offset(source, side*(4-p*3)*scale,
+                          (-7+index*7+p*3)*scale)
+            path = (start, _offset(middle, side*5*scale, -4*scale), end)
+            rp.line(layer, path, colors[0], 8*scale)
+            rp.line(layer, path, colors[1], 5*scale)
+            rp.line(layer, path, colors[3], 2*scale)
+    elif key == 'storm_conductor':
+        # Thunder's charge is a vertical conductor: five leaders descend into
+        # one low coil, separate from Spark Chain's horizontal chain links.
+        for index in range(5):
+            x = (index-2)*(9-p*4)*scale
+            top = _offset(source, x+math.sin(index+p*4)*4*scale,
+                          (-38+p*15)*scale)
+            bottom = _offset(source, x*.35, (-8+p*5)*scale)
+            path = (top, _offset(source, x*.65+((index%2)*2-1)*5*scale,
+                                 (-24+p*10)*scale), bottom)
+            rp.line(layer, path, colors[0], 6*scale)
+            rp.line(layer, path, colors[1], 3*scale)
+        image, draw, center = rp.cel(40)
+        b = _Brush(draw, center)
+        radius = 8+p*5
+        b.oval((-radius, -radius*.42, radius, radius*.42), colors[1],
+               outline=colors[3], width=2)
+        rp.put(layer, image, _offset(source,0,-4*scale), scale*.75)
     elif key == 'dragon_crosscurrent':
         for index in (-1, 1):
             _sprite(layer, 'water', _offset(source, index*11*scale,
@@ -638,6 +712,59 @@ def _windup(layer, key, source, target, colors, scale, density, p, emitters):
                     colors, scale*(.16+.10*p), step)
     elif key == 'undertow_lock':
         _whirlpool_contact(layer, source, colors, p*.43, scale*.48, density)
+    elif key == 'glacier_beam':
+        # Aurora gathering: frost shards converge on the caster's focus point.
+        for index in range(6):
+            a = index*math.tau/6+p*2.4
+            radius = (26-15*p)*scale
+            _sprite(layer, 'chip', _offset(source, math.cos(a)*radius,
+                                           math.sin(a)*radius*.72), colors,
+                    scale*(.30+.10*p), step+index, math.degrees(a))
+        image, draw, center = rp.cel(32)
+        b = _Brush(draw, center)
+        core = 3+p*6
+        b.oval((-core, -core, core, core), colors[2], outline=colors[3])
+        rp.put(layer, image, source, scale*.8)
+    elif key == 'storm_peck':
+        # The drill beak forms first; gathered sparks orbit it asymmetrically.
+        _sprite(layer, 'needle', _offset(source, 0, -4*scale), colors,
+                scale*(.24+.22*p), step, _heading(source, target))
+        for index in range(3):
+            a = index*math.tau/3+p*3.2
+            _sprite(layer, 'spark', _offset(source, math.cos(a)*(19-8*p)*scale,
+                                            math.sin(a)*(15-6*p)*scale-4*scale),
+                    colors, scale*(.16+.07*p), step+index)
+    elif key == 'sky_blaze':
+        # Sky Attack's rising charge: a slow flame helix climbs off the caster.
+        for index in range(3):
+            local = p-index*.18
+            if not 0 <= local <= 1.:
+                continue
+            a = local*math.tau*.8+index*2.1
+            _sprite(layer, 'flame', _offset(source, math.cos(a)*9*scale,
+                                            (-local*34-4)*scale), colors,
+                    scale*(.22+.16*local), step+index)
+    elif key == 'mind_shatter':
+        # Four pressure arcs contract toward the caster's core.
+        image, draw, center = rp.cel(64)
+        b = _Brush(draw, center)
+        radius = (26-14*p)
+        for index in range(4):
+            start = index*90+round(p*40)
+            b.arc((-radius, -radius*.8, radius, radius*.8),
+                  (start, start+52), colors[1+index % 3], max(1, round(4-p*2)))
+        b.oval((-4-p*3, -4-p*3, 4+p*3, 4+p*3), colors[2], outline=colors[3])
+        rp.put(layer, image, source, scale)
+    elif key == 'ancient_mind':
+        # Ancient glyph tablets lift off the ground in a slow spiral.
+        for index in range(5):
+            local = p-index*.13
+            if not 0 <= local <= 1.:
+                continue
+            a = local*math.tau*.6+index*1.26
+            _sprite(layer, 'glyph', _offset(source, math.cos(a)*14*scale,
+                                            6*scale-local*30*scale), colors,
+                    scale*(.28-.06*local), step+index, math.degrees(a))
 
 
 def _flight(layer, key, source, target, colors, scale, density, p, emitters):
@@ -712,6 +839,56 @@ def _flight(layer, key, source, target, colors, scale, density, p, emitters):
     elif key == 'undertow_lock':
         retro_water.surf_front(layer, source, target, colors, p, scale=scale,
                                density=density)
+    elif key == 'glacier_beam':
+        # A narrow ice lance leads; staggered shards trail the exact route.
+        _sprite(layer, 'needle', at, colors, scale*.50, round(p*18),
+                heading)
+        rp.line(layer, (source, at), colors[2], 4*scale)
+        rp.line(layer, (source, at), colors[3], 2*scale)
+        for index in range(4):
+            q = max(0., p-(index+1)*.075)
+            center = rp.point(source, target, q)
+            _sprite(layer, 'chip', _offset(center, (index % 2*2-1)*5*scale,
+                                           -math.sin(q*math.pi)*9*scale),
+                    colors, scale*(.30-index*.03), round(p*20)+index)
+    elif key == 'storm_peck':
+        # Drill Peck wrapped in Thunder's arcs: two flanking sparks, one beak.
+        _sprite(layer, 'needle', at, colors, scale*.55, round(p*24), heading)
+        for index in (-1, 1):
+            q = max(0., p-.10)
+            center = rp.point(source, target, q)
+            ux, uy, nx, ny = _basis(source, target)
+            _sprite(layer, 'spark', (center[0]+nx*index*9*scale,
+                                     center[1]+ny*index*9*scale),
+                    colors, scale*.24, round(p*22)+index)
+    elif key == 'sky_blaze':
+        # A blazing head with two wing flames swept off the flight axis.
+        _sprite(layer, 'flame', at, colors, scale*(.58+.10*p), round(p*26),
+                heading)
+        ux, uy, nx, ny = _basis(source, target)
+        for index in (-1, 1):
+            q = max(0., p-.08)
+            center = rp.point(source, target, q)
+            wing = (center[0]+nx*index*13*scale, center[1]+ny*index*13*scale)
+            _sprite(layer, 'flame', wing, colors, scale*.26,
+                    round(p*26)+index, heading+index*18)
+    elif key == 'mind_shatter':
+        # Psychic's heavy pressure advances as one filled crescent volume;
+        # there are no same-colour concentric rings borrowed from a field.
+        _sprite(layer, 'psychic_weight', at, colors, scale*(.62+.22*p),
+                round(p*18), heading)
+    elif key == 'ancient_mind':
+        # A large faceted glyph leads two smaller tumbling glyphs along the
+        # exact route; no generic psychic halo or thin ring is added.
+        _sprite(layer, 'glyph', at, colors, scale*.54, round(p*16), heading)
+        for index in range(2):
+            q = max(0., p-(index+1)*.10)
+            center = rp.point(source, target, q)
+            side = -1 if index else 1
+            _sprite(layer, 'glyph', _offset(center, side*8*scale,
+                                            -math.sin(q*math.pi)*8*scale),
+                    colors, scale*(.31-index*.04), round(p*18)+index,
+                    heading+side*22)
 
 
 def _contact(layer, key, source, target, colors, scale, density, age, emitters, secondary):
@@ -786,6 +963,107 @@ def _contact(layer, key, source, target, colors, scale, density, age, emitters, 
         _eruption_contact(layer, target, colors, age, local, density)
     elif key == 'undertow_lock':
         _whirlpool_contact(layer, target, colors, age, local, density)
+    elif key == 'glacier_beam':
+        if secondary:
+            # Side hits are a small shard spray at the actual neighbour only.
+            if age < .30:
+                for index in range(3):
+                    a = age*8+index*math.tau/3
+                    _sprite(layer, 'chip', _offset(target, math.cos(a)*8*local,
+                                                   math.sin(a)*6*local-4*local),
+                            colors, local*(.30-age*.6), round(age*30)+index)
+            return
+        # A six-point crystal star opens on the main recipient, then frosts out.
+        if age < .34:
+            q = age/.34
+            for index in range(6):
+                a = index*math.tau/6+.3
+                ux, uy = math.cos(a), math.sin(a)
+                length = (8+q*17)*local
+                rp.line(layer, (_offset(target, ux*4*local, uy*4*local),
+                                _offset(target, ux*length, uy*length*.8)),
+                        colors[1], 4*local*(1-q*.4))
+                rp.line(layer, (_offset(target, ux*4*local, uy*4*local),
+                                _offset(target, ux*length, uy*length*.8)),
+                        colors[3], 2*local*(1-q*.4))
+        for index in range(max(3, round(5*density))):
+            born = .03+index*.05
+            elapsed = age-born
+            if not 0 <= elapsed < .40:
+                continue
+            a = index*2.4+elapsed*5
+            _sprite(layer, 'chip', _offset(target, math.cos(a)*14*local,
+                                           (-6-elapsed*26)*local), colors,
+                    local*(.30-elapsed*.5), round(age*26)+index)
+    elif key == 'storm_peck':
+        # The beak stamp pierces first; discharge arcs follow on the same clock.
+        if age < .17:
+            _sprite(layer, 'needle', _offset(target, 0, -3*local), colors,
+                    local*(.62-age*1.6), round(age*40), _heading(source, target))
+        _electric_contact(layer, target, colors, age, local*.66, density)
+    elif key == 'sky_blaze':
+        _fire_spread(layer, target, colors, age, local, density)
+        if age < .30:
+            q = age/.30
+            for index in range(5):
+                a = -math.pi/2+(index-2)*.5
+                ux, uy = math.cos(a), math.sin(a)
+                length = (12+q*16)*local
+                rp.line(layer, (_offset(target, ux*6*local, uy*6*local),
+                                _offset(target, ux*length, uy*length)),
+                        colors[2+index % 2], 3*local*(1-q))
+    elif key == 'mind_shatter':
+        # Psychic lands as a heavy recipient-local dome: a filled pressing
+        # volume first, then only short fracture seams remain.
+        if age < .42:
+            q = age/.42
+            image, draw, center = rp.cel(80)
+            b = _Brush(draw, center)
+            radius = 34-q*9
+            path = [(-radius+j*2.6, -10+q*15+
+                     (1-(j/24)**2)*-(20-q*8)) for j in range(25)]
+            widths = [10.5*(1-q*.62)*math.sin(j/24*math.pi)+1
+                      for j in range(25)]
+            _ribbon(b, path, [w+2 for w in widths], colors[0])
+            _ribbon(b, path, widths, colors[1])
+            _ribbon(b, path[4:20], [w*.62 for w in widths[4:20]], colors[2])
+            _ribbon(b, path[9:16], [max(.9,w*.22) for w in widths[9:16]], colors[4])
+            rp.put(layer, image, target, local*(.72-q*.28))
+        if age < .50:
+            q = age/.50
+            for index in range(max(3, round(5*density))):
+                a = index*math.tau/max(3, round(5*density))+.55
+                ux, uy = math.cos(a), math.sin(a)
+                inner = (7+q*9)*local
+                outer = (15+q*13-index % 2*4)*local
+                rp.line(layer, (_offset(target, ux*inner, uy*inner*.8),
+                                _offset(target, ux*outer, uy*outer*.8)),
+                        colors[1+index % 3], max(1.,(3-q*1.6)*local))
+    elif key == 'ancient_mind':
+        # Ancient Power impresses a small faceted slab, then glyphs lift away.
+        if age < .30:
+            q = age/.30
+            image, draw, center = rp.cel(64)
+            b = _Brush(draw, center)
+            radius = 10+q*8
+            b.poly(((-radius,-radius*.48),(radius*.72,-radius*.62),
+                    (radius,radius*.38),(-radius*.58,radius*.72)),colors[0])
+            b.poly(((-radius*.62,-radius*.28),(radius*.42,-radius*.38),
+                    (radius*.62,radius*.22),(-radius*.34,radius*.46)),colors[1])
+            b.poly(((-radius*.24,-radius*.14),(radius*.24,-radius*.20),
+                    (radius*.30,radius*.16),(-radius*.12,radius*.30)),colors[2])
+            b.line(((-radius*.45,-radius*.34),(radius*.35,radius*.28)),colors[3],2)
+            rp.put(layer,image,target,local*(.72-q*.28))
+        for index in range(max(3,round(5*density))):
+            born = .02+index*.055
+            elapsed = age-born
+            if not 0 <= elapsed < .45:
+                continue
+            a = index*1.7+elapsed*3
+            _sprite(layer, 'glyph', _offset(target, math.cos(a)*13*local,
+                                           (-4-elapsed*30)*local), colors,
+                    local*(.24-elapsed*.34), round(age*22)+index,
+                    math.degrees(a)*2)
 
 
 def draw(layer, skill_id, source, target, phase, progress, config, *, emitters=(), secondary=False):

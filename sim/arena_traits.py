@@ -176,6 +176,22 @@ TRAITS.update({
     162: {'id': 'trait_keen_eye', 'name': '锐利目光', 'category': 'support', 'cooldown': 3., 'limit': 3,
           'trigger': '原本被道具闪避的进攻判定', 'tags': ['命中', '反闪避'],
           'description': '进攻原本会被道具闪避且原判定落在闪避率后半区时，改为命中。冷却3秒，每战最多3次，沿用该次随机判定，不额外掷骰。'},
+    # 传说档（4/5 费）：三神鸟沿用属性吸收模板，超梦沿用低血增伤，梦幻沿用半血保命。
+    144: {'id': 'trait_ice_body', 'name': '冰冻之躯', 'category': 'support', 'cooldown': 4., 'limit': 3,
+          'trigger': '冰属性直接命中造成实际生命损失后存活', 'tags': ['冰', '自疗', '回能'],
+          'description': '受到冰属性直接命中的实际生命伤害且仍存活时，自疗4%最大生命，并获得最多4实际能量。冷却4秒，每战最多3次，实际恢复或回能成功才消耗次数。本作改编为受伤后的有限吸收。'},
+    145: {'id': 'trait_lightning_rod', 'name': '避雷针', 'category': 'support', 'cooldown': 4., 'limit': 3,
+          'trigger': '电属性直接命中造成实际生命损失后存活', 'tags': ['电', '回能'],
+          'description': '受到电属性直接命中的实际生命伤害且仍存活时，获得最多8实际能量。冷却4秒，每战最多3次，实际回能成功才消耗次数。'},
+    146: {'id': 'trait_flame_body', 'name': '火焰之躯', 'category': 'support', 'cooldown': 4., 'limit': 3,
+          'trigger': '火属性直接命中造成实际生命损失后存活', 'tags': ['火', '自疗', '回能'],
+          'description': '受到火属性直接命中的实际生命伤害且仍存活时，自疗4%最大生命，并获得最多4实际能量。冷却4秒，每战最多3次，实际恢复或回能成功才消耗次数。本作改编为受伤后的有限吸收。'},
+    150: {'id': 'trait_psychic_surge', 'name': '精神涌动', 'category': 'attack', 'cooldown': 3., 'limit': 3,
+          'trigger': '生命不高于三分之一时的超能力属性直接命中', 'tags': ['低血量', '超能力'], 'fraction': .25,
+          'description': '生命不高于最大生命的三分之一时，超能力属性直接命中伤害提高25%。冷却3秒，每战最多3次；只有实际多扣生命或额外消耗护盾才消耗次数。'},
+    151: {'id': 'trait_safeguard', 'name': '神秘守护', 'category': 'defense', 'cooldown': 0., 'limit': 1,
+          'trigger': '生命不低于一半时遭受直接命中的致命生命伤害', 'tags': ['保命'],
+          'description': '生命不低于最大生命的一半时遭受直接命中的致命伤害，先结算护盾，再保留1生命，每战一次。毒伤与岩钉不触发。'},
 })
 
 
@@ -211,11 +227,15 @@ _CONTACT_ROOT = {'trait_cursed_body': 1.2, 'trait_tangling_vines': 1.2,
 _TYPED_ABSORB = {'trait_volt_absorb': ('ELECTRIC', .04, 4),
                  'trait_water_absorb': ('WATER', .04, 4),
                  'trait_flash_fire': ('FIRE', .04, 4),
-                 'trait_galvanize': ('ELECTRIC', 0., 8)}
+                 'trait_galvanize': ('ELECTRIC', 0., 8),
+                 'trait_ice_body': ('ICE', .04, 4),
+                 'trait_lightning_rod': ('ELECTRIC', 0., 8),
+                 'trait_flame_body': ('FIRE', .04, 4)}
 # key -> (move type, hp divisor): boost while source.hp * divisor <= max_hp.
 _LOW_HP_BOOST = {'trait_blaze': ('FIRE', 3), 'trait_torrent': ('WATER', 2),
                  'trait_swarm': ('BUG', 3), 'trait_cornered': ('FIGHTING', 3),
-                 'trait_raging_tide': ('WATER', 3)}
+                 'trait_raging_tide': ('WATER', 3),
+                 'trait_psychic_surge': ('PSYCHIC', 3)}
 _VULNERABLE_BOOST = {'trait_crushing_grip', 'trait_weakness_read'}
 # Offense windows open once (consuming a use) and boost until expiry; settle
 # never charges them per hit. Debuff-tied windows also end with the status.
@@ -225,7 +245,7 @@ _CAST_WINDOWS = {'trait_rising_kick', 'trait_sharpened_blades'}
 _WINDOWS = {**_DEBUFF_WINDOWS, **{key: 'all' for key in _CAST_WINDOWS}}
 _OPENING_WEAKEN = {'trait_intimidate', 'trait_unnerve'}
 _CADENCE_HEAL = {'trait_regenerator', 'trait_moonlight', 'trait_verdant_rhythm'}
-_LETHAL_GUARD = {'trait_sturdy', 'trait_stone_core', 'trait_steel_core'}
+_LETHAL_GUARD = {'trait_sturdy', 'trait_stone_core', 'trait_steel_core', 'trait_safeguard'}
 _ANTI_DODGE = {'trait_compound_eyes', 'trait_keen_eye'}
 
 

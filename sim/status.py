@@ -373,6 +373,8 @@ def _apply_debuff(battle, unit, kind: str, t: float, source=None, *, non_spreadi
         after_debuff(battle, source, unit, kind, t)
         from arena_traits import after_debuff as trait_after_debuff
         trait_after_debuff(battle, source, unit, kind, t)
+        from arena_teaching import after_ally_debuff
+        after_ally_debuff(battle, source, unit, kind, t)
 
 
 def _revert_debuff(unit, st: _UnitState) -> None:

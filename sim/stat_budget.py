@@ -15,14 +15,14 @@ import math
 from data import ATTACK_INTERVAL_MULT, SPEED_TO_ATTACK_INTERVAL, pokedex
 
 STAT_KEYS = ("hp", "attack", "defense", "special_attack", "special_defense", "speed")
-BUDGET_BY_TIER = {1: 300, 2: 420, 3: 540}
+BUDGET_BY_TIER = {1: 300, 2: 420, 3: 540, 4: 660, 5: 780}
 MIN_SHARE, MAX_SHARE = 0.60, 1.60
 
 
 def normalize(base, tier):
     """Proportionally allocate and round an exact fixed pool under hard caps."""
     if type(tier) is not int or tier not in BUDGET_BY_TIER:
-        raise ValueError("budget_v1 supports tiers 1, 2 and 3")
+        raise ValueError("budget_v1 supports tiers 1, 2, 3, 4 and 5")
     values = [base[key] for key in STAT_KEYS]
     if any(isinstance(value, bool) or not isinstance(value, (int, float))
            or not math.isfinite(value) or value <= 0 for value in values):

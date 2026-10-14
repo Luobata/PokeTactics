@@ -272,26 +272,60 @@ class MotionSystem:
         if au.dying(t):
             state, age = 'death', t - au.die_t
         else:
-            candidates = [(c[0], anim._cast_release(c)-c[0], c[3]) for c in reversed(anim.cutins)
-                          if c[2] == au.u.idx and c[0] <= t < anim._cast_release(c)+release_length]
-            attack = next((a for a in reversed(au.attacks)
-                           if 0 <= t-a[0] < anim._attack_preparation(au.u.idx, a[0])+release_length), None)
+            def action_timing(onset):
+                timeline = getattr(anim, 'timeline', None)
+                return timeline.action_by_onset.get((au.u.idx, onset)) if timeline else None
+
+            # ActionTiming owns the presentation contract when available: release
+            # is the exact windup/strike seam and impact is the exact
+            # strike/recovery seam. Legacy raw-event callers retain the old local
+            # reconstruction below instead of depending on a retimed timeline.
+            candidates = []
+            for c in reversed(anim.cutins):
+                if c[2] != au.u.idx:
+                    continue
+                timing = action_timing(c[0])
+                release = anim._cast_release(c)
+                end = timing.recover_end if timing is not None else release+release_length
+                active = c[0] <= t < end
+                if active:
+                    candidates.append((c[0], c[3], timing, release-c[0]))
+            attack = None
+            for candidate in reversed(au.attacks):
+                timing = action_timing(candidate[0])
+                fallback_prep = anim._attack_preparation(au.u.idx, candidate[0])
+                end = (timing.recover_end if timing is not None else
+                       candidate[0]+fallback_prep+release_length)
+                elapsed = t-candidate[0]
+                active = 0 <= elapsed < end-candidate[0]
+                if active:
+                    attack = candidate+(timing,fallback_prep)
+                    break
             if candidates and (attack is None or candidates[0][0] >= attack[0]):
                 action_kind = 'cast'
-                onset, prep, target = candidates[0]
+                onset, target, timing, prep = candidates[0]
                 a, b = anim._event_position(au.u.idx,onset), anim._event_position(target,onset)
                 dx, dy = b[0]-a[0], b[1]-a[1]
                 norm = math.hypot(dx,dy) or 1
                 direction = dx/norm,dy/norm
             elif attack:
                 action_kind = 'attack'
-                onset, dx, dy = attack
-                prep, direction = anim._attack_preparation(au.u.idx, onset), (dx,dy)
+                onset, dx, dy, timing, prep = attack
             else:
-                onset = None
+                onset = timing = None
             if onset is not None:
                 elapsed = t-onset
-                if elapsed < prep-1e-8:
+                if timing is not None:
+                    if t < timing.release:
+                        span = max(.001, timing.release-timing.start)
+                        state, age = 'windup', windup(sid)*(elapsed/span)
+                    elif t < timing.impact:
+                        span = max(.001, timing.impact-timing.release)
+                        state, age = 'strike', strike_length*((t-timing.release)/span)
+                    else:
+                        span = max(.001, timing.recover_end-timing.impact)
+                        state, age = 'recover', duration(sid,'recover')*((t-timing.impact)/span)
+                elif elapsed < prep-1e-8:
                     state, age = 'windup', min(elapsed * windup(sid) / prep, windup(sid)-.001)
                 elif elapsed < prep+strike_length-1e-8:
                     state, age = 'strike', elapsed-prep

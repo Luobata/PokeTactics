@@ -129,9 +129,15 @@ class Unit:
         self.partner_id = None
         self.partner_trait_uses = 0
         self.technique = None
-        self.technique_used = False
+        self.technique_used = 0      # 竞技场：次数制（上限 = 星级）；经典规则 0/1
+        self.technique_rearm = 0     # 再装填：还需多少次有效普攻
         self.partner_dr = 0.0
         self.partner_dr_until = -1.0
+        self.protect_window_until = -1.0  # 守住：减伤窗口与窗口内承伤累计
+        self.protect_accum = 0
+        self.protect_charged = False
+        self.protect_empower = False      # 蓄势：下一次原生主命中 +12%
+        self.helping_hand_mark = False    # 帮助标记：下一次原生主命中 +15%
         # ---- UnitProfile（docs/13 R1）：有理由的覆盖项，其余回落推导 ----
         prof = profiles_mod.get(piece.species_id)
         if prof is not None:
@@ -630,9 +636,9 @@ class Battle:
         if status_mod.stunned(u, t):  # S12：冰冻/睡眠期间不行动（默认 False）
             u.next_act = t + 0.2
             return
-        if (u.technique == "rest" and not u.technique_used
-                and u.hp <= u.max_hp / 2):
-            u.technique_used = True
+        if (u.technique == "rest" and u.hp <= u.max_hp / 2
+                and self._technique_available(u)):
+            self._technique_spend(u)
             self._partner_heal(u, u, .25, t, "rest")
             u.next_act = t + self._action_interval(u, t)
             return
@@ -653,11 +659,11 @@ class Battle:
             if self._arena_on:
                 from arena_fields import move_unit
                 origin = u.pos
-                self._step_toward(u, target.pos)
+                self._advance(u, target)
                 destination, u.pos = u.pos, origin
                 move_unit(self, u, destination, t)
             else:
-                self._step_toward(u, target.pos)
+                self._advance(u, target)
                 self.events.append((t, "move", u.idx, u.pos))
             step = MOVE_TICK * (melee_move_mult() if u.range == 1 else 1.0) \
                 * u.move_mult                      # R1 档案移速（卡比兽 0.85）
@@ -726,30 +732,63 @@ class Battle:
         for unit, target, damage in pending:
             self._land_hit(unit, target, damage, 0.0)
 
-    def _step_toward(self, u: Unit, goal: tuple) -> None:
-        """BFS 最短路走第一步（绕开占用格；终点视为可通行）。
+    def _step_toward(self, u: Unit, goal: tuple, reach: int = 1) -> None:
+        """BFS 最短路走第一步（绕开占用格），终点为 goal 的 reach 格范围内。
 
         旧版贪心一步会被己方单位和地形卡成来回抖动；BFS 保证单调接近。
+        终点按「能打到目标」判定而非目标格本身：近战等价走到邻格，远程
+        停在开火线上——目标格被围死时远程不会再原地空转。
         """
         from collections import deque
+        if _manhattan(u.pos, goal) <= reach:
+            return
         occupied = {o.pos for o in self.units if o.alive and o is not u}
         queue = deque([(u.pos, None)])
         seen = {u.pos}
         while queue:
             pos, first = queue.popleft()
-            if pos == goal:
-                if first:
-                    u.pos = first
-                return
             c, r = pos
             for dc, dr in self._directions(u.team):
                 nxt = (c + dc, r + dr)
                 if not (0 <= nxt[0] < self.cols and 0 <= nxt[1] < self.rows):
                     continue
-                if nxt in seen or (nxt in occupied and nxt != goal):
+                if nxt in seen or nxt in occupied:
                     continue
                 seen.add(nxt)
-                queue.append((nxt, first or nxt))
+                step = first or nxt
+                if _manhattan(nxt, goal) <= reach:
+                    u.pos = step
+                    return
+                queue.append((nxt, step))
+
+    def _advance(self, u: Unit, target: Unit) -> None:
+        """向目标走一步；目标被围死时改锁路径可达的最近敌人（嘲讽不换）。"""
+        start = u.pos
+        self._step_toward(u, target.pos, reach=u.range)
+        if u.pos != start:
+            return
+        if (getattr(u, 'taunt_source_idx', None) is not None
+                and u.taunt_until > self.duration + 1e-9):
+            return
+        fallback = self._reachable_target(u, exclude=target)
+        if fallback is None:
+            return
+        u.target_idx = fallback.idx
+        self._step_toward(u, fallback.pos, reach=u.range)
+
+    def _reachable_target(self, u: Unit, exclude=None):
+        """按目标优先级找第一个已在射程内、或能寻路进入射程的敌人。"""
+        enemies = [e for e in self.units if e.alive and e.team != u.team and e is not exclude]
+        for enemy in sorted(enemies, key=lambda e: self._target_key(u, e)):
+            if _manhattan(u.pos, enemy.pos) <= u.range:
+                return enemy
+            start = u.pos
+            self._step_toward(u, enemy.pos, reach=u.range)
+            reachable = u.pos != start
+            u.pos = start
+            if reachable:
+                return enemy
+        return None
 
     @staticmethod
     def _directions(team):
@@ -1204,6 +1243,8 @@ class Battle:
             if direct:
                 arena_traits.after_direct_hit(self, attacker, target, actual_hp, t,
                                              action_index, move, basic=primary and not cast)
+                from arena_teaching import after_hit_taken
+                after_hit_taken(self, target, attacker, actual_hp, t, action_index)
         return actual_hp
 
     def _partner_mates(self, unit, wounded=False):
@@ -1267,17 +1308,32 @@ class Battle:
                 self._partner_event(unit, victim, "surf", t, damage=damage)
                 self._land_hit(unit, victim, damage, t, move=move, cast=self._arena_on)
 
+    def _technique_available(self, unit):
+        """竞技场技能机：次数 = 星级，触发后 3 次有效普攻再装填；经典每场一次。"""
+        if not self._arena_on:
+            return not unit.technique_used
+        from arena_teaching import technique_available
+        return technique_available(unit)
+
+    def _technique_spend(self, unit):
+        if not self._arena_on:
+            unit.technique_used = True
+        else:
+            from arena_teaching import technique_spend
+            technique_spend(unit)
+
     def _partner_after_basic(self, unit, target, t, actual_hp=None):
         if self._arena_on and not unit.alive:
             return
+        used_before = unit.technique_used
         if unit.partner_id == 26 and unit.partner_trait_uses < 2:
             unit.partner_trait_uses += 1
             mate = min(self._partner_mates(unit), key=lambda candidate: (
                 candidate.energy, self._target_key(unit, candidate)), default=None)
             if mate is not None:
                 self._partner_energy(unit, mate, 16, t, "relay")
-        if unit.technique == "cut" and not unit.technique_used:
-            unit.technique_used = True
+        if unit.technique == "cut" and self._technique_available(unit):
+            self._technique_spend(unit)
             victim = min((enemy for enemy in self.units if enemy.alive
                           and enemy.team != unit.team and enemy is not target
                           and _manhattan(target.pos, enemy.pos) <= 1),
@@ -1290,6 +1346,10 @@ class Battle:
         if self._arena_on:
             from arena_teaching import after_basic
             after_basic(self, unit, target, t, actual_hp=actual_hp)
+            # 再装填：未触发技能机的有效普攻才计数（本击已触发则重新计 3 次）。
+            if (actual_hp and unit.technique_used == used_before
+                    and unit.technique_rearm > 0):
+                unit.technique_rearm -= 1
 
     @contextmanager
     def _skill_effect(self, caster, target, effect, t, cast_index, **details):

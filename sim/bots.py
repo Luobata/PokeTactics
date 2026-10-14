@@ -26,6 +26,7 @@ import shop as shop_mod
 from profiles import effective_range
 import profiles
 import tactics
+import arena as arena_mod  # 传说限一判定；arena 不依赖 bots，无循环
 from combat import COLS  # C-sym 棋盘列数（docs/10 §1.5）：列对位随棋盘常量走
 from shop import OwnedPiece, SharedPool, try_combine
 
@@ -514,7 +515,7 @@ class Bot:
             # 进化石单人进化，只需 1 只中段形态），第 3 只无合并价值，
             # 维持 −800 暂缓罚（装备开关两臂一致——原「装备开解除」随门删除）
             score -= 800
-        score += {1: 0, 2: 100, 3: 220}[piece.tier]   # 高档位通用升级价值
+        score += {1: 0, 2: 100, 3: 220, 4: 340, 5: 460}[piece.tier]   # 高档位通用升级价值
         if in_target:
             score += 400            # 供主羁绊
         else:   # 次级羁绊：双属性世界里单点锁定太窄，跟随场上自然成堆的属性
@@ -570,6 +571,9 @@ class Bot:
             sid = self.shop.slots[slot]
             if sid is None:
                 continue
+            if (getattr(self.pool, 'arena', False) and sid in arena_mod.LEGENDARY
+                    and arena_mod.holds_legendary(self.all_pieces())):
+                continue           # 传说限一：已持有一只传说时跳过商店里的传说
             price = self.shop.price(slot)
             if self.gold - price < reserve:
                 continue

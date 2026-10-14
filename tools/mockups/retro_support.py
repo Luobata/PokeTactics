@@ -406,29 +406,144 @@ def _egg_shells(layer, target, life, colors, scale, density):
         put(layer,image.rotate(round(i*51+life*(100 if i%2 else -130)),resample=Image.Resampling.NEAREST),at,scale*.62)
 
 
+def _music_ribbon(layer, source, target, progress, colors, scale, *, phase=0.,
+                   width=9., strength=1.):
+    """SING/HEAL_BELL cast track: filled stave ribbons, not loose note glyphs."""
+    if strength<=0:return
+    p=min(1.,max(0.,progress));distance=math.dist(source,target) or 1.
+    ux,uy,nx,ny=_vec(source,target)
+    spine=[];widths=[]
+    for i in range(13):
+        q=i/12
+        sway=math.sin(q*math.tau-phase)*min(16.,distance*.065)*scale
+        spine.append((source[0]+ux*distance*q+nx*sway,
+                      source[1]+uy*distance*q+ny*sway))
+        # Root connects to the caster; the note-head end is deliberately broad.
+        widths.append((4.5+math.sin(q*math.pi)*width+q*4.5)*scale*strength)
+    def band(fraction, count):
+        pts=spine[:count];ws=widths[:count];left=[];right=[]
+        for i,(cx,cy) in enumerate(pts):
+            a=pts[max(0,i-1)];b=pts[min(len(pts)-1,i+1)]
+            dx,dy=b[0]-a[0],b[1]-a[1];dist=math.hypot(dx,dy) or 1.
+            w=ws[i]*fraction
+            left.append((round((cx-dy/dist*w)/3)*3,round((cy+dx/dist*w)/3)*3))
+            right.append((round((cx+dy/dist*w)/3)*3,round((cy-dx/dist*w)/3)*3))
+        return left+right[::-1]
+    draw=ImageDraw.Draw(layer)
+    outer=band(1.,13)
+    draw.polygon(outer,fill=colors[1])
+    draw.line(outer+[outer[0]],fill=colors[0],width=1)
+    draw.polygon(band(.70,12),fill=colors[2])
+    draw.polygon(band(.38,10),fill=colors[3])
+    line(layer,spine[:4],colors[4],3*scale*strength)
+    # A compact bright beat marks the travelling note head without adding text.
+    head=spine[-1]
+    r=(3.5+2.5*math.sin(p*math.pi))*scale*strength
+    beat=[(head[0],head[1]-r),(head[0]+r*.66,head[1]),(head[0],head[1]+r),
+          (head[0]-r*.66,head[1])]
+    beat=[(round(x/3)*3,round(y/3)*3) for x,y in beat]
+    draw.polygon(beat,fill=colors[4]);draw.line(beat+[beat[0]],fill=colors[1],width=1)
+
+
+def _music_charge(layer, source, progress, colors, scale):
+    """Two filled ribbons coil inward to the singer before release."""
+    p=min(1.,max(0.,progress))
+    for i,side in enumerate((-1,1)):
+        start=(source[0]+side*33*scale,source[1]+(-1 if side<0 else 1)*11*scale)
+        _music_ribbon(layer,start,source,min(1.,p*.9+i*.05),colors,scale,
+                      phase=1.1+i*2.4,width=6.5-i*.7,
+                      strength=max(.15,1-p*.48))
+
+
+def _life_pulse_capsule(layer, position, progress, colors, scale, *, rupture=0.):
+    """SOFT-BOILED packet: shaded egg carried inside a physical membrane."""
+    image,d,(x,y)=cel(58)
+    p=min(1.,max(0.,progress));squash=max(0.,math.sin(min(1.,p/.35)*math.pi)*.12)
+    membrane=((x-20,y-24+round(4*squash)),(x+20,y+24-round(3*squash)))
+    d.ellipse(membrane,fill=colors[1],outline=colors[0],width=2)
+    d.ellipse((x-17,y-21,x+17,y+21),fill=colors[2])
+    d.arc(membrane,205,340,fill=colors[3],width=3)
+    egg=(x-11,y-15,x+11,y+15)
+    d.ellipse(egg,fill=colors[3],outline=colors[1],width=2)
+    d.ellipse((x-5,y-8,x+5,y+1),fill=colors[4])
+    d.arc(egg,25,125,fill=colors[4],width=2)
+    if rupture>0:
+        image=_dissolve(image,rupture)
+    put(layer,image,position,scale*(.78+.10*math.sin(p*math.pi)))
+
+
+def _life_membrane(layer, target, life, colors, scale, density):
+    """A hatching membrane opens in filled arcs while egg shards leave."""
+    if not 0<=life<.88:return
+    fade=max(0.,(life-.48)/.38)
+    image,d,(x,y)=cel(78)
+    grow=min(1.,life/.20);open_=max(0.,(life-.12)/.60)
+    radius=19+grow*11+open_*23
+    thickness=(7.5-open_*3.5)*scale
+    spans=((165,295),(330,90),(120,52))
+    for i,(start,end) in enumerate(spans):
+        outer=[];inner=[]
+        span=(end-start)%360+1
+        for step in range(13):
+            angle=math.radians(start+span*step/12)
+            outer.append((x+math.cos(angle)*radius,
+                          y+math.sin(angle)*radius*.72-open_*10))
+            inner.append((x+math.cos(angle)*max(3.,radius-thickness),
+                          y+math.sin(angle)*max(3.,radius-thickness)*.72-open_*10))
+        path=[(round(px/3)*3,round(py/3)*3) for px,py in outer+inner[::-1]]
+        d.polygon(path,fill=colors[2])
+        d.line(path+[path[0]],fill=colors[1],width=1)
+        d.line([(round(px/3)*3,round(py/3)*3) for px,py in inner],
+               colors[3],2)
+        bright=start+span*.62
+        bx=x+math.cos(math.radians(bright))*radius
+        by=y+math.sin(math.radians(bright))*radius*.72-open_*10
+        d.line(((round((bx-thickness*.4)/3)*3,round(by/3)*3),
+                (round((bx+thickness*.4)/3)*3,round(by/3)*3)),fill=colors[4],width=2)
+    if life<.34:
+        pulse=math.sin(life/.34*math.pi)
+        r=round(6+5*pulse)
+        d.ellipse((x-r,y-round(r*.76),x+r,y+round(r*.76)),fill=colors[3])
+        d.ellipse((x-3,y-4,x+3,y+2),fill=colors[4])
+    image=_dissolve(image,fade)
+    put(layer,image,target,scale*.80)
+    _egg_shells(layer,target,life,colors,scale,density)
+
+
+def _choir_petals(layer, target, life, colors, scale, density):
+    """HEAL_BELL/MILK_DRINK arrival: three independently breathing petal tiers."""
+    if not 0<=life<.92:return
+    layers=(
+        (-14,.72,7,.02,.42),   # dark, broad back tier opens at contact
+        (0,.90,6,.08,.68),     # mid tier carries the main choir silhouette
+        (-28,1.08,4,.18,.55),  # bright front tier answers on a delayed beat
+    )
+    for tier,(lift,size,count,born,clock) in enumerate(layers):
+        for i in range(max(1,round(count*density))):
+            q=(life-born)/(.82-born)
+            if not 0<=q<1:continue
+            angle=i*math.tau/count+q*(2.1 if tier%2 else -2.7)+tier*.73
+            radius=(17+q*25+(tier-1)*7)*scale
+            at=(target[0]+math.cos(angle)*radius,
+                target[1]+math.sin(angle)*radius*.58+lift*scale-q*(20+tier*5)*scale)
+            _speck(layer,'petal',at,colors,scale*size,i+tier*9,
+                   max(0.,(q-.64)/.36),turn=math.sin(q*math.tau*clock+i)*42+tier*31)
+
+
 def _local_material(layer, key, target, life, colors, scale, density, *, source=None, config=None):
     """One continuous material clock from real contact through its finite tail."""
     source=source or target
     direction=math.degrees(math.atan2(target[1]-source[1],target[0]-source[0]))
     fade=max(0.,(life-.52)/.40)
-    if key in ('healing_song','bliss_chorus'):
-        count=4 if key=='healing_song' else 5
-        for i in range(round(count*density)):
-            angle=i*math.tau/count+.5;radius=(13+life*31)*scale
-            pos=(target[0]+math.cos(angle)*radius,
-                 target[1]+math.sin(angle)*radius*.6-life*24*scale)
-            _speck(layer,'note',pos,colors,scale*(.77 if key=='healing_song' else .69),i,fade,
-                   turn=math.sin(life*8+i)*15)
-        if life<.64:
-            _ring(layer,target,colors,7+life*18,scale*.77,flatten=.48)
-            if key=='bliss_chorus':
-                _ring(layer,(target[0],target[1]+10*scale),colors,6+life*18,scale*.76,flatten=.45)
-        if key=='healing_song' and life<.30:
-            # A low echo ring answers the landing note before the main ring opens.
-            _ring(layer,(target[0],target[1]+9*scale),colors,5+life*34,scale*.60,flatten=.40)
-        if key=='bliss_chorus' and life<.22:
-            _speck(layer,'bell',(target[0]-23*scale,target[1]-8*scale),colors,scale*.55,
-                   turn=math.sin(life*16)*16)
+    if key=='healing_song':
+        # Filled staves unwrap around the patient; the beat rises twice, then rests.
+        for i,side in enumerate((-1,0,1)[:max(1,round(3*density))]):
+            start=(target[0]-side*(42-life*13)*scale,target[1]+(9-i)*10*scale)
+            _music_ribbon(layer,start,target,min(1.,max(0.,(life-.03-i*.04)/.60)),
+                          colors,scale,phase=1.35+i*2.25,width=6.2-i*.7,
+                          strength=max(0.,1-fade))
+    elif key=='bliss_chorus':
+        _choir_petals(layer,target,life,colors,scale,density)
     elif key=='cleansing_powder':
         for i in range(round(11*density)):
             born=(i%4)*.07;q=(life-born)/(.9-born)
@@ -535,7 +650,7 @@ def _local_material(layer, key, target, life, colors, scale, density, *, source=
                                     target[1]+math.sin(angle)*radius*.55-q*13*scale),
                        colors,scale*(.44-.12*q),i+1,fade)
     elif key=='life_pulse':
-        _egg_shells(layer,target,life,colors,scale,density)
+        _life_membrane(layer,target,life,colors,scale,density)
     elif key=='rescue_tongue':
         # Wet contact becomes a few falling drops, not a second ray or hitsplat.
         for i in range(round(4*density)):
@@ -569,7 +684,7 @@ def draw(layer, skill_id, source, target, phase, progress, config, *, emitters=(
                 line(layer,((source[0]+side*22*scale,source[1]-13*scale),
                             (source[0]+side*14*scale,source[1]-6*scale),source),colors[3],3)
         elif skill_id=='life_pulse':
-            _speck(layer,'egg',(source[0],source[1]-p*7*scale),colors,scale*.62)
+            _life_pulse_capsule(layer,(source[0],source[1]-p*7*scale),p,colors,scale*.72)
         elif skill_id=='rescue_tongue':
             head=point(source,target,min(1.,p*19*scale/(math.dist(source,target) or 1.)))
             _tongue(layer,source,head,colors,scale*.65)
@@ -579,9 +694,13 @@ def draw(layer, skill_id, source, target, phase, progress, config, *, emitters=(
         elif skill_id=='bliss_chorus':
             _speck(layer,'bell',(source[0],source[1]-10*scale),colors,scale*.62,
                    turn=math.sin(p*12)*15)
-            for i in range(2):
-                _speck(layer,'note',(source[0]+(i*2-1)*(11+p*9)*scale,source[1]+4*scale),
-                       colors,scale*.57,i)
+            for i in range(3):
+                angle=i*math.tau/3+p*2.4;radius=(10+p*8)*scale
+                _speck(layer,'petal',(source[0]+math.cos(angle)*radius,
+                                      source[1]+math.sin(angle)*radius*.65+6*scale),
+                       colors,scale*(.45+i*.07),i,turn=math.sin(p*8+i)*28+i*42)
+        elif skill_id=='healing_song':
+            _music_charge(layer,source,p,colors,scale)
         else:
             kind={'healing_song':'note','bliss_chorus':'note','watchful_lullaby':'note',
                   'cleansing_powder':'powder','moon_blessing':'sparkle','aroma_garden':'petal',
@@ -603,7 +722,7 @@ def draw(layer, skill_id, source, target, phase, progress, config, *, emitters=(
             _tongue(layer,source,head,colors,scale)
         elif skill_id=='life_pulse':
             arc=(head[0],head[1]-math.sin(p*math.pi)*49*scale)
-            _speck(layer,'egg',arc,colors,scale*.68)
+            _life_pulse_capsule(layer,arc,p,colors,scale*.82)
         elif skill_id=='barrier_relay':
             direction=math.degrees(math.atan2(target[1]-source[1],target[0]-source[0]))
             for i in range(4):
@@ -632,6 +751,14 @@ def draw(layer, skill_id, source, target, phase, progress, config, *, emitters=(
             _stream(layer,source,target,p,colors,'orb',count=3,spread=9,scale=scale*.65,density=density)
         elif skill_id=='moon_blessing':
             _moon_rays(layer,head,p,colors,scale*.78)
+        elif skill_id=='healing_song':
+            _music_ribbon(layer,source,head,p,colors,scale,phase=p*5.4,width=8.5)
+            if density>=.75:
+                _music_ribbon(layer,source,head,max(0.,p-.14),colors,scale*.72,
+                              phase=p*5.4+2.4,width=5.2)
+        elif skill_id=='bliss_chorus':
+            _stream(layer,source,target,p,colors,'petal',count=7,spread=31,
+                    wave=2.2,arc=20,scale=scale,density=density)
         elif skill_id=='watchful_lullaby':
             for i in range(3):
                 q=p-i*.11
@@ -699,7 +826,8 @@ def draw_assistance(layer, skill_id, source, target, phase, progress, config, *,
         if skill_id=='rescue_tongue':
             _tongue(layer,source,head,colors,scale)
         elif skill_id=='life_pulse':
-            _speck(layer,'egg',(head[0],head[1]-math.sin(p*math.pi)*49*scale),colors,scale*.68)
+            _life_pulse_capsule(layer,(head[0],head[1]-math.sin(p*math.pi)*49*scale),
+                                p,colors,scale*.82)
         elif skill_id in ('moon_blessing','barrier_relay','frost_shelter'):
             # Parallel light facets / snowmist deliver protection. Neither an
             # Ice Beam nor a Psybeam is fired into a friendly recipient.
@@ -726,12 +854,20 @@ def draw_assistance(layer, skill_id, source, target, phase, progress, config, *,
             if skill_id=='star_resonance':
                 _speck(layer,'swift_star',(head[0],head[1]-math.sin(p*math.pi)*18*scale),
                        palette('ELECTRIC',config),scale*.58,0,turn=p*100)
+        elif skill_id=='healing_song':
+            _music_ribbon(layer,source,head,p,colors,scale,phase=p*5.4,width=8.5)
+            if density>=.75:
+                _music_ribbon(layer,source,head,max(0.,p-.14),colors,scale*.72,
+                              phase=p*5.4+2.4,width=5.2)
+        elif skill_id=='bliss_chorus':
+            _stream(layer,source,target,p,colors,'petal',count=7,spread=31,
+                    wave=2.2,arc=20,scale=scale,density=density)
         elif skill_id=='watchful_lullaby':
             _stream(layer,source,target,p,colors,'note',count=4,spread=21,wave=1.5,
                     arc=12,scale=scale*.93,density=density)
         else:
-            kind={'healing_song':'note','bliss_chorus':'note','cleansing_powder':'powder',
-                  'aroma_garden':'petal','verdant_sanctuary':'leaf'}[skill_id]
+            kind={'cleansing_powder':'powder','aroma_garden':'petal',
+                  'verdant_sanctuary':'leaf'}[skill_id]
             _stream(layer,source,target,p,colors,kind,count=9 if kind=='powder' else 5,
                     spread=23 if kind=='powder' else 17,wave=1.5,arc=9,
                     scale=scale,density=density)
@@ -987,8 +1123,18 @@ def _healing_stars(layer, key, target, p, config, scale, density):
             radius=(34*(1-q)+5)*scale
             _speck(layer,'orb',(target[0]+math.cos(angle)*radius,
                                target[1]+math.sin(angle)*radius*.65),colors,scale*.3,i)
-    # Keep native healing identity secondary to the common blue-green recovery.
-    if key in ('healing_song','watchful_lullaby','bliss_chorus') and p<.80:
+    # Native identities own a second readable silhouette, not just palette accents.
+    if key=='healing_song':
+        for i,side in enumerate((-1,0,1)[:max(1,round(3*density))]):
+            start=(target[0]-side*(43-p*12)*scale,target[1]+(8-i)*10*scale)
+            _music_ribbon(layer,start,target,min(1.,max(0.,(p-.02-i*.04)/.62)),
+                          palette(_TYPES[key],config),scale,phase=1.2+i*2.2,
+                          width=5.8-i*.6,strength=max(0.,1-max(0.,(p-.62)/.34)))
+    elif key=='life_pulse':
+        _life_membrane(layer,target,p,palette(_TYPES[key],config),scale,density)
+    elif key=='bliss_chorus':
+        _choir_petals(layer,target,p,palette(_TYPES[key],config),scale,density)
+    elif key=='watchful_lullaby' and p<.80:
         for i in range(2):
             q=min(1.,max(0.,(p-i*.09)/.72))
             at=(target[0]+(i*2-1)*(31+math.sin(q*4)*6)*scale,

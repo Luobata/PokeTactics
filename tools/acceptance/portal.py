@@ -11,6 +11,20 @@ NAV_LINKS = (("/", "营地首页"), ("/play", "游戏试玩"),
 PORTAL_ROUTES = ("/", "/pokedex", "/guide", "/tools")
 
 
+def _technique_advice():
+    """Hand-written copy plus generated stubs so a new machine never ships blank."""
+    import copy
+    import arena
+    import catalog_advice as advice
+    table = copy.deepcopy(advice.TECHNIQUES)
+    for row in arena.technique_catalog():
+        if row['id'] not in table:
+            table[row['id']] = {'category': 'other', 'tags': [],
+                                'advice': row['description'], 'tradeoff': '',
+                                'generated': True}
+    return table
+
+
 def wrap_page(page, path):
     """Add the same navigation without changing any page scripts or game state."""
     if 'aria-label="全站导航"' in page:
@@ -93,6 +107,7 @@ def catalog_view(demo):
     for sid, piece in arena.build_templates().items():
         generation = 2 if sid in arena.GEN2_ROSTER else 1
         pool_group = ('第二世代精灵' if generation == 2 else
+                      '传说精灵' if sid in arena.LEGENDARY else
                       '第一世代独立精灵' if sid in arena.EXPANSION_ROSTER else '进化形态')
         pokemon_views.append({**demo._piece_view(piece, ruleset=arena.RULESET),
                               'cost': piece.tier, 'pool_total': arena.pool_cap(sid),
@@ -121,7 +136,7 @@ def catalog_view(demo):
                 'coverage_note': (f"本版覆盖{covered}位精灵，共{len(arena_traits.catalog())}项特性；"
                                   '其余精灵尚未配置，不会随机获得特性。'
                                   if (covered := sum(bool(row.get('trait')) for row in pokemon_views)) < len(pokemon_views)
-                                  else f"本版48位竞技精灵全部拥有特性，共{len(arena_traits.catalog())}项特性；特性不会随机获得，始终跟随物种。"),
+                                  else f"本版{len(pokemon_views)}位竞技精灵全部拥有特性，共{len(arena_traits.catalog())}项特性；特性不会随机获得，始终跟随物种。"),
             },
             'techniques': arena.technique_catalog(),
             'items': item_views,
@@ -146,7 +161,7 @@ def catalog_view(demo):
                                      '第 1、7、13 轮，从三个选项中选择一个；同一强化不能重复选择'),
                           **({'unlock_challenge': arena.AUGMENT_LOCKS[key]} if key in arena.AUGMENT_LOCKS else {}),
                           'scope': '本局全队生效'} for key in arena.AUGMENTS],
-            'technique_advice': copy.deepcopy(advice.TECHNIQUES),
+            'technique_advice': _technique_advice(),
             'builds': build_views}
 
 

@@ -35,40 +35,52 @@ GEN2_ROSTER = {
     157: (3, 'attack'), 212: (3, 'attack'), 230: (3, 'attack'), 160: (3, 'defense'),
     248: (3, 'defense'), 154: (3, 'support'),
 }
-ROSTER = {**ORIGINAL_ROSTER, **EXPANSION_ROSTER, **GEN2_ROSTER}
-POOL_BY_COST = {1: 22, 2: 18, 3: 12}
+# Legendary tier (docs/12 §1): the three birds at 4-cost, Mewtwo/Mew at 5-cost.
+# One legendary at most per seat (board + bench), regardless of species; the
+# limit makes collecting three copies of one species impossible, so legendaries
+# never star up and combine() needs no special case.
+LEGENDARY_ROSTER = {
+    144: (4, 'attack'), 145: (4, 'attack'), 146: (4, 'attack'),
+    150: (5, 'attack'), 151: (5, 'attack'),
+}
+LEGENDARY = frozenset(LEGENDARY_ROSTER)
+ROSTER = {**ORIGINAL_ROSTER, **EXPANSION_ROSTER, **GEN2_ROSTER, **LEGENDARY_ROSTER}
+POOL_BY_COST = {1: 20, 2: 16, 3: 10, 4: 10, 5: 8}
 PVE_WAVES = ((76, 76), (68, 68, 12), (31, 34, 73, 40),
              (9, 9, 65, 36), (59, 59, 6, 6, 3), (9, 9, 6, 6, 65, 121))
 PVE_LABELS = ('滚石试炼', '四臂试炼', '毒刺试炼', '水炮试炼', '火焰试炼', '进化精英试炼')
 AUGMENTS = {
-    'sharp_focus': {'name': '精准火力', 'description': '全队攻击与特攻提高 12%。'},
-    'iron_wall': {'name': '坚不可摧', 'description': '全队额外减伤 8%，与其他减伤相乘。'},
-    'first_aid': {'name': '急救花园', 'description': '辅助型的每次团队回复量提高 30%。'},
-    'vitality': {'name': '生命之泉', 'description': '全队最大生命提高 15%。'},
-    'quick_step': {'name': '迅捷步伐', 'description': '全队攻击速度提高 12%。'},
-    'mana_flow': {'name': '能量涌动', 'description': '全队开战时获得 20 点能量，更早施放招式。'},
-    'poison_catalyst': {'name': '毒性催化', 'description': '原生技能主命中对施法前已中毒的目标造成实际生命损失后，施法者获得 8 能量；每只冷却 2 秒、每战最多 3 次。教学、毒伤和侧击不触发。'},
-    'watch_echo': {'name': '守望回响', 'description': '辅助原生技能有效治疗其他队友后，为两格内未满能量、能量最高的攻击型队友补 8 能量；每名辅助冷却 4 秒、每战最多 3 次。被动回复和睡觉不触发。'},
+    'sharp_focus': {'name': '精准火力', 'scope': 'team', 'brief': '全队攻击与特攻 +12%', 'description': '全队攻击与特攻提高 12%。'},
+    'iron_wall': {'name': '坚不可摧', 'scope': 'team', 'brief': '全队额外减伤 8%（与其他减伤相乘）', 'description': '全队额外减伤 8%，与其他减伤相乘。'},
+    'first_aid': {'name': '急救花园', 'scope': 'support', 'brief': '辅助型每次团队回复量 +30%', 'description': '辅助型的每次团队回复量提高 30%。'},
+    'vitality': {'name': '生命之泉', 'scope': 'team', 'brief': '全队最大生命 +15%', 'description': '全队最大生命提高 15%。'},
+    'quick_step': {'name': '迅捷步伐', 'scope': 'team', 'brief': '全队攻击速度 +12%', 'description': '全队攻击速度提高 12%。'},
+    'mana_flow': {'name': '能量涌动', 'scope': 'team', 'brief': '全队开战能量 +20', 'description': '全队开战时获得 20 点能量，更早施放招式。'},
+    'poison_catalyst': {'name': '毒性催化', 'scope': 'team', 'brief': '条件触发：原生技能主命中施法前已中毒目标并造成实际生命损失后，施法者回 8 能量', 'description': '原生技能主命中对施法前已中毒的目标造成实际生命损失后，施法者获得 8 能量；每只冷却 2 秒、每战最多 3 次。教学、毒伤和侧击不触发。'},
+    'watch_echo': {'name': '守望回响', 'scope': 'team', 'brief': '条件触发：辅助原生技能有效治疗队友后，为两格内能量最高的攻击型队友回 8 能量', 'description': '辅助原生技能有效治疗其他队友后，为两格内未满能量、能量最高的攻击型队友补 8 能量；每名辅助冷却 4 秒、每战最多 3 次。被动回复和睡觉不触发。'},
     'barrier_feedback': {'name': '屏障回流', 'shield_threshold': .05, 'energy': 8,
-                         'cooldown': 4., 'limit': 3,
+                         'cooldown': 4., 'limit': 3, 'scope': 'team',
+                         'brief': '条件触发：供盾实吸累计达受盾者最大生命 5%，为施盾者回 8 能量',
                          'description': '自己提供给其他队友的护盾实际吸收累计达到受盾者最大生命的 5%，为施盾者补 8 能量。同一连续护盾周期最多触发一次，更强覆盾不重置资格；每名施盾者冷却 4 秒、每战最多 3 次。自盾、已阵亡或满能量的施盾者无收益。'},
     'native_inspiration': {'name': '充能鼓舞', 'damage_bonus': .25, 'duration': 3.,
-                           'cooldown': 5., 'limit': 3,
+                           'cooldown': 5., 'limit': 3, 'scope': 'team',
+                           'brief': '条件触发：收到其他友军本命回能后，3 秒直接攻击伤害 +25%',
                            'description': '实际收到其他友军本命技能回能后，直接攻击伤害提高 25%，持续 3 秒；每只受益宝可梦冷却 5 秒、每战最多 3 次。强化普攻、攻击技能及按正常直接命中结算的反击，不强化毒伤、岩钉或治疗。不叠加；自回能、普攻回能、教学及其他海克斯回能不触发。'},
     'breach_momentum': {'name': '乘隙追击', 'vulnerability': .12, 'duration': 4.,
-                        'cooldown': 4., 'limit': 3,
+                        'cooldown': 4., 'limit': 3, 'scope': 'team',
+                        'brief': '条件触发：原生技能或吼叫击退存活敌人后，其受伤 +12% 持续 4 秒',
                         'description': '原生技能或吼叫成功把存活敌人击退后，使其受到的伤害提高 12%、持续 4 秒。每名推动者冷却 4 秒、每战最多 3 次。移动、救援、闪现及被边界或堵路阻止的击退不触发，当前技能不能吃到自己新施加的易伤。'},
-    'growth_mark': {'name': '成长印记',
+    'growth_mark': {'name': '成长印记', 'scope': 'team', 'brief': '成长型：每过一轮全队攻击与特攻 +2%，至多 +10%',
                     'description': '成长型：选取后每经过一轮，全队攻击与特攻提高 2%，最多叠加 5 层（+10%）。'},
-    'growth_bulwark': {'name': '积蓄力量',
+    'growth_bulwark': {'name': '积蓄力量', 'scope': 'team', 'brief': '成长型：每过一轮全队最大生命 +2%，至多 +10%',
                        'description': '成长型：选取后每经过一轮，全队最大生命提高 2%，最多叠加 5 层（+10%）。'},
-    'war_drum': {'name': '战鼓催征',
+    'war_drum': {'name': '战鼓催征', 'scope': 'team', 'brief': '成长型：全队攻速 +1%×当前轮数，第 12 轮封顶 +12%',
                  'description': '成长型：全队攻击速度提高 1%×当前轮数，第 12 轮起封顶（+12%）。'},
-    'xp_doctrine': {'name': '经验学说',
+    'xp_doctrine': {'name': '经验学说', 'scope': 'economy', 'brief': '每轮开始自动获得经验',
                     'description': '成长型：选取后的每轮开始自动获得 1 点经验；持有满 6 轮后改为每轮 2 点。'},
-    'war_banner': {'name': '战旗高扬',
+    'war_banner': {'name': '战旗高扬', 'scope': 'team', 'brief': '全队攻击与特攻 +6% · 攻速 +6%',
                    'description': '全队攻击与特攻提高 6%，攻击速度提高 6%。完成竞技挑战「竞技首秀」后进入候选池。'},
-    'deep_reserves': {'name': '深厚储备',
+    'deep_reserves': {'name': '深厚储备', 'scope': 'team', 'brief': '全队最大生命 +8% · 开战能量 +10',
                       'description': '全队最大生命提高 8%，开战时获得 10 点能量。完成竞技挑战「竞技场冠军」后进入候选池。'},
 }
 # Challenge-locked candidates: an option unlock for future runs, never a
@@ -109,6 +121,11 @@ def build_templates():
 
 def pool_cap(species_id):
     return POOL_BY_COST[ROSTER[species_id][0]]
+
+
+def holds_legendary(owned_pieces):
+    """限一判定：场上 + 备战席（含商店格不算持有）已有一只传说精灵。"""
+    return any(owned.piece.species_id in LEGENDARY for owned in owned_pieces)
 
 
 def pool_caps():
@@ -216,41 +233,83 @@ def begin_round(session):
                 owned.arena_trait = 'trait_rain_dish' if rain else None
 
 
+# 类别 × 携带者定位匹配分：伤害给攻击位，控制/反制给前排，恢复/支援/启动给非攻击位。
+_BOT_ROLE_MATCH = {
+    'damage': {'attack': 3, 'defense': 1, 'support': 1},
+    'control': {'defense': 3, 'support': 2, 'attack': 1},
+    'counter': {'defense': 3, 'support': 2, 'attack': 1},
+    'recovery': {'support': 3, 'defense': 2},
+    'survival': {'defense': 3, 'support': 1, 'attack': 1},
+    'support': {'support': 3, 'defense': 1},
+    'startup': {'support': 3, 'defense': 1, 'attack': 1},
+}
+
+
 def bot_teaching_choice(board):
-    """Build a legal weather pair from owned teammates, never future rolls."""
+    """Score every learnable machine against its best carrier on the board."""
     unused = [owned for owned in board if owned.technique is None]
     if not unused:
         return None, None
     known = {owned.technique for owned in board}
     types = [set(owned.piece.types) for owned in board]
+    weather_known = bool(known.intersection({'rain_dance', 'sunny_day'}))
+    wants_rain = (any('WATER' in row for row in types)
+                  and (any('ELECTRIC' in row for row in types)
+                       or any(owned.piece.species_id == 230 for owned in board)))
+    wants_sun = (sum(bool(row.intersection({'GRASS', 'FIRE'})) for row in types) >= 2
+                 and any(owned.piece.species_id == 3 for owned in board))
+
     def learner(key):
         eligible = [owned for owned in unused if techniques.compatible_species(
             owned.piece.species_id, key, RULESET)]
         return min(eligible, key=lambda owned: (
             owned.piece.role_key != 'support', owned.piece.role_key == 'attack',
             owned.piece.species_id), default=None)
-    if not known.intersection({'rain_dance', 'sunny_day'}):
-        wants_rain = (any('WATER' in row for row in types)
-                      and (any('ELECTRIC' in row for row in types)
-                           or any(owned.piece.species_id == 230 for owned in board)))
-        wants_sun = (sum(bool(row.intersection({'GRASS', 'FIRE'})) for row in types) >= 2
-                     and any(owned.piece.species_id == 3 for owned in board))
-        for key, wanted in (('rain_dance', wants_rain), ('sunny_day', wants_sun)):
-            owned = learner(key) if wanted else None
-            if owned is not None:
-                return owned, key
-    if 'rain_dance' in known and 'thunder' not in known:
-        owned = learner('thunder')
-        if owned is not None:
-            return owned, 'thunder'
-    for owned in unused:
-        if owned.piece.species_id == 34 and owned.item == 'life_orb':
-            return owned, 'ice_beam'
-    owned = unused[0]
-    key = 'rest' if owned.piece.role_key != 'attack' else (
-        'surf' if 'WATER' in owned.piece.types else 'cut' if techniques.compatible_species(
-            owned.piece.species_id, 'cut', RULESET) else 'rest')
-    return owned, key
+
+    def score(owned, key):
+        role = getattr(owned.piece, 'role_key', 'attack')
+        value = _BOT_ROLE_MATCH.get(techniques.category_of(key) or '', {}).get(role, 0)
+        # 既有特判保留为加分项：天气对、雨后打雷连招、强行尼多王冰光。
+        if key == 'rain_dance' and wants_rain or key == 'sunny_day' and wants_sun:
+            value += 4
+        if key == 'thunder' and 'rain_dance' in known and 'thunder' not in known:
+            value += 4
+        if key == 'ice_beam' and owned.piece.species_id == 34 and owned.item == 'life_orb':
+            value += 4
+        # 机制机的阵容适配加分：守住给承伤前排，帮助要有攻击核心可标记，
+        # 治愈铃声要有足够队友可净化。
+        if key == 'protect' and role == 'defense':
+            value += 1
+        if key == 'helping_hand' and any(
+                mate is not owned and getattr(mate.piece, 'role_key', 'attack') == 'attack'
+                for mate in board):
+            value += 2
+        if key == 'heal_bell' and len(board) >= 3:
+            value += 2
+        # 兜底偏好：没有任何定位分时，维持 rest/surf/cut 的现有偏好序。
+        if not value:
+            if key == 'rest' and role != 'attack':
+                value = 1
+            elif key == 'surf' and 'WATER' in owned.piece.types:
+                value = 1
+            elif key == 'cut':
+                value = 1
+        return value
+
+    best_owned, best_key, best_score = None, None, 0
+    for key in techniques.ids_for(RULESET):
+        if key in ('rain_dance', 'sunny_day') and weather_known:
+            continue
+        owned = learner(key)
+        if owned is None:
+            continue
+        value = score(owned, key)
+        if value > best_score:
+            best_owned, best_key, best_score = owned, key, value
+    if best_owned is None:
+        # 与旧兜底一致：实在没分更好的，至少有全场可学的 rest。
+        best_owned, best_key = unused[0], 'rest'
+    return best_owned, best_key
 
 
 def claim_augment(session, reward_id, choice):

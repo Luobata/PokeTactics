@@ -42,6 +42,19 @@ LEVEL_ODDS: Dict[int, tuple] = {
     7: (30, 45, 25),
 }
 
+# 竞技场专属五档表（docs/12 §1.6 设计稿的审定收紧版）：L1-5 沿用三档权重、
+# 4 费从 L6 起可见、5 费仅 L7；经典表 LEVEL_ODDS 不动。选择依据是共享池的
+# pool.arena 标志（demo.Session 在竞技规则下置位）。
+ARENA_LEVEL_ODDS: Dict[int, tuple] = {
+    1: (100, 0, 0, 0, 0),
+    2: (100, 0, 0, 0, 0),
+    3: (75, 25, 0, 0, 0),
+    4: (60, 35, 5, 0, 0),
+    5: (50, 40, 10, 0, 0),
+    6: (30, 40, 22, 8, 0),
+    7: (22, 33, 30, 12, 3),
+}
+
 # 通信进化族（勇基拉→胡地、豪力→怪力、鬼斯通→耿鬼）：不走 3 合 1——
 # 2026-09-14 用户裁定（S2 §1.5 修订）：通信进化唯一通道 = 进化石
 # （sim/items.py：装备到中段形态上即单人进化，不消耗·每局一次）。
@@ -79,7 +92,8 @@ class SharedPool:
         self.templates = templates
         self.remaining: Dict[int, int] = {}
         for sid, piece in templates.items():
-            self.remaining[sid] = POOL_COPIES[piece.tier]
+            # 竞技 4/5 费不在经典限量表内；竞技会话随后用 arena.pool_caps() 整体覆写。
+            self.remaining[sid] = POOL_COPIES.get(piece.tier, 0)
 
     def take(self, species_id: int) -> None:
         assert self.remaining.get(species_id, 0) > 0, f"池空: {species_id}"
@@ -124,10 +138,12 @@ def draw_slot(rng: random.Random, level: int, pool: SharedPool,
     抽中即从共享池**预留**一张（同一批 4 格可能抽到同种——各自占一张），
     买家买入时不再扣池；该档全空时逐档下潜（极端情况：终局 3 费被买光）。
     """
-    odds = LEVEL_ODDS[min(max(level, 1), max(LEVEL_ODDS))]
-    tier = rng.choices((1, 2, 3), weights=odds)[0]
-    for t in (tier, tier - 1, tier + 1, 1, 2, 3):  # 优先原档，缺货时补位
-        if t not in POOL_COPIES:
+    odds_table = ARENA_LEVEL_ODDS if getattr(pool, 'arena', False) else LEVEL_ODDS
+    odds = odds_table[min(max(level, 1), max(odds_table))]
+    tiers = tuple(range(1, len(odds) + 1))
+    tier = rng.choices(tiers, weights=odds)[0]
+    for t in (tier, tier - 1, tier + 1, *tiers):  # 优先原档，缺货时补位
+        if t not in tiers:
             continue
         avail = [sid for sid, piece in templates.items()
                  if piece.tier == t and pool.remaining.get(sid, 0) > 0]

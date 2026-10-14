@@ -261,7 +261,7 @@ class AnimationTimeline:
                         base_prep = .50 if targeting in ('self', 'field') else \
                                     .45 if category in ('shield', 'guard', 'protection') else .40
                     ranged = unit.range > 1 or (kind == 'cast' and sid in CORE_CAST_SPECIES) or native_arena
-                    travel = grid(min(MAX_TRAVEL, max(.15, distance / 520))) if ranged else .05
+                    travel = grid(min(MAX_TRAVEL, max(.15, distance / 520))) if ranged else .15
                     if targeting == 'self':
                         travel = .15  # Stance unfurls locally, without a projectile.
                     if kind == 'cast' and (sid in CORE_CAST_SPECIES or native_arena) and targeting != 'self':

@@ -1,4 +1,4 @@
-"""Forty-eight authored basic-attack tracks for the arena roster.
+"""Fifty-three authored basic-attack tracks for the arena roster.
 
 The simulator remains authoritative. These bounded Pillow drawings consume only
 an event's source, target and presentation phase, and never alter combat state.
@@ -476,6 +476,79 @@ def _gen2_motif(sid, d, x, y, k, angle, hit):
             d.arc((x - 28, y - 24, x + 28, y + 24), 195, 345, fill=(186, 236, 137, 255), width=2)
 
 
+def _legendary_motif(sid, d, x, y, k, angle, hit):
+    """Legendary silhouettes: frost fan, thunder V, fire wings, psychic cores."""
+    r = 9 + k * 8
+    if sid == 144:
+        # Articuno: a three-shard frost fan sweeps outward from a pale core.
+        for i in (-1, 0, 1):
+            a = angle * .3 + i * .5
+            ux, uy = math.cos(a), math.sin(a)
+            tip = r + 12 - abs(i) * 3
+            d.polygon(((x + uy * 5, y - ux * 5), (x - uy * 5, y + ux * 5),
+                       (x + ux * tip, y + uy * tip * .8)),
+                      fill=(161, 226, 244, 255), outline=WHITE)
+        d.ellipse((x - 5, y - 5, x + 5, y + 5), fill=(231, 250, 255, 255), outline=(117, 194, 226, 255))
+        if hit:
+            for i in range(6):
+                a = angle + i * math.tau / 6
+                _star(d, x + math.cos(a) * (r + 9), y + math.sin(a) * (r + 9) * .7,
+                      3, (214, 245, 255, 255), 4, a)
+    elif sid == 145:
+        # Zapdos: a jagged twin-pronged bolt in a spiked V, never a smooth arc.
+        for sign in (-1, 1):
+            pts = [(x, y - 4), (x + sign * 9, y - 10), (x + sign * 6, y + 1),
+                   (x + sign * 17, y - 3), (x + sign * 13, y + 9)]
+            d.line(pts, fill=(255, 213, 62, 255), width=4)
+            d.line(pts, fill=WHITE, width=1)
+        d.polygon(((x - 4, y - 14), (x + 4, y - 14), (x, y - 20 - k * 6)),
+                  fill=(255, 236, 137, 255), outline=WHITE)
+        if hit:
+            for off in (-20, 0, 20):
+                d.line((x + off, y - 16, x + off * .6, y - 24 - k * 4),
+                       fill=(255, 228, 99, 255), width=2)
+    elif sid == 146:
+        # Moltres: two wing arcs of layered flame with rising embers.
+        for sign in (-1, 1):
+            d.arc((x - 24 if sign < 0 else x - 2, y - 18,
+                   x + 2 if sign < 0 else x + 24, y + 12),
+                  150 if sign < 0 else 240, 300 if sign < 0 else 30,
+                  fill=(255, 126, 48, 255), width=5)
+            d.arc((x - 18 if sign < 0 else x - 4, y - 12,
+                   x + 4 if sign < 0 else x + 18, y + 8),
+                  160 if sign < 0 else 250, 290 if sign < 0 else 20,
+                  fill=(255, 213, 105, 255), width=2)
+        for i in (-1, 0, 1):
+            xx = x + i * 9
+            d.polygon(((xx - 3, y - 6), (xx, y - 14 - k * 8 - abs(i) * 2), (xx + 3, y - 6)),
+                      fill=(249, 93, 40, 255), outline=(255, 225, 141, 255))
+        if hit:
+            _ring(d, x, y, r + 10, (255, 186, 92, 220), 1)
+    elif sid == 150:
+        # Mewtwo: a compressed psychic core between two hard pressure bars.
+        d.ellipse((x - 8, y - 8, x + 8, y + 8), fill=(186, 122, 219, 255), outline=WHITE, width=2)
+        d.ellipse((x - 3, y - 3, x + 3, y + 3), fill=(244, 226, 255, 255))
+        for sign in (-1, 1):
+            d.line((x - 24, y + sign * (10 + k * 4), x - 11, y + sign * 7),
+                   fill=(255, 139, 213, 255), width=3)
+            d.line((x + 11, y + sign * 7, x + 24, y + sign * (10 + k * 4)),
+                   fill=(255, 139, 213, 255), width=3)
+        _ring(d, x, y, r + 4, (207, 147, 237, 255), 2)
+        if hit:
+            d.line((x - 26, y, x - 15, y), fill=WHITE, width=3)
+            d.line((x + 15, y, x + 26, y), fill=WHITE, width=3)
+    elif sid == 151:
+        # Mew: a small bright orb trailing a long curled ribbon tail.
+        route = [(x + 4 + i * 3, y + 2 + math.sin(i * .7 + angle) * 6) for i in range(8)]
+        d.line(route, fill=(255, 171, 205, 255), width=4)
+        d.line(route, fill=WHITE, width=1)
+        d.ellipse((x - 7, y - 7, x + 7, y + 7), fill=(255, 192, 218, 255), outline=WHITE, width=2)
+        d.ellipse((x - 3, y - 4, x + 1, y), fill=(255, 244, 250, 255))
+        _star(d, x - 12, y - 10, 3, (255, 226, 244, 255), 4, angle)
+        if hit:
+            _ring(d, x, y, r + 8, (255, 203, 228, 220), 1)
+
+
 def _authored(sid):
     return lambda d, x, y, k, angle, hit: _expansion_motif(sid,d,x,y,k,angle,hit)
 
@@ -507,6 +580,19 @@ GEN2_EFFECTS = {
 }
 
 
+def _legendary_authored(sid):
+    return lambda d, x, y, k, angle, hit: _legendary_motif(sid, d, x, y, k, angle, hit)
+
+
+LEGENDARY_EFFECTS = {
+    144: ('霜翎扇击', _legendary_authored(144)),
+    145: ('锯齿雷楔', _legendary_authored(145)),
+    146: ('焰翼余烬', _legendary_authored(146)),
+    150: ('念压核心', _legendary_authored(150)),
+    151: ('幻尾缎带', _legendary_authored(151)),
+}
+
+
 EFFECTS = {
     26: ('交叉电弧', _raichu), 68: ('四臂连拳', _machamp),
     31: ('甲壳震波', _nidoqueen), 76: ('滚石碎击', _golem),
@@ -519,6 +605,7 @@ EFFECTS = {
     3: ('双藤飞叶', _venusaur), 121: ('旋转星刃', _starmie),
     **EXPANSION_EFFECTS,
     **GEN2_EFFECTS,
+    **LEGENDARY_EFFECTS,
 }
 
 
@@ -803,6 +890,11 @@ def draw_native_skill(img, species_id, kind, source, target, phase, progress, te
         _expansion_motif(species_id,d,x,y,p if hit else p*.4,angle,hit)
         if hit:
             _ring(d,x,y,r+16,color,2)
+        return
+    if species_id in LEGENDARY_EFFECTS:
+        _legendary_motif(species_id, d, x, y, p if hit else p * .4, angle, hit)
+        if hit:
+            _ring(d, x, y, r + 16, color, 2)
         return
     if kind == 'spark_chain':
         if phase != 'windup':

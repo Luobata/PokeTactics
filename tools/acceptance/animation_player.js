@@ -9,11 +9,13 @@
     const value = {...result?.meta, ...result};
     const mode = value.mode == null ? previewMode(expectedMode) : value.mode;
     if (!modes.includes(mode) || expectedMode && mode !== expectedMode) throw new Error('预览模式与当前选择不一致。');
+    const view = value.view ?? 'composite';
+    if (!['composite', 'body'].includes(view) || view === 'body' && mode !== 'arena') throw new Error('预览视图与模式不一致。');
     const width = value.width ?? (mode === 'arena' ? 960 : 240);
     const height = value.height ?? (mode === 'arena' ? 640 : 320);
     if ((mode === 'arena' && (width !== 960 || height !== 640)) || (mode === 'classic' && (width !== 240 || height !== 320))) throw new Error('预览画布尺寸与模式不一致。');
     if (value.presentation != null && typeof value.presentation !== 'string') throw new Error('预览表现版本无效。');
-    return {...value, mode, width, height, presentation: value.presentation || (mode === 'classic' ? 'device-v1' : 'web-arena-v2-articulated')};
+    return {...value, mode, view, width, height, presentation: value.presentation || (mode === 'classic' ? 'device-v1' : 'web-arena-v2-articulated')};
   };
   function normalizePlayback(result, {mode, baseURL} = {}) {
     const value = metadata(result, mode);
@@ -86,8 +88,9 @@
         if (canvas.width !== width) canvas.width = width;
         if (canvas.height !== height) canvas.height = height;
         canvas.dataset.mode = this.result.mode;
+        canvas.dataset.view = this.result.view;
         const context = canvas.getContext('2d');
-        context.imageSmoothingEnabled = this.result.presentation.startsWith('web-arena-');
+        context.imageSmoothingEnabled = this.result.view !== 'body' && this.result.presentation.startsWith('web-arena-');
         context.clearRect(0, 0, width, height); context.drawImage(images[track], 0, 0, width, height);
       });
       this.frame = index; this.cursor = index;

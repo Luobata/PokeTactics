@@ -105,6 +105,16 @@ class AnimationPreviewContracts(unittest.TestCase):
         request = preview.normalize_preview({"species": 9})
         self.assertNotEqual(preview._key(request, "source-a"), preview._key(request, "source-b"))
 
+    def test_source_revision_is_stable_across_lazy_initialization_and_tracks_public_constants(self):
+        import data
+        with patch.object(data, "_DATA", None):
+            before = preview.source_revision()
+            self.assertIsNotNone(data.pokedex())
+            self.assertIsNotNone(data._DATA)
+            self.assertEqual(preview.source_revision(), before)
+        with patch.object(data, "PUBLIC_RUNTIME_TEST_CONSTANT", 123, create=True):
+            self.assertNotEqual(preview.source_revision(), before)
+
     def test_failed_pairs_cannot_fill_cache_or_evict_the_last_success(self):
         with patch.object(preview, "MAX_CACHE_ENTRIES", 2):
             previous = preview.preview({"mode": "classic", "species": 6, "seed": 7,

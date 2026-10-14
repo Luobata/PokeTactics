@@ -361,7 +361,7 @@
     $("shop").innerHTML = state.shop
       .map((p, i) =>
         p
-          ? `<button type="button" class="shop-card${shopSelected === i ? " selected" : ""}${y.gold < p.price ? " unaffordable" : ""}" data-shop="${i}" style="--card-tint:${/^#[0-9a-f]{6}$/i.test(p.colors?.[0]) ? p.colors[0] + "20" : "#e9efda"}"${shopSelected === i ? ' aria-pressed="true"' : ""} aria-label="查看${esc(p.name)}详情，${roleNames[roleOf(p)]}，${p.price}金币"><div class="shop-art"><span class="shop-tier">${p.tier} 费 · ★</span><span class="shop-role role-${roleOf(p)}">${roleNames[roleOf(p)]}</span><img src="${spriteOf(p)}" alt="" draggable="false"><span class="shop-buy-hint">+</span></div><div class="shop-info"><div class="shop-name">${esc(p.name)}<span class="shop-price">${p.price}${icon("coin")}</span></div><div class="shop-types">${p.types.map((t) => `<span class="type-tag">${esc(t)}</span>`).join("")}</div><div class="shop-move"><span>${esc(nativeOf(p).name)}</span><span>${attackStyle(p)} ${p.range}格</span></div><div class="shop-skill-tags">${skillTags(p)}${p.trait ? `<span class="trait-shop-tag">◎ ${esc(p.trait.name)}</span>` : ""}</div></div></button>`
+          ? `<button type="button" class="shop-card${shopSelected === i ? " selected" : ""}${y.gold < p.price ? " unaffordable" : ""}" data-shop="${i}" style="--card-tint:${/^#[0-9a-f]{6}$/i.test(p.colors?.[0]) ? p.colors[0] + "20" : "#e9efda"}"${shopSelected === i ? ' aria-pressed="true"' : ""} aria-label="查看${esc(p.name)}详情，${roleNames[roleOf(p)]}，${p.price}金币"><div class="shop-art"><span class="shop-tier">${p.tier} 费 · ★</span><span class="shop-role role-${roleOf(p)}">${roleNames[roleOf(p)]}</span>${p.pool_remaining != null ? `<span class="shop-stock${Number(p.pool_remaining) <= 3 ? " shop-stock-low" : ""}">剩 ${Number(p.pool_remaining)}</span>` : ""}<img src="${spriteOf(p)}" alt="" draggable="false"><span class="shop-buy-hint">+</span></div><div class="shop-info"><div class="shop-name">${esc(p.name)}<span class="shop-price">${p.price}${icon("coin")}</span></div><div class="shop-types">${p.types.map((t) => `<span class="type-tag">${esc(t)}</span>`).join("")}</div><div class="shop-move"><span>${esc(nativeOf(p).name)}</span><span>${attackStyle(p)} ${p.range}格</span></div><div class="shop-skill-tags">${skillTags(p)}${p.trait ? `<span class="trait-shop-tag">◎ ${esc(p.trait.name)}</span>` : ""}</div></div></button>`
           : `<div class="shop-card sold"><div class="sold-content">${icon("ball")}<p>伙伴已加入</p></div></div>`,
       )
       .join("");
@@ -443,12 +443,16 @@
           : "每次操作自动保存");
     $("battle-next").disabled = locked || ($("battle-dialog").open && playback.n > 0 && !playback.verdictShown);
   }
-  function renderCombatStats(scope, stats) {
+  function renderCombatStats(scope, stats, combatants, highlights) {
     const container = $(`${scope}-statistics`);
     if (!recordedStats(stats)) {
       container.innerHTML = '<div class="stat-heading"><h3>战斗统计</h3><span>未记录</span></div><p class="stats-unavailable">这份旧战果未记录单位统计，无法还原输出、治疗与承伤。</p>';
       return;
     }
+    const loadout = new Map((combatants || []).map((unit) => [Number(unit.idx), unit]));
+    const kindTag = {sash: "披带", technique: "技能机", item: "装备"};
+    const highlightRows = (highlights || []).filter((row) => row.team === undefined || Number(row.team) === 0);
+    const highlightHtml = highlightRows.length ? `<div class="loadout-highlights" aria-label="装备与技能高光"><span class="loadout-highlights-title">装备与技能高光</span>${highlightRows.map((row) => `<p class="loadout-highlight"><i class="buff-src ${row.kind === "technique" ? "src-augment" : "src-item"}">${kindTag[row.kind] || "装备"}</i><strong>${esc(row.unit ? `${row.unit} · ` : "")}${esc(row.name)}</strong><span>${esc(row.text)}</span></p>`).join("")}</div>` : "";
     const view = statViews[scope];
     const metric = statMetrics.find((entry) => entry.key === view.metric);
     const units = stats.units.filter((unit) => Number(unit.team) === view.team)
@@ -458,7 +462,7 @@
     const maximum = Math.max(0, ...units.map((unit) => statValue(unit[view.metric]) ?? 0));
     const teams = scope === "scout" ? [scoutName(scoutSubject()), trainerName(scoutReport()?.opp_name) || "当场对手"] : ["我方", "敌方"];
     const teamName = esc(teams[view.team]);
-    container.innerHTML = `<div class="stat-heading"><h3>战斗统计</h3><span>全场结算 · 含阵亡精灵</span></div>
+    container.innerHTML = `${highlightHtml}<div class="stat-heading"><h3>战斗统计</h3><span>全场结算 · 含阵亡精灵</span></div>
       <div class="stat-teams" role="group" aria-label="选择统计阵营">${[0, 1].map((team) => `<button type="button" data-stat-scope="${scope}" data-stat-team="${team}" aria-pressed="${team === view.team}">${team === 0 ? "● " : "▲ "}${esc(teams[team])}</button>`).join("")}</div>
       <div class="stat-metrics" role="group" aria-label="选择统计指标并按数值排序">${statMetrics.map((entry) => `<button type="button" data-stat-scope="${scope}" data-stat-metric="${entry.key}" aria-pressed="${entry.key === view.metric}" title="${entry.note}"><span>${entry.label}</span><strong>${statNumber(entry.key === "kills" ? units.reduce((sum, unit) => sum + (statValue(unit.kills) ?? 0), 0) : total?.[entry.key])}</strong></button>`).join("")}</div>
       <div class="stat-ranking-heading"><span>${teamName} · ${metric.label}排行</span><small>由高到低 · ${units.length} 位伙伴</small></div>
@@ -469,7 +473,9 @@
         const selfHeal = view.metric === "healing_done" && statValue(unit.self_healing) != null
           ? `<small class="stat-self-heal">其中自疗 ${statNumber(unit.self_healing)}</small>` : "";
         const unitSprite = spriteOf({...unit, shiny: unit.shiny ?? starsOf(unit) === 3});
-        return `<li class="stat-unit-row" data-stat-unit="${Number(unit.idx)}"><span class="stat-rank" aria-hidden="true">${rank + 1}</span><img src="${unitSprite}" alt="" loading="lazy"><div class="stat-unit-main"><div class="stat-unit-heading"><strong>${esc(unit.name)}</strong>${unit.mvp ? '<span class="stat-mvp" title="本场 MVP：输出+治疗加权最高">★ MVP</span>' : ""}<span class="stat-unit-stars" aria-label="${starsOf(unit)}星">${"★".repeat(starsOf(unit))}</span></div><small class="stat-unit-role">${esc(role)}${unit.item ? `${role ? " · " : ""}携带装备` : ""}</small><div class="stat-bar" aria-hidden="true"><span style="width:${width.toFixed(2)}%"></span></div></div><div class="stat-unit-value"><strong>${statNumber(value)}</strong>${selfHeal}</div></li>`;
+        const gear = loadout.get(Number(unit.idx));
+        const gearBadges = `${gear?.item_name ? `<span class="stat-loadout stat-loadout-item" title="装备">${esc(gear.item_name)}</span>` : unit.item ? `<span class="stat-loadout stat-loadout-item" title="装备">携带装备</span>` : ""}${gear?.technique_name ? `<span class="stat-loadout stat-loadout-tm" title="技能机">${esc(gear.technique_name)}</span>` : ""}`;
+        return `<li class="stat-unit-row" data-stat-unit="${Number(unit.idx)}"><span class="stat-rank" aria-hidden="true">${rank + 1}</span><img src="${unitSprite}" alt="" loading="lazy"><div class="stat-unit-main"><div class="stat-unit-heading"><strong>${esc(unit.name)}</strong>${unit.mvp ? '<span class="stat-mvp" title="本场 MVP：输出+治疗加权最高">★ MVP</span>' : ""}<span class="stat-unit-stars" aria-label="${starsOf(unit)}星">${"★".repeat(starsOf(unit))}</span></div><small class="stat-unit-role">${esc(role)}${gearBadges ? `<span class="stat-loadouts">${gearBadges}</span>` : ""}</small><div class="stat-bar" aria-hidden="true"><span style="width:${width.toFixed(2)}%"></span></div></div><div class="stat-unit-value"><strong>${statNumber(value)}</strong>${selfHeal}</div></li>`;
       }).join("") || `<li class="stats-empty-team">${teamName}没有上阵精灵。</li>`}</ol>
       <p class="stat-accounting">输出与承伤只计实际掉血。治疗只计有效回血，包含自疗。护盾吸收单列，所有上阵精灵均计入。击杀归属造成最后一段实际生命损失的伤害来源（持续伤害/岩钉归施加者，反噬与自伤不算）。★ MVP 为全队输出+治疗加权最高者。</p>`;
     container.dataset.team = String(view.team);
@@ -486,7 +492,8 @@
       view.metric = target.dataset.statMetric;
       selector = `[data-stat-metric="${view.metric}"]`;
     } else return;
-    renderCombatStats(scope, (scope === "scout" ? scoutReport() : scope === "history" ? historyReport : playback.meta)?.statistics);
+    const report = scope === "scout" ? scoutReport() : scope === "history" ? historyReport : playback.meta;
+    renderCombatStats(scope, report?.statistics, report?.combatants, report?.loadout_highlights);
     $(`${scope}-statistics`).querySelector(selector)?.focus();
   }
   function renderBattleHistory() {
@@ -533,7 +540,7 @@
     $("history-report-result").className = `history-result ${verdict.kind}`;
     $("history-report-round").innerHTML = (state.battle_history || []).map((entry) => `<option value="${Number(entry.round)}"${Number(entry.round) === Number(row.round) ? " selected" : ""}>第 ${Number(entry.round)} 轮 · ${reportVerdict(entry.winner).label}</option>`).join("");
     $("history-report-round").value = String(row.round);
-    renderCombatStats("history", row.statistics);
+    renderCombatStats("history", row.statistics, row.combatants, row.loadout_highlights);
     renderBondSpark("history", row.statistics?.units);
     showCombinationSummary(row, "history");
     if (!$("history-report-dialog").open) $("history-report-dialog").showModal();
@@ -566,6 +573,23 @@
     const entries = [...(state.bonds?.entries || []), ...(state.arena?.bond_catalog || [])];
     return (p.bonds || []).map(id => { const row = entries.find(row => row.id === id); const name = row?.name || id; return `<a href="/pokedex?tab=bonds&q=${encodeURIComponent(id)}">${esc(name)}</a>`; }).join("");
   }
+  function unitBuffs(p) {
+    const lines = [];
+    for (const augment of state?.augments?.selected || []) {
+      const scope = augment.scope || "team";
+      if (scope === "economy") continue;
+      if (scope === "support" && roleOf(p) !== "support") continue;
+      const effect = augment.current || augment.brief || augment.description || "";
+      lines.push(`<p class="detail-buff"><i class="buff-src src-augment">海克斯</i><strong>${esc(augment.name)}</strong><span>${esc(effect)}</span></p>`);
+    }
+    for (const id of p.bonds || []) {
+      const row = (state?.bonds?.entries || []).find(row => row.id === id);
+      if (row && Number(row.tier) > 0)
+        lines.push(`<p class="detail-buff"><i class="buff-src src-bond">羁绊</i><strong>${esc(row.name)} · ${Number(row.tier)} 种档</strong><span>${esc(row.effect)}</span></p>`);
+    }
+    if (!lines.length) return "";
+    return `<div class="detail-buffs"><span class="detail-buffs-title">本局生效加成</span>${lines.join("")}</div>`;
+  }
   function renderDetail() {
     if (shopSelected != null) {
       renderShopDetail();
@@ -578,7 +602,7 @@
       return;
     }
     $("unit-detail").innerHTML =
-      `<div class="unit-detail-card"><img src="${spriteOf(p)}" alt="${esc(p.name)}"><h3>${esc(p.name)}</h3><p class="detail-star">${"★".repeat(starsOf(p))}${p.shiny ? " · 闪光" : ""}</p><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · ${esc(p.types.join(" / "))}</p><div style="clear:both"></div><p>${esc(p.role_description || "")}</p>${skillSlots(p)}${p.bonds?.length ? `<div class="unit-bonds"><span>所属羁绊</span>${pieceBonds(p)}</div>` : ""}<div class="detail-stat"><span>攻击方式</span><b>${attackStyle(p)} · ${p.range} 格</b></div>${p.item ? `<div class="detail-item"><p class="detail-item-heading"><span class="detail-item-badge" aria-hidden="true">◆</span><strong>装备：${esc(p.item_name)}</strong></p><p>${esc(p.item_effect)}</p></div>` : ""}<div class="detail-actions"><button data-open-system="techniques">为它学习技能</button><button data-action="sell" class="sell-button" ${!canPrep() ? "disabled" : ""}>出售 +${p.sell} 金币</button>${p.item ? `<button data-action="unequip" ${!canPrep() ? "disabled" : ""}>卸下装备</button>` : ""}<button data-action="cancel-select">取消选择</button></div></div>`;
+      `<div class="unit-detail-card"><img src="${spriteOf(p)}" alt="${esc(p.name)}"><h3>${esc(p.name)}</h3><p class="detail-star">${"★".repeat(starsOf(p))}${p.shiny ? " · 闪光" : ""}</p><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · ${esc(p.types.join(" / "))}</p><div style="clear:both"></div><p>${esc(p.role_description || "")}</p>${skillSlots(p)}${p.bonds?.length ? `<div class="unit-bonds"><span>所属羁绊</span>${pieceBonds(p)}</div>` : ""}<div class="detail-stat"><span>攻击方式</span><b>${attackStyle(p)} · ${p.range} 格</b></div>${p.item ? `<div class="detail-item"><p class="detail-item-heading"><span class="detail-item-badge" aria-hidden="true">◆</span><strong>装备：${esc(p.item_name)}</strong></p><p>${esc(p.item_effect)}</p></div>` : ""}${unitBuffs(p)}<div class="detail-actions"><button data-open-system="techniques">为它学习技能</button><button data-action="sell" class="sell-button" ${!canPrep() ? "disabled" : ""}>出售 +${p.sell} 金币</button>${p.item ? `<button data-action="unequip" ${!canPrep() ? "disabled" : ""}>卸下装备</button>` : ""}<button data-action="cancel-select">取消选择</button></div></div>`;
   }
   function renderShopDetail() {
     const p = state?.shop?.[shopSelected];
@@ -594,7 +618,7 @@
         ? `金币不足，还差 ${p.price - y.gold} 金币`
         : "";
     $("unit-detail").innerHTML =
-      `<div class="unit-detail-card shop-detail"><img src="${spriteOf(p)}" alt="${esc(p.name)}"><h3>${esc(p.name)}</h3><p class="detail-star">${"★".repeat(starsOf(p))} · ${p.tier} 费${p.shiny ? " · 闪光" : ""}</p><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · ${esc(p.types.join(" / "))}</p><div style="clear:both"></div><p>${esc(p.role_description || "")}</p>${skillSlots(p, { learned: false })}${p.bonds?.length ? `<div class="unit-bonds"><span>所属羁绊</span>${pieceBonds(p)}</div>` : ""}<div class="detail-stat"><span>攻击方式</span><b>${attackStyle(p)} · ${p.range} 格</b></div><div class="detail-actions"><button class="recruit-button" data-shop-buy="${shopSelected}" ${reason || !canPrep() ? "disabled" : ""} aria-label="招募${esc(p.name)}，${p.price}金币${reason ? "，" + reason : ""}">招募 · ${p.price} ${icon("coin")}</button><button data-action="cancel-select">取消选择</button>${reason ? `<p class="recruit-note">${reason}</p>` : ""}</div></div>`;
+      `<div class="unit-detail-card shop-detail"><img src="${spriteOf(p)}" alt="${esc(p.name)}"><h3>${esc(p.name)}</h3><p class="detail-star">${"★".repeat(starsOf(p))} · ${p.tier} 费${p.shiny ? " · 闪光" : ""}</p><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · ${esc(p.types.join(" / "))}</p><div style="clear:both"></div><p>${esc(p.role_description || "")}</p>${skillSlots(p, { learned: false })}${p.bonds?.length ? `<div class="unit-bonds"><span>所属羁绊</span>${pieceBonds(p)}</div>` : ""}<div class="detail-stat"><span>攻击方式</span><b>${attackStyle(p)} · ${p.range} 格</b></div>${p.pool_remaining != null ? `<div class="detail-stat"><span>共享池剩余</span><b>${Number(p.pool_remaining)} / ${Number(p.pool_total)} 张</b></div>` : ""}<div class="detail-actions"><button class="recruit-button" data-shop-buy="${shopSelected}" ${reason || !canPrep() ? "disabled" : ""} aria-label="招募${esc(p.name)}，${p.price}金币${reason ? "，" + reason : ""}">招募 · ${p.price} ${icon("coin")}</button><button data-action="cancel-select">取消选择</button>${reason ? `<p class="recruit-note">${reason}</p>` : ""}</div></div>`;
   }
   function renderInventory() {
     const items = state.items;
@@ -1083,7 +1107,11 @@
     if (!p) return '<p class="scout-inspect-hint">点选站位格或下方精灵，查看特性、技能与装备的完整效果。</p>';
     const stats = p.stat_scope === "deployment_base" ? p.stats : null;
     const facts = [["max_hp", "生命"], ["atk", "物攻"], ["sp_atk", "特攻"], ["defense", "物防"], ["sp_defense", "特防"], ["speed", "速度"]];
-    return `<section id="scout-unit-detail" class="scout-unit-detail ${scoutSubject()?.human ? "own" : "enemy"}" aria-labelledby="scout-unit-title" tabindex="-1"><div class="scout-detail-heading"><img src="${spriteOf(p)}" alt=""><div><span class="scout-readonly">${scoutSubject()?.human ? "我方公开情报" : "敌方情报"} · 只读</span><h3 id="scout-unit-title">${esc(p.name)} <span class="detail-star">${"★".repeat(starsOf(p))}${p.shiny ? " ✦ 闪光" : ""}</span></h3><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · 射程 ${Number(p.range) || "—"} 格</p><p>${esc((p.types || []).join(" / "))}</p></div></div><p>${esc(p.role_description || "")}</p>${stats ? `<dl class="scout-base-stats">${facts.map(([key, name]) => `<div><dt>${name}</dt><dd>${statNumber(stats[key])}</dd></div>`).join("")}</dl><p class="scout-section-note">部署基础值 · 已计星级与角色；装备、羁绊、海克斯与战中增益另计，生命不是战中剩余值。</p>` : ""}${skillSlots(p, {readonly: true})}<section class="skill-slot scout-item-slot" aria-label="装备完整效果"><div class="skill-slot-heading"><span>携带装备</span><small>当前配置</small></div><strong>${p.item ? esc(p.item_name || p.item) : "未装备"}</strong><p>${p.item ? esc(p.item_effect || "这份快照未记录装备效果。") : "该精灵没有携带装备。"}</p></section></section>`;
+    const pool = (state?.arena?.catalog || []).find(entry => entry.sid === p.sid && entry.pool_remaining != null);
+    const poolLine = pool
+      ? `<p class="scout-pool-stock">共享池 · 全桌已拿 ${Number(pool.pool_total) - Number(pool.pool_remaining)} / 上限 ${Number(pool.pool_total)}（含各席位持仓与商店占位）</p>`
+      : "";
+    return `<section id="scout-unit-detail" class="scout-unit-detail ${scoutSubject()?.human ? "own" : "enemy"}" aria-labelledby="scout-unit-title" tabindex="-1"><div class="scout-detail-heading"><img src="${spriteOf(p)}" alt=""><div><span class="scout-readonly">${scoutSubject()?.human ? "我方公开情报" : "敌方情报"} · 只读</span><h3 id="scout-unit-title">${esc(p.name)} <span class="detail-star">${"★".repeat(starsOf(p))}${p.shiny ? " ✦ 闪光" : ""}</span></h3><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · 射程 ${Number(p.range) || "—"} 格</p><p>${esc((p.types || []).join(" / "))}</p></div></div><p>${esc(p.role_description || "")}</p>${stats ? `<dl class="scout-base-stats">${facts.map(([key, name]) => `<div><dt>${name}</dt><dd>${statNumber(stats[key])}</dd></div>`).join("")}</dl><p class="scout-section-note">部署基础值 · 已计星级与角色；装备、羁绊、海克斯与战中增益另计，生命不是战中剩余值。</p>` : ""}${poolLine}${skillSlots(p, {readonly: true})}<section class="skill-slot scout-item-slot" aria-label="装备完整效果"><div class="skill-slot-heading"><span>携带装备</span><small>当前配置</small></div><strong>${p.item ? esc(p.item_name || p.item) : "未装备"}</strong><p>${p.item ? esc(p.item_effect || "这份快照未记录装备效果。") : "该精灵没有携带装备。"}</p></section></section>`;
   }
   function scoutAugments(p) {
     return `<section class="scout-effects" aria-label="海克斯完整效果"><h3>海克斯强化 · 当前公开配置</h3>${(p.augments || []).map(a => `<details class="scout-effect"><summary><span>${esc(a.name || a)}</span><small>展开效果</small></summary>${a.current ? `<p class="augment-current">${esc(a.current)}</p>` : ""}<p>${esc(a.description || "这份快照未记录强化说明。")}</p></details>`).join("") || '<p class="empty-copy">尚未选择海克斯。</p>'}</section>`;
@@ -1157,7 +1185,7 @@
     $("scout-tabs").innerHTML = `<button type="button" data-scout-overview aria-pressed="${scoutSeat == null}">全场概览</button>` + seats.map(p => `<button type="button" data-scout="${Number(p.seat)}" aria-pressed="${p.seat === scoutSeat}">${p.human ? "我方" : esc(trainerName(p.name))}${p.current_opponent ? " · 本轮" : ""}</button>`).join("");
     $("scout-content").innerHTML = scoutSeat == null && seats.length ? scoutOverview(seats) : p ? `<div class="scout-heading${p.human ? " own" : ""}"><h3>${esc(scoutName(p))} <span class="scout-badges">${scoutBadges(p)}</span></h3><p>${p.hp != null ? Number(p.hp) + " HP · " : ""}${p.level != null ? "Lv." + Number(p.level) + " · " : ""}${p.gold != null ? Number(p.gold) + " 金币 · " : ""}上场 ${(p.board || []).length} 只</p></div><div class="scout-position-heading"><h3>${p.battle_snapshot ? "本轮已锁定站位" : "当前实际站位"}</h3><span>点选精灵查看完整效果</span></div>${p.battle_snapshot ? `<p class="scout-section-note">第 ${Number(p.battle_snapshot.round)} 轮对手快照 · 上场装备、技能与特性按开战时记录；备战席为当前公开信息。</p>` : ""}${scoutBoard(p)}${scoutUnitDetail()}${scoutPieces(p.board, "上场精灵", p)}${scoutPieces(p.bench, "备战席", p)}${scoutSynergies(p, true)}${scoutAugments(p)}${scoutRecentReports(p)}` : '<p class="empty-copy">当前存档未提供侦察信息。新的竞技规则支持全部训练家侦察。</p>';
     const report = scoutReport();
-    if (report) { const teams = [scoutName(p), trainerName(report.opp_name) || "当场对手"]; renderCombatStats("scout", report.statistics); showCombinationSummary(report, "scout", teams); }
+    if (report) { const teams = [scoutName(p), trainerName(report.opp_name) || "当场对手"]; renderCombatStats("scout", report.statistics, report.combatants, report.loadout_highlights); showCombinationSummary(report, "scout", teams); }
     document.querySelectorAll("[data-scout-unit]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.scoutUnit === scoutUnit?.loc)));
   }
   function renderCatalog() {
@@ -1375,8 +1403,13 @@
   function closeBattle() {
     playback.token++;
     stopPlayback();
+    if (playback.healTimer) {
+      clearTimeout(playback.healTimer);
+      playback.healTimer = null;
+    }
     for (const request of playback.pending.values()) request.cancel();
     playback.pending.clear();
+    playback.backoff?.clear();
     playback.frames = [];
     playback.cached.clear();
     if ($("battle-dialog").open) $("battle-dialog").close();
@@ -1420,7 +1453,7 @@
     const row = (state.round_rewards || []).find((r) => r.round === (meta?.round || state.round));
     $("battle-rewards").hidden = !row;
     $("battle-rewards").innerHTML = row ? `<h3>回合奖励 · 已入仓</h3><p>${row.result === "win" ? "胜利获得 2 份" : "失败或平局获得 1 份"}，下轮可装备或学习。</p>${rewardCards(row)}` : '<p class="combination-note">这轮未记录额外奖励。</p>';
-    renderCombatStats("battle", meta?.statistics);
+    renderCombatStats("battle", meta?.statistics, meta?.combatants, meta?.loadout_highlights);
     renderBondSpark("battle", meta?.statistics?.units);
     renderAdvice("battle",
       nextRoundAdvice({won: meta?.winner === 0, lost: meta?.winner === 1,
@@ -1571,7 +1604,7 @@
       pumpReplayFrames();
     }, (p.dt * 1000) / p.speed);
   }
-  function pumpReplayFrames() {
+  function pumpReplayFrames(extra = 0) {
     const p = playback;
     if (!p.n || !$("battle-dialog").open) return;
     const token = p.token;
@@ -1587,8 +1620,8 @@
     for (const [index, request] of [...p.pending]) {
       if (!wanted.has(index)) request.cancel();
     }
-    while (p.pending.size < 4) {
-      const index = candidates.find((candidate) => !p.frames[candidate]?.naturalWidth && !p.pending.has(candidate) && !p.failed.has(candidate));
+    while (p.pending.size < 4 + extra) {
+      const index = candidates.find((candidate) => !p.frames[candidate]?.naturalWidth && !p.pending.has(candidate) && !p.failed.has(candidate) && !p.backoff.has(candidate));
       if (index == null) break;
       const image = new Image();
       let done = false;
@@ -1614,15 +1647,28 @@
           p.frames[index] = image;
           p.cached.add(index);
           p.loaded.add(index);
+          p.attempts.delete(index);
           if (p.requested === index) showFrame(index);
         } else {
-          p.failed.add(index);
-          if (p.requested === index) {
-            p.retryIndex = index;
-            setBattleLoading("这一帧暂时无法载入，可重试或查看战果。", true);
-            if (p.revealOnFailure && index === p.n - 1) {
-              $("battle-status").textContent = "画面暂时无法载入，本轮战果已保存。";
-              showVerdict();
+          const tries = (p.attempts.get(index) || 0) + 1;
+          p.attempts.set(index, tries);
+          if (tries < 3) {
+            p.backoff.add(index);
+            setTimeout(() => {
+              p.backoff.delete(index);
+              if (token !== p.token || p.frames[index]?.naturalWidth || p.pending.has(index) || p.failed.has(index)) return;
+              pumpReplayFrames(1);
+              startPlaybackTimer();
+            }, 1200);
+          } else {
+            p.failed.add(index);
+            if (p.requested === index) {
+              p.retryIndex = index;
+              setBattleLoading("这一帧暂时无法载入，可重试或查看战果。", true);
+              if (p.revealOnFailure && index === p.n - 1) {
+                $("battle-status").textContent = "画面暂时无法载入，本轮战果已保存。";
+                showVerdict();
+              }
             }
           }
         }
@@ -1638,6 +1684,32 @@
       image.src = `/demo/frame/${sid}/r${p.meta.round}/${index}.png${revision ? `?v=${encodeURIComponent(revision)}` : ""}`;
     }
     updateBattleTimeline();
+  }
+  function healFailedFrames() {
+    const p = playback;
+    if (p.healTimer) {
+      clearTimeout(p.healTimer);
+      p.healTimer = null;
+    }
+    if (p.n && $("battle-dialog").open) {
+      p.healTimer = setTimeout(healFailedFrames, 4000);
+    }
+    if (!p.n || !$("battle-dialog").open || !p.failed.size) return;
+    let healed = false;
+    for (const index of [...p.failed]) {
+      // 渲染可能仍在进行：把失败帧重新排队，低频自愈；
+      // 尝试次数过多的帧视为真缺失，保留手动「重试画面」。
+      if ((p.attempts.get(index) || 0) >= 15) continue;
+      p.failed.delete(index);
+      healed = true;
+    }
+    if (!healed) return;
+    if (p.retryIndex != null && !p.failed.has(p.retryIndex)) {
+      p.retryIndex = null;
+      setBattleLoading("正在重新载入画面…");
+    }
+    pumpReplayFrames();
+    startPlaybackTimer();
   }
   function requestBattleFrame(index, {resume = false, revealOnFailure = false} = {}) {
     const p = playback;
@@ -1688,6 +1760,7 @@
     const meta = state.last_battle;
     Object.assign(playback, {
       meta, frames: [], cached: new Set(), loaded: new Set(), failed: new Set(), pending: new Map(),
+      attempts: new Map(), backoff: new Set(),
       current: 0, requested: meta?.n ? 0 : null, n: meta?.n || 0, dt: meta?.dt || 0.05,
       complete: false, verdictShown: false, buffering: true, intentPlaying: !!meta?.n,
       reportTab: "events", reportTabTouched: false, lastEvent: null, retryIndex: null,
@@ -1733,6 +1806,7 @@
       return;
     }
     setBattleLoading("正在准备战场，画面就绪后开始回放…");
+    playback.healTimer = setTimeout(healFailedFrames, 4000);
     pumpReplayFrames();
   }
   async function nextRound() {
@@ -1989,6 +2063,8 @@
     const target = playback.retryIndex ?? playback.requested ?? playback.current;
     const running = playback.intentPlaying;
     playback.failed.delete(target);
+    playback.attempts.delete(target);
+    playback.backoff.delete(target);
     playback.retryIndex = null;
     requestBattleFrame(playback.requested ?? playback.current, {resume: running});
   };

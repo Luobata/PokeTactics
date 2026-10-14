@@ -52,5 +52,28 @@ class ArenaGeometry(unittest.TestCase):
         self.assertEqual(board_floor(None).size, (240, 240))
         self.assertEqual(board_floor(None, 8).size, (240, 320))
 
+    def test_sealed_ranged_target_advances_to_firing_line(self):
+        # 第 9 轮实战复盘案例：目标格被围死时远程不再原地空转，走一步进入射程开火。
+        t = arena.build_templates()
+        b = Battle([t[26]], [t[76]] * 4, random.Random(7), ruleset='arena_v1',
+                   positions_a=[(2, 4)], positions_b=[(2, 0), (1, 0), (3, 0), (2, 1)])
+        u, sealed = b.units[:2]
+        u.target_idx = sealed.idx
+        b._act(u, 0.1)
+        self.assertEqual(u.pos, (2, 3))
+        b._act(u, 0.7)
+        self.assertTrue(any(e[1] == 'attack' and e[2] == u.idx for e in b.events))
+
+    def test_taunt_keeps_lock_even_when_taunter_is_sealed(self):
+        # 近战够不到被围死的嘲讽者：不改锁、不换目标，原地等待嘲讽结束。
+        t = arena.build_templates()
+        b = Battle([t[68], t[76]], [t[76]] * 4, random.Random(7), ruleset='arena_v1',
+                   positions_a=[(2, 4), (2, 3)], positions_b=[(2, 2), (1, 2), (3, 2), (2, 1)])
+        u, taunter = b.units[0], b.units[2]
+        u.target_idx = taunter.idx
+        u.taunt_source_idx, u.taunt_until = taunter.idx, 99.0
+        b._act(u, 0.1)
+        self.assertEqual((u.pos, u.target_idx), ((2, 4), taunter.idx))
+
 
 if __name__ == '__main__': unittest.main()

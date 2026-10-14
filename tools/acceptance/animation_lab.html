@@ -16,6 +16,7 @@
 <div class="lead"><div><h1>看清每一招，调好每一个动作。</h1><p>直接预览试玩使用的竞技战场、专属技能与关节动作。选择一只宝可梦检查六种动作，也可切换到经典设备画面。</p></div><div class="lead-links"><a id="editor-link" href="/animation-editor?mode=arena">动作编辑器 →</a><a href="/anim?mode=arena&seed=7">完整战斗 →</a></div></div>
 <form id="preview-form" class="lab-controls">
 <label>渲染模式<select id="mode"><option value="arena">当前竞技 · 960 × 640</option><option value="classic">经典设备 · 240 × 320</option></select></label>
+<label class="view-field">预览内容<select id="view" aria-describedby="view-note"><option value="composite">完整效果</option><option value="body">仅身体</option></select></label>
 <label class="species-field">宝可梦<select id="species" disabled><option>正在读取角色目录…</option></select></label>
 <label>动作<select id="kind"><option value="idle">待机</option><option value="move">移动</option><option value="attack">普通攻击</option><option value="cast" selected>原生大招</option><option value="hit">受击</option><option value="death">退场</option></select></label>
 <label>种子<input id="seed" type="number" min="0" max="4294967295" step="1" value="7" required></label>
@@ -23,6 +24,11 @@
 </form>
 <p id="status" class="status" role="status" aria-live="polite">正在读取当前角色目录…</p>
 <div id="error" class="preview-error" role="alert" hidden></div>
+<p id="view-note" class="body-scope-note">完整效果保留招式与外部特效；仅身体视图放大单角色、隐藏外部特效，并沿用完整效果的同一时间轴。</p>
+<section id="body-samples" class="body-samples" aria-labelledby="body-samples-title">
+<div><h2 id="body-samples-title">仅身体快捷样片</h2><p>一键生成仅身体 + 原生大招。六个快捷样片均使用现有拆件基线。</p></div>
+<div id="body-sample-buttons" class="body-sample-buttons" role="group" aria-label="生成仅身体快捷样片"></div>
+</section>
 <div class="lab-workspace">
 <section aria-labelledby="live-title">
 <div class="preview-heading"><h2 id="live-title">实时动作预览</h2><span id="canvas-meta">960 × 640 · 当前竞技</span></div>
@@ -44,12 +50,15 @@
   const {PreviewPlayer,metadata,previewMode,requestJSON} = window.PokeAnimation;
   const $ = id => document.getElementById(id), write = (id,value) => { $(id).textContent = value; };
   const query = new URLSearchParams(location.search), ACTIONS = {idle:'待机',move:'移动',attack:'普通攻击',cast:'原生大招',hit:'受击',death:'退场'};
+  const VIEWS = {composite:'完整效果',body:'仅身体'};
+  const BODY_SAMPLES = [{species:68,name:'怪力'},{species:9,name:'水箭龟'},{species:26,name:'雷丘'},{species:212,name:'巨钳螳螂'},{species:6,name:'喷火龙'},{species:3,name:'妙蛙花'}];
+  const previewView = (value,currentMode='arena') => currentMode !== 'arena' || value !== 'body' ? 'composite' : 'body';
   const bodyNames = {web_part_rig:'竞技关节',part_rig:'专属部件',authored_pose:'手编整身',procedural:'通用动作',shared_overlay:'共享反馈',shared_intro:'共享开场',pending:'待制作',procedural_joints:'程序化关节'};
   const finite = value => typeof value === 'number' && Number.isFinite(value), fmt = (value,digits=2) => finite(value) ? value.toLocaleString('zh-CN',{maximumFractionDigits:digits}) : '未提供';
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches || false;
-  let mode = previewMode(query.get('mode')), characters = {}, result = null, rendering = false;
+  let mode = previewMode(query.get('mode')), view = previewView(query.get('view'),mode), characters = {}, result = null, rendering = false;
   let catalogToken = 0, catalogAbort = null, renderToken = 0, renderAbort = null;
-  $('mode').value = mode; document.body.dataset.mode = mode;
+  $('mode').value = mode; document.body.dataset.mode = mode; $('view').value = view;
   if (Object.hasOwn(ACTIONS,query.get('kind'))) $('kind').value = query.get('kind');
   const player = new PreviewPlayer({canvases:[$('preview-canvas')], onFrame: value => {
     $('empty').hidden = true; $('seek').value = value.frame; $('seek').max = value.n-1;
@@ -66,12 +75,21 @@
   function notice(message,error=false) { write('status',message); $('status').classList.toggle('error',error); }
   function showError(message) { write('error',message); $('error').hidden=false; }
   function clearError() { $('error').hidden=true; write('error',''); }
+  function syncView() {
+    if(mode !== 'arena' && view === 'body') view='composite';
+    document.body.dataset.view=view; $('view').value=view; $('view').querySelector('[value=body]').disabled=mode!=='arena';
+    write('view-note',view==='body' ? '仅身体基线：4倍像素放大，镜头跟随角色，隐藏外部特效；保留四肢移动、受击与退场等真实身体反馈，并和完整效果使用同一时间轴。这是当前动作基线，不代表新动画已完成。' : '完整效果保留招式与外部特效。如拳影遮挡四臂，切换「仅身体」检查当前动作；两种视图使用同一时间轴。');
+    const url=new URL(location.href); url.searchParams.set('mode',mode); url.searchParams.set('view',view); const species=Number($('species').value),kind=$('kind').value;
+    if(species) url.searchParams.set('species',species); if(Object.hasOwn(ACTIONS,kind)) url.searchParams.set('kind',kind); url.searchParams.delete('seed');
+    url.searchParams.delete('actor_art');
+    window.history?.replaceState({},'',url);
+  }
   function transport(enabled) { ['play','previous','next','seek'].forEach(id => $(id).disabled=!enabled); }
   function clearStage() {
     player.cancel(); result=null; transport(false); $('empty').hidden=false;
     const [width,height]=mode==='arena'?[960,640]:[240,320], canvas=$('preview-canvas');
     canvas.width=width; canvas.height=height; const context=canvas.getContext('2d'); context.fillStyle='#172b28'; context.fillRect(0,0,width,height);
-    write('canvas-meta',width+' × '+height+' · '+(mode==='arena'?'当前竞技':'经典设备')); write('live-title','实时动作预览');
+    write('canvas-meta',width+' × '+height+' · '+(mode==='arena'?'当前竞技':'经典设备')+' · '+VIEWS[view]); write('live-title','实时动作预览'); syncView();
     write('time','— / — 帧'); $('seek').value=0; $('phases').replaceChildren(); $('metrics').replaceChildren();
     $('snapshot-shield').hidden=true; write('snapshot-shield','');
     write('snapshot-hp','—'); write('snapshot-energy','—'); write('skill-outcomes','生成预览后显示实际事件快照。'); write('revision','等待本次渲染记录');
@@ -101,7 +119,8 @@
       [label,bodyNames[action?.body] || action?.body || '未提供',action?.parts==='authored'?'专属轨道':action?.parts==='none'?'无':action?.parts==='procedural_joints'?'程序化关节':action?.parts || '—'].forEach(text=>{const cell=document.createElement('td');cell.textContent=text;row.append(cell);});
       if(action?.note) row.title=action.note; $('action-matrix').append(row);
     });
-    $('editor-link').href='/animation-editor?'+new URLSearchParams({mode,species:entry.species,kind:$('kind').value});
+    const link=new URLSearchParams({mode,species:entry.species,kind:$('kind').value,view});
+    $('editor-link').href='/animation-editor?'+link;
   }
   function selectionChanged() { cancelRequest(); clearStage(); clearError(); updateCharacter(); notice('选择已更新，点击生成预览查看当前动作。'); }
   async function loadCharacters(preferred=Number($('species').value) || Number(query.get('species'))) {
@@ -125,8 +144,8 @@
   function addMetric(label,value) { const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;row.append(dt,dd);$('metrics').append(row); }
   function showResult(config,value) {
     result=value; transport(true); $('seek').max=value.n-1;
-    write('live-title',(characters[config.species]?.name || '#'+config.species)+' · '+ACTIONS[config.kind]);
-    write('canvas-meta',value.width+' × '+value.height+' · '+value.n+' 帧 · seed '+config.seed);
+    write('live-title',(characters[config.species]?.name || '#'+config.species)+' · '+ACTIONS[config.kind]+' · '+VIEWS[config.view]);
+    write('canvas-meta',value.width+' × '+value.height+' · '+value.n+' 帧 · seed '+config.seed+' · '+VIEWS[config.view]);
     $('phases').replaceChildren(); (value.phases || []).filter(phase=>finite(phase.at)).forEach(phase=>{const button=document.createElement('button');button.type='button';button.textContent=phase.label+' '+fmt(phase.at,3)+'s';button.dataset.phaseAt=phase.at;button.setAttribute('aria-pressed','false');button.addEventListener('click',()=>player.seek(Math.ceil((phase.at-value.clip_start)/value.dt-1e-8)));$('phases').append(button);});
     const assistance=config.kind==='cast' && ['ally','self','field'].includes(value.targeting || value.native_skill?.targeting);
     write('subject',(value.subject?.name || '观察对象')+' HP：'+(assistance?'生效前 → 生效时':'观察前 → 观察时'));
@@ -137,32 +156,42 @@
     write('snapshot-shield','护盾：'+fmt(shieldBefore,0)+' → '+fmt(shieldAfter,0));
     const effectNames={side_hit:'追加伤害',heal:'治疗',guard:'减伤',shield:'护盾',absorb:'护盾吸收',expire:'效果到期',taunt:'嘲讽',thorns:'反击姿态',thorn_hit:'毒刺反击',status:'施加状态',cleanse:'净化',knockback:'击退',pull:'拉近',energy_drain:'吸取能量',energy:'补充能量',flinch:'畏缩',place:'铺设地形',charge:'反击蓄力',empowered_basic:'强化普攻（额外部分）',vulnerability:'击退易伤'};
     write('skill-outcomes',(value.skill_effects || []).map(effect=>fmt(effect.at,2)+'s '+effect.target+' · '+(effectNames[effect.effect] || effect.effect)).join('；') || '本动作无额外专属效果记录。援护观察实际友军，架势观察自身，地形观察中心目标；受击 / 退场观察所选角色。');
-    $('metrics').replaceChildren(); addMetric('实际画布',value.width+' × '+value.height); addMetric('片段帧数',fmt(value.n,0));
+    $('metrics').replaceChildren(); addMetric('实际画布',value.width+' × '+value.height); addMetric('预览内容',VIEWS[config.view]); addMetric('片段帧数',fmt(value.n,0));
+    if(config.view==='body' && value.body_preview) addMetric('身体镜头','4倍像素放大 · 镜头跟随角色 · 无外部特效');
     const labels={host_frame_ms_p95:'PC 帧耗时 p95 / ms',particle_peak:mode==='arena'?'通用粒子峰值（不含招式像素帧）':'粒子峰值',active_action_peak:'动作轨峰值'};
     Object.entries(labels).forEach(([key,label])=>{if(finite(value.metrics?.[key]))addMetric(label,fmt(value.metrics[key],3));});
     write('revision',[...new Set([value.presentation,value.render_revision || value.revision].filter(Boolean))].join(' · ')+'\nPC 独立训练场数据。');
   }
-  async function render(event) {
+  async function render(event,{startFrame=0,resumeOverride}={}) {
     event?.preventDefault(); if(rendering) return;
     if(!Object.keys(characters).length && !await loadCharacters()) return;
     const species=Number($('species').value),kind=$('kind').value,seed=$('seed').valueAsNumber;
     if(!characters[species] || !Object.hasOwn(ACTIONS,kind) || !Number.isInteger(seed) || seed<0 || seed>4294967295) {showError('请选择有效角色、动作与 0 至 4294967295 的整数种子。');return;}
-    const config={mode,species,kind,seed,settings:{palette:'classic',effect_scale:1,particle_density:1,motion_scale:1}}, token=++renderToken;
+    const config={mode,view,species,kind,seed,settings:{palette:'classic',effect_scale:1,particle_density:1,motion_scale:1}}, token=++renderToken;
     renderAbort?.abort(); renderAbort=new AbortController(); clearError(); clearStage(); rendering=true;
     $('generate').disabled=true; $('cancel').disabled=false; write('generate','后端渲染中…'); notice('正在生成 '+characters[species].name+' 的'+ACTIONS[kind]+'…');
     try {
       const value=metadata(await requestJSON('/api/animation/preview',{method:'POST',body:config,signal:renderAbort.signal}),config.mode);
-      if(token!==renderToken || config.mode!==mode) return;
+      if(value.view!==config.view) throw new Error('预览内容与当前选择不一致。');
+      if(token!==renderToken || config.mode!==mode || config.view!==view) return;
       showResult(config,value); write('generate','正在读取画面…');
-      await player.load(value,{mode:config.mode,autoplay:!reducedMotion});
-      if(token!==renderToken || config.mode!==mode) return;
+      await player.load(value,{mode:config.mode,autoplay:!reducedMotion && (resumeOverride ?? true),startFrame});
+      if(token!==renderToken || config.mode!==mode || config.view!==view) return;
       notice('预览已就绪，可播放、逐帧检查，或进入动作编辑器比较参数。');
     } catch(error) { if(token!==renderToken || error.name==='AbortError')return;showError(error.message || '预览失败，请重试。');notice('预览未完成，可重试画面或重新生成。',true); }
     finally { if(token===renderToken){rendering=false;$('generate').disabled=false;$('cancel').disabled=true;write('generate','生成预览');} }
   }
   $('preview-form').addEventListener('submit',render);
-  $('mode').addEventListener('change',async()=>{cancelRequest();mode=previewMode($('mode').value);document.body.dataset.mode=mode;characters={};clearStage();clearError();await loadCharacters();});
-  ['species','kind','seed'].forEach(id=>$(id).addEventListener('change',selectionChanged));
+  $('mode').addEventListener('change',async()=>{cancelRequest();mode=previewMode($('mode').value);view=previewView(view,mode);document.body.dataset.mode=mode;characters={};clearStage();clearError();await loadCharacters();});
+  $('view').addEventListener('change',()=>{const next=previewView($('view').value,mode);if(next===view)return;const sameFrame=player.result?player.frame:0,resumePlayback=player.wanted;view=next;cancelRequest();clearStage();clearError();updateCharacter();render(null,{startFrame:sameFrame,resumeOverride:resumePlayback});});
+  ['species','kind'].forEach(id=>$(id).addEventListener('change',selectionChanged));
+  $('seed').addEventListener('change',()=>{cancelRequest();clearStage();clearError();updateCharacter();notice('种子已更新，点击生成预览。');});
+  async function renderBodySample(sample) {
+    cancelRequest(); mode='arena'; view='body'; $('mode').value=mode; $('kind').value='cast'; characters={}; clearStage(); clearError(); syncView();
+    if(!await loadCharacters(sample.species)) return;
+    await render();
+  }
+  BODY_SAMPLES.forEach(sample=>{const button=document.createElement('button');button.type='button';button.dataset.bodyKind='cast';button.textContent=sample.name+' · #'+String(sample.species).padStart(3,'0');button.addEventListener('click',()=>renderBodySample(sample));$('body-sample-buttons').append(button);});
   $('cancel').addEventListener('click',()=>{cancelRequest('已取消生成，可重新选择后再试。');clearStage();});
   $('play').addEventListener('click',()=>player.wanted?player.pause():player.play()); $('previous').addEventListener('click',()=>player.step(-1));$('next').addEventListener('click',()=>player.step(1));
   $('seek').addEventListener('input',()=>player.seek(Number($('seek').value)));$('speed').addEventListener('change',()=>player.setSpeed($('speed').value));
@@ -193,7 +222,8 @@
     finally {clearTimeout(timer);}
   }
   $('history').addEventListener('toggle',()=>{if($('history').open)loadHistory();});$('history-clip').addEventListener('change',historyClip);
-  clearStage(); loadCharacters().then(ready=>{if(ready)render();});
+  syncView(); clearStage();
+  loadCharacters().then(ready=>{if(ready)render();});
 })();
 </script>
 </body>

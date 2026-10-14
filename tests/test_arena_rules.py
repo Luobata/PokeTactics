@@ -84,4 +84,23 @@ class ArenaRules(unittest.TestCase):
             self.assertEqual(len(row['board']),len(seat.board))
             self.assertEqual([a['id'] for a in row['augments']],[a['id'] for a in seat.arena_augments_selected])
             self.assertTrue(all(o['sid'] in arena.ROSTER for o in row['board']))
-        self.assertEqual(len(state['arena']['catalog']),48)
+        self.assertEqual(len(state['arena']['catalog']),53)
+
+    def test_arena_shop_slots_expose_shared_pool_stock(self):
+        state=demo.state_json(self.s)
+        slots=[slot for slot in state['shop'] if slot]
+        self.assertEqual(len(slots),self.s.shop_slots)
+        for slot in slots:
+            self.assertEqual(slot['pool_remaining'],self.s.pool.remaining[slot['sid']])
+            self.assertEqual(slot['pool_total'],arena.pool_cap(slot['sid']))
+        bought=slots[0]
+        demo.act_buy(self.s,0)
+        self.assertEqual(demo.state_json(self.s)['shop'][0],None)
+        self.assertEqual(self.s.pool.remaining[bought['sid']],bought['pool_remaining'])
+
+    def test_classic_shop_slots_carry_no_pool_stock(self):
+        classic=demo.Session(7);classic.begin_round(1)
+        for slot in demo.state_json(classic)['shop']:
+            if slot:
+                self.assertNotIn('pool_remaining',slot)
+                self.assertNotIn('pool_total',slot)

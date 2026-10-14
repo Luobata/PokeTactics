@@ -1,9 +1,11 @@
 """Read-only build checks and actual arena combination telemetry."""
 
 import arena_skills
+import arena_teaching
 import arena_traits
 from items import FINISHED
 import status
+import techniques as techniques_mod
 
 NAMES = {'poison_catalyst': '毒性催化', 'heart_bell': '护心铃', 'watch_echo': '守望回响',
          'ward_bracer': '守势护腕', 'clarity_charm': '清明坠饰',
@@ -474,3 +476,131 @@ def field_summary(events, teams, team=0):
         elif effect == 'clear' and teams.get(source) == team:
             result['cleared'] += max(0, int(payload.get('cleared_count', 0)))
     return result
+
+
+# ---------------------------------------------------------------- 技能机遥测
+# battle_summary 的 combo_effect 计数器不动；技能机聚合并列走独立函数。
+TECHNIQUE_NAMES = {row['id']: row['name'] for row in techniques_mod.catalog('arena_v1')}
+# 技能机 cast 包记的是招式名（toxic 的 cast 名是 sludge_bomb），映射回技能机键。
+MOVE_TO_TECHNIQUE = {move['name']: key for key, move in arena_teaching.MOVES.items()}
+MOVE_TO_TECHNIQUE.update({key: key for key in arena_teaching._HANDLERS})
+MOVE_TO_TECHNIQUE['cut'] = 'cut'        # cut 走 combat._partner_after_basic 的 cast 包
+TECHNIQUE_COUNTERS = ('triggers', 'casts', 'damage', 'damage_absorbed',
+                      'control_hits', 'control_misses', 'healing', 'cleanses',
+                      'marks', 'windows', 'charges', 'empowered_hits',
+                      'empower_damage', 'knockbacks', 'weather_requests')
+
+
+def absorbed_by_action(events):
+    """每个 attack/cast 事件被护盾吸收的量；与战报 _display_damage 同一口径。
+
+    absorb 包的 payload.cast_index 指向入射伤害事件的下标（arena_combinations
+    .consume 记的是 action_index）。实伤 = 请求伤害 - 该下标累计吸收。
+    """
+    absorbed = {}
+    for index, event in enumerate(events):
+        if event[1] == 'combo_effect' and len(event) == 7 and event[5] == 'absorb':
+            payload = event[6]
+            action = payload.get('cast_index')
+            if type(action) is int and 0 <= action < len(events):
+                absorbed[action] = absorbed.get(action, 0) + max(0, int(payload.get('amount', 0)))
+    return absorbed
+
+
+def direct_damage(events, teams, team):
+    """一方全部直接伤害（普攻+施法包）的实伤合计；DOT、岩钉与反噬不计。"""
+    absorbed = absorbed_by_action(events)
+    total = 0
+    for index, event in enumerate(events):
+        if event[1] not in ('attack', 'cast') or teams.get(event[2]) != team:
+            continue
+        requested = max(0, int(event[4] if event[1] == 'attack' else event[6]))
+        total += requested - min(requested, absorbed.get(index, 0))
+    return total
+
+
+def technique_summary(events, teams, team=0):
+    """Aggregate one team's technique machines from the raw event stream.
+
+    归因口径（拿不到干净归因的维度不硬凑）：
+    - casts/triggers：cast 包按 (时刻, 施法者, 技能机) 去重——surf/地震的多段
+      受害者包只算一次施放；天气机（求雨/晴天）无 cast 包，触发 = weather_request；
+      守住 = 减伤窗口开启（protect）；帮助 = 标记授予；治愈铃声 = 成功净化
+      （skill_effect 空包会被引擎弹掉，留下的即成功）；睡觉 = 实际治疗包。
+    - damage：cast 请求伤害减去同 action 的护盾吸收（与战报 _display_damage 同口径）。
+    - control_hits/misses：只有能可靠归因的——挑衅（taunt skill_effect 即施加）
+      与打雷（accuracy 包带 hit 标志）；催眠粉/污泥贴的异常施加事件不带来源，
+      不计入命中归因。
+    - knockbacks：吼叫教学触发的击退（skill_effect 的招式名已被引擎改写为 roar）。
+    """
+    absorbed = absorbed_by_action(events)
+    rows = {}
+    seen_casts = set()
+
+    def row_of(key):
+        return rows.setdefault(key, {'id': key, 'name': TECHNIQUE_NAMES[key],
+                                     **dict.fromkeys(TECHNIQUE_COUNTERS, 0)})
+
+    for index, event in enumerate(events):
+        kind = event[1]
+        if kind == 'cast' and len(event) == 9:
+            key = MOVE_TO_TECHNIQUE.get(event[4])
+            if key is None or teams.get(event[2]) != team:
+                continue
+            row = row_of(key)
+            requested = max(0, int(event[6]))
+            absorbed_hit = min(requested, absorbed.get(index, 0))
+            row['damage'] += requested - absorbed_hit
+            row['damage_absorbed'] += absorbed_hit
+            activation = (event[0], event[2], key)
+            if activation not in seen_casts:
+                seen_casts.add(activation)
+                row['casts'] += 1
+                row['triggers'] += 1
+        elif kind == 'skill_effect' and len(event) == 7:
+            payload = event[6]
+            key = payload.get('technique')
+            if key not in TECHNIQUE_NAMES or teams.get(event[2]) != team:
+                if not (event[4] == 'roar' and event[5] == 'knockback'
+                        and teams.get(event[2]) == team):
+                    continue
+                row_of('roar')['knockbacks'] += 1
+                continue
+            row = row_of(key)
+            effect = event[5]
+            if effect == 'taunt':
+                row['control_hits'] += 1
+            elif effect == 'helping_hand':
+                row['marks'] += 1     # 触发次数已由同动作的 0 伤害 cast 包计入
+            elif effect == 'protect':
+                row['windows'] += 1
+                row['triggers'] += 1
+            elif effect == 'protect_charge':
+                row['charges'] += 1
+            elif effect == 'heal_bell':
+                row['cleanses'] += 1
+                row['triggers'] += 1
+            elif effect == 'native_empower':
+                row['empowered_hits'] += 1
+                row['empower_damage'] += max(0, int(payload.get('extra_damage', 0)))
+        elif kind == 'combo_effect' and len(event) == 7:
+            payload = event[6]
+            key = payload.get('technique')
+            if key not in TECHNIQUE_NAMES or teams.get(event[2]) != team:
+                continue
+            row = row_of(key)
+            if event[5] == 'weather_request':
+                row['weather_requests'] += 1
+                row['triggers'] += 1
+            elif event[5] == 'accuracy' and key == 'thunder':
+                row['control_hits' if payload.get('hit') else 'control_misses'] += 1
+        elif kind == 'partner_effect' and len(event) == 7:
+            if event[5] == 'rest' and teams.get(event[2]) == team:
+                row = row_of('rest')
+                row['casts'] += 1
+                row['triggers'] += 1
+                row['healing'] += max(0, int(event[6].get('amount', 0)))
+    by_key = [rows[key] for key in TECHNIQUE_NAMES if key in rows]
+    totals = {f'total_{field}': sum(row[field] for row in by_key)
+              for field in TECHNIQUE_COUNTERS}
+    return {**totals, 'by_key': by_key}

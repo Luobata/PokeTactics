@@ -1,6 +1,6 @@
 """One presentation contract for the trial, authoring tools and exported evidence."""
 
-WEB_BATTLE_REVISION = 'web-arena-v14-impact-r7'
+WEB_BATTLE_REVISION = 'web-arena-v17-persistent-state-r1'
 CLASSIC_REVISION = 'device-v1'
 
 
@@ -42,6 +42,12 @@ class PresentationRenderer:
         return (self.renderer.frame(seconds) if self.renderer else
                 self.anim.playback_frame(seconds, show_cutins=show_cutins))
 
+    def body_frame(self, seconds, *, unit_idx=0):
+        """Inspection camera on the arena's shared body track, at simulation time."""
+        if self.renderer is None:
+            raise ValueError('仅身体预览当前支持竞技模式')
+        return self.renderer.body_frame(seconds, unit_idx=unit_idx)
+
     def frame_playback(self, seconds, *, show_cutins=True):
         """Audience clock: arena battles hold heavy impacts for a short dwell."""
         return (self.renderer.frame_playback(seconds) if self.renderer else
@@ -50,6 +56,19 @@ class PresentationRenderer:
     def playback_time(self, t):
         """Playback second at which simulation time t appears (warp inverse)."""
         return self.renderer.presentation_time(t) if self.renderer else t
+
+    def step_view(self, seconds):
+        """Advance the shared presentation view to playback second without drawing.
+
+        Same time mapping as frame_playback; lets callers read per-frame unit
+        state (team telemetry) without paying for PIL rendering. The view is
+        seekable, so a later frame_playback re-syncs from any position.
+        """
+        if self.renderer:
+            self.renderer.view._ensure(self.anim.timeline.time(self.renderer._warp(seconds)))
+        else:
+            self.anim._presentation_view()._ensure(self.anim.timeline.time(seconds))
+        return self.anim._presentation_view()
 
     @property
     def metrics(self):
