@@ -28,7 +28,7 @@ class ArenaVisuals(unittest.TestCase):
                 self.assertIsNotNone(image.getbbox())
                 track.update(image.tobytes())
             hashes.append(track.hexdigest())
-        self.assertEqual(len(set(hashes)),53)
+        self.assertEqual(len(set(hashes)),62)
 
     def test_same_attack_uses_both_color_and_shape_to_show_faction(self):
         a,b=Image.new('RGBA',(240,160)),Image.new('RGBA',(240,160))

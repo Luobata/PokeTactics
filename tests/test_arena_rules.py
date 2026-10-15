@@ -84,7 +84,7 @@ class ArenaRules(unittest.TestCase):
             self.assertEqual(len(row['board']),len(seat.board))
             self.assertEqual([a['id'] for a in row['augments']],[a['id'] for a in seat.arena_augments_selected])
             self.assertTrue(all(o['sid'] in arena.ROSTER for o in row['board']))
-        self.assertEqual(len(state['arena']['catalog']),53)
+        self.assertEqual(len(state['arena']['catalog']),62)
 
     def test_arena_shop_slots_expose_shared_pool_stock(self):
         state=demo.state_json(self.s)
