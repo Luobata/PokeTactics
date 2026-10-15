@@ -455,3 +455,26 @@ REFERENCES['beacon_relay']['moves'] = [
     {'name': '萤火', 'symbol': 'Move_TAIL_GLOW', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L3896'},
     {'name': '蓄电', 'symbol': 'Move_CHARGE', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L3570'},
 ]
+
+
+# 补强档（docs/49）：九只新竞技物种的原作动画脚本引用。
+REFERENCES.update({
+    'phantom_hex': {'moves': [{'name': '舌舔', 'symbol': 'Move_LICK', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L7371'}, {'name': '黑夜魔影', 'symbol': 'Move_NIGHT_SHADE', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L7312'}],
+     'adaptation': '瓦斯爪影错拍挥击；异常追击只跟随施法前已存在的异常', 'basis': 'G3 原版动画脚本编排'},
+    'frost_kiss': {'moves': [{'name': '恶魔之吻', 'symbol': 'Move_LOVELY_KISS', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L7808'}, {'name': '冰冻拳', 'symbol': 'Move_ICE_PUNCH', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L4668'}],
+     'adaptation': '唇形冻印贴面后炸开冰晶；控制追击只跟随施法前已存在的定身/冰冻/麻痹', 'basis': 'G3 原版动画脚本编排'},
+    'dragon_vein': {'moves': [{'name': '神秘守护', 'symbol': 'Move_SAFEGUARD', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L1799'}, {'name': '龙之怒', 'symbol': 'Move_DRAGON_RAGE', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L5243'}],
+     'adaptation': '蛇形龙脉波纹绕体弱友军收束，治疗与回能只跟随真实生效', 'basis': 'G3 原版动画脚本编排'},
+    'night_plunder': {'moves': [{'name': '小偷', 'symbol': 'Move_THIEF', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L2170'}, {'name': '追击', 'symbol': 'Move_PURSUIT', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L1273'}],
+     'adaptation': '鸦翼掠过留下暗色羽痕；能量掠夺回流只跟随真实偷取', 'basis': 'G3 原版动画脚本编排'},
+    'spiteful_wail': {'moves': [{'name': '怨念', 'symbol': 'Move_SPITE', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L3111'}, {'name': '灭亡之歌', 'symbol': 'Move_PERISH_SONG', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L7933'}],
+     'adaptation': '怨珠随尖啸波纹扩散；邻格控能只跟随真实命中', 'basis': 'G3 原版动画脚本编排'},
+    'razor_flurry': {'moves': [{'name': '乱抓', 'symbol': 'Move_FURY_SWIPES', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L7821'}, {'name': '劈开', 'symbol': 'Move_SLASH', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L3034'}],
+     'adaptation': '冰色双爪痕错拍连闪；恶属性追击不再触发联动', 'basis': 'G3 原版动画脚本编排'},
+    'icicle_aegis': {'moves': [{'name': '贝壳夹', 'symbol': 'Move_CLAMP', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L5334'}, {'name': '极光束', 'symbol': 'Move_AURORA_BEAM', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L5401'}],
+     'adaptation': '紫壳合拢震出冰棱；邻格溅射只跟随真实命中', 'basis': 'G3 原版动画脚本编排'},
+    'steel_pinion': {'moves': [{'name': '钢翼', 'symbol': 'Move_STEEL_WING', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L7224'}, {'name': '乱击', 'symbol': 'Move_FURY_ATTACK', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L2441'}],
+     'adaptation': '钢色刃翼剪刀式交叉推击；击退与清钉只跟随真实位移', 'basis': 'G3 原版动画脚本编排'},
+    'dragon_dive': {'moves': [{'name': '神速', 'symbol': 'Move_EXTREME_SPEED', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L3392'}, {'name': '逆鳞', 'symbol': 'Move_OUTRAGE', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L1900'}, {'name': '破坏光线', 'symbol': 'Move_HYPER_BEAM', 'url': 'https://github.com/pret/pokeemerald/blob/731ad5bfd6e6f265508d0efcca0ba42f9dcf5881/data/battle_anim_scripts.s#L8362'}],
+     'adaptation': '琥珀俯冲弧直贯目标，尾端龙鳞星屑散开；击退只跟随真实位移', 'basis': 'G3 原版动画脚本编排'},
+})

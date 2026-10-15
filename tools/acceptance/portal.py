@@ -89,6 +89,7 @@ def catalog_view(demo):
     import arena_bonds
     import arena_traits
     import copy
+    from data import pokedex
     items = demo.items_mod
     item_views = [{
         'id': key, 'name': spec['name'],
@@ -104,11 +105,13 @@ def catalog_view(demo):
         **copy.deepcopy(advice.ITEMS.get(key, {})),
     } for key, spec in items.catalog(arena.RULESET).items()]
     pokemon_views = []
+    dex = pokedex()
     for sid, piece in arena.build_templates().items():
-        generation = 2 if sid in arena.GEN2_ROSTER else 1
+        generation = 2 if sid > 151 else 1
         pool_group = ('第二世代精灵' if generation == 2 else
                       '传说精灵' if sid in arena.LEGENDARY else
-                      '第一世代独立精灵' if sid in arena.EXPANSION_ROSTER else '进化形态')
+                      '第一世代独立精灵' if sid in arena.EXPANSION_ROSTER
+                      or len(dex.family_of(sid)) == 1 else '进化形态')
         pokemon_views.append({**demo._piece_view(piece, ruleset=arena.RULESET),
                               'cost': piece.tier, 'pool_total': arena.pool_cap(sid),
                               'generation': generation,

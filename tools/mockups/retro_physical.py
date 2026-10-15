@@ -16,11 +16,12 @@ SKILL_IDS = (
     'sweeping_kick', 'root_domain', 'armor_pincer', 'gale_cross', 'bull_rush',
     'cliff_swoop', 'alert_tail', 'mud_anchor', 'spinning_cleanup',
     'horn_pressure', 'iron_fault', 'cross_bullet', 'crag_citadel',
+    'night_plunder', 'razor_flurry', 'steel_pinion', 'dragon_dive',
 )
 _ELEMENTS = dict(zip(SKILL_IDS, (
     'FIGHTING', 'POISON', 'GROUND', 'ROCK', 'FIGHTING', 'GRASS', 'BUG', 'BUG',
     'NORMAL', 'ROCK', 'NORMAL', 'GROUND', 'FIGHTING', 'FIGHTING', 'STEEL',
-    'STEEL', 'ROCK',
+    'STEEL', 'ROCK', 'DARK', 'ICE', 'STEEL', 'DRAGON',
 )))
 # Fur, hard chitin and blade surfaces choose material inks without changing move type.
 _PALETTE_MATERIAL = {'bull_rush':'GROUND','alert_tail':'GROUND',
@@ -550,7 +551,7 @@ def _material_debris(layer,key,a,b,elapsed,colors,scale,density):
             w=(4-i%2)*scale*(1-p*.45)
             painter.polygon(((x-w,y+3),(x-w*.4,y-w),(x+w,y-w*.4),(x+w*.5,y+3)),fill=colors[2])
             R.line(layer,((x-w,y+3),(x+w,y-w*.4)),colors[3],3)
-        elif key in ('iron_fault','cross_bullet','gale_cross'):
+        elif key in ('iron_fault','cross_bullet','gale_cross','steel_pinion'):
             at=(b[0]+side*(11+math.sin(p*math.pi*.7)*(20+i%3*6))*scale,
                 b[1]+(6-p*21+p*p*34+(i%3-1)*8)*scale)
             x,y=(round(v/3)*3 for v in at)
@@ -656,6 +657,30 @@ def _windup(layer,key,a,b,p,colors,scale,density,emitters):
         for i in range(2):
             _crescent(layer,a,colors,scale,p*math.tau*2+i*math.pi,
                       rx=25,ry=9,sweep=2.3,width=6)
+    elif key=='night_plunder':
+        # Dark wings fold inward around a readied claw before the plunder dive.
+        for side in (-1,1):
+            _crescent(layer,(a[0]+side*(16-9*p)*scale,a[1]-4*scale),colors,scale,
+                      side*(.8+p*.9),rx=24,ry=10,width=8)
+        _material_put(layer,'pincer',(a[0],a[1]-6*scale),colors,
+                      scale*(.30+p*.16),turn=-20+p*40)
+    elif key=='razor_flurry':
+        # Twin ice blades cross tighter as the flurry charges.
+        for side in (-1,1):
+            _material_put(layer,'blade',(a[0]+side*(15-6*p)*scale,
+                                         a[1]-3*scale),colors,
+                          scale*(.34+p*.14),turn=side*(50-p*30))
+    elif key=='steel_pinion':
+        # Steel pinions unfold outward, then lock for the wing sweep.
+        for side in (-1,1):
+            _material_put(layer,'blade',(a[0]+side*(10+8*p)*scale,
+                                         a[1]-2*scale),colors,
+                          scale*(.36+p*.12),turn=side*(15+35*p))
+    elif key=='dragon_dive':
+        # The dive charge rises off the caster before it stoops on the target.
+        for i in range(2):
+            _crescent(layer,(a[0],a[1]-(6+p*18)*scale),colors,scale,
+                      -math.pi/2+p*1.2+i*math.pi,rx=23,ry=9,sweep=2.2,width=7)
     else:
         ux,uy,nx,ny=_basis(a,b)
         for side in (-1,1):
@@ -722,7 +747,8 @@ def _flight(layer,key,a,b,p,colors,scale,density,emitters):
             heights.append(max(2.,tooth))
         _fault_mass(layer,points,heights,colors,scale)
         return
-    bends={'sweeping_kick':13,'cliff_swoop':-30,'alert_tail':17,'iron_fault':-11}
+    bends={'sweeping_kick':13,'cliff_swoop':-30,'alert_tail':17,'iron_fault':-11,
+           'night_plunder':12,'dragon_dive':-36}
     q=_head(a,b,p,bends.get(key,0)*scale)
     if key=='sweeping_kick':
         low=(q[0],q[1]+11*scale)
@@ -759,6 +785,29 @@ def _flight(layer,key,a,b,p,colors,scale,density,emitters):
         for i in range(3):
             _crescent(layer,q,colors,scale,p*math.tau*2+i*math.tau/3,
                       rx=29,ry=11,sweep=1.65,width=7)
+    elif key=='night_plunder':
+        # Folded dark wings streak ahead of the plundering claw.
+        for side in (-1,1):
+            _crescent(layer,(q[0]+side*11*scale,q[1]),colors,scale,
+                      side*(1.1+p*1.2),rx=22,ry=9,width=8)
+        _material_put(layer,'pincer',q,colors,scale*.42,turn=-25+p*50)
+    elif key=='razor_flurry':
+        # Two razor blades fly in staggered lanes off the flight axis.
+        for side in (-1,1):
+            lane=_head(a,b,max(0.,p-.05),-6*scale,side*9*scale)
+            _material_put(layer,'blade',lane,colors,scale*.44,
+                          turn=side*25+p*40)
+    elif key=='steel_pinion':
+        # Locked pinions carry a broad leading wing plane.
+        for side in (-1,1):
+            _crescent(layer,(q[0]+side*13*scale,q[1]-2*scale),colors,scale,
+                      side*math.pi*.6+p*.8,rx=26,ry=10,width=9)
+        _material_put(layer,'blade',q,colors,scale*.48,turn=p*30)
+    elif key=='dragon_dive':
+        # A high rising feint tips into the stoop: one body, one wake.
+        _crescent(layer,q,colors,scale,-1.2+p*1.6,rx=30,ry=13,width=11)
+        _material_put(layer,'blade',(q[0],q[1]+6*scale),colors,scale*.40,
+                      turn=55-p*40)
 
 
 def _stone_impact(layer,b,colors,elapsed,scale):
@@ -910,6 +959,36 @@ def _contact(layer,key,a,b,elapsed,colors,scale):
                 _crescent(layer,b,colors,scale,i*math.tau/3+elapsed*21,
                           rx=31,ry=13,sweep=1.55,width=7*(1-elapsed*2))
         _flash(layer,b,colors,elapsed,scale,duration=.052,size=.47)
+    elif key=='night_plunder':
+        _blade_cut(layer,b,colors,elapsed,scale,-.6,duration=.13,length=44,width=9)
+        # The plunder arc sweeps back off the body after the cut connects.
+        if elapsed<.20:
+            _crescent(layer,(b[0],b[1]+4*scale),colors,scale,
+                      .6+elapsed*7,rx=24+elapsed*38,ry=10,sweep=2.1,
+                      width=7*(1-elapsed*2.5),bright=False)
+        _compression(layer,a,b,colors,elapsed,scale,delay=.03,duration=.09,radius=22)
+        _flash(layer,b,colors,elapsed,scale,.03,.05,.46)
+    elif key=='razor_flurry':
+        # Two staggered razor cuts, the second crossing the first.
+        _blade_cut(layer,b,colors,elapsed,scale,-.55,duration=.13,length=46,width=9)
+        _blade_cut(layer,b,colors,elapsed,scale,.62,.07,.13,42,8)
+        _flash(layer,b,colors,elapsed,scale,.07,.05,.44)
+    elif key=='steel_pinion':
+        # One broad wing sweep stamps across the whole body.
+        if elapsed<.18:
+            _crescent(layer,(b[0],b[1]+6*scale),colors,scale,
+                      -.9+elapsed*9,rx=36,ry=13,width=13*(1-elapsed*2.6))
+            _material_put(layer,'blade',b,colors,scale*(.50-elapsed*1.4),
+                          turn=-30+elapsed*320)
+        _compression(layer,a,b,colors,elapsed,scale,duration=.11,radius=36)
+        _flash(layer,b,colors,elapsed,scale,.02,.06,.52)
+    elif key=='dragon_dive':
+        # The stoop lands as one heavy stamp with a deep compression ring.
+        _compression(layer,a,b,colors,elapsed,scale,duration=.15,radius=46)
+        _flash(layer,b,colors,elapsed,scale,duration=.07,size=.62)
+        if elapsed<.22:
+            _crescent(layer,(b[0],b[1]+18*scale),colors,scale,
+                      math.pi+elapsed*6,rx=27+elapsed*42,ry=8,width=8,bright=False)
 
 def draw(layer,skill_id,source,target,phase,progress,config,*,emitters=(),secondary=False):
     """Return ownership; draw bounded, seekable art without changing replay facts."""
@@ -922,7 +1001,11 @@ def draw(layer,skill_id,source,target,phase,progress,config,*,emitters=(),second
     if (secondary and phase in ('windup','flight')) or (phase=='aftermath' and p>=1.):
         return True
     scale,density=R.settings(config)
-    colors=R.palette(_PALETTE_MATERIAL.get(skill_id,_ELEMENTS[skill_id]),config)
+    element=_PALETTE_MATERIAL.get(skill_id,_ELEMENTS[skill_id])
+    if secondary and skill_id=='razor_flurry':
+        # Sneasel's side-hit follow-through is dark-type plunder material.
+        element='DARK'
+    colors=R.palette(element,config)
     if phase=='windup':
         _windup(layer,skill_id,source,target,p,colors,scale,density,emitters)
     elif phase=='flight':

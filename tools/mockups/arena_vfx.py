@@ -1,4 +1,4 @@
-"""Fifty-three authored basic-attack tracks for the arena roster.
+"""Sixty-two authored basic-attack tracks for the arena roster.
 
 The simulator remains authoritative. These bounded Pillow drawings consume only
 an event's source, target and presentation phase, and never alter combat state.
@@ -258,6 +258,57 @@ def _expansion_motif(sid, d, x, y, k, angle, hit):
         d.polygon(((x-24,y-10),(x-6,y+7),(x,y-8),(x+6,y+7),(x+24,y-10),(x+11,y+14),(x-11,y+14)),fill=(172,154,189,255),outline=WHITE)
         for off in (-19,19):
             d.polygon(((x+off,y+17),(x+off+4,y+21),(x+off-3,y+22)),fill=(197,172,131,255))
+    elif sid == 91:
+        # A spiked bivalve shell bursts open with icy splinters.
+        shell = [(x + math.cos(i * math.pi / 3 + .5) * 13,
+                  y + math.sin(i * math.pi / 3 + .5) * 13) for i in range(6)]
+        d.polygon(shell, fill=(98, 32, 106, 255), outline=(172, 80, 180, 255))
+        d.ellipse((x - 5, y - 5, x + 5, y + 5), fill=(172, 80, 180, 255), outline=WHITE)
+        for i in range(6):
+            a = i * math.tau / 6 + angle * .2
+            tip = r + 10
+            d.polygon(((x + math.cos(a - .25) * 12, y + math.sin(a - .25) * 12),
+                       (x + math.cos(a) * tip, y + math.sin(a) * tip),
+                       (x + math.cos(a + .25) * 12, y + math.sin(a + .25) * 12)),
+                      fill=(161, 243, 255, 255), outline=WHITE)
+        if hit:
+            _ring(d, x, y, r + 12, (161, 243, 255, 200), 1)
+    elif sid == 93:
+        # Clawed gas hands reach out of a violet haze.
+        for i in range(3):
+            a = angle * .4 + i * math.tau / 3
+            xx, yy = x + math.cos(a) * 8, y + math.sin(a) * 6
+            d.ellipse((xx - 7, yy - 7, xx + 7, yy + 7), fill=(115, 0, 156, 170), outline=(150, 126, 235, 255))
+        for sign in (-1, 1):
+            for i in range(3):
+                d.line((x + sign * (12 + i * 4), y + 8 - i * 7,
+                        x + sign * (20 + i * 4), y + 2 - i * 7), fill=(205, 56, 49, 255), width=2)
+        if hit:
+            d.arc((x - 22, y - 20, x + 22, y + 20), 30, 300, fill=(205, 56, 49, 255), width=2)
+    elif sid == 124:
+        # A lip-shaped frost kiss blooms into a crystal halo.
+        d.ellipse((x - 9, y - 5, x + 1, y + 4), fill=(238, 48, 156, 255), outline=WHITE)
+        d.ellipse((x - 1, y - 5, x + 9, y + 4), fill=(238, 48, 156, 255), outline=WHITE)
+        d.line((x - 8, y, x + 8, y), fill=(115, 16, 123, 255), width=2)
+        for i in range(4):
+            a = i * math.pi / 2 + angle * .3
+            xx, yy = x + math.cos(a) * (r + 6), y + math.sin(a) * (r + 6) * .7
+            d.polygon(((xx, yy - 6), (xx + 3, yy), (xx, yy + 5), (xx - 3, yy)),
+                      fill=(161, 243, 255, 255), outline=WHITE)
+        if hit:
+            _ring(d, x, y, r + 10, (161, 243, 255, 220), 1)
+    elif sid == 148:
+        # A serpentine body wave carries the dragon's pearl glow.
+        route = [(x - 22 + i * 4, y + math.sin(i * .7 + angle) * 8) for i in range(12)]
+        d.line(route, fill=(41, 113, 189, 255), width=7)
+        d.line(route, fill=(139, 157, 255, 255), width=3)
+        d.ellipse((x - 5, y - 5, x + 5, y + 5), fill=(231, 250, 255, 255), outline=(132, 166, 255, 255), width=2)
+        for i in (3, 8):
+            xx, yy = route[i]
+            d.polygon(((xx - 4, yy - 8), (xx + 1, yy - 2), (xx - 5, yy + 1)),
+                      fill=(178, 238, 251, 255), outline=WHITE)
+        if hit:
+            _ring(d, x, y, r + 12, (132, 166, 255, 200), 1)
     if hit:
         _ring(d,x,y,r+12,(255,237,190,190),1)
 
@@ -474,6 +525,47 @@ def _gen2_motif(sid, d, x, y, k, angle, hit):
             d.line((x + sign * 17, y + 9, x + sign * 25, y - 8), fill=(64, 132, 89, 255), width=1)
         if hit:
             d.arc((x - 28, y - 24, x + 28, y + 24), 195, 345, fill=(186, 236, 137, 255), width=2)
+    elif sid == 198:
+        # A crow's swooping wing pair folds around a bright beak jab.
+        for sign in (-1, 1):
+            d.polygon(((x + sign * 4, y + 4), (x + sign * 24, y - 14),
+                       (x + sign * 18, y + 2), (x + sign * 26, y + 8)),
+                      fill=(57, 57, 140, 255), outline=(148, 133, 184, 255))
+            d.line((x + sign * 8, y + 2, x + sign * 20, y - 9), fill=WHITE, width=1)
+        d.polygon(((x - 3, y - 4), (x + 13, y), (x - 3, y + 4)), fill=(214, 214, 24, 255), outline=WHITE)
+        if hit:
+            d.arc((x - 26, y - 20, x + 26, y + 20), 200, 340, fill=(126, 121, 169, 255), width=2)
+    elif sid == 200:
+        # Grudge beads orbit inside a drifting ghostly haze.
+        for i in range(3):
+            xx = x + (i - 1) * 11
+            yy = y + math.sin(angle + i * .9) * 5
+            d.ellipse((xx - 6, yy - 6, xx + 6, yy + 6), fill=(74, 74, 140, 160), outline=(150, 126, 235, 255))
+        for i in range(4):
+            a = angle * .5 + i * math.tau / 4
+            xx, yy = x + math.cos(a) * (r + 3), y + math.sin(a) * (r + 3) * .7
+            d.ellipse((xx - 3, yy - 3, xx + 3, yy + 3), fill=(247, 49, 156, 255), outline=WHITE)
+        if hit:
+            _ring(d, x, y, r + 10, (247, 49, 156, 200), 1)
+    elif sid == 215:
+        # Twin icy claw rakes flash ahead of a navy crest feather.
+        for i in (-1, 0, 1):
+            d.line((x - 14, y + i * 7 + 5, x + 13, y + i * 7 - 5), fill=(57, 57, 90, 255), width=4)
+            d.line((x - 10, y + i * 7 + 3, x + 13, y + i * 7 - 5), fill=(161, 243, 255, 255), width=2)
+        d.polygon(((x - 4, y - 14), (x + 2, y - 24 - k * 4), (x + 8, y - 13)),
+                  fill=(255, 49, 148, 255), outline=WHITE)
+        if hit:
+            _star(d, x + 15, y - 10, 4, WHITE, 4, angle)
+    elif sid == 227:
+        # Two bladed steel wings scissor across a crimson streak.
+        for sign in (-1, 1):
+            d.polygon(((x + sign * 2, y + 6), (x + sign * 25, y - 16),
+                       (x + sign * 27, y - 8), (x + sign * 9, y + 9)),
+                      fill=(205, 229, 239, 255), outline=(140, 57, 33, 255))
+            d.line((x + sign * 7, y + 5, x + sign * 22, y - 11), fill=(156, 107, 255, 255), width=1)
+        d.line((x - 16, y + 13, x + 16, y - 13), fill=(140, 57, 33, 255), width=2)
+        if hit:
+            d.line((x - 19, y + 15, x + 19, y - 15), fill=WHITE, width=1)
 
 
 def _legendary_motif(sid, d, x, y, k, angle, hit):
@@ -547,6 +639,20 @@ def _legendary_motif(sid, d, x, y, k, angle, hit):
         _star(d, x - 12, y - 10, 3, (255, 226, 244, 255), 4, angle)
         if hit:
             _ring(d, x, y, r + 8, (255, 203, 228, 220), 1)
+    elif sid == 149:
+        # Dragonite: a diving amber arc sheds a storm of glinting scales.
+        d.polygon(((x - 24, y - 6), (x - 6, y - 14), (x + 16, y - 4),
+                   (x + 24, y + 4), (x + 4, y + 10), (x - 14, y + 8)),
+                  fill=(197, 141, 32, 255), outline=WHITE)
+        d.polygon(((x - 4, y - 12), (x + 10, y - 20), (x + 4, y - 4)),
+                  fill=(255, 241, 208, 255), outline=(197, 141, 32, 255))
+        for i in range(5):
+            a = angle + i * math.tau / 5
+            xx, yy = x + math.cos(a) * (r + 8), y + math.sin(a) * (r + 8) * .7
+            d.polygon(((xx, yy - 4), (xx + 3, yy), (xx, yy + 4), (xx - 3, yy)),
+                      fill=(132, 166, 255, 255), outline=WHITE)
+        if hit:
+            _ring(d, x, y, r + 12, (255, 213, 105, 220), 1)
 
 
 def _authored(sid):
@@ -577,6 +683,16 @@ GEN2_EFFECTS = {
     157: ('火领喷焰', _gen2_authored(157)), 212: ('赤钳钢刃', _gen2_authored(212)),
     230: ('龙旋水枪', _gen2_authored(230)), 160: ('潮牙咬合', _gen2_authored(160)),
     248: ('砂甲暗裂', _gen2_authored(248)), 154: ('花环叶盾', _gen2_authored(154)),
+    198: ('鸦翼喙击', _gen2_authored(198)), 200: ('怨珠幽雾', _gen2_authored(200)),
+    215: ('冰爪疾闪', _gen2_authored(215)), 227: ('钢翼剪击', _gen2_authored(227)),
+}
+
+
+# Rebalance additions (sim/arena.py REBALANCE_ROSTER) reuse the expansion-era
+# geometry but keep their own registry so EXPANSION_EFFECTS stays epoch-exact.
+REBALANCE_EFFECTS = {
+    91: ('冰壳尖刺', _authored(91)), 93: ('鬼影瓦斯爪', _authored(93)),
+    124: ('冰吻冻气', _authored(124)), 148: ('龙躯波涌', _authored(148)),
 }
 
 
@@ -590,6 +706,7 @@ LEGENDARY_EFFECTS = {
     146: ('焰翼余烬', _legendary_authored(146)),
     150: ('念压核心', _legendary_authored(150)),
     151: ('幻尾缎带', _legendary_authored(151)),
+    149: ('龙鳞风暴', _legendary_authored(149)),
 }
 
 
@@ -606,6 +723,7 @@ EFFECTS = {
     **EXPANSION_EFFECTS,
     **GEN2_EFFECTS,
     **LEGENDARY_EFFECTS,
+    **REBALANCE_EFFECTS,
 }
 
 
@@ -886,7 +1004,7 @@ def draw_native_skill(img, species_id, kind, source, target, phase, progress, te
         if hit:
             _ring(d, x, y, r + 16, color, 2)
         return
-    if species_id in EXPANSION_EFFECTS:
+    if species_id in EXPANSION_EFFECTS or species_id in REBALANCE_EFFECTS:
         _expansion_motif(species_id,d,x,y,p if hit else p*.4,angle,hit)
         if hit:
             _ring(d,x,y,r+16,color,2)

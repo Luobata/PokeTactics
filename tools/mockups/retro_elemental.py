@@ -21,6 +21,8 @@ TYPES = {
     'dragon_crosscurrent': 'WATER', 'undertow_lock': 'WATER',
     'glacier_beam': 'ICE', 'storm_peck': 'ELECTRIC', 'sky_blaze': 'FIRE',
     'mind_shatter': 'PSYCHIC', 'ancient_mind': 'PSYCHIC',
+    'phantom_hex': 'GHOST', 'spiteful_wail': 'GHOST',
+    'frost_kiss': 'ICE', 'icicle_aegis': 'ICE',
 }
 SKILL_IDS = tuple(TYPES)
 BODY_ONLY_FLIGHTS = frozenset(('psychic_blink', 'slow_field', 'fracture_vision'))
@@ -765,6 +767,54 @@ def _windup(layer, key, source, target, colors, scale, density, p, emitters):
             _sprite(layer, 'glyph', _offset(source, math.cos(a)*14*scale,
                                             6*scale-local*30*scale), colors,
                     scale*(.28-.06*local), step+index, math.degrees(a))
+    elif key == 'phantom_hex':
+        # Shadow wisps spiral inward against the flight's drift; the orb gathers.
+        for index in range(4):
+            a = -index*math.tau/4-p*4.6
+            radius = (27-16*p)*scale
+            _sprite(layer, 'smoke', _offset(source, math.cos(a)*radius,
+                                            math.sin(a)*radius*.62), colors,
+                    scale*(.24+.10*p), step+index, math.degrees(a))
+        _sprite(layer, 'shadow', source, colors, scale*(.20+.22*p), step)
+    elif key == 'spiteful_wail':
+        # A smoke ring tightens around the caster before the wail is released.
+        image, draw, center = rp.cel(64)
+        b = _Brush(draw, center)
+        radius = 24-11*p
+        for index in range(3):
+            start = index*120+round(p*50)
+            b.arc((-radius, -radius*.62, radius, radius*.62),
+                  (start, start+74), colors[1+index % 3], max(1, round(3-p)))
+        rp.put(layer, image, _offset(source, 0, -4*scale), scale)
+        _sprite(layer, 'smoke', _offset(source, 0, -6*scale), colors,
+                scale*(.22+.12*p), step)
+    elif key == 'frost_kiss':
+        # Two frost chips orbit a small bright core: a kiss of ice, not a beam.
+        for index in range(2):
+            a = index*math.pi+p*5.2
+            _sprite(layer, 'chip', _offset(source, math.cos(a)*14*scale,
+                                           math.sin(a)*9*scale-4*scale),
+                    colors, scale*(.30+.10*p), step+index, math.degrees(a))
+        image, draw, center = rp.cel(24)
+        b = _Brush(draw, center)
+        core = 2+p*4
+        b.oval((-core, -core, core, core), colors[2], outline=colors[3])
+        rp.put(layer, image, _offset(source, 0, -4*scale), scale*.8)
+    elif key == 'icicle_aegis':
+        # Six shards close into a defensive shell around the caster.
+        for index in range(6):
+            a = index*math.tau/6+.4
+            radius = (30-19*p)*scale
+            _sprite(layer, 'chip', _offset(source, math.cos(a)*radius,
+                                           math.sin(a)*radius*.78), colors,
+                    scale*(.30+.08*p), step+index, math.degrees(a))
+        if p > .45:
+            image, draw, center = rp.cel(48)
+            b = _Brush(draw, center)
+            q = (p-.45)/.55
+            b.arc((-16, -20, 16, 14), (200, 340), colors[1], max(1, round(2+q*2)))
+            b.arc((-13, -16, 13, 11), (210, 330), colors[3], 1)
+            rp.put(layer, image, source, scale*(.5+.3*q))
 
 
 def _flight(layer, key, source, target, colors, scale, density, p, emitters):
@@ -889,6 +939,51 @@ def _flight(layer, key, source, target, colors, scale, density, p, emitters):
                                             -math.sin(q*math.pi)*8*scale),
                     colors, scale*(.31-index*.04), round(p*18)+index,
                     heading+side*22)
+    elif key == 'phantom_hex':
+        # The hex orb flies straight; smoke wisps trail on a reverse spiral.
+        _sprite(layer, 'shadow', at, colors, scale*(.52+.06*p), round(p*22))
+        for index in range(3):
+            q = max(0., p-(index+1)*.07)
+            center = rp.point(source, target, q)
+            a = -q*7+index*2.1
+            _sprite(layer, 'smoke', _offset(center, math.cos(a)*9*scale,
+                                            math.sin(a)*6*scale), colors,
+                    scale*(.20-index*.03), round(p*20)+index)
+    elif key == 'spiteful_wail':
+        # A rolling smoke burst leads; two staggered wail arcs chase behind it.
+        _sprite(layer, 'smoke', at, colors, scale*(.44+.08*p), round(p*24),
+                heading)
+        for index in range(2):
+            q = max(0., p-(index+1)*.09)
+            center = rp.point(source, target, q)
+            image, draw, cel_center = rp.cel(40)
+            b = _Brush(draw, cel_center)
+            spread = 6+index*4
+            start = round(p*140)+index*70
+            b.arc((-spread, -spread*.7, spread, spread*.7),
+                  (start, start+96), colors[2+index], 2)
+            rp.put(layer, image, center, scale*.8)
+    elif key == 'frost_kiss':
+        # A compact ice kiss travels low; the two escort chips keep orbiting it.
+        _sprite(layer, 'chip', at, colors, scale*(.40+.06*p), round(p*20),
+                heading)
+        for index in range(2):
+            q = max(0., p-.06)
+            center = rp.point(source, target, q)
+            a = index*math.pi+p*6
+            _sprite(layer, 'chip', _offset(center, math.cos(a)*7*scale,
+                                           math.sin(a)*5*scale), colors,
+                    scale*.22, round(p*22)+index, math.degrees(a))
+    elif key == 'icicle_aegis':
+        # The shell travels as one needle-led aegis, shards hugging its flanks.
+        _sprite(layer, 'needle', at, colors, scale*.52, round(p*18), heading)
+        ux, uy, nx, ny = _basis(source, target)
+        for index in (-1, 1):
+            q = max(0., p-.05)
+            center = rp.point(source, target, q)
+            _sprite(layer, 'chip', (center[0]+nx*index*8*scale,
+                                    center[1]+ny*index*8*scale),
+                    colors, scale*.26, round(p*20)+index)
 
 
 def _contact(layer, key, source, target, colors, scale, density, age, emitters, secondary):
@@ -1064,6 +1159,122 @@ def _contact(layer, key, source, target, colors, scale, density, age, emitters, 
                                            (-4-elapsed*30)*local), colors,
                     local*(.24-elapsed*.34), round(age*22)+index,
                     math.degrees(a)*2)
+    elif key == 'phantom_hex':
+        # Three claw rakes land in sequence; the hex smoke sinks, never rising.
+        for index in range(3):
+            local_age = age-index*.06
+            if not 0 <= local_age < .16:
+                continue
+            q = local_age/.16
+            slash = math.radians(_heading(source, target)+index*38-30)
+            ux, uy = math.cos(slash), math.sin(slash)
+            cx, cy = (index-1)*10*local, (index-1)*6*local-4*local
+            rp.line(layer, (_offset(target, cx-ux*(4+q*9)*local,
+                                    cy-uy*(4+q*9)*local),
+                            _offset(target, cx+ux*(4+q*9)*local,
+                                    cy+uy*(4+q*9)*local)),
+                    colors[1+index % 2], max(1., (4-q*2)*local))
+        for index in range(max(3, round(4*density))):
+            born = .04+(index % 3)*.05
+            elapsed = age-born
+            if not 0 <= elapsed < .46:
+                continue
+            sign = -1 if index % 2 else 1
+            x = sign*(11+elapsed*34)*local
+            y = (-16+elapsed*44)*local
+            _sprite(layer, 'smoke', _offset(target, x, y), colors,
+                    local*(.42-elapsed*.7), round(age*22)+index, sign*elapsed*30)
+    elif key == 'spiteful_wail':
+        # Concentric wail arcs burst out of the recipient, then break apart.
+        if age < .40:
+            q = age/.40
+            image, draw, center = rp.cel(72)
+            b = _Brush(draw, center)
+            for index in range(3):
+                radius = 6+q*(9+index*7)
+                start = round(age*260)+index*125
+                b.arc((-radius, -radius*.72, radius, radius*.72),
+                      (start, start+58+index*16), colors[1+index % 3],
+                      max(1, round((4-index)-q*2)))
+            rp.put(layer, image, target, local*.62)
+        for index in range(max(3, round(5*density))):
+            born = .05+(index % 3)*.06
+            elapsed = age-born
+            if not 0 <= elapsed < .42:
+                continue
+            a = index*2.1+elapsed*3
+            _sprite(layer, 'smoke',
+                    _offset(target, math.cos(a)*(10+elapsed*22)*local,
+                            math.sin(a)*(7+elapsed*15)*local-6*local),
+                    colors, local*(.34-elapsed*.6), round(age*24)+index)
+    elif key == 'frost_kiss':
+        if secondary:
+            # Psychic side hits are a small bright burst at the neighbour only.
+            if age < .26:
+                for index in range(3):
+                    a = age*9+index*math.tau/3
+                    _sprite(layer, 'spark',
+                            _offset(target, math.cos(a)*7*local,
+                                    math.sin(a)*5*local-3*local),
+                            colors, local*(.26-age*.5), round(age*30)+index)
+            return
+        # A four-petal crystal opens on the diagonal axes, unlike Glacier's
+        # six-point star, then melts into drifting chips.
+        if age < .30:
+            q = age/.30
+            for index in range(4):
+                a = index*math.pi/2+math.pi/4
+                ux, uy = math.cos(a), math.sin(a)
+                length = (6+q*15)*local
+                rp.line(layer, (_offset(target, ux*3*local, uy*3*local),
+                                _offset(target, ux*length, uy*length*.9)),
+                        colors[1], max(1., 3*local*(1-q*.4)))
+                rp.line(layer, (_offset(target, ux*3*local, uy*3*local),
+                                _offset(target, ux*length, uy*length*.9)),
+                        colors[3], max(1., 2*local*(1-q*.3)))
+        for index in range(max(3, round(4*density))):
+            born = .03+index*.05
+            elapsed = age-born
+            if not 0 <= elapsed < .38:
+                continue
+            a = index*2.6+elapsed*4
+            _sprite(layer, 'chip', _offset(target, math.cos(a)*11*local,
+                                           (-4-elapsed*22)*local), colors,
+                    local*(.26-elapsed*.45), round(age*26)+index)
+    elif key == 'icicle_aegis':
+        if secondary:
+            # Side hits spray chips sideways at the actual neighbour only.
+            if age < .28:
+                for index in range(3):
+                    sign = -1 if index % 2 else 1
+                    _sprite(layer, 'chip', _offset(target,
+                                                   sign*(5+age*30)*local,
+                                                   (index-1)*5*local-age*8*local),
+                            colors, local*(.28-age*.55), round(age*30)+index,
+                            sign*30)
+            return
+        # The aegis lands as a low shell arc that holds, then frosts apart.
+        if age < .34:
+            q = age/.34
+            image, draw, center = rp.cel(72)
+            b = _Brush(draw, center)
+            radius = 15+q*9
+            b.arc((-radius, -radius*.9, radius, radius*.55),
+                  (185, 355), colors[0], max(1, round(5*(1-q*.5))))
+            b.arc((-radius+3, -radius*.9+3, radius-3, radius*.55-2),
+                  (195, 345), colors[2], max(1, round(3*(1-q*.5))))
+            b.arc((-radius+6, -radius*.9+6, radius-6, radius*.55-4),
+                  (210, 330), colors[3], 1)
+            rp.put(layer, image, _offset(target, 0, 4*local), local*(.80-q*.2))
+        for index in range(max(3, round(5*density))):
+            born = .04+index*.05
+            elapsed = age-born
+            if not 0 <= elapsed < .40:
+                continue
+            a = index*1.9+elapsed*2
+            _sprite(layer, 'chip', _offset(target, math.cos(a)*13*local,
+                                           (-2-elapsed*24)*local), colors,
+                    local*(.28-elapsed*.5), round(age*24)+index)
 
 
 def draw(layer, skill_id, source, target, phase, progress, config, *, emitters=(), secondary=False):
@@ -1083,7 +1294,12 @@ def draw(layer, skill_id, source, target, phase, progress, config, *, emitters=(
     if phase == 'aftermath' and p >= 1.:
         return True
     scale, density = rp.settings(config)
-    element = 'DRAGON' if secondary and skill_id == 'dragon_crosscurrent' else TYPES[skill_id]
+    if secondary and skill_id == 'dragon_crosscurrent':
+        element = 'DRAGON'
+    elif secondary and skill_id == 'frost_kiss':
+        element = 'PSYCHIC'
+    else:
+        element = TYPES[skill_id]
     colors = rp.palette(element, config)
     if phase == 'windup':
         _windup(layer, skill_id, source, target, colors, scale, density, p, emitters)

@@ -46,7 +46,9 @@ def run():
                 'combinations': battle_summary(battle.events, teams)}
 
     witnesses = []
-    for sid in arena.GEN2_ROSTER:
+    gen2_new = sorted(set(arena.GEN2_ROSTER) |
+                      {s for s in arena.REBALANCE_ROSTER if s > 151})
+    for sid in gen2_new:
         allies = [sid] + [s for s in (195, 242, 214) if s != sid][:2]
         samples = [fight([(s, 'heart_bell' if templates[s].role_key == 'support' else 'leftovers') for s in allies],
                          [(128, 'leftovers'), (113, 'heart_bell'), (40, 'heart_bell')], 71000 + sid * 10 + n)

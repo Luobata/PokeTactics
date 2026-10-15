@@ -18,7 +18,7 @@ SKILL_IDS = (
     'healing_song', 'cleansing_powder', 'moon_blessing', 'aroma_garden',
     'solar_relay', 'star_resonance', 'rescue_tongue', 'life_pulse',
     'barrier_relay', 'frost_shelter', 'watchful_lullaby', 'beacon_relay',
-    'moon_guard', 'bliss_chorus', 'verdant_sanctuary',
+    'moon_guard', 'bliss_chorus', 'verdant_sanctuary', 'dragon_vein',
 )
 # Chosen from the pinned original scripts BEFORE implementing these tracks.
 REFERENCES = {
@@ -37,6 +37,7 @@ REFERENCES = {
     'moon_guard': ('CONFUSE_RAY', 'REFLECT', 'BARRIER'),
     'bliss_chorus': ('HEAL_BELL', 'MILK_DRINK'),
     'verdant_sanctuary': ('PETAL_DANCE', 'AROMATHERAPY', 'SYNTHESIS'),
+    'dragon_vein': ('SAFEGUARD', 'DRAGON_RAGE'),
 }
 _TYPES = {entry['id']: entry['type'] for entry in SKILLS.values()}
 OUTCOME_EFFECTS = frozenset(('heal', 'cleanse', 'guard', 'shield', 'absorb',
@@ -664,6 +665,17 @@ def _local_material(layer, key, target, life, colors, scale, density, *, source=
             angle=i*2.399+life*.8;radius=(9+life*45)*scale
             at=(target[0]+math.cos(angle)*radius,target[1]+math.sin(angle)*radius*.68-life*12*scale)
             _speck(layer,'sparkle',at,colors,scale*(.57 if i%3==0 else .36),i,fade)
+    elif key=='dragon_vein':
+        # Two rings answer around the patient while draconic motes rise.
+        if life<.8:
+            _ring(layer,target,colors,9+life*22,scale)
+            _ring(layer,(target[0],target[1]-6*scale),colors,5+life*14,scale*.72)
+        for i in range(round(5*density)):
+            angle=i*2.399+life*2.2;radius=(8+life*30)*scale
+            at=(target[0]+math.cos(angle)*radius,
+                target[1]+math.sin(angle)*radius*.5-life*30*scale)
+            _speck(layer,'sparkle' if i%2 else 'orb',at,colors,
+                   scale*(.46 if i%2 else .38),i,fade,turn=life*80)
 
 
 def draw(layer, skill_id, source, target, phase, progress, config, *, emitters=(), secondary=False):
@@ -701,6 +713,14 @@ def draw(layer, skill_id, source, target, phase, progress, config, *, emitters=(
                        colors,scale*(.45+i*.07),i,turn=math.sin(p*8+i)*28+i*42)
         elif skill_id=='healing_song':
             _music_charge(layer,source,p,colors,scale)
+        elif skill_id=='dragon_vein':
+            # A dragon pulse ring gathers over the caster before it travels.
+            _ring(layer,(source[0],source[1]-6*scale),colors,8+p*10,scale)
+            for i in range(3):
+                angle=i*math.tau/3+p*3.1;radius=(13-5*p)*scale
+                _speck(layer,'orb',(source[0]+math.cos(angle)*radius,
+                                    source[1]+math.sin(angle)*radius*.6-4*scale),
+                       colors,scale*(.42+.10*p),i)
         else:
             kind={'healing_song':'note','bliss_chorus':'note','watchful_lullaby':'note',
                   'cleansing_powder':'powder','moon_blessing':'sparkle','aroma_garden':'petal',
@@ -759,6 +779,13 @@ def draw(layer, skill_id, source, target, phase, progress, config, *, emitters=(
         elif skill_id=='bliss_chorus':
             _stream(layer,source,target,p,colors,'petal',count=7,spread=31,
                     wave=2.2,arc=20,scale=scale,density=density)
+        elif skill_id=='dragon_vein':
+            # The shared track still owns a flight when exercised directly:
+            # pulse orbs arc along the route with a heal star at the head.
+            _stream(layer,source,target,p,colors,'orb',count=4,spread=12,wave=1.4,
+                    arc=14,scale=scale,density=density)
+            _speck(layer,'heal_star',(head[0],head[1]-math.sin(p*math.pi)*15*scale),
+                   colors,scale*.62,0,turn=p*90)
         elif skill_id=='watchful_lullaby':
             for i in range(3):
                 q=p-i*.11
@@ -865,6 +892,13 @@ def draw_assistance(layer, skill_id, source, target, phase, progress, config, *,
         elif skill_id=='watchful_lullaby':
             _stream(layer,source,target,p,colors,'note',count=4,spread=21,wave=1.5,
                     arc=12,scale=scale*.93,density=density)
+        elif skill_id=='dragon_vein':
+            # Dragon Breath material arcs to the patient; a heal star rides its
+            # head. It is a blessing delivery, never an enemy projectile.
+            _stream(layer,source,target,p,colors,'orb',count=4,spread=12,wave=1.4,
+                    arc=14,scale=scale,density=density)
+            _speck(layer,'heal_star',(head[0],head[1]-math.sin(p*math.pi)*15*scale),
+                   colors,scale*.62,0,turn=p*90)
         else:
             kind={'cleansing_powder':'powder','aroma_garden':'petal',
                   'verdant_sanctuary':'leaf'}[skill_id]
