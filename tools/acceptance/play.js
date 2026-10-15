@@ -109,6 +109,7 @@
     failed: new Set(),
     pending: new Map(),
     cacheLimit: 72,
+    renderDead: false,
     reportTab: "events",
     reportTabTouched: false,
   };
@@ -1571,6 +1572,7 @@
   }
   function startPlaybackTimer() {
     const p = playback;
+    if (p.renderDead) return;
     if (!p.intentPlaying || p.timer || !p.complete || p.requested != null || document.hidden || $("scout-dialog").open || !$("battle-dialog").open) return;
     const end = Math.min(p.n - 1, p.current + 3);
     for (let index = p.current + 1; index <= end; index++) {
@@ -1670,6 +1672,7 @@
                 showVerdict();
               }
             }
+            checkRenderHealth();
           }
         }
         updateBattleTimeline();
@@ -1685,12 +1688,40 @@
     }
     updateBattleTimeline();
   }
+  function showRenderDead() {
+    const p = playback;
+    if (p.renderDead) return;
+    p.renderDead = true;
+    if (p.healTimer) {
+      clearTimeout(p.healTimer);
+      p.healTimer = null;
+    }
+    for (const request of p.pending.values()) request.cancel();
+    p.pending.clear();
+    setBattleLoading("本轮画面渲染中断，战果已保存。", true);
+    $("battle-retry").hidden = true;
+    $("battle-status").textContent = "画面渲染中断，本轮战果已保存。";
+    showVerdict();
+  }
+  async function checkRenderHealth() {
+    // 帧重试多次仍失败时确认渲染管线状态：渲染已死（服务器重启/渲染崩溃且
+    // 无法重建）就不再空转重试，直接落战果；仍在渲染则保持现有重试节奏。
+    const p = playback;
+    if (!p.n || p.renderDead || !p.meta) return;
+    let status = null;
+    try {
+      const response = await fetch(`/demo/render-status/${sid}/r${p.meta.round}`);
+      if (response.ok) status = (await response.json()).status;
+    } catch (error) { return; }
+    if (status === "dead") showRenderDead();
+  }
   function healFailedFrames() {
     const p = playback;
     if (p.healTimer) {
       clearTimeout(p.healTimer);
       p.healTimer = null;
     }
+    if (p.renderDead) return;
     if (p.n && $("battle-dialog").open) {
       p.healTimer = setTimeout(healFailedFrames, 4000);
     }
@@ -1716,6 +1747,15 @@
     if (!p.n) return;
     stopPlayback();
     const target = Math.max(0, Math.min(p.n - 1, Math.round(Number(index) || 0)));
+    if (p.renderDead) {
+      // 渲染已死：已缓存的帧仍可拖看，缺失帧不再触发载入与重试。
+      if (p.frames[target]?.naturalWidth) {
+        p.requested = null;
+        showFrame(target);
+        updateBattleTimeline();
+      }
+      return;
+    }
     if (target < p.n - 1) hideBattleDisclosure();
     p.requested = target;
     p.revealOnFailure = revealOnFailure;
@@ -1763,6 +1803,7 @@
       attempts: new Map(), backoff: new Set(),
       current: 0, requested: meta?.n ? 0 : null, n: meta?.n || 0, dt: meta?.dt || 0.05,
       complete: false, verdictShown: false, buffering: true, intentPlaying: !!meta?.n,
+      renderDead: false,
       reportTab: "events", reportTabTouched: false, lastEvent: null, retryIndex: null,
       revealOnFailure: false, seekResume: false,
       cacheLimit: window.matchMedia?.("(max-width: 720px)")?.matches ? 36 : 72,

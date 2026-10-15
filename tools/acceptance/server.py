@@ -816,6 +816,12 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_header("Content-Length", str(len(data)))
             self.end_headers()
             self.wfile.write(data)
+        elif parsed.path.startswith("/demo/render-status/"):
+            m = re.match(r"^/demo/render-status/([\w-]+)/r(\d+)$", parsed.path)
+            if not m:
+                return self.send_error(404)
+            return self._json({"ok": True,
+                               "status": demo_mod.ensure_render_job(m.group(1), int(m.group(2)))})
         elif parsed.path.startswith("/demo/frame/"):
             # /demo/frame/<sid>/r<round>/<i>.png -> .build/demo/<sid>/r<round>/
             m = re.match(r"^/demo/frame/([\w-]+)/r(\d+)/(\d+)\.png$", parsed.path)
@@ -827,8 +833,15 @@ class Handler(SimpleHTTPRequestHandler):
                 # meta.json 最后落盘：此前回合仍在流式渲染，播放器预取会抢在
                 # 写盘前到达。短轮询等待该帧出现，避免把"还没渲染到"误判为 404；
                 # meta.json 一旦出现说明渲染结束，缺失帧是真 404，立即返回。
+                # 渲染线程崩溃/随重启被杀时 ensure_render_job 自动重启渲染，
+                # 无法恢复（dead）则立即 404，不再让播放器空等。
                 deadline = time.monotonic() + 12
+                tick = 0
                 while time.monotonic() < deadline:
+                    tick += 1
+                    if tick % 5 == 1 and \
+                            demo_mod.ensure_render_job(m.group(1), int(m.group(2))) == "dead":
+                        break
                     time.sleep(0.2)
                     if (frame.is_file() and frame.stat().st_size) or \
                             (directory / "meta.json").is_file():

@@ -150,14 +150,30 @@ def sprite_png(species_id: int, shiny=False):
 # ---------------------------------------------------------------- 渲染包装
 DEFER_RENDER = False     # 验收服务器置 True：帧改后台流式渲染，end_prep 只解算
 _RENDER_THREADS = []     # 后台渲染线程登记（防 GC；测试可 join 等落帧完成）
+_RENDER_LOCK = threading.Lock()
+_RENDER_PARAMS = {}        # (sid, round) -> 渲染中断后重建 render_job 的参数快照
+_RENDER_RESTARTS = set()   # (sid, round) 已自动重启过一次；再崩判定 dead，防确定性崩溃死循环
+_RENDER_PARAMS_LIMIT = 8
+_RENDER_HEARTBEAT_STALE_S = 30
 
 
-def _run_render_job(job) -> None:
+def _run_render_job(job, out_dir=None) -> None:
     try:
         job()
     except Exception:  # noqa: BLE001 —— 落帧失败由播放端重试/战果兜底
         import traceback
         traceback.print_exc()
+        if out_dir is not None:
+            # 留下机器可读的失败标记：帧端点据此尝试重启渲染或快速判死，
+            # 而不是让播放器对着一个永远不会完成的轮次空轮询。
+            try:
+                out_dir.mkdir(parents=True, exist_ok=True)
+                (out_dir / "rendering.json").unlink(missing_ok=True)
+                (out_dir / "render_error.json").write_text(json.dumps(
+                    {"error": traceback.format_exc(), "at": time.time()},
+                    ensure_ascii=False))
+            except OSError:
+                pass
 
 
 def _prepare_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
@@ -244,16 +260,94 @@ def _prepare_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
         if out_dir.exists():
             shutil.rmtree(out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
+        heartbeat = out_dir / "rendering.json"
+
+        def beat(done):
+            # 心跳：帧端点据此区分「还在渲染」与「渲染线程已死」。
+            heartbeat.write_text(json.dumps(
+                {"pid": os.getpid(), "updated": time.time(), "done": done, "n": n}))
+
+        beat(0)
         T = 0.0
         for i in range(n):
             frame = renderer.frame_playback(T)
-            frame.convert("RGB").save(out_dir / f"{i}.png", compress_level=1)
+            # 先写临时文件再原子替换，杜绝播放端读到半截 PNG。
+            tmp = out_dir / f"{i}.png.tmp"
+            frame.convert("RGB").save(tmp, "PNG", compress_level=1)
+            os.replace(tmp, out_dir / f"{i}.png")
+            if i % 16 == 15:
+                beat(i + 1)
             T += FPS_DT
         render_s = round(time.time() - t0, 1)
         (out_dir / "meta.json").write_text(json.dumps(
             {**meta, "render_s": render_s}, ensure_ascii=False))
+        heartbeat.unlink(missing_ok=True)
         return render_s
     return meta, render_job
+
+
+def _render_alive(directory: Path) -> bool:
+    """渲染线程存活判定：心跳文件新鲜且写入进程仍在。"""
+    try:
+        info = json.loads((directory / "rendering.json").read_text())
+    except (OSError, ValueError):
+        return False
+    try:
+        updated = float(info.get("updated", 0))
+    except (TypeError, ValueError):
+        return False
+    if time.time() - updated > _RENDER_HEARTBEAT_STALE_S:
+        return False
+    pid = info.get("pid")
+    if type(pid) is not int or pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    return True
+
+
+def ensure_render_job(sid, round_no) -> str:
+    """帧端点兜底：'ready' 帧集已发布 / 'rendering' 渲染中（含刚重启）/ 'dead' 无法恢复。
+
+    渲染线程崩溃（render_error.json）或随服务器重启被杀（心跳过期）时，
+    若本进程还持有该轮的渲染参数快照，自动重启一次渲染；否则判 dead，
+    让播放器停止空轮询、直接落到战果。
+    """
+    directory = ROOT / ".build" / "demo" / str(sid) / f"r{round_no}"
+    if (directory / "meta.json").is_file():
+        return "ready"
+    if _render_alive(directory):
+        return "rendering"
+    key = (str(sid), int(round_no))
+    with _RENDER_LOCK:
+        params = _RENDER_PARAMS.get(key)
+        already = key in _RENDER_RESTARTS
+        if params is not None and not already:
+            _RENDER_RESTARTS.add(key)
+    if params is None:
+        return "dead"
+    if already:
+        # 重启后又崩（错误标记重新出现）视为确定性失败，不再循环重启；
+        # 心跳还没写出来属于刚启动的竞态，按渲染中处理。
+        return "dead" if (directory / "render_error.json").is_file() else "rendering"
+    try:
+        _, job = _prepare_battle_frames(
+            params["comp_a"], params["comp_b"],
+            rng_mod.derive(params["seed"], int(round_no), "battle", params["battle_i"]),
+            params["weather_name"], params["out_dir"],
+            positions_a=params["positions_a"], hud_snapshot=params["hud_snapshot"],
+            **params["battle_options"])
+    except Exception:  # noqa: BLE001 —— 重建失败同样落到战果兜底
+        import traceback
+        traceback.print_exc()
+        return "dead"
+    worker = threading.Thread(target=_run_render_job, args=(job, params["out_dir"]),
+                              name=f"battle-render-retry-{sid}-r{round_no}", daemon=True)
+    _RENDER_THREADS.append(worker)
+    worker.start()
+    return "rendering"
 
 
 def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
@@ -1545,14 +1639,27 @@ class Session:
             battle_options['tactics_b'] = copy.deepcopy(self.opponent_tactics)
         if DEFER_RENDER:
             # 帧后台流式落盘：end_prep 只等权威解算，播放端边播边拉帧。
+            player_positions = me.battle_positions()
+            hud = {"hp": max(0, me.hp), "gold": me.gold,
+                   "level": me.level, "round": r}
             meta, job = _prepare_battle_frames(
                 comp_a, comp_b, rng, weather, out_dir,
-                positions_a=me.battle_positions(),
-                hud_snapshot={"hp": max(0, me.hp), "gold": me.gold,
-                              "level": me.level, "round": r},
+                positions_a=player_positions,
+                hud_snapshot=hud,
                 **battle_options)
             meta["render_s"] = None   # 落帧完成后写入 meta.json
-            worker = threading.Thread(target=_run_render_job, args=(job,),
+            with _RENDER_LOCK:
+                # 参数快照供渲染中断后原地重建（阵容此后还会随对局变化）。
+                while len(_RENDER_PARAMS) >= _RENDER_PARAMS_LIMIT:
+                    _RENDER_PARAMS.pop(next(iter(_RENDER_PARAMS)))
+                _RENDER_PARAMS[(str(self.sid), int(r))] = {
+                    "comp_a": copy.deepcopy(comp_a), "comp_b": copy.deepcopy(comp_b),
+                    "seed": self.seed, "battle_i": battle_i, "weather_name": weather,
+                    "out_dir": out_dir, "positions_a": copy.deepcopy(player_positions),
+                    "hud_snapshot": dict(hud),
+                    "battle_options": copy.deepcopy(battle_options)}
+                _RENDER_RESTARTS.discard((str(self.sid), int(r)))
+            worker = threading.Thread(target=_run_render_job, args=(job, out_dir),
                                       name=f"battle-render-{self.sid}-r{r}", daemon=True)
             _RENDER_THREADS[:] = [t for t in _RENDER_THREADS if t.is_alive()]
             _RENDER_THREADS.append(worker)
