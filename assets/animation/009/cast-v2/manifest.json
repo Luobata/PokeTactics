@@ -1,0 +1,228 @@
+{
+  "schema_version": 1,
+  "species": 9,
+  "kind": "cast",
+  "version": "cast-v2",
+  "palette": "RGBA",
+  "canvas_size": [
+    64,
+    64
+  ],
+  "intrinsic_facing": -1,
+  "colors": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      65,
+      89,
+      255
+    ],
+    [
+      197,
+      165,
+      24
+    ]
+  ],
+  "poses": [
+    {
+      "name": "idle",
+      "file": "idle.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "left_muzzle": [
+          14.5,
+          5.5
+        ],
+        "right_muzzle": [
+          55.0,
+          14.5
+        ]
+      }
+    },
+    {
+      "name": "windup_1",
+      "file": "windup_1.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "left_muzzle": [
+          14.5,
+          6.5
+        ],
+        "right_muzzle": [
+          55.0,
+          15.5
+        ]
+      }
+    },
+    {
+      "name": "windup_2",
+      "file": "windup_2.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "left_muzzle": [
+          13.5,
+          7.5
+        ],
+        "right_muzzle": [
+          54.0,
+          16.5
+        ]
+      }
+    },
+    {
+      "name": "windup_3",
+      "file": "windup_3.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "left_muzzle": [
+          12.5,
+          8.5
+        ],
+        "right_muzzle": [
+          54.0,
+          17.5
+        ]
+      }
+    },
+    {
+      "name": "windup_4",
+      "file": "windup_4.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "left_muzzle": [
+          11.5,
+          8.5
+        ],
+        "right_muzzle": [
+          53.0,
+          18.5
+        ]
+      }
+    },
+    {
+      "name": "strike_1",
+      "file": "strike_1.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "left_muzzle": [
+          16.5,
+          6.5
+        ],
+        "right_muzzle": [
+          57.0,
+          15.5
+        ]
+      }
+    },
+    {
+      "name": "strike_2",
+      "file": "strike_2.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "left_muzzle": [
+          17.5,
+          7.5
+        ],
+        "right_muzzle": [
+          58.0,
+          16.5
+        ]
+      }
+    },
+    {
+      "name": "strike_3",
+      "file": "strike_3.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "left_muzzle": [
+          16.5,
+          7.5
+        ],
+        "right_muzzle": [
+          57.0,
+          16.5
+        ]
+      }
+    },
+    {
+      "name": "recover_1",
+      "file": "recover_1.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "left_muzzle": [
+          15.5,
+          6.5
+        ],
+        "right_muzzle": [
+          56.0,
+          15.5
+        ]
+      }
+    },
+    {
+      "name": "recover_2",
+      "file": "recover_2.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "left_muzzle": [
+          14.5,
+          6.5
+        ],
+        "right_muzzle": [
+          55.0,
+          15.5
+        ]
+      }
+    }
+  ],
+  "sequences": {
+    "windup": [
+      "windup_1",
+      "windup_2",
+      "windup_3",
+      "windup_4"
+    ],
+    "strike": [
+      "strike_1",
+      "strike_2",
+      "strike_3"
+    ],
+    "recover": [
+      "recover_1",
+      "recover_2"
+    ]
+  }
+}

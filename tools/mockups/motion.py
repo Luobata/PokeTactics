@@ -8,6 +8,7 @@ Missing species return None: the renderer must execute its original branch.
 from dataclasses import dataclass
 import math
 from PIL import Image, ImageDraw, ImageOps
+import authored_cels
 from character_rigs import implemented as has_character_rig, render_rig, _point_after_rotation
 
 REST = (0, 0, 100, 100, 0, 0)
@@ -464,20 +465,30 @@ def transform(sprite, sid, pose):
     if not bounds:
         return sprite
     progress = pose.index / max(1,len(species_motion[sid][pose.state])-1)
-    character = render_rig(sprite,sid,pose.action_kind,pose.state,progress,
-                           facing=1 if pose.direction[0]>=0 else -1)
+    facing = 1 if pose.direction[0]>=0 else -1
+    # 手绘完整姿态帧优先：姿态已画进帧内，不再叠加整身缩放/旋转，只保留
+    # 受击挤压与 dissolve；素材不可用时回退切片 rig。
+    character = authored_cels.render(sid, pose.action_kind, pose.state, progress, facing)
+    authored = character is not None
+    if not authored:
+        character = render_rig(sprite,sid,pose.action_kind,pose.state,progress,facing)
     if character is not None:
-        sx,sy = frame[2]*pose.hit[2]/10000,frame[3]*pose.hit[3]/10000
+        if authored:
+            sx,sy = pose.hit[2]/100,pose.hit[3]/100
+            angle = -pose.hit[4]*facing
+        else:
+            sx,sy = frame[2]*pose.hit[2]/10000,frame[3]*pose.hit[3]/10000
+            angle = -(frame[4]+pose.hit[4])*facing
         scaled = character.resize((max(1,round(character.width*sx)),
                                     max(1,round(character.height*sy))),Image.Resampling.NEAREST)
-        angle = -(frame[4]+pose.hit[4]) * (1 if pose.direction[0]>=0 else -1)
         out = scaled.rotate(angle,Image.Resampling.NEAREST,expand=True)
         def point(xy):
             position = (xy[0]*scaled.width/character.width,xy[1]*scaled.height/character.height)
             return tuple(round(v) for v in _point_after_rotation(position,scaled.size,out.size,angle))
         out.info['foot_anchor'] = point(character.info['foot_anchor'])
         out.info['rig_anchors'] = {name:point(xy) for name,xy in character.info['rig_anchors'].items()}
-        out.info['rig_parts'] = character.info['rig_parts']
+        if not authored:
+            out.info['rig_parts'] = character.info['rig_parts']
         dissolve = max(frame[5],pose.hit[5])
         if dissolve:
             alpha = out.getchannel('A')

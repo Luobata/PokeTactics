@@ -115,6 +115,7 @@ def source_revision():
     # Packed asset provenance must invalidate the cache as well as renderer code.
     from decoders import POKEWALK, GEN2_FRONT
     files += sorted(GEN2_FRONT.rglob("*.png"))
+    files += [p for p in sorted((ROOT / "assets/animation").rglob("*")) if p.is_file()]
     files += [POKEWALK / name for name in ("gen1_front.bin", "palettes.bin", "font16.bin")]
     digest = hashlib.sha256()
     for path in files:
