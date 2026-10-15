@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "species": 6,
+  "kind": "cast",
+  "version": "cast-v2",
+  "palette": "RGBA",
+  "canvas_size": [
+    64,
+    64
+  ],
+  "intrinsic_facing": -1,
+  "colors": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      49,
+      72,
+      123
+    ],
+    [
+      255,
+      89,
+      0
+    ]
+  ],
+  "poses": [
+    {
+      "name": "idle",
+      "file": "idle.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "mouth": [
+          8.5,
+          15.2
+        ]
+      }
+    },
+    {
+      "name": "windup_1",
+      "file": "windup_1.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "mouth": [
+          8.5,
+          16.2
+        ]
+      }
+    },
+    {
+      "name": "windup_2",
+      "file": "windup_2.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "mouth": [
+          8.5,
+          17.2
+        ]
+      }
+    },
+    {
+      "name": "windup_3",
+      "file": "windup_3.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "mouth": [
+          7.5,
+          18.2
+        ]
+      }
+    },
+    {
+      "name": "windup_4",
+      "file": "windup_4.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "mouth": [
+          6.5,
+          19.2
+        ]
+      }
+    },
+    {
+      "name": "strike_1",
+      "file": "strike_1.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "mouth": [
+          9.5,
+          17.2
+        ]
+      }
+    },
+    {
+      "name": "strike_2",
+      "file": "strike_2.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "mouth": [
+          10.5,
+          18.2
+        ]
+      }
+    },
+    {
+      "name": "strike_3",
+      "file": "strike_3.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "mouth": [
+          9.5,
+          18.2
+        ]
+      }
+    },
+    {
+      "name": "recover_1",
+      "file": "recover_1.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "mouth": [
+          9.5,
+          17.2
+        ]
+      }
+    },
+    {
+      "name": "recover_2",
+      "file": "recover_2.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {
+        "mouth": [
+          8.5,
+          16.2
+        ]
+      }
+    }
+  ],
+  "sequences": {
+    "windup": [
+      "windup_1",
+      "windup_2",
+      "windup_3",
+      "windup_4"
+    ],
+    "strike": [
+      "strike_1",
+      "strike_2",
+      "strike_3"
+    ],
+    "recover": [
+      "recover_1",
+      "recover_2"
+    ]
+  }
+}

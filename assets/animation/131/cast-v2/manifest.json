@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "species": 131,
+  "kind": "cast",
+  "version": "cast-v2",
+  "palette": "RGBA",
+  "canvas_size": [
+    64,
+    64
+  ],
+  "intrinsic_facing": -1,
+  "colors": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      65,
+      133,
+      230
+    ],
+    [
+      230,
+      174,
+      106
+    ]
+  ],
+  "poses": [
+    {
+      "name": "idle",
+      "file": "idle.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {}
+    },
+    {
+      "name": "windup_1",
+      "file": "windup_1.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {}
+    },
+    {
+      "name": "windup_2",
+      "file": "windup_2.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {}
+    },
+    {
+      "name": "windup_3",
+      "file": "windup_3.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {}
+    },
+    {
+      "name": "windup_4",
+      "file": "windup_4.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {}
+    },
+    {
+      "name": "strike_1",
+      "file": "strike_1.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {}
+    },
+    {
+      "name": "strike_2",
+      "file": "strike_2.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {}
+    },
+    {
+      "name": "strike_3",
+      "file": "strike_3.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {}
+    },
+    {
+      "name": "recover_1",
+      "file": "recover_1.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {}
+    },
+    {
+      "name": "recover_2",
+      "file": "recover_2.png",
+      "foot_anchor": [
+        32.0,
+        59.0
+      ],
+      "anchors": {}
+    }
+  ],
+  "sequences": {
+    "windup": [
+      "windup_1",
+      "windup_2",
+      "windup_3",
+      "windup_4"
+    ],
+    "strike": [
+      "strike_1",
+      "strike_2",
+      "strike_3"
+    ],
+    "recover": [
+      "recover_1",
+      "recover_2"
+    ]
+  }
+}
