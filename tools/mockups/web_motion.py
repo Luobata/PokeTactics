@@ -255,6 +255,37 @@ def _angles(sid,index,state,p,cast):
             return sign*10*(1-p),0
     return 0.,0.
 
+def _fill_enclosed(image):
+    """NEAREST rotation leaves single-pixel holes inside the posed silhouette;
+    repaint fully enclosed transparent pixels from their nearest opaque neighbour."""
+    w,h=image.size
+    alpha=image.getchannel('A').load()
+    open_air=bytearray(w*h)
+    stack=[(x,0) for x in range(w)]+[(x,h-1) for x in range(w)]+[(0,y) for y in range(h)]+[(w-1,y) for y in range(h)]
+    while stack:
+        x,y=stack.pop()
+        if not(0<=x<w and 0<=y<h) or alpha[x,y] or open_air[y*w+x]:
+            continue
+        open_air[y*w+x]=1
+        stack.extend(((x+1,y),(x-1,y),(x,y+1),(x,y-1)))
+    px=image.load()
+    pending=[(x,y) for y in range(h) for x in range(w) if not alpha[x,y] and not open_air[y*w+x]]
+    while pending:
+        rest=[]
+        for x,y in pending:
+            for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)):
+                nx,ny=x+dx,y+dy
+                if 0<=nx<w and 0<=ny<h and px[nx,ny][3]:
+                    px[x,y]=px[nx,ny]
+                    break
+            else:
+                rest.append((x,y))
+        if len(rest)==len(pending):
+            break
+        pending=rest
+    return image
+
+
 def _joint_patch(source,point,radius):
     """Local original-colour shoulder/elbow overlap prevents a detached cut seam."""
     mask=Image.new('L',source.size)
@@ -338,6 +369,7 @@ def render_articulated(source,sid,state,progress,facing=1,action_kind='attack',m
     for layer,image in sorted(rendered,key=lambda part:part[0]):
         if layer>=0:
             out.alpha_composite(image)
+    out=_fill_enclosed(out)
     if sid==26:
         cheek=body_point((source.width*13/54,source.height*22/54))
         anchors['cheek']=(round(pad+cheek[0],2),round(pad+cheek[1],2))

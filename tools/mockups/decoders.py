@@ -52,6 +52,30 @@ def _rgb565(v: int) -> tuple:
     return (r * 255 // 31, g * 255 // 63, b * 255 // 31)
 
 
+def _restore_enclosed_white(image: Image.Image, white: tuple) -> Image.Image:
+    """Johto 素材的色号 0 同时承担背景与 sprite 自身的白色（翅膀、腹部、眼睛、
+    浅色高光），转成透明后这些内部白色就成了空洞。只把与边框不连通的透明像素
+    还原为不透明白，连到边缘的开放间隙（如大钢蛇体节之间）保持透明。"""
+    image = image.copy()
+    w, h = image.size
+    alpha = image.getchannel("A").load()
+    open_air = bytearray(w * h)
+    stack = [(x, 0) for x in range(w)] + [(x, h - 1) for x in range(w)] + \
+            [(0, y) for y in range(h)] + [(w - 1, y) for y in range(h)]
+    while stack:
+        x, y = stack.pop()
+        if not (0 <= x < w and 0 <= y < h) or alpha[x, y] or open_air[y * w + x]:
+            continue
+        open_air[y * w + x] = 1
+        stack.extend(((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
+    px = image.load()
+    for y in range(h):
+        for x in range(w):
+            if not alpha[x, y] and not open_air[y * w + x]:
+                px[x, y] = white + (255,)
+    return image
+
+
 class Front:
     """FRNT：头 <4sHH，段目录 <HHII>×n（size, per, count, offset），记录 = u16 id + per 字节。"""
 
@@ -102,6 +126,7 @@ class Front:
                     # Set alpha on this decoded copy; preserve every source byte.
                     source.info["transparency"] = 0
                     image = source.convert("RGBA")
+                    image = _restore_enclosed_white(image, tuple(source.getpalette()[:3]))
             except (OSError, ValueError) as exc:
                 if isinstance(exc, AssetError):
                     raise
