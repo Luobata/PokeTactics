@@ -10,8 +10,8 @@
 帧编排复用水箭龟形状：windup 下沉蓄力并向发射方向（左）倾，
 strike 后坐（+dx）下沉，recover 回稳。
 
-颜色泛化：轮廓色 = 原图中最暗的不透明色；补缝填充色 = 身体区域中
-出现次数最多的非轮廓色。
+颜色泛化：轮廓色 = 原图中最暗的不透明色；补缝填充色局部自适应
+（最近的非轮廓邻像素），回退值 = 身体区域中出现次数最多的非轮廓色。
 
 锚点：foot 为脚底线中点；若 character_rigs 对该物种有无部件锚点
 （position_percent，相对 bbox），按同一语义换算到画布坐标并逐帧随
@@ -94,9 +94,10 @@ def seam_fills(src, out, body_mask, body_move, ox, oy, outline, fill):
 
     与水箭龟手工包同一算法：候选 = 原图不透明而合成后透明的像素，只保留
     距移动后身体剪影 ≤2px 的候选（旧位置下面是背景而非身体时保持透明，
-    避免把旧轮廓补成重影）；保留的候选先补身体填充色，再从画布边缘洪水
-    填充确定最终外部背景（原图的抖动透明孔是封闭的，不会误判为外部），
-    与外部相邻的补像素描轮廓色——轮廓只出现在最终剪影外缘。
+    避免把旧轮廓补成重影）；保留的候选补「最近的非轮廓邻像素」颜色
+    （取不到时回退身体填充色），再从画布边缘洪水填充确定最终外部背景
+    （原图的抖动透明孔是封闭的，不会误判为外部），与外部相邻的补像素
+    描轮廓色——轮廓只出现在最终剪影外缘。
     """
     w, h = src.size
     spx, opx = src.load(), out.load()
@@ -118,8 +119,21 @@ def seam_fills(src, out, body_mask, body_move, ox, oy, outline, fill):
             cx, cy = ox + x, oy + y
             if spx[x, y][3] and not opx[cx, cy][3] and (cx, cy) in near_body:
                 kept.add((cx, cy))
+    # 填充色局部自适应：取输出中最近的非轮廓不透明邻像素颜色
+    # （全局单一填充色会把粉色头冠的颜色补进棕色腿部接缝）。
     for x, y in kept:
-        out.putpixel((x, y), fill)
+        color = None
+        best = None
+        for dx in range(-2, 3):
+            for dy in range(-2, 3):
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < CANVAS and 0 <= ny < CANVAS:
+                    pixel = opx[nx, ny]
+                    if pixel[3] and pixel != outline:
+                        dist = abs(dx) + abs(dy)
+                        if best is None or dist < best:
+                            best, color = dist, pixel
+        out.putpixel((x, y), color if color is not None else fill)
     exterior = set()
     queue = deque()
     for x in range(CANVAS):
