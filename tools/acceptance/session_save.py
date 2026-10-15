@@ -96,6 +96,11 @@ PRE_SUPPORT_TECHNIQUES = frozenset({
 # before remaining stock is recomputed as clamp(new_cap - held, 0, new_cap).
 PRE_LEGENDARY_POOL_FINGERPRINT = 'd7c81287aff94d80e653b882b9e938a5acbef613caf51dbd9c26ca91c22f41cf'
 PRE_LEGENDARY_POOL_BY_COST = {1: 22, 2: 18, 3: 12}
+# Verified 53-species build before the docs/49 rebalance additions (91/93/124/
+# 148/198/200/215/227 + 149 入传说档). Caps and record layout are identical to
+# the current build: the nine new species refill at the current cap when nobody
+# holds them, and every committed species keeps its current-cap conservation.
+PRE_REBALANCE_FINGERPRINT = '475e78b0bb4edc69f9a9c65dadf18c55dee202edf075ea7fd02bb7f9c110e822'
 PRE_SYNERGY_TECHNIQUES = frozenset({'cut', 'surf', 'rest', 'thunderbolt', 'ice_beam',
                                      'toxic', 'earthquake', 'roar', 'rapid_spin'})
 # Exact arena catalog from the frozen fixed-trait predecessor. Its fingerprint
@@ -303,7 +308,8 @@ class SessionCodec:
                      PRE_ATTRIBUTION_FINGERPRINT, PRE_AUGMENT_REROLL_FINGERPRINT,
                      PRE_GROWTH_AUGMENTS_FINGERPRINT, PRE_ARENA_META_FINGERPRINT,
                      PRE_PATHING_FIX_FINGERPRINT, PRE_TECHNIQUE_GROWTH_FINGERPRINT,
-                     PRE_SUPPORT_TECHNIQUES_FINGERPRINT, PRE_LEGENDARY_POOL_FINGERPRINT}
+                     PRE_SUPPORT_TECHNIQUES_FINGERPRINT, PRE_LEGENDARY_POOL_FINGERPRINT,
+                     PRE_REBALANCE_FINGERPRINT}
         if ruleset == tactics.BASE_RULESET:
             supported.add(LEGACY_BASE_FINGERPRINT)
         if ruleset in (tactics.BASE_RULESET, tactics.TACTICS_RULESET):
@@ -322,7 +328,8 @@ class SessionCodec:
                                          PRE_ARENA_META_FINGERPRINT, PRE_PATHING_FIX_FINGERPRINT,
                                          PRE_TECHNIQUE_GROWTH_FINGERPRINT,
                                          PRE_SUPPORT_TECHNIQUES_FINGERPRINT,
-                                         PRE_LEGENDARY_POOL_FINGERPRINT)
+                                         PRE_LEGENDARY_POOL_FINGERPRINT,
+                                         PRE_REBALANCE_FINGERPRINT)
         migrating_arena = is_arena and fingerprint == TWO_ROW_ARENA_FINGERPRINT
         migrating_expansion = (is_arena and fingerprint in supported
                                and fingerprint not in (current_fingerprint, PRE_STATISTICS_FINGERPRINT,
@@ -334,7 +341,8 @@ class SessionCodec:
                                                        PRE_PATHING_FIX_FINGERPRINT,
                                                        PRE_TECHNIQUE_GROWTH_FINGERPRINT,
                                                        PRE_SUPPORT_TECHNIQUES_FINGERPRINT,
-                                                       PRE_LEGENDARY_POOL_FINGERPRINT))
+                                                       PRE_LEGENDARY_POOL_FINGERPRINT,
+                                                       PRE_REBALANCE_FINGERPRINT))
         if not is_arena:
             supported.add(PRE_ARENA_FINGERPRINT)
         if not choices and not is_arena:
@@ -568,19 +576,26 @@ class SessionCodec:
                 saved_pool = {**saved_pool, **{str(s): demo.arena_mod.pool_cap(s) for s in missing}}
         pre_legendary_arena = is_arena and fingerprint != current_fingerprint
         if pre_legendary_arena:
-            # 传说档晚于全部已验证竞技指纹：缺失的新物种在无人持有时按新上限补满；
-            # 持有传说却缺池记录的存档是伪造的，留给下面的种类校验拒绝。
-            legendary = set(demo.arena_mod.LEGENDARY_ROSTER)
-            missing_legendary = {sid for sid in legendary if str(sid) not in saved_pool}
-            if missing_legendary and not any(held[sid] for sid in legendary):
+            # 后加物种晚于全部已验证竞技指纹：缺失的新物种在无人持有时按新上限
+            # 补满（传说档 + docs/49 补强档）；持有新物种却缺池记录的存档是伪造的，
+            # 留给下面的种类校验拒绝。
+            added = set(demo.arena_mod.LEGENDARY_ROSTER) | set(demo.arena_mod.REBALANCE_ROSTER)
+            missing_added = {sid for sid in added if str(sid) not in saved_pool}
+            if missing_added and not any(held[sid] for sid in added):
                 saved_pool = {**saved_pool,
-                              **{str(sid): demo.arena_mod.pool_cap(sid) for sid in missing_legendary}}
+                              **{str(sid): demo.arena_mod.pool_cap(sid) for sid in missing_added}}
         if set(saved_pool) != {str(s) for s in state.templates}:
             raise ValueError("卡池种类与当前版本不一致")
         committed_pool = set(data['pool'])
+        # docs/49 补强只增物种不改上限：该时代的存档按现行上限直接守恒。
+        same_cap_era = fingerprint == PRE_REBALANCE_FINGERPRINT
         for sid, template in state.templates.items():
             cap = demo.arena_mod.pool_cap(sid) if is_arena else demo.shop_mod.POOL_COPIES[template.tier]
-            if pre_legendary_arena and str(sid) in committed_pool:
+            if pre_legendary_arena and same_cap_era and str(sid) in committed_pool:
+                count = integer(saved_pool[str(sid)], 0, cap, "pool")
+                if count + held[sid] != cap:
+                    raise ValueError("卡池守恒校验失败")
+            elif pre_legendary_arena and str(sid) in committed_pool:
                 # 先按存档时代的旧上限证明守恒，再把池剩余收紧到新上限：
                 # 超出新上限的部分视为合法历史持仓，池剩余钳 0。
                 old_cap = PRE_LEGENDARY_POOL_BY_COST.get(template.tier)
@@ -591,7 +606,7 @@ class SessionCodec:
                     raise ValueError("卡池守恒校验失败")
                 count = max(0, min(cap, cap - held[sid]))
             elif pre_legendary_arena:
-                # 本次恢复按新上限补满的新物种（扩池/传说档），不允许已被持有。
+                # 本次恢复按新上限补满的新物种（扩池/传说档/补强档），不允许已被持有。
                 count = integer(saved_pool[str(sid)], 0, cap, "pool")
                 if count != cap or held[sid]:
                     raise ValueError("卡池守恒校验失败")
@@ -764,6 +779,7 @@ class SessionCodec:
                                                    PRE_TECHNIQUE_GROWTH_FINGERPRINT,
                                                    PRE_SUPPORT_TECHNIQUES_FINGERPRINT,
                                                    PRE_LEGENDARY_POOL_FINGERPRINT,
+                                                   PRE_REBALANCE_FINGERPRINT,
                                                    PRE_TRAITS_GEAR_FINGERPRINT,
                                                    PRE_ARENA_SYNERGY_FINGERPRINT), pre_synergy_arena,
                                reroll_required=fingerprint in (current_fingerprint,
@@ -772,7 +788,8 @@ class SessionCodec:
                                                                PRE_PATHING_FIX_FINGERPRINT,
                                                                PRE_TECHNIQUE_GROWTH_FINGERPRINT,
                                                                PRE_SUPPORT_TECHNIQUES_FINGERPRINT,
-                                                               PRE_LEGENDARY_POOL_FINGERPRINT))
+                                                               PRE_LEGENDARY_POOL_FINGERPRINT,
+                                                               PRE_REBALANCE_FINGERPRINT))
         elif 'arena' in data:
             raise ValueError('旧规则不能包含竞技强化记录')
         if schema_version >= 4:
@@ -820,8 +837,13 @@ class SessionCodec:
         if is_arena and fingerprint == PRE_LEGENDARY_POOL_FINGERPRINT:
             state.save_warning = ('卡池上限调整为 20/16/10，新增三神鸟（4 费）与超梦、梦幻（5 费）传说档，同场限一；'
                                   '阵容、装备、已学技能、海克斯与历史账本已保留，历史战斗结果不会重算。')
+        if is_arena and fingerprint == PRE_REBALANCE_FINGERPRINT:
+            state.save_warning = ('竞技池补强：新增哈克龙、鬼斯通、迷唇姐、刺甲贝、黑暗鸦、梦妖、狃拉、盔甲鸟，'
+                                  '快龙进入 5 费传说档（同场限一）；阵容、装备、已学技能、海克斯与历史账本已保留，'
+                                  '新精灵从后续刷新进入，历史战斗结果不会重算。')
         if (is_arena and fingerprint in supported
-                and fingerprint not in (current_fingerprint, PRE_LEGENDARY_POOL_FINGERPRINT)):
+                and fingerprint not in (current_fingerprint, PRE_LEGENDARY_POOL_FINGERPRINT,
+                                        PRE_REBALANCE_FINGERPRINT)):
             # 比传说档更老的存档同样完成卡池迁移（物种补满 + 上限收紧），把这条变化并入提示。
             previous = getattr(state, 'save_warning', '')
             pool_note = ('卡池上限调整为 20/16/10 并新增三神鸟（4 费）与超梦、梦幻（5 费）传说档，'
