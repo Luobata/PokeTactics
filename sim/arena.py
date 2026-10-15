@@ -35,16 +35,25 @@ GEN2_ROSTER = {
     157: (3, 'attack'), 212: (3, 'attack'), 230: (3, 'attack'), 160: (3, 'defense'),
     248: (3, 'defense'), 154: (3, 'support'),
 }
+# Rebalance additions (docs/49): activate the dead dragon/ghost bond groups and
+# thicken ice/dark/steel. Gen2 members keep their species in pokemon_gen2.json;
+# 149 joins the legendary tier below as the 600-BST pseudo-legendary.
+REBALANCE_ROSTER = {
+    93: (2, 'attack'), 124: (2, 'attack'), 148: (2, 'support'),
+    198: (2, 'attack'), 200: (2, 'attack'), 215: (2, 'attack'),
+    91: (3, 'defense'), 227: (3, 'defense'),
+}
 # Legendary tier (docs/12 §1): the three birds at 4-cost, Mewtwo/Mew at 5-cost.
 # One legendary at most per seat (board + bench), regardless of species; the
 # limit makes collecting three copies of one species impossible, so legendaries
 # never star up and combine() needs no special case.
 LEGENDARY_ROSTER = {
     144: (4, 'attack'), 145: (4, 'attack'), 146: (4, 'attack'),
-    150: (5, 'attack'), 151: (5, 'attack'),
+    150: (5, 'attack'), 151: (5, 'attack'), 149: (5, 'attack'),
 }
 LEGENDARY = frozenset(LEGENDARY_ROSTER)
-ROSTER = {**ORIGINAL_ROSTER, **EXPANSION_ROSTER, **GEN2_ROSTER, **LEGENDARY_ROSTER}
+ROSTER = {**ORIGINAL_ROSTER, **EXPANSION_ROSTER, **GEN2_ROSTER, **LEGENDARY_ROSTER,
+          **REBALANCE_ROSTER}
 POOL_BY_COST = {1: 20, 2: 16, 3: 10, 4: 10, 5: 8}
 PVE_WAVES = ((76, 76), (68, 68, 12), (31, 34, 73, 40),
              (9, 9, 65, 36), (59, 59, 6, 6, 3), (9, 9, 6, 6, 65, 121))

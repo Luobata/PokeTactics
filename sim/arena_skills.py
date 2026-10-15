@@ -151,6 +151,31 @@ SKILLS = {
     154: dict(id='verdant_sanctuary', name='清露花幕', type='GRASS', power=40, role='support',
               tags=['群体净化', '回复'],
               description='优先净化两格内至多两名带主要异常的其他友军，再各回复12%最大生命；没有异常时治疗最虚弱的受伤友军。不治疗自身，治疗受封疗影响。'),
+    # 补强档（docs/49）：激活龙/幽灵羁绊组，加厚冰/恶/钢；效果只复用既有机制件。
+    93: dict(id='phantom_hex', name='幽影咒爪', type='GHOST', power=60, role='attack',
+             tags=['异常追击', '连击'],
+             description='攻击主目标；主命中实际扣除生命且目标施法前已带任一主要异常时，追加一次40%幽灵属性伤害。追击不再触发异常或原生联动。'),
+    124: dict(id='frost_kiss', name='冰霜之吻', type='ICE', power=60, role='attack',
+              tags=['控制追击', '双属性'],
+              description='攻击主目标；主命中实际扣除生命且目标施法前已定身、冰冻或麻痹时，追加一次40%超能力属性伤害。追击不再触发异常或原生联动。'),
+    148: dict(id='dragon_vein', name='龙脉回响', type='DRAGON', power=0, role='support',
+              tags=['回能', '回复'],
+              description='为两格内生命比例最低的一名其他友军回复10%最大生命，并为其补充12点能量；没有可治疗或可充能的目标时保留能量。不治疗自身、不为自身回能，治疗受封疗影响，能量上限80。'),
+    198: dict(id='night_plunder', name='夜幕掠夺', type='DARK', power=60, role='attack',
+              tags=['汲能', '干扰'],
+              description='攻击主目标；主命中实际扣除生命后，偷取目标至多8点能量，自身获得其中一半；能量上限80。'),
+    200: dict(id='spiteful_wail', name='怨念尖啸', type='GHOST', power=55, role='attack',
+              tags=['控能', '干扰'],
+              description='攻击主目标；主命中实际扣除生命后，目标与其邻格至多一名其他敌人各失去至多8点能量。'),
+    215: dict(id='razor_flurry', name='冰爪连袭', type='ICE', power=55, role='attack',
+              tags=['连击', '双属性'],
+              description='攻击主目标；主命中实际扣除生命后，追加一次40%恶属性伤害。追击不再触发异常或原生联动。'),
+    91: dict(id='icicle_aegis', name='冰棱铁壳', type='ICE', power=50, role='defense',
+             tags=['减伤', '溅射'],
+             description='攻击主目标；主命中实际扣除生命后，对目标邻格至多一名其他敌人造成35%冰属性伤害；自身获得3秒30%减伤。侧击不再触发异常或原生联动。'),
+    227: dict(id='steel_pinion', name='钢翼推阵', type='STEEL', power=55, role='defense',
+              tags=['击退', '减伤', '清场'],
+              description='攻击主目标；主命中实际扣除生命且目标存活、后方有空位时，击退一格，可触发岩钉入格；清除自身一格内至多1格敌方岩钉；自身获得3秒30%减伤。'),
     # 传说档（4/5 费，同场限一）：高威力攻击技能，效果只复用既有机制件。
     144: dict(id='glacier_beam', name='冰冻光束', type='ICE', power=75, role='attack',
               tags=['范围', '冰炮'],
@@ -167,6 +192,9 @@ SKILLS = {
     151: dict(id='ancient_mind', name='原始念力', type='PSYCHIC', power=70, role='attack',
               tags=['汲能', '干扰'],
               description='攻击主目标；主命中实际扣除生命后，偷取目标至多10点能量，自身获得其中一半；能量上限80。'),
+    149: dict(id='dragon_dive', name='神速俯冲', type='DRAGON', power=85, role='attack',
+              tags=['高威爆发', '击退'],
+              description='以85威力龙属性攻击主目标；主命中实际扣除生命且目标存活、后方有空位时，击退一格，可触发岩钉入格。'),
 
 }
 
@@ -200,7 +228,11 @@ _IDENTITIES = {
     248: ('enemy', 'terrain', '岩钉壁垒'), 154: ('ally', 'cleanse', '群体净化'),
     144: ('enemy', 'area', '冰系轰炸'), 145: ('enemy', 'drain', '单体汲能'),
     146: ('enemy', 'burst', '高威爆发'), 150: ('enemy', 'burst', '高威爆发'),
-    151: ('enemy', 'drain', '汲能干扰'),
+    151: ('enemy', 'drain', '汲能干扰'), 149: ('enemy', 'burst', '高威俯冲'),
+    93: ('enemy', 'pursuit', '异常追击'), 124: ('enemy', 'pursuit', '控场追击'),
+    148: ('ally', 'energy', '治疗回能'), 198: ('enemy', 'drain', '掠能干扰'),
+    200: ('enemy', 'drain', '范围控能'), 215: ('enemy', 'combo', '双属性连击'),
+    91: ('enemy', 'area', '冰棱溅射'), 227: ('enemy', 'displacement', '击退清场'),
 }
 for _sid, (_targeting, _category, _behavior) in _IDENTITIES.items():
     SKILLS[_sid].update(targeting=_targeting, category=_category, behavior=_behavior)
@@ -424,6 +456,12 @@ def _support_targets(battle, unit, key, t):
         return sorted(candidates, key=lambda friend: (
             not (key == 'frost_shelter' and _major(friend, {'freeze'})),
             health_key(friend)))[:2 if key == 'frost_shelter' else 1]
+    if key == 'dragon_vein':
+        candidates = [friend for friend in friends
+                      if _can_heal(battle, unit, friend, .10, t) or friend.energy < ENERGY_MAX]
+        return sorted(candidates, key=lambda friend: (
+            friend.hp / friend.max_hp, -friend.energy,
+            battle._target_key(unit, friend)))[:1]
     fractions = {'healing_song': .12, 'cleansing_powder': .15, 'aroma_garden': .10,
                  'rescue_tongue': .12, 'life_pulse': .25, 'bliss_chorus': .18,
                  'verdant_sanctuary': .12}
@@ -491,6 +529,10 @@ def _support_cast(battle, unit, skill, t):
                 cleanse(patient, {'sleep', 'para'})
             amount = {'star_resonance': 18, 'beacon_relay': 14, 'watchful_lullaby': 16}[key]
             _energy(battle, unit, patient, amount, t, cast_index)
+        if key == 'dragon_vein':
+            heals.append((patient, _heal(battle, unit, patient,
+                                        patient.max_hp * .10, t, cast_index)))
+            _energy(battle, unit, patient, 12, t, cast_index)
     battle._partner_after_cast(unit, target, t, anchor, False)
     battle._request_weather(unit, t, cast_index)
     # Finish every native shield first: an item must not claim a shield that
@@ -781,11 +823,33 @@ def _cast(battle, unit, target, t):
         _drain(battle, unit, target, 12, t, cast_index)
     elif key == 'ancient_mind' and lost_hp:
         _drain(battle, unit, target, 10, t, cast_index, transfer=True)
+    elif key == 'phantom_hex' and lost_hp and prior_status is not None:
+        _side_hit(battle, unit, target, move, .40, t, cast_index)
+    elif key == 'frost_kiss' and lost_hp and already_controlled:
+        _side_hit(battle, unit, target, {**move, 'type': 'PSYCHIC'}, .40, t, cast_index)
+    elif key == 'razor_flurry' and lost_hp:
+        _side_hit(battle, unit, target, {**move, 'type': 'DARK'}, .40, t, cast_index)
+    elif key == 'night_plunder' and lost_hp:
+        _drain(battle, unit, target, 8, t, cast_index, transfer=True)
+    elif key == 'spiteful_wail' and lost_hp:
+        _drain(battle, unit, target, 8, t, cast_index)
+        for victim in _near_enemies(battle, unit, anchor, target)[:1]:
+            _drain(battle, unit, victim, 8, t, cast_index)
+    elif key == 'icicle_aegis' and lost_hp:
+        for victim in _near_enemies(battle, unit, anchor, target)[:1]:
+            _side_hit(battle, unit, victim, move, .35, t, cast_index)
+    elif key == 'steel_pinion':
+        if lost_hp:
+            _knockback(battle, unit, target, t, cast_index)
+        arena_fields.clear_near(battle, unit, t, cast_index, limit=1)
+    elif key == 'dragon_dive' and lost_hp:
+        _knockback(battle, unit, target, t, cast_index)
 
     guards = {'stone_pulse': .25, 'venom_tide': .20, 'twin_cannon': .20,
               'slow_field': .30, 'bull_rush': .20, 'mud_anchor': .25,
               'spinning_cleanup': .20, 'moon_guard': .25, 'iron_fault': .30,
-              'undertow_lock': .25, 'crag_citadel': .25}
+              'undertow_lock': .25, 'crag_citadel': .25, 'icicle_aegis': .30,
+              'steel_pinion': .30}
     if key in guards:
         _guard(battle, unit, unit, guards[key], t, cast_index)
     if key == 'solar_relay' and lost_hp:

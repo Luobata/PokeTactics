@@ -192,6 +192,34 @@ TRAITS.update({
     151: {'id': 'trait_safeguard', 'name': '神秘守护', 'category': 'defense', 'cooldown': 0., 'limit': 1,
           'trigger': '生命不低于一半时遭受直接命中的致命生命伤害', 'tags': ['保命'],
           'description': '生命不低于最大生命的一半时遭受直接命中的致命伤害，先结算护盾，再保留1生命，每战一次。毒伤与岩钉不触发。'},
+    # 补强档（docs/49）：全部沿用既有模板，不新增机制类型。
+    93: {'id': 'trait_spectral_grasp', 'name': '幽影缠手', 'category': 'defense', 'cooldown': 5., 'limit': 2,
+         'trigger': '邻格敌人普攻造成实际生命损失', 'tags': ['受击', '定身'],
+         'description': '受到邻格敌人的有效生命普攻后，使该敌人定身1.2秒，限制自然移动但不限制攻击和强制位移。冷却5秒，每战最多2次；定身不占主要异常槽。'},
+    124: {'id': 'trait_frost_absorb', 'name': '寒冰吸收', 'category': 'support', 'cooldown': 4., 'limit': 3,
+          'trigger': '冰属性直接命中造成实际生命损失后存活', 'tags': ['冰', '自疗', '回能'],
+          'description': '受到冰属性直接命中的实际生命伤害且仍存活时，自疗4%最大生命，并获得最多4实际能量。冷却4秒，每战最多3次，实际恢复或回能成功才消耗次数。本作改编为受伤后的有限吸收。'},
+    148: {'id': 'trait_shed_skin', 'name': '蜕皮', 'category': 'support', 'cooldown': 4., 'limit': 2,
+          'trigger': '成功完成本命施法且自己仍有主要异常', 'tags': ['施法', '自净化'],
+          'description': '成功完成本命施法后，清除自己的一个主要异常。冷却4秒，每战最多2次；空净化、教学、被阻止的施法不触发，保留短畏缩与控制保护。'},
+    198: {'id': 'trait_night_feed', 'name': '夜食', 'category': 'attack', 'cooldown': 4., 'limit': 3,
+          'trigger': '恶属性直接命中造成实际生命损失后存活', 'tags': ['恶', '回能'],
+          'description': '受到恶属性直接命中的实际生命伤害且仍存活时，获得最多8实际能量。冷却4秒，每战最多3次，实际回能成功才消耗次数。'},
+    200: {'id': 'trait_nightmare_touch', 'name': '梦魇之触', 'category': 'attack', 'cooldown': 5., 'limit': 2,
+          'trigger': '邻格敌人普攻造成实际生命损失', 'tags': ['受击', '睡眠'],
+          'description': '受到邻格敌人的有效生命普攻后，使该敌人睡眠。冷却5秒，每战最多2次；免疫、主要异常占槽或控制保护挡住时不消耗次数。'},
+    215: {'id': 'trait_honed_claws', 'name': '磨爪', 'category': 'attack', 'cooldown': 5., 'limit': 2,
+          'trigger': '成功完成本命施法', 'tags': ['施法', '增伤'], 'fraction': .15,
+          'description': '成功完成本命施法后，获得3秒直接伤害加成15%。冷却5秒，每战最多2次；被阻止的施法不触发，不强化毒伤、岩钉或治疗。'},
+    91: {'id': 'trait_shell_armor', 'name': '硬壳盔甲', 'category': 'defense', 'cooldown': 0., 'limit': 1,
+         'trigger': '生命不低于一半时遭受直接命中的致命生命伤害', 'tags': ['保命'],
+         'description': '生命不低于最大生命的一半时遭受直接命中的致命伤害，先结算护盾，再保留1生命，每战一次。毒伤与岩钉不触发。'},
+    227: {'id': 'trait_steel_feathers', 'name': '钢羽', 'category': 'defense', 'cooldown': 5., 'limit': 2,
+          'trigger': '邻格敌人普攻造成实际生命损失', 'tags': ['受击', '定身'],
+          'description': '受到邻格敌人的有效生命普攻后，使该敌人定身1.2秒，限制自然移动但不限制攻击和强制位移。冷却5秒，每战最多2次；定身不占主要异常槽。'},
+    149: {'id': 'trait_outrage', 'name': '逆鳞', 'category': 'attack', 'cooldown': 3., 'limit': 3,
+          'trigger': '生命不高于一半时的龙属性直接命中', 'tags': ['低血量', '龙'], 'fraction': .20,
+          'description': '生命不高于最大生命的一半时，龙属性直接命中伤害提高20%。冷却3秒，每战最多3次；只有实际多扣生命或额外消耗护盾才消耗次数。'},
 })
 
 
@@ -220,9 +248,11 @@ TRAIT_LOCKS = {'trait_verdant_rhythm': 'arena_bonds_6'}
 # combat hook; settlement semantics stay identical to the original template.
 _CONTACT_STATUS = {'trait_static': 'para', 'trait_poison_point': 'poison',
                    'trait_venom_scales': 'poison', 'trait_poison_needles': 'poison',
-                   'trait_effect_spore': 'sleep', 'trait_static_fleece': 'para'}
+                   'trait_effect_spore': 'sleep', 'trait_static_fleece': 'para',
+                   'trait_nightmare_touch': 'sleep'}
 _CONTACT_ROOT = {'trait_cursed_body': 1.2, 'trait_tangling_vines': 1.2,
-                 'trait_mud_wrap': 1.2}
+                 'trait_mud_wrap': 1.2, 'trait_spectral_grasp': 1.2,
+                 'trait_steel_feathers': 1.2}
 # key -> (move type, self-heal fraction, energy cap)
 _TYPED_ABSORB = {'trait_volt_absorb': ('ELECTRIC', .04, 4),
                  'trait_water_absorb': ('WATER', .04, 4),
@@ -230,22 +260,26 @@ _TYPED_ABSORB = {'trait_volt_absorb': ('ELECTRIC', .04, 4),
                  'trait_galvanize': ('ELECTRIC', 0., 8),
                  'trait_ice_body': ('ICE', .04, 4),
                  'trait_lightning_rod': ('ELECTRIC', 0., 8),
-                 'trait_flame_body': ('FIRE', .04, 4)}
+                 'trait_flame_body': ('FIRE', .04, 4),
+                 'trait_frost_absorb': ('ICE', .04, 4),
+                 'trait_night_feed': ('DARK', 0., 8)}
 # key -> (move type, hp divisor): boost while source.hp * divisor <= max_hp.
 _LOW_HP_BOOST = {'trait_blaze': ('FIRE', 3), 'trait_torrent': ('WATER', 2),
                  'trait_swarm': ('BUG', 3), 'trait_cornered': ('FIGHTING', 3),
                  'trait_raging_tide': ('WATER', 3),
-                 'trait_psychic_surge': ('PSYCHIC', 3)}
+                 'trait_psychic_surge': ('PSYCHIC', 3),
+                 'trait_outrage': ('DRAGON', 2)}
 _VULNERABLE_BOOST = {'trait_crushing_grip', 'trait_weakness_read'}
 # Offense windows open once (consuming a use) and boost until expiry; settle
 # never charges them per hit. Debuff-tied windows also end with the status.
 _DEBUFF_WINDOWS = {'trait_guts': 'physical', 'trait_competitive': 'special',
                    'trait_anger_point': 'physical'}
-_CAST_WINDOWS = {'trait_rising_kick', 'trait_sharpened_blades'}
+_CAST_WINDOWS = {'trait_rising_kick', 'trait_sharpened_blades', 'trait_honed_claws'}
 _WINDOWS = {**_DEBUFF_WINDOWS, **{key: 'all' for key in _CAST_WINDOWS}}
 _OPENING_WEAKEN = {'trait_intimidate', 'trait_unnerve'}
 _CADENCE_HEAL = {'trait_regenerator', 'trait_moonlight', 'trait_verdant_rhythm'}
-_LETHAL_GUARD = {'trait_sturdy', 'trait_stone_core', 'trait_steel_core', 'trait_safeguard'}
+_LETHAL_GUARD = {'trait_sturdy', 'trait_stone_core', 'trait_steel_core', 'trait_safeguard',
+                 'trait_shell_armor'}
 _ANTI_DODGE = {'trait_compound_eyes', 'trait_keen_eye'}
 
 
@@ -743,7 +777,7 @@ def after_native_cast(battle, source, t, cast_index):
             or battle.events[cast_index][4] != 'arena_' + source.ult_arch):
         return requested
     key = spec['id']
-    if key == 'trait_natural_cure':
+    if key in ('trait_natural_cure', 'trait_shed_skin'):
         return _cleanse(battle, source, source, spec, t, cast_index,
                         'completed_native_self_cure') or requested
     if key in _CAST_WINDOWS:

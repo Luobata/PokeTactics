@@ -219,9 +219,11 @@ class Bot:
         #    围巾只在持有同系棋子时才合（切系损耗，docs/07 §2）——无同系
         #    载体的围巾是死装备；幸运蛋达全场上限让位；无通信进化目标/
         #    石头已用则不烧进化石（组件留作后续特定配方）
-        stone_ok = not self.stone_used and any(
-            o.piece.species_id in items_mod.STONE_TARGETS
-            for o in self.all_pieces())
+        # 竞技场棋子按形态独立购买、不局内进化（docs/49）：进化石通道在
+        # arena_v1 下整体关闭，93 鬼斯通入池也不激活通信进化。
+        stone_ok = (self.inventory.ruleset != 'arena_v1' and not self.stone_used
+                    and any(o.piece.species_id in items_mod.STONE_TARGETS
+                            for o in self.all_pieces()))
         behind = self._is_behind(others)   # 落后方：幸运蛋提前（追赶条款）
         priority = items_mod.craft_priority(self.pers_key, stone_ok, behind)
         if self.inventory.ruleset == 'arena_v1':
@@ -253,7 +255,8 @@ class Bot:
             self.item_crafts += 1
         # 2) 进化石：装备到通信族中段形态上即触发通信进化（不消耗、每局一次；
         #    2026-09-14 裁定后的唯一通道——3 合 1 通道已删除）
-        if "evo_stone" in self.inventory.finished and not self.stone_used:
+        if ("evo_stone" in self.inventory.finished and not self.stone_used
+                and self.inventory.ruleset != 'arena_v1'):
             for o in sorted(self.all_pieces(),
                             key=lambda x: -dex.bst(x.piece.species_id)):
                 nxt = items_mod.STONE_TARGETS.get(o.piece.species_id)

@@ -1,6 +1,6 @@
 {
   "upstream": "https://github.com/pret/pokegold @656583c939d30f920a316177311a502dd222b57c",
-  "scope": "18 curated Gen2 arena species; Gold/Silver stats, types and level-up moves; Chinese names curated.",
+  "scope": "22 curated Gen2 arena species; Gold/Silver stats, types and level-up moves; Chinese names curated.",
   "entries": [
     {
       "id": 154,
@@ -634,6 +634,105 @@
       ]
     },
     {
+      "id": 198,
+      "name": "murkrow",
+      "name_zh": "黑暗鸦",
+      "types": [
+        "DARK",
+        "FLYING"
+      ],
+      "base": {
+        "hp": 60,
+        "attack": 85,
+        "defense": 42,
+        "speed": 91,
+        "special_attack": 85,
+        "special_defense": 42
+      },
+      "lineage": [
+        198
+      ],
+      "level_up": [
+        [
+          1,
+          64
+        ],
+        [
+          11,
+          228
+        ],
+        [
+          16,
+          114
+        ],
+        [
+          26,
+          101
+        ],
+        [
+          31,
+          185
+        ],
+        [
+          41,
+          212
+        ]
+      ]
+    },
+    {
+      "id": 200,
+      "name": "misdreavus",
+      "name_zh": "梦妖",
+      "types": [
+        "GHOST"
+      ],
+      "base": {
+        "hp": 60,
+        "attack": 60,
+        "defense": 60,
+        "speed": 85,
+        "special_attack": 85,
+        "special_defense": 85
+      },
+      "lineage": [
+        200
+      ],
+      "level_up": [
+        [
+          1,
+          45
+        ],
+        [
+          1,
+          149
+        ],
+        [
+          6,
+          180
+        ],
+        [
+          12,
+          109
+        ],
+        [
+          19,
+          212
+        ],
+        [
+          27,
+          60
+        ],
+        [
+          36,
+          220
+        ],
+        [
+          46,
+          195
+        ]
+      ]
+    },
+    {
       "id": 208,
       "name": "steelix",
       "name_zh": "大钢蛇",
@@ -864,6 +963,114 @@
         [
           54,
           224
+        ]
+      ]
+    },
+    {
+      "id": 215,
+      "name": "sneasel",
+      "name_zh": "狃拉",
+      "types": [
+        "DARK",
+        "ICE"
+      ],
+      "base": {
+        "hp": 55,
+        "attack": 95,
+        "defense": 55,
+        "speed": 115,
+        "special_attack": 35,
+        "special_defense": 75
+      },
+      "lineage": [
+        215
+      ],
+      "level_up": [
+        [
+          1,
+          10
+        ],
+        [
+          1,
+          43
+        ],
+        [
+          9,
+          98
+        ],
+        [
+          17,
+          103
+        ],
+        [
+          25,
+          185
+        ],
+        [
+          33,
+          154
+        ],
+        [
+          41,
+          97
+        ],
+        [
+          49,
+          163
+        ],
+        [
+          57,
+          251
+        ]
+      ]
+    },
+    {
+      "id": 227,
+      "name": "skarmory",
+      "name_zh": "盔甲鸟",
+      "types": [
+        "STEEL",
+        "FLYING"
+      ],
+      "base": {
+        "hp": 65,
+        "attack": 80,
+        "defense": 140,
+        "speed": 70,
+        "special_attack": 40,
+        "special_defense": 70
+      },
+      "lineage": [
+        227
+      ],
+      "level_up": [
+        [
+          1,
+          43
+        ],
+        [
+          1,
+          64
+        ],
+        [
+          13,
+          28
+        ],
+        [
+          19,
+          129
+        ],
+        [
+          25,
+          97
+        ],
+        [
+          37,
+          31
+        ],
+        [
+          49,
+          211
         ]
       ]
     },
