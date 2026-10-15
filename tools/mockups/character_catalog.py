@@ -136,7 +136,7 @@ def _arena_catalog(*, pieces=None, asset_root=None):
     controls = ['palette', 'effect_scale', 'particle_density', 'motion_scale']
     notes = {68: ('四条肩肘轨道交替出拳', '四臂蓄力、交错追击与收招'),
              26: ('耳朵摆动，尾巴独立蓄电', '脸颊释放电流，耳尾跟随充能'),
-             212: ('双钳分别出击，翅膀独立摆动', '交叉弹拳与双钳收招')}
+             212: ('右钳高举过顶挥砸，左钳后收平衡', '交叉弹拳与双钳收招')}
     for piece in sorted(pieces, key=lambda p: p.species_id):
         sid = piece.species_id
         if sid not in arena.ROSTER:

@@ -205,16 +205,29 @@ def _angles(sid,index,state,p,cast):
         if state=='windup':
             if cast:
                 return sign*(11+9*_ease(p)),-sign*(18+9*_ease(p))
-            return sign*22*_ease(p),-sign*31*_ease(p)
+            # 挥拳蓄力：先小幅下沉预示，再把右钳高举过顶；左钳后收配合
+            dip=_pulse(p,.12,.14)
+            q=_ease(min(1.,max(0.,(p-.18)/.82)))
+            if index==1:
+                return 12*dip-55*q,-8*q
+            return 16*q,-13*q
         if state=='strike':
-            center=(.18 if index==0 else .68) if cast else (.10 if index==0 else .58)
-            hit=_pulse(p,center,.30 if cast else .42)
-            return -sign*(31 if cast else 39)*hit,sign*(26 if cast else 32)*hit
+            if cast:
+                center=.18 if index==0 else .68
+                hit=_pulse(p,center,.30)
+                return -sign*31*hit,sign*26*hit
+            # 右钳从头顶向前下方挥砸到位，左钳反向平衡
+            hit=_pulse(p,.35,.32)
+            if index==1:
+                return -55*(1-hit)+55*hit,-8*(1-hit)+50*hit
+            return 16*(1-hit)-12*hit,-13*(1-hit)+9*hit
         if state=='recover':
             q=1-_ease(p)
             if cast:
                 return sign*5*q,-sign*6*q
-            return -sign*8*q,sign*9*q
+            if index==1:
+                return -6*q,-5*q
+            return 4*q,3*q
         if state=='hit':
             return sign*12*(1-p),sign*9*(1-p)
     elif sid==26:
