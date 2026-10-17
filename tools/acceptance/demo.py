@@ -35,6 +35,7 @@ craft(item) / equip(item,loc) / unequip(loc) / lock / end_prep / next / finish�
 """
 
 import copy
+import fcntl
 import io
 import json
 import os
@@ -46,6 +47,7 @@ import threading
 import time
 import uuid
 from pathlib import Path
+from contextlib import contextmanager
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 for _p in (str(ROOT), str(ROOT / "sim"), str(ROOT / "tools" / "mockups")):
@@ -155,27 +157,86 @@ _RENDER_THREADS = []     # 后台渲染线程登记（防 GC；测试可 join �
 _RENDER_LOCK = threading.Lock()
 _RENDER_PARAMS = {}        # (sid, round) -> 渲染中断后重建 render_job 的参数快照
 _RENDER_RESTARTS = set()   # (sid, round) 已自动重启过一次；再崩判定 dead，防确定性崩溃死循环
+_RENDER_ACTIVE = {}        # (sid, round) -> 正在运行/排队的渲染线程
 _RENDER_PARAMS_LIMIT = 8
 _RENDER_HEARTBEAT_STALE_S = 30
+_RENDER_CONCURRENCY = 2
+_RENDER_SEMAPHORE = threading.BoundedSemaphore(_RENDER_CONCURRENCY)
 
 
-def _run_render_job(job, out_dir=None) -> None:
+@contextmanager
+def _render_store_guard(*, blocking=True):
+    """Serialize ownership claims and deletion across threads and local servers."""
+    if not _RENDER_LOCK.acquire(blocking=blocking):
+        yield False
+        return
     try:
-        job()
-    except Exception:  # noqa: BLE001 —— 落帧失败由播放端重试/战果兜底
+        lock_path = ROOT / '.build' / '.render-cache.lock'
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        with lock_path.open('a') as handle:
+            try:
+                fcntl.flock(handle, fcntl.LOCK_EX | (0 if blocking else fcntl.LOCK_NB))
+            except BlockingIOError:
+                yield False
+                return
+            try:
+                yield True
+            finally:
+                fcntl.flock(handle, fcntl.LOCK_UN)
+    finally:
+        _RENDER_LOCK.release()
+
+
+def _write_heartbeat(out_dir: Path, *, frames: int, total=None, queued=False) -> None:
+    """Atomically publish render progress for status polling."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps({"pid": os.getpid(), "updated": time.time(),
+                          "done": frames, "n": frames, "frames": frames,
+                          "total": total, "queued": queued},
+                         ensure_ascii=False)
+    temporary = out_dir / "rendering.json.tmp"
+    temporary.write_text(payload)
+    os.replace(temporary, out_dir / "rendering.json")
+
+
+def _write_render_error(out_dir: Path, error: str) -> None:
+    try:
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / "rendering.json").unlink(missing_ok=True)
+        temporary = out_dir / "render_error.json.tmp"
+        temporary.write_text(json.dumps(
+            {"error": error, "at": time.time()}, ensure_ascii=False))
+        os.replace(temporary, out_dir / "render_error.json")
+    except OSError:
+        pass
+
+
+def _run_render_job(job, out_dir=None, key=None) -> None:
+    """Run one frame job with queueing, bounded CPU use and failure accounting."""
+    try:
+        if key is None:
+            job()
+            return
+        _write_heartbeat(out_dir, frames=0, total=None, queued=True)
+        if not _RENDER_SEMAPHORE.acquire(timeout=_RENDER_HEARTBEAT_STALE_S):
+            _write_render_error(out_dir, "render queue timeout")
+            return
+        try:
+            job()
+        finally:
+            _RENDER_SEMAPHORE.release()
+    except BaseException as exc:  # noqa: BLE001 —— worker 必须留下终态标记
         import traceback
         traceback.print_exc()
         if out_dir is not None:
-            # 留下机器可读的失败标记：帧端点据此尝试重启渲染或快速判死，
-            # 而不是让播放器对着一个永远不会完成的轮次空轮询。
-            try:
-                out_dir.mkdir(parents=True, exist_ok=True)
-                (out_dir / "rendering.json").unlink(missing_ok=True)
-                (out_dir / "render_error.json").write_text(json.dumps(
-                    {"error": traceback.format_exc(), "at": time.time()},
-                    ensure_ascii=False))
-            except OSError:
-                pass
+            _write_render_error(out_dir, traceback.format_exc())
+        if isinstance(exc, (KeyboardInterrupt, SystemExit)):
+            raise
+    finally:
+        if key is not None:
+            with _RENDER_LOCK:
+                if _RENDER_ACTIVE.get(key) is threading.current_thread():
+                    _RENDER_ACTIVE.pop(key, None)
 
 
 def _prepare_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
@@ -264,15 +325,17 @@ def _prepare_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
 
     def render_job() -> float:
         t0 = time.time()
-        if out_dir.exists():
-            shutil.rmtree(out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
+        # Keep ownership visible while replacing stale frames; another preview
+        # process must not mistake this active directory for abandoned output.
+        for old in out_dir.iterdir():
+            if old.is_file() and old.name != 'rendering.json':
+                old.unlink(missing_ok=True)
         heartbeat = out_dir / "rendering.json"
 
         def beat(done):
-            # 心跳：帧端点据此区分「还在渲染」与「渲染线程已死」。
-            heartbeat.write_text(json.dumps(
-                {"pid": os.getpid(), "updated": time.time(), "done": done, "n": n}))
+            # 心跳：状态端点据此展示进度并区分「还在渲染」与「渲染线程已死」。
+            _write_heartbeat(out_dir, frames=done, total=n)
 
         beat(0)
         T = 0.0
@@ -315,30 +378,117 @@ def _render_alive(directory: Path) -> bool:
     return True
 
 
-def ensure_render_job(sid, round_no) -> str:
-    """帧端点兜底：'ready' 帧集已发布 / 'rendering' 渲染中（含刚重启）/ 'dead' 无法恢复。
+def _start_render_job(job, out_dir: Path, key, name: str) -> None:
+    """Register and launch one worker; the map closes the no-heartbeat startup race."""
+    with _render_store_guard():
+        active = _RENDER_ACTIVE.get(key)
+        if active is not None and active.is_alive():
+            return
+        # Publish ownership before registration/start. Another local preview
+        # process can otherwise prune the directory in the startup gap.
+        _write_heartbeat(out_dir, frames=0,
+                         total=_RENDER_PARAMS.get(key, {}).get('total'),
+                         queued=True)
+        worker = threading.Thread(target=_run_render_job,
+                                  args=(job, out_dir, key), name=name, daemon=True)
+        _RENDER_ACTIVE[key] = worker
+        _RENDER_THREADS[:] = [t for t in _RENDER_THREADS if t.is_alive()]
+        _RENDER_THREADS.append(worker)
+        # Registration and start share the lock: a concurrent status probe can
+        # never observe an unstarted-but-registered thread as rebuildable.
+        worker.start()
 
-    渲染线程崩溃（render_error.json）或随服务器重启被杀（心跳过期）时，
-    若本进程还持有该轮的渲染参数快照，自动重启一次渲染；否则判 dead，
-    让播放器停止空轮询、直接落到战果。
+
+def _render_error_text(directory: Path) -> str | None:
+    try:
+        row = json.loads((directory / "render_error.json").read_text())
+    except (OSError, ValueError):
+        return None
+    value = row.get("error") or row.get("reason")
+    return value if isinstance(value, str) and value else "render failed"
+
+
+def render_job_status(sid: str, round_no: int) -> dict:
+    """Machine-readable render state used by playback and missing-frame retries."""
+    directory = ROOT / ".build" / "demo" / str(sid) / f"r{round_no}"
+    status = ensure_render_job(sid, round_no)
+    frames = total = updated_at = None
+    queued = False
+    try:
+        heartbeat = json.loads((directory / "rendering.json").read_text())
+        frames = heartbeat.get("frames", heartbeat.get("n"))
+        total = heartbeat.get("total")
+        updated_at = heartbeat.get("updated")
+        queued = bool(heartbeat.get("queued"))
+    except (OSError, ValueError, TypeError):
+        pass
+    if total is None:
+        with _RENDER_LOCK:
+            total = _RENDER_PARAMS.get((str(sid), int(round_no)), {}).get("total")
+    try:
+        if status == "ready":
+            meta = json.loads((directory / "meta.json").read_text())
+            total = int(meta["n"])
+            frames = total
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    return {"ok": True, "status": status, "frames": frames, "total": total,
+            "updated_at": updated_at, "queued": queued,
+            "error": _render_error_text(directory) if status == "dead" else None}
+
+
+def ensure_render_job(sid, round_no) -> str:
+    """帧端点兜底：'ready' 帧集已发布 / 'rendering' 渲染中 / 'dead' 无法恢复。
+
+    首次显式崩溃与心跳丢失一样，只要仍持有渲染参数就重建一次；重建后再
+    崩溃或停滞直接判 dead，不能无限重建，也不能永远宣称 rendering。
     """
     directory = ROOT / ".build" / "demo" / str(sid) / f"r{round_no}"
     if (directory / "meta.json").is_file():
         return "ready"
-    if _render_alive(directory):
-        return "rendering"
     key = (str(sid), int(round_no))
-    with _RENDER_LOCK:
+    with _render_store_guard():
         params = _RENDER_PARAMS.get(key)
         already = key in _RENDER_RESTARTS
-        if params is not None and not already:
+        active = _RENDER_ACTIVE.get(key)
+        error = _render_error_text(directory)
+        if error is None and _render_alive(directory):
+            return "rendering"
+        if active is not None and active.is_alive():
+            if error is None:
+                try:
+                    heartbeat = json.loads((directory / "rendering.json").read_text())
+                    updated = float(heartbeat.get("updated", 0))
+                except (OSError, ValueError, TypeError):
+                    # The ownership heartbeat is written before registration.
+                    return "rendering"
+                if bool(heartbeat.get("queued")) and time.time() - updated <= _RENDER_HEARTBEAT_STALE_S:
+                    return "rendering"
+                # A finished/restarted worker must not receive another rebuild.
+                return "dead"
+            # The worker is unwinding after writing its terminal marker. Let the
+            # next status call retry rather than recording a second restart now.
+            return "rendering"
+        if error is not None:
+            if params is None or already:
+                return "dead"
+            # First explicit crash consumes the sole retry and clears the marker
+            # before a fresh ownership heartbeat is published.
+            try:
+                (directory / "render_error.json").unlink()
+            except OSError:
+                return "dead"
             _RENDER_RESTARTS.add(key)
+        elif params is not None and not already:
+            _RENDER_RESTARTS.add(key)
+        if params is not None and not already:
+            # Claim the rebuild before releasing the lock for simulation setup.
+            # Concurrent status requests then see pending work, not a dead retry.
+            _write_heartbeat(directory, frames=0, total=params.get('total'), queued=True)
     if params is None:
         return "dead"
     if already:
-        # 重启后又崩（错误标记重新出现）视为确定性失败，不再循环重启；
-        # 心跳还没写出来属于刚启动的竞态，按渲染中处理。
-        return "dead" if (directory / "render_error.json").is_file() else "rendering"
+        return "dead"
     try:
         _, job = _prepare_battle_frames(
             params["comp_a"], params["comp_b"],
@@ -349,13 +499,11 @@ def ensure_render_job(sid, round_no) -> str:
     except Exception:  # noqa: BLE001 —— 重建失败同样落到战果兜底
         import traceback
         traceback.print_exc()
+        _write_render_error(directory, traceback.format_exc())
         return "dead"
-    worker = threading.Thread(target=_run_render_job, args=(job, params["out_dir"]),
-                              name=f"battle-render-retry-{sid}-r{round_no}", daemon=True)
-    _RENDER_THREADS.append(worker)
-    worker.start()
+    _start_render_job(job, params["out_dir"], key,
+                      f"battle-render-retry-{sid}-r{round_no}")
     return "rendering"
-
 
 def _render_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
                           positions_a=None, hud_snapshot=None, **battle_options):
@@ -1696,13 +1844,11 @@ class Session:
                     "seed": self.seed, "battle_i": battle_i, "weather_name": weather,
                     "out_dir": out_dir, "positions_a": copy.deepcopy(player_positions),
                     "hud_snapshot": dict(hud),
-                    "battle_options": copy.deepcopy(battle_options)}
+                    "battle_options": copy.deepcopy(battle_options),
+                    "total": meta["n"]}
                 _RENDER_RESTARTS.discard((str(self.sid), int(r)))
-            worker = threading.Thread(target=_run_render_job, args=(job, out_dir),
-                                      name=f"battle-render-{self.sid}-r{r}", daemon=True)
-            _RENDER_THREADS[:] = [t for t in _RENDER_THREADS if t.is_alive()]
-            _RENDER_THREADS.append(worker)
-            worker.start()
+            _start_render_job(job, out_dir, (str(self.sid), int(r)),
+                              f"battle-render-{self.sid}-r{r}")
         else:
             meta = _render_battle_frames(
                 comp_a, comp_b, rng, weather, out_dir,
@@ -1796,7 +1942,9 @@ class Session:
     def next_round(self) -> None:
         if self.phase != "battle":
             raise DemoError("当前不在结算阶段")
+        previous_round = self.round_no
         self.begin_round(self.round_no + 1)
+        _prune_round_frames(self.sid, previous_round, keep_rounds=2)
 
     def finish_spectating(self) -> None:
         if self.player.alive and self.phase != "over":
@@ -1809,6 +1957,91 @@ class Session:
             if self.phase == "prep":
                 self.end_prep()
         raise DemoError("观战轮数异常，请重新开局")
+
+
+def _prune_round_frames(sid: str, current_round: int, keep_rounds: int = 2) -> None:
+    """Keep only recent frame sets; committed battle summaries remain in saves."""
+    if not re.fullmatch(r"[a-f0-9]{12}", sid or "") or type(current_round) is not int:
+        return
+    session_dir = ROOT / ".build" / "demo" / sid
+    try:
+        rounds = list(session_dir.iterdir())
+    except OSError:
+        return
+    for directory in rounds:
+        match = re.fullmatch(r"r(\d+)", directory.name)
+        round_no = int(match.group(1)) if match else None
+        if round_no is not None and round_no <= current_round - keep_rounds:
+            _remove_inactive_render_path(directory, sid, round_no)
+
+
+def _session_has_live_renderer(session_dir: Path) -> bool:
+    """For cleanup, a live owner retains its directory even if progress stalls."""
+    paths = ([session_dir / 'rendering.json'] if re.fullmatch(r'r\d+', session_dir.name)
+             else session_dir.glob('r*/rendering.json'))
+    for heartbeat_path in paths:
+        try:
+            row = json.loads(heartbeat_path.read_text())
+            pid = row.get("pid")
+        except (OSError, ValueError, TypeError):
+            continue
+        if type(pid) is not int or pid <= 0:
+            continue
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            continue
+        return True
+    return False
+
+
+def _remove_inactive_render_path(directory: Path, sid: str, round_no=None) -> bool:
+    # Cleanup is best-effort: contention must never delay a gameplay request.
+    # The final check and delete share the same lock used to publish ownership.
+    with _render_store_guard(blocking=False) as acquired:
+        if not acquired:
+            return False
+        if any(owner == sid and (round_no is None or number == round_no)
+               for owner, number in _RENDER_ACTIVE):
+            return False
+        if _session_has_live_renderer(directory):
+            return False
+        shutil.rmtree(directory, ignore_errors=True)
+        return True
+
+
+def _prune_render_store(max_sessions: int | None = None) -> None:
+    """Bound historical frame directories; active workers are never removed."""
+    limit = MAX_SESSIONS * 2 if max_sessions is None else max_sessions
+    root = ROOT / ".build" / "demo"
+    try:
+        directories = [p for p in root.iterdir() if p.is_dir()]
+    except OSError:
+        return
+    def modified(path):
+        try:
+            return path.stat().st_mtime
+        except OSError:
+            return 0
+    directories.sort(key=modified, reverse=True)
+    for directory in directories[limit:]:
+        _remove_inactive_render_path(directory, directory.name)
+
+
+_HOUSEKEEPING_LOCK = threading.Lock()
+_HOUSEKEEPING_STARTED = False
+
+
+def start_render_housekeeping() -> None:
+    """Run one bounded historical-frame cleanup after server startup."""
+    global _HOUSEKEEPING_STARTED
+    with _HOUSEKEEPING_LOCK:
+        if _HOUSEKEEPING_STARTED:
+            return
+        _HOUSEKEEPING_STARTED = True
+    worker = threading.Thread(target=_prune_render_store, name='battle-render-housekeeping',
+                              daemon=True)
+    worker.start()
 
 
 # ---------------------------------------------------------------- 状态 JSON
@@ -2382,7 +2615,9 @@ def state_json(sess) -> dict:
         st['combinations'] = preparation(sess)
         import arena_bonds
         st['bonds'] = arena_bonds.preparation([o.piece for o in p.board], sess.templates.values())
-        st['arena']['bond_catalog'] = arena_bonds.catalog()
+        from bond_view import catalog_for_templates
+        st['arena']['bond_catalog'] = (catalog_for_templates(sess.templates)
+                                      if sess.is_family else arena_bonds.catalog())
         import arena_traits
         st['arena']['trait_catalog'] = arena_traits.catalog(
                         include_families=True, species_ids=sess.templates)
@@ -2817,8 +3052,10 @@ def _new_session(seed: int, params=None) -> Session:
 
 def _drop_session(sid: str) -> None:
     sess = SESSIONS.pop(sid, None)
-    if sess is not None:
-        shutil.rmtree(ROOT / ".build" / "demo" / sess.sid, ignore_errors=True)
+    if sess is None:
+        return
+    directory = ROOT / ".build" / "demo" / sess.sid
+    _remove_inactive_render_path(directory, sid)
 
 
 def _apply_action(params: dict):

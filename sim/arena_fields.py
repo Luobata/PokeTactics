@@ -50,6 +50,8 @@ def expire(battle, t):
                 with _effect(battle, source, target, key, 'expire', t,
                              expires_at=until):
                     setattr(target, attr, 0.)
+                    if key == 'vulnerability':
+                        target.vulnerable_fraction = 0.
                     battle._emit_state(target, t)
 
 
@@ -153,7 +155,9 @@ def apply_vulnerability(battle, unit, target, t, cast_index=None):
         return False
     with _effect(battle, unit, target, 'vulnerability', 'apply', t, cast_index,
                  fraction=.12, duration=4., expires_at=t + 4.):
-        target.vulnerable_until, target.vulnerability_source = t + 4., unit.idx
+        target.vulnerable_until = t + 4.
+        target.vulnerable_fraction = .12
+        target.vulnerability_source = unit.idx
         battle._emit_state(target, t)
     return True
 

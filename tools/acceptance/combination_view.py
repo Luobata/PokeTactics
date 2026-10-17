@@ -16,6 +16,9 @@ NAMES = {'poison_catalyst': '毒性催化', 'heart_bell': '护心铃', 'watch_ec
          'bond_inspiration': '鼓舞羁绊', 'element_wet': '湿润铺垫',
          'element_conduct': '水电导流', 'element_bloom': '水草滋养',
          'arena_weather': '天气争夺', 'life_orb': FINISHED['life_orb']['name']}
+DEPTH_BOND_NAMES = {'bond_frostline': '寒脉羁绊', 'bond_spirit': '魂缚羁绊',
+                    'bond_mindsong': '脑波羁绊', 'bond_dragon_pressure': '龙威羁绊'}
+NAMES.update(DEPTH_BOND_NAMES)
 GEAR_KEYS = ('drain_fang', 'tide_shell', 'dew_charm', 'torrent_orb', 'pulse_band',
              'relay_coil', 'grounding_cloak', 'storm_chime')
 NAMES.update({key: FINISHED[key]['name'] for key in GEAR_KEYS})
@@ -408,7 +411,9 @@ def battle_summary(events, teams, team=0):
             continue
         if effect not in ('energy', 'energy_drain', 'shield', 'absorb', 'charge', 'empowered_basic', 'vulnerability',
                           'spread', 'tempo', 'offense_buff', 'heal', 'cleanse', 'status',
-                          'guard', 'absorb_damage', 'accuracy', 'weaken', 'empowered_hit'):
+                          'guard', 'absorb_damage', 'accuracy', 'weaken', 'empowered_hit', 'chill', 'root'):
+            continue
+        if effect in ('chill', 'root') and payload.get('applied') is not True:
             continue
         if effect == 'spread' and payload.get('applied') is not True:
             continue
@@ -456,6 +461,9 @@ def battle_summary(events, teams, team=0):
         elif effect == 'offense_buff':
             row['triggers'] += 1
             row['offense_buffs'] += 1
+        elif effect in ('chill', 'root'):
+            row['triggers'] += 1
+            row['controls'] = row.get('controls', 0) + 1
         elif effect in ('heal', 'cleanse', 'status', 'guard', 'absorb_damage', 'accuracy', 'weaken'):
             row['triggers'] += 1
             field = {'heal': 'healing', 'cleanse': 'cleanses', 'status': 'statuses',
@@ -471,6 +479,10 @@ def battle_summary(events, teams, team=0):
               'total_healing': 'healing', 'total_cleanses': 'cleanses',
               'total_statuses': 'statuses', 'total_mitigated': 'mitigated',
               'total_accuracy_saves': 'accuracy_saves', 'total_weakens': 'weakens'}
+    if any('controls' in row for row in by_key):
+        fields['total_controls'] = 'controls'
+        for row in by_key:
+            row.setdefault('controls', 0)
     return {**{key: sum(row[field] for row in by_key) for key, field in fields.items()},
             'by_key': by_key}
 

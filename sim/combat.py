@@ -205,9 +205,13 @@ class Unit:
         self.bond_tiers = {}
         self.erosion_counts = {}
         self.erosion_used_targets = set()
+        self.bond_frost_counts = {}
         self.tempo_target_idx = None
         self.tempo_stacks = 0
         self.tempo_until = 0.
+        self.bond_chill_fraction = 0.
+        self.bond_chill_until = 0.
+        self.bond_chill_source_idx = None
         self.offense_buff_fraction = 0.
         self.offense_buff_until = 0.
         self.offense_buff_source_idx = None
@@ -232,6 +236,7 @@ class Unit:
         self.combo_ready_at = {}
         self.root_until = 0.
         self.vulnerable_until = 0.
+        self.vulnerable_fraction = .12
         self.rock_hits = 0
         self.rock_ready_at = 0.
         self.wet_until = 0.
@@ -693,6 +698,8 @@ class Battle:
         if self._arena_on:
             from arena_offense import tempo_multiplier
             interval /= tempo_multiplier(self, u, t)
+            from arena_offense import chill_multiplier
+            interval *= chill_multiplier(self, u, t)
             from arena_traits import action_multiplier
             interval /= action_multiplier(self, u, t)
         return interval
@@ -1262,6 +1269,9 @@ class Battle:
             if direct:
                 arena_traits.after_direct_hit(self, attacker, target, actual_hp, t,
                                              action_index, move, basic=primary and not cast)
+                from arena_bonds import after_direct_hit as after_bond_direct_hit
+                after_bond_direct_hit(self, attacker, target, actual_hp, t,
+                                      action_index, move, basic=primary and not cast)
                 from arena_teaching import after_hit_taken
                 after_hit_taken(self, target, attacker, actual_hp, t, action_index)
         return actual_hp
@@ -1594,7 +1604,7 @@ class Battle:
             from arena_offense import damage_multiplier
             dmg = int(dmg * damage_multiplier(self, u, self.duration))
         if self._arena_on and target.vulnerable_until > self.duration:
-            dmg = int(dmg * 1.12)
+            dmg = int(dmg * (1.0 + (target.vulnerable_fraction or .12)))
         # 通用技能「铁壁」：临时受伤减免（bulwark 施法后 3s；
         # 到期判定用本 tick 的 self.duration，_strike 同拍一致）
         temporary_dr = target.temp_dr if target.temp_dr_until >= self.duration else 0.0

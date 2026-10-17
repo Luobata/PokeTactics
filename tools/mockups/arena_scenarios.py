@@ -3,6 +3,22 @@ import copy
 import random
 
 SCENARIOS = {
+    'arena_bond_frostline': {
+        'label': '进阶羁绊 · 寒脉追击', 'exp': 'combinations',
+        'description': '刺甲贝、拉普拉斯、迷唇姐组成3寒脉；同目标连续命中后观察寒滞标记与行动节奏。',
+        'a': (91, 131, 76, 124, 26, 40), 'b': (31, 195, 128, 211, 40, 108)},
+    'arena_bond_spirit': {
+        'label': '进阶羁绊 · 魂缚反制', 'exp': 'combinations',
+        'description': '耿鬼与梦妖组成2魂缚；承受近身直接伤害跨过55%血线时束缚攻击者，每位每战一次。',
+        'a': (94, 200, 76, 26, 40, 36), 'b': (31, 34, 215, 212, 26, 40)},
+    'arena_bond_mindsong': {
+        'label': '进阶羁绊 · 脑波接力', 'exp': 'combinations',
+        'description': '呆壳兽、胡地、魔墙人偶与太阳伊布组成4脑波；邻近超能成员完成本命后给队友实际回能。',
+        'a': (80, 76, 122, 65, 196, 40), 'b': (31, 195, 128, 211, 40, 108)},
+    'arena_bond_dragon_pressure': {
+        'label': '进阶羁绊 · 龙威集火', 'exp': 'combinations',
+        'description': '刺龙王与快龙组成2龙威；本命主命中后向目标邻格扩散易伤，观察集火窗口。',
+        'a': (76, 195, 149, 230, 40, 36), 'b': (31, 128, 68, 211, 40, 108)},
     'arena_bond_erosion': {
         'label': '基础羁绊 · 侵蚀消耗', 'exp': 'combinations',
         'description': '尼多后、千针鱼、尼多王与毒刺水母组成4侵蚀；无装备、教学和海克斯，观察真实毒伤回能。',

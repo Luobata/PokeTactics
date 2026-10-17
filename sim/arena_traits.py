@@ -991,7 +991,9 @@ def after_native_cast(battle, source, t, cast_index):
         with _effect(battle, source, target, key, 'vulnerability', t, cast_index,
                      amount=0, fraction=.12, duration=4., expires_at=until,
                      reason='completed_native_attack_mark'):
-            target.vulnerable_until, target.vulnerability_source = until, source.idx
+            target.vulnerable_until = until
+            target.vulnerable_fraction = .12
+            target.vulnerability_source = source.idx
             _used_trait(source, spec, t)
             battle._emit_state(target, t)
         return requested

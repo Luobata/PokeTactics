@@ -320,6 +320,7 @@ def after_knockback(battle, unit, target, origin, t, cast_index, action_index):
                  origin=origin, destination=target.pos,
                  reason='successful_enemy_knockback'):
         target.vulnerable_until = t + spec['duration']
+        target.vulnerable_fraction = spec['vulnerability']
         target.vulnerability_source = unit.idx
         _used(unit, key, t, spec['cooldown'])
         battle._emit_state(target, t)

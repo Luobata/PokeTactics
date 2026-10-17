@@ -105,6 +105,8 @@ PRE_HOENN_FINGERPRINT = '3105c8e3f3386efe16c7b74e519a7b4acb2b770155a607a7e6af7d0
 PRE_REBALANCE_FINGERPRINT = '475e78b0bb4edc69f9a9c65dadf18c55dee202edf075ea7fd02bb7f9c110e822'
 # Verified families-v2 build immediately before in-match tactical research.
 PRE_TACTICAL_RESEARCH_FINGERPRINT = 'fd6a3572ba682a361a6edfb008f5fd4c0e1ae7a13cea85fac94f7fd5285e51ce'
+# Verified build with the full research ledger, before deeper member bonds.
+PRE_BOND_DEPTH_FINGERPRINT = '771abf263e2c1603af3178e3ac321b43a963123d79b29159257f2ac97bf05638'
 PRE_SYNERGY_TECHNIQUES = frozenset({'cut', 'surf', 'rest', 'thunderbolt', 'ice_beam',
                                      'toxic', 'earthquake', 'roar', 'rapid_spin'})
 # Exact arena catalog from the frozen fixed-trait predecessor. Its fingerprint
@@ -127,12 +129,21 @@ class UnknownRulesError(UnsupportedVersionError, ValueError):
     """A verified incompatible rule version must not trigger old-bank recovery."""
 
 
-def rules_fingerprint():
+def _compute_rules_fingerprint():
     digest = hashlib.sha256()
     for path in sorted((ROOT / "sim").glob("*.py")) + sorted((ROOT / "data").glob("*.json")):
         digest.update(path.name.encode())
         digest.update(path.read_bytes())
     return digest.hexdigest()
+
+
+# Bind saves to the running rules at process startup. Editing sources while a
+# preview server is alive must not label its old simulation as the new rules.
+_RUNTIME_RULES_FINGERPRINT = _compute_rules_fingerprint()
+
+
+def rules_fingerprint():
+    return _RUNTIME_RULES_FINGERPRINT
 
 
 def integer(value, low, high, label):
@@ -313,6 +324,11 @@ class SessionCodec:
         fingerprint = data.get('rules')
         current_fingerprint = rules_fingerprint()
         loaded_fingerprint = fingerprint
+        allow_depth_bonds = loaded_fingerprint == current_fingerprint
+        if fingerprint == PRE_BOND_DEPTH_FINGERPRINT:
+            # Same pool, inventory and research schema; only future combats
+            # use the new bonds. Keep every already committed battle unchanged.
+            fingerprint = current_fingerprint
         # Exact predecessor retains its species shop and all committed ledgers.
         if fingerprint == PRE_FAMILY_FINGERPRINT:
             if data.get('arena_pool', 'species_v1') != 'species_v1':
@@ -834,7 +850,8 @@ class SessionCodec:
                                                    PRE_REBALANCE_FINGERPRINT,
                                                    PRE_TRAITS_GEAR_FINGERPRINT,
                                                    PRE_ARENA_SYNERGY_FINGERPRINT), pre_synergy_arena,
-                               research_required=loaded_fingerprint == current_fingerprint,
+                               research_required=loaded_fingerprint in (
+                                   current_fingerprint, PRE_BOND_DEPTH_FINGERPRINT),
                                reroll_required=fingerprint in (current_fingerprint,
                                                                PRE_GROWTH_AUGMENTS_FINGERPRINT,
                                                                PRE_ARENA_META_FINGERPRINT,
@@ -848,6 +865,23 @@ class SessionCodec:
             raise ValueError('旧规则不能包含竞技强化记录')
         if schema_version >= 4:
             self._decode_tactics(state, data)
+        if is_arena and loaded_fingerprint == PRE_BOND_DEPTH_FINGERPRINT:
+            state.save_warning = ('已更新羁绊战法；阵容、库存、奖励和本局研习已保留，'
+                                  '历史战斗结果不会重算，新效果只在后续战斗生效。')
+        if not allow_depth_bonds:
+            from combination_view import DEPTH_BOND_NAMES
+            def reject_new_reports(value):
+                if isinstance(value, dict):
+                    if 'total_controls' in value or value.get('id') in DEPTH_BOND_NAMES:
+                        raise ValueError('旧版存档不能包含新羁绊战报')
+                    for child in value.values():
+                        reject_new_reports(child)
+                elif isinstance(value, list):
+                    for child in value:
+                        reject_new_reports(child)
+            for report in (state.last_battle, state.battle_history,
+                           getattr(state, 'scouting_history', None)):
+                reject_new_reports(report)
         if is_arena and fingerprint == PRE_NATIVE_SKILLS_FINGERPRINT:
             state.save_warning = '已加入18种专属原生技能；学习技能、装备和回合奖励进度已保留。'
         if is_arena and fingerprint == PRE_COMBINATIONS_FINGERPRINT:
@@ -1055,10 +1089,12 @@ class SessionCodec:
         packed = copy.deepcopy(report)
         if packed.get('effect_version') == 1:
             for key in ('combinations', 'enemy_combinations'):
-                rows = [[row['id'], *[row[counter] for counter in COMBINATION_COUNTERS]]
+                version = 2 if 'total_controls' in packed[key] else 1
+                counters = COMBINATION_COUNTERS + (('controls',) if version == 2 else ())
+                rows = [[row['id'], *[row[counter] for counter in counters]]
                         for row in packed[key]['by_key']]
                 compact = json.dumps(rows, separators=(',', ':'), allow_nan=False).encode('utf-8')
-                packed[key] = {'version': 1, 'encoding': 'zlib-json-v1',
+                packed[key] = {'version': version, 'encoding': 'zlib-json-v1',
                                'data': base64.b64encode(zlib.compress(compact)).decode('ascii')}
         if compact_statistics and packed['statistics'] is not None:
             packed['statistics'] = {'version': 1, 'units': [
@@ -1086,7 +1122,7 @@ class SessionCodec:
             value = report[key]
             if isinstance(value, dict) and 'version' in value:
                 if (not extended or set(value) != {'version', 'encoding', 'data'}
-                        or type(value['version']) is not int or value['version'] != 1
+                        or type(value['version']) is not int or value['version'] not in (1, 2)
                         or value['encoding'] != 'zlib-json-v1' or not isinstance(value['data'], str)
                         or len(value['data']) > 128 * 1024):
                     raise ValueError('紧凑联动版本或字段无效')
@@ -1101,15 +1137,17 @@ class SessionCodec:
                     raise ValueError('紧凑联动压缩数据无效') from exc
                 from combination_view import NAMES, battle_summary
                 summary = battle_summary([], {})
+                controls = value['version'] == 2
+                counters = COMBINATION_COUNTERS + (('controls',) if controls else ())
                 rows = sequence(decoded_rows, len(NAMES), 'compact combinations')
                 for row in rows:
-                    if not isinstance(row, list) or len(row) != len(COMBINATION_COUNTERS) + 1:
+                    if not isinstance(row, list) or len(row) != len(counters) + 1:
                         raise ValueError('紧凑联动行长度无效')
                     combo = row[0]
                     if not isinstance(combo, str) or combo not in NAMES:
                         raise ValueError('紧凑联动类别无效')
                     summary['by_key'].append({'id': combo, 'name': NAMES[combo],
-                                              **dict(zip(COMBINATION_COUNTERS, row[1:]))})
+                                              **dict(zip(counters, row[1:]))})
                 total_fields = {'triggers': 'triggers', 'total_energy': 'energy', 'total_shield': 'shield',
                                 'absorbed': 'absorbed', 'total_charges': 'charges', 'total_damage': 'damage',
                                 'damage_absorbed': 'damage_absorbed', 'total_vulnerable': 'vulnerable',
@@ -1118,8 +1156,10 @@ class SessionCodec:
                                 'total_cleanses': 'cleanses', 'total_statuses': 'statuses',
                                 'total_mitigated': 'mitigated', 'total_accuracy_saves': 'accuracy_saves',
                                 'total_weakens': 'weakens'}
+                if controls:
+                    total_fields['total_controls'] = 'controls'
                 for row in summary['by_key']:
-                    for counter in COMBINATION_COUNTERS:
+                    for counter in counters:
                         integer(row[counter], 0, 2 ** 31 - 1, 'compact combination counter')
                 summary.update({key: sum(row[field] for row in summary['by_key'])
                                 for key, field in total_fields.items()})
@@ -1268,11 +1308,14 @@ class SessionCodec:
                         'total_statuses': 'statuses', 'total_mitigated': 'mitigated',
                         'total_accuracy_saves': 'accuracy_saves', 'total_weakens': 'weakens'}
         trait_shape = attack_shape | set(trait_fields)
-        if not isinstance(summary, dict) or set(summary) not in (old_shape, new_shape, attack_shape, trait_shape):
+        control_shape = trait_shape | {'total_controls'}
+        if not isinstance(summary, dict) or set(summary) not in (old_shape, new_shape, attack_shape, trait_shape, control_shape):
             raise ValueError('联动统计字段无效')
         extended = set(summary) != old_shape
-        attack_extended = set(summary) in (attack_shape, trait_shape)
-        traits_extended = set(summary) == trait_shape
+        attack_extended = set(summary) in (attack_shape, trait_shape, control_shape)
+        traits_extended = set(summary) in (trait_shape, control_shape)
+        if set(summary) == control_shape:
+            trait_fields['total_controls'] = 'controls'
         numeric_totals = (totals | (extra_totals if extended else set())
                           | (attack_totals if attack_extended else set())
                           | (set(trait_fields) if traits_extended else set()))
@@ -1285,6 +1328,8 @@ class SessionCodec:
                    'bond_guard', 'bond_inspiration'}
         if traits_extended:
             import arena_traits
+            from combination_view import DEPTH_BOND_NAMES
+            allowed.update(DEPTH_BOND_NAMES)
             allowed.update({'drain_fang', 'tide_shell', 'dew_charm', 'torrent_orb',
                             'pulse_band', 'relay_coil', 'grounding_cloak', 'storm_chime',
                             'life_orb', 'element_wet', 'element_conduct', 'element_bloom',

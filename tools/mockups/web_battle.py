@@ -172,6 +172,7 @@ STATUS_LABELS = {
     'reflect': ('壁', (159, 217, 242)), 'sworddance': ('攻', (255, 192, 91)),
     'flinch': ('晕', (253, 221, 129)), 'root': ('缚', (152, 216, 102)),
     'vulnerability': ('破', (255, 173, 126)),
+    'chill': ('寒', (133, 223, 250)),
     'healing_block': ('封', (255, 140, 121)),
     'taunt': ('嘲', (255, 172, 109)), 'thorns': ('刺', (223, 170, 249)),
     'ward_charge': ('蓄', (255, 205, 111)),
@@ -183,7 +184,7 @@ STATUS_LABELS = {
 }
 # Control and prevention remain visible when several effects coexist. Overflow
 # is explicit; it does not imply that the unshown replay states ended.
-STATUS_PRIORITY = ('freeze', 'sleep', 'flinch', 'paralysis', 'root',
+STATUS_PRIORITY = ('freeze', 'sleep', 'flinch', 'paralysis', 'root', 'chill',
     'healing_block', 'taunt', 'vulnerability', 'physical_weaken', 'shield',
     'burn', 'poison', 'guard', 'thorns', 'ward_charge', 'wet',
     'lightscreen', 'reflect', 'sworddance', 'offense_buff', 'physical_buff',
@@ -1176,7 +1177,15 @@ class WebBattleRenderer:
         for event in self.anim.timeline.recent_events(t, 4.):
             if event[1] != 'combo_effect':
                 continue
-            if event[4] == 'breach_momentum' and event[5] == 'vulnerability' and event[3] == idx:
+            if event[4] in ('bond_frostline', 'bond_spirit') and event[3] == idx:
+                control = 'chill' if event[4] == 'bond_frostline' else 'root'
+                if event[5] == 'expire':
+                    active.pop(control, None)
+                elif (event[5] == control and event[6].get('applied') is True
+                      and 0 <= t-event[0] < event[6].get('duration', 0)):
+                    active[control] = event
+                continue
+            if event[4] in ('breach_momentum', 'bond_dragon_pressure') and event[5] == 'vulnerability' and event[3] == idx:
                 if 0 <= t-event[0] < event[6].get('duration', 0):
                     active['vulnerability'] = event
                 continue

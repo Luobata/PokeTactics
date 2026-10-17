@@ -285,7 +285,7 @@
   const libraryCopy = {
     items: ['ITEMS / ONE SLOT, MANY CHOICES', '为队员选一件趁手的道具。', '输出、启动、生存或反制。普通装备可重复获得，多名精灵可携带同名装备；每只精灵一个装备位，可以卸下转移。', '27', '搜索道具、效果、组件或推荐精灵'],
     traits: ['TRAITS / SPECIES IDENTITY', '特性，让同伴多一份本领。', '查看当前卡池各形态的固定或可选特性，了解触发条件与配队方式。特性不消耗能量，也不占本命或学习槽。', '—', '搜索特性、触发条件或精灵'],
-    bonds: ['BONDS / TEAM BEFORE LOADOUT', '不同伙伴，拼出一套战法。', '属性提供队伍基础，战术羁绊按2 / 4位不同伙伴分档。冰、龙、幽灵可从1位启动轻量专长；其他属性按各自门槛激活。同物种不同星级不会重复计数。', '↔', '搜索羁绊、门槛、效果或成员'],
+    bonds: ['BONDS / TEAM BEFORE LOADOUT', '不同伙伴，拼出一套战法。', '属性奠定基础，战术决定配队与出手节奏。寒脉追击、魂缚控场、脑波接力、龙威集火各有门槛与反制；家族卡池中，同一家族对每项羁绊最多计一次。', '↔', '搜索羁绊、门槛、效果或成员'],
     augments: ['AUGMENTS / STRENGTHEN YOUR TEAM', '基础阵容先启动，再选一份强化。', '第 1、7、13 轮从三个选项中选择一个，本局最多三次选择。数值增益加强现有阵容；特定效果转化仍需相应海克斯，同一强化不能重复选择。竞技挑战可解锁额外候选。', '17', '搜索海克斯、效果或推荐精灵'],
     techniques: ['TECHNIQUES / COMPLETE THE LOADOUT', '补上核心需要的那一招。', '有库存时消耗一台技能机免费学习，没有库存时花 2 金币；替换不返还旧技能。独立学习位不覆盖原生技能。常规技能机次数等于培养档，每次用后需 3 次有效普攻再装填；天气机每战一次。', '09', '搜索技能机、触发条件或可学精灵'],
     builds: ['BUILD NOTES / MAKE IT WORK TOGETHER', '先让伙伴配合，再把路线强化。', '每条路线先列本命技能能组成的基础战法，再列装备、学习技能与海克斯强化。基础阵容不必等待整套推荐齐全；反击、传播和效果转化仍需各自明确的道具或海克斯条件。', '↔', '搜索组合、精灵、道具、技能或海克斯'],
@@ -373,7 +373,13 @@
   }
   function bondCard(row) {
     const data = libraryState.catalog;
-    return `<article class="resource-card bond-card ${escape(row.category)}" id="entry-${escape(row.id)}" tabindex="-1"><div class="resource-card-heading"><span class="resource-icon" aria-hidden="true">${escape(categorySymbols[row.category])}</span><div><span class="catalog-kind">${escape(categoryNames[row.category])}</span><h2>${escape(row.name)}</h2></div></div><p class="resource-effect">${escape(row.description)}</p><ol class="bond-thresholds">${arr(row.thresholds).map(tier => `<li><span>${Number(tier.count)}<small>位不同伙伴</small></span><p>${escape(tier.effect)}</p></li>`).join('')}</ol><p class="resource-source">${row.id === 'bond_inspiration' ? '成员援护的实际受益队友可获增益' : row.beneficiaries === 'team' ? '达到门槛后全队受益' : '达到门槛后相应羁绊成员受益'} · 同物种只计一次</p><details class="bond-members" open><summary>羁绊成员 · ${arr(row.members).length} 位</summary><div class="pokemon-references">${pokemonReferences(row.members, data)}</div></details>${row.category === 'tactic' ? `<a class="build-reference" href="/anim?mode=arena&scenario=arena_${escape(row.id)}&seed=7">观看无装备、技能机或海克斯的羁绊对战 ${arrow}</a>` : ''}<p class="resource-tradeoff">${escape(row.note || '只统计已部署精灵，备战席不计数；战术联动仍需真实的命中、状态与站位条件。')}</p></article>`;
+    const familyMode = row.count_unit === '家族';
+    const countLabel = familyMode ? '个不同家族' : '位不同伙伴';
+    const identityNote = familyMode ? '同一家族对每项羁绊最多计一次；进化后的实际属性决定成员资格' : '同物种只计一次';
+    const memberTitle = familyMode ? `${Number(row.identity_count)} 个家族 · ${arr(row.members).length} 个可用形态` : `${arr(row.members).length} 位`;
+    const tactics = row.playstyle ? `<section class="trait-tactics" aria-label="羁绊战法与反制"><h3>${escape(row.playstyle)}</h3><p><strong>搭配思路</strong>${arr(row.synergy).map(escape).join('；')}</p><p><strong>如何反制</strong>${escape(row.counterplay)}</p></section>` : '';
+    const preview = row.scenario ? `<a class="build-reference" href="/anim?mode=arena&scenario=${escape(row.scenario)}&seed=7">观看无装备、技能机或海克斯的羁绊对战 ${arrow}</a>` : '';
+    return `<article class="resource-card bond-card ${escape(row.category)}" id="entry-${escape(row.id)}" tabindex="-1"><div class="resource-card-heading"><span class="resource-icon" aria-hidden="true">${escape(categorySymbols[row.category])}</span><div><span class="catalog-kind">${escape(categoryNames[row.category])}</span><h2>${escape(row.name)}</h2></div></div><p class="resource-effect">${escape(row.description)}</p><ol class="bond-thresholds">${arr(row.thresholds).map(tier => `<li><span>${Number(tier.count)}<small>${countLabel}</small></span><p>${escape(tier.effect)}</p></li>`).join('')}</ol><p class="resource-source">${row.id === 'bond_inspiration' ? '成员援护的实际受益队友可获增益' : row.beneficiaries === 'team' ? '达到门槛后全队受益' : '达到门槛后相应羁绊成员受益'} · ${identityNote}</p>${tactics}<details class="bond-members"><summary>羁绊成员 · ${memberTitle}</summary><div class="pokemon-references">${pokemonReferences(row.members, data)}</div></details>${preview}<p class="resource-tradeoff">${escape(row.note || '只统计已部署精灵，备战席不计数；战术联动仍需真实的命中、状态与站位条件。')}</p></article>`;
   }
   function groupedBuilds(builds) {
     const groups = new Map();

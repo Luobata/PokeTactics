@@ -1216,6 +1216,8 @@ COMBINATION_NAMES = {'heart_bell': '护心铃', 'poison_catalyst': '毒性催化
                      'metronome': '节拍器', 'native_inspiration': '充能鼓舞',
                      'bond_erosion': '侵蚀羁绊', 'bond_combo': '连击羁绊',
                      'bond_guard': '守护羁绊', 'bond_inspiration': '鼓舞羁绊'}
+COMBINATION_NAMES.update({'bond_frostline': '寒脉羁绊', 'bond_spirit': '魂缚羁绊',
+                          'bond_mindsong': '脑波羁绊', 'bond_dragon_pressure': '龙威羁绊'})
 
 COMBINATION_NAMES.update({key: FINISHED[key]['name'] for key in (
     'drain_fang', 'tide_shell', 'dew_charm', 'torrent_orb', 'pulse_band',
@@ -1277,6 +1279,11 @@ def combination_label(key, effect, details):
             label['expire'] = '物理强化结束' if key == 'trait_guts' else '物理压制结束'
     if effect == 'tempo' and key == 'bond_combo':
         label['tempo'] = label['tempo'].replace('节拍', '连击', 1)
+    if key == 'bond_frostline':
+        label.update(chill=f"行动间隔 +{details.get('fraction', 0):.0%} · {details.get('duration', 0):g}秒",
+                     expire='寒滞结束')
+    if key == 'bond_spirit':
+        label.update(root=f"束缚 {details.get('duration', 0):g}秒", expire='魂缚结束')
     if effect == 'tempo' and details.get('base_fraction', 0) > 0 and details.get('item_fraction', 0) > 0:
         label['tempo'] += (f"（连击+{details['base_fraction']:.0%} / 装备+{details['item_fraction']:.0%}）")
     if effect == 'expire' and key in ('metronome', 'native_inspiration', 'bond_combo', 'bond_inspiration'):
@@ -1335,6 +1342,35 @@ def draw_combination(img, key, effect, source, target, progress, details):
     ax, ay = source
     bx, by = target
     alpha = 220 if effect == 'active' else round(245 * (1 - p * .6))
+    if key in ('bond_frostline', 'bond_spirit'):
+        color = (133, 223, 250, alpha) if key == 'bond_frostline' else (195, 149, 232, alpha)
+        radius = 10 + p * 4
+        draw.arc((bx-radius, by+7-radius*.35, bx+radius, by+7+radius*.35),
+                 5, 355, fill=color, width=2)
+        if effect == 'expire':
+            return
+        if key == 'bond_frostline':
+            for offset in (-8, 0, 8):
+                _star(draw, bx+offset, by+3-abs(offset)*.4, 3, color, 6)
+        else:
+            for offset in (-7, 7):
+                draw.line(((bx+offset,by+7),(bx+offset-3,by),(bx+offset,by-5)), fill=color, width=2)
+        return
+    if key == 'bond_mindsong':
+        violet = (210, 167, 255, alpha)
+        for phase in (0., .3, .6):
+            flight = (p+phase) % 1.
+            xx, yy = ax+(bx-ax)*flight, ay+(by-ay)*flight-4
+            draw.ellipse((xx-2,yy-2,xx+2,yy+2), fill=violet)
+        draw.arc((bx-9,by-7,bx+9,by+7), 30, 330, fill=violet, width=1)
+        return
+    if key == 'bond_dragon_pressure':
+        gold = (255, 188, 105, alpha)
+        for side in (-1, 1):
+            xx = bx+side*(11+p*4)
+            draw.line(((xx,by-9),(xx-side*4,by),(xx,by+9)), fill=gold, width=2)
+        _star(draw, bx, by-13, 4, gold, 4)
+        return
     if key == 'element_wet':
         cyan, pale = (87, 208, 239, alpha), (221, 255, 245, alpha)
         radius = 10 + (math.sin(p*math.tau)*2 if effect == 'active' else p*12)

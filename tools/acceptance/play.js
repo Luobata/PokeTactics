@@ -16,6 +16,37 @@
     );
   const icon = (name) =>
     `<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;
+  const API_TIMEOUT_MS = 12000;
+  const RENDER_STATUS_TIMEOUT_MS = 5000;
+  const RENDER_STATUS_MAX_ERRORS = 3;
+  const RENDER_NO_PROGRESS_TIMEOUT_MS = 180000;
+  const finiteStatusNumber = (value) =>
+    typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+  const renderTimeoutError = (error) =>
+    error?.name === "TimeoutError" || error?.name === "AbortError";
+  async function fetchJson(url, {timeoutMs = API_TIMEOUT_MS, signal} = {}) {
+    let controller = null;
+    let timeout;
+    const followExternal = () => controller?.abort(signal?.reason);
+    if (typeof AbortController === "function") {
+      controller = new AbortController();
+      signal?.addEventListener("abort", followExternal, {once: true});
+      if (signal?.aborted) controller.abort(signal.reason);
+      timeout = setTimeout(() => {
+        const error = new Error("请求超时");
+        error.name = "TimeoutError";
+        controller.abort(error);
+      }, timeoutMs);
+    }
+    try {
+      const response = await fetch(url, {cache: "no-store", signal: controller?.signal});
+      if (!response.ok) throw new Error(`连接失败（${response.status}）`);
+      return await response.json();
+    } finally {
+      if (timeout != null) clearTimeout(timeout);
+      signal?.removeEventListener("abort", followExternal);
+    }
+  }
   const trainerName = (value) => String(value ?? "").replace(/L[123]\b/g, "");
   const SLOT_KEY = "poketactics.play.arena.slot";
   let state = null,
@@ -108,8 +139,17 @@
     loaded: new Set(),
     failed: new Set(),
     pending: new Map(),
+    backoffTimers: new Map(),
     cacheLimit: 72,
     renderDead: false,
+    renderStatus: "unknown",
+    renderStatusTimer: null,
+    renderStatusAbort: null,
+    renderStatusPending: false,
+    renderStatusErrors: 0,
+    renderPollDelay: 500,
+    renderLastProgress: null,
+    renderDeadline: 0,
     reportTab: "events",
     reportTabTouched: false,
   };
@@ -184,11 +224,7 @@
     )
       query.set("expected_sequence", String(state.save.sequence));
     try {
-      const response = await fetch(`/api/demo/action?${query}`, {
-        cache: "no-store",
-      });
-      if (!response.ok) throw new Error(`连接失败（${response.status}）`);
-      const result = await response.json();
+      const result = await fetchJson(`/api/demo/action?${query}`);
       if (!result.ok) {
         if (result.recovery_sid) {
           sid = result.recovery_sid;
@@ -226,7 +262,7 @@
       // A lost mutation response is uncertain: reload disk before another purchase.
       if (!["state", "resume", "new"].includes(cmd)) needsResume = true;
       toast(
-        `${error.message}。${needsResume ? "请点击继续存档核对进度。" : "请检查本地服务后重试。"}`,
+        `${renderTimeoutError(error) ? "连接超时" : error.message}。${needsResume ? "请点击继续存档核对进度。" : "请检查本地服务后重试。"}`,
         true,
       );
       $("save-status").textContent = "连接中断，可点击「继续存档」重试。";
@@ -560,11 +596,15 @@
     showCombinationSummary(row, "history");
     if (!$("history-report-dialog").open) $("history-report-dialog").showModal();
   }
+  const familyBondMode = () => state?.arena?.pool_version?.startsWith('families_');
+  const bondCountUnit = () => familyBondMode() ? '个家族' : '种';
+  const bondTierUnit = () => familyBondMode() ? '家族档' : '种档';
+  const bondRecruitUnit = () => familyBondMode() ? '个不同家族' : '位不同伙伴';
   function renderBonds() {
     const entries = Array.isArray(state.bonds?.entries) ? state.bonds.entries : null;
     if (!entries) {
       $("synergy-list").innerHTML = (state.synergies || []).map((s) => `<details class="synergy-row${s.tier ? " on" : ""}"><summary><span class="type-dot">${esc((s.zh || s.name || "").slice(0, 1))}</span><strong>${esc(s.zh || s.name)}</strong><small>${Number(s.n)}${s.next ? " / " + Number(s.next) : ""}</small></summary><p>${esc(s.effect || `还需 ${Number(s.need)} 位伙伴。`)}</p></details>`).join("") || '<p class="empty-copy">上场精灵，点亮你的第一组羁绊。</p>';
-      $("bond-note").textContent = "旧存档按其原有规则显示属性计数；新竞技按不同物种计数。";
+      $("bond-note").textContent = "按该存档原有规则显示属性计数；只计已上场伙伴。";
       return;
     }
     const catalog = state.arena?.catalog || [];
@@ -581,9 +621,9 @@
       previousCategory = row.category;
       const candidates = [...(row.candidates || [])].sort((a, b) => priority(a) - priority(b) || a - b).slice(0, 4);
       const nextTier = (row.thresholds || []).find(tier => Number(tier.count) === Number(row.next));
-      const effect = row.effect || (nextTier ? `${row.next}种档：${nextTier.effect}` : "部署不同伙伴，达到门槛后激活。");
+      const effect = row.effect || (nextTier ? `${row.next}${bondTierUnit()}：${nextTier.effect}` : "部署不同伙伴，达到门槛后激活。");
       const available = candidates.map(sid => { const p = catalog.find(p => p.sid === sid); return p ? `<a href="/pokedex?q=${encodeURIComponent(p.name)}"><span>${esc(p.name)}</span><small>${bench.has(sid) ? "备战席" : shop.has(sid) ? "商店" : "图鉴"}</small></a>` : ""; }).join("");
-      return `${heading}<details class="synergy-row bond-row${row.tier ? " on" : ""}"><summary><span class="type-dot${row.category === "tactic" ? " tactic" : ""}">${esc((row.name || "").slice(0, 1))}</span><strong>${esc(row.name)}</strong><small>${Number(row.n)}${row.next ? " / " + Number(row.next) : " · 满档"}</small></summary><p class="bond-tier">${row.tier ? `已激活 ${Number(row.tier)} 种档` : "尚未激活"}${row.next ? ` · 再补 ${Number(row.need)} 位不同伙伴` : ""}</p><p>${esc(effect)}</p>${available ? `<div class="bond-candidates"><span>可补伙伴</span>${available}</div>` : ""}<a class="bond-directory-link" href="/pokedex?tab=bonds&q=${encodeURIComponent(row.name)}">完整成员与门槛 ↗</a></details>`;
+      return `${heading}<details class="synergy-row bond-row${row.tier ? " on" : ""}"><summary><span class="type-dot${row.category === "tactic" ? " tactic" : ""}">${esc((row.name || "").slice(0, 1))}</span><strong>${esc(row.name)}</strong><small>${Number(row.n)}${row.next ? " / " + Number(row.next) : " · 满档"}</small></summary><p class="bond-tier">${row.tier ? `已激活 ${Number(row.tier)} ${bondTierUnit()}` : "尚未激活"}${row.next ? ` · 再补 ${Number(row.need)} ${bondRecruitUnit()}` : ""}</p><p>${esc(effect)}</p>${available ? `<div class="bond-candidates"><span>可补伙伴</span>${available}</div>` : ""}<a class="bond-directory-link" href="/pokedex?tab=bonds&q=${encodeURIComponent(row.name)}">完整成员与门槛 ↗</a></details>`;
     }).join("") || '<p class="empty-copy">上场精灵，点亮你的第一组羁绊。</p>';
   }
   function pieceBonds(p) {
@@ -602,7 +642,7 @@
     for (const id of p.bonds || []) {
       const row = (state?.bonds?.entries || []).find(row => row.id === id);
       if (row && Number(row.tier) > 0)
-        lines.push(`<p class="detail-buff"><i class="buff-src src-bond">羁绊</i><strong>${esc(row.name)} · ${Number(row.tier)} 种档</strong><span>${esc(row.effect)}</span></p>`);
+        lines.push(`<p class="detail-buff"><i class="buff-src src-bond">羁绊</i><strong>${esc(row.name)} · ${Number(row.tier)} ${bondTierUnit()}</strong><span>${esc(row.effect)}</span></p>`);
     }
     for (const track of state.arena?.research?.tracks || []) {
       if (track.stacks) lines.push(`<p class="detail-buff"><i class="buff-src src-augment">研习</i><strong>${esc(track.name)} · ${track.stacks} 层</strong><span>${esc(track.reward)}</span></p>`);
@@ -865,7 +905,8 @@
     if (Object.hasOwn(data, "total_damage")) totals.push(["total_damage", "已结算的强化额外生命损失"], ["damage_absorbed", "强化部分被盾吸收"], ["total_charges", "反击蓄力"], ["total_vulnerable", "成功施加易伤"]);
     if (Object.hasOwn(data, "total_spreads")) totals.push(["total_spreads", "成功异常传播"], ["total_tempo_stacks", "有效普攻增层"], ["total_offense_buffs", "直接攻击鼓舞次数"]);
     if (Object.hasOwn(data, "total_healing")) totals.push(["total_healing", "特性 / 装备实际治疗"], ["total_mitigated", "实际避免生命损失"], ["total_cleanses", "实际净化"], ["total_statuses", "成功施加异常"], ["total_accuracy_saves", "修正闪避"], ["total_weakens", "物理压制目标"]);
-    const visible = rows.filter((row) => row.triggers || row.absorbed || row.charges);
+    if (Object.hasOwn(data, "total_controls")) totals.push(["total_controls", "减速 / 束缚次数"]);
+    const visible = rows.filter((row) => row.triggers || row.absorbed || row.charges || row.controls);
     function benefit(row) {
       const metrics = [];
       if (row.energy) metrics.push(`回能 ${Number(row.energy)}`);
@@ -876,6 +917,7 @@
       if (row.spreads) metrics.push(`成功传播 ${Number(row.spreads)} 次`);
       if (row.tempo_stacks) metrics.push(`有效普攻增层 ${Number(row.tempo_stacks)} 次（清层后可重新累计）`);
       if (row.offense_buffs) metrics.push(row.id === "trait_guts" ? `毅力 ${Number(row.offense_buffs)} 次 · 3秒物理直接伤害+20%` : row.id === "bond_inspiration" ? `鼓舞 ${Number(row.offense_buffs)} 次 · 3秒直接攻击增益` : `鼓舞 ${Number(row.offense_buffs)} 次 · 每次3秒直接攻击+25%`);
+      if (row.controls) metrics.push(`减速 / 束缚 ${Number(row.controls)} 次`);
       if (row.healing) metrics.push(`实际治疗 ${Number(row.healing)}`);
       if (row.cleanses) metrics.push(`实际净化 ${Number(row.cleanses)} 次`);
       if (row.statuses) metrics.push(`成功异常 ${Number(row.statuses)} 次`);
@@ -918,17 +960,22 @@
         ? `（${sources.map(sid => `${esc(nameOf(sid))}在${bench.has(sid) ? "备战席" : "商店"}`).filter(text => !text.startsWith("在")).join("、")}）`
         : "";
       return `<li>${row.tier
-        ? `当前阵容「${esc(row.name)}」已激活 ${Number(row.tier)} 种档，再补 ${Number(row.need)} 位不同伙伴点亮 ${Number(row.next)} 种档`
-        : `当前阵容再上场 ${Number(row.need)} 位不同伙伴即可点亮「${esc(row.name)}」`}${effect}${hint}</li>`;
+        ? `当前阵容「${esc(row.name)}」已激活 ${Number(row.tier)} ${bondTierUnit()}，再补 ${Number(row.need)} ${bondRecruitUnit()}点亮 ${Number(row.next)} ${bondTierUnit()}`
+        : `当前阵容再上场 ${Number(row.need)} ${bondRecruitUnit()}即可点亮「${esc(row.name)}」`}${effect}${hint}</li>`;
     }).join("")}</ul>`;
   }
   function bondSparkRows(units) {
     const catalog = Array.isArray(state?.arena?.bond_catalog) ? state.arena.bond_catalog : [];
     if (!catalog.length || !Array.isArray(units)) return null;
+    if (familyBondMode() && catalog.some(bond => bond.count_unit !== '家族' || !bond.identity_by_species))
+      return null;
     const deployed = new Set(units.filter(unit => Number(unit.team) === 0).map(unit => Number(unit.sid)));
     return catalog.map(bond => {
       const members = new Set((bond.members || []).map(Number));
-      const n = [...deployed].filter(sid => members.has(sid)).length;
+      const identities = [...deployed].filter(sid => members.has(sid))
+        .map(sid => familyBondMode() ? bond.identity_by_species[String(sid)] : sid)
+        .filter(identity => identity != null);
+      const n = new Set(identities).size;
       if (!n) return null;
       const thresholds = [...(bond.thresholds || [])].sort((a, b) => Number(a.count) - Number(b.count));
       const reached = thresholds.filter(t => n >= Number(t.count));
@@ -954,10 +1001,10 @@
     const active = rows.filter(row => row.tier > 0);
     const pending = rows.filter(row => !row.tier && row.need > 0).slice(0, 3);
     container.hidden = false;
-    container.innerHTML = `<div class="bond-spark-heading"><h3>羁绊点亮 · 上场阵容</h3><span>按上场不同物种计数，与准备区口径一致</span></div>${
-      active.map(row => `<p class="bond-spark-row on"><strong>${esc(row.name)} <small>${Number(row.n)} 种${row.category === "tactic" ? " · 战术" : ""}</small></strong><span>已激活 ${Number(row.tier)} 种档 · ${esc(row.effect)}${row.next ? ` · 再补 ${Number(row.need)} 位升 ${Number(row.next)} 档` : " · 已封顶"}</span></p>`).join("") ||
+    container.innerHTML = `<div class="bond-spark-heading"><h3>羁绊点亮 · 上场阵容</h3><span>${familyBondMode() ? "按上场不同家族计数，同族多形态最多计一次" : "按上场不同物种计数，与准备区口径一致"}</span></div>${
+      active.map(row => `<p class="bond-spark-row on"><strong>${esc(row.name)} <small>${Number(row.n)} ${bondCountUnit()}${row.category === "tactic" ? " · 战术" : ""}</small></strong><span>已激活 ${Number(row.tier)} ${bondTierUnit()} · ${esc(row.effect)}${row.next ? ` · 再补 ${Number(row.need)} ${familyBondMode() ? "个家族" : "位"}升 ${Number(row.next)} 档` : " · 已封顶"}</span></p>`).join("") ||
       '<p class="bond-spark-row"><span>本场没有点亮任何羁绊档位。</span></p>'}${
-      pending.map(row => `<p class="bond-spark-row"><strong>${esc(row.name)} <small>${Number(row.n)} / ${Number(row.next)} 种</small></strong><span>还差 ${Number(row.need)} 位不同伙伴点亮：${esc(row.nextEffect)}</span></p>`).join("")}`;
+      pending.map(row => `<p class="bond-spark-row"><strong>${esc(row.name)} <small>${Number(row.n)} / ${Number(row.next)} ${bondCountUnit()}</small></strong><span>还差 ${Number(row.need)} ${bondRecruitUnit()}点亮：${esc(row.nextEffect)}</span></p>`).join("")}`;
   }
   // 下局建议：全部由 state / 战报里的真实记录推导，数据缺一项就少一条，不凑数。
   function adviceTeamTotal(stats, team, metric) {
@@ -1036,12 +1083,12 @@
       ? `；${sources.map(sid => `${esc(nameOf(sid))}就在${bench.has(sid) ? "备战席" : "商店"}`).join("、")}`
       : "";
     const effect = (near.thresholds || []).find(t => Number(t.count) === Number(near.next))?.effect;
-    return `「${esc(near.name)}」还差 ${Number(near.need)} 位不同伙伴点亮 ${Number(near.next)} 种档${effect ? `（${esc(effect)}）` : ""}${hint}：下局见到优先拿下。`;
+    return `「${esc(near.name)}」还差 ${Number(near.need)} ${bondRecruitUnit()}点亮 ${Number(near.next)} ${bondTierUnit()}${effect ? `（${esc(effect)}）` : ""}${hint}：下局见到优先拿下。`;
   }
   function adviceConsolidateTip(stats) {
     const active = (bondSparkRows(stats?.units) || []).find(row => row.tier > 0);
     if (!active) return null;
-    return `「${esc(active.name)}」已点亮 ${Number(active.tier)} 种档（${esc(active.effect)}）：下局继续围绕它补强${active.next ? `，再补 ${Number(active.need)} 位升 ${Number(active.next)} 档` : "，已封顶保持人口质量"}。`;
+    return `「${esc(active.name)}」已点亮 ${Number(active.tier)} ${bondTierUnit()}（${esc(active.effect)}）：下局继续围绕它补强${active.next ? `，再补 ${Number(active.need)} ${familyBondMode() ? "个家族" : "位"}升 ${Number(active.next)} 档` : "，已封顶保持人口质量"}。`;
   }
   function adviceEconomyTip(won) {
     const streak = Number(state?.you?.streak) || 0;
@@ -1111,7 +1158,7 @@
     const rows = p.bonds?.entries || p.synergies || [];
     const active = rows.filter(s => s.tier);
     if (!detailed) return active.map(s => `<span title="${esc(s.effect)}">${esc(s.name || s.zh)} ${Number(s.n)}</span>`).join("") || '<span class="inactive">暂无激活羁绊</span>';
-    return `<section class="scout-effects" aria-label="羁绊完整效果"><h3>队伍羁绊 · 当前公开配置</h3><p class="scout-section-note">${esc(p.bonds?.note || "当前公开阵容的成员计数与已激活效果。")}</p>${rows.map(row => `<details class="scout-effect${row.tier ? " active" : ""}"><summary><span>${esc(row.name || row.zh)}</span><small>${row.tier ? "已激活 " + Number(row.tier) + " 种档" : "未激活"} · ${Number(row.n)}${row.next ? " / " + Number(row.next) : ""}</small></summary><p>${esc(row.effect || "尚未达到激活门槛。")}</p>${(row.thresholds || []).map(tier => `<p class="scout-effect-tier"><strong>${Number(tier.count)}种档</strong> ${esc(tier.effect)}</p>`).join("")}</details>`).join("") || '<p class="empty-copy">暂无羁绊记录。</p>'}</section>`;
+    return `<section class="scout-effects" aria-label="羁绊完整效果"><h3>队伍羁绊 · 当前公开配置</h3><p class="scout-section-note">${esc(p.bonds?.note || "当前公开阵容的成员计数与已激活效果。")}</p>${rows.map(row => `<details class="scout-effect${row.tier ? " active" : ""}"><summary><span>${esc(row.name || row.zh)}</span><small>${row.tier ? "已激活 " + Number(row.tier) + " " + bondTierUnit() : "未激活"} · ${Number(row.n)}${row.next ? " / " + Number(row.next) : ""}</small></summary><p>${esc(row.effect || "尚未达到激活门槛。")}</p>${(row.thresholds || []).map(tier => `<p class="scout-effect-tier"><strong>${Number(tier.count)}${bondTierUnit()}</strong> ${esc(tier.effect)}</p>`).join("")}</details>`).join("") || '<p class="empty-copy">暂无羁绊记录。</p>'}</section>`;
   }
   function scoutBoard(p, mini = false) {
     if (!p.rows) return '<p class="empty-copy">当前数据未提供站位。</p>';
@@ -1445,8 +1492,16 @@
       clearTimeout(playback.healTimer);
       playback.healTimer = null;
     }
+    if (playback.renderStatusTimer) {
+      clearTimeout(playback.renderStatusTimer);
+      playback.renderStatusTimer = null;
+    }
+    playback.renderStatusAbort?.abort(new Error("回放已关闭"));
+    playback.renderStatusPending = false;
     for (const request of playback.pending.values()) request.cancel();
     playback.pending.clear();
+    for (const timer of playback.backoffTimers.values()) clearTimeout(timer);
+    playback.backoffTimers.clear();
     playback.backoff?.clear();
     playback.frames = [];
     playback.cached.clear();
@@ -1586,6 +1641,72 @@
     document.querySelector(".battle-screen").setAttribute("aria-busy", String(!retry));
     updatePlaybackState();
   }
+  function hideRenderProgress() {
+    const progress = $("battle-render-progress");
+    progress.hidden = true;
+    progress.value = 0;
+    progress.removeAttribute("aria-valuetext");
+  }
+  function updateRenderProgress(status) {
+    const progress = $("battle-render-progress");
+    const frames = finiteStatusNumber(status?.frames);
+    const total = finiteStatusNumber(status?.total);
+    if (!total) {
+      progress.hidden = true;
+      return;
+    }
+    progress.max = String(total);
+    progress.value = String(Math.min(total, frames ?? 0));
+    progress.setAttribute("aria-valuetext", `已渲染 ${frames ?? 0} / ${total} 帧`);
+    progress.hidden = false;
+  }
+  function renderProgressMessage(status) {
+    const frames = finiteStatusNumber(status?.frames);
+    const total = finiteStatusNumber(status?.total);
+    if (status?.queued) return "战斗渲染排队中，完成后会自动恢复回放…";
+    if (frames != null && total) return `正在渲染战斗画面 ${frames} / ${total} 帧…`;
+    return "战斗画面仍在渲染，完成后会自动恢复回放…";
+  }
+  function scheduleRenderStatusPoll(delay = playback.renderPollDelay) {
+    const p = playback;
+    if (!p.n || p.renderDead || p.renderStatusTimer || !$("battle-dialog").open) return;
+    p.renderStatusTimer = setTimeout(() => {
+      p.renderStatusTimer = null;
+      checkRenderHealth({automatic: true});
+    }, delay);
+  }
+  function pauseFrameLoadsForStatus() {
+    const p = playback;
+    if (p.renderStatus !== "unknown") return;
+    p.renderStatus = "checking";
+    p.renderDeadline = Date.now() + RENDER_NO_PROGRESS_TIMEOUT_MS;
+    for (const timer of p.backoffTimers.values()) clearTimeout(timer);
+    p.backoffTimers.clear();
+    if (p.timer) {
+      clearInterval(p.timer);
+      p.timer = null;
+      p.playing = false;
+    }
+    for (const request of p.pending.values()) request.cancel();
+    p.pending.clear();
+    for (const index of [...p.failed, ...p.backoff]) {
+      p.failed.delete(index);
+      p.attempts.delete(index);
+      p.backoff.add(index);
+    }
+  }
+  function showRenderStatusFailure(message, revealResult = true) {
+    const p = playback;
+    p.renderStatus = "unavailable";
+    if (p.renderStatusTimer) {
+      clearTimeout(p.renderStatusTimer);
+      p.renderStatusTimer = null;
+    }
+    setBattleLoading(message, true);
+    hideRenderProgress();
+    $("battle-status").textContent = message;
+    if (revealResult) showVerdict();
+  }
   function trimReplayCache() {
     const p = playback;
     if (p.cached.size <= p.cacheLimit) return;
@@ -1610,6 +1731,7 @@
   function startPlaybackTimer() {
     const p = playback;
     if (p.renderDead) return;
+    if (["checking", "rendering", "unavailable"].includes(p.renderStatus)) return;
     if (!p.intentPlaying || p.timer || !p.complete || p.requested != null || document.hidden || $("scout-dialog").open || !$("battle-dialog").open) return;
     const end = Math.min(p.n - 1, p.current + 3);
     for (let index = p.current + 1; index <= end; index++) {
@@ -1646,6 +1768,7 @@
   function pumpReplayFrames(extra = 0) {
     const p = playback;
     if (!p.n || !$("battle-dialog").open) return;
+    if (["checking", "rendering", "unavailable"].includes(p.renderStatus)) return;
     const token = p.token;
     trimReplayCache();
     const center = p.requested ?? p.current;
@@ -1691,14 +1814,22 @@
         } else {
           const tries = (p.attempts.get(index) || 0) + 1;
           p.attempts.set(index, tries);
+          if (p.renderStatus === "unknown") {
+            pauseFrameLoadsForStatus();
+            checkRenderHealth();
+            updateBattleTimeline();
+            return;
+          }
           if (tries < 3) {
             p.backoff.add(index);
-            setTimeout(() => {
+            const backoffTimer = setTimeout(() => {
+              p.backoffTimers.delete(index);
               p.backoff.delete(index);
               if (token !== p.token || p.frames[index]?.naturalWidth || p.pending.has(index) || p.failed.has(index)) return;
               pumpReplayFrames(1);
               startPlaybackTimer();
             }, 1200);
+            p.backoffTimers.set(index, backoffTimer);
           } else {
             p.failed.add(index);
             if (p.requested === index) {
@@ -1709,7 +1840,6 @@
                 showVerdict();
               }
             }
-            checkRenderHealth();
           }
         }
         updateBattleTimeline();
@@ -1740,17 +1870,80 @@
     $("battle-status").textContent = "画面渲染中断，本轮战果已保存。";
     showVerdict();
   }
-  async function checkRenderHealth() {
-    // 帧重试多次仍失败时确认渲染管线状态：渲染已死（服务器重启/渲染崩溃且
-    // 无法重建）就不再空转重试，直接落战果；仍在渲染则保持现有重试节奏。
+  async function checkRenderHealth({automatic = false} = {}) {
+    // 缺帧先问渲染状态。rendering 只轮询进度，ready 后才恢复图片请求，
+    // dead 直接落已保存战果，避免把 425 当成普通图片失败无限重试。
     const p = playback;
-    if (!p.n || p.renderDead || !p.meta) return;
+    if (!p.n || p.renderDead || !p.meta || p.renderStatusPending || !$("battle-dialog").open) return;
+    const token = p.token;
+    if (p.renderStatusTimer) {
+      clearTimeout(p.renderStatusTimer);
+      p.renderStatusTimer = null;
+    }
+    if (automatic && p.renderDeadline && Date.now() >= p.renderDeadline) {
+      showRenderStatusFailure("战斗渲染长时间没有进展，可重试画面，或先查看已保存战果。");
+      return;
+    }
     let status = null;
+    p.renderStatusPending = true;
+    let controller = null;
     try {
-      const response = await fetch(`/demo/render-status/${sid}/r${p.meta.round}`);
-      if (response.ok) status = (await response.json()).status;
-    } catch (error) { return; }
-    if (status === "dead") showRenderDead();
+      if (typeof AbortController === "function") {
+        controller = new AbortController();
+        p.renderStatusAbort = controller;
+      }
+      status = await fetchJson(`/demo/render-status/${sid}/r${p.meta.round}`, {
+        timeoutMs: RENDER_STATUS_TIMEOUT_MS, signal: controller?.signal,
+      });
+      if (token !== p.token || !$("battle-dialog").open) return;
+      if (!status?.ok || !["ready", "rendering", "dead"].includes(status.status))
+        throw new Error("渲染状态响应无效");
+      p.renderStatusErrors = 0;
+      if (status.status === "dead") {
+        if (status.error) $("battle-status").textContent = "渲染已中断，本轮战果已保存。";
+        showRenderDead();
+        return;
+      }
+      if (status.status === "ready") {
+        if (p.renderStatus !== "ready") {
+          p.renderStatus = "ready";
+          p.renderDeadline = 0;
+          p.renderLastProgress = null;
+          p.failed.clear();
+          p.backoff.clear();
+          p.retryIndex = null;
+        }
+        hideRenderProgress();
+        if (p.requested != null && !p.frames[p.requested]?.naturalWidth)
+          setBattleLoading(`正在载入 ${replayClock(p.requested * p.dt)} 的画面…`);
+        pumpReplayFrames();
+        startPlaybackTimer();
+        return;
+      }
+      p.renderStatus = "rendering";
+      const progress = JSON.stringify([status.queued, status.frames, status.total]);
+      if (p.renderLastProgress !== progress) {
+        p.renderLastProgress = progress;
+        p.renderDeadline = Date.now() + RENDER_NO_PROGRESS_TIMEOUT_MS;
+      } else if (!p.renderDeadline) p.renderDeadline = Date.now() + RENDER_NO_PROGRESS_TIMEOUT_MS;
+      setBattleLoading(renderProgressMessage(status));
+      updateRenderProgress(status);
+      $("battle-retry").hidden = true;
+      p.renderPollDelay = Math.min(5000, Math.max(500, p.renderPollDelay * 2));
+      scheduleRenderStatusPoll();
+    } catch (error) {
+      if (token !== p.token || error?.name === "AbortError") return;
+      p.renderStatusErrors += 1;
+      if (p.renderStatusErrors < RENDER_STATUS_MAX_ERRORS) {
+        setBattleLoading("正在重新获取渲染进度…");
+        scheduleRenderStatusPoll(1000);
+      } else {
+        showRenderStatusFailure("无法获取渲染进度，可重试画面，或先查看已保存战果。");
+      }
+    } finally {
+      if (p.renderStatusAbort === controller) p.renderStatusAbort = null;
+      p.renderStatusPending = false;
+    }
   }
   function healFailedFrames() {
     const p = playback;
@@ -1784,6 +1977,10 @@
     if (!p.n) return;
     stopPlayback();
     const target = Math.max(0, Math.min(p.n - 1, Math.round(Number(index) || 0)));
+    p.requested = target;
+    p.revealOnFailure = revealOnFailure;
+    p.intentPlaying = resume;
+    if (target < p.n - 1) hideBattleDisclosure();
     if (p.renderDead) {
       // 渲染已死：已缓存的帧仍可拖看，缺失帧不再触发载入与重试。
       if (p.frames[target]?.naturalWidth) {
@@ -1793,10 +1990,17 @@
       }
       return;
     }
-    if (target < p.n - 1) hideBattleDisclosure();
-    p.requested = target;
-    p.revealOnFailure = revealOnFailure;
-    p.intentPlaying = resume;
+    if (["checking", "rendering", "unavailable"].includes(p.renderStatus)) {
+      if (p.frames[target]?.naturalWidth) {
+        p.requested = null;
+        showFrame(target);
+        updateBattleTimeline();
+      } else {
+        checkRenderHealth();
+        if (revealOnFailure && target === p.n - 1) showVerdict();
+      }
+      return;
+    }
     if (!showFrame(target)) {
       if (p.failed.has(target)) {
         p.retryIndex = target;
@@ -1837,10 +2041,13 @@
     const meta = state.last_battle;
     Object.assign(playback, {
       meta, frames: [], cached: new Set(), loaded: new Set(), failed: new Set(), pending: new Map(),
-      attempts: new Map(), backoff: new Set(),
+      attempts: new Map(), backoff: new Set(), backoffTimers: new Map(),
       current: 0, requested: meta?.n ? 0 : null, n: meta?.n || 0, dt: meta?.dt || 0.05,
       complete: false, verdictShown: false, buffering: true, intentPlaying: !!meta?.n,
       renderDead: false,
+      renderStatus: "unknown", renderStatusTimer: null, renderStatusAbort: null,
+      renderStatusPending: false, renderStatusErrors: 0, renderPollDelay: 500,
+      renderLastProgress: null, renderDeadline: 0,
       reportTab: "events", reportTabTouched: false, lastEvent: null, retryIndex: null,
       revealOnFailure: false, seekResume: false,
       cacheLimit: window.matchMedia?.("(max-width: 720px)")?.matches ? 36 : 72,
@@ -2035,7 +2242,7 @@
     if (!busy) render();
   });
   $("refresh-button").onclick = () => {
-    if (canPrep()) api("refresh");
+    if (canPrep()) return api("refresh");
   };
   $("lock-button").onclick = () => {
     if (canPrep()) api("lock");
@@ -2142,9 +2349,23 @@
   $("battle-retry").onclick = () => {
     const target = playback.retryIndex ?? playback.requested ?? playback.current;
     const running = playback.intentPlaying;
+    if (["checking", "rendering", "unavailable"].includes(playback.renderStatus)) {
+      playback.renderStatus = playback.renderStatus === "rendering" ? "rendering" : "checking";
+      playback.renderStatusErrors = 0;
+      playback.renderPollDelay = 500;
+      playback.renderDeadline = Date.now() + RENDER_NO_PROGRESS_TIMEOUT_MS;
+      setBattleLoading("正在重新获取渲染进度…");
+      checkRenderHealth();
+      return;
+    }
     playback.failed.delete(target);
     playback.attempts.delete(target);
     playback.backoff.delete(target);
+    const backoffTimer = playback.backoffTimers.get(target);
+    if (backoffTimer != null) {
+      clearTimeout(backoffTimer);
+      playback.backoffTimers.delete(target);
+    }
     playback.retryIndex = null;
     requestBattleFrame(playback.requested ?? playback.current, {resume: running});
   };

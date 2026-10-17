@@ -434,6 +434,14 @@ class Handler(SimpleHTTPRequestHandler):
     def log_message(self, fmt, *args) -> None:
         pass  # 安静模式；准备动作单独打点
 
+    def handle_one_request(self) -> None:
+        # 回放预取会主动取消图片请求；客户端断开是正常控制流，不应向终端
+        # 倾泻整段 BrokenPipe 堆栈，也不应继续写已关闭的连接。
+        try:
+            super().handle_one_request()
+        except (BrokenPipeError, ConnectionResetError):
+            self.close_connection = True
+
     def _txt(self, text: str, status: int = 200) -> None:
         body = text.encode()
         self.send_response(status)
@@ -442,11 +450,13 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def _json(self, data, status: int = 200) -> None:
+    def _json(self, data, status: int = 200, headers: dict | None = None) -> None:
         body = json.dumps(data, ensure_ascii=False).encode()
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
+        for key, value in (headers or {}).items():
+            self.send_header(key, str(value))
         self.end_headers()
         self.wfile.write(body)
 
@@ -834,8 +844,7 @@ class Handler(SimpleHTTPRequestHandler):
             m = re.match(r"^/demo/render-status/([\w-]+)/r(\d+)$", parsed.path)
             if not m:
                 return self.send_error(404)
-            return self._json({"ok": True,
-                               "status": demo_mod.ensure_render_job(m.group(1), int(m.group(2)))})
+            return self._json(demo_mod.render_job_status(m.group(1), int(m.group(2))))
         elif parsed.path.startswith("/demo/frame/"):
             # /demo/frame/<sid>/r<round>/<i>.png -> .build/demo/<sid>/r<round>/
             m = re.match(r"^/demo/frame/([\w-]+)/r(\d+)/(\d+)\.png$", parsed.path)
@@ -843,23 +852,28 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_error(404)
             directory = ROOT / ".build" / "demo" / m.group(1) / f"r{m.group(2)}"
             frame = directory / f"{m.group(3)}.png"
-            if not frame.is_file() and not (directory / "meta.json").is_file():
-                # meta.json 最后落盘：此前回合仍在流式渲染，播放器预取会抢在
-                # 写盘前到达。短轮询等待该帧出现，避免把"还没渲染到"误判为 404；
-                # meta.json 一旦出现说明渲染结束，缺失帧是真 404，立即返回。
-                # 渲染线程崩溃/随重启被杀时 ensure_render_job 自动重启渲染，
-                # 无法恢复（dead）则立即 404，不再让播放器空等。
-                deadline = time.monotonic() + 12
-                tick = 0
+            if not frame.is_file():
+                # 帧端点只做很短等待，绝不承担长期健康探测。播放器通过
+                # render-status 获取进度/终态；ready 后缺失才是真 404。
+                deadline = time.monotonic() + 1.0
                 while time.monotonic() < deadline:
-                    tick += 1
-                    if tick % 5 == 1 and \
-                            demo_mod.ensure_render_job(m.group(1), int(m.group(2))) == "dead":
+                    if frame.is_file() and frame.stat().st_size:
                         break
-                    time.sleep(0.2)
-                    if (frame.is_file() and frame.stat().st_size) or \
-                            (directory / "meta.json").is_file():
+                    status = demo_mod.ensure_render_job(m.group(1), int(m.group(2)))
+                    if status == "dead":
+                        return self._json(
+                            {"ok": False, "status": "dead",
+                             "error": "battle render is unavailable"}, 425,
+                            {"Retry-After": "1"})
+                    if status == "ready":
                         break
+                    time.sleep(0.1)
+                if not frame.is_file() or not frame.stat().st_size:
+                    status = demo_mod.ensure_render_job(m.group(1), int(m.group(2)))
+                    if status == "ready":
+                        return self.send_error(404)
+                    return self._json({"ok": False, "status": status}, 425,
+                                      {"Retry-After": "1"})
             self.path = (f"/.build/demo/{m.group(1)}/"
                          f"r{m.group(2)}/{m.group(3)}.png")
             super().do_GET()
@@ -909,6 +923,7 @@ def main() -> None:
         # listen backlog 溢出会被系统直接 RST（浏览器表现为图片载入失败）。
         request_queue_size = 128
     srv = Server(("127.0.0.1", args.port), Handler)
+    demo_mod.start_render_housekeeping()
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

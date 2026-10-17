@@ -584,6 +584,8 @@ def _support_cast(battle, unit, skill, t):
     arena_combinations.after_native(battle, unit, target, t, cast_index, False, 0, heals)
     from arena_traits import after_native_cast
     after_native_cast(battle, unit, t, cast_index)
+    from arena_bonds import after_native_cast as bond_after_native_cast
+    bond_after_native_cast(battle, unit, t, cast_index)
     return True
 
 
@@ -619,6 +621,8 @@ def _stance_cast(battle, unit, skill, t):
             battle._emit_state(unit, t)
     from arena_traits import after_native_cast
     after_native_cast(battle, unit, t, cast_index)
+    from arena_bonds import after_native_cast as bond_after_native_cast
+    bond_after_native_cast(battle, unit, t, cast_index)
     return True
 
 
@@ -689,6 +693,8 @@ def _cast(battle, unit, target, t):
         arena_combinations.after_native(battle, unit, target, t, cast_index, False, 0, [])
         from arena_traits import after_native_cast
         after_native_cast(battle, unit, t, cast_index)
+        from arena_bonds import after_native_cast as bond_after_native_cast
+        bond_after_native_cast(battle, unit, t, cast_index)
         return True
     if key == 'shadow_siphon' and not taunted:
         candidates = [enemy for enemy in battle.units if enemy.alive
@@ -735,6 +741,8 @@ def _cast(battle, unit, target, t):
     settle_native_primary(battle, unit, target, empower, t, cast_index)
     from arena_equipment import after_native_hit
     after_native_hit(battle, unit, target, t, cast_index, lost_hp)
+    from arena_bonds import after_native_hit as bond_after_native_hit
+    bond_after_native_hit(battle, unit, target, t, cast_index, lost_hp)
     from arena_interactions import after_primary
     after_primary(battle, unit, target, move, lost_hp, t, cast_index)
     if not unit.alive:
@@ -904,4 +912,6 @@ def _cast(battle, unit, target, t):
                                     already_poisoned, lost_hp, heals)
     from arena_traits import after_native_cast
     after_native_cast(battle, unit, t, cast_index)
+    from arena_bonds import after_native_cast as bond_after_native_cast
+    bond_after_native_cast(battle, unit, t, cast_index)
     return True

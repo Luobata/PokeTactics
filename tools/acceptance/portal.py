@@ -109,13 +109,8 @@ def catalog_view(demo, version='species_v1'):
         selected_families = families.families_for(version)
         legal = set(templates)
         traits = arena_traits.catalog(include_families=True, species_ids=legal)
-        bonds = []
-        for row in arena_bonds.catalog():
-            members = sorted(sid for sid in legal
-                             if row['id'] in arena_bonds.memberships(sid))
-            if not members:
-                continue
-            bonds.append({**row, 'members': members, 'pool_size': len(members)})
+        from bond_view import catalog_for_templates
+        bonds = catalog_for_templates(templates)
     else:
         raise ValueError('未知竞技目录版本')
 

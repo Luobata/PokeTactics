@@ -48,6 +48,8 @@
 .battle-screen canvas { display: block; width: 100%; height: auto; max-width: none; object-fit: contain; margin: 0 auto; border-radius: 0; image-rendering: auto; background: #172826; }
 .battle-loading { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); padding: 11px 16px; background: #172f2ded; border: 1px solid #58766c; border-radius: 7px; box-shadow: 0 8px 22px #031d2d50; color: #d3e2ce; font-size: 11px; z-index: 4; white-space: nowrap; }
 .battle-loading[hidden] { display: none; }
+.battle-loading > progress { width: 88px; height: 7px; accent-color: #8fc27a; }
+.battle-loading > progress[hidden] { display: none; }
 .arena-loading-dot { width: 15px; height: 15px; flex: 0 0 auto; border: 2px solid #93aa8840; border-top-color: #c8e790; border-radius: 50%; animation: arena-loading 1s linear infinite; }
 .battle-loading.load-error { color: #efd3bb; border-color: #8a735f; }
 .battle-loading.load-error .arena-loading-dot { animation: none; border: 0; width: 14px; height: 14px; background: #d89968; clip-path: polygon(50% 0, 100% 100%, 0 100%); }

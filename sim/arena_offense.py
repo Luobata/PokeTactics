@@ -39,6 +39,18 @@ def expire(battle, unit, t):
         return
     if unit.tempo_stacks and t + EPS >= unit.tempo_until:
         _reset_tempo(battle, unit, t, 'idle')
+    if unit.bond_chill_fraction and t + EPS >= unit.bond_chill_until:
+        source = battle.units[unit.bond_chill_source_idx] if unit.bond_chill_source_idx is not None else unit
+        with _effect(battle, source, unit, 'bond_frostline', 'expire', t,
+                     amount=0, applied=False, fraction=0.,
+                     previous_fraction=unit.bond_chill_fraction,
+                     duration=0., expires_at=unit.bond_chill_until,
+                     source_idx=source.idx, recipient_idx=unit.idx,
+                     reason='duration'):
+            unit.bond_chill_fraction = 0.
+            unit.bond_chill_until = 0.
+            unit.bond_chill_source_idx = None
+            battle._emit_state(unit, t)
     # The stronger augment and the basic bond own separate windows. Expiring
     # either must not erase, shorten or refresh the other one.
     for key, prefix in (('native_inspiration', 'offense_buff'),
@@ -94,6 +106,14 @@ def tempo_multiplier(battle, unit, t):
         return 1.
     _, _, base, item = _tempo_spec(unit)
     return 1. + (base + item) * unit.tempo_stacks
+
+
+def chill_multiplier(battle, unit, t):
+    """Chill slows the next action tick; it never blocks movement itself."""
+    if (not battle._arena_on or not unit.bond_chill_fraction
+            or t + EPS >= unit.bond_chill_until):
+        return 1.
+    return 1. + unit.bond_chill_fraction
 
 
 def damage_multiplier(battle, unit, t):

@@ -777,7 +777,7 @@
           </div>
           <div class="battle-screen" aria-busy="true">
             <canvas id="battle-canvas" width="960" height="640" aria-label="战斗动画回放：蓝色圆标为我方，红色三角标为敌方"></canvas>
-            <div id="battle-loading" class="battle-loading" role="status"><span class="arena-loading-dot" aria-hidden="true"></span><span id="battle-loading-copy">正在准备战场…</span><button id="battle-retry" type="button" hidden>重试画面</button></div>
+            <div id="battle-loading" class="battle-loading" role="status"><span class="arena-loading-dot" aria-hidden="true"></span><span id="battle-loading-copy">正在准备战场…</span><progress id="battle-render-progress" max="1" value="0" hidden></progress><button id="battle-retry" type="button" hidden>重试画面</button></div>
             <div id="battle-verdict" class="battle-verdict" aria-live="polite" hidden><div class="verdict-symbol" aria-hidden="true"></div><div><strong></strong><p></p></div></div>
           </div>
           <div class="arena-caption"><span id="battle-current-event">双方伙伴，即将登场。</span><span id="battle-status" role="status">战斗画面载入中…</span></div>
