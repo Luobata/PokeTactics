@@ -283,13 +283,26 @@ _LETHAL_GUARD = {'trait_sturdy', 'trait_stone_core', 'trait_steel_core', 'trait_
 _ANTI_DODGE = {'trait_compound_eyes', 'trait_keen_eye'}
 
 
+def _default(sid):
+    if sid in TRAITS:
+        return TRAITS[sid]
+    from arena_families import SPECIES_FAMILY, mentor
+    if sid == 129:
+        return None
+    if sid == 130:
+        return TRAITS.get(59)
+    if sid in (133, 134, 135, 136):
+        return TRAITS.get({133: 162, 134: 131, 135: 26, 136: 6}[sid])
+    return TRAITS.get(mentor(sid)) if sid in SPECIES_FAMILY else None
+
+
 def validate_choice(sid, key):
     """Normalize a legal explicit default to None; reject cross-species choices."""
     if type(sid) is not int:
         raise ValueError('竞技特性需要有效宝可梦编号')
     if key is None:
         return None
-    default, alternative = TRAITS.get(sid), ALTERNATIVES.get(sid)
+    default, alternative = _default(sid), ALTERNATIVES.get(sid)
     if isinstance(key, str) and default and key == default['id']:
         return None
     if isinstance(key, str) and alternative and key == alternative['id']:
@@ -299,9 +312,9 @@ def validate_choice(sid, key):
 
 def _view(sid, spec):
     fixed = sid not in ALTERNATIVES
-    default = spec['id'] == TRAITS[sid]['id']
+    default = spec['id'] == _default(sid)['id']
     return {**deepcopy(spec), 'sid': sid, 'species': sid,
-            'source_label': '原作特性改编', 'fixed': fixed,
+            'source_label': '原作特性改编' if sid in TRAITS else '家族原型特性', 'fixed': fixed,
             'selectable': not fixed, 'default': default,
             'choice': None if default else spec['id'],
             'unlock_challenge': TRAIT_LOCKS.get(spec['id']), 'arena_only': True}
@@ -311,14 +324,14 @@ def for_species(sid, trait_key=None):
     if type(sid) is not int:
         return None if trait_key is None else validate_choice(sid, trait_key)
     chosen = validate_choice(sid, trait_key)
-    spec = ALTERNATIVES.get(sid) if chosen is not None else TRAITS.get(sid)
+    spec = ALTERNATIVES.get(sid) if chosen is not None else _default(sid)
     return _view(sid, spec) if spec else None
 
 
 def options_for(sid):
-    if type(sid) is not int or sid not in TRAITS:
+    if type(sid) is not int or _default(sid) is None:
         return []
-    specs = [TRAITS[sid]] + ([ALTERNATIVES[sid]] if sid in ALTERNATIVES else [])
+    specs = [_default(sid)] + ([ALTERNATIVES[sid]] if sid in ALTERNATIVES else [])
     return [_view(sid, spec) for spec in specs]
 
 
@@ -331,7 +344,7 @@ def _spec(battle, unit, key=None):
         return None
     sid = unit.piece.species_id
     chosen = validate_choice(sid, getattr(unit.piece, 'arena_trait_key', None))
-    spec = ALTERNATIVES.get(sid) if chosen else TRAITS.get(sid)
+    spec = ALTERNATIVES.get(sid) if chosen else _default(sid)
     return spec if spec and (key is None or spec['id'] == key) else None
 
 

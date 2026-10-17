@@ -251,7 +251,34 @@ for _sid, _tags in {
 
 def skill_of(species_id):
     if species_id not in SKILLS:
-        raise ValueError('精灵没有竞技原生技能')
+        from arena_families import SPECIES_FAMILY, mentor, role_of
+        if species_id not in SPECIES_FAMILY:
+            raise ValueError('精灵没有竞技原生技能')
+        from data import pokedex
+        role = role_of(species_id)
+        target = mentor(species_id)
+        if species_id in (134, 135, 136):
+            spec = copy.deepcopy(SKILLS[{134: 59, 135: 26, 136: 6}[species_id]])
+            spec['name'] = {134: '水流护幕', 135: '雷电接力', 136: '烈焰迸发'}[species_id]
+            spec['type'] = {134: 'WATER', 135: 'ELECTRIC', 136: 'FIRE'}[species_id]
+        elif role == 'support' and target in SKILLS:
+            spec = copy.deepcopy(SKILLS[target])
+            spec['name'] = '初阶·' + spec['name']
+            spec['description'] = '家族支援技：' + spec['description']
+        else:
+            kind = pokedex().species_record(species_id)['types'][0]
+            names = {'FIRE': '火花', 'WATER': '水枪', 'GRASS': '藤鞭', 'ELECTRIC': '电击',
+                     'PSYCHIC': '念力', 'FIGHTING': '碎岩', 'ROCK': '落石', 'GROUND': '掷泥',
+                     'GHOST': '惊吓', 'POISON': '毒针', 'NORMAL': '撞击', 'BUG': '虫咬', 'ICE': '细雪'}
+            name, power = names.get(kind, '属性冲击'), 50
+            if species_id == 129:
+                kind, name, power = 'NORMAL', '奋力跃击', 35
+            elif species_id == 130:
+                kind, name, power = 'WATER', '怒涛冲撞', 75
+            spec = dict(id='family_strike_' + str(species_id), name=name, type=kind, power=power,
+                        role=role, targeting='enemy', category='burst', behavior='单体攻击',
+                        tags=['单体'], description=f'以{power}威力攻击主目标；属性克制按招式属性结算。')
+        return {'arch': spec['id'], **spec}
     return {'arch': SKILLS[species_id]['id'], **copy.deepcopy(SKILLS[species_id])}
 
 

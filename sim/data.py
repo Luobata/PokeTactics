@@ -92,6 +92,7 @@ class Pokedex:
         # Supplemental arena species must not change classic family/roster scope.
         self.arena_species: Dict[int, dict] = {
             m["id"]: m for m in _load("pokemon_gen2")["entries"]}
+        self.arena_species.update({m['id']: m for m in _load('pokemon_family_preforms')['entries']})
         self.moves: Dict[int, dict] = {m["id"]: m for m in _load("moves")["entries"]}
         tc = _load("typechart")
         self.types: List[str] = tc["types"]

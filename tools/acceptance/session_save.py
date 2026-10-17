@@ -100,6 +100,7 @@ PRE_LEGENDARY_POOL_BY_COST = {1: 22, 2: 18, 3: 12}
 # 148/198/200/215/227 + 149 入传说档). Caps and record layout are identical to
 # the current build: the nine new species refill at the current cap when nobody
 # holds them, and every committed species keeps its current-cap conservation.
+PRE_FAMILY_FINGERPRINT = '82905d3a65a8abc5ee827a16eb99c28f0f7ac6f416c7afb1b131349cb3aa0211'
 PRE_REBALANCE_FINGERPRINT = '475e78b0bb4edc69f9a9c65dadf18c55dee202edf075ea7fd02bb7f9c110e822'
 PRE_SYNERGY_TECHNIQUES = frozenset({'cut', 'surf', 'rest', 'thunderbolt', 'ice_beam',
                                      'toxic', 'earthquake', 'roar', 'rapid_spin'})
@@ -154,6 +155,9 @@ def owned_record(owned, evolution_choices=False, arena=False):
         import arena_traits
         trait_key = arena_traits.validate_choice(owned.piece.species_id, trait_key)
         record['star'] = owned.piece.star
+        if hasattr(owned.piece, 'family_id'):
+            record['family'] = owned.piece.family_id
+            record['branch'] = owned.piece.branch_id
         record['arena_trait'] = trait_key
     elif trait_key is not None:
         raise ValueError('非竞技棋子不能包含竞技特性选择')
@@ -170,6 +174,8 @@ def comp_record(comp, arena=False):
             import arena_traits
             trait_key = arena_traits.validate_choice(p.species_id, trait_key)
             row['star'] = getattr(p, 'star', 1)
+            if hasattr(p, 'family_id'):
+                row['family'], row['branch'] = p.family_id, p.branch_id
             row['arena_trait'] = trait_key
         elif trait_key is not None:
             raise ValueError('非竞技阵容不能包含竞技特性选择')
@@ -244,8 +250,12 @@ class SessionCodec:
                 "eliminated_round": state.eliminated_round,
                 "final_team": [{"species": o["sid"], "item": o.get("item"),
                                 **({'star': o['star']} if is_arena else {}),
+                                **({'family': o['family']['id'], 'branch': o['family']['branch']}
+                                   if is_arena and o.get('family') else {}),
                                 "technique": (o.get('technique') or {}).get('id')}
                                for o in state.final_team] if state.final_team is not None else None}
+        if state.is_family:
+            payload['arena_pool'] = state.arena_pool
         if is_arena:
             payload['arena'] = {
                 'pending': [{"id": row['id'], "round": row['round'],
@@ -298,6 +308,11 @@ class SessionCodec:
             raise UnknownRulesError('旧存档版本不能包含新战术规则')
         fingerprint = data.get('rules')
         current_fingerprint = rules_fingerprint()
+        # Exact predecessor retains its species shop and all committed ledgers.
+        if fingerprint == PRE_FAMILY_FINGERPRINT:
+            if data.get('arena_pool', 'species_v1') != 'species_v1':
+                raise ValueError('旧存档不能伪造家族卡池')
+            fingerprint = current_fingerprint
         supported = {current_fingerprint, TWO_ROW_ARENA_FINGERPRINT,
                      PRE_NATIVE_SKILLS_FINGERPRINT, NATIVE_SKILLS_INITIAL_FINGERPRINT,
                      PRE_COMBINATIONS_FINGERPRINT, PRE_EXPANSION_FINGERPRINT,
@@ -349,7 +364,8 @@ class SessionCodec:
             supported.add(LEGACY_COUNTER_PACING_FINGERPRINT)
         if fingerprint not in supported:
             raise UnknownRulesError('无法识别此存档的规则指纹；需要对应版本继续，原存档未修改')
-        state = demo.Session(integer(data["seed"], -(2 ** 63), 2 ** 63 - 1, "seed"), ruleset=ruleset)
+        state = demo.Session(integer(data["seed"], -(2 ** 63), 2 ** 63 - 1, "seed"), ruleset=ruleset,
+                             arena_pool=data.get("arena_pool", "species_v1"))
         state.round_no = integer(data["round"], 1, demo.MAX_ROUNDS, "round")
         if data["phase"] not in ("prep", "battle", "over"):
             raise ValueError("无效的对局阶段")
@@ -396,6 +412,24 @@ class SessionCodec:
             selected_trait = trait_choice(record, sid, live_choice)
             if is_arena:
                 star = integer(record.get('star'), 1, 3, 'star')
+                if state.is_family:
+                    import arena_families as families
+                    fid = record.get('family')
+                    if fid is None and not owned and sid in demo.arena_mod.ROSTER:
+                        template = demo.arena_mod.build_templates()[sid]
+                    else:
+                        if type(fid) is not int or fid != families.SPECIES_FAMILY[sid]:
+                            raise ValueError('棋子家族身份无效')
+                        branch = record.get('branch')
+                        if branch is not None and type(branch) is not int:
+                            raise ValueError('进化分支无效')
+                        if star > 1 and branch is None:
+                            raise ValueError('进化形态缺少分支')
+                        template = families.make_piece(fid, star, branch)
+                        if template.species_id != sid:
+                            raise ValueError('培养档与进化形态不一致')
+                elif 'family' in record or 'branch' in record:
+                    raise ValueError('旧卡池不能包含家族记录')
                 template = copy.copy(template)
                 template.star = star
                 template.shiny = star == 3
@@ -405,14 +439,17 @@ class SessionCodec:
             if not owned:
                 return (template, item) if item else template
             sources = sequence(record["sources"], 128, "sources")
-            if not sources or sid not in sources:
+            source_id = getattr(template, 'family_id', sid)
+            if not sources or source_id not in sources:
                 raise ValueError("棋子来源账本缺失")
             for source in sources:
                 if type(source) is not int or source not in state.templates:
                     raise ValueError("棋子来源账本无效")
-            if is_arena and (len(sources) != 3 ** (star - 1) or any(source != sid for source in sources)):
+            if is_arena and (len(sources) != 3 ** (star - 1) or any(source != source_id for source in sources)):
                 raise ValueError('竞技星级与卡池来源不一致')
             investment = integer(record["invested"], 1, sum(state.templates[s].tier for s in sources), "invested")
+            if state.is_family and investment != template.tier * len(sources):
+                raise ValueError('家族购卡投入不一致')
             result = demo.shop_mod.OwnedPiece(template, investment)
             result.sources, result.item = list(sources), item
             result.arena_trait = selected_trait
@@ -531,6 +568,8 @@ class SessionCodec:
                 if sid is not None:
                     if type(sid) is not int or sid not in state.templates:
                         raise ValueError("商店未知棋子")
+                    if state.is_family and sid not in demo.families_mod.FAMILIES:
+                        raise ValueError('商店不能售卖进化形态')
                     held[sid] += 1
             seat.shop.slots = list(slots)
             if not seat.alive and (seat.board or seat.bench or any(s is not None for s in slots)):
@@ -590,7 +629,8 @@ class SessionCodec:
         # docs/49 补强只增物种不改上限：该时代的存档按现行上限直接守恒。
         same_cap_era = fingerprint == PRE_REBALANCE_FINGERPRINT
         for sid, template in state.templates.items():
-            cap = demo.arena_mod.pool_cap(sid) if is_arena else demo.shop_mod.POOL_COPIES[template.tier]
+            cap = (demo.families_mod.pool_caps()[sid] if state.is_family else
+                   demo.arena_mod.pool_cap(sid) if is_arena else demo.shop_mod.POOL_COPIES[template.tier])
             if pre_legendary_arena and same_cap_era and str(sid) in committed_pool:
                 count = integer(saved_pool[str(sid)], 0, cap, "pool")
                 if count + held[sid] != cap:

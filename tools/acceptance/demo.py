@@ -58,6 +58,7 @@ import techniques as techniques_mod  # noqa: E402
 import tactics as tactics_mod  # noqa: E402
 import abilities as abilities_mod  # noqa: E402
 import arena as arena_mod  # noqa: E402
+import arena_families as families_mod
 import arena_skills  # noqa: E402
 import metagame as metagame_mod  # noqa: E402
 import pacing
@@ -783,18 +784,24 @@ class PlayerSeat:
 
 # ---------------------------------------------------------------- 会话
 class Session:
-    def __init__(self, seed: int, ruleset=tactics_mod.BASE_RULESET) -> None:
+    def __init__(self, seed: int, ruleset=tactics_mod.BASE_RULESET, arena_pool='species_v1') -> None:
         self.ruleset = tactics_mod.validate_ruleset(ruleset)
         self.is_arena = self.ruleset == 'arena_v1'
+        if arena_pool not in (families_mod.VERSION, families_mod.LEGACY_VERSION):
+            raise ValueError('未知竞技卡池版本')
+        self.arena_pool = arena_pool if self.is_arena else families_mod.LEGACY_VERSION
+        self.is_family = self.is_arena and self.arena_pool == families_mod.VERSION
         self.bench_capacity = 8 if self.is_arena else BENCH_CAP
         self.shop_slots = 5 if self.is_arena else SHOP_SLOTS_UI
         self.sid = uuid.uuid4().hex[:12]
         self.seed = seed
-        self.templates = arena_mod.build_templates() if self.is_arena else build_templates()
+        self.templates = (families_mod.build_templates() if self.is_family else
+                          arena_mod.build_templates() if self.is_arena else build_templates())
         self.pool = shop_mod.SharedPool(self.templates)
         if self.is_arena:
             self.pool.arena = True
-            self.pool.remaining = arena_mod.pool_caps()
+            self.pool.remaining = families_mod.pool_caps() if self.is_family else arena_mod.pool_caps()
+            self.pool.family_version = families_mod.VERSION if self.is_family else None
         self.player = PlayerSeat(self.pool, self.templates)
         self.grid_rows = 3 if self.is_arena else 2
         self.player.grid_rows = self.grid_rows
@@ -1196,7 +1203,7 @@ class Session:
         labels = arena_mod.PVE_LABELS if self.is_arena else PVE_LABELS
         wave_ids = waves[min(r // 5 - 1, len(waves) - 1)]
         label = labels[min(r // 5 - 1, len(labels) - 1)]
-        row = [_piece_view(make_piece(sid, self.templates), ruleset=self.ruleset)
+        row = [_piece_view(make_piece(sid, arena_mod.build_templates() if self.is_arena else self.templates), ruleset=self.ruleset)
                for sid in wave_ids]
         rows = self._enemy_rows(row)
         return {"name": f"野怪轮 · {label}", "hp": None, "level": None,
@@ -1517,7 +1524,7 @@ class Session:
         labels = arena_mod.PVE_LABELS if self.is_arena else PVE_LABELS
         wave_name = f"野怪轮 · {labels[min(r // 5 - 1, len(labels) - 1)]}"
         wave_ids = waves[min(r // 5 - 1, len(waves) - 1)]
-        wave = [make_piece(sid, self.templates) for sid in wave_ids]
+        wave = [make_piece(sid, arena_mod.build_templates() if self.is_arena else self.templates) for sid in wave_ids]
         events = []
         battle_i = 0
         p = self.player
@@ -1812,7 +1819,7 @@ def _piece_view(piece, item=None, ruleset=tactics_mod.BASE_RULESET):
                     native_skill={**native, 'type': TYPE_ZH.get(native['type'], native['type']),
                                   'energy': arena_skills.ENERGY_MAX, 'replaceable': False})
         view.update(star=getattr(piece, 'star', 1), shiny=getattr(piece, 'shiny', False),
-                    bonds=arena_bonds.memberships(piece.species_id),
+                    bonds=arena_bonds.memberships(piece),
                     trait=arena_traits.for_species(piece.species_id,
                                                    getattr(piece, 'arena_trait_key', None)),
                     trait_options=arena_traits.options_for(piece.species_id),
@@ -1822,7 +1829,8 @@ def _piece_view(piece, item=None, ruleset=tactics_mod.BASE_RULESET):
                     learnable=[t['id'] for t in arena_mod.technique_catalog()
                                if techniques_mod.compatible_species(piece.species_id, t['id'], ruleset=ruleset)],
                     item_effect=_item_effect(item, 'budget_v1') if item else None,
-                    stat_scope='deployment_base', stats=_deployment_stats(piece))
+                    stat_scope='deployment_base', stats=_deployment_stats(piece),
+                    family=families_mod.route_view(piece))
     return view
 
 
@@ -1842,7 +1850,8 @@ def _deployment_stats(piece):
     Reuse Unit and the simulator's deterministic arena modifier. No Battle is
     constructed, run, or randomized for a read-only panel.
     """
-    key = (piece.species_id, piece.star, getattr(piece, 'arena_trait_key', None))
+    key = (piece.species_id, piece.tier, piece.star, getattr(piece, 'family_id', None),
+           getattr(piece, 'arena_trait_key', None))
     if key not in _DEPLOYMENT_STATS:
         from combat import Unit
         import stat_budget
@@ -2226,7 +2235,7 @@ def state_json(sess) -> dict:
             v["price"] = p.templates[sid].tier
             if sess.is_arena:
                 v['pool_remaining'] = sess.pool.remaining[sid]
-                v['pool_total'] = arena_mod.pool_cap(sid)
+                v['pool_total'] = (families_mod.pool_caps() if sess.is_family else arena_mod.pool_caps())[sid]
             if tactics_mod.evolution_choices_enabled(sess.ruleset):
                 v['evolution_preview'] = _evolution_preview(sess, shop_index=i)
             shop.append(v)
@@ -2323,8 +2332,10 @@ def state_json(sess) -> dict:
                        'catalog': [{**_piece_view(piece, ruleset=sess.ruleset),
                                     'cost': piece.tier,
                                     'pool_remaining': sess.pool.remaining[sid],
-                                    'pool_total': arena_mod.pool_cap(sid)}
-                                   for sid, piece in sess.templates.items()]}
+                                    'pool_total': (families_mod.pool_caps() if sess.is_family else arena_mod.pool_caps())[sid]}
+                                   for sid, piece in sess.templates.items()
+                                   if not sess.is_family or sid in families_mod.FAMILIES],
+                       'pool_version': sess.arena_pool}
         st['augments'] = {'pending': copy.deepcopy(sess.arena_augments_pending),
                           'selected': augments_of(p)}
         from combination_view import preparation
@@ -2427,6 +2438,36 @@ def act_buy(sess, i: int, evolution='auto'):
     for line in logs:
         msg += f"；{line}"
     return msg
+
+
+def act_family_evolve(sess, loc, branch):
+    _guard_prep(sess)
+    if not sess.is_family:
+        raise DemoError('当前对局没有家族进化规则')
+    sess.ensure_unit_ids()
+    selected, _, _ = sess.locate(loc)
+    p = selected.piece
+    paths = families_mod.FAMILIES[p.family_id][1]
+    if p.star != 1 or len(paths) < 2 or branch not in [path[-1] for path in paths]:
+        raise DemoError('只能为未进化的分支家族选择路线')
+    materials = [selected] + [o for o in sess.player.all_pieces() if o is not selected
+                and o.piece.family_id == p.family_id and o.piece.star == 1]
+    if len(materials) < 3:
+        raise DemoError('需要三只初始形态才能选择进化')
+    materials = materials[:3]
+    board, bench, inventory = copy.deepcopy((sess.player.board, sess.player.bench, sess.player.inventory))
+    ids = {o.uid for o in materials}
+    for o in board + bench:
+        if o.uid in ids:
+            o.piece = copy.copy(o.piece)
+            o.piece.branch_id = branch
+    families_mod.combine(board, bench, inventory)
+    if len(bench) > sess.bench_capacity:
+        raise DemoError('请先腾出一个备战位接收进化后的伙伴')
+    for o in materials:
+        o.piece = copy.copy(o.piece)
+        o.piece.branch_id = branch
+    return '；'.join(sess.combine_player())
 
 
 def act_evolution_lock(sess, uid, locked):
@@ -2707,7 +2748,8 @@ def _new_session(seed: int, params=None) -> Session:
     params = params or {}
     tactical = params.get('mode') == 'tactics'
     arena = params.get('mode') == 'arena'
-    sess = Session(seed, 'arena_v1' if arena else tactics_mod.CURRENT_TACTICS_RULESET if tactical else tactics_mod.BASE_RULESET)
+    sess = Session(seed, 'arena_v1' if arena else tactics_mod.CURRENT_TACTICS_RULESET if tactical else tactics_mod.BASE_RULESET,
+                   arena_pool=families_mod.VERSION if arena else families_mod.LEGACY_VERSION)
     if arena:
         # Challenge unlocks are options for the next run: snapshot once here.
         try:
@@ -2762,6 +2804,8 @@ def _apply_action(params: dict):
                 msg = "进度已保存"
             elif cmd == "buy":
                 msg = act_buy(sess, int(params.get("i", -1)), params.get('evolution', 'auto'))
+            elif cmd == 'family_evolve':
+                msg = act_family_evolve(sess, params.get('loc', ''), int(params.get('branch', 0)))
             elif cmd == 'set_evolution_lock':
                 msg = act_evolution_lock(sess, params.get('uid', ''), params.get('locked', ''))
             elif cmd == 'evolve':

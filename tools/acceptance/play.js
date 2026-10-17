@@ -261,7 +261,7 @@
     layer.className = `merge-stage${piece.shiny ? " merge-shiny" : ""}`;
     layer.setAttribute("aria-hidden", "true");
     const remaining = new Set(ownedSnapshot(state).map((p) => p.uid));
-    const sources = before.filter((old) => old.sid === piece.sid && old.star < piece.star &&
+    const sources = before.filter((old) => (piece.family ? old.family?.id === piece.family.id : old.sid === piece.sid) && old.star < piece.star &&
       (old.uid === piece.uid || !remaining.has(old.uid))).slice(0, 3);
     // The newly purchased copy does not exist in the pre-action snapshot.
     // Show all three contributing cards, including that incoming copy.
@@ -272,13 +272,13 @@
       const dx = Math.max(-180, Math.min(180, start.x - point.x));
       const dy = Math.max(-160, Math.min(160, start.y - point.y));
       return `<img class="merge-source" src="${spriteOf(old)}" alt="" style="--dx:${dx}px;--dy:${dy}px;--delay:${i * 45}ms">`;
-    }).join("") + `<span class="merge-ring"></span><span class="merge-ring second"></span><span class="merge-flash">✦</span><span class="merge-label">${"★".repeat(piece.star)}${piece.shiny ? " 闪光！" : " 升星！"}</span>`;
+    }).join("") + `<span class="merge-ring"></span><span class="merge-ring second"></span><span class="merge-flash">✦</span><span class="merge-label">${"★".repeat(piece.star)}${piece.family ? (piece.star === 3 ? " 满培养！" : " 进化！") : piece.shiny ? " 闪光！" : " 升星！"}</span>`;
     layer.style.left = `${point.x}px`;
     layer.style.top = `${point.y}px`;
     document.body.append(layer);
     target.classList.add("unit-upgrade");
     const announce = $("merge-status");
-    announce.textContent = `${piece.name}升为${piece.star}星${piece.shiny ? "，成为闪光精灵" : ""}`;
+    announce.textContent = piece.family ? `${piece.name}达到培养第 ${piece.star} 档` : `${piece.name}升为${piece.star}星${piece.shiny ? "，成为闪光精灵" : ""}`;
     setTimeout(() => {layer.remove(); target.classList.remove("unit-upgrade");}, 1500);
   }
 
@@ -309,6 +309,13 @@
     if (shopSelected != null && !state.shop[shopSelected]) shopSelected = null;
     const y = state.you,
       prep = canPrep();
+    const familyMode = state.arena?.pool_version === 'families_v1';
+    $('pool-summary').textContent = familyMode
+      ? `${state.arena.catalog.length} 个家族 · 固定费用 · 累计 1 / 3 / 9 张培养`
+      : `${state.arena?.catalog?.length || 0} 种竞技精灵 · 同种同星三合一 · 三星闪光`;
+    $('help-growth-rules').textContent = familyMode
+      ? '商店只卖初始形态，费用固定。累计 1 / 3 / 9 张培养，短链与无进化家族同样可满培养。伊布集齐三只后在个体详情选择路线；进化后仅同分支合并。同一家族对每项羁绊最多计一次。稀有单位全队限一，不参与培养。'
+      : '旧对局沿用物种卡池：同种同星三合一，形态保持一致，三星累计九张。上场的不同物种贡献羁绊，同种不同星不重复。传说单位全队限一。';
     $("hp").textContent = y.hp;
     $("hp-fill").style.width = `${Math.max(0, Math.min(100, y.hp))}%`;
     $("gold").textContent = y.gold;
@@ -557,7 +564,9 @@
     const bench = new Set((state.bench || []).filter(Boolean).map(p => p.sid));
     const shop = new Set((state.shop || []).filter(Boolean).map(p => p.sid));
     const priority = sid => bench.has(sid) ? 0 : shop.has(sid) ? 1 : 2;
-    $("bond-note").textContent = state.bonds.note || "只计上场的不同物种，同种不同星级不重复，备战席不计入。";
+    $("bond-note").textContent = state.arena?.pool_version === 'families_v1'
+      ? '同一家族对每项羁绊最多计一次；不同分支可贡献各自属性，每只均占人口。'
+      : state.bonds.note || "只计上场的不同物种，同种不同星级不重复，备战席不计入。";
     const ordered = [...entries].sort((a, b) => Number(b.category === "tactic") - Number(a.category === "tactic"));
     let previousCategory = null;
     $("synergy-list").innerHTML = ordered.map(row => {
@@ -591,6 +600,14 @@
     if (!lines.length) return "";
     return `<div class="detail-buffs"><span class="detail-buffs-title">本局生效加成</span>${lines.join("")}</div>`;
   }
+  function familyPanel(p, owned = false) {
+    const f = p.family;
+    if (!f) return '';
+    const waiting = [...(state.board || []).flat(), ...(state.bench || [])].filter(x => x?.family?.id === f.id && x.family.step === 1).length;
+    const choices = owned && f.step === 1 && f.routes.length > 1;
+    const routes = f.step > 1 ? f.routes.filter(r => r.branch === f.branch) : f.routes;
+    return `<section class="skill-slot family-growth-panel"><div class="skill-slot-heading"><span>${f.rare ? '稀有 · 全队限一' : `培养 ${f.step}/3 · 累计 ${f.copies} 张`}</span><a href="/pokedex?q=${encodeURIComponent(f.entrance)}&stage=${f.step}" target="_blank" rel="noopener">图鉴对比 ↗</a></div><p>商店一直出售 ${esc(f.entrance)} · 每张 ${f.cost} 金。${f.rare ? '单张即战力，不参与培养。' : '三只同档合成，满培养共需九张。'}</p>${routes.map(r=>`<p>${r.names.map(esc).join(' → ')}${r.names.length < 3 && !f.rare ? ' → 满培养' : ''}${f.routes.length > 1 ? `<br><strong>${esc(roleNames[r.role])} · ${esc(r.skill)}</strong><br>${esc(r.description)}` : ''}</p>`).join('')}${f.step > 1 && f.routes.length > 1 ? '<p>进化路线已锁定，之后仅同分支可合并。</p>' : ''}${choices ? `<p>集齐三只后选择进化方向，之后仅同分支可合并。当前持有 ${waiting} 只初始形态。</p><div class="detail-actions">${f.routes.map(r=>`<button data-family-evolve="${r.branch}" ${!canPrep() || waiting < 3 ? 'disabled' : ''}>进化为 ${esc(r.names[r.names.length-1])}</button>`).join('')}</div>` : ''}</section>`;
+  }
   function renderDetail() {
     if (shopSelected != null) {
       renderShopDetail();
@@ -603,7 +620,7 @@
       return;
     }
     $("unit-detail").innerHTML =
-      `<div class="unit-detail-card"><img src="${spriteOf(p)}" alt="${esc(p.name)}"><h3>${esc(p.name)}</h3><p class="detail-star">${"★".repeat(starsOf(p))}${p.shiny ? " · 闪光" : ""}</p><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · ${esc(p.types.join(" / "))}</p><div style="clear:both"></div><p>${esc(p.role_description || "")}</p>${skillSlots(p)}${p.bonds?.length ? `<div class="unit-bonds"><span>所属羁绊</span>${pieceBonds(p)}</div>` : ""}<div class="detail-stat"><span>攻击方式</span><b>${attackStyle(p)} · ${p.range} 格</b></div>${p.item ? `<div class="detail-item"><p class="detail-item-heading"><span class="detail-item-badge" aria-hidden="true">◆</span><strong>装备：${esc(p.item_name)}</strong></p><p>${esc(p.item_effect)}</p></div>` : ""}${unitBuffs(p)}<div class="detail-actions"><button data-open-system="techniques">为它学习技能</button><button data-action="sell" class="sell-button" ${!canPrep() ? "disabled" : ""}>出售 +${p.sell} 金币</button>${p.item ? `<button data-action="unequip" ${!canPrep() ? "disabled" : ""}>卸下装备</button>` : ""}<button data-action="cancel-select">取消选择</button></div></div>`;
+      `<div class="unit-detail-card"><img src="${spriteOf(p)}" alt="${esc(p.name)}"><h3>${esc(p.name)}</h3><p class="detail-star">${"★".repeat(starsOf(p))}${p.shiny ? " · 闪光" : ""}</p><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · ${esc(p.types.join(" / "))}</p><div style="clear:both"></div><p>${esc(p.role_description || "")}</p>${skillSlots(p)}${familyPanel(p, true)}${p.bonds?.length ? `<div class="unit-bonds"><span>所属羁绊</span>${pieceBonds(p)}</div>` : ""}<div class="detail-stat"><span>攻击方式</span><b>${attackStyle(p)} · ${p.range} 格</b></div>${p.item ? `<div class="detail-item"><p class="detail-item-heading"><span class="detail-item-badge" aria-hidden="true">◆</span><strong>装备：${esc(p.item_name)}</strong></p><p>${esc(p.item_effect)}</p></div>` : ""}${unitBuffs(p)}<div class="detail-actions"><button data-open-system="techniques">为它学习技能</button><button data-action="sell" class="sell-button" ${!canPrep() ? "disabled" : ""}>出售 +${p.sell} 金币</button>${p.item ? `<button data-action="unequip" ${!canPrep() ? "disabled" : ""}>卸下装备</button>` : ""}<button data-action="cancel-select">取消选择</button></div></div>`;
   }
   function renderShopDetail() {
     const p = state?.shop?.[shopSelected];
@@ -619,7 +636,7 @@
         ? `金币不足，还差 ${p.price - y.gold} 金币`
         : "";
     $("unit-detail").innerHTML =
-      `<div class="unit-detail-card shop-detail"><img src="${spriteOf(p)}" alt="${esc(p.name)}"><h3>${esc(p.name)}</h3><p class="detail-star">${"★".repeat(starsOf(p))} · ${p.tier} 费${p.shiny ? " · 闪光" : ""}</p><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · ${esc(p.types.join(" / "))}</p><div style="clear:both"></div><p>${esc(p.role_description || "")}</p>${skillSlots(p, { learned: false })}${p.bonds?.length ? `<div class="unit-bonds"><span>所属羁绊</span>${pieceBonds(p)}</div>` : ""}<div class="detail-stat"><span>攻击方式</span><b>${attackStyle(p)} · ${p.range} 格</b></div>${p.pool_remaining != null ? `<div class="detail-stat"><span>共享池剩余</span><b>${Number(p.pool_remaining)} / ${Number(p.pool_total)} 张</b></div>` : ""}<div class="detail-actions"><button class="recruit-button" data-shop-buy="${shopSelected}" ${reason || !canPrep() ? "disabled" : ""} aria-label="招募${esc(p.name)}，${p.price}金币${reason ? "，" + reason : ""}">招募 · ${p.price} ${icon("coin")}</button><button data-action="cancel-select">取消选择</button>${reason ? `<p class="recruit-note">${reason}</p>` : ""}</div></div>`;
+      `<div class="unit-detail-card shop-detail"><img src="${spriteOf(p)}" alt="${esc(p.name)}"><h3>${esc(p.name)}</h3><p class="detail-star">${"★".repeat(starsOf(p))} · ${p.tier} 费${p.shiny ? " · 闪光" : ""}</p><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · ${esc(p.types.join(" / "))}</p><div style="clear:both"></div><p>${esc(p.role_description || "")}</p>${skillSlots(p, { learned: false })}${familyPanel(p)}${p.bonds?.length ? `<div class="unit-bonds"><span>所属羁绊</span>${pieceBonds(p)}</div>` : ""}<div class="detail-stat"><span>攻击方式</span><b>${attackStyle(p)} · ${p.range} 格</b></div>${p.pool_remaining != null ? `<div class="detail-stat"><span>共享池剩余</span><b>${Number(p.pool_remaining)} / ${Number(p.pool_total)} 张</b></div>` : ""}<div class="detail-actions"><button class="recruit-button" data-shop-buy="${shopSelected}" ${reason || !canPrep() ? "disabled" : ""} aria-label="招募${esc(p.name)}，${p.price}金币${reason ? "，" + reason : ""}">招募 · ${p.price} ${icon("coin")}</button><button data-action="cancel-select">取消选择</button>${reason ? `<p class="recruit-note">${reason}</p>` : ""}</div></div>`;
   }
   function renderInventory() {
     const items = state.items;
@@ -763,7 +780,7 @@
     ].join("");
     $("growth").innerHTML =
       '<p class="system-note">跨局挑战只解锁选项与收藏，不提供永久数值加成；解锁从下一局开始生效，机器人始终使用基础候选池。</p>' +
-      `<p class="growth-stats">竞技 ${Number(stats.runs) || 0} 局 · 夺冠 ${Number(stats.wins) || 0} 次 · 累计击杀 ${Number(stats.kills) || 0} · 单局最高连胜 ${Number(stats.streak) || 0} · 点亮羁绊 ${Number(stats.bonds) || 0} 组 · 上场 ${Number(stats.species) || 0}/48 种</p>` +
+      `<p class="growth-stats">竞技 ${Number(stats.runs) || 0} 局 · 夺冠 ${Number(stats.wins) || 0} 次 · 累计击杀 ${Number(stats.kills) || 0} · 单局最高连胜 ${Number(stats.streak) || 0} · 点亮羁绊 ${Number(stats.bonds) || 0} 组 · 上场 ${Number(stats.species) || 0} 种</p>` +
       (data.new_this_run?.length
         ? `<p class="growth-new">本次新完成挑战：${esc(data.new_this_run.join("、"))}</p>`
         : "") +
@@ -1192,7 +1209,7 @@
   function renderCatalog() {
     const catalog = state.arena?.catalog || [];
     $("catalog-description").textContent =
-      `${catalog.length} 种竞技精灵：${Object.keys(roleNames).map(role => roleNames[role] + " " + catalog.filter(p => roleOf(p) === role).length + " 种").join("、")}。八位训练家共享卡池，同种同星三合一；三星需要九张并使用闪光配色。`;
+      `${catalog.length} 种竞技精灵：${Object.keys(roleNames).map(role => roleNames[role] + " " + catalog.filter(p => roleOf(p) === role).length + " 种").join("、")}。${state.arena.pool_version === "families_v1" ? "家族卡池：商店仅出售初始形态，累计1/3/9张培养；分支在进化时主动选择。打开顶部战术图鉴可比较强度。" : "八位训练家共享卡池，同种同星三合一；三星需要九张并使用闪光配色。"}`;
     $("catalog-grid").innerHTML = catalog
       .filter((p) => roleFilter === "all" || roleOf(p) === roleFilter)
       .map(
@@ -1867,7 +1884,9 @@
   document.addEventListener("click", async (event) => {
     const target = event.target.closest("button");
     if (!target || target.disabled) return;
-    if (target.dataset.shop != null) {
+    if (target.dataset.familyEvolve && selected && canPrep()) {
+      await api("family_evolve", {loc: selected, branch: target.dataset.familyEvolve});
+    } else if (target.dataset.shop != null) {
       const i = Number(target.dataset.shop);
       if (shopSelected === i) {
         // 再次点击已选中的卡片等同于点「招募」，沿用旧的一步买入习惯。

@@ -20,8 +20,12 @@ POKEWALK = Path(__file__).resolve().parent.parent.parent.parent / "ESP32-Pokemon
 GEN2_FRONT = Path(__file__).resolve().parents[2] / "assets" / "gen2"
 GEN2_SPECIES = frozenset((162, 211, 195, 237, 164, 171, 181, 196, 214,
                           197, 208, 242, 157, 212, 230, 160, 248, 154,
-                          198, 200, 215, 227))
+                          198, 200, 215, 227,
+                          152, 153, 155, 156, 158, 159, 161, 163, 170, 172,
+                          173, 174, 179, 180, 194, 236, 238, 239, 246, 247))
 GEN2_TEXT = (
+    "菊草叶月桂叶火球鼠火岩鼠小锯鳄蓝鳄尾立咕咕灯笼鱼皮丘皮宝宝宝宝丁"
+    "咩利羊茸茸羊乌波无畏小子迷唇娃电击怪幼基拉斯沙基拉斯初阶奋力跃击怒涛冲撞水流护幕雷电接力烈焰迸发"
     "大尾立千针鱼沼王战舞郎猫头夜鹰电灯怪电龙太阳伊布赫拉克罗斯月亮伊布"
     "大钢蛇幸福蛋火暴兽巨钳螳螂刺龙王大力鳄班基拉斯大竺葵"
     "黑暗鸦梦妖狃拉盔甲鸟"
@@ -108,7 +112,7 @@ class Front:
                 q += 2 + per
 
     def _uses_local_png(self, pid: int) -> bool:
-        return self._allow_local_png and pid in GEN2_SPECIES and pid not in self.blob_of
+        return self._allow_local_png and pid in GEN2_SPECIES
 
     def _png_image(self, pid: int, shiny: bool = False) -> Image.Image:
         key = (pid, bool(shiny))

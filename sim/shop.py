@@ -115,7 +115,7 @@ class OwnedPiece:
     def __init__(self, piece: Piece, invested: int) -> None:
         self.piece = piece
         self.invested = invested
-        self.sources = [piece.species_id]
+        self.sources = [getattr(piece, 'family_id', piece.species_id)]
         self.item = None   # S5 装备栏：每单位 1 格（None = 空手，docs/07 §3）
         self.uid = None  # 会话分配稳定编号；移位、教学和进化沿用。
         self.technique = None

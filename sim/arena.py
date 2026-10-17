@@ -134,7 +134,8 @@ def pool_cap(species_id):
 
 def holds_legendary(owned_pieces):
     """限一判定：场上 + 备战席（含商店格不算持有）已有一只传说精灵。"""
-    return any(owned.piece.species_id in LEGENDARY for owned in owned_pieces)
+    from arena_families import rare_piece
+    return any(rare_piece(owned.piece) for owned in owned_pieces)
 
 
 def pool_caps():
@@ -437,6 +438,9 @@ def positions_for(comp, team):
 def combine(board, bench, inventory=None, *, single=False, only_species=None):
     """Merge owned card accounting without taking an extra pool copy."""
     from shop import OwnedPiece
+    if any(hasattr(o.piece, 'family_id') for o in board + bench):
+        from arena_families import combine as combine_family
+        return combine_family(board, bench, inventory, single=single, only_species=only_species)
     logs = []
     while True:
         grouped = {}

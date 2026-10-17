@@ -409,10 +409,12 @@ class Battle:
     def _apply_arena_stats(self):
         for unit in self.units:
             piece = unit.piece
-            if piece.species_id not in arena_mod.ROSTER:
+            import arena_families
+            family = hasattr(piece, 'family_id')
+            if piece.species_id not in (arena_families.SPECIES_FAMILY if family else arena_mod.ROSTER):
                 raise ValueError('species is outside the arena pool')
             star = getattr(piece, 'star', 1)
-            role = arena_mod.ROSTER[piece.species_id][1]
+            role = arena_families.role_of(piece.species_id) if family else arena_mod.ROSTER[piece.species_id][1]
             if type(star) is not int or not 1 <= star <= 3:
                 raise ValueError('arena star must be 1, 2, or 3')
             if getattr(piece, 'role_key', role) != role:

@@ -7,6 +7,7 @@ another attack, heal or cast. All counters belong to this battle's units.
 import copy
 
 import arena
+import arena_families as families
 from data import ENERGY_MAX
 
 EPS = 1e-9
@@ -80,18 +81,26 @@ def _species_id(entry):
 def memberships(species_id):
     """Stable bond identifiers for one legal arena species."""
     sid = _species_id(species_id)
-    if sid not in arena.ROSTER:
+    if sid not in arena.ROSTER and sid not in families.SPECIES_FAMILY:
         return []
-    return ([key for key in ELEMENT_TIERS if sid in ELEMENT_MEMBERS[key]]
-            + [key for key, spec in TACTICS.items() if sid in spec['members']])
+    from data import pokedex
+    origin = sid if sid in arena.ROSTER else families.mentor(sid)
+    return ([key for key in ELEMENT_TIERS if key in pokedex().species_record(sid)['types']]
+            + [key for key, spec in TACTICS.items() if origin in spec['members']])
 
 
 def count(comp):
-    """Deployed species count once, regardless of duplicates, stars or equipment."""
-    result = {}
-    for sid in sorted({_species_id(entry) for entry in comp} & arena.ROSTER.keys()):
+    """Count each family once per bond; legacy pieces retain species identity."""
+    result, seen = {}, set()
+    for entry in comp:
+        piece = entry[0] if isinstance(entry, tuple) else entry
+        piece = getattr(piece, 'piece', piece)
+        sid = _species_id(piece)
+        identity = getattr(piece, 'family_id', sid)
         for key in memberships(sid):
-            result[key] = result.get(key, 0) + 1
+            if (key, identity) not in seen:
+                seen.add((key, identity))
+                result[key] = result.get(key, 0) + 1
     return result
 
 
@@ -143,24 +152,36 @@ def catalog():
 
 def preparation(comp, available=None):
     """Only represented bonds; candidates are undeployed compatible species."""
-    deployed = {_species_id(entry) for entry in comp} & arena.ROSTER.keys()
+    pieces = [getattr(e[0] if isinstance(e, tuple) else e, 'piece', e[0] if isinstance(e, tuple) else e)
+              for e in comp]
+    is_family = any(hasattr(p, 'family_id') for p in pieces)
+    legal = families.SPECIES_FAMILY.keys() if is_family else arena.ROSTER.keys()
+    deployed = {_species_id(entry) for entry in comp} & legal
     counts = count(comp)
-    allowed = (arena.ROSTER.keys() if available is None else
-               {_species_id(entry) for entry in available} & arena.ROSTER.keys())
+    allowed = (legal if available is None else
+               {_species_id(entry) for entry in available} & legal)
     entries = []
     for row in catalog():
+        if is_family:
+            row = {**row, 'members': [sid for sid in legal if row['id'] in memberships(sid)]}
         key, n = row['id'], counts.get(row['id'], 0)
         if not n:
             continue
         tier = tier_of(n, key)
         next_tier = next((step['count'] for step in row['thresholds'] if step['count'] > n), None)
         effect = next((step['effect'] for step in row['thresholds'] if step['count'] == tier), '')
+        candidates = set(row['members']) & allowed - deployed
+        if is_family:
+            represented = {getattr(p, 'family_id', _species_id(p)) for p in pieces
+                           if key in memberships(p)}
+            candidates = {sid for sid in candidates if families.SPECIES_FAMILY[sid] not in represented}
         entries.append({**row, 'n': n, 'tier': tier, 'next': next_tier,
                         'need': max(0, next_tier - n) if next_tier is not None else 0,
                         'effect': effect, 'members': sorted(deployed & set(row['members'])),
-                        'candidates': sorted(set(row['members']) & allowed - deployed)})
+                        'candidates': sorted(candidates)})
     return {'entries': entries,
-            'note': '只计算上场的不同种族。重复棋子与星级不增加羁绊；属性只强化对应成员，战术按目录中的成员与触发条件生效。'}
+            'note': ('同一家族对每项羁绊最多计一次；不同分支可贡献各自属性，每只均占人口。' if is_family else
+                     '只计算上场的不同种族。重复棋子与星级不增加羁绊；属性只强化对应成员，战术按目录中的成员与触发条件生效。')}
 
 
 def apply(units, comp, *, enabled=True):

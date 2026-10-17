@@ -1,0 +1,1085 @@
+{
+  "upstream": "https://github.com/pret/pokecrystal @7a7881d0d62e0ddbd82dcf10e7116807487ac651",
+  "scope": "Arena family preforms only; never extends the classic roster.",
+  "entries": [
+    {
+      "id": 152,
+      "name": "chikorita",
+      "name_zh": "菊草叶",
+      "types": [
+        "GRASS"
+      ],
+      "base": {
+        "hp": 45,
+        "attack": 49,
+        "defense": 65,
+        "speed": 45,
+        "special_attack": 49,
+        "special_defense": 65
+      },
+      "lineage": [
+        152
+      ],
+      "level_up": [
+        [
+          1,
+          33
+        ],
+        [
+          1,
+          45
+        ],
+        [
+          8,
+          75
+        ],
+        [
+          12,
+          115
+        ],
+        [
+          15,
+          77
+        ],
+        [
+          22,
+          235
+        ],
+        [
+          29,
+          34
+        ],
+        [
+          36,
+          113
+        ],
+        [
+          43,
+          219
+        ],
+        [
+          50,
+          76
+        ]
+      ]
+    },
+    {
+      "id": 153,
+      "name": "bayleef",
+      "name_zh": "月桂叶",
+      "types": [
+        "GRASS"
+      ],
+      "base": {
+        "hp": 60,
+        "attack": 62,
+        "defense": 80,
+        "speed": 60,
+        "special_attack": 63,
+        "special_defense": 80
+      },
+      "lineage": [
+        153,
+        152
+      ],
+      "level_up": [
+        [
+          1,
+          33
+        ],
+        [
+          1,
+          45
+        ],
+        [
+          1,
+          75
+        ],
+        [
+          1,
+          115
+        ],
+        [
+          8,
+          75
+        ],
+        [
+          12,
+          115
+        ],
+        [
+          15,
+          77
+        ],
+        [
+          23,
+          235
+        ],
+        [
+          31,
+          34
+        ],
+        [
+          39,
+          113
+        ],
+        [
+          47,
+          219
+        ],
+        [
+          55,
+          76
+        ]
+      ]
+    },
+    {
+      "id": 155,
+      "name": "cyndaquil",
+      "name_zh": "火球鼠",
+      "types": [
+        "FIRE"
+      ],
+      "base": {
+        "hp": 39,
+        "attack": 52,
+        "defense": 43,
+        "speed": 65,
+        "special_attack": 60,
+        "special_defense": 50
+      },
+      "lineage": [
+        155
+      ],
+      "level_up": [
+        [
+          1,
+          33
+        ],
+        [
+          1,
+          43
+        ],
+        [
+          6,
+          108
+        ],
+        [
+          12,
+          52
+        ],
+        [
+          19,
+          98
+        ],
+        [
+          27,
+          172
+        ],
+        [
+          36,
+          129
+        ],
+        [
+          46,
+          53
+        ]
+      ]
+    },
+    {
+      "id": 156,
+      "name": "quilava",
+      "name_zh": "火岩鼠",
+      "types": [
+        "FIRE"
+      ],
+      "base": {
+        "hp": 58,
+        "attack": 64,
+        "defense": 58,
+        "speed": 80,
+        "special_attack": 80,
+        "special_defense": 65
+      },
+      "lineage": [
+        156,
+        155
+      ],
+      "level_up": [
+        [
+          1,
+          33
+        ],
+        [
+          1,
+          43
+        ],
+        [
+          1,
+          108
+        ],
+        [
+          6,
+          108
+        ],
+        [
+          12,
+          52
+        ],
+        [
+          21,
+          98
+        ],
+        [
+          31,
+          172
+        ],
+        [
+          42,
+          129
+        ],
+        [
+          54,
+          53
+        ]
+      ]
+    },
+    {
+      "id": 158,
+      "name": "totodile",
+      "name_zh": "小锯鳄",
+      "types": [
+        "WATER"
+      ],
+      "base": {
+        "hp": 50,
+        "attack": 65,
+        "defense": 64,
+        "speed": 43,
+        "special_attack": 44,
+        "special_defense": 48
+      },
+      "lineage": [
+        158
+      ],
+      "level_up": [
+        [
+          1,
+          10
+        ],
+        [
+          1,
+          43
+        ],
+        [
+          7,
+          99
+        ],
+        [
+          13,
+          55
+        ],
+        [
+          20,
+          44
+        ],
+        [
+          27,
+          184
+        ],
+        [
+          35,
+          163
+        ],
+        [
+          43,
+          103
+        ],
+        [
+          52,
+          56
+        ]
+      ]
+    },
+    {
+      "id": 159,
+      "name": "croconaw",
+      "name_zh": "蓝鳄",
+      "types": [
+        "WATER"
+      ],
+      "base": {
+        "hp": 65,
+        "attack": 80,
+        "defense": 80,
+        "speed": 58,
+        "special_attack": 59,
+        "special_defense": 63
+      },
+      "lineage": [
+        159,
+        158
+      ],
+      "level_up": [
+        [
+          1,
+          10
+        ],
+        [
+          1,
+          43
+        ],
+        [
+          1,
+          99
+        ],
+        [
+          7,
+          99
+        ],
+        [
+          13,
+          55
+        ],
+        [
+          21,
+          44
+        ],
+        [
+          28,
+          184
+        ],
+        [
+          37,
+          163
+        ],
+        [
+          45,
+          103
+        ],
+        [
+          55,
+          56
+        ]
+      ]
+    },
+    {
+      "id": 161,
+      "name": "sentret",
+      "name_zh": "尾立",
+      "types": [
+        "NORMAL"
+      ],
+      "base": {
+        "hp": 35,
+        "attack": 46,
+        "defense": 34,
+        "speed": 20,
+        "special_attack": 35,
+        "special_defense": 45
+      },
+      "lineage": [
+        161
+      ],
+      "level_up": [
+        [
+          1,
+          33
+        ],
+        [
+          5,
+          111
+        ],
+        [
+          11,
+          98
+        ],
+        [
+          17,
+          154
+        ],
+        [
+          25,
+          21
+        ],
+        [
+          33,
+          156
+        ],
+        [
+          41,
+          133
+        ]
+      ]
+    },
+    {
+      "id": 163,
+      "name": "hoothoot",
+      "name_zh": "咕咕",
+      "types": [
+        "NORMAL",
+        "FLYING"
+      ],
+      "base": {
+        "hp": 60,
+        "attack": 30,
+        "defense": 30,
+        "speed": 50,
+        "special_attack": 36,
+        "special_defense": 56
+      },
+      "lineage": [
+        163
+      ],
+      "level_up": [
+        [
+          1,
+          33
+        ],
+        [
+          1,
+          45
+        ],
+        [
+          6,
+          193
+        ],
+        [
+          11,
+          64
+        ],
+        [
+          16,
+          95
+        ],
+        [
+          22,
+          115
+        ],
+        [
+          28,
+          36
+        ],
+        [
+          34,
+          93
+        ],
+        [
+          48,
+          138
+        ]
+      ]
+    },
+    {
+      "id": 170,
+      "name": "chinchou",
+      "name_zh": "灯笼鱼",
+      "types": [
+        "WATER",
+        "ELECTRIC"
+      ],
+      "base": {
+        "hp": 75,
+        "attack": 38,
+        "defense": 38,
+        "speed": 67,
+        "special_attack": 56,
+        "special_defense": 56
+      },
+      "lineage": [
+        170
+      ],
+      "level_up": [
+        [
+          1,
+          145
+        ],
+        [
+          1,
+          86
+        ],
+        [
+          5,
+          48
+        ],
+        [
+          13,
+          175
+        ],
+        [
+          17,
+          55
+        ],
+        [
+          25,
+          209
+        ],
+        [
+          29,
+          109
+        ],
+        [
+          37,
+          36
+        ],
+        [
+          41,
+          56
+        ]
+      ]
+    },
+    {
+      "id": 172,
+      "name": "pichu",
+      "name_zh": "皮丘",
+      "types": [
+        "ELECTRIC"
+      ],
+      "base": {
+        "hp": 20,
+        "attack": 40,
+        "defense": 15,
+        "speed": 60,
+        "special_attack": 35,
+        "special_defense": 35
+      },
+      "lineage": [
+        172
+      ],
+      "level_up": [
+        [
+          1,
+          84
+        ],
+        [
+          1,
+          204
+        ],
+        [
+          6,
+          39
+        ],
+        [
+          8,
+          86
+        ],
+        [
+          11,
+          186
+        ]
+      ]
+    },
+    {
+      "id": 173,
+      "name": "cleffa",
+      "name_zh": "皮宝宝",
+      "types": [
+        "NORMAL"
+      ],
+      "base": {
+        "hp": 50,
+        "attack": 25,
+        "defense": 28,
+        "speed": 15,
+        "special_attack": 45,
+        "special_defense": 55
+      },
+      "lineage": [
+        173
+      ],
+      "level_up": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          204
+        ],
+        [
+          4,
+          227
+        ],
+        [
+          8,
+          47
+        ],
+        [
+          13,
+          186
+        ]
+      ]
+    },
+    {
+      "id": 174,
+      "name": "igglybuff",
+      "name_zh": "宝宝丁",
+      "types": [
+        "NORMAL"
+      ],
+      "base": {
+        "hp": 90,
+        "attack": 30,
+        "defense": 15,
+        "speed": 15,
+        "special_attack": 40,
+        "special_defense": 20
+      },
+      "lineage": [
+        174
+      ],
+      "level_up": [
+        [
+          1,
+          47
+        ],
+        [
+          1,
+          204
+        ],
+        [
+          4,
+          111
+        ],
+        [
+          9,
+          1
+        ],
+        [
+          14,
+          186
+        ]
+      ]
+    },
+    {
+      "id": 179,
+      "name": "mareep",
+      "name_zh": "咩利羊",
+      "types": [
+        "ELECTRIC"
+      ],
+      "base": {
+        "hp": 55,
+        "attack": 40,
+        "defense": 40,
+        "speed": 35,
+        "special_attack": 65,
+        "special_defense": 45
+      },
+      "lineage": [
+        179
+      ],
+      "level_up": [
+        [
+          1,
+          33
+        ],
+        [
+          1,
+          45
+        ],
+        [
+          9,
+          84
+        ],
+        [
+          16,
+          86
+        ],
+        [
+          23,
+          178
+        ],
+        [
+          30,
+          113
+        ],
+        [
+          37,
+          87
+        ]
+      ]
+    },
+    {
+      "id": 180,
+      "name": "flaaffy",
+      "name_zh": "茸茸羊",
+      "types": [
+        "ELECTRIC"
+      ],
+      "base": {
+        "hp": 70,
+        "attack": 55,
+        "defense": 55,
+        "speed": 45,
+        "special_attack": 80,
+        "special_defense": 60
+      },
+      "lineage": [
+        180,
+        179
+      ],
+      "level_up": [
+        [
+          1,
+          33
+        ],
+        [
+          1,
+          45
+        ],
+        [
+          1,
+          84
+        ],
+        [
+          9,
+          84
+        ],
+        [
+          18,
+          86
+        ],
+        [
+          27,
+          178
+        ],
+        [
+          36,
+          113
+        ],
+        [
+          45,
+          87
+        ]
+      ]
+    },
+    {
+      "id": 194,
+      "name": "wooper",
+      "name_zh": "乌波",
+      "types": [
+        "WATER",
+        "GROUND"
+      ],
+      "base": {
+        "hp": 55,
+        "attack": 45,
+        "defense": 45,
+        "speed": 15,
+        "special_attack": 25,
+        "special_defense": 25
+      },
+      "lineage": [
+        194
+      ],
+      "level_up": [
+        [
+          1,
+          55
+        ],
+        [
+          1,
+          39
+        ],
+        [
+          11,
+          21
+        ],
+        [
+          21,
+          133
+        ],
+        [
+          31,
+          89
+        ],
+        [
+          41,
+          240
+        ],
+        [
+          51,
+          54
+        ],
+        [
+          51,
+          114
+        ]
+      ]
+    },
+    {
+      "id": 236,
+      "name": "tyrogue",
+      "name_zh": "无畏小子",
+      "types": [
+        "FIGHTING"
+      ],
+      "base": {
+        "hp": 35,
+        "attack": 35,
+        "defense": 35,
+        "speed": 35,
+        "special_attack": 35,
+        "special_defense": 35
+      },
+      "lineage": [
+        236
+      ],
+      "level_up": [
+        [
+          1,
+          33
+        ]
+      ]
+    },
+    {
+      "id": 238,
+      "name": "smoochum",
+      "name_zh": "迷唇娃",
+      "types": [
+        "ICE",
+        "PSYCHIC_TYPE"
+      ],
+      "base": {
+        "hp": 45,
+        "attack": 30,
+        "defense": 15,
+        "speed": 65,
+        "special_attack": 85,
+        "special_defense": 65
+      },
+      "lineage": [
+        238
+      ],
+      "level_up": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          122
+        ],
+        [
+          9,
+          186
+        ],
+        [
+          13,
+          181
+        ],
+        [
+          21,
+          93
+        ],
+        [
+          25,
+          47
+        ],
+        [
+          33,
+          212
+        ],
+        [
+          37,
+          94
+        ],
+        [
+          45,
+          195
+        ],
+        [
+          49,
+          59
+        ]
+      ]
+    },
+    {
+      "id": 239,
+      "name": "elekid",
+      "name_zh": "电击怪",
+      "types": [
+        "ELECTRIC"
+      ],
+      "base": {
+        "hp": 45,
+        "attack": 63,
+        "defense": 37,
+        "speed": 95,
+        "special_attack": 65,
+        "special_defense": 55
+      },
+      "lineage": [
+        239
+      ],
+      "level_up": [
+        [
+          1,
+          98
+        ],
+        [
+          1,
+          43
+        ],
+        [
+          9,
+          9
+        ],
+        [
+          17,
+          113
+        ],
+        [
+          25,
+          129
+        ],
+        [
+          33,
+          103
+        ],
+        [
+          41,
+          85
+        ],
+        [
+          49,
+          87
+        ]
+      ]
+    },
+    {
+      "id": 246,
+      "name": "larvitar",
+      "name_zh": "幼基拉斯",
+      "types": [
+        "ROCK",
+        "GROUND"
+      ],
+      "base": {
+        "hp": 50,
+        "attack": 64,
+        "defense": 50,
+        "speed": 41,
+        "special_attack": 45,
+        "special_defense": 50
+      },
+      "lineage": [
+        246
+      ],
+      "level_up": [
+        [
+          1,
+          44
+        ],
+        [
+          1,
+          43
+        ],
+        [
+          8,
+          201
+        ],
+        [
+          15,
+          103
+        ],
+        [
+          22,
+          157
+        ],
+        [
+          29,
+          37
+        ],
+        [
+          36,
+          184
+        ],
+        [
+          43,
+          242
+        ],
+        [
+          50,
+          89
+        ],
+        [
+          57,
+          63
+        ]
+      ]
+    },
+    {
+      "id": 247,
+      "name": "pupitar",
+      "name_zh": "沙基拉斯",
+      "types": [
+        "ROCK",
+        "GROUND"
+      ],
+      "base": {
+        "hp": 70,
+        "attack": 84,
+        "defense": 70,
+        "speed": 51,
+        "special_attack": 65,
+        "special_defense": 70
+      },
+      "lineage": [
+        247,
+        246
+      ],
+      "level_up": [
+        [
+          1,
+          44
+        ],
+        [
+          1,
+          43
+        ],
+        [
+          1,
+          201
+        ],
+        [
+          1,
+          103
+        ],
+        [
+          8,
+          201
+        ],
+        [
+          15,
+          103
+        ],
+        [
+          22,
+          157
+        ],
+        [
+          29,
+          37
+        ],
+        [
+          38,
+          184
+        ],
+        [
+          47,
+          242
+        ],
+        [
+          56,
+          89
+        ],
+        [
+          65,
+          63
+        ]
+      ]
+    }
+  ]
+}

@@ -83,13 +83,14 @@ def normalize_visual_overrides(overrides=None):
     if not isinstance(overrides, dict):
         raise ValueError('visual_overrides must be a species-to-settings object')
     from arena import ROSTER
+    from arena_families import SPECIES_FAMILY
     result = {}
     for key, values in overrides.items():
         if (isinstance(key, bool) or not (type(key) is int or
                 isinstance(key, str) and key.isdecimal())):
             raise ValueError('visual species keys must be integer ids')
         sid = int(key)
-        if sid not in ROSTER or sid in result:
+        if (sid not in ROSTER and sid not in SPECIES_FAMILY) or sid in result:
             raise ValueError('unknown or duplicate arena visual species')
         if not isinstance(values, dict) or set(values) - set(DEFAULT_VISUAL):
             raise ValueError('invalid arena visual fields')

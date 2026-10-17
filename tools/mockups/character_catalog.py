@@ -139,7 +139,8 @@ def _arena_catalog(*, pieces=None, asset_root=None):
              212: ('右钳高举过顶挥砸，左钳后收平衡', '交叉弹拳与双钳收招')}
     for piece in sorted(pieces, key=lambda p: p.species_id):
         sid = piece.species_id
-        if sid not in arena.ROSTER:
+        from arena_families import SPECIES_FAMILY
+        if sid not in arena.ROSTER and sid not in SPECIES_FAMILY:
             raise ValueError(f'精灵 {sid} 不在竞技试玩池中')
         skill, move = arena_skills.skill_of(sid), arena_skills.resolve_cast(piece)
         rig = copy.deepcopy(rigs.get(str(sid), {'implemented': False, 'parts': [], 'anchors': {}}))

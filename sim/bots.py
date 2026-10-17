@@ -110,7 +110,11 @@ def power(owned: OwnedPiece, target_types=()) -> int:
     R1 单体档案（docs/13 §5）：建档棋子按档案价值乘数加价——
     溅射/斩杀/坦度原语是 BST 表达不了的强度，不加价 bot 会贱卖主角。
     """
-    value = _species_power(owned.piece.species_id)
+    if hasattr(owned.piece, 'family_id'):
+        from stat_budget import BUDGET_BY_TIER
+        value = BUDGET_BY_TIER[owned.piece.tier]
+    else:
+        value = _species_power(owned.piece.species_id)
     return int(value * (1, 1.6, 2.5)[getattr(owned.piece, 'star', 1) - 1])
 
 
@@ -161,10 +165,16 @@ class Bot:
         return self.board + self.bench
 
     def count_species(self, species_id: int) -> int:
+        if getattr(self.pool, 'family_version', None):
+            from arena_families import SPECIES_FAMILY
+            fid = SPECIES_FAMILY[species_id]
+            return sum(len(o.sources) for o in self.all_pieces() if o.piece.family_id == fid)
         return sum(1 for o in self.all_pieces()
                    if o.piece.species_id == species_id)
 
     def _has_combine_progress(self, species_id: int) -> bool:
+        if getattr(self.pool, 'family_version', None):
+            return self.count_species(species_id) % 9 >= 2
         if getattr(self.pool, 'arena', False):
             stars = [o.piece.star for o in self.all_pieces() if o.piece.species_id == species_id]
             return any(stars.count(star) >= 2 for star in (1, 2))
@@ -504,8 +514,11 @@ class Bot:
         # 铺场期（还没凑出主羁绊方向、阵容未满编）：什么都能买
         if not self.target_types and len(self.all_pieces()) < self.pop() + 4:
             return 10 ** 9
-        score = _species_power(sid)
+        score = (power(OwnedPiece(piece, piece.tier))
+                 if hasattr(piece, 'family_id') else _species_power(sid))
         copies = self.count_species(sid)
+        if hasattr(piece, 'family_id'):
+            copies %= 9
         in_target = bool(set(piece.types) & set(self.target_types))
         valuable = in_target or score >= 400
         if getattr(self.pool, 'arena', False) or _can_combine(sid):
@@ -531,7 +544,8 @@ class Bot:
         """L1 规则经济（docs/03 §4.1「只买当前阵容族」）：
         可合成复制件 / 主属性族（板上前 2 属性）/ 明确的高档升级 才买。"""
         if ((getattr(self.pool, 'arena', False) or _can_combine(piece.species_id))
-                and self.count_species(piece.species_id) >= 1):
+                and (self.count_species(piece.species_id) % 9 if hasattr(piece, 'family_id')
+                     else self.count_species(piece.species_id)) >= 1):
             return True
         if not self.board:          # 空场先铺
             return True
@@ -605,6 +619,9 @@ class Bot:
             owned = self.shop.buy(slot)
             self.gold -= price
             self.bench.append(owned)
+            if getattr(self.pool, 'family_version', None):
+                from arena_families import choose_bot_branches
+                choose_bot_branches(self)
             self.combines += len(try_combine(
                 self.board, self.bench, self.pool, self.templates,
                 self.inventory, respect_locks=tactics.evolution_choices_enabled(self.inventory.ruleset)))
