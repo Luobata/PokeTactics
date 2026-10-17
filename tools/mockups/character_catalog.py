@@ -120,6 +120,8 @@ def _arena_catalog(*, pieces=None, asset_root=None):
     import arena_skills
     import web_motion
     import retro_native
+    import family_vfx
+    import family_motion
     from action_preview import action_coverage, PREVIEW_ACTIONS
     from decoders import Front, Palettes, GEN3_SPECIES
     from motion import species_motion, validate_motion
@@ -192,6 +194,10 @@ def _arena_catalog(*, pieces=None, asset_root=None):
         body = 'web_part_rig' if web_parts else 'part_rig' if rig['implemented'] else 'authored_pose' if authored else 'procedural'
         attack, cast = notes.get(sid, ('共享整身动作与真实命中时序' if authored else '程序化蓄力、出手、回收',
                                        '原生技能按蓄力、飞行、命中、余波呈现'))
+        profile = family_motion.profile_of(sid)
+        if profile:
+            attack, cast = profile['attack_note'], profile['cast_note']
+        visual = family_vfx.describe(sid)
         role = getattr(piece, 'role_key', None) or arena_families.role_of(sid)
         result[str(sid)] = {**mode_info('arena'), 'species': sid, 'name': piece.name,
             'role': arena.ROLE_NAMES[role], 'role_key': role,
@@ -199,10 +205,11 @@ def _arena_catalog(*, pieces=None, asset_root=None):
             'skill': {'move_id': move['name'], 'native_id': skill['id'], 'name': skill['name'],
                       'type': skill['type'], 'tier': 'native', 'arch': skill['id'], 'can_cast': True,
                       'fallback_payload': False, 'description': skill['description'],
-                      'presentation': retro_native.describe(skill['id']),
+                      'presentation': retro_native.describe(skill['id'], species_id=sid),
                       'tags': list(skill['tags']), 'tactic': '、'.join(skill['tags']),
                       'counterplay': '结合属性克制、目标距离和站位，避免敌方技能连续触发。'},
             'resources': resources, 'rig': rig, 'motion_notes': {'attack': attack, 'cast': cast},
+            'attack_presentation': visual,
             'capabilities': {'body': body, 'whole_body': 'authored_pose' if authored else 'procedural',
                              'parts': 'web_polygon_joints' if web_parts else 'source_slice_rig' if rig['implemented'] else 'none',
                              'effect': 'arena_native', 'resource_ready': not errors,

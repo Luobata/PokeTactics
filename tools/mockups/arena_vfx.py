@@ -4,7 +4,7 @@ The simulator remains authoritative. These bounded Pillow drawings consume only
 an event's source, target and presentation phase, and never alter combat state.
 """
 import math
-from PIL import ImageDraw
+from PIL import Image, ImageDraw
 from items import FINISHED
 import arena_traits
 
@@ -748,6 +748,10 @@ def attack_effect(species_id):
     """Resolve authored tracks; only legal family forms use the shared fallback."""
     if species_id in EFFECTS:
         return EFFECTS[species_id]
+    from family_vfx import attack_motif
+    authored = attack_motif(species_id)
+    if authored:
+        return authored
     from arena_families import SPECIES_FAMILY
     if type(species_id) is int and species_id in SPECIES_FAMILY:
         return FAMILY_ATTACK
@@ -1012,6 +1016,20 @@ def draw_native_skill(img, species_id, kind, source, target, phase, progress, te
     sparks/runes never choose additional victims or create extra combat links.
     """
     from arena_skills import skill_of
+    import family_vfx
+    if species_id in family_vfx.SPECIES:
+        # This renderer uses device coordinates; family packs use web pixels.
+        # Render at 3x and reduce with NEAREST to retain its material vocabulary.
+        layer = Image.new('RGBA', (img.width * 3, img.height * 3))
+        if family_vfx.draw(layer, species_id, tuple(v * 3 for v in source),
+                           tuple(v * 3 for v in target), phase, progress,
+                           {'palette': 'classic', 'effect_scale': 1., 'particle_density': 1.}):
+            reduced = layer.resize(img.size, Image.Resampling.NEAREST)
+            if img.mode == 'RGBA':
+                img.alpha_composite(reduced)
+            else:
+                img.paste(reduced, (0, 0), reduced)
+            return
     move_type = element or skill_of(species_id)['type']
     p = max(0., min(1., progress))
     draw_skill(img, species_id, move_type, source, target, phase, p, team, 'arena_' + kind)

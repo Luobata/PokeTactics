@@ -5,6 +5,7 @@ import math
 from PIL import Image, ImageDraw
 
 import arena_vfx
+import family_vfx
 import retro_primitives as rp
 
 
@@ -26,6 +27,8 @@ def _motif(sid, phase, step, direction, palette, size):
 
 
 def draw(layer, sid, source, target, phase, p, config, *, ranged=False, trails=0):
+    if family_vfx.draw(layer, sid, source, target, phase, p, config, kind='attack'):
+        return True
     if sid not in arena_vfx.EFFECTS or phase not in ('windup', 'flight', 'impact', 'aftermath'):
         return False
     if not 0 <= p < 1:

@@ -9,6 +9,7 @@ from dataclasses import dataclass
 import math
 from PIL import Image, ImageDraw, ImageOps
 import authored_cels
+import family_motion
 from character_rigs import implemented as has_character_rig, render_rig, _point_after_rotation
 
 REST = (0, 0, 100, 100, 0, 0)
@@ -144,6 +145,14 @@ species_motion = {
  'death': [(0,-1,99,101,-5,0),(-1,-2,97,99,-10,1),(-1,-3,95,97,-15,1),(-1,-4,93,95,-20,2),(-1,-5,91,93,-25,3),(-1,-6,89,91,-30,3)]},
 }
 
+# Family battle forms retain the legacy seven-state ABI while their action
+# sample below selects the hand-authored attack or cast curve.  Existing
+# classic tracks (including 130) are immutable and are never replaced.
+for _family_sid in sorted(family_motion.INTEGRATED_SPECIES):
+    if _family_sid not in species_motion:
+        species_motion[_family_sid] = family_motion.body_states(_family_sid)
+
+
 # Retiming preserves the authored keys, amplitude and order. Insert integer
 # in-betweens at 20 Hz; keep dissolve discrete and hold the last non-loop key.
 # RIG_PHASES retain the original local-part phase instead of speeding up wings
@@ -245,10 +254,14 @@ def windup(sid):
     return duration(sid, 'windup')
 
 
-def sample(sid, state, age):
+def sample(sid, state, age, action_kind=None):
     frames = species_motion[sid][state]
     index = max(0, math.floor((age + 1e-8) / frame_dt(state)))
     index = index % len(frames) if state in ('idle', 'walk') else min(index, len(frames)-1)
+    if (sid in family_motion.INTEGRATED_SPECIES and action_kind in family_motion.KINDS
+            and state in family_motion.ACTION_STATES):
+        progress = index / max(1, len(frames)-1)
+        return index, family_motion.sample_action(sid, action_kind, state, progress)
     return index, frames[index]
 
 
@@ -334,7 +347,7 @@ class MotionSystem:
                     state, age = 'recover', elapsed-prep-strike_length
             elif 0 <= t-au.move_t0 < duration(sid, 'walk'):
                 state, age = 'walk', t-au.move_t0
-        index, frame = sample(sid,state,age)
+        index, frame = sample(sid,state,age,action_kind)
         hit, hit_dir = REST, direction
         if state != 'death':
             impacts = [(e[0]+anim._attack_delay(e), e[2]) for e in anim._recent_hits(t)
@@ -497,7 +510,8 @@ def transform(sprite, sid, pose):
                            for a in (alpha.getpixel((x,y)),)])
             out.putalpha(alpha)
         return out
-    if has_character_rig(sid) and pose.direction[0] >= 0:
+    family_profile = family_motion.profile_of(sid) if sid in family_motion.INTEGRATED_SPECIES else None
+    if (has_character_rig(sid) or family_profile is not None) and pose.direction[0] >= 0:
         sprite = ImageOps.mirror(sprite)
         bounds = sprite.getbbox()
     cel = sprite.crop(bounds)
@@ -518,8 +532,25 @@ def transform(sprite, sid, pose):
     scaled = rigged.resize((max(1,round(w*sx)),max(1,round(h*sy))),Image.Resampling.NEAREST)
     angle = -(frame[4]+pose.hit[4]) * (1 if pose.direction[0]>=0 else -1)
     rotated = scaled.rotate(angle,Image.Resampling.NEAREST,expand=True)
-    out = Image.new('RGBA',sprite.size)
-    out.paste(rotated,((sprite.width-rotated.width)//2,sprite.height-rotated.height))
+    if family_profile is None:
+        out = Image.new('RGBA',sprite.size)
+        out.paste(rotated,((sprite.width-rotated.width)//2,sprite.height-rotated.height))
+    else:
+        # Transform only body-local scale/rotation and anchor geometry.  The
+        # renderer's _unit_pose()/offsets() owns world-space action travel, so
+        # putting dx/dy in this canvas would be cancelled by foot_anchor.
+        out = rotated
+        ex,ey = family_profile['emitter']
+        if pose.direction[0] >= 0:
+            ex = 1-ex
+        local = (ex*scaled.width, ey*scaled.height)
+        turned = _point_after_rotation(local,scaled.size,out.size,angle)
+        out.info['rig_anchors'] = {'emitter': turned}
+        visible = out.getchannel('A').getbbox()
+        if visible:
+            out.info['foot_anchor'] = ((visible[0]+visible[2])/2,visible[3])
+        else:
+            out.info['foot_anchor'] = (out.width/2,out.height)
     dissolve = max(frame[5],pose.hit[5])
     if dissolve:
         alpha = out.getchannel('A')

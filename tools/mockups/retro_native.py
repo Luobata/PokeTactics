@@ -5,6 +5,7 @@ import retro_physical
 import retro_support
 from move_references import REFERENCES
 from arena_skills import SKILLS
+import family_vfx
 
 CONTACT_DURATION = .22
 LIFETIME = .8
@@ -15,7 +16,8 @@ SKILL_IDS = frozenset((*_OWNERS,'flame_storm'))
 
 
 def has_move(move):
-    return isinstance(move,str) and move.startswith('arena_') and move[6:] in SKILL_IDS
+    return (isinstance(move,str) and move.startswith('arena_')
+            and (move[6:] in SKILL_IDS or family_vfx.species_for_key(move[6:]) is not None))
 
 
 def lifetime(move):
@@ -23,10 +25,16 @@ def lifetime(move):
 
 
 def draw(layer, move, source, target, phase, progress, config, *, emitters=(),secondary=False,
-         targeting=None, field_cells=()):
+         targeting=None, field_cells=(), species_id=None):
     if not has_move(move):
         return False
     key=move[6:]
+    sid = species_id if species_id is not None else family_vfx.species_for_key(key)
+    if family_vfx.matches_native(sid, key):
+        return family_vfx.draw(layer, sid, source, target, phase, progress, config,
+                               emitters=emitters, secondary=secondary)
+    if key not in SKILL_IDS:
+        return False
     targeting = targeting or next((s.get('targeting', 'enemy') for s in SKILLS.values()
                                   if s['id'] == key), 'enemy')
     if not secondary and targeting == 'ally':
@@ -48,15 +56,18 @@ def effect_key(event, original_events):
         return None
     key=event[4]
     index=event[6].get('cast_index')
-    if key not in SKILL_IDS or type(index) is not int or not 0<=index<len(original_events):
+    if type(index) is not int or not 0<=index<len(original_events):
         return None
     owner=original_events[index]
-    if len(owner)<5 or owner[1]!='cast' or owner[2]!=event[2] or owner[4]!='arena_'+key:
+    if len(owner)<5 or owner[1]!='cast' or owner[2]!=event[2] or not has_move(owner[4]):
         return None
-    return key
+    native_key = owner[4][6:]
+    if key != native_key and not family_vfx.matches_packet(native_key, key):
+        return None
+    return native_key
 
 
-def draw_outcome(layer,key,effect,source,target,age,config,details):
+def draw_outcome(layer,key,effect,source,target,age,config,details,*,species_id=None):
     if not 0<=age<LIFETIME:
         return False
     if effect=='side_hit':
@@ -65,13 +76,17 @@ def draw_outcome(layer,key,effect,source,target,age,config,details):
         phase='impact' if age<CONTACT_DURATION else 'aftermath'
         progress=(age/CONTACT_DURATION if age<CONTACT_DURATION else
                   (age-CONTACT_DURATION)/(LIFETIME-CONTACT_DURATION))
-        return draw(layer,'arena_'+key,source,target,phase,progress,config,secondary=True)
+        return draw(layer,'arena_'+key,source,target,phase,progress,config,
+                    secondary=True,species_id=species_id)
     if effect=='heal' and details.get('amount',0)<=0:
         return False  # Preserve the explicit blocked-healing mark in the renderer.
     return retro_support.draw_outcome(layer,key,effect,source,target,age/LIFETIME,config,details)
 
 
-def describe(key):
+def describe(key, *, species_id=None):
+    sid = species_id if species_id is not None else family_vfx.species_for_key(key)
+    if family_vfx.matches_native(sid, key):
+        return family_vfx.describe(sid)
     if key not in SKILL_IDS:
         return None
     group=next((name for name,module in GROUPS if key in module.SKILL_IDS),'元素招式')

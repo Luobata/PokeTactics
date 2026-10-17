@@ -15,6 +15,7 @@ from PIL import Image, ImageDraw, ImageEnhance, ImageFont, ImageOps
 
 import arena_vfx
 import retro_native
+import family_vfx
 import retro_attacks
 import retro_feedback
 import retro_status
@@ -1717,8 +1718,17 @@ class WebBattleRenderer:
                 retro_attacks.draw(layer, source.u.piece.species_id, a, b, phase,
                     min(1., max(0., p)), config, ranged=source.u.range > 1, trails=trails)
                 continue
+            if (source.u.piece.species_id in family_vfx.SPECIES
+                    and family_vfx.matches_native(source.u.piece.species_id, move.removeprefix('arena_'))
+                    and phase in ('impact', 'aftermath')
+                    and native_targeting(event, self.anim.by_idx) == 'enemy'
+                    and not self._damaging_impact(event, timing)):
+                # A miss or immune/fully shielded primary never invents a hit
+                # stamp. Applied secondary packets retain their own outcomes.
+                continue
             if cast and retro_native.draw(layer,move,a,b,phase,min(1.,max(0.,p)),config,
                                           emitters=tuple(emitters),
+                                          species_id=source.u.piece.species_id,
                                           targeting=native_targeting(event,self.anim.by_idx),
                                           field_cells=tuple((self.cell_point(cell)[0],self.cell_point(cell)[1]-3)
                                               for cell in self._field_footprints.get(timing.source_index, ()))):
@@ -1830,7 +1840,7 @@ class WebBattleRenderer:
                     if details.get('amount')!=event[3]:
                         details={**details,'amount':event[3]}
                     retro_native.draw_outcome(img,key,'heal',(a[0],a[1]-34),b,
-                        age,config,details)
+                        age,config,details,species_id=self.view.units[source].u.piece.species_id)
                 else:
                     retro_support.draw_healing(img,b,age/lifetime,config)
                 continue
@@ -1884,7 +1894,8 @@ class WebBattleRenderer:
                 # Positive heals are presented once by their actual child regen.
                 continue
             if native_key and retro_native.draw_outcome(img,native_key,effect,a,b,age,
-                    self.visual_config(self.view.units[source].u.piece.species_id),payload):
+                    self.visual_config(self.view.units[source].u.piece.species_id),payload,
+                    species_id=self.view.units[source].u.piece.species_id):
                 # Actual regen records already supply the single HP amount in
                 # _draw_numbers; native cels should not print it a second time.
                 continue

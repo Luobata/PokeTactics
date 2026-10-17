@@ -98,9 +98,9 @@ class FamilyActionRenderTests(unittest.TestCase):
         self.assertEqual(anim.by_idx[0].piece.species_id, 212)
         self.assertEqual(anim.preview_fixture['ruleset'], 'arena_v1')
 
-    def test_family_basic_attack_falls_back_without_expanding_authored_registry(self):
+    def test_family_basic_attack_is_authored_without_changing_legacy_registry(self):
         self.assertEqual(set(arena_vfx.EFFECTS), set(arena.ROSTER))
-        self.assertEqual(arena_vfx.attack_label(254), '家族冲击')
+        self.assertEqual(arena_vfx.attack_label(254), '三连疾叶')
         for species in (5, 130, 254, 350):
             for phase in PHASES:
                 with self.subTest(species=species, phase=phase):
@@ -141,8 +141,19 @@ class FamilyActionRenderTests(unittest.TestCase):
         arena_vfx.draw_native_skill(image, 254, 'cross_bullet',
                                     (60, 230), (170, 130), 'impact', .55)
         colors = {rgba[:3] for _, rgba in image.getcolors(image.width * image.height) if rgba[3]}
-        self.assertIn(arena_vfx.ELEMENT_COLORS['GRASS'], colors)
+        self.assertTrue(any(g > r and g > b for r, g, b in colors))
         self.assertIsNotNone(image.getchannel('A').getbbox())
+
+    def test_family_device_native_renders_both_packs_in_rgb_and_rgba(self):
+        for species in (5, 130, 254, 350):
+            for phase in PHASES:
+                for mode in ('RGB', 'RGBA'):
+                    with self.subTest(species=species, phase=phase, mode=mode):
+                        image = Image.new(mode, (240, 320))
+                        before = image.tobytes()
+                        arena_vfx.draw_native_skill(image, species, arena_skills.skill_of(species)['id'],
+                                                   (60, 230), (170, 130), phase, .55)
+                        self.assertNotEqual(image.tobytes(), before)
 
 
 if __name__ == '__main__':

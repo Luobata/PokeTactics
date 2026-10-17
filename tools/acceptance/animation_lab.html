@@ -29,6 +29,10 @@
 <div><h2 id="body-samples-title">仅身体快捷样片</h2><p>一键生成仅身体 + 原生大招。六个快捷样片均使用现有拆件基线。</p></div>
 <div id="body-sample-buttons" class="body-sample-buttons" role="group" aria-label="生成仅身体快捷样片"></div>
 </section>
+<section class="body-samples" aria-labelledby="family-samples-title">
+<div><h2 id="family-samples-title">新增家族演出</h2><p>查看本命演出后，可切换「普通攻击」或「仅身体」逐帧比较。保留原贴图，整身发力与独立部件分别标明。</p></div>
+<div id="family-sample-buttons" class="body-sample-buttons" role="group" aria-label="生成新增家族演出"></div>
+</section>
 <div class="lab-workspace">
 <section aria-labelledby="live-title">
 <div class="preview-heading"><h2 id="live-title">实时动作预览</h2><span id="canvas-meta">960 × 640 · 当前竞技</span></div>
@@ -39,7 +43,7 @@
 <p class="lab-live-note">空格：播放 / 暂停　← →：逐帧　点击阶段：暂停定位。仅按需读取附近画面。</p>
 <dl class="lab-snapshot"><div><dt id="subject">命中观察对象</dt><dd id="snapshot-hp">—</dd></div><div><dt>能量：观察前 → 观察时</dt><dd id="snapshot-energy">—</dd></div></dl><p id="snapshot-shield" class="lab-snapshot-note" hidden></p><p id="skill-outcomes" class="lab-snapshot-note">生成预览后显示实际事件快照。</p>
 </section>
-<aside class="lab-detail" aria-labelledby="character-title"><h2 id="character-title">角色与动作覆盖</h2><p id="character-role">目录读取中</p><p id="character-skill"></p><p id="character-tactic"></p><p id="character-counter"></p><p id="character-rig"></p><div id="action-buttons" class="lab-actions" role="group" aria-label="选择并预览动作"></div><table class="lab-matrix"><caption>身体与部件动作分别标明</caption><thead><tr><th scope="col">动作</th><th scope="col">身体</th><th scope="col">部件</th></tr></thead><tbody id="action-matrix"></tbody></table><dl id="metrics" class="lab-metrics"></dl><p id="revision" class="lab-revision">等待本次渲染记录</p></aside>
+<aside class="lab-detail" aria-labelledby="character-title"><h2 id="character-title">角色与动作覆盖</h2><p id="character-role">目录读取中</p><p id="character-skill"></p><p id="character-tactic"></p><p id="character-counter"></p><p id="character-visual"></p><p id="character-rig"></p><div id="action-buttons" class="lab-actions" role="group" aria-label="选择并预览动作"></div><table class="lab-matrix"><caption>身体与部件动作分别标明</caption><thead><tr><th scope="col">动作</th><th scope="col">身体</th><th scope="col">部件</th></tr></thead><tbody id="action-matrix"></tbody></table><dl id="metrics" class="lab-metrics"></dl><p id="revision" class="lab-revision">等待本次渲染记录</p></aside>
 </div>
 <details id="history" class="history-evidence"><summary>历史 / 离线导出样片</summary><p>此处读取已有 GIF 与静态分镜，按生成物元数据标明模式。旧的 240 × 320 素材属于 device-v1；离线样片用于参考。</p><div class="history-links"><a href="/animation-editor?mode=classic">经典设备编辑器</a><a href="/reference?path=docs%2F21-animation-authoring-and-acceptance.md">动画制作说明</a><a href="/mockups/battle_storyboard.png">历史静态分镜</a></div><p id="history-status">展开后读取离线生成物。</p><div id="history-body" hidden><div class="history-picker"><label for="history-clip">离线片段</label><select id="history-clip"></select><a id="history-original" target="_blank" rel="noopener">打开原图 →</a></div><div class="history-assets"><div><img id="history-image" class="history-image" alt="离线动画片段"><p id="history-image-error" hidden></p></div><div><div class="history-contact" tabindex="0" aria-label="离线分镜，可横向滚动"><img id="history-contact" alt="离线动作五阶段分镜"></div><p id="history-contact-error" hidden></p></div></div><p id="history-metadata"></p></div></details>
 <footer class="footer">本地独立训练场 · 预览与试玩共用渲染器 · 不创建或修改对局存档</footer>
@@ -52,6 +56,7 @@
   const query = new URLSearchParams(location.search), ACTIONS = {idle:'待机',move:'移动',attack:'普通攻击',cast:'原生大招',hit:'受击',death:'退场'};
   const VIEWS = {composite:'完整效果',body:'仅身体'};
   const BODY_SAMPLES = [{species:68,name:'怪力'},{species:9,name:'水箭龟'},{species:26,name:'雷丘'},{species:212,name:'巨钳螳螂'},{species:6,name:'喷火龙'},{species:3,name:'妙蛙花'}];
+  const FAMILY_SAMPLES = [{species:257,name:'火焰鸡 · 连踢'},{species:376,name:'巨金怪 · 重拳'},{species:254,name:'蜥蜴王 · 叶刃'},{species:260,name:'巨沼怪 · 泥水'},{species:282,name:'沙奈朵 · 守护'},{species:350,name:'美纳斯 · 鳞光'},{species:334,name:'七夕青鸟 · 云羽'},{species:373,name:'暴飞龙 · 俯冲'},{species:359,name:'阿勃梭鲁 · 角刃'},{species:272,name:'乐天河童 · 雨舞'},{species:286,name:'斗笠菇 · 孢拳'},{species:306,name:'波士可多拉 · 钢甲'},{species:130,name:'暴鲤龙 · 怒涛'},{species:135,name:'雷伊布 · 电棘'}];
   const previewView = (value,currentMode='arena') => currentMode !== 'arena' || value !== 'body' ? 'composite' : 'body';
   const bodyNames = {web_part_rig:'竞技关节',part_rig:'专属部件',authored_pose:'手编整身',procedural:'通用动作',shared_overlay:'共享反馈',shared_intro:'共享开场',pending:'待制作',procedural_joints:'程序化关节'};
   const finite = value => typeof value === 'number' && Number.isFinite(value), fmt = (value,digits=2) => finite(value) ? value.toLocaleString('zh-CN',{maximumFractionDigits:digits}) : '未提供';
@@ -78,7 +83,7 @@
   function syncView() {
     if(mode !== 'arena' && view === 'body') view='composite';
     document.body.dataset.view=view; $('view').value=view; $('view').querySelector('[value=body]').disabled=mode!=='arena';
-    write('view-note',view==='body' ? '仅身体基线：4倍像素放大，镜头跟随角色，隐藏外部特效；保留四肢移动、受击与退场等真实身体反馈，并和完整效果使用同一时间轴。这是当前动作基线，不代表新动画已完成。' : '完整效果保留招式与外部特效。如拳影遮挡四臂，切换「仅身体」检查当前动作；两种视图使用同一时间轴。');
+    write('view-note',view==='body' ? '仅身体基线：4倍像素放大，镜头跟随角色，隐藏外部特效；保留当前整身或部件动作、受击与退场反馈，并和完整效果使用同一时间轴。具体身体与部件覆盖见右侧。' : '完整效果保留招式与外部特效。如拳影遮挡四臂，切换「仅身体」检查当前动作；两种视图使用同一时间轴。');
     const url=new URL(location.href); url.searchParams.set('mode',mode); url.searchParams.set('view',view); const species=Number($('species').value),kind=$('kind').value;
     if(species) url.searchParams.set('species',species); if(Object.hasOwn(ACTIONS,kind)) url.searchParams.set('kind',kind); url.searchParams.delete('seed');
     url.searchParams.delete('actor_art');
@@ -105,9 +110,12 @@
     write('character-title',entry.name+' · '+(mode==='arena'?'竞技':'经典'));
     write('character-role',entry.role+' / '+entry.cost+' 费 / 射程 '+entry.range+' 格 / '+(bodyNames[cap.body] || cap.body || '资料待补'));
     write('character-skill',(skill.name || '技能')+' · '+(skill.description || '资料待补'));
-    write('character-tactic','站位与用途：'+(skill.tactic || '资料待补')+(skill.presentation?.authored?' · '+skill.presentation.style+' / '+skill.presentation.group+' · 原版参考：'+(skill.presentation.reference?.moves || []).map(move=>move.name).join(' / '):'')); write('character-counter','应对方式：'+(skill.counterplay || '资料待补'));
+    const references=(skill.presentation?.reference?.moves || []).map(move=>move.name).join(' / ');
+    write('character-tactic','站位与用途：'+(skill.tactic || '资料待补')+(skill.presentation?.authored?' · '+skill.presentation.style+' / '+skill.presentation.group+(references?' · 原版参考：'+references:''):'')); write('character-counter','应对方式：'+(skill.counterplay || '资料待补'));
+    const visual=entry.attack_presentation;
+    write('character-visual',visual ? '普攻：'+visual.attack_name+'。视觉主题：'+visual.identity+'。' : '');
     const parts=Array.isArray(rig.parts)?rig.parts:[];
-    write('character-rig',parts.length?(rig.implemented?'已接入部件：':'计划部件：')+parts.map(p=>p.label || p.name).join('、'):'使用通用整身动作；尚无物种部件拆解。');
+    write('character-rig',parts.length?(rig.implemented?'已接入部件：':'计划部件：')+parts.map(p=>p.label || p.name).join('、'):(entry.motion_notes?.[$('kind').value] || entry.motion_notes?.attack || '通用整身动作')+'；整身发力，尚无独立关节动画。');
     $('kind').querySelector('[value=cast]').disabled=skill.can_cast===false;
     if(skill.can_cast===false && $('kind').value==='cast') $('kind').value='attack';
     $('action-buttons').replaceChildren(); $('action-matrix').replaceChildren();
@@ -192,6 +200,7 @@
     await render();
   }
   BODY_SAMPLES.forEach(sample=>{const button=document.createElement('button');button.type='button';button.dataset.bodyKind='cast';button.textContent=sample.name+' · #'+String(sample.species).padStart(3,'0');button.addEventListener('click',()=>renderBodySample(sample));$('body-sample-buttons').append(button);});
+  FAMILY_SAMPLES.forEach(sample=>{const button=document.createElement('button');button.type='button';button.dataset.familyKind='cast';button.textContent=sample.name;button.addEventListener('click',async()=>{cancelRequest();mode='arena';view='composite';$('mode').value=mode;$('kind').value='cast';characters={};clearStage();clearError();syncView();if(await loadCharacters(sample.species))await render();});$('family-sample-buttons').append(button);});
   $('cancel').addEventListener('click',()=>{cancelRequest('已取消生成，可重新选择后再试。');clearStage();});
   $('play').addEventListener('click',()=>player.wanted?player.pause():player.play()); $('previous').addEventListener('click',()=>player.step(-1));$('next').addEventListener('click',()=>player.step(1));
   $('seek').addEventListener('input',()=>player.seek(Number($('seek').value)));$('speed').addEventListener('change',()=>player.setSpeed($('speed').value));

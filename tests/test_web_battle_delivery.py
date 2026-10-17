@@ -32,7 +32,7 @@ class WebBattleDelivery(unittest.TestCase):
                                              positions_a=[(2, 3)], **options)
             self.assertEqual(meta['winner'], result['winner'])
             self.assertEqual(meta['statistics'], battle.statistics())
-            self.assertEqual(demo.WEB_BATTLE_REVISION, 'web-arena-v17-persistent-state-r1')
+            self.assertEqual(demo.WEB_BATTLE_REVISION, 'web-arena-v18-family-effects-r1')
             self.assertEqual(meta['presentation'], demo.WEB_BATTLE_REVISION)
             self.assertEqual(meta['render_revision'], demo.WEB_BATTLE_REVISION)
             self.assertNotEqual(meta['render_revision'], 'web-arena-v1')

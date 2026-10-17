@@ -314,7 +314,7 @@ class RetroMovePresentation(unittest.TestCase):
         self.assertGreater(box[0], source[0] + 200)
 
     def test_new_cel_source_and_render_revision_invalidate_public_preview_cache(self):
-        self.assertEqual(presentation_modes.WEB_BATTLE_REVISION, 'web-arena-v17-persistent-state-r1')
+        self.assertEqual(presentation_modes.WEB_BATTLE_REVISION, 'web-arena-v18-family-effects-r1')
         request = animation_preview.normalize_preview({'species': 6, 'kind': 'cast'})
         before = animation_preview.source_revision()
         cel_path = Path(retro_moves.__file__).resolve()

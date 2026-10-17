@@ -1,6 +1,6 @@
 """One presentation contract for the trial, authoring tools and exported evidence."""
 
-WEB_BATTLE_REVISION = 'web-arena-v17-persistent-state-r1'
+WEB_BATTLE_REVISION = 'web-arena-v18-family-effects-r1'
 CLASSIC_REVISION = 'device-v1'
 
 
