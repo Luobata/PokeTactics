@@ -7,10 +7,12 @@ import copy
 from data import pokedex
 from roster import Piece, LEVEL_BY_TIER, RANGED, MELEE
 
-VERSION = 'families_v1'
+VERSION = 'families_v2'
+FIRST_VERSION = 'families_v1'
+VERSIONS = (FIRST_VERSION, VERSION)
 LEGACY_VERSION = 'species_v1'
 # cost, supported routes. A route names real species, never invented forms.
-FAMILIES = {
+FIRST_FAMILIES = {
     1: (2, ((1, 2, 3),)), 4: (2, ((4, 5, 6),)), 7: (2, ((7, 8, 9),)),
     10: (1, ((10, 11, 12),)), 29: (1, ((29, 30, 31),)),
     32: (2, ((32, 33, 34),)), 43: (2, ((43, 44, 45),)),
@@ -38,14 +40,32 @@ FAMILIES = {
     236: (1, ((236, 106), (236, 237))), 238: (2, ((238, 124),)),
     239: (2, ((239, 125),)), 246: (3, ((246, 247, 248),)),
 }
+HOENN_FAMILIES = {
+    252: (2, ((252, 253, 254),)), 255: (2, ((255, 256, 257),)),
+    258: (2, ((258, 259, 260),)), 270: (1, ((270, 271, 272),)),
+    280: (3, ((280, 281, 282),)), 285: (1, ((285, 286),)),
+    304: (1, ((304, 305, 306),)), 333: (2, ((333, 334),)),
+    349: (2, ((349, 350),)), 359: (3, ((359,),)),
+    371: (3, ((371, 372, 373),)), 374: (3, ((374, 375, 376),)),
+}
+FAMILIES = {**FIRST_FAMILIES, **HOENN_FAMILIES}
 SPECIES_FAMILY = {sid: fid for fid, (_, paths) in FAMILIES.items() for path in paths for sid in path}
 RARE = frozenset(fid for fid, (cost, _) in FAMILIES.items() if cost >= 4)
 # 3-cost stock grows from 10 to 18: two full cultivations can exist per family.
 POOL_BY_COST = {1: 24, 2: 22, 3: 18, 4: 10, 5: 8}
 
 
+def families_for(version=VERSION):
+    if version not in VERSIONS:
+        raise ValueError('未知家族卡池版本')
+    return FIRST_FAMILIES if version == FIRST_VERSION else FAMILIES
+
+
 def role_of(sid):
     import arena
+    if sid >= 252:
+        from arena_gen3 import ROLES
+        return ROLES[sid]
     if sid in arena.ROSTER:
         return arena.ROSTER[sid][1]
     if sid in (129, 130):
@@ -83,9 +103,9 @@ def make_piece(fid, step=1, branch=None):
     return piece
 
 
-def build_templates():
+def build_templates(version=VERSION):
     result = {}
-    for fid, (_, paths) in FAMILIES.items():
+    for fid, (_, paths) in families_for(version).items():
         for path in paths:
             for step in range(1, 2 if fid in RARE else 4):
                 piece = make_piece(fid, step, path[-1])
@@ -94,8 +114,10 @@ def build_templates():
     return result
 
 
-def pool_caps():
-    return {sid: POOL_BY_COST[FAMILIES[sid][0]] if sid in FAMILIES else 0 for sid in SPECIES_FAMILY}
+def pool_caps(version=VERSION):
+    entries = families_for(version)
+    species = {sid for _, paths in entries.values() for path in paths for sid in path}
+    return {sid: POOL_BY_COST[entries[sid][0]] if sid in entries else 0 for sid in species}
 
 
 def source_id(piece):

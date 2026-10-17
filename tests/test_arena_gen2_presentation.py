@@ -96,7 +96,7 @@ class Gen2VisualTracks(unittest.TestCase):
 class Gen2AssetContracts(unittest.TestCase):
     def test_all_22_normal_and_shiny_pngs_are_real_independent_art(self):
         from arena_families import SPECIES_FAMILY
-        self.assertEqual(decoders.GEN2_SPECIES, {sid for sid in SPECIES_FAMILY if sid > 151})
+        self.assertEqual(decoders.GEN2_SPECIES, set(range(152, 252)))
         front = Front()
         palette = Mock()
         palette.for_species.side_effect = AssertionError('Gen 2 must not use the Gen 1 palette map')

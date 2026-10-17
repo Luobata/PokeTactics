@@ -7,12 +7,14 @@ window.FamilyDex = (() => {
   const fmt = (k,v) => k==='attack_interval' ? `${Number(v).toFixed(2)} 秒` : Math.round(v);
   function mount(root, navigation) {
     const params = new URLSearchParams(location.search);
-    const state = {data:null,q:params.get('q')||'',cost:'all',role:'all',stage:['1','2','3'].includes(params.get('stage'))?Number(params.get('stage')):1,sort:'cost',branches:{},compare:[]};
-    root.innerHTML = `<header class="fd-head"><div><p class="eyebrow">FIELD GUIDE / 家族培养 · 第一版</p><h1>从相遇，到并肩作战。</h1><p class="lead">看清每个家族的成长，再决定把金币交给谁。</p></div><a class="primary-link" href="/play">前往竞技场 →</a></header>${navigation}<div class="fd-loading" role="status">正在读取家族与战斗面板…</div>`;
+    if (params.get('view') === 'all') { window.ReferenceDex.mount(root, navigation); return; }
+    const pool = params.get('pool') || 'families_v2';
+    const state = {data:null,q:params.get('q')||'',cost:'all',role:'all',generation:params.get('generation')||'all',stage:['1','2','3'].includes(params.get('stage'))?Number(params.get('stage')):1,sort:'cost',branches:{},compare:[]};
+    root.innerHTML = `<header class="fd-head"><div><p class="eyebrow">FIELD GUIDE / 家族培养 · 丰缘扩展</p><h1>从相遇，到并肩作战。</h1><p class="lead">看清每个家族的成长，再决定把金币交给谁。</p></div><a class="primary-link" href="/play">前往竞技场 →</a></header>${navigation}<div class="fd-loading" role="status">正在读取家族与战斗面板…</div>`;
     async function load() {
       const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),15000);
       try {
-        const response=await fetch('/api/portal/families',{signal:controller.signal});
+        const response=await fetch('/api/portal/families?pool='+encodeURIComponent(pool),{signal:controller.signal});
         if(!response.ok) throw Error('HTTP '+response.status);
         const data=await response.json(); if(!data.ok||!Array.isArray(data.families))throw Error('目录格式无效');
         state.data=data; renderShell();
@@ -23,8 +25,10 @@ window.FamilyDex = (() => {
     function pick(f) {const branch=f.branches.find(b=>b.id===state.branches[f.id])||f.branches[0];return {f,branch,p:branch.stages[Math.min(state.stage-1,branch.stages.length-1)]};}
     function renderShell() {
       const d=state.data;
-      root.querySelector('.fd-loading').outerHTML=`<section class="fd-overview"><div><b>${d.families.length}</b><span>可抽家族</span></div><div><b>${d.forms}</b><span>战斗形态</span></div><div><b>1 / 3 / 9</b><span>累计培养张数</span></div><div><b>${d.total_stock}</b><span>全场共享基础牌</span></div></section><aside class="fd-rules"><strong>商店只卖初始形态，家族费用固定。</strong><span>两段与无进化家族同样可满培养；稀有单位只需一张、全队限一。伊布集齐三只后主动选择五条路线之一。</span><small>${esc(d.note)} 费用与数值为首轮试玩初值。</small></aside><section class="fd-controls" aria-label="图鉴筛选"><label class="search-field"><span aria-hidden="true">⌕</span><input id="fd-search" type="search" aria-label="搜索家族、形态或技能" placeholder="搜索小火龙、喷火龙、伊布、技能…" value="${esc(state.q)}"></label><div class="fd-control-row"><fieldset><legend>比较培养档</legend>${[1,2,3].map((n)=>`<button type="button" data-fd-stage="${n}" aria-pressed="${state.stage===n}">${['1 张 · 初始','3 张 · 进阶','9 张 · 满培养'][n-1]}</button>`).join('')}</fieldset><label>定位<select id="fd-role"><option value="all">全部定位</option><option value="attack">攻击</option><option value="defense">防守</option><option value="support">辅助</option></select></label><label>排序<select id="fd-sort"><option value="cost">费用 · 从低到高</option><option value="max_hp">生命 · 从高到低</option><option value="atk">攻击 · 从高到低</option><option value="sp_atk">特攻 · 从高到低</option><option value="defense">防御 · 从高到低</option><option value="attack_interval">攻击间隔 · 从短到长</option></select></label></div><fieldset class="fd-costs"><legend>家族费用</legend><button data-fd-cost="all" aria-pressed="true">全部</button>${[1,2,3,4,5].map(c=>`<button data-fd-cost="${c}" aria-pressed="false">${c} 费 <small>${d.distribution[c]||0} 族</small></button>`).join('')}</fieldset></section><div class="fd-result-meta"><span id="fd-count" role="status" aria-live="polite"></span><span>选择「加入比较」，并排查看最多 3 只</span></div><section id="fd-compare" aria-label="宝可梦强度对照"></section><section id="fd-grid" class="fd-grid" aria-label="家族名册"></section><footer class="hub-footer"><span>FAMILY NOTES / ${esc(d.version)}</span><a href="/pokedex?tab=items">查看道具与搭配 →</a></footer>`;
+      root.querySelector('.fd-loading').outerHTML=`<nav class="fd-view-switch" aria-label="资料范围"><a aria-current="page" href="/pokedex?pool=${esc(pool)}">竞技强度 · ${d.families.length} 家族</a><a href="/pokedex?view=all&pool=${esc(pool)}">前三世代资料 · 386 种</a></nav>${pool==='families_v1'?'<aside class="fd-rules">正在查看旧对局的 56 家族卡池。<a href="/pokedex">查看新局丰缘卡池 →</a></aside>':''}<section class="fd-overview"><div><b>${d.families.length}</b><span>可抽家族</span></div><div><b>${d.forms}</b><span>战斗形态</span></div><div><b>1 / 3 / 9</b><span>累计培养张数</span></div><div><b>${d.total_stock}</b><span>全场共享基础牌</span></div></section><aside class="fd-rules"><strong>商店只卖初始形态，家族费用固定。</strong><span>两段与无进化家族同样可满培养；稀有单位只需一张、全队限一。伊布集齐三只后主动选择五条路线之一。</span><small>${esc(d.note)} 费用与数值为首轮试玩初值。</small></aside><section class="fd-controls" aria-label="图鉴筛选"><label class="search-field"><span aria-hidden="true">⌕</span><input id="fd-search" type="search" aria-label="搜索家族、形态或技能" placeholder="搜索小火龙、喷火龙、伊布、技能…" value="${esc(state.q)}"></label><div class="fd-control-row"><fieldset><legend>比较培养档</legend>${[1,2,3].map((n)=>`<button type="button" data-fd-stage="${n}" aria-pressed="${state.stage===n}">${['1 张 · 初始','3 张 · 进阶','9 张 · 满培养'][n-1]}</button>`).join('')}</fieldset><label>家族世代<select id="fd-generation"><option value="all">全部世代</option><option value="1">第一世代</option><option value="2">第二世代</option><option value="3">第三世代</option></select></label><label>定位<select id="fd-role"><option value="all">全部定位</option><option value="attack">攻击</option><option value="defense">防守</option><option value="support">辅助</option></select></label><label>排序<select id="fd-sort"><option value="cost">费用 · 从低到高</option><option value="max_hp">生命 · 从高到低</option><option value="atk">攻击 · 从高到低</option><option value="sp_atk">特攻 · 从高到低</option><option value="defense">防御 · 从高到低</option><option value="attack_interval">攻击间隔 · 从短到长</option></select></label></div><fieldset class="fd-costs"><legend>家族费用</legend><button data-fd-cost="all" aria-pressed="true">全部</button>${[1,2,3,4,5].map(c=>`<button data-fd-cost="${c}" aria-pressed="false">${c} 费 <small>${d.distribution[c]||0} 族</small></button>`).join('')}</fieldset></section><div class="fd-result-meta"><span id="fd-count" role="status" aria-live="polite"></span><span>选择「加入比较」，并排查看最多 3 只</span></div><section id="fd-compare" aria-label="宝可梦强度对照"></section><section id="fd-grid" class="fd-grid" aria-label="家族名册"></section><footer class="hub-footer"><span>FAMILY NOTES / ${esc(d.version)}</span><a href="/pokedex?tab=items&pool=${esc(pool)}">查看道具与搭配 →</a></footer>`;
       root.querySelector('#fd-search').addEventListener('input',e=>{state.q=e.target.value;renderGrid();});
+      root.querySelector('#fd-generation').value=state.generation;
+      root.querySelector('#fd-generation').addEventListener('change',e=>{state.generation=e.target.value;renderGrid();});
       root.querySelector('#fd-role').addEventListener('change',e=>{state.role=e.target.value;renderGrid();});
       root.querySelector('#fd-sort').addEventListener('change',e=>{state.sort=e.target.value;renderGrid();});
       renderGrid();
@@ -37,11 +41,11 @@ window.FamilyDex = (() => {
     function renderGrid() {
       if(!state.data)return;
       const q=state.q.trim().toLowerCase();
-      const rows=state.data.families.map(pick).filter(({f,p})=>(state.cost==='all'||f.cost===Number(state.cost))&&(state.role==='all'||p.role_key===state.role)&&(!q||JSON.stringify(f).toLowerCase().includes(q)));
+      const rows=state.data.families.map(pick).filter(({f,p})=>(state.generation==='all'||f.generation===Number(state.generation))&&(state.cost==='all'||f.cost===Number(state.cost))&&(state.role==='all'||p.role_key===state.role)&&(!q||JSON.stringify(f).toLowerCase().includes(q)));
       rows.sort((a,b)=>state.sort==='cost'?a.f.cost-b.f.cost||a.f.id-b.f.id:state.sort==='attack_interval'?a.p.stats.attack_interval-b.p.stats.attack_interval:b.p.stats[state.sort]-a.p.stats[state.sort]);
       root.querySelector('#fd-count').textContent=`${rows.length} / ${state.data.families.length} 个家族 · 当前按 ${[1,3,9][state.stage-1]} 张培养查看，稀有保持单张`;
       root.querySelector('#fd-grid').innerHTML=rows.length?rows.map(card).join(''):'<div class="status-box"><h2>没有匹配的家族</h2><p>试试其他形态名称或清除筛选。</p><button data-fd-clear>清除筛选</button></div>';
-      const qp=new URLSearchParams();if(state.q)qp.set('q',state.q);qp.set('stage',state.stage);history.replaceState(null,'','/pokedex?'+qp);
+      const qp=new URLSearchParams();if(state.q)qp.set('q',state.q);qp.set('stage',state.stage);if(state.generation!=='all')qp.set('generation',state.generation);if(pool==='families_v1')qp.set('pool',pool);history.replaceState(null,'','/pokedex?'+qp);
       renderCompare();
     }
     function renderCompare() {
@@ -59,7 +63,7 @@ window.FamilyDex = (() => {
       else if(b.dataset.fdAdd){const f=state.data.families.find(f=>f.id===Number(b.dataset.fdAdd)),r=pick(f);r.key=`${f.id}:${r.branch.id}:${r.p.star}`;const i=state.compare.findIndex(x=>x.key===r.key);if(i>=0)state.compare.splice(i,1);else if(state.compare.length<3)state.compare.push(r);}
       else if(b.dataset.fdRemove)state.compare=state.compare.filter(r=>r.key!==b.dataset.fdRemove);
       else if(b.hasAttribute('data-fd-empty'))state.compare=[];
-      else if(b.hasAttribute('data-fd-clear')){state.q='';state.cost=state.role='all';root.querySelector('#fd-search').value='';root.querySelector('#fd-role').value='all';root.querySelectorAll('[data-fd-cost]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.fdCost==='all')));}
+      else if(b.hasAttribute('data-fd-clear')){state.q='';state.cost=state.role=state.generation='all';root.querySelector('#fd-generation').value='all';root.querySelector('#fd-search').value='';root.querySelector('#fd-role').value='all';root.querySelectorAll('[data-fd-cost]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.fdCost==='all')));}
       else return;
       renderGrid();
     });

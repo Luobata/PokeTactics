@@ -22,7 +22,7 @@ class Gen2Roster(unittest.TestCase):
         self.assertEqual(set(dex.species), set(range(1, 152)))
         self.assertEqual(len(shop.build_templates()), 84)
         from arena_families import SPECIES_FAMILY
-        self.assertEqual(set(dex.arena_species), {sid for sid in SPECIES_FAMILY if sid > 151})
+        self.assertEqual(set(dex.arena_species), {sid for sid in SPECIES_FAMILY if 151 < sid <= 251})
         self.assertEqual(dex.species_record(164)['base']['special_attack'], 76)
         self.assertEqual(dex.species_record(181)['base']['defense'], 75)
         self.assertEqual(dex.species_record(208)['types'], ['STEEL', 'GROUND'])

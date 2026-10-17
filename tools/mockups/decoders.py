@@ -18,11 +18,9 @@ from PIL import Image, ImageDraw, ImageFont
 # PokeTactics/tools/mockups/ -> 上三级到 luobata/，再进 ESP32-PokemonGo/assets
 POKEWALK = Path(__file__).resolve().parent.parent.parent.parent / "ESP32-PokemonGo" / "assets"
 GEN2_FRONT = Path(__file__).resolve().parents[2] / "assets" / "gen2"
-GEN2_SPECIES = frozenset((162, 211, 195, 237, 164, 171, 181, 196, 214,
-                          197, 208, 242, 157, 212, 230, 160, 248, 154,
-                          198, 200, 215, 227,
-                          152, 153, 155, 156, 158, 159, 161, 163, 170, 172,
-                          173, 174, 179, 180, 194, 236, 238, 239, 246, 247))
+GEN3_FRONT = Path(__file__).resolve().parents[2] / "assets" / "gen3"
+GEN2_SPECIES = frozenset(range(152, 252))
+GEN3_SPECIES = frozenset(range(252, 387))
 GEN2_TEXT = (
     "菊草叶月桂叶火球鼠火岩鼠小锯鳄蓝鳄尾立咕咕灯笼鱼皮丘皮宝宝宝宝丁"
     "咩利羊茸茸羊乌波无畏小子迷唇娃电击怪幼基拉斯沙基拉斯初阶奋力跃击怒涛冲撞水流护幕雷电接力烈焰迸发"
@@ -92,6 +90,7 @@ class Front:
         # Explicit binary resources retain their complete, unrestricted ID table.
         self._allow_local_png = path is None
         self._png_root = GEN2_FRONT
+        self._gen3_root = GEN3_FRONT
         self._png_cache = {}
         d = _read_resource(self.path)
         magic, ver, nseg = struct.unpack("<4sHH", d[:8])
@@ -112,29 +111,37 @@ class Front:
                 q += 2 + per
 
     def _uses_local_png(self, pid: int) -> bool:
-        return self._allow_local_png and pid in GEN2_SPECIES
+        return self._allow_local_png and pid in GEN2_SPECIES | GEN3_SPECIES
 
     def _png_image(self, pid: int, shiny: bool = False) -> Image.Image:
         key = (pid, bool(shiny))
         if key not in self._png_cache:
-            path = self._png_root / ("shiny" if shiny else "normal") / f"{pid}.png"
+            root = self._gen3_root if pid in GEN3_SPECIES else self._png_root
+            path = root / ("shiny" if shiny else "normal") / f"{pid}.png"
             try:
                 with Image.open(path) as source:
                     if source.format != "PNG":
                         raise AssetError(f"species {pid}: invalid PNG front sprite in {path}")
                     if source.width != source.height or source.width < 1:
                         raise AssetError(f"species {pid}: front sprite must be square in {path}")
-                    if source.mode != "P":
+                    if pid in GEN3_SPECIES:
+                        if source.mode != 'RGBA':
+                            raise AssetError(f"species {pid}: expected RGBA PNG front sprite in {path}")
+                        image = source.copy()
+                        if any(image.getpixel(point)[3] != 0 for point in
+                               ((0, 0), (source.width - 1, 0), (0, source.height - 1),
+                                (source.width - 1, source.height - 1))):
+                            raise AssetError(f"species {pid}: PNG corners must be transparent in {path}")
+                    elif source.mode != "P":
                         raise AssetError(f"species {pid}: expected indexed P PNG front sprite in {path}")
-                    corners = ((0, 0), (source.width - 1, 0),
-                               (0, source.height - 1), (source.width - 1, source.height - 1))
-                    if any(source.getpixel(point) != 0 for point in corners):
-                        raise AssetError(f"species {pid}: PNG background must use palette index 0 in {path}")
-                    # The checked-in Johto pack reserves index 0 for background.
-                    # Set alpha on this decoded copy; preserve every source byte.
-                    source.info["transparency"] = 0
-                    image = source.convert("RGBA")
-                    image = _restore_enclosed_white(image, tuple(source.getpalette()[:3]))
+                    else:
+                        corners = ((0, 0), (source.width - 1, 0),
+                                   (0, source.height - 1), (source.width - 1, source.height - 1))
+                        if any(source.getpixel(point) != 0 for point in corners):
+                            raise AssetError(f"species {pid}: PNG background must use palette index 0 in {path}")
+                        # The legacy Johto format reserves index zero for white/background.
+                        source.info["transparency"] = 0
+                        image = _restore_enclosed_white(source.convert("RGBA"), tuple(source.getpalette()[:3]))
             except (OSError, ValueError) as exc:
                 if isinstance(exc, AssetError):
                     raise
@@ -223,15 +230,21 @@ class Font16:
             self._glyph[chr(cp)] = d[14 + 2 * count + i * per:(14 + 2 * count) + (i + 1) * per]
         self.fallback_font_path = None
         if path is None:
-            missing = set(GEN2_TEXT) - self._glyph.keys()
+            # Decoders also run as standalone art tools without sim on sys.path.
+            # Read bundled text for glyph coverage without importing the runtime.
+            root = Path(__file__).resolve().parents[2]
+            text = (root / 'data/pokemon_gen123_reference.json').read_text(encoding='utf-8')
+            text += (root / 'sim/arena_gen3.py').read_text(encoding='utf-8')
+            characters = {ch for ch in text if '\u4e00' <= ch <= '\u9fff'}
+            missing = (set(GEN2_TEXT) | characters) - self._glyph.keys()
             if missing:
-                self._add_gen2_glyphs(missing)
+                self._add_reference_glyphs(missing)
 
-    def _add_gen2_glyphs(self, chars):
-        """Rasterize only missing Johto names; existing firmware glyphs stay exact."""
+    def _add_reference_glyphs(self, chars):
+        """Rasterize missing reference text; existing firmware glyphs stay exact."""
         font_path = next((path for path in CJK_FONT_PATHS if path.is_file()), None)
         if font_path is None:
-            raise AssetError("missing system CJK font for Gen 2 name glyphs")
+            raise AssetError("missing system CJK font for reference glyphs")
         try:
             font = ImageFont.truetype(str(font_path), self.size - 1)
         except OSError as exc:

@@ -9,6 +9,7 @@ import random
 
 from action_preview import PREVIEW_ACTIONS
 from arena import build_templates
+from arena_families import build_templates as build_family_templates
 from combat import Battle
 from data import ENERGY_MAX
 import arena_skills
@@ -19,7 +20,8 @@ from render_battle_gif import BattleAnimation
 SCENES = ('dummy', 'melee', 'ranged')
 
 
-def make_preview_scene(species_id, kind, seed=7, visual_overrides=None, *, scene='dummy'):
+def make_preview_scene(species_id, kind, seed=7, visual_overrides=None, *, scene='dummy',
+                       templates=None):
     """Return a BattleAnimation with unit 0 as the selected arena character.
 
     Cast scenes have two injured friends and four durable enemies so healing,
@@ -28,7 +30,9 @@ def make_preview_scene(species_id, kind, seed=7, visual_overrides=None, *, scene
     away; melee posts engage at contact distance. Idle delays the first action
     beyond the inspection window rather than fabricating an idle event.
     """
-    templates = build_templates()
+    # Family forms are the playable default; passing arena.build_templates()
+    # intentionally preserves the frozen 62-template preview pack.
+    templates = build_family_templates() if templates is None else templates
     if type(species_id) is not int or species_id not in templates:
         raise ValueError('请选择竞技上场池中的宝可梦')
     if not isinstance(kind, str) or kind not in PREVIEW_ACTIONS:
@@ -109,7 +113,7 @@ def make_preview_scene(species_id, kind, seed=7, visual_overrides=None, *, scene
                             'ruleset': 'arena_v1', 'stat_mode': 'budget_v1',
                             'selected_unit': 0, 'primary_target': recipient,
                             'opponent_anchor': primary.idx,
-                            'targeting': arena_skills.SKILLS[species_id].get('targeting', 'enemy') if kind == 'cast' else 'enemy',
+                            'targeting': arena_skills.skill_of(species_id).get('targeting', 'enemy') if kind == 'cast' else 'enemy',
                             'reactive_probe': kind == 'cast' and species_id == 31,
                             'initial_injury': kind == 'cast', 'action_onset': onset,
                             'native_skill': kind == 'cast'}

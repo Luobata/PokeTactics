@@ -7,16 +7,32 @@ All durations are seconds on a 20 Hz presentation grid, independent of playback 
 """
 from bisect import bisect_right
 from dataclasses import dataclass
+from functools import lru_cache
 import math
 
-from arena_skills import SKILLS
+from arena_families import SPECIES_FAMILY
+from arena_skills import SKILLS, skill_of
+
+
+@lru_cache(maxsize=1)
+def _native_skills():
+    """Union native skills with the frozen registry taking precedence."""
+    skills = list(SKILLS.values())
+    known = {skill['id'] for skill in skills}
+    for sid in sorted(SPECIES_FAMILY):
+        skill = skill_of(sid)
+        if skill['id'] not in known:
+            skills.append(skill)
+            known.add(skill['id'])
+    return tuple(skills)
 
 
 def native_targeting(event, units=None):
     """Optional arena metadata leaves classic/older casts on their enemy path."""
     if len(event) < 5 or event[1] != 'cast' or not isinstance(event[4], str):
         return 'enemy'
-    targeting = next((skill.get('targeting', 'enemy') for skill in SKILLS.values()
+    skills = _native_skills()
+    targeting = next((skill.get('targeting', 'enemy') for skill in skills
                       if event[4] == 'arena_' + skill['id']), 'enemy')
     # Old replays can carry the same native ID with its earlier offensive
     # behavior. The actual team/damage tuple takes precedence over today's kit.
@@ -256,7 +272,7 @@ class AnimationTimeline:
                     native_arena = kind == 'cast' and ev[4].startswith('arena_')
                     targeting = native_targeting(ev, by_idx)
                     if native_arena and targeting != 'enemy':
-                        category = next((skill.get('category') for skill in SKILLS.values()
+                        category = next((skill.get('category') for skill in _native_skills()
                                          if ev[4] == 'arena_' + skill['id']), None)
                         base_prep = .50 if targeting in ('self', 'field') else \
                                     .45 if category in ('shield', 'guard', 'protection') else .40

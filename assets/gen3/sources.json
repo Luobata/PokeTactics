@@ -1,0 +1,1629 @@
+{
+  "repository": "https://github.com/PokeAPI/sprites",
+  "commit": "289e842364648ec0495ae4ba12f48d5cbfbf670b",
+  "style": "Emerald front sprites",
+  "format": "RGBA with true transparency and internal white preserved",
+  "decode_policy": "Do not apply the Crystal enclosed-white transform",
+  "files": {
+    "assets/gen3/normal/252.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/252.png",
+      "sha256": "76208df936a1b8c91f38f513c4b5c54b8bf840d6517e265f4e5dfd18b9546cf2",
+      "bytes": 635,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/253.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/253.png",
+      "sha256": "7afbc9e2a53615af2a861ac4d4e5c72ad535ebd1446e8d449ccb7ebe61bc2186",
+      "bytes": 970,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/254.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/254.png",
+      "sha256": "8f050d4d58954927933b97f22415aa35d612557ade101cfdd3331627226628c7",
+      "bytes": 1047,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/255.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/255.png",
+      "sha256": "bc15d6f17ece3b5a9f565b52827f440751be01226ea53a40c8d9f3c6dbb19b20",
+      "bytes": 548,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/256.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/256.png",
+      "sha256": "48146ff542359d2bd0922f38df186d02997caadcb38793de88cde3c23483bd8f",
+      "bytes": 838,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/257.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/257.png",
+      "sha256": "8a9fb582d07176c22166312341fdf7daef21d4bfc518eab63b71ba9a38590c53",
+      "bytes": 967,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/258.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/258.png",
+      "sha256": "096d9b1f4e8de55c284dae5a201b2e371ee15a5954b3e0b49cd5b7df77b61074",
+      "bytes": 572,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/259.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/259.png",
+      "sha256": "1d5c9b19892655f0a9047c3c11507950d4b7e72a30ce9cf33cffd21cb30a7147",
+      "bytes": 736,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/260.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/260.png",
+      "sha256": "d1e1fa8e1b924a0e995755b1626df04e38643a8b8b052d41f431cf3b11b5e076",
+      "bytes": 1160,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/261.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/261.png",
+      "sha256": "33802c1d4ccbe01420c1aaf97a602a268767fe2e5dc8b55290999d470537a867",
+      "bytes": 570,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/262.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/262.png",
+      "sha256": "0d82810b061e1589b116fe835d396f3108cccaf4951f25b6fa1d5f1cb52859b5",
+      "bytes": 854,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/263.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/263.png",
+      "sha256": "52de03c90f18ea7550823c4e248f756be796d89ce6cc55b7cad4a44397c325c1",
+      "bytes": 797,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/264.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/264.png",
+      "sha256": "6bcbe52c2ad653b191c84269ccb889fe0267de76fa2172a6d9c33ac2a4c7d152",
+      "bytes": 703,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/265.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/265.png",
+      "sha256": "f1f11f8db45c828c1ef013179da246d0f87370363f0187dce012425468c0b0e1",
+      "bytes": 522,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/266.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/266.png",
+      "sha256": "7dcf562d06affac6bf9a32a7f43e4699d85c9a074ec234c6c61767235b18719c",
+      "bytes": 520,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/267.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/267.png",
+      "sha256": "fb9cff7cd12aa3f383ad8e6366d0cd89e1861e3ed7d34be3eaf313fba77b4c98",
+      "bytes": 699,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/268.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/268.png",
+      "sha256": "22b4bf9c25af3664571228b44c5a4e849a69a07fbd7b64f9216fc18f1be8394b",
+      "bytes": 493,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/269.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/269.png",
+      "sha256": "9f4112aa97d20e45338a5d11fcd66faad83b166af088deb8229c8a4b5af878f1",
+      "bytes": 732,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/270.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/270.png",
+      "sha256": "2983deb87f1f0eb393a5f109c82c4104f902beb07c63c2c5a4084705fec3dcff",
+      "bytes": 492,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/271.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/271.png",
+      "sha256": "c11a39b9752c02a27b88e99d4a8c7ae61ab6acd19e9f84ad93ce3c46e81f816a",
+      "bytes": 647,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/272.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/272.png",
+      "sha256": "43e41634412569709c0f4b27bbc8389b0cbd736e1dbef3c225611fbfcf4ee9f9",
+      "bytes": 1040,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/273.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/273.png",
+      "sha256": "62bc96f3b325a0b7dfac2733db364f791ee86c1f54f50ed3e00f1bf3029555f5",
+      "bytes": 502,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/274.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/274.png",
+      "sha256": "f9a9b5af5ca691ae834aa19c581ac9175c153d16496ce72016dba76576d30100",
+      "bytes": 624,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/275.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/275.png",
+      "sha256": "502fa9f3bc778bb89c70904eed80bae729d8b781f58d072f01de95c6ea858d73",
+      "bytes": 1023,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/276.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/276.png",
+      "sha256": "9c1f53d908b7cb03bbb636cc03e4ef4420949950aa7c83c60d6caa67c82637cb",
+      "bytes": 508,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/277.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/277.png",
+      "sha256": "4a415100ee8a57ba516a1b3f09f31c92d8ee59dd07c7589d4be6c62a70550b6e",
+      "bytes": 816,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/278.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/278.png",
+      "sha256": "dbbe82330c54823b91ae548b9030c00f7e827097e77e975039ab73d48c616b3f",
+      "bytes": 471,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/279.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/279.png",
+      "sha256": "886a0f0bf482068a56ae7faccc29bdef0b09c782b4ead2c03cc21f542afcc8f2",
+      "bytes": 771,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/280.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/280.png",
+      "sha256": "044b8f73227addd6c03cab75fb134b27f54ae5bff48cb1718a0eeb1337da7d62",
+      "bytes": 433,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/281.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/281.png",
+      "sha256": "f6ab42d98c3fee1c32ac40f50efe6e7129fb8f0e90221c48b82d4b962adbf799",
+      "bytes": 618,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/282.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/282.png",
+      "sha256": "764ef9f7b5cc280bd50d6e9ff80dbde223db3aeffb6f697514d10b35ed065a8d",
+      "bytes": 761,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/283.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/283.png",
+      "sha256": "6cb8b094795e5a8fa4a52e92ab9e33f33312becc4fad1adf892f370cd92f6654",
+      "bytes": 417,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/284.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/284.png",
+      "sha256": "11a247951ef119397ca16eba5e064333727d9244215226ddc3c4662c359c963d",
+      "bytes": 782,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/285.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/285.png",
+      "sha256": "25553d9b91b6c3c2ee8771fe1f1e109a28bf12dbc195dc3a46b09cd5a3a27c52",
+      "bytes": 493,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/286.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/286.png",
+      "sha256": "ff5d8c2a81d0f2db8b0fa9a86ce3d5b09c9d7457c4e1db8c83bd94e93085e996",
+      "bytes": 849,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/287.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/287.png",
+      "sha256": "069b98bd8a30d9b635b1a84cbce20580ab2b74911edf9715bc624861d7b143a5",
+      "bytes": 602,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/288.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/288.png",
+      "sha256": "64b1f91425719a6d60bd4afbaf993a4d266e1d3c11fe678af9a583026e88d0a4",
+      "bytes": 886,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/289.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/289.png",
+      "sha256": "5b409e88e8b50229d806425b8d0f9be9e25df2936512f311aa15a27cd55f3c00",
+      "bytes": 1034,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/290.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/290.png",
+      "sha256": "f7993ac9f250104bdd71e4419417e1c38c1cb8d7294c16dd21707d8202e2b68a",
+      "bytes": 578,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/291.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/291.png",
+      "sha256": "080b87a6d574786f9c3b816f7bd5f3a35614521d27dd43c4005addaec4769c19",
+      "bytes": 740,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/292.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/292.png",
+      "sha256": "cef609c40bd6f9666e5201202ea2718ab056afbbe8d979603e58576b615a910d",
+      "bytes": 654,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/293.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/293.png",
+      "sha256": "ae698dd9a4c00bafd5d11962793dfeb56cb3419ccf2de914f87fed81e78b87ba",
+      "bytes": 527,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/294.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/294.png",
+      "sha256": "32ce2f44d2c267e97446b3ad0bc5cc5e5b9df83450b6684a4cb67857e4897de1",
+      "bytes": 936,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/295.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/295.png",
+      "sha256": "968afb756cf0b984537a4865efc674929c919e7d9adedc0ec421074cd803eb3c",
+      "bytes": 1157,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/296.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/296.png",
+      "sha256": "98b7bd98546f8f6f43964ae51e1cb1de39c23aa5fb308afe03048e3f19038828",
+      "bytes": 637,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/297.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/297.png",
+      "sha256": "6fd87fc57508f81372ea2502704925a968dbe2c7d1bdd185b3ea53f4a17cac3f",
+      "bytes": 1006,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/298.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/298.png",
+      "sha256": "0fc8785b78d7a2ca39885b5776c98dcc9715fa5c164e77388e4227b7a23590e6",
+      "bytes": 589,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/299.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/299.png",
+      "sha256": "e751da519204c30e87c3bd8ab89abcbcbe9c908a782928ef725a925b37271235",
+      "bytes": 565,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/300.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/300.png",
+      "sha256": "325fae7450f8bf1cc1e2a34dc69a514f5dd9a578f040dd3f742f866a86a6d3ba",
+      "bytes": 639,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/301.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/301.png",
+      "sha256": "4ddeb277389f06b8fb907c6687023bc7b5d13d809628167c40d71f5f025b82e8",
+      "bytes": 765,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/302.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/302.png",
+      "sha256": "d8e2e30a76c3366a45477a7224e84ebdb1adbcb75485dede5a4882d8ccdadd22",
+      "bytes": 619,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/303.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/303.png",
+      "sha256": "98dcd5a383c9b2f54858d0bc0ecbd37adadf65bcf3971e29ba8965b3df6d6b11",
+      "bytes": 774,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/304.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/304.png",
+      "sha256": "79a46a91fca50a8fa1675f7ae6f33fbcc2b112de0bb632ad5a25ab8adf221256",
+      "bytes": 384,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/305.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/305.png",
+      "sha256": "75ef43b3662871ce5f4a2783f5bd549b2bef0950cd785a5f5bd4b06eb52eee8c",
+      "bytes": 814,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/306.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/306.png",
+      "sha256": "ad7fa026ef8200e15f18d02e33e101cc5249f1c5e0466189828560a966651449",
+      "bytes": 1158,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/307.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/307.png",
+      "sha256": "6bd5f3ff579418d25256f8d7ebd4130726995ec27c8450b9a2c9728c41ed7299",
+      "bytes": 573,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/308.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/308.png",
+      "sha256": "2653a2d05a2d807f24a044920c6f3675c24e872395d5d4a80663b5a88bc0d67b",
+      "bytes": 711,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/309.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/309.png",
+      "sha256": "2b733c6394b1142effbaa42f7d03e04b3411330257efbe5d9e1b58530ee26ef6",
+      "bytes": 511,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/310.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/310.png",
+      "sha256": "324b340a4d9af1cad15a7bf2843bcbf0e8ac169d7d066f8a2e402c85a542345f",
+      "bytes": 685,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/311.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/311.png",
+      "sha256": "525b4fef1d45c4f97c78b00beb3795ecad03edc80a7afe87e7395a29712f3daf",
+      "bytes": 524,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/312.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/312.png",
+      "sha256": "ed8782349f70baa1a3a980972ea358bb1abfd2031242c73366b3172b1fbe0fd7",
+      "bytes": 505,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/313.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/313.png",
+      "sha256": "ebe574141f33eb7590d6b9fcd554bcddd6cc46e8bbf936a8b89e7b72f6df209c",
+      "bytes": 774,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/314.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/314.png",
+      "sha256": "67e45ad768eb758c685d8a89897d7b7e7fc09de4b4eb09f525f4d105d9b0f5af",
+      "bytes": 729,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/315.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/315.png",
+      "sha256": "8ef13104eb05080c666ac94d8c8b299e859af5522a7cd2a5113a56731dfb1aeb",
+      "bytes": 745,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/316.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/316.png",
+      "sha256": "4c337c62fa8d484d8f0528216102ec3a8ca836ef81839651aca86791202f47dc",
+      "bytes": 428,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/317.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/317.png",
+      "sha256": "97a502b8711e6a8f0ccd68de278f0871cac7635ebaf91d87fa81249888ecccfd",
+      "bytes": 677,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/318.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/318.png",
+      "sha256": "cf251c06cd43530b69a05771f0d1b023a08d33bc653279022cdecdc05d40004b",
+      "bytes": 692,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/319.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/319.png",
+      "sha256": "8c9418bd620748213e3e43aa68d2079e12c49a0881b17feeb8f18c7dc0877214",
+      "bytes": 748,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/320.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/320.png",
+      "sha256": "873b8545fb02b75166a055a74a863cfe2dd9067e614f953f7ed3af7bc19680e0",
+      "bytes": 596,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/321.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/321.png",
+      "sha256": "b3430cb926e9768007268c09892243bc7fdc237ddd237939e7e1b50738fb31f4",
+      "bytes": 767,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/322.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/322.png",
+      "sha256": "cf423cd00d5c3fcb87e88fbb74d71423803ccb445710e7622d9f84a2a5415724",
+      "bytes": 574,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/323.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/323.png",
+      "sha256": "9bdc187a766070010eabbc11217a081663194ae86b93c38f555b319b95c80369",
+      "bytes": 839,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/324.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/324.png",
+      "sha256": "2f2b1f86ec83257bfa402e1e101d035ce44f141e2fde200da03f46f69b5f361f",
+      "bytes": 977,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/325.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/325.png",
+      "sha256": "3765eabddc044dc52aeeacfb1e227aea04da17b1e282c9cfdd90072d80d814bf",
+      "bytes": 491,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/326.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/326.png",
+      "sha256": "7fe54942f1dfdd7c646f65a4592536bb14c634fefd69da76647ad1bb16ea0250",
+      "bytes": 831,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/327.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/327.png",
+      "sha256": "d1697242b9411da63f1509cbae9153beca5d224b152ebf92aa3300aa69dea31d",
+      "bytes": 654,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/328.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/328.png",
+      "sha256": "ce9fd9fb35a99e2310b5457272adf2523d9e3b96be7d85b10b4dee4b4525202a",
+      "bytes": 419,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/329.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/329.png",
+      "sha256": "6b0414b6e449a7268201c57aefebdc6a1106fb249801958cf7b5845b3be0e3a2",
+      "bytes": 708,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/330.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/330.png",
+      "sha256": "44156c3a535248e77695b1341579fa96440dc085ab9cb2370b9aca13c31234d7",
+      "bytes": 1076,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/331.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/331.png",
+      "sha256": "31ec2852ba8507000fd2ba11d7ba630a136f14c804aa6048957adf887125eaaa",
+      "bytes": 662,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/332.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/332.png",
+      "sha256": "ec67c9980c08740db4e4a406e364fa7bbe1353d527d23d73ff3c51ed7b086b50",
+      "bytes": 917,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/333.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/333.png",
+      "sha256": "7924564d6a9bebc4565cd1d6ff18458dad4e68835f43e87ba4bd82674578906f",
+      "bytes": 583,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/334.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/334.png",
+      "sha256": "2d3f8f07eb0bd20942f18c382a7d98efacd5e93ff85d4dd1ac9c45cc048c6aed",
+      "bytes": 825,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/335.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/335.png",
+      "sha256": "32255c66915c52b87fbed20e8210f7e84a70127c5eef0376aa9f78c8e95f24d8",
+      "bytes": 844,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/336.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/336.png",
+      "sha256": "95f83fa8646322ebb383e55ea25db4afaa94e9c1af8ffd820ffefd0b5cebe23e",
+      "bytes": 886,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/337.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/337.png",
+      "sha256": "5e3a1c01685887cfc5cad1075d486bb1b98399893654e1f68b474fbf1bb27182",
+      "bytes": 660,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/338.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/338.png",
+      "sha256": "a46f4ea6fb9582dc3602b143d17decd21790b82a509aae328030f4cd92318c42",
+      "bytes": 945,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/339.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/339.png",
+      "sha256": "19341db827811eaa23b973b12f44b686ac5ce651cfc1da40687c98df5220b55c",
+      "bytes": 565,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/340.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/340.png",
+      "sha256": "241260203b3479aef323f7092d011d1e9fe2c9d0241a837ef8681f2ce89bfc3a",
+      "bytes": 752,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/341.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/341.png",
+      "sha256": "0bb0f88b4de20153fac7eb7bf62d838a4b28cb04f9cd6c95028fd59d6d93b673",
+      "bytes": 704,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/342.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/342.png",
+      "sha256": "507ca84f003a53227dc8b25d2ee6ffee4918166a54fa00165ceb12d38cd7065f",
+      "bytes": 1006,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/343.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/343.png",
+      "sha256": "6788eaf61365825e73aab4bce2c3337c872c7303317f6de326f272ac9ba84407",
+      "bytes": 416,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/344.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/344.png",
+      "sha256": "746d097e33e1328f2c0d1037f87fe2553d42506ed28c90b2e303c140809e08fa",
+      "bytes": 771,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/345.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/345.png",
+      "sha256": "8d548e2bcf1f2e7702a097c13223d87798a1649d39b476bd04a3bc87b3f7345c",
+      "bytes": 692,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/346.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/346.png",
+      "sha256": "024590f25182c1246b8526333f5dd5c12fe156545e109dbf2b3237190b80e94b",
+      "bytes": 887,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/347.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/347.png",
+      "sha256": "59b773a0651284ab9096fec6ffd39799cc2c2b26627f09595dcad98691a33bb3",
+      "bytes": 691,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/348.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/348.png",
+      "sha256": "49a34e7706298db4652bf6df3b616205d7f179b0fa7090ed67d6639eb788c94b",
+      "bytes": 1165,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/349.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/349.png",
+      "sha256": "b4e5820c45e4116b85900a001a59ca552e1292c0ea82d9722f0407cfe0b1703f",
+      "bytes": 539,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/350.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/350.png",
+      "sha256": "269b352d08a05d175faf4cd774a6af43084370efa73caf47a485f04ce2877fc5",
+      "bytes": 966,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/351.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/351.png",
+      "sha256": "491ba0d533469508ebd5de8e8cc895d4998823c66066b0115c18410845b7a67f",
+      "bytes": 382,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/352.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/352.png",
+      "sha256": "81f5f322ec23c9ae6554bcfe72131135547b22d1a21717dbf40d6435f20e37d8",
+      "bytes": 762,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/353.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/353.png",
+      "sha256": "959f4b440f974fb6a9835c5d503727c76dd924040a26f310975f89296f98c65a",
+      "bytes": 435,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/354.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/354.png",
+      "sha256": "fa161ddf9159dfb50695e956d4986377f29575d81c7bed68e77294c258b0aec2",
+      "bytes": 546,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/355.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/355.png",
+      "sha256": "b507b58772596bff96eeaf5350753c52f603e1d400b1adfb3ada095ce1b0adf4",
+      "bytes": 616,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/356.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/356.png",
+      "sha256": "8b2458769ea1c93245c681478baa06a5b84d692c271e347d9ade24b478dd3c98",
+      "bytes": 741,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/357.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/357.png",
+      "sha256": "07e3389c210a8d733cde499d37b078d233b46e2df9308a18e73c70bb5538f854",
+      "bytes": 1172,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/358.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/358.png",
+      "sha256": "b43bf02855b1b56fc38638e4981ecbf65d974a7dc031ba2a6be3be709dcdcd43",
+      "bytes": 458,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/359.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/359.png",
+      "sha256": "80d411c7fe4531f93ad73a840de203e31e6184605d2fc4a44b2c98064c8f393c",
+      "bytes": 890,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/360.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/360.png",
+      "sha256": "b14cfe404c3861725dcb49d2d61d04fe058cbd3a512ad6493ae49ad0862e222d",
+      "bytes": 532,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/361.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/361.png",
+      "sha256": "befdfca2374d42b0b663fa944cc7081fe66493eb55e8aa538c67807aab354256",
+      "bytes": 574,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/362.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/362.png",
+      "sha256": "d07529ec2a72228e4bcec894bb0c0560176dd4aeb51e156ecc00395d8fc2674b",
+      "bytes": 788,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/363.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/363.png",
+      "sha256": "e517f57e40b568bedb759cfe508e85f9f1392f6bc809ef492edd5ed1b5b2da43",
+      "bytes": 507,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/364.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/364.png",
+      "sha256": "51ce75c69b900663ac583e6f3dfe184cdc1b6b41fe345503e693ffd5a7547413",
+      "bytes": 758,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/365.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/365.png",
+      "sha256": "72416c5e49ce607b3a6ba7761f16d64b2e2d270758d01f098cfabb27469b0dee",
+      "bytes": 997,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/366.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/366.png",
+      "sha256": "2af1134e10cd2cddd9ea4d2eade2f7cb87c380cb9dd996d48f19ced44b014248",
+      "bytes": 611,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/367.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/367.png",
+      "sha256": "302a511b4422be047cb6497f6570af05018570990cea72d74ae0c97b57d38a69",
+      "bytes": 833,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/368.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/368.png",
+      "sha256": "4b8ee3cac1c8c5ca96aa16906f41f3bfbb0643ce8a6e9afdc8e518cd2bf32191",
+      "bytes": 659,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/369.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/369.png",
+      "sha256": "208ac545253a799a0a6bc34c5c5501bb0bf0fffefe554336d4f2e72e169cca2a",
+      "bytes": 759,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/370.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/370.png",
+      "sha256": "c3779164bbafbeb0979d80186d3816488baadbc5b427f341d4f7ec48efa357bb",
+      "bytes": 328,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/371.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/371.png",
+      "sha256": "1b5150a2f6a211fdb17c32085df23bfce2d5c4e200b605e2e0a8ca9c38d5654d",
+      "bytes": 512,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/372.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/372.png",
+      "sha256": "f2d39e9dfceabb92e6e05368f34bcd956336971c134eda9c7defef327a20410d",
+      "bytes": 631,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/373.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/373.png",
+      "sha256": "4cfc3b4384f20049de30b0c03c8eb27e4a26f5a9967298c5e64ddfa2b2ba4704",
+      "bytes": 918,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/374.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/374.png",
+      "sha256": "625707b92f382ed0e07bdb1c51301a789cb2742f4a51dea5018ac52c279ec401",
+      "bytes": 465,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/375.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/375.png",
+      "sha256": "37cf9d1ca6fc888102bbdf0177b1f7d07e403f2e1d18d56de7e189861a250b5d",
+      "bytes": 899,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/376.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/376.png",
+      "sha256": "7a97be43c959199529266aa9584f8c3ce2052f5af8de30906340f4cf660c712c",
+      "bytes": 911,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/377.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/377.png",
+      "sha256": "e19647c6619c2980dd16c3d0d911b0ebde6ac64e5a176fa07aa4c09c52930e70",
+      "bytes": 965,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/378.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/378.png",
+      "sha256": "7c8fcbf9b0fc5ab36344d0a64b9900bae2dc0d692b441900a61b6120a774a5de",
+      "bytes": 883,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/379.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/379.png",
+      "sha256": "a23e360e38580922e533863eae085a12ed873c841ad17b4c6a0860c0d0d1caeb",
+      "bytes": 948,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/380.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/380.png",
+      "sha256": "7b8af3b695631deb1a58337d791b5e35570542bf6443cbaa85606fd1d53a66be",
+      "bytes": 867,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/381.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/381.png",
+      "sha256": "000105f65c5700fe290b4f026d0e489f58ebf12215541500ac66e02269a118c7",
+      "bytes": 959,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/382.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/382.png",
+      "sha256": "f72aeb52bbf3139bb31782baaf52c525df7a22ff161b4e1753c5c9a0a279d7d7",
+      "bytes": 965,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/383.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/383.png",
+      "sha256": "07726d03f79501e7d32db7710bce00eafab74e4922d2261a4e2458b627be0014",
+      "bytes": 1247,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/384.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/384.png",
+      "sha256": "e539b9cdcf5bb7388543d461370c73ae644b15e06d6006fcc356ff248896dcdf",
+      "bytes": 1057,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/385.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/385.png",
+      "sha256": "6e4cd342f6b60794b3e1f7d43cfed9c63aa952ae84b476cb5225b7d7ee79609d",
+      "bytes": 637,
+      "kind": "normal"
+    },
+    "assets/gen3/normal/386.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/386.png",
+      "sha256": "10ea8a7b02c07f42037d837d77a1f8b8d6ea2419575c83ba44187dc4e843f758",
+      "bytes": 844,
+      "kind": "normal"
+    },
+    "assets/gen3/shiny/252.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/252.png",
+      "sha256": "a0c7cd55ed35c0eb338a636af1fff6d28c38070b0f13692668ac3418bc0a7447",
+      "bytes": 635,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/253.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/253.png",
+      "sha256": "8ab8a460e6fb0aee933a2aa367bac42012e49c2735d9ce116e421ade424bc8aa",
+      "bytes": 970,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/254.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/254.png",
+      "sha256": "316ac1c2e0a30997e31bae4d8a01b367a2ac3bdcfe9317cfc6e2486aaf7a2643",
+      "bytes": 1047,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/255.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/255.png",
+      "sha256": "22973e6632d0351b3fbe8bf3837420b103f4e72f371b479f4061363df27177f3",
+      "bytes": 548,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/256.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/256.png",
+      "sha256": "7118639fe3b2722a33716be041f0fcf9a423cdcf00bf2a1895951cf544857729",
+      "bytes": 838,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/257.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/257.png",
+      "sha256": "8598b86de415476490f2c5df5d02fc83e3d518347d022bb8a49a8de85bd3a9d2",
+      "bytes": 967,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/258.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/258.png",
+      "sha256": "93729be9718f1512bacefadc397d0423575581e5ad49b547bc4612d6b0a49dee",
+      "bytes": 572,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/259.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/259.png",
+      "sha256": "849595e6061362911386a043c93df41b93199ea84d2aba2e2dcdff633d046e46",
+      "bytes": 736,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/260.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/260.png",
+      "sha256": "224ecec613612960cfb88a49837664240316bc6b3051cd9477c7797217051f22",
+      "bytes": 1160,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/261.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/261.png",
+      "sha256": "a7dada4f934f09bd53ce121abc12100506438a83e5a29aea0451992b1794de19",
+      "bytes": 570,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/262.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/262.png",
+      "sha256": "00e43aee1a0941c429a52a6ebe0acac511668791b8d519d61b15de350bf424d4",
+      "bytes": 854,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/263.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/263.png",
+      "sha256": "1a5404efb82b7f0079a1a00d5816b361d0b1b585440bb6d952f56213a1996036",
+      "bytes": 797,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/264.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/264.png",
+      "sha256": "0aff513220a0b4c978b82140d8dd48e9a39e936df7b6262396390860eeb6ed6c",
+      "bytes": 703,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/265.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/265.png",
+      "sha256": "2ec0493be0f13b4eb71bb4b3827cfb9f163b0c6b419c05141de2a9d85142c440",
+      "bytes": 522,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/266.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/266.png",
+      "sha256": "65bc9daecffebf868a07fcceb9e7ddaa99f2b6a30bc0c63a0a4ce4208f35b473",
+      "bytes": 520,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/267.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/267.png",
+      "sha256": "886b868257afad24c9b237d386b08e336083b86ca288b1b30cb1e6e14ffbaafe",
+      "bytes": 699,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/268.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/268.png",
+      "sha256": "3b8e913ed4e724087dcd924622b2aa914abb51eeec90bd22269a523b38a34f09",
+      "bytes": 493,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/269.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/269.png",
+      "sha256": "e82bcb5351ea44da91c7155ceca3459a80797b0df2ec614467acc152200b77d7",
+      "bytes": 732,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/270.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/270.png",
+      "sha256": "9653dad15bf12a78a3622c846da59663342732498370c6ea05416edd39c16961",
+      "bytes": 492,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/271.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/271.png",
+      "sha256": "59464b553658e1c9936f8a2b614aa7b02d41c652d773a06e9c4f2f722621b2df",
+      "bytes": 647,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/272.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/272.png",
+      "sha256": "834b10784b421e8f9e913907769d947701620035a4c14fa22af53e293a63317b",
+      "bytes": 1040,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/273.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/273.png",
+      "sha256": "3334ce87fc467e4eb401c400d8f174e402e11d9ffdf25692ee62f76f4971b95d",
+      "bytes": 502,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/274.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/274.png",
+      "sha256": "5d4d7d77fccc0a9ca8e9d8e125902ce7bf5a7c3e14f100871f222dfc6de7d021",
+      "bytes": 624,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/275.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/275.png",
+      "sha256": "e71d7739228c57feb0bc53a88ab1a5cbc704743361f43d5431510496452d28d6",
+      "bytes": 1023,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/276.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/276.png",
+      "sha256": "15a36654c5d46f186d420b76bfa40c6150b1288930ab3c312b2a0d6b8d819b75",
+      "bytes": 508,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/277.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/277.png",
+      "sha256": "2fed1d3600952466c40a8b6bab4352e5bd41a23e0ee831fa1bb049dbbfbfcf7b",
+      "bytes": 816,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/278.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/278.png",
+      "sha256": "49b4a564f080cb04bd87ea6f74945ea706830cdc0ffa2d1995b2cfd407cf1c78",
+      "bytes": 471,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/279.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/279.png",
+      "sha256": "19f8a7a71ca5b6d563e642e0474471e36f307d69d5323954d87b87bf0d582338",
+      "bytes": 771,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/280.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/280.png",
+      "sha256": "05f2658df7b7fe7b5364aeca171b668827172c2b9a83a31fe9bfd34b33ad9d4e",
+      "bytes": 433,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/281.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/281.png",
+      "sha256": "92702412d0209c6e9aef851d046fc905698cde966d9f7b0319d7bfd53f1057bd",
+      "bytes": 618,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/282.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/282.png",
+      "sha256": "6acfd92d84560e80ba1d0ea96c72233e9b952d8368776252202762a9b777c467",
+      "bytes": 761,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/283.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/283.png",
+      "sha256": "2034fdf27b38e0eb97d8b12f3d5c06cba8f70ae8a9254a7e87d695215340378f",
+      "bytes": 417,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/284.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/284.png",
+      "sha256": "ef8d841865a9ec17a2da87e2b541315d26ebb84daa78a0863c3bce8a07d4dc14",
+      "bytes": 782,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/285.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/285.png",
+      "sha256": "2953906526c8f7544acc7d0a86c342113339fb9987117d69626a6edfd3fc5997",
+      "bytes": 493,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/286.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/286.png",
+      "sha256": "6c8ff1f3dd8ee9e704adddc8c8084f6284612a5829bffcb7dc0dc61ce0a55544",
+      "bytes": 849,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/287.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/287.png",
+      "sha256": "cc3a8c6dc2579447ff41a9869964c92f6d366f5d1ecd6bb54cbd3456ba0f0abb",
+      "bytes": 602,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/288.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/288.png",
+      "sha256": "5e0dd33111710d9f209bc350b533b74994d3672767fdad1fa9c478941cb872e7",
+      "bytes": 886,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/289.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/289.png",
+      "sha256": "db2debe763de94fdc69660f6fa744772d5266e95b9841ee26072c5101f10387e",
+      "bytes": 1034,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/290.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/290.png",
+      "sha256": "475cb951d115e30878c1fbf05806e602c05d125b8e2087be16eac4d6f42a93dd",
+      "bytes": 578,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/291.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/291.png",
+      "sha256": "eba7beaea7c939d40a0c75c8cb16aa2087c95289c32016d15bc3c74e49de123c",
+      "bytes": 740,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/292.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/292.png",
+      "sha256": "e56f92ea42786664a150d6003b1aaea9e2acfc772e0b144cfb14feeebc7576bb",
+      "bytes": 654,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/293.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/293.png",
+      "sha256": "3113c9b732d43c0113bb8d24fcc692484b42cea74229b880b6bb35ab7352e740",
+      "bytes": 527,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/294.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/294.png",
+      "sha256": "a3006745c3aa408da4be209fe5dae4a1b1a5d480574d78db01a752660f615573",
+      "bytes": 936,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/295.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/295.png",
+      "sha256": "9104e428ecd8115dc2989350de9be0c1dc09c1b16f4ebbbc669e48a96a12755b",
+      "bytes": 1157,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/296.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/296.png",
+      "sha256": "1783cd76294becb5a43a65732ffc3c2950c5f8071cd0a89d245c5d07c86b7456",
+      "bytes": 637,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/297.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/297.png",
+      "sha256": "d648baa4bfbaade0877bc91bd4b80773a1be8ebd58c1c46b971fd920fea16bcd",
+      "bytes": 1006,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/298.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/298.png",
+      "sha256": "62a6f796cd8baa17a5e72bb753adc36198d6e7833992577a4a68925e336e6e99",
+      "bytes": 589,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/299.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/299.png",
+      "sha256": "d4a7ef3e3a449805ea35092e8afea0cfdbaefef4d542f830cc4f9fa5299e0e9c",
+      "bytes": 565,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/300.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/300.png",
+      "sha256": "af6f17f590e9d5a400a3ba33aa5e89d9881a9669efde1b29fd9c5c39f1fd1396",
+      "bytes": 639,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/301.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/301.png",
+      "sha256": "15fc531d0aa35365b4efbae251d615701b9b8239a7eb0dd756f76c054e41d304",
+      "bytes": 765,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/302.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/302.png",
+      "sha256": "84407d03f1d80ad57de15be89783566220ee69af37fe99548198a151e0fbf673",
+      "bytes": 619,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/303.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/303.png",
+      "sha256": "5c8a1a77699710e9a2bc75006137ca033902d47fea0cbd7a5bedccc3f79c7a37",
+      "bytes": 774,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/304.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/304.png",
+      "sha256": "253f7185677ac09c85a1303ff2227f48bbb1a5df143e8abfb7e7c45563f6a325",
+      "bytes": 384,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/305.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/305.png",
+      "sha256": "3c28c65b48f0085db097eccb713d745e03e49f8e6e10b54d38b18ef1cbd28232",
+      "bytes": 814,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/306.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/306.png",
+      "sha256": "51d0f8ee3a35bdd383430539355893dfac4f244512362a783844052fb023ef28",
+      "bytes": 1158,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/307.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/307.png",
+      "sha256": "07c80a0278077571977f703fcb013a18d7479cd71e3d20fbf6fadd594ab3269a",
+      "bytes": 573,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/308.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/308.png",
+      "sha256": "2c169ee02ade30e10cb022c02b088cbf5d4df5cd99e726a7261f9b591ac32cfc",
+      "bytes": 711,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/309.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/309.png",
+      "sha256": "819ff963d6774e4ec6bf5f7214fa1909c622e6f718564aeec1c9647190ade739",
+      "bytes": 511,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/310.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/310.png",
+      "sha256": "83b421e9113e902aeb30c087f3bc331e689d4a6c49258c2a35cf8089d1576ac3",
+      "bytes": 685,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/311.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/311.png",
+      "sha256": "03185966148d47ef71dd6e79b28236ec0cdbcf60cf0593885f43789c2d56ef57",
+      "bytes": 524,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/312.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/312.png",
+      "sha256": "246730ba767fa063c274a437be35e11cc6ff4b874a608b8e71da0bdfd04fd80d",
+      "bytes": 505,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/313.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/313.png",
+      "sha256": "588ed53892bab59effb84a5743a3e9167df4bf2c23794948d64ac2620c84f7e2",
+      "bytes": 774,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/314.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/314.png",
+      "sha256": "aaf6563ed6065b33ef679c5fa0f1e72a6b4b9718fbb09831bcb097b9e72f484e",
+      "bytes": 729,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/315.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/315.png",
+      "sha256": "73f9ecd9c922f240d25902cf6688f8f64cf08dff5aee914e231ee3f2f62e60ad",
+      "bytes": 745,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/316.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/316.png",
+      "sha256": "cc10e93f1f30f226870a99cc1fbb96b48a9075143c94ef9d6ebc3143fe203f6f",
+      "bytes": 428,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/317.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/317.png",
+      "sha256": "8685c09dd117379d298614da9b3eef80dc21b3f6cd064c7b575d53c239736f66",
+      "bytes": 677,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/318.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/318.png",
+      "sha256": "0e8921ec75945e2ae012acfda80bf7071415a4719d185cdb286870b64d461c16",
+      "bytes": 692,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/319.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/319.png",
+      "sha256": "906cb6da32ccf58dd0e3c1c0661e3debbd8e5b34a1412239b31d0c319970eea9",
+      "bytes": 748,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/320.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/320.png",
+      "sha256": "f82b67581cd6a5ad90a182c0ffa1cc4c9ad6e558808f044bd8e94d35d9b1d390",
+      "bytes": 596,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/321.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/321.png",
+      "sha256": "c8965c0327e2fb7545405f499cf4b853cdc8f8f4242089b8966b73b1b9e8a2f0",
+      "bytes": 767,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/322.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/322.png",
+      "sha256": "a871f74730482b77f84ab9400ec9087b160a451e53b99df8f9aba59a1534088a",
+      "bytes": 574,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/323.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/323.png",
+      "sha256": "6830874ffa57f866175b0f7ea9efd6bfe8c08b1f8f366bfe96adf3f47e5349e0",
+      "bytes": 839,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/324.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/324.png",
+      "sha256": "d7c32b6447266051747eb55e3b437fb686cb5bbd60d443b6a29f31a25bf3cedb",
+      "bytes": 977,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/325.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/325.png",
+      "sha256": "f28dd7fc05218f099cfa9e619a8da6deec0222594a48ee01e41aae2fe2f531c5",
+      "bytes": 491,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/326.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/326.png",
+      "sha256": "8482d841ab55348a1f0d8f8bcbd4145c24342106ebc172594b3d90ef000df458",
+      "bytes": 831,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/327.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/327.png",
+      "sha256": "7c30074f427495a29e5894c873124e2bffe73d2220a460033c88da8cd505473a",
+      "bytes": 654,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/328.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/328.png",
+      "sha256": "fc45055b853f65d9e94f87cc26a298272281d8619df725e56a5c5919c7a645bf",
+      "bytes": 419,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/329.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/329.png",
+      "sha256": "74cdc35e5d818ed78688d59e714efda74bb12389f1aabaa7358b0b08d8884952",
+      "bytes": 708,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/330.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/330.png",
+      "sha256": "92b2219a66156a3259294c14483bca5eace2c100405fc72481a9b1a49ff31e14",
+      "bytes": 1076,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/331.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/331.png",
+      "sha256": "db68a3a771be2be39c002e3687ead98b103e2416047c229cd75eb4dbb5cdab4e",
+      "bytes": 662,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/332.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/332.png",
+      "sha256": "aa2ff18ad413e09fd6e8ff999418cace06c795bc390b22750f4a8e89d123865e",
+      "bytes": 917,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/333.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/333.png",
+      "sha256": "cc46a62e23705bc3d4654206d70501551fa486b4424aa22bccfac5d7f41467ef",
+      "bytes": 583,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/334.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/334.png",
+      "sha256": "ece4dbd088bd118d8f2478733b85d3e81620a1a8a12b17990e6ac0e8a75ee42f",
+      "bytes": 825,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/335.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/335.png",
+      "sha256": "b064c041c0392a557509b23a7351cb630f4c3f261bc576e9e7843d319d51f0eb",
+      "bytes": 844,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/336.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/336.png",
+      "sha256": "46dd64311754ecc6db3b5ba3565da8fe747edf215cfc495e2a0ed78e9994ce44",
+      "bytes": 886,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/337.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/337.png",
+      "sha256": "a049e21a02c405dbcbd6f7d65a26084a3261c8012e215436762c44a889f6e2dd",
+      "bytes": 660,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/338.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/338.png",
+      "sha256": "e3ad7627e250814216119d802866f2527605cd6d3e17eaa7d018bfd2061b6e28",
+      "bytes": 945,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/339.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/339.png",
+      "sha256": "d98f86ab3ec74ce1c8c030b11ed698957988aefa654a3a45984780a1450db443",
+      "bytes": 565,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/340.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/340.png",
+      "sha256": "23bea9c6e1ef6a0f90cb7949590f2c873f2fc28476bef84094fe0692287d4771",
+      "bytes": 752,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/341.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/341.png",
+      "sha256": "1cab4412650d0626d4d88f1505c9e14dedef3ab4acdd51dacf061fb46e5bf1fb",
+      "bytes": 704,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/342.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/342.png",
+      "sha256": "18a75da5fbd4e994b1b6199ba3fb44cad7eff24c58044693d2ab20bb4c68ba3e",
+      "bytes": 1006,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/343.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/343.png",
+      "sha256": "4c928d67df29036bb176dc4fc54590a0e86ad14ae60c6020f9efcfa2789e674e",
+      "bytes": 416,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/344.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/344.png",
+      "sha256": "35c660ff44c40cd56ff25715070a8dc1d747dccd1375215154b4f146386ec1aa",
+      "bytes": 771,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/345.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/345.png",
+      "sha256": "43be7eff178f129fbef51e2ef2a2183a8c3a689a602197f0d21138c886e62178",
+      "bytes": 692,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/346.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/346.png",
+      "sha256": "98b01f3c06b42bdb57b7e1bd477a475a6213d2a4f69654226a5120b55da40804",
+      "bytes": 887,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/347.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/347.png",
+      "sha256": "30bef4dcff571c7e80db2c19470e0258f4321d4a4caa9aacbb38c28d600409af",
+      "bytes": 691,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/348.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/348.png",
+      "sha256": "6664886fca855821cdbe506e2df7c9375e26b489eb19ba9180cfd6d1d50a8eb2",
+      "bytes": 1165,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/349.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/349.png",
+      "sha256": "702dec28d7c6f8d8460417fca98280ac72e5aedbd37d2a869ffbec867c8f7d85",
+      "bytes": 539,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/350.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/350.png",
+      "sha256": "843619a49202a330b69655825afa011eb170d6de931d49e8b27d50ec9bff2f93",
+      "bytes": 966,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/351.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/351.png",
+      "sha256": "3219f5b92a4160b96562476a602591cbc124c901b83b398da130215ff2a1712b",
+      "bytes": 382,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/352.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/352.png",
+      "sha256": "4ccd369a81870069d6aa9944d52010644c08fdb8b4193dd42cf2a9d76c0f4814",
+      "bytes": 762,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/353.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/353.png",
+      "sha256": "3adea24c747becd82fcc0ed5bf349ee6ebe325ce4902f755be0bd037600f7db3",
+      "bytes": 435,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/354.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/354.png",
+      "sha256": "959e46498f7d47fb20a5548c88a550bafa45ddd777a69815c5dbc233cc9bc5f9",
+      "bytes": 546,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/355.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/355.png",
+      "sha256": "a4d0e869aa31bf4ce23627cf4a909407782eb7892800739a78309dcc8c1d271a",
+      "bytes": 616,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/356.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/356.png",
+      "sha256": "23d3b76926b6bd1652691e96fb88b12f5eb51370d5f35ac176a853ae91919d9c",
+      "bytes": 741,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/357.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/357.png",
+      "sha256": "58aab752df24bf1033e16ca5db8bfc06476a60d7602cde703bb3805bf5ed24b5",
+      "bytes": 1172,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/358.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/358.png",
+      "sha256": "e0f5708f942ffe4a17f11d5b9d1eeb5129e0e9a948d20bdf149d2a8a5eebe63f",
+      "bytes": 458,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/359.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/359.png",
+      "sha256": "ab1bd21be7a08faacd22ecccd5a7397a91f5ff2481cf9bbe388cbde4666ac5a8",
+      "bytes": 890,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/360.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/360.png",
+      "sha256": "8a96615f3ad2a0a3a381acbf0183d9547e8a5987f1c3b3be76797b37614c480f",
+      "bytes": 532,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/361.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/361.png",
+      "sha256": "b197e7a78e6d1b54e942be3c1fae888bcb34c06465df7f2fdfc26f09617be37e",
+      "bytes": 574,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/362.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/362.png",
+      "sha256": "74ba4b36edd9ff8d1810a1122cede2ec1df6623d238e9e92f412e90e9c72a0d8",
+      "bytes": 788,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/363.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/363.png",
+      "sha256": "5c95a0b969043ceaf43c7e1da263e63a7c4308af961fe651b29895a9c66f261f",
+      "bytes": 507,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/364.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/364.png",
+      "sha256": "373d7c7eba2834f0890df8271460fe000ed8635638e0824b6be7916e9f78b8d0",
+      "bytes": 758,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/365.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/365.png",
+      "sha256": "444a4756b4950347143d33f8a3bec27d93ce638541d4cfc472bc5e0dd55fe032",
+      "bytes": 997,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/366.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/366.png",
+      "sha256": "74a3f5b00d95ee0d7a17e333eec11e060a13d13a18fa559242cd745dab97c164",
+      "bytes": 611,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/367.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/367.png",
+      "sha256": "8458e4ef06c107bf77eeda8869aba0394fb487e5e2a49b243eeb74d0af5898ed",
+      "bytes": 833,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/368.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/368.png",
+      "sha256": "3b0dd547648f6f31d6908f84af3d0466b01b23bcb1f5b8397a3f7f0883acd438",
+      "bytes": 659,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/369.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/369.png",
+      "sha256": "cf0d2ae68ff970756f8c5d3e4104993ce71fc2c991e5e78f0d814ceee4109692",
+      "bytes": 759,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/370.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/370.png",
+      "sha256": "769dedfc04e0e3a118dc95ab8d3449fe3e912af90940902ff3c9d25049532635",
+      "bytes": 328,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/371.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/371.png",
+      "sha256": "739434212242344934f5c954337c3811455f18f200832f7d246bdc52dbb96b64",
+      "bytes": 512,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/372.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/372.png",
+      "sha256": "4fa0477ded9d0e9a37816558531131fa49553521ab3e977ffde6af73e6da06b3",
+      "bytes": 631,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/373.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/373.png",
+      "sha256": "6c0e5ec8f6182398126775d5c34b1a7d1e454cf4238440baed0b1c0570aa3645",
+      "bytes": 918,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/374.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/374.png",
+      "sha256": "e375466b523106e270875e47eeb66896ba6103144602f58f93042da95c1b56fc",
+      "bytes": 465,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/375.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/375.png",
+      "sha256": "5be0bb63df0cc8ded324db043f13b38dcfd860f814d6c8e4d02c61f564b4bed6",
+      "bytes": 899,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/376.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/376.png",
+      "sha256": "56b198a1450b2b645b761a7511f9dc1750d90b9bc3658153625ce6a305855555",
+      "bytes": 911,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/377.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/377.png",
+      "sha256": "85d1bd46dcd5ca92266b3490f6e9234c9f59617edf4218e644b4ddc7b6c6f51f",
+      "bytes": 965,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/378.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/378.png",
+      "sha256": "45c808edfd49fc3495deed4d2b0d0890eb7c35e67566f5a0321a5d1740f58f1e",
+      "bytes": 883,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/379.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/379.png",
+      "sha256": "f6bc697e604a5cbd1fff7a62ba3b8b4a5d9b75c3e9b579e64ccd88fc4dd4c1a4",
+      "bytes": 948,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/380.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/380.png",
+      "sha256": "9c5a5c6e6a6181197da14e49048a61b1ba9e30bfb57c5467084e555b08f790e7",
+      "bytes": 867,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/381.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/381.png",
+      "sha256": "465b20645093e72b41b86eeb5e6c2754be6e567312142b53232dc0cf5c3fd6d7",
+      "bytes": 959,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/382.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/382.png",
+      "sha256": "7793207e721d9dac94bc5d1e9f3b845da2bdce991dd319a711cf4413682816fc",
+      "bytes": 965,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/383.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/383.png",
+      "sha256": "01e0002f557f0261cfeece438454104ac5b73759a5f20b6058ddb424da39a710",
+      "bytes": 1247,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/384.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/384.png",
+      "sha256": "2f2e0abc11cfea41f1469f49c1de315a05d6848eb9e75e7bbc571e36b57a01c6",
+      "bytes": 1057,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/385.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/385.png",
+      "sha256": "df3ecc4db97516b85c21e0c5c2945fb4dd81bce9d2fedfecc4561de662f1da8b",
+      "bytes": 637,
+      "kind": "shiny"
+    },
+    "assets/gen3/shiny/386.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-iii/emerald/shiny/386.png",
+      "sha256": "abcabec0926c81ddcfd423837ae597393f83c51002763619b2793d3d74fbe166",
+      "bytes": 844,
+      "kind": "shiny"
+    }
+  }
+}

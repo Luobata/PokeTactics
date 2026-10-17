@@ -119,8 +119,10 @@ def _ult_move_powers():
     """Move power per castable move name, from the authoritative catalogs."""
     powers = {}
     import arena_skills
-    for skill in arena_skills.catalog():
-        powers['arena_'+skill['id']] = skill.get('power', 0)
+    skills = arena_skills.catalog(include_families=True)
+    legacy_first = sorted(skills, key=lambda s: s['sid'] not in arena_skills.SKILLS)
+    for skill in legacy_first:
+        powers.setdefault('arena_' + skill['id'], skill.get('power', 0))
     from render_battle_gif import pokedex
     for move in pokedex().moves.values():
         powers[move['name']] = move.get('power', 0)
@@ -1397,16 +1399,14 @@ class WebBattleRenderer:
         img = Image.new('RGBA',(112,112))
         center = (56,56)
         progress = step/8
-        if move.startswith('arena_') and sid in arena_vfx.EFFECTS:
+        if move.startswith('arena_'):
             arena_vfx.draw_native_skill(img,sid,move[6:],center,center,phase,progress,team,element)
         elif move:
             arena_vfx.draw_skill(img,sid,element,center,center,phase,progress,team,move)
-        elif sid in arena_vfx.EFFECTS:
-            # The authored motif itself is available without drawing a fake route.
-            arena_vfx.EFFECTS[sid][1](ImageDraw.Draw(img),56,56,progress*.5,
-                                    progress*2,phase in ('impact','aftermath'))
         else:
-            arena_vfx.draw_skill(img,sid,element,center,center,phase,progress,team)
+            # The authored or family-fallback motif is available without a fake route.
+            arena_vfx.attack_effect(sid)[1](ImageDraw.Draw(img),56,56,progress*.5,
+                                            progress*2,phase in ('impact','aftermath'))
         if palette == 'vivid':
             vivid = ImageEnhance.Color(img.convert('RGB')).enhance(1.45)
             vivid = ImageEnhance.Brightness(vivid).enhance(1.12).convert('RGBA')

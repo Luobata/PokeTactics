@@ -85,8 +85,12 @@ def memberships(species_id):
         return []
     from data import pokedex
     origin = sid if sid in arena.ROSTER else families.mentor(sid)
+    extra = ()
+    if sid >= 252:
+        from arena_gen3 import BONDS
+        extra = BONDS.get(sid, ())
     return ([key for key in ELEMENT_TIERS if key in pokedex().species_record(sid)['types']]
-            + [key for key, spec in TACTICS.items() if origin in spec['members']])
+            + [key for key, spec in TACTICS.items() if origin in spec['members'] or key in extra])
 
 
 def count(comp):

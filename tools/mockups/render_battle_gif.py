@@ -547,8 +547,14 @@ class BattleAnimation:
         from build_rules import resolve_cast
         if self.is_arena:
             import arena_skills
-            self.move_type.update({'arena_' + s['id']: s['type'] for s in arena_skills.catalog()})
-            self.move_zh.update({'arena_' + s['id']: s['name'] for s in arena_skills.catalog()})
+            native_skills = arena_skills.catalog(include_families=True)
+            # Native event names carry a move ID, not a species ID. Keep the
+            # frozen registry label first so historical replays stay stable.
+            legacy_first = sorted(native_skills, key=lambda s: s['sid'] not in arena_skills.SKILLS)
+            for skill in legacy_first:
+                move = 'arena_' + skill['id']
+                self.move_type.setdefault(move, skill['type'])
+                self.move_zh.setdefault(move, skill['name'])
             import techniques
             self.move_zh.update({row['id']: row['name']
                                  for row in techniques.catalog('arena_v1')})
@@ -1992,7 +1998,7 @@ class BattleAnimation:
                 label=f'睡觉回复 +{ev[6]["amount"]}' if ev[1] == 'partner_effect' else f'团队回复 +{ev[4]}'
             elif ev[1] == 'attack':
                 arena_vfx.draw_attack(img,source.piece.species_id,a,b,phase,p,source.team)
-                label=arena_vfx.EFFECTS[source.piece.species_id][0]
+                label=arena_vfx.attack_label(source.piece.species_id)
             else:
                 if ev[4] == self._native_moves[ev[2]]:
                     arena_vfx.draw_native_skill(img,source.piece.species_id,

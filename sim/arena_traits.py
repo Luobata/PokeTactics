@@ -268,6 +268,7 @@ _LOW_HP_BOOST = {'trait_blaze': ('FIRE', 3), 'trait_torrent': ('WATER', 2),
                  'trait_swarm': ('BUG', 3), 'trait_cornered': ('FIGHTING', 3),
                  'trait_raging_tide': ('WATER', 3),
                  'trait_psychic_surge': ('PSYCHIC', 3),
+                 'trait_overgrow': ('GRASS', 3),
                  'trait_outrage': ('DRAGON', 2)}
 _VULNERABLE_BOOST = {'trait_crushing_grip', 'trait_weakness_read'}
 # Offense windows open once (consuming a use) and boost until expiry; settle
@@ -286,6 +287,9 @@ _ANTI_DODGE = {'trait_compound_eyes', 'trait_keen_eye'}
 def _default(sid):
     if sid in TRAITS:
         return TRAITS[sid]
+    from arena_gen3 import GEN3_TRAITS
+    if sid in GEN3_TRAITS:
+        return deepcopy(GEN3_TRAITS[sid])
     from arena_families import SPECIES_FAMILY, mentor
     if sid == 129:
         return None
@@ -311,10 +315,12 @@ def validate_choice(sid, key):
 
 
 def _view(sid, spec):
+    from arena_gen3 import GEN3_TRAITS
     fixed = sid not in ALTERNATIVES
     default = spec['id'] == _default(sid)['id']
     return {**deepcopy(spec), 'sid': sid, 'species': sid,
-            'source_label': '原作特性改编' if sid in TRAITS else '家族原型特性', 'fixed': fixed,
+            'source_label': ('原作特性改编' if sid in TRAITS or sid in GEN3_TRAITS
+                          else '家族原型特性'), 'fixed': fixed,
             'selectable': not fixed, 'default': default,
             'choice': None if default else spec['id'],
             'unlock_challenge': TRAIT_LOCKS.get(spec['id']), 'arena_only': True}
@@ -335,8 +341,20 @@ def options_for(sid):
     return [_view(sid, spec) for spec in specs]
 
 
-def catalog():
-    return [row for sid in sorted(TRAITS) for row in options_for(sid)]
+def catalog(include_families=False, species_ids=None):
+    """Return one row per covered species, preserving the legacy scope by default.
+
+    ``species_ids`` is useful for a session catalog: it filters to exactly the
+    templates legal in that pool version.  Family expansion includes inherited
+    and Gen3 traits while skipping entrances with no native trait.
+    """
+    covered = set(TRAITS)
+    if include_families:
+        from arena_families import SPECIES_FAMILY
+        covered.update(SPECIES_FAMILY)
+    if species_ids is not None:
+        covered.intersection_update(species_ids)
+    return [row for sid in sorted(covered) for row in options_for(sid)]
 
 
 def _spec(battle, unit, key=None):

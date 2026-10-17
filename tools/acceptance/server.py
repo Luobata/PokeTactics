@@ -510,12 +510,20 @@ class Handler(SimpleHTTPRequestHandler):
             return self.send_error(403, "Use the backup export endpoint")
         if parsed.path.rstrip('/') in ('', '/pokedex', '/guide', '/tools'):
             self._play_asset("hub.html", "text/html; charset=utf-8")
-        elif parsed.path == "/api/portal/families":
-            from family_catalog import catalog_view
-            self._json(catalog_view())
+        elif parsed.path in ("/api/portal/families", "/api/portal/species"):
+            from family_catalog import catalog_view, reference_view
+            from arena_families import VERSION
+            try:
+                read = reference_view if parsed.path.endswith('/species') else catalog_view
+                self._json(read(qs.get('pool', [VERSION])[0]))
+            except ValueError as exc:
+                self._json({'ok': False, 'error': str(exc)}, status=400)
         elif parsed.path == "/api/portal/catalog":
-            with _LOCK:
-                self._json(portal.catalog_view(demo_mod))
+            try:
+                with _LOCK:
+                    self._json(portal.catalog_view(demo_mod, version=qs.get('pool', ['species_v1'])[0]))
+            except ValueError as exc:
+                self._json({'ok': False, 'error': str(exc)}, status=400)
         elif parsed.path == "/reference":
             relative = qs.get('path', [''])[0]
             document = (ROOT / relative).resolve()
@@ -526,7 +534,8 @@ class Handler(SimpleHTTPRequestHandler):
             relative = document.relative_to(ROOT).as_posix()
             self._html(portal.document_view(relative, document.read_text()))
         elif parsed.path.startswith("/hub/assets/"):
-            assets = {"/hub/assets/family_dex.js": ("family_dex.js", "text/javascript; charset=utf-8"),
+            assets = {"/hub/assets/reference_dex.js": ("reference_dex.js", "text/javascript; charset=utf-8"),
+                      "/hub/assets/family_dex.js": ("family_dex.js", "text/javascript; charset=utf-8"),
                       "/hub/assets/family_dex.css": ("family_dex.css", "text/css; charset=utf-8"),
                       "/hub/assets/hub.css": ("hub.css", "text/css; charset=utf-8"),
                       "/hub/assets/hub.js": ("hub.js", "text/javascript; charset=utf-8"),

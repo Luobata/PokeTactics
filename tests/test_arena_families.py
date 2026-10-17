@@ -170,7 +170,7 @@ class FamilyPoolTests(unittest.TestCase):
         self.assertEqual(set(r.templates),set(arena.ROSTER))
 
     def test_catalog_uses_real_combat_panels_all_branches(self):
-        catalog=catalog_view();self.assertEqual(len(catalog['families']),56)
+        catalog=catalog_view();self.assertEqual(len(catalog['families']),68)
         for family in catalog['families']:
             for branch in family['branches']:
                 for stage in branch['stages']:

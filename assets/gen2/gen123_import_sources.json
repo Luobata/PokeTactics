@@ -1,0 +1,1209 @@
+{
+  "repository": "https://github.com/PokeAPI/sprites",
+  "commit": "289e842364648ec0495ae4ba12f48d5cbfbf670b",
+  "style": "Crystal front sprites",
+  "format": "indexed P; background/enclosed white folded to palette index 0",
+  "decode_policy": "Use the existing assets/gen2 Crystal decoder policy",
+  "files": {
+    "assets/gen2/normal/152.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/152.png",
+      "sha256": "5876639decca0dcfdfe7b3df36da3a4f82e524962fd889eeb22261cc93cb038c",
+      "bytes": 391,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/153.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/153.png",
+      "sha256": "1fad3b38b32f1057d57edb3214c9ccbe729b719fb31f5ee02504d6dfb758ff11",
+      "bytes": 518,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/154.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/154.png",
+      "sha256": "afb72d97ff213428e49d26046ce576b1005d2f46c5ac8fadcc01e8a21f222710",
+      "bytes": 673,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/155.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/155.png",
+      "sha256": "7554dbec57cc82c991d206396b80dc18ba2eb6d8570eea37383053d2da979f06",
+      "bytes": 415,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/156.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/156.png",
+      "sha256": "5c4244c2e461d272acae186eaf259ec6867d8533d5b2dc031651314393070155",
+      "bytes": 528,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/157.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/157.png",
+      "sha256": "ebacfc685a98a53a3af31aec4fea0483318c3147ffbb9ed87bf60d8711274092",
+      "bytes": 629,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/158.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/158.png",
+      "sha256": "c2a7b79cfe05ae0abadb4273958b7e9aa62169a9f9637da4b3edbb13423fba77",
+      "bytes": 423,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/159.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/159.png",
+      "sha256": "07797f3f3151b6bbe7d8359c807b62634216f3a9d8ed6b0d3abd0b3a8e3d8442",
+      "bytes": 547,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/160.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/160.png",
+      "sha256": "a1171cde07831f3a4999bf0f08662ad955b8303057bccd70cbd6ace1bc3b5908",
+      "bytes": 718,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/161.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/161.png",
+      "sha256": "6bcc0145012ae5db0e60000c6b9e07bd16a9b744288f85d70a9f0ef3a19f9c0c",
+      "bytes": 380,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/162.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/162.png",
+      "sha256": "200bf05da80a130b0a36c45d10c9535c10bf0dbdc4af39f8b845c5e58a62a27c",
+      "bytes": 459,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/163.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/163.png",
+      "sha256": "6a04a055a29a01c1e0da2e64237578e52d7978912c2fd722ed61efbe3535c281",
+      "bytes": 411,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/164.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/164.png",
+      "sha256": "83fcd1fdacfa3b3faf5c8481d99eb330a8d6b1a20d87d2d565c28ed448ec3971",
+      "bytes": 576,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/165.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/165.png",
+      "sha256": "822ada2998e7ff306d289f85f8e907e38f067801a809c82d05ce4d6b19bd264f",
+      "bytes": 483,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/166.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/166.png",
+      "sha256": "28082511b822c3801a6a5f9cbf1f93209ac5af19314de278716285b6f5733ae9",
+      "bytes": 482,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/167.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/167.png",
+      "sha256": "38d22da42f1d5fc535f6e74477ff8dba87bc84251f1b5ff049e9db5ae4b92071",
+      "bytes": 336,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/168.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/168.png",
+      "sha256": "8f676516806b4fea6a9771a6f4a9014eb9b0c9e6c9f3f3143ee5909fc52394e1",
+      "bytes": 520,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/169.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/169.png",
+      "sha256": "680b39f75a3bb0ea84c1eae540ae9acd494f99483caa637c61383b18094e4d26",
+      "bytes": 530,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/170.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/170.png",
+      "sha256": "e4ea82667548e3bdf371e3bc7973f77d1910c09b94bcde65102e42d6c29ee508",
+      "bytes": 450,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/171.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/171.png",
+      "sha256": "3aae0ea4177653f21e14f5f36b055d1ad1750f60ad04cb80b8aa75fb7c0cb2ec",
+      "bytes": 453,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/172.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/172.png",
+      "sha256": "a2f41cd7fa0abb017134c597ff1a4e57f029404e357f97c8f0ed3fd8b6357497",
+      "bytes": 346,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/173.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/173.png",
+      "sha256": "87a207f24e832b9165b64427e4516ee7ececb6a2aa0bcab37b6bf1079c686f20",
+      "bytes": 331,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/174.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/174.png",
+      "sha256": "fb27f33f3f58a044caa1c75344a3e051b78a66b6b8d5c276c5e18d3701d27461",
+      "bytes": 349,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/175.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/175.png",
+      "sha256": "e566eaa42b4dc210b3025e117ab7c5cfe4a0c6c12ee45200b6820df6848bd4cc",
+      "bytes": 315,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/176.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/176.png",
+      "sha256": "acd709c1d50ed04797a1b676b55cf8c8bb60f1a5439a81fd7325266a10a5a93a",
+      "bytes": 516,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/177.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/177.png",
+      "sha256": "7aacc2253a7c76999e44f2297a33cda989ed602b6763a9410a5cf824e483c93e",
+      "bytes": 291,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/178.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/178.png",
+      "sha256": "296775a1fc338043b6bfa7e7fc1c2f5c50dfd2ddab844f9fc97d4f7121a313d0",
+      "bytes": 459,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/179.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/179.png",
+      "sha256": "2042dcbf615f5d8faa665bb3c1e974adfa1ca5eb1997aab3bbbf73201786c16c",
+      "bytes": 411,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/180.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/180.png",
+      "sha256": "980159b9d277123ed35cd379a3c03388dc8e44b7ca86a6c16d06ada8287b06de",
+      "bytes": 499,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/181.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/181.png",
+      "sha256": "04865f16d06186eb0785acc83b6f814f033124bc0bbe2da8c5ec3f6d139cd6eb",
+      "bytes": 535,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/182.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/182.png",
+      "sha256": "361ec079f2060f94546c522966cc189597aafa65d9a94af162234d294ae8ec69",
+      "bytes": 502,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/183.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/183.png",
+      "sha256": "9211641b785d35fb133951c59c1855e733d4a5ea5f518725be0c65d5adcf30f4",
+      "bytes": 392,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/184.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/184.png",
+      "sha256": "d8d1a5e016d03f46ec9079364a54760009e266749adf3f54d790929d781fcbc9",
+      "bytes": 595,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/185.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/185.png",
+      "sha256": "991600faafcc32754edd02e225e9d33345441c7145271e9cc332c5642b2e6b06",
+      "bytes": 495,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/186.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/186.png",
+      "sha256": "0cbd10f1bedd724e5d0422d597fb6b58fbe965b65955938982f2615a5881568d",
+      "bytes": 581,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/187.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/187.png",
+      "sha256": "8103b49d2a3bef9e7fbfd7a9bbe4d415daf49a99d0c874147212826a4a9bc924",
+      "bytes": 378,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/188.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/188.png",
+      "sha256": "02b346b78a4d7d7b1bb2025aae992d94bf6a716d5deedf352f14b1bc72dbcd0d",
+      "bytes": 400,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/189.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/189.png",
+      "sha256": "fb13333dedaaf74685961de5a3dc358d55d3f8a9d9fb0f4a25822fd12fe6df38",
+      "bytes": 544,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/190.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/190.png",
+      "sha256": "f7e1f92c386faa43f3a9c33565f44924f0a0d2a0999f7c2c807f84bf51fce3b6",
+      "bytes": 417,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/191.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/191.png",
+      "sha256": "c81ad64cc803dc161f91aebe53c46053df09806801ddd695c3a1497da9863458",
+      "bytes": 380,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/192.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/192.png",
+      "sha256": "cfca7c7c4b05e040df878270ecdbeaaab1da6a5376bd3fa533ed61de2601df74",
+      "bytes": 557,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/193.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/193.png",
+      "sha256": "306722fdb21068b451ec259dbb3439cb6aa7697aee197b107cb40b005ec7018c",
+      "bytes": 493,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/194.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/194.png",
+      "sha256": "5bcc7a25e164fdc2516a1cd8e77aaefc7fa8a45b7763e6e78f8fe4a6a909e2be",
+      "bytes": 359,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/195.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/195.png",
+      "sha256": "d9fcd8af058af1cb7ee66036b5884eb03ee1972ac8a2d90fddf4da58861a8fa7",
+      "bytes": 459,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/196.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/196.png",
+      "sha256": "f01056f6e20ad331974d4103816567d43a38bf6d1f482cba275d0132255b45b9",
+      "bytes": 490,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/197.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/197.png",
+      "sha256": "e274d1af80e4813ed4552079a627a67bdc09bf26f52dd4e6907d313a00b038cd",
+      "bytes": 466,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/198.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/198.png",
+      "sha256": "a319788cf8a88da89a2a3c82f04a91d9c34eceaffd55c9ebac60a085ea8f2d29",
+      "bytes": 529,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/199.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/199.png",
+      "sha256": "f9663ac05b7efa17308dee2737ea85e796335bee860f69219e675a59a076544a",
+      "bytes": 630,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/200.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/200.png",
+      "sha256": "1c46a1bdb8756b6384553af741383fccf9d0f71bd2235e62e4bd0dbe2d485b7f",
+      "bytes": 490,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/201.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/201.png",
+      "sha256": "e9e8aa0dafd7ee431b42d6ea19f8f4c32a6addd4b40bec75cefb9b35a8fac896",
+      "bytes": 267,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/202.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/202.png",
+      "sha256": "c5a86bc884e9cb7e6de4e6dae991ee55eb1ae1f1f4ca712018f3b9b4e8e622f9",
+      "bytes": 443,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/203.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/203.png",
+      "sha256": "b7547d329c95cb81d4e4083fea0212fc8a34bb77636f56b72e9e47445745179e",
+      "bytes": 576,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/204.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/204.png",
+      "sha256": "2e908d31139400881f219b276fe219ea7f5b5e87f3b419608170a3b0a3028c83",
+      "bytes": 405,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/205.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/205.png",
+      "sha256": "450bdf52ef65a7f650b7187df8a1c27c86e676683442a1652e773a4a600f5e19",
+      "bytes": 637,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/206.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/206.png",
+      "sha256": "0dc459e8f288b2438b2aa3bacd81db75fb785ca4988c82e3b39442439cd18d4d",
+      "bytes": 470,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/207.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/207.png",
+      "sha256": "b77b99cdb9bd990a1ec809c2c1abd2b43ca79c5a2ad82498cfe15dac6c477d9d",
+      "bytes": 541,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/208.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/208.png",
+      "sha256": "7d3b98d29d01f65b7d37ce7e855752d8fecbd68e7e2e49057747f55f26faaeff",
+      "bytes": 754,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/209.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/209.png",
+      "sha256": "41d58a65d00b179e20d298b26f6e02f26de7ae0f3060bd205c08aba71fb20a8a",
+      "bytes": 477,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/210.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/210.png",
+      "sha256": "8c54972705179d54536d2660b9ef6ef2db04bf98dbc428db52e58ffd35d8e509",
+      "bytes": 547,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/211.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/211.png",
+      "sha256": "c3f4de4132591333de849d6f4adb7b33be3a7f06a9350c142db7e99ae82108d5",
+      "bytes": 371,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/212.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/212.png",
+      "sha256": "31afbd9ca0d3d7d97688f7e4ee7e2d2ac451dd0bd4761316bfc41e8de062fd0d",
+      "bytes": 649,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/213.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/213.png",
+      "sha256": "83a137ba6aaf5e8b3e59ce9be8bd3fe63935eef9f5fd8549a33b858de867577c",
+      "bytes": 388,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/214.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/214.png",
+      "sha256": "8853a2217fccdbfa2c696482a80cc8699c2fe16c2fbd424e7a18da47bbc23ed7",
+      "bytes": 532,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/215.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/215.png",
+      "sha256": "b9a7a95cac78e14294d191dcfc466d6ee3fc1cdaa7361dceb9a0ec8ed9d0d746",
+      "bytes": 536,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/216.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/216.png",
+      "sha256": "ec2c004904be8322b620c240f3a841d4c1c61140a28e8d97923a6853f66dd129",
+      "bytes": 384,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/217.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/217.png",
+      "sha256": "9adbdf73061524a23f67ce22adb18e84d519fe6cd4e53e1b1e8ab1a4e71856d7",
+      "bytes": 582,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/218.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/218.png",
+      "sha256": "42a5e49ddb4a29d806848eb780c00bf54ea485ddf0d4a6ba8c2fd11056bc2a78",
+      "bytes": 383,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/219.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/219.png",
+      "sha256": "3c4a6f0c9c87695cd13b4138e726b2874140a20d73153db194678fc49f65a1fe",
+      "bytes": 551,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/220.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/220.png",
+      "sha256": "f0ce157704438b88949ad0dbefdaaf31b781bcd51c25237f8ef4dc9efabd445e",
+      "bytes": 307,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/221.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/221.png",
+      "sha256": "e24ecf47d171ff0019fac5e01169a47122afbfc70aeaa8a9156cb5cba1f10890",
+      "bytes": 487,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/222.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/222.png",
+      "sha256": "221ae0d3554d2a59f83d234610c34c4754f88180ba1fbf7bff3477315f236587",
+      "bytes": 464,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/223.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/223.png",
+      "sha256": "e4aff6b4688bc243fac1a1dec083d2fd9ae7c0f1a799f2d5206c488e5e346b46",
+      "bytes": 404,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/224.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/224.png",
+      "sha256": "70121848ad6348d49c51c2c9f4a911de7fb453fe70ec23a80f5fe4a7d0a940c0",
+      "bytes": 479,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/225.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/225.png",
+      "sha256": "ab1966c3b6084ba934c990b0275d470b8b1288270240d11efcbbee887f68776e",
+      "bytes": 501,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/226.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/226.png",
+      "sha256": "1d606af5eb2bbcfdabfa71213b635dcbf45f3f20ffdd4c16bcaee6e46283ef2c",
+      "bytes": 600,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/227.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/227.png",
+      "sha256": "81899773b4821f75e10216dfc099f7c0276afbac15be93be719fddff0f8b98ec",
+      "bytes": 674,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/228.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/228.png",
+      "sha256": "a371de26171f8b0ad8d51f91dccfb030f23a050ea5b1f013326559c053bfe4b9",
+      "bytes": 426,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/229.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/229.png",
+      "sha256": "c0b297b0c00423616cb2ca2ea1b88a13ea75ba6cd8874a9f3e21db153168c547",
+      "bytes": 591,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/230.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/230.png",
+      "sha256": "193a51cb7d62d00719c8f5834792ea723bd83714f35745a0ada98a5520ad0aad",
+      "bytes": 567,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/231.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/231.png",
+      "sha256": "3e0132691a38acaa3036a94e60af92061ea2fe50b48600c7e4325188137a4513",
+      "bytes": 361,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/232.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/232.png",
+      "sha256": "aa2556b65f49560338fcc51cff896b8681e0ca98e52c5624050354615b581a01",
+      "bytes": 597,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/233.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/233.png",
+      "sha256": "8a22c0f5fcbb295d885541d3136426b3f6c80161cd70963591ac32f6758ebd12",
+      "bytes": 423,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/234.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/234.png",
+      "sha256": "6ce8c1ccde6fe6c87c391ae775481f84d0d055d18ab731cc7cafbc4c3695d08f",
+      "bytes": 578,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/235.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/235.png",
+      "sha256": "fca61d0f6314edd8acfb0852f7222041f033a5bdee5c504b751edf5e76488e5e",
+      "bytes": 573,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/236.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/236.png",
+      "sha256": "30d221ca94d3011af67167a7ed370fa170cc24a23fe6d90e49ca4ebaa444ed14",
+      "bytes": 426,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/237.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/237.png",
+      "sha256": "1b14ff17d6cdb30e6586a576a5388e305e282eba29be8b9b54702bea9db988ec",
+      "bytes": 584,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/238.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/238.png",
+      "sha256": "3e0a946a5c2681bc2dfffbc5935168689fe8b82e221c6ba4e35687c716ff6ad1",
+      "bytes": 408,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/239.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/239.png",
+      "sha256": "dd324069c3360766b0a5cd15991641d4a0fb805354c30346c6326b90aae032f8",
+      "bytes": 526,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/240.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/240.png",
+      "sha256": "95daaee92a2baeb3ccf9a6f373e92b2019fcef0e9bc9e3b9191fbef390ccd4d1",
+      "bytes": 445,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/241.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/241.png",
+      "sha256": "eb3f4f540cdc0c76ae5dc8e5a4bdc61d4ef50985a1c88fe9681b844651094196",
+      "bytes": 539,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/242.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/242.png",
+      "sha256": "05500702d4079ed223bb1f8788cb7d858a90a388f18bb0cb18baa00f5c9cfed7",
+      "bytes": 604,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/243.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/243.png",
+      "sha256": "0e571876a142e3c4d80cbf4732f013f71fe3bddb6d385bbdaf0302f3cb4c7c95",
+      "bytes": 681,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/244.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/244.png",
+      "sha256": "22a310d5d361b5fef3894bae90cfd44a1acbc3efc89627df9bf291980fa298f9",
+      "bytes": 699,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/245.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/245.png",
+      "sha256": "67e780147857c1cf861f012e0d2683d47aa3ab73bbbe4897ae9dd7af09e0c4f4",
+      "bytes": 667,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/246.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/246.png",
+      "sha256": "ffa3730be9393b51cbee2376c41c616b048ef09190a8d84be30de72bc78714bf",
+      "bytes": 376,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/247.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/247.png",
+      "sha256": "1a3e2b6fe482aecc275541a70b6c8e15d301c7316f24bac76ee945960a24080f",
+      "bytes": 511,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/248.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/248.png",
+      "sha256": "7c53e4811da246f48da47fbb03067d1ac4271471f8b2151a44cdb6adbe774017",
+      "bytes": 690,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/249.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/249.png",
+      "sha256": "96877dc7d8b6803176ccdda5354aa8c533f7b7b0617b90681d75888b4105d1ea",
+      "bytes": 647,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/250.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/250.png",
+      "sha256": "3f6cec1c79aeb8bbafc64b29e93a9f3b8085dc4c6969fa58ea0b960156f1d0c5",
+      "bytes": 774,
+      "kind": "normal"
+    },
+    "assets/gen2/normal/251.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/251.png",
+      "sha256": "f9059ba1a2188aa41b334b9e98ad656537cd89fcf5278365fcd183f8bc29a69f",
+      "bytes": 374,
+      "kind": "normal"
+    },
+    "assets/gen2/shiny/152.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/152.png",
+      "sha256": "acf20c7d400a7d05ce0d6b8d0fd0aaf77aed77f97314f954460b4ee074adf984",
+      "bytes": 391,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/153.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/153.png",
+      "sha256": "9a5f19d06b3043904e792c667d4f6aacc7e8e963e5c6e61a1ec0350e51529884",
+      "bytes": 518,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/154.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/154.png",
+      "sha256": "dca83fa653c3ff9885d56954e10121891a122d1a315616ee6318bbc139f1a357",
+      "bytes": 673,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/155.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/155.png",
+      "sha256": "77b654f9a3ff26ecf211e8bcb5ed40174b709a3f6b434322eccaa125701843cf",
+      "bytes": 415,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/156.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/156.png",
+      "sha256": "33c79f7b0c4cb0546d6c03a557e468dd3db2f6402b1f4c46be52b0d92d19a5f8",
+      "bytes": 528,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/157.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/157.png",
+      "sha256": "39c010170073e560e886521c89364adab6ddf2903cb872bfc56b6e6c054231ab",
+      "bytes": 629,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/158.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/158.png",
+      "sha256": "76b131e113dabdceff8446dcc4f1ee7c6025736a4b4fd9a2629116eb31d77817",
+      "bytes": 423,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/159.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/159.png",
+      "sha256": "ff8446dfd33e7aaf0444a2bffda351917abef65bf8dc2445cc5bfacdc36d0e35",
+      "bytes": 547,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/160.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/160.png",
+      "sha256": "569d81a4d5ebd2f6800a06bc29f3c7b4b2915330d9242c6f21641e10061dbd2d",
+      "bytes": 718,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/161.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/161.png",
+      "sha256": "2460cbb0492da29e1e834fcc1804d70a9a37ff8721a0bf8f37fce6b7cd799e83",
+      "bytes": 380,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/162.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/162.png",
+      "sha256": "9ffb78c92c68460e47a2f6b36c137ae279b5cf52a156c7841d90a748eb9b6f7f",
+      "bytes": 459,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/163.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/163.png",
+      "sha256": "3836c8365123c942fe67e7110ddad36e5f4386415ea39a7bda5ff10cc6c3fe6a",
+      "bytes": 411,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/164.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/164.png",
+      "sha256": "e84a4c463de478c0674f98fcf886668949539a1f453e01ca7588e14e81317f1d",
+      "bytes": 576,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/165.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/165.png",
+      "sha256": "6b303928f6f3ceee0f00e4d69a7f605e6d268622b60a6c6d498b90fd589ad33d",
+      "bytes": 483,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/166.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/166.png",
+      "sha256": "8c6dd69a3b6e523de8ad382705a1fa4916b34bfc5e74e1f295a7b5b4b239264f",
+      "bytes": 482,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/167.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/167.png",
+      "sha256": "38bee653413cbb61b815e8a79e62872acdb1764e99848fdfe7a819b89afbee14",
+      "bytes": 336,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/168.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/168.png",
+      "sha256": "c3a7cb75839c4d0bb199b8ebe42d9baad0d19c07d5412a5395f27f886751eca7",
+      "bytes": 520,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/169.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/169.png",
+      "sha256": "85a7b3f999ddd8f7fb819d766a173409e4379312bffdf0dc59e89cdca7ebc0db",
+      "bytes": 530,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/170.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/170.png",
+      "sha256": "fd986f51816a11c6c35d742880fb292535e032019446c80e24bbab7ef6cc0470",
+      "bytes": 450,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/171.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/171.png",
+      "sha256": "1b51f99b0a1cd3d3a0e895c917f1249e8d85619b845d52cfec34cde644cbb456",
+      "bytes": 453,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/172.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/172.png",
+      "sha256": "06b264164a1c290f56b421cb40e02a0fc4604e261184f7d667695ae2375f0374",
+      "bytes": 346,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/173.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/173.png",
+      "sha256": "3bb78a96842c6cc68315b57699f0551b7157ccaa7b049c07aa07e6c2827773b5",
+      "bytes": 331,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/174.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/174.png",
+      "sha256": "87507a26d15f727b33c31282bbbcaa9555a7e069c245cd5645d3974733550b9e",
+      "bytes": 349,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/175.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/175.png",
+      "sha256": "a0118fbb9c722fc9333e261069b401ea77484cbf82a4685f6e9b66fe8a9a849e",
+      "bytes": 315,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/176.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/176.png",
+      "sha256": "2fbf1e2d9978ba521d2ad95849d77ed73eb7b6d3112a1d3ad8ae5e372a716101",
+      "bytes": 516,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/177.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/177.png",
+      "sha256": "92dc05454ab754c69993ed8bf2563d7af6880694a402c500d054499821fdb192",
+      "bytes": 291,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/178.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/178.png",
+      "sha256": "8a71e118017169f4f6f1b735f8b717f76ae93d0794ac19aee625f9403e6dc9fb",
+      "bytes": 459,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/179.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/179.png",
+      "sha256": "e08af79ccfed7b6633998c8f7a5c1c0c8a0fb5c6cec8d3fb4cf3f2d0a984e96f",
+      "bytes": 411,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/180.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/180.png",
+      "sha256": "21f5df685d46b7a02d6dccb46ef96c584a8e5a843b8d3b6e3f62e254729e3f35",
+      "bytes": 499,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/181.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/181.png",
+      "sha256": "cacd66ca08e9dd669b2d45f5ecbb526ce34b0aa8ffd8306fa14e940d8ffed2e8",
+      "bytes": 535,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/182.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/182.png",
+      "sha256": "1a9760ca80c6641ab0ac8d4197f968058f58d3b45ec70f7f40318e14a02380cd",
+      "bytes": 502,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/183.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/183.png",
+      "sha256": "00c99496743166e2520aa48e5fcba4ffe3b58fd372eac88aba5c8d7461724684",
+      "bytes": 392,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/184.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/184.png",
+      "sha256": "4a095cf4b69aa7b1129d38928dd8d56b87477d5e64068118264ff6254849ea26",
+      "bytes": 595,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/185.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/185.png",
+      "sha256": "fd302c81b4fd1a4c43616aac694cadb3c29e67e007d0315b4e28287f2eaba84e",
+      "bytes": 495,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/186.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/186.png",
+      "sha256": "0c76e91b377d1c8bf4614e66eac8bea16822f915f1687bc56601ece140bd23d8",
+      "bytes": 581,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/187.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/187.png",
+      "sha256": "ef4b0759d60c1b4fe3ffcf9daf72cf4baba90969966ff65c7916901cfd0c56a8",
+      "bytes": 378,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/188.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/188.png",
+      "sha256": "28410ac779e77f6d56bf362ce7f8073ed3fa8b8e195b9f3c2ae593056a937763",
+      "bytes": 400,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/189.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/189.png",
+      "sha256": "6d5985f9fec5f61cb61436bbad3bacd0cbc1cac3a788be8967f36d36a1e499bf",
+      "bytes": 544,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/190.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/190.png",
+      "sha256": "9f9f21ce53002290d18b0bc6ca80f894a249ba05d719fa2ea8fe4a61df60f0d2",
+      "bytes": 417,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/191.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/191.png",
+      "sha256": "547e8c028c4eb6a8bc75c7eb2ba60f33bf41ab21ef3112a7cfb975e52f102c88",
+      "bytes": 380,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/192.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/192.png",
+      "sha256": "acd4a7d992020669d0de7e5e5bb8a7d989b9b8d8a4f29dd48ca56d887b508df2",
+      "bytes": 557,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/193.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/193.png",
+      "sha256": "3e0ffa5625677e646a577edf1e7e4c6d9da9df01cb5d3b416ca424b4395250f6",
+      "bytes": 493,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/194.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/194.png",
+      "sha256": "5cfccb706f504ed92e2c467126d3b73f30f648b5001ce7ebb1312b5afdfc457f",
+      "bytes": 359,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/195.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/195.png",
+      "sha256": "b7e16ca12d0ebce0e1bab1f655142cae0394eb54d058aca7d654e7dfe04a187f",
+      "bytes": 459,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/196.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/196.png",
+      "sha256": "1004e69c1f330435ac546474a8ef47e04c648e5cf171f20ee5934e9c7a97ef57",
+      "bytes": 490,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/197.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/197.png",
+      "sha256": "0da50450f992a87709af99edd738e227c0d2f8b77eee1257b7d5c39267deff84",
+      "bytes": 466,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/198.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/198.png",
+      "sha256": "428e5e398662350c1aff8b55fe9ad495153c21e2996a156d5be2cdbd806e3fb9",
+      "bytes": 529,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/199.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/199.png",
+      "sha256": "36c89ebba8d13b5dc8fde7f119384ae2e3805210f01cb779fd6745333548de8c",
+      "bytes": 630,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/200.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/200.png",
+      "sha256": "2941921428e4d6758c559dc2dbf63e3be3b3bee6c504a27a11aabfbc24ae74bd",
+      "bytes": 490,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/201.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/201.png",
+      "sha256": "5467bc68f8de3051a38cc4a702787f8b0763d88fb09f1ae71ee2200c973b0b29",
+      "bytes": 267,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/202.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/202.png",
+      "sha256": "3e0f957313a2c0944a1ab2c7cb3330e3cad5f728b3dffec5ece5a40e393acb02",
+      "bytes": 443,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/203.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/203.png",
+      "sha256": "b3daa185d15fc3b0a64a5dfa6e49f71542e1524da210a92236ffe1d1b7597c0b",
+      "bytes": 576,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/204.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/204.png",
+      "sha256": "b70ec7e229259779136bb754380bda1ce20f0e27baff3861a015fe0a238328b3",
+      "bytes": 405,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/205.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/205.png",
+      "sha256": "bb4b6be9ee7f78335c9dca6762075cb1108059871d2a3a0f2ee02ac027317bec",
+      "bytes": 637,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/206.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/206.png",
+      "sha256": "9fd29bcd9c8824783f62d8db8561e80a333af778493d220cdb6adfd40c1f0583",
+      "bytes": 470,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/207.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/207.png",
+      "sha256": "5566d15690d677f83c9b78739541c94263158467bfd604ce3a473b7c0b53ac85",
+      "bytes": 541,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/208.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/208.png",
+      "sha256": "329faa193240232ab4e89f6188d2b597f1b1cc0af629819aa4f36b8e3cefbcc1",
+      "bytes": 754,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/209.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/209.png",
+      "sha256": "36d7690170d76ca3b0322f27e6c322f9da169dfe891e17d43c114cd1087e7286",
+      "bytes": 477,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/210.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/210.png",
+      "sha256": "0cdbfc6c303c3fd04ee70dcb130c0ae81e10c0453769e012fea5c42cbef8d4f1",
+      "bytes": 547,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/211.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/211.png",
+      "sha256": "faedb7588f012a6d64a2af42e82fba0139860579093739c5cf067004a97a54ae",
+      "bytes": 371,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/212.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/212.png",
+      "sha256": "321689b2796e55d254d4b8f07087fa7b37107b9e9711fe3cfbf0a2711cf077f1",
+      "bytes": 649,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/213.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/213.png",
+      "sha256": "48139238337764fba21779ab524767933323990848855a4d2e7b1ff1c0f37687",
+      "bytes": 388,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/214.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/214.png",
+      "sha256": "01dc120697a3d8f7ef4b23df2d63932de4ab13768be263cc3b84c85de2715306",
+      "bytes": 532,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/215.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/215.png",
+      "sha256": "5a7b5ede19e2611e4cd3918b8de890772c2c841e6b51c1ceca4f890b05ae4f27",
+      "bytes": 536,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/216.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/216.png",
+      "sha256": "e90a0273fd4a0dacdeea1cbedaf8d9b69ccaad4d1254ccbd3c888e4f59702e27",
+      "bytes": 384,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/217.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/217.png",
+      "sha256": "a73a8a2291de7544bbb9f022428a34b188057af0e67c072cdcdf9f5b7c358d64",
+      "bytes": 582,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/218.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/218.png",
+      "sha256": "9d837cde70cbb9c78753bf8c501fb84dbb04033511ab0b4b0487a7b0fdbc1aa6",
+      "bytes": 383,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/219.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/219.png",
+      "sha256": "f68fac71f8ff1cb9bba34a1d3de6a155370c8f01f7e2620d27e3edfeb33f3a9b",
+      "bytes": 551,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/220.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/220.png",
+      "sha256": "d0dfad8d86f75e5c88b0240c1326e7774828fa3e3b80691c318e5b0d6de76de1",
+      "bytes": 307,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/221.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/221.png",
+      "sha256": "550bf849533d161e13e20c79365a2a7a32b88a63159ce9bb24138b99dfd4732d",
+      "bytes": 487,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/222.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/222.png",
+      "sha256": "fb98cfab4273acd35d406968c2d19c4b4786977e0e6283f3431bd6379b52e499",
+      "bytes": 464,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/223.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/223.png",
+      "sha256": "e597dc94666b8404bba718838e9df525a521e72dba2223d191ab94ae204fadc1",
+      "bytes": 404,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/224.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/224.png",
+      "sha256": "a17722c596543df163df64c5ea6ac1b1639af39b06c2f5a974cef982bfe3f27c",
+      "bytes": 479,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/225.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/225.png",
+      "sha256": "7681155f8100fe4ee3c01a7fb3b56f5da51c09eb8159b77cde5dacd8a5e2c0d2",
+      "bytes": 501,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/226.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/226.png",
+      "sha256": "cede93929f240b52247a097e9b69ab7031406a04cffbb2154f5018bf201ec780",
+      "bytes": 600,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/227.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/227.png",
+      "sha256": "238c680a4649f6e097e7a6aaded50b954674479fc7e3a1d40a30f2f6b2108a13",
+      "bytes": 674,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/228.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/228.png",
+      "sha256": "91fb50bff1573a2603d2298367cd516c2ea798ca4e420d8769c37fd106bc6362",
+      "bytes": 426,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/229.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/229.png",
+      "sha256": "5a1326a6e632798a67e3b105b66cd85dc1ad28540ecdfa001242f9a5739d8541",
+      "bytes": 591,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/230.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/230.png",
+      "sha256": "6e9592df2d4780b6ea0e8ae3ba341509ed2c48b28e18f46dd88c43bec0920f90",
+      "bytes": 567,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/231.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/231.png",
+      "sha256": "208d8d8636d66876e381f92cd730dfc32a17af198d3f87452d0a21874b6c801c",
+      "bytes": 361,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/232.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/232.png",
+      "sha256": "ab878479dc348da5c4c3a5ecc86e028b4a0a0126482031a4fe1df2f17965f98b",
+      "bytes": 597,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/233.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/233.png",
+      "sha256": "ff7052166877ff21034b3f7b9cfe9ba79c7de8b6ef81e4b36598473f06dea067",
+      "bytes": 423,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/234.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/234.png",
+      "sha256": "0e8137b070097d17193a94b21917231fd4b25b84ed9a02c9cab2b94a9c57e2ec",
+      "bytes": 578,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/235.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/235.png",
+      "sha256": "39c58bc5edc2866147fe8ee7a2b92b2b41a275ed7bf93df9d7f405b5bb0461f3",
+      "bytes": 573,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/236.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/236.png",
+      "sha256": "ed9d9188f358e2665954ecc2ef8b8aa63ea2036db5485af1ec74cb50c7ee4d53",
+      "bytes": 426,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/237.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/237.png",
+      "sha256": "6ac99a355890241a0d4076a0535dc622da05aac09473bea27d740441d8cd89e3",
+      "bytes": 584,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/238.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/238.png",
+      "sha256": "d90219a42eab07e50ccb6b1c20360642617163af743f813e2a2ded891af83c93",
+      "bytes": 408,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/239.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/239.png",
+      "sha256": "d7ec19c29c4b71e18f1173c3efe56a5fb7d5c2c3c930fa98c553fca8b5f07b53",
+      "bytes": 526,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/240.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/240.png",
+      "sha256": "2b45f34c4d15fa9a04dbe84640187fae17a0eed20fbc658c5d34d4ce07e1e06e",
+      "bytes": 445,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/241.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/241.png",
+      "sha256": "1ad80c88ece5f301d139d3dfbe3171d48f9707a915659fb8c8bdca9e96c4338f",
+      "bytes": 539,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/242.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/242.png",
+      "sha256": "70745ac9ac9e6efd8f18c3c3ad5de3dc79ddab1cb2de5b225fe80005843f9038",
+      "bytes": 604,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/243.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/243.png",
+      "sha256": "ecd114f62d96ede96f14c6ab97a58bc59938377e7224e88efb2217505ff76655",
+      "bytes": 681,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/244.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/244.png",
+      "sha256": "a565d96e3b39b8753806bba47ae6645f69ee06467de51d9042db5aa337e477b9",
+      "bytes": 699,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/245.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/245.png",
+      "sha256": "82b43c1bbfa901874163a63ca578439934f9040a61e2e104637e616831ebfb57",
+      "bytes": 667,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/246.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/246.png",
+      "sha256": "d749b72aa21915a68e20f010e614ec5653afc499c63765fffe59dd3f69c1f2df",
+      "bytes": 376,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/247.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/247.png",
+      "sha256": "abd95c833504370c9011d5a53ff6592f2eab422c591913f083198b141166ef9c",
+      "bytes": 511,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/248.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/248.png",
+      "sha256": "76be3cf624b9abde87389ed1e3e7cd2d2b936d7f7ab7b20ac0d7549dc31e5c77",
+      "bytes": 690,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/249.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/249.png",
+      "sha256": "7f6221f537173d051020fe329961f0e6d6052ebc5b1d162016d6ebab74aa996b",
+      "bytes": 647,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/250.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/250.png",
+      "sha256": "4905d5423ba193ed9c1b093c2c7596affef871013d5674537464021c9fb2d44d",
+      "bytes": 774,
+      "kind": "shiny"
+    },
+    "assets/gen2/shiny/251.png": {
+      "url": "https://raw.githubusercontent.com/PokeAPI/sprites/289e842364648ec0495ae4ba12f48d5cbfbf670b/sprites/pokemon/versions/generation-ii/crystal/shiny/251.png",
+      "sha256": "24222450a1b8b34f410efe652f7fedff63ce7b0f0bd5718be389a74960c8e76b",
+      "bytes": 374,
+      "kind": "shiny"
+    }
+  }
+}

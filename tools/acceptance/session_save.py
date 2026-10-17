@@ -101,6 +101,7 @@ PRE_LEGENDARY_POOL_BY_COST = {1: 22, 2: 18, 3: 12}
 # the current build: the nine new species refill at the current cap when nobody
 # holds them, and every committed species keeps its current-cap conservation.
 PRE_FAMILY_FINGERPRINT = '82905d3a65a8abc5ee827a16eb99c28f0f7ac6f416c7afb1b131349cb3aa0211'
+PRE_HOENN_FINGERPRINT = '3105c8e3f3386efe16c7b74e519a7b4acb2b770155a607a7e6af7d0d789b4015'
 PRE_REBALANCE_FINGERPRINT = '475e78b0bb4edc69f9a9c65dadf18c55dee202edf075ea7fd02bb7f9c110e822'
 PRE_SYNERGY_TECHNIQUES = frozenset({'cut', 'surf', 'rest', 'thunderbolt', 'ice_beam',
                                      'toxic', 'earthquake', 'roar', 'rapid_spin'})
@@ -312,6 +313,10 @@ class SessionCodec:
         if fingerprint == PRE_FAMILY_FINGERPRINT:
             if data.get('arena_pool', 'species_v1') != 'species_v1':
                 raise ValueError('旧存档不能伪造家族卡池')
+            fingerprint = current_fingerprint
+        if fingerprint == PRE_HOENN_FINGERPRINT:
+            if data.get('arena_pool', 'species_v1') not in ('species_v1', 'families_v1'):
+                raise ValueError('旧存档不能声明尚未开放的家族卡池')
             fingerprint = current_fingerprint
         supported = {current_fingerprint, TWO_ROW_ARENA_FINGERPRINT,
                      PRE_NATIVE_SKILLS_FINGERPRINT, NATIVE_SKILLS_INITIAL_FINGERPRINT,
@@ -568,7 +573,7 @@ class SessionCodec:
                 if sid is not None:
                     if type(sid) is not int or sid not in state.templates:
                         raise ValueError("商店未知棋子")
-                    if state.is_family and sid not in demo.families_mod.FAMILIES:
+                    if state.is_family and sid not in demo.families_mod.families_for(state.arena_pool):
                         raise ValueError('商店不能售卖进化形态')
                     held[sid] += 1
             seat.shop.slots = list(slots)
@@ -629,7 +634,7 @@ class SessionCodec:
         # docs/49 补强只增物种不改上限：该时代的存档按现行上限直接守恒。
         same_cap_era = fingerprint == PRE_REBALANCE_FINGERPRINT
         for sid, template in state.templates.items():
-            cap = (demo.families_mod.pool_caps()[sid] if state.is_family else
+            cap = (demo.families_mod.pool_caps(state.arena_pool)[sid] if state.is_family else
                    demo.arena_mod.pool_cap(sid) if is_arena else demo.shop_mod.POOL_COPIES[template.tier])
             if pre_legendary_arena and same_cap_era and str(sid) in committed_pool:
                 count = integer(saved_pool[str(sid)], 0, cap, "pool")
@@ -1272,7 +1277,7 @@ class SessionCodec:
                             'pulse_band', 'relay_coil', 'grounding_cloak', 'storm_chime',
                             'life_orb', 'element_wet', 'element_conduct', 'element_bloom',
                             'arena_weather'})
-            allowed.update(spec['id'] for spec in arena_traits.catalog())
+            allowed.update(spec['id'] for spec in arena_traits.catalog(include_families=True))
         expected = {key: NAMES[key] for key in allowed}
         rows = sequence(summary['by_key'], len(expected), 'combination entries')
         row_fields = {'id', 'name', 'triggers', 'energy', 'shield', 'absorbed'}

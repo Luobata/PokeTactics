@@ -15,6 +15,7 @@ from data import pokedex
 from shop import make_piece
 import animation_preview
 import art_manifest
+import decoders
 
 
 class CharacterCatalogContracts(unittest.TestCase):
@@ -37,16 +38,39 @@ class CharacterCatalogContracts(unittest.TestCase):
         dex = pokedex()
         future = copy.deepcopy(dex.species[123])
         future.update(id=212, name_zh="扩展测试", lineage=[212, 123])
-        with patch.dict(dex.species, {212: future}):
-            entries = character_catalog()
-            self.assertIn("212", entries)
-            cap = entries["212"]["capabilities"]
-            self.assertEqual(cap["body"], "procedural")
-            self.assertFalse(cap["resource_ready"])
-            self.assertIn("front/212", " ".join(cap["resource_errors"]))
-            with self.assertRaisesRegex(ValueError, "资源"):
-                animation_preview.normalize_preset({"schema_version": 1, "species": 212})
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            root.joinpath("gen1_front.bin").write_bytes(
+                self._front_without_species(212))
+            root.joinpath("palettes.bin").write_bytes(
+                (decoders.POKEWALK / "palettes.bin").read_bytes())
+            with patch.dict(dex.species, {212: future}), \
+                    patch.object(decoders, "POKEWALK", root):
+                entries = character_catalog(asset_root=root)
+                self.assertIn("212", entries)
+                cap = entries["212"]["capabilities"]
+                self.assertEqual(cap["body"], "procedural")
+                self.assertFalse(cap["resource_ready"])
+                self.assertIn("front/212", " ".join(cap["resource_errors"]))
+                with self.assertRaisesRegex(ValueError, "资源"):
+                    animation_preview.normalize_preset({"schema_version": 1, "species": 212})
         self.assertNotIn("212", character_catalog())
+
+    @staticmethod
+    def _front_without_species(species_id):
+        source = (decoders.POKEWALK / "gen1_front.bin").read_bytes()
+        data = bytearray(source)
+        segment_count = struct.unpack_from("<H", data, 6)[0]
+        directory_end = 8 + segment_count * 12
+        for offset in range(8, directory_end, 12):
+            _, per, count, relative = struct.unpack_from("<HHII", data, offset)
+            record = directory_end + relative
+            for _ in range(count):
+                candidate = struct.unpack_from("<H", data, record)[0]
+                if candidate == species_id:
+                    struct.pack_into("<H", data, record, 0xFFFF)
+                record += 2 + per
+        return bytes(data)
 
     def test_existing_dex_member_is_not_in_shop_until_selected(self):
         self.assertNotIn("151", character_catalog())

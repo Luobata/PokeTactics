@@ -483,7 +483,11 @@ def _move_zh(name: str) -> str:
         from data import pokedex
         _MOVES_ZH = {m["name"]: (m.get("name_zh") or {'cross_chop': '十字劈'}.get(m['name'], m['name']))
                      for m in pokedex().moves.values()}
+        # The frozen legacy catalog owns stable event names. Family adaptations
+        # can reuse a hook id, so later species only add unseen translations.
         _MOVES_ZH.update({'arena_' + s['id']: s['name'] for s in arena_skills.catalog()})
+        for skill in arena_skills.catalog(include_families=True):
+            _MOVES_ZH.setdefault('arena_' + skill['id'], skill['name'])
         _MOVES_ZH.update({'roar': '吼叫', 'rapid_spin': '高速旋转'})
         _MOVES_ZH.update({t['id']: t['name'] for t in arena_mod.technique_catalog()})
     return _MOVES_ZH.get(name, name)
@@ -787,21 +791,21 @@ class Session:
     def __init__(self, seed: int, ruleset=tactics_mod.BASE_RULESET, arena_pool='species_v1') -> None:
         self.ruleset = tactics_mod.validate_ruleset(ruleset)
         self.is_arena = self.ruleset == 'arena_v1'
-        if arena_pool not in (families_mod.VERSION, families_mod.LEGACY_VERSION):
+        if arena_pool not in (*families_mod.VERSIONS, families_mod.LEGACY_VERSION):
             raise ValueError('未知竞技卡池版本')
         self.arena_pool = arena_pool if self.is_arena else families_mod.LEGACY_VERSION
-        self.is_family = self.is_arena and self.arena_pool == families_mod.VERSION
+        self.is_family = self.is_arena and self.arena_pool in families_mod.VERSIONS
         self.bench_capacity = 8 if self.is_arena else BENCH_CAP
         self.shop_slots = 5 if self.is_arena else SHOP_SLOTS_UI
         self.sid = uuid.uuid4().hex[:12]
         self.seed = seed
-        self.templates = (families_mod.build_templates() if self.is_family else
+        self.templates = (families_mod.build_templates(self.arena_pool) if self.is_family else
                           arena_mod.build_templates() if self.is_arena else build_templates())
         self.pool = shop_mod.SharedPool(self.templates)
         if self.is_arena:
             self.pool.arena = True
-            self.pool.remaining = families_mod.pool_caps() if self.is_family else arena_mod.pool_caps()
-            self.pool.family_version = families_mod.VERSION if self.is_family else None
+            self.pool.remaining = families_mod.pool_caps(self.arena_pool) if self.is_family else arena_mod.pool_caps()
+            self.pool.family_version = self.arena_pool if self.is_family else None
         self.player = PlayerSeat(self.pool, self.templates)
         self.grid_rows = 3 if self.is_arena else 2
         self.player.grid_rows = self.grid_rows
@@ -2235,7 +2239,7 @@ def state_json(sess) -> dict:
             v["price"] = p.templates[sid].tier
             if sess.is_arena:
                 v['pool_remaining'] = sess.pool.remaining[sid]
-                v['pool_total'] = (families_mod.pool_caps() if sess.is_family else arena_mod.pool_caps())[sid]
+                v['pool_total'] = (families_mod.pool_caps(sess.arena_pool) if sess.is_family else arena_mod.pool_caps())[sid]
             if tactics_mod.evolution_choices_enabled(sess.ruleset):
                 v['evolution_preview'] = _evolution_preview(sess, shop_index=i)
             shop.append(v)
@@ -2332,19 +2336,20 @@ def state_json(sess) -> dict:
                        'catalog': [{**_piece_view(piece, ruleset=sess.ruleset),
                                     'cost': piece.tier,
                                     'pool_remaining': sess.pool.remaining[sid],
-                                    'pool_total': (families_mod.pool_caps() if sess.is_family else arena_mod.pool_caps())[sid]}
+                                    'pool_total': (families_mod.pool_caps(sess.arena_pool) if sess.is_family else arena_mod.pool_caps())[sid]}
                                    for sid, piece in sess.templates.items()
-                                   if not sess.is_family or sid in families_mod.FAMILIES],
+                                   if not sess.is_family or sid in families_mod.families_for(sess.arena_pool)],
                        'pool_version': sess.arena_pool}
         st['augments'] = {'pending': copy.deepcopy(sess.arena_augments_pending),
                           'selected': augments_of(p)}
         from combination_view import preparation
         st['combinations'] = preparation(sess)
         import arena_bonds
-        st['bonds'] = arena_bonds.preparation([o.piece for o in p.board])
+        st['bonds'] = arena_bonds.preparation([o.piece for o in p.board], sess.templates.values())
         st['arena']['bond_catalog'] = arena_bonds.catalog()
         import arena_traits
-        st['arena']['trait_catalog'] = arena_traits.catalog()
+        st['arena']['trait_catalog'] = arena_traits.catalog(
+                        include_families=True, species_ids=sess.templates)
         try:
             st['growth'] = _growth_view(sess)
         except Exception as exc:

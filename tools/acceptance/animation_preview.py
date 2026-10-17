@@ -113,8 +113,9 @@ def source_revision():
     files += [Path(__file__)]
     files += sorted((ROOT / "esp32_runtime").glob("*.py"))
     # Packed asset provenance must invalidate the cache as well as renderer code.
-    from decoders import POKEWALK, GEN2_FRONT
+    from decoders import POKEWALK, GEN2_FRONT, GEN3_FRONT
     files += sorted(GEN2_FRONT.rglob("*.png"))
+    files += sorted(GEN3_FRONT.rglob("*.png"))
     files += [p for p in sorted((ROOT / "assets/animation").rglob("*")) if p.is_file()]
     files += [POKEWALK / name for name in ("gen1_front.bin", "palettes.bin", "font16.bin")]
     digest = hashlib.sha256()

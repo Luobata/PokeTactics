@@ -82,14 +82,43 @@ def wrap_page(page, path):
     return page
 
 
-def catalog_view(demo):
-    """Use the trial's authoritative definitions, never allocate a Session."""
+def catalog_view(demo, version='species_v1'):
+    """Use authoritative definitions without allocating a Session.
+
+    ``species_v1`` is the frozen legacy catalog contract.  Family versions use
+    their actual templates and filter traits, bond members and build candidates
+    to species legal in that pool.
+    """
     arena = demo.arena_mod
-    import catalog_advice as advice
     import arena_bonds
+    import arena_families as families
     import arena_traits
+    import catalog_advice as advice
     import copy
     from data import pokedex
+
+    if version == families.LEGACY_VERSION:
+        templates = arena.build_templates()
+        caps = None
+        selected_families = None
+        traits = arena_traits.catalog()
+        bonds = arena_bonds.catalog()
+    elif version in families.VERSIONS:
+        templates = families.build_templates(version)
+        caps = families.pool_caps(version)
+        selected_families = families.families_for(version)
+        legal = set(templates)
+        traits = arena_traits.catalog(include_families=True, species_ids=legal)
+        bonds = []
+        for row in arena_bonds.catalog():
+            members = sorted(sid for sid in legal
+                             if row['id'] in arena_bonds.memberships(sid))
+            if not members:
+                continue
+            bonds.append({**row, 'members': members, 'pool_size': len(members)})
+    else:
+        raise ValueError('未知竞技目录版本')
+
     items = demo.items_mod
     item_views = [{
         'id': key, 'name': spec['name'],
@@ -104,42 +133,57 @@ def catalog_view(demo):
                       if key == 'lucky_egg' else '可重复合成或获得；多名精灵可各装备一件同名道具'),
         **copy.deepcopy(advice.ITEMS.get(key, {})),
     } for key, spec in items.catalog(arena.RULESET).items()]
+
     pokemon_views = []
     dex = pokedex()
-    for sid, piece in arena.build_templates().items():
-        generation = 2 if sid > 151 else 1
-        pool_group = ('第二世代精灵' if generation == 2 else
-                      '传说精灵' if sid in arena.LEGENDARY else
-                      '第一世代独立精灵' if sid in arena.EXPANSION_ROSTER
-                      or len(dex.family_of(sid)) == 1 else '进化形态')
+    for sid, piece in templates.items():
+        generation = dex.generation_of(sid)
+        if selected_families is None:
+            pool_group = ('第二世代精灵' if generation == 2 else
+                          '传说精灵' if sid in arena.LEGENDARY else
+                          '第一世代独立精灵' if sid in arena.EXPANSION_ROSTER
+                          or len(dex.family_of(sid)) == 1 else '进化形态')
+        else:
+            family_id = families.SPECIES_FAMILY[sid]
+            pool_group = ('稀有 · 限一' if family_id in families.RARE else
+                          '入口家族' if sid in selected_families else '进化形态')
         pokemon_views.append({**demo._piece_view(piece, ruleset=arena.RULESET),
-                              'cost': piece.tier, 'pool_total': arena.pool_cap(sid),
+                              'cost': piece.tier,
+                              'pool_total': caps[sid] if caps is not None else arena.pool_cap(sid),
                               'generation': generation,
-                              'generation_name': '第二世代' if generation == 2 else '第一世代',
+                              'generation_name': ('第二世代' if generation == 2 else '第一世代') if selected_families is None else f'第{generation}世代',
                               'pool_group': pool_group,
                               'bonds': arena_bonds.memberships(sid)})
+
     build_views = copy.deepcopy(advice.BUILDS)
+    available = list(templates.values())
     for build in build_views:
-        build['base_stage']['bonds'] = arena_bonds.preparation(build['base_stage']['members'])
-        if build.get('transition'):
-            build['transition']['bonds'] = arena_bonds.preparation(build['transition']['members'])
+        for stage_key in ('base_stage', 'transition'):
+            stage = build.get(stage_key)
+            if not stage:
+                continue
+            deployed = [templates[sid] for sid in stage['members'] if sid in templates]
+            stage['bonds'] = arena_bonds.preparation(deployed, available)
+
+    covered = sum(bool(row.get('trait')) for row in pokemon_views)
     return {'ok': True,
+            'version': version,
             'ruleset': arena.RULESET,
             'pokemon': pokemon_views,
-            'bonds': arena_bonds.catalog(),
-            'traits': arena_traits.catalog(),
+            'bonds': bonds,
+            'traits': traits,
             'trait_rules': {
-                'covered_species': sum(bool(row.get('trait')) for row in pokemon_views),
-                'available_traits': len(arena_traits.catalog()),
+                'covered_species': covered,
+                'available_traits': len(traits),
                 'roster_species': len(pokemon_views),
                 'fixed_by_species': False, 'random_unlock': False,
                 'mutually_exclusive': True, 'choice_phase': 'prep', 'choice_cost': 0,
                 'occupies_skill_slot': False,
                 'description': '竞技特性满足条件时自动触发，不消耗能量，也不占本命或学习位。尼多王、水箭龟可在准备期免费切换各自两项互斥特性；大竺葵的第二特性需完成竞技挑战「羁绊编织者」解锁，其他精灵保留固定特性。',
-                'coverage_note': (f"本版覆盖{covered}位精灵，共{len(arena_traits.catalog())}项特性；"
+                'coverage_note': (f"本版覆盖{covered}位精灵，共{len(traits)}项特性；"
                                   '其余精灵尚未配置，不会随机获得特性。'
-                                  if (covered := sum(bool(row.get('trait')) for row in pokemon_views)) < len(pokemon_views)
-                                  else f"本版{len(pokemon_views)}位竞技精灵全部拥有特性，共{len(arena_traits.catalog())}项特性；特性不会随机获得，始终跟随物种。"),
+                                  if covered < len(pokemon_views)
+                                  else f"本版{len(pokemon_views)}位竞技精灵全部拥有特性，共{len(traits)}项特性；特性不会随机获得，始终跟随物种。"),
             },
             'techniques': arena.technique_catalog(),
             'items': item_views,

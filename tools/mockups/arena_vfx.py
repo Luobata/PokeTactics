@@ -727,10 +727,39 @@ EFFECTS = {
 }
 
 
+def _family_attack(d, x, y, k, angle, hit):
+    """Shared basic-attack silhouette for family forms outside the authored 62."""
+    radius = 6 + k * 7
+    _star(d, x, y, radius, (239, 231, 200, 235), 4, angle)
+    _ring(d, x, y, radius + 5, (255, 251, 225, 205), 1)
+    if hit:
+        for i in range(4):
+            direction = angle + i * math.pi / 2
+            d.line((x + math.cos(direction) * radius,
+                    y + math.sin(direction) * radius,
+                    x + math.cos(direction) * (radius + 7),
+                    y + math.sin(direction) * (radius + 7)), fill=(255, 251, 225, 220), width=2)
+
+
+FAMILY_ATTACK = ('家族冲击', _family_attack)
+
+
+def attack_effect(species_id):
+    """Resolve authored tracks; only legal family forms use the shared fallback."""
+    if species_id in EFFECTS:
+        return EFFECTS[species_id]
+    from arena_families import SPECIES_FAMILY
+    if type(species_id) is int and species_id in SPECIES_FAMILY:
+        return FAMILY_ATTACK
+    raise ValueError('no arena attack effect for species')
+
+
+def attack_label(species_id):
+    return attack_effect(species_id)[0]
+
+
 def draw_attack(image, species_id, source, target, phase, progress, team=0):
     """Draw an individual attack plus a legible source-to-target guide."""
-    if species_id not in EFFECTS:
-        raise ValueError('no arena attack effect for species')
     if phase not in ('windup', 'flight', 'impact', 'aftermath'):
         raise ValueError('unknown attack phase')
     p = min(1., max(0., progress))
@@ -767,7 +796,7 @@ def draw_attack(image, species_id, source, target, phase, progress, team=0):
         x,y=bx,by
         k=p if phase == 'impact' else 1-p
         _ring(d,bx,by,13+p*5,color,1)
-    EFFECTS[species_id][1](d,x,y,k,angle,phase in ('impact','aftermath'))
+    attack_effect(species_id)[1](d,x,y,k,angle,phase in ('impact','aftermath'))
 
 
 def draw_heal(image, source, target, progress):
@@ -982,8 +1011,8 @@ def draw_native_skill(img, species_id, kind, source, target, phase, progress, te
     Source and target are one real action (or one applied side hit). Decorative
     sparks/runes never choose additional victims or create extra combat links.
     """
-    from arena_skills import SKILLS
-    move_type = element or SKILLS[species_id]['type']
+    from arena_skills import skill_of
+    move_type = element or skill_of(species_id)['type']
     p = max(0., min(1., progress))
     draw_skill(img, species_id, move_type, source, target, phase, p, team, 'arena_' + kind)
     d = ImageDraw.Draw(img)
@@ -1192,6 +1221,8 @@ COMBINATION_NAMES.update({key: FINISHED[key]['name'] for key in (
     'drain_fang', 'tide_shell', 'dew_charm', 'torrent_orb', 'pulse_band',
     'relay_coil', 'grounding_cloak', 'storm_chime')})
 COMBINATION_NAMES.update({row['id']: row['name'] for row in arena_traits.catalog()})
+for row in arena_traits.catalog(include_families=True):
+    COMBINATION_NAMES.setdefault(row['id'], row['name'])
 # These display IDs follow combination_view.NAMES; no new reward/stat source.
 COMBINATION_NAMES.update({'element_wet': '湿润铺垫', 'element_conduct': '水电导流',
                           'element_bloom': '水草滋养', 'arena_weather': '天气争夺',

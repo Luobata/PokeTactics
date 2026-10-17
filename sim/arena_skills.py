@@ -250,6 +250,10 @@ for _sid, _tags in {
 
 
 def skill_of(species_id):
+    from arena_gen3 import GEN3_SKILLS
+    if species_id in GEN3_SKILLS:
+        return {'arch': GEN3_SKILLS[species_id]['effect'],
+                **copy.deepcopy(GEN3_SKILLS[species_id])}
     if species_id not in SKILLS:
         from arena_families import SPECIES_FAMILY, mentor, role_of
         if species_id not in SPECIES_FAMILY:
@@ -282,8 +286,17 @@ def skill_of(species_id):
     return {'arch': SKILLS[species_id]['id'], **copy.deepcopy(SKILLS[species_id])}
 
 
-def catalog():
-    return [dict(sid=sid, **skill_of(sid)) for sid in sorted(SKILLS)]
+def catalog(include_families=False):
+    """Return the frozen legacy catalog by default.
+
+    Presentation code that receives family events asks for the union of all
+    deployable family forms so external Hoenn kits still resolve move names.
+    """
+    species_ids = set(SKILLS)
+    if include_families:
+        from arena_families import SPECIES_FAMILY
+        species_ids.update(SPECIES_FAMILY)
+    return [dict(sid=sid, **skill_of(sid)) for sid in sorted(species_ids)]
 
 
 def resolve_cast(piece):
@@ -518,7 +531,7 @@ def _announce_cast(battle, unit, target, move, t):
 
 
 def _support_cast(battle, unit, skill, t):
-    key = skill['id']
+    key = skill.get('effect', skill['id'])
     patients = _support_targets(battle, unit, key, t)
     if not patients:
         return False
@@ -668,7 +681,7 @@ def _cast(battle, unit, target, t):
         target = forced
     if target is None or not target.alive or target.team == unit.team or _distance(unit, target) > unit.range:
         return False
-    key, move = skill['id'], resolve_cast(unit.piece)
+    key, move = skill.get('effect', skill['id']), resolve_cast(unit.piece)
     if skill['targeting'] == 'field':
         cast_index = _announce_cast(battle, unit, target, move, t)
         arena_fields.place_rocks(battle, unit, target, t, cast_index)

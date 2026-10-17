@@ -116,11 +116,12 @@ def _arena_catalog(*, pieces=None, asset_root=None):
     from pathlib import Path
     import copy
     import arena
+    import arena_families
     import arena_skills
     import web_motion
     import retro_native
     from action_preview import action_coverage, PREVIEW_ACTIONS
-    from decoders import Front, Palettes
+    from decoders import Front, Palettes, GEN3_SPECIES
     from motion import species_motion, validate_motion
     from presentation_modes import mode_info
     from profiles import effective_range
@@ -130,8 +131,10 @@ def _arena_catalog(*, pieces=None, asset_root=None):
     else:
         root = Path(asset_root)
         front, palettes = Front(root / 'gen1_front.bin'), Palettes(root / 'palettes.bin')
-        front._allow_local_png, front._png_root = True, root / 'gen2'
-    pieces = list(arena.build_templates().values()) if pieces is None else pieces
+        # An exporter pack carries both local-PNG generations beside the binaries.
+        front._allow_local_png = True
+        front._png_root, front._gen3_root = root / 'gen2', root / 'gen3'
+    pieces = list(arena_families.build_templates(arena_families.VERSION).values()) if pieces is None else pieces
     rigs, result = rig_catalog(), {}
     controls = ['palette', 'effect_scale', 'particle_density', 'motion_scale']
     notes = {68: ('四条肩肘轨道交替出拳', '四臂蓄力、交错追击与收招'),
@@ -175,9 +178,10 @@ def _arena_catalog(*, pieces=None, asset_root=None):
             except (ValueError, OSError, IndexError, KeyError) as exc:
                 errors.append(f'{"闪光" if shiny else "普通"}精灵资源 species/{sid}: {exc}')
         local_png = front._uses_local_png(sid)
-        resources = ({'source': 'gen2_png',
-                      'normal': str(front._png_root / 'normal' / f'{sid}.png'),
-                      'shiny': str(front._png_root / 'shiny' / f'{sid}.png')}
+        png_root = front._gen3_root if sid in GEN3_SPECIES else front._png_root
+        resources = ({'source': 'gen3_png' if sid in GEN3_SPECIES else 'gen2_png',
+                      'normal': str(png_root / 'normal' / f'{sid}.png'),
+                      'shiny': str(png_root / 'shiny' / f'{sid}.png')}
                      if local_png else {'source': 'gen1_front', 'normal': str(front.path),
                                         'shiny': str(front.path), 'palettes': str(palettes.path)})
         matrix = action_coverage(sid, rig, authored, True)
@@ -188,7 +192,7 @@ def _arena_catalog(*, pieces=None, asset_root=None):
         body = 'web_part_rig' if web_parts else 'part_rig' if rig['implemented'] else 'authored_pose' if authored else 'procedural'
         attack, cast = notes.get(sid, ('共享整身动作与真实命中时序' if authored else '程序化蓄力、出手、回收',
                                        '原生技能按蓄力、飞行、命中、余波呈现'))
-        role = getattr(piece, 'role_key', None) or arena.ROSTER[sid][1]
+        role = getattr(piece, 'role_key', None) or arena_families.role_of(sid)
         result[str(sid)] = {**mode_info('arena'), 'species': sid, 'name': piece.name,
             'role': arena.ROLE_NAMES[role], 'role_key': role,
             'cost': piece.tier, 'range': effective_range(piece), 'types': list(piece.types),

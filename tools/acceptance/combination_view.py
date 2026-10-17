@@ -19,7 +19,10 @@ NAMES = {'poison_catalyst': '毒性催化', 'heart_bell': '护心铃', 'watch_ec
 GEAR_KEYS = ('drain_fang', 'tide_shell', 'dew_charm', 'torrent_orb', 'pulse_band',
              'relay_coil', 'grounding_cloak', 'storm_chime')
 NAMES.update({key: FINISHED[key]['name'] for key in GEAR_KEYS})
-NAMES.update({row['id']: row['name'] for row in arena_traits.catalog()})
+for row in arena_traits.catalog(include_families=True):
+    # Gen3 adaptations intentionally reuse hook ids.  The original hook label
+    # remains the stable telemetry name (e.g. Sturdy, not Hard Head).
+    NAMES.setdefault(row['id'], row['name'])
 NATIVE_CLEANSERS = {12, 45, 113, 154, 164}
 NATIVE_SHIELDERS = {36, 122, 131}
 NATIVE_HEALERS = {40, 12, 45, 3, 108, 113, 242, 154}

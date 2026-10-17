@@ -93,6 +93,8 @@ class Pokedex:
         self.arena_species: Dict[int, dict] = {
             m["id"]: m for m in _load("pokemon_gen2")["entries"]}
         self.arena_species.update({m['id']: m for m in _load('pokemon_family_preforms')['entries']})
+        # Historical Gen1–3 reference coverage is independent of shop membership.
+        self.reference_species = {m['id']: m for m in _load('pokemon_gen123_reference')['entries']}
         self.moves: Dict[int, dict] = {m["id"]: m for m in _load("moves")["entries"]}
         tc = _load("typechart")
         self.types: List[str] = tc["types"]
@@ -102,10 +104,18 @@ class Pokedex:
         """Resolve classic or supplemental arena data, preserving classic overrides."""
         if species_id in self.species:
             return self.species[species_id]
-        return self.arena_species[species_id]
+        if species_id in self.arena_species:
+            return self.arena_species[species_id]
+        return self.reference_species[species_id]
 
     def has_species(self, species_id: int) -> bool:
-        return species_id in self.species or species_id in self.arena_species
+        return species_id in self.species or species_id in self.arena_species or species_id in self.reference_species
+
+    @staticmethod
+    def generation_of(species_id):
+        if type(species_id) is not int or not 1 <= species_id <= 386:
+            raise ValueError('资料目录只收录前三世代')
+        return 1 if species_id <= 151 else 2 if species_id <= 251 else 3
 
     def multiplier(self, atk_type: str, def_types: Tuple[str, ...]) -> float:
         """攻击属性对防守方属性组合的总倍率（乘法叠加，如电打水/飞行=4x）。

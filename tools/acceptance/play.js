@@ -309,7 +309,7 @@
     if (shopSelected != null && !state.shop[shopSelected]) shopSelected = null;
     const y = state.you,
       prep = canPrep();
-    const familyMode = state.arena?.pool_version === 'families_v1';
+    const familyMode = state.arena?.pool_version?.startsWith('families_');
     $('pool-summary').textContent = familyMode
       ? `${state.arena.catalog.length} 个家族 · 固定费用 · 累计 1 / 3 / 9 张培养`
       : `${state.arena?.catalog?.length || 0} 种竞技精灵 · 同种同星三合一 · 三星闪光`;
@@ -437,6 +437,13 @@
     renderBattleHistory();
     if ($("scout-dialog").open) renderScout();
     if ($("catalog-dialog").open) renderCatalog();
+    if (state.arena?.pool_version?.startsWith('families_')) {
+      document.querySelectorAll('a[href^="/pokedex"]').forEach(link => {
+        const url = new URL(link.getAttribute('href'), location.origin);
+        url.searchParams.set('pool', state.arena.pool_version);
+        link.setAttribute('href', url.pathname + url.search + url.hash);
+      });
+    }
     $("battle-log").innerHTML =
       state.log
         .slice(-5)
@@ -564,7 +571,7 @@
     const bench = new Set((state.bench || []).filter(Boolean).map(p => p.sid));
     const shop = new Set((state.shop || []).filter(Boolean).map(p => p.sid));
     const priority = sid => bench.has(sid) ? 0 : shop.has(sid) ? 1 : 2;
-    $("bond-note").textContent = state.arena?.pool_version === 'families_v1'
+    $("bond-note").textContent = state.arena?.pool_version?.startsWith('families_')
       ? '同一家族对每项羁绊最多计一次；不同分支可贡献各自属性，每只均占人口。'
       : state.bonds.note || "只计上场的不同物种，同种不同星级不重复，备战席不计入。";
     const ordered = [...entries].sort((a, b) => Number(b.category === "tactic") - Number(a.category === "tactic"));
@@ -606,7 +613,7 @@
     const waiting = [...(state.board || []).flat(), ...(state.bench || [])].filter(x => x?.family?.id === f.id && x.family.step === 1).length;
     const choices = owned && f.step === 1 && f.routes.length > 1;
     const routes = f.step > 1 ? f.routes.filter(r => r.branch === f.branch) : f.routes;
-    return `<section class="skill-slot family-growth-panel"><div class="skill-slot-heading"><span>${f.rare ? '稀有 · 全队限一' : `培养 ${f.step}/3 · 累计 ${f.copies} 张`}</span><a href="/pokedex?q=${encodeURIComponent(f.entrance)}&stage=${f.step}" target="_blank" rel="noopener">图鉴对比 ↗</a></div><p>商店一直出售 ${esc(f.entrance)} · 每张 ${f.cost} 金。${f.rare ? '单张即战力，不参与培养。' : '三只同档合成，满培养共需九张。'}</p>${routes.map(r=>`<p>${r.names.map(esc).join(' → ')}${r.names.length < 3 && !f.rare ? ' → 满培养' : ''}${f.routes.length > 1 ? `<br><strong>${esc(roleNames[r.role])} · ${esc(r.skill)}</strong><br>${esc(r.description)}` : ''}</p>`).join('')}${f.step > 1 && f.routes.length > 1 ? '<p>进化路线已锁定，之后仅同分支可合并。</p>' : ''}${choices ? `<p>集齐三只后选择进化方向，之后仅同分支可合并。当前持有 ${waiting} 只初始形态。</p><div class="detail-actions">${f.routes.map(r=>`<button data-family-evolve="${r.branch}" ${!canPrep() || waiting < 3 ? 'disabled' : ''}>进化为 ${esc(r.names[r.names.length-1])}</button>`).join('')}</div>` : ''}</section>`;
+    return `<section class="skill-slot family-growth-panel"><div class="skill-slot-heading"><span>${f.rare ? '稀有 · 全队限一' : `培养 ${f.step}/3 · 累计 ${f.copies} 张`}</span><a href="/pokedex?q=${encodeURIComponent(f.entrance)}&stage=${f.step}&pool=${encodeURIComponent(state.arena.pool_version)}" target="_blank" rel="noopener">图鉴对比 ↗</a></div><p>商店一直出售 ${esc(f.entrance)} · 每张 ${f.cost} 金。${f.rare ? '单张即战力，不参与培养。' : '三只同档合成，满培养共需九张。'}</p>${routes.map(r=>`<p>${r.names.map(esc).join(' → ')}${r.names.length < 3 && !f.rare ? ' → 满培养' : ''}${f.routes.length > 1 ? `<br><strong>${esc(roleNames[r.role])} · ${esc(r.skill)}</strong><br>${esc(r.description)}` : ''}</p>`).join('')}${f.step > 1 && f.routes.length > 1 ? '<p>进化路线已锁定，之后仅同分支可合并。</p>' : ''}${choices ? `<p>集齐三只后选择进化方向，之后仅同分支可合并。当前持有 ${waiting} 只初始形态。</p><div class="detail-actions">${f.routes.map(r=>`<button data-family-evolve="${r.branch}" ${!canPrep() || waiting < 3 ? 'disabled' : ''}>进化为 ${esc(r.names[r.names.length-1])}</button>`).join('')}</div>` : ''}</section>`;
   }
   function renderDetail() {
     if (shopSelected != null) {
@@ -1209,7 +1216,7 @@
   function renderCatalog() {
     const catalog = state.arena?.catalog || [];
     $("catalog-description").textContent =
-      `${catalog.length} 种竞技精灵：${Object.keys(roleNames).map(role => roleNames[role] + " " + catalog.filter(p => roleOf(p) === role).length + " 种").join("、")}。${state.arena.pool_version === "families_v1" ? "家族卡池：商店仅出售初始形态，累计1/3/9张培养；分支在进化时主动选择。打开顶部战术图鉴可比较强度。" : "八位训练家共享卡池，同种同星三合一；三星需要九张并使用闪光配色。"}`;
+      `${catalog.length} 种竞技精灵：${Object.keys(roleNames).map(role => roleNames[role] + " " + catalog.filter(p => roleOf(p) === role).length + " 种").join("、")}。${state.arena.pool_version?.startsWith("families_") ? "家族卡池：商店仅出售初始形态，累计1/3/9张培养；分支在进化时主动选择。打开顶部战术图鉴可比较强度。" : "八位训练家共享卡池，同种同星三合一；三星需要九张并使用闪光配色。"}`;
     $("catalog-grid").innerHTML = catalog
       .filter((p) => roleFilter === "all" || roleOf(p) === roleFilter)
       .map(

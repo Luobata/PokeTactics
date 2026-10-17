@@ -839,7 +839,7 @@
       "name_zh": "迷唇娃",
       "types": [
         "ICE",
-        "PSYCHIC_TYPE"
+        "PSYCHIC"
       ],
       "base": {
         "hp": 45,
