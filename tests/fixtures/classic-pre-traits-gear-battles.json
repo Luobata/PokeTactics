@@ -1,0 +1,597 @@
+{
+  "rules": "6fc72304a52e7df57665c33931933063ebd6ca66cc54d983ec97d67112d8122c",
+  "cases": [
+    {
+      "seed": 1,
+      "a": [
+        6,
+        68,
+        40
+      ],
+      "b": [
+        9,
+        31,
+        12
+      ],
+      "result": {
+        "winner": 1,
+        "duration": 19.300000000000004,
+        "survivors": {
+          "0": 0,
+          "1": 1
+        }
+      },
+      "hp": [
+        0,
+        0,
+        0,
+        26,
+        0,
+        0
+      ],
+      "statistics": {
+        "version": 1,
+        "units": [
+          {
+            "idx": 0,
+            "team": 0,
+            "sid": 6,
+            "name": "喷火龙",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 0,
+            "damage_dealt": 250,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 125,
+            "shield_absorbed": 0,
+            "mvp": true
+          },
+          {
+            "idx": 1,
+            "team": 0,
+            "sid": 68,
+            "name": "怪力",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 0,
+            "damage_dealt": 0,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 136,
+            "shield_absorbed": 0,
+            "mvp": false
+          },
+          {
+            "idx": 2,
+            "team": 0,
+            "sid": 40,
+            "name": "胖可丁",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 2,
+            "damage_dealt": 116,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 181,
+            "shield_absorbed": 0,
+            "mvp": false
+          },
+          {
+            "idx": 3,
+            "team": 1,
+            "sid": 9,
+            "name": "水箭龟",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 3,
+            "damage_dealt": 354,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 107,
+            "shield_absorbed": 0,
+            "mvp": true
+          },
+          {
+            "idx": 4,
+            "team": 1,
+            "sid": 31,
+            "name": "尼多后",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 0,
+            "damage_dealt": 0,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 144,
+            "shield_absorbed": 0,
+            "mvp": false
+          },
+          {
+            "idx": 5,
+            "team": 1,
+            "sid": 12,
+            "name": "巴大蝶",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 0,
+            "damage_dealt": 88,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 115,
+            "shield_absorbed": 0,
+            "mvp": false
+          }
+        ],
+        "totals": [
+          {
+            "team": 0,
+            "damage_dealt": 366,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 442,
+            "shield_absorbed": 0
+          },
+          {
+            "team": 1,
+            "damage_dealt": 442,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 366,
+            "shield_absorbed": 0
+          }
+        ]
+      }
+    },
+    {
+      "seed": 7,
+      "a": [
+        6,
+        68,
+        40
+      ],
+      "b": [
+        9,
+        31,
+        12
+      ],
+      "result": {
+        "winner": 0,
+        "duration": 12.69999999999997,
+        "survivors": {
+          "0": 2,
+          "1": 0
+        }
+      },
+      "hp": [
+        0,
+        45,
+        171,
+        0,
+        0,
+        0
+      ],
+      "statistics": {
+        "version": 1,
+        "units": [
+          {
+            "idx": 0,
+            "team": 0,
+            "sid": 6,
+            "name": "喷火龙",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 1,
+            "damage_dealt": 123,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 125,
+            "shield_absorbed": 0,
+            "mvp": false
+          },
+          {
+            "idx": 1,
+            "team": 0,
+            "sid": 68,
+            "name": "怪力",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 1,
+            "damage_dealt": 151,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 91,
+            "shield_absorbed": 0,
+            "mvp": true
+          },
+          {
+            "idx": 2,
+            "team": 0,
+            "sid": 40,
+            "name": "胖可丁",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 1,
+            "damage_dealt": 118,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 10,
+            "shield_absorbed": 0,
+            "mvp": false
+          },
+          {
+            "idx": 3,
+            "team": 1,
+            "sid": 9,
+            "name": "水箭龟",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 1,
+            "damage_dealt": 66,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 133,
+            "shield_absorbed": 0,
+            "mvp": false
+          },
+          {
+            "idx": 4,
+            "team": 1,
+            "sid": 31,
+            "name": "尼多后",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 0,
+            "damage_dealt": 32,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 144,
+            "shield_absorbed": 0,
+            "mvp": false
+          },
+          {
+            "idx": 5,
+            "team": 1,
+            "sid": 12,
+            "name": "巴大蝶",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 0,
+            "damage_dealt": 128,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 115,
+            "shield_absorbed": 0,
+            "mvp": true
+          }
+        ],
+        "totals": [
+          {
+            "team": 0,
+            "damage_dealt": 392,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 226,
+            "shield_absorbed": 0
+          },
+          {
+            "team": 1,
+            "damage_dealt": 226,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 392,
+            "shield_absorbed": 0
+          }
+        ]
+      }
+    },
+    {
+      "seed": 19,
+      "a": [
+        6,
+        68,
+        40
+      ],
+      "b": [
+        9,
+        31,
+        12
+      ],
+      "result": {
+        "winner": 0,
+        "duration": 12.99999999999997,
+        "survivors": {
+          "0": 2,
+          "1": 0
+        }
+      },
+      "hp": [
+        0,
+        63,
+        83,
+        0,
+        0,
+        0
+      ],
+      "statistics": {
+        "version": 1,
+        "units": [
+          {
+            "idx": 0,
+            "team": 0,
+            "sid": 6,
+            "name": "喷火龙",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 0,
+            "damage_dealt": 152,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 125,
+            "shield_absorbed": 0,
+            "mvp": false
+          },
+          {
+            "idx": 1,
+            "team": 0,
+            "sid": 68,
+            "name": "怪力",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 0,
+            "damage_dealt": 164,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 73,
+            "shield_absorbed": 0,
+            "mvp": true
+          },
+          {
+            "idx": 2,
+            "team": 0,
+            "sid": 40,
+            "name": "胖可丁",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 3,
+            "damage_dealt": 104,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 98,
+            "shield_absorbed": 0,
+            "mvp": false
+          },
+          {
+            "idx": 3,
+            "team": 1,
+            "sid": 9,
+            "name": "水箭龟",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 1,
+            "damage_dealt": 102,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 133,
+            "shield_absorbed": 0,
+            "mvp": false
+          },
+          {
+            "idx": 4,
+            "team": 1,
+            "sid": 31,
+            "name": "尼多后",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 0,
+            "damage_dealt": 61,
+            "healing_done": 28,
+            "self_healing": 28,
+            "damage_taken": 172,
+            "shield_absorbed": 0,
+            "mvp": false
+          },
+          {
+            "idx": 5,
+            "team": 1,
+            "sid": 12,
+            "name": "巴大蝶",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 0,
+            "damage_dealt": 133,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 115,
+            "shield_absorbed": 0,
+            "mvp": true
+          }
+        ],
+        "totals": [
+          {
+            "team": 0,
+            "damage_dealt": 420,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 296,
+            "shield_absorbed": 0
+          },
+          {
+            "team": 1,
+            "damage_dealt": 296,
+            "healing_done": 28,
+            "self_healing": 28,
+            "damage_taken": 420,
+            "shield_absorbed": 0
+          }
+        ]
+      }
+    },
+    {
+      "seed": 31,
+      "a": [
+        6,
+        68,
+        40
+      ],
+      "b": [
+        9,
+        31,
+        12
+      ],
+      "result": {
+        "winner": 0,
+        "duration": 10.799999999999978,
+        "survivors": {
+          "0": 2,
+          "1": 0
+        }
+      },
+      "hp": [
+        74,
+        0,
+        171,
+        0,
+        0,
+        0
+      ],
+      "statistics": {
+        "version": 1,
+        "units": [
+          {
+            "idx": 0,
+            "team": 0,
+            "sid": 6,
+            "name": "喷火龙",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 2,
+            "damage_dealt": 131,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 51,
+            "shield_absorbed": 0,
+            "mvp": false
+          },
+          {
+            "idx": 1,
+            "team": 0,
+            "sid": 68,
+            "name": "怪力",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 0,
+            "damage_dealt": 194,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 136,
+            "shield_absorbed": 0,
+            "mvp": true
+          },
+          {
+            "idx": 2,
+            "team": 0,
+            "sid": 40,
+            "name": "胖可丁",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 1,
+            "damage_dealt": 95,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 10,
+            "shield_absorbed": 0,
+            "mvp": false
+          },
+          {
+            "idx": 3,
+            "team": 1,
+            "sid": 9,
+            "name": "水箭龟",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 0,
+            "damage_dealt": 67,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 133,
+            "shield_absorbed": 0,
+            "mvp": false
+          },
+          {
+            "idx": 4,
+            "team": 1,
+            "sid": 31,
+            "name": "尼多后",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 0,
+            "damage_dealt": 45,
+            "healing_done": 28,
+            "self_healing": 28,
+            "damage_taken": 172,
+            "shield_absorbed": 0,
+            "mvp": false
+          },
+          {
+            "idx": 5,
+            "team": 1,
+            "sid": 12,
+            "name": "巴大蝶",
+            "star": 1,
+            "role": null,
+            "item": null,
+            "kills": 1,
+            "damage_dealt": 85,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 115,
+            "shield_absorbed": 0,
+            "mvp": true
+          }
+        ],
+        "totals": [
+          {
+            "team": 0,
+            "damage_dealt": 420,
+            "healing_done": 0,
+            "self_healing": 0,
+            "damage_taken": 197,
+            "shield_absorbed": 0
+          },
+          {
+            "team": 1,
+            "damage_dealt": 197,
+            "healing_done": 28,
+            "self_healing": 28,
+            "damage_taken": 420,
+            "shield_absorbed": 0
+          }
+        ]
+      }
+    }
+  ]
+}

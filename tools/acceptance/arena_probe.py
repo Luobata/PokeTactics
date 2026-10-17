@@ -27,6 +27,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / 'tools/acceptance'), str(ROOT / 'sim'), str(ROOT)]
 import arena as arena_mod
+import arena_research
 from arena_teaching import technique_limit
 from bots import Bot, PERSONALITIES
 from combat import Battle
@@ -109,6 +110,8 @@ def headless(a, b, battle_rng, weather, path, positions_a=None, hud_snapshot=Non
                 'duration': result['duration'], 'events': [],
                 'statistics': battle.statistics()}
         meta.update(demo._battle_effects(battle.events, {u.idx: u.team for u in battle.units}))
+        meta['research_teams'] = [arena_research.review(battle, team) for team in (0, 1)]
+        meta['research'] = meta['research_teams'][0]
         return meta
     finally:
         CONTEXT['player_battle'] = False

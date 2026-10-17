@@ -131,6 +131,7 @@ def rare_piece(piece):
 
 def route_view(piece):
     from arena_skills import skill_of
+    from arena_traits import for_species
     fid = getattr(piece, 'family_id', None)
     if fid is None:
         return None
@@ -139,7 +140,7 @@ def route_view(piece):
                 rare=fid in RARE, branch=piece.branch_id,
                 entrance=pokedex().species_record(fid)['name_zh'],
                 routes=[dict(branch=p[-1], names=[pokedex().species_record(s)['name_zh'] for s in p],
-                             species=list(p), role=role_of(p[-1]),
+                             species=list(p), role=role_of(p[-1]), trait=for_species(p[-1]),
                              skill=skill_of(p[-1])['name'],
                              description=skill_of(p[-1])['description']) for p in paths])
 

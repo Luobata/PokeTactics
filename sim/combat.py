@@ -275,7 +275,7 @@ class Battle:
                  positions_a=None, positions_b=None, team_options=None,
                  stat_mode: str = "legacy", learned_a=None, learned_b=None,
                  ruleset=tactics_mod.BASE_RULESET, tactics_a=None, tactics_b=None,
-                 arena_teams=None, arena_growth=None) -> None:
+                 arena_teams=None, arena_growth=None, arena_research=None) -> None:
         # S11 天气按 Battle 实例持有（2026-09-14 修订：原 set_active 全局写
         # 在验收后台多线程下会交叉污染——/anim 与 /demo 并行时互改对方天气；
         # damage_mult 由 _final_damage 显式传 self.weather_name）
@@ -314,6 +314,19 @@ class Battle:
                    for key, stacks in row.items()):
                 raise ValueError('unknown or excessive arena growth stacks')
         self.arena_growth = tuple(dict(row) for row in arena_growth)
+        if arena_research is not None and not self._arena_on:
+            raise ValueError('arena research requires arena_v1')
+        if arena_research is None:
+            arena_research = ({}, {})
+        if (not isinstance(arena_research, (list, tuple)) or len(arena_research) != 2
+                or any(not isinstance(row, dict) for row in arena_research)):
+            raise ValueError('arena research must contain two stack maps')
+        from arena_research import TRACKS, STACK_LIMIT
+        for row in arena_research:
+            if (set(row) - set(TRACKS) or any(type(row.get(track)) is not int
+                    or not 0 <= row.get(track, 0) <= STACK_LIMIT for track in row)):
+                raise ValueError('unknown or excessive arena research stacks')
+        self.arena_research = tuple(dict(row) for row in arena_research)
         self._tactics_on = tactics_mod.enabled(self.ruleset)
         if self._tactics_on and weather_name not in weather_mod.WEATHERS:
             raise ValueError("unknown base weather")
@@ -454,6 +467,10 @@ class Battle:
             drum = growth.get('war_drum', 0)
             if drum:
                 unit.attack_interval /= 1 + arena_mod.WAR_DRUM_STEP * drum
+            research = self.arena_research[unit.team]
+            hp_mult *= 1 + .01 * research.get('sustain', 0)
+            atk_mult *= 1 + .01 * research.get('assault', 0)
+            unit.energy = min(ENERGY_MAX, unit.energy + research.get('tempo', 0))
             unit.max_hp = max(1, int(unit.max_hp * hp_mult))
             unit.hp = unit.max_hp
             unit.attack = max(1, int(unit.attack * atk_mult))

@@ -4743,3 +4743,6 @@ p.combination-guide { padding-left: 0; }
     max-height: none;
   }
 }
+
+.research-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.research-card{padding:18px;background:#fbfaf2;border:1px solid #d9deca;border-top:3px solid #9c804c}.research-card>div:first-child{display:flex;align-items:center;justify-content:space-between;gap:10px}.research-card h3{font-size:16px;margin:0}.research-card p{font-size:12px;line-height:1.8;color:#6a735f}.research-card>strong{font-size:12px;color:#68522b}.research-card a{font-size:12px;color:#456441}.research-meter{display:flex;gap:5px;margin:16px 0}.research-meter i{height:7px;flex:1;background:#e1e5d8}.research-meter i.filled{background:#9b8045}.research-recent{font-size:12px;color:#62744e;padding:8px 0}
+@media(max-width:800px){.research-grid{grid-template-columns:1fr}}

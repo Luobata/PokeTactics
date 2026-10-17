@@ -1233,12 +1233,15 @@ def combination_label(key, effect, details):
     name = COMBINATION_NAMES.get(key, key)
     amount = max(0, int(details.get('amount', 0)))
     label = {'heal': f'实际回复 +{amount}', 'cleanse': '实际净化',
-             'status': '施加麻痹' if details.get('status_kind') == 'para' else '施加中毒',
+             'status': '施加' + {'para': '麻痹', 'poison': '中毒', 'burn': '灼伤',
+                               'sleep': '睡眠', 'freeze': '冰冻'}.get(details.get('status_kind'), '异常'),
              'accuracy': '修正闪避命中', 'weaken': f"物理攻击 -{details.get('fraction', 0):.0%}",
              'guard': f'实际避免生命损失 {amount}', 'absorb_damage': f'实际避免生命损失 {amount}',
              'empowered_hit': f"强化命中 · 已结算额外生命损失 {details.get('extra_damage', amount)}",
              'shield': f'护盾 +{amount}', 'absorb': f'护盾吸收 {amount}',
-             'energy': f'回能 +{amount}', 'expire': '护盾到期',
+             'energy': f'回能 +{amount}',
+             'energy_drain': f'掠取 {details.get("stolen", 0)} 能量 · 自身回能 +{details.get("gained", 0)}',
+             'expire': '护盾到期',
              'charge': '反击蓄力',
              'empowered_basic': f'强化普攻 · 额外生命损失 {details.get("extra_damage", amount)}',
              'vulnerability': f'易伤 {details.get("fraction", 0):.0%}',
@@ -1468,15 +1471,24 @@ def draw_combination(img, key, effect, source, target, progress, details):
             return
         if effect == 'status':
             electric = details.get('status_kind') == 'para'
-            color = gold if electric else violet
+            burning = details.get('status_kind') == 'burn'
+            color = gold if electric else (255, 138, 71, alpha) if burning else violet
             for i in range(5):
                 angle = i*math.tau/5+p*.7
                 xx,yy = bx+math.cos(angle)*(8+p*12),by+math.sin(angle)*(7+p*9)
                 if electric:
                     draw.line(((xx-3,yy-4),(xx+1,yy-1),(xx-1,yy+1),(xx+3,yy+4)),fill=color,width=2)
+                elif burning:
+                    draw.polygon(((xx,yy-6),(xx+3,yy-1),(xx+2,yy+3),
+                                  (xx-2,yy+3),(xx-3,yy-1)), fill=color)
+                    draw.line((xx,yy-1,xx,yy+2), fill=gold, width=1)
                 else:
                     draw.ellipse((xx-3,yy-4,xx+3,yy+2),fill=color,outline=WHITE)
             return
+        # Plunder travels from the struck opponent back to the trait owner.
+        if effect == 'energy_drain':
+            ax, ay, bx, by = bx, by, ax, ay
+            effect = 'energy'
         # Trait recovery uses the same actual-outcome material as equipment.
         key = 'grounding_cloak' if effect == 'cleanse' else 'relay_coil' if effect == 'energy' else 'dew_charm'
     if key in ('drain_fang', 'dew_charm', 'tide_shell', 'torrent_orb', 'pulse_band',

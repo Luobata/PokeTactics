@@ -1,0 +1,154 @@
+{
+  "rules": "771abf263e2c1603af3178e3ac321b43a963123d79b29159257f2ac97bf05638",
+  "training_step": 3,
+  "seeds_per_matchup": 20,
+  "opponent_lineups": [
+    [
+      9,
+      65,
+      36,
+      125
+    ],
+    [
+      59,
+      6,
+      45,
+      31
+    ],
+    [
+      197,
+      198,
+      121,
+      68
+    ]
+  ],
+  "rows": [
+    {
+      "sid": 134,
+      "name": "水伊布",
+      "trait": "潮汐续疗",
+      "partners": [
+        9,
+        6,
+        36
+      ],
+      "battles": 60,
+      "active_battles": 60,
+      "wins": 42,
+      "control_wins": 41,
+      "triggers": 78,
+      "healing": 2418,
+      "energy": 0,
+      "shield": 0,
+      "absorbed": 0,
+      "damage": 0,
+      "vulnerable": 0
+    },
+    {
+      "sid": 135,
+      "name": "雷伊布",
+      "trait": "雷霆接力",
+      "partners": [
+        9,
+        65,
+        196
+      ],
+      "battles": 60,
+      "active_battles": 60,
+      "wins": 60,
+      "control_wins": 60,
+      "triggers": 60,
+      "healing": 0,
+      "energy": 600,
+      "shield": 0,
+      "absorbed": 0,
+      "damage": 0,
+      "vulnerable": 0
+    },
+    {
+      "sid": 136,
+      "name": "火伊布",
+      "trait": "引火追猎",
+      "partners": [
+        59,
+        6,
+        157
+      ],
+      "battles": 60,
+      "active_battles": 35,
+      "wins": 55,
+      "control_wins": 47,
+      "triggers": 83,
+      "healing": 0,
+      "energy": 0,
+      "shield": 0,
+      "absorbed": 0,
+      "damage": 673,
+      "vulnerable": 0
+    },
+    {
+      "sid": 196,
+      "name": "太阳伊布",
+      "trait": "破绽洞悉",
+      "partners": [
+        208,
+        127,
+        242
+      ],
+      "battles": 60,
+      "active_battles": 44,
+      "wins": 40,
+      "control_wins": 40,
+      "triggers": 54,
+      "healing": 0,
+      "energy": 0,
+      "shield": 0,
+      "absorbed": 0,
+      "damage": 69,
+      "vulnerable": 44
+    },
+    {
+      "sid": 197,
+      "name": "月亮伊布",
+      "trait": "月光庇护",
+      "partners": [
+        9,
+        135,
+        65
+      ],
+      "battles": 60,
+      "active_battles": 6,
+      "wins": 60,
+      "control_wins": 60,
+      "triggers": 6,
+      "healing": 0,
+      "energy": 0,
+      "shield": 234,
+      "absorbed": 63,
+      "damage": 0,
+      "vulnerable": 0
+    },
+    {
+      "sid": 198,
+      "name": "黑暗鸦",
+      "trait": "趁隙掠能",
+      "partners": [
+        31,
+        196,
+        45
+      ],
+      "battles": 60,
+      "active_battles": 60,
+      "wins": 22,
+      "control_wins": 22,
+      "triggers": 155,
+      "healing": 0,
+      "energy": 482,
+      "shield": 0,
+      "absorbed": 0,
+      "damage": 0,
+      "vulnerable": 0
+    }
+  ],
+  "limitation": "固定阵容的特性开关对照；非排位胜率，不含经济、选牌与本局研习。"
+}

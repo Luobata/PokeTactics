@@ -103,6 +103,8 @@ PRE_LEGENDARY_POOL_BY_COST = {1: 22, 2: 18, 3: 12}
 PRE_FAMILY_FINGERPRINT = '82905d3a65a8abc5ee827a16eb99c28f0f7ac6f416c7afb1b131349cb3aa0211'
 PRE_HOENN_FINGERPRINT = '3105c8e3f3386efe16c7b74e519a7b4acb2b770155a607a7e6af7d0d789b4015'
 PRE_REBALANCE_FINGERPRINT = '475e78b0bb4edc69f9a9c65dadf18c55dee202edf075ea7fd02bb7f9c110e822'
+# Verified families-v2 build immediately before in-match tactical research.
+PRE_TACTICAL_RESEARCH_FINGERPRINT = 'fd6a3572ba682a361a6edfb008f5fd4c0e1ae7a13cea85fac94f7fd5285e51ce'
 PRE_SYNERGY_TECHNIQUES = frozenset({'cut', 'surf', 'rest', 'thunderbolt', 'ice_beam',
                                      'toxic', 'earthquake', 'roar', 'rapid_spin'})
 # Exact arena catalog from the frozen fixed-trait predecessor. Its fingerprint
@@ -269,6 +271,7 @@ class SessionCodec:
                 'loot_start': state.arena_loot_start,
                 'component_choices': copy.deepcopy(state.arena_component_choices),
                 'component_choice_start': state.arena_component_choice_start,
+                'research': copy.deepcopy(state.arena_research),
                 'meta': {'unlocks': {'augments': list(state.arena_unlocks['augments']),
                                      'traits': list(state.arena_unlocks['traits'])},
                          'run': copy.deepcopy(state.arena_run),
@@ -309,6 +312,7 @@ class SessionCodec:
             raise UnknownRulesError('旧存档版本不能包含新战术规则')
         fingerprint = data.get('rules')
         current_fingerprint = rules_fingerprint()
+        loaded_fingerprint = fingerprint
         # Exact predecessor retains its species shop and all committed ledgers.
         if fingerprint == PRE_FAMILY_FINGERPRINT:
             if data.get('arena_pool', 'species_v1') != 'species_v1':
@@ -329,7 +333,8 @@ class SessionCodec:
                      PRE_GROWTH_AUGMENTS_FINGERPRINT, PRE_ARENA_META_FINGERPRINT,
                      PRE_PATHING_FIX_FINGERPRINT, PRE_TECHNIQUE_GROWTH_FINGERPRINT,
                      PRE_SUPPORT_TECHNIQUES_FINGERPRINT, PRE_LEGENDARY_POOL_FINGERPRINT,
-                     PRE_REBALANCE_FINGERPRINT}
+                     PRE_REBALANCE_FINGERPRINT,
+                     PRE_TACTICAL_RESEARCH_FINGERPRINT}
         if ruleset == tactics.BASE_RULESET:
             supported.add(LEGACY_BASE_FINGERPRINT)
         if ruleset in (tactics.BASE_RULESET, tactics.TACTICS_RULESET):
@@ -349,7 +354,8 @@ class SessionCodec:
                                          PRE_TECHNIQUE_GROWTH_FINGERPRINT,
                                          PRE_SUPPORT_TECHNIQUES_FINGERPRINT,
                                          PRE_LEGENDARY_POOL_FINGERPRINT,
-                                         PRE_REBALANCE_FINGERPRINT)
+                                         PRE_REBALANCE_FINGERPRINT,
+                                         PRE_TACTICAL_RESEARCH_FINGERPRINT)
         migrating_arena = is_arena and fingerprint == TWO_ROW_ARENA_FINGERPRINT
         migrating_expansion = (is_arena and fingerprint in supported
                                and fingerprint not in (current_fingerprint, PRE_STATISTICS_FINGERPRINT,
@@ -362,7 +368,8 @@ class SessionCodec:
                                                        PRE_TECHNIQUE_GROWTH_FINGERPRINT,
                                                        PRE_SUPPORT_TECHNIQUES_FINGERPRINT,
                                                        PRE_LEGENDARY_POOL_FINGERPRINT,
-                                                       PRE_REBALANCE_FINGERPRINT))
+                                                       PRE_REBALANCE_FINGERPRINT,
+                                                       PRE_TACTICAL_RESEARCH_FINGERPRINT))
         if not is_arena:
             supported.add(PRE_ARENA_FINGERPRINT)
         if not choices and not is_arena:
@@ -632,7 +639,7 @@ class SessionCodec:
             raise ValueError("卡池种类与当前版本不一致")
         committed_pool = set(data['pool'])
         # docs/49 补强只增物种不改上限：该时代的存档按现行上限直接守恒。
-        same_cap_era = fingerprint == PRE_REBALANCE_FINGERPRINT
+        same_cap_era = fingerprint in (PRE_REBALANCE_FINGERPRINT, PRE_TACTICAL_RESEARCH_FINGERPRINT)
         for sid, template in state.templates.items():
             cap = (demo.families_mod.pool_caps(state.arena_pool)[sid] if state.is_family else
                    demo.arena_mod.pool_cap(sid) if is_arena else demo.shop_mod.POOL_COPIES[template.tier])
@@ -827,6 +834,7 @@ class SessionCodec:
                                                    PRE_REBALANCE_FINGERPRINT,
                                                    PRE_TRAITS_GEAR_FINGERPRINT,
                                                    PRE_ARENA_SYNERGY_FINGERPRINT), pre_synergy_arena,
+                               research_required=loaded_fingerprint == current_fingerprint,
                                reroll_required=fingerprint in (current_fingerprint,
                                                                PRE_GROWTH_AUGMENTS_FINGERPRINT,
                                                                PRE_ARENA_META_FINGERPRINT,
@@ -834,7 +842,8 @@ class SessionCodec:
                                                                PRE_TECHNIQUE_GROWTH_FINGERPRINT,
                                                                PRE_SUPPORT_TECHNIQUES_FINGERPRINT,
                                                                PRE_LEGENDARY_POOL_FINGERPRINT,
-                                                               PRE_REBALANCE_FINGERPRINT))
+                                                               PRE_REBALANCE_FINGERPRINT,
+                                                               PRE_TACTICAL_RESEARCH_FINGERPRINT))
         elif 'arena' in data:
             raise ValueError('旧规则不能包含竞技强化记录')
         if schema_version >= 4:
@@ -882,13 +891,16 @@ class SessionCodec:
         if is_arena and fingerprint == PRE_LEGENDARY_POOL_FINGERPRINT:
             state.save_warning = ('卡池上限调整为 20/16/10，新增三神鸟（4 费）与超梦、梦幻（5 费）传说档，同场限一；'
                                   '阵容、装备、已学技能、海克斯与历史账本已保留，历史战斗结果不会重算。')
+        if is_arena and fingerprint == PRE_TACTICAL_RESEARCH_FINGERPRINT:
+            state.save_warning = '已加入本局战术研习；历史回合不追溯，所有研习从零开始。'
         if is_arena and fingerprint == PRE_REBALANCE_FINGERPRINT:
             state.save_warning = ('竞技池补强：新增哈克龙、鬼斯通、迷唇姐、刺甲贝、黑暗鸦、梦妖、狃拉、盔甲鸟，'
                                   '快龙进入 5 费传说档（同场限一）；阵容、装备、已学技能、海克斯与历史账本已保留，'
                                   '新精灵从后续刷新进入，历史战斗结果不会重算。')
         if (is_arena and fingerprint in supported
                 and fingerprint not in (current_fingerprint, PRE_LEGENDARY_POOL_FINGERPRINT,
-                                        PRE_REBALANCE_FINGERPRINT)):
+                                        PRE_REBALANCE_FINGERPRINT,
+                                        PRE_TACTICAL_RESEARCH_FINGERPRINT)):
             # 比传说档更老的存档同样完成卡池迁移（物种补满 + 上限收紧），把这条变化并入提示。
             previous = getattr(state, 'save_warning', '')
             pool_note = ('卡池上限调整为 20/16/10 并新增三神鸟（4 费）与超梦、梦幻（5 费）传说档，'
@@ -1355,7 +1367,7 @@ class SessionCodec:
                 'new_challenges': list(new_challenges)}
 
     def _decode_arena(self, state, data, migrating=False, migrating_components=False,
-                      pre_synergy=False, reroll_required=False):
+                      pre_synergy=False, reroll_required=False, research_required=False):
         import arena
         raw = data.get('arena')
         fields = {'pending', 'selected'} if migrating else {'pending', 'selected', 'loot', 'loot_start'}
@@ -1365,7 +1377,7 @@ class SessionCodec:
         # The growth meta block is additive (kills/mvp-style): predecessors
         # simply omit it and decode with defaults; a forged block must validate.
         meta = self._decode_arena_meta(raw.get('meta'))
-        core = set(raw) - {'meta'}
+        core = set(raw) - {'meta', 'research'}
         if core == fields and migrating_components:
             # Only a known predecessor may omit both new fields. Partial fields
             # and a current-rules snapshot are never treated as an old save.
@@ -1374,6 +1386,15 @@ class SessionCodec:
             legacy_components = False
         else:
             raise ValueError('竞技强化存档结构无效')
+        import arena_research
+        research_raw = raw.get('research')
+        if research_required and research_raw is None:
+            raise ValueError('当前存档缺少战术研习账本')
+        if not research_required and research_raw is not None:
+            raise ValueError('旧版存档不能包含战术研习账本')
+        state.arena_research = (arena_research.validate_history(
+            arena_research.normalize_state(research_raw), state.round_no, state.phase)
+            if research_raw is not None else arena_research.initial_state())
         milestones = (1, 7, 13)
         available = sum(r <= state.round_no for r in milestones)
         rows = sequence(raw['selected'], 8, 'selected augments')

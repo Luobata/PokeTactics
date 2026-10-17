@@ -10,6 +10,8 @@ import arena
 import arena_families as families
 import demo
 import portal
+import family_catalog
+import arena_research
 
 class PortalPoolCatalogTests(unittest.TestCase):
     def test_default_remains_the_frozen_legacy_contract(self):
@@ -60,6 +62,24 @@ class PortalPoolCatalogTests(unittest.TestCase):
         for stage in stages:
             for entry in stage['bonds']['entries']:
                 self.assertLessEqual(set(entry['candidates']), legal)
+
+    def test_eevee_preview_and_live_evolution_choices_share_tactical_traits(self):
+        view = family_catalog.catalog_view(families.VERSION)
+        family = next(row for row in view['families'] if row['id'] == 133)
+        starter = demo._piece_view(families.make_piece(133), ruleset='arena_v1')
+        live_routes = {row['branch']: row for row in starter['family']['routes']}
+        trait_ids = set()
+        for branch in family['branches']:
+            evolved = branch['stages'][1]
+            trait = evolved['trait']
+            self.assertEqual(evolved['total_cost'], 6)
+            self.assertEqual(trait, live_routes[branch['id']]['trait'])
+            self.assertTrue(trait['playstyle'])
+            self.assertTrue(trait['synergy'])
+            self.assertTrue(trait['counterplay'])
+            trait_ids.add(trait['id'])
+        self.assertEqual(len(trait_ids), 5)
+        self.assertEqual(view['research_catalog'], arena_research.catalog())
 
 
 if __name__ == "__main__":

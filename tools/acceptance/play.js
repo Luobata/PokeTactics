@@ -604,6 +604,9 @@
       if (row && Number(row.tier) > 0)
         lines.push(`<p class="detail-buff"><i class="buff-src src-bond">羁绊</i><strong>${esc(row.name)} · ${Number(row.tier)} 种档</strong><span>${esc(row.effect)}</span></p>`);
     }
+    for (const track of state.arena?.research?.tracks || []) {
+      if (track.stacks) lines.push(`<p class="detail-buff"><i class="buff-src src-augment">研习</i><strong>${esc(track.name)} · ${track.stacks} 层</strong><span>${esc(track.reward)}</span></p>`);
+    }
     if (!lines.length) return "";
     return `<div class="detail-buffs"><span class="detail-buffs-title">本局生效加成</span>${lines.join("")}</div>`;
   }
@@ -613,7 +616,7 @@
     const waiting = [...(state.board || []).flat(), ...(state.bench || [])].filter(x => x?.family?.id === f.id && x.family.step === 1).length;
     const choices = owned && f.step === 1 && f.routes.length > 1;
     const routes = f.step > 1 ? f.routes.filter(r => r.branch === f.branch) : f.routes;
-    return `<section class="skill-slot family-growth-panel"><div class="skill-slot-heading"><span>${f.rare ? '稀有 · 全队限一' : `培养 ${f.step}/3 · 累计 ${f.copies} 张`}</span><a href="/pokedex?q=${encodeURIComponent(f.entrance)}&stage=${f.step}&pool=${encodeURIComponent(state.arena.pool_version)}" target="_blank" rel="noopener">图鉴对比 ↗</a></div><p>商店一直出售 ${esc(f.entrance)} · 每张 ${f.cost} 金。${f.rare ? '单张即战力，不参与培养。' : '三只同档合成，满培养共需九张。'}</p>${routes.map(r=>`<p>${r.names.map(esc).join(' → ')}${r.names.length < 3 && !f.rare ? ' → 满培养' : ''}${f.routes.length > 1 ? `<br><strong>${esc(roleNames[r.role])} · ${esc(r.skill)}</strong><br>${esc(r.description)}` : ''}</p>`).join('')}${f.step > 1 && f.routes.length > 1 ? '<p>进化路线已锁定，之后仅同分支可合并。</p>' : ''}${choices ? `<p>集齐三只后选择进化方向，之后仅同分支可合并。当前持有 ${waiting} 只初始形态。</p><div class="detail-actions">${f.routes.map(r=>`<button data-family-evolve="${r.branch}" ${!canPrep() || waiting < 3 ? 'disabled' : ''}>进化为 ${esc(r.names[r.names.length-1])}</button>`).join('')}</div>` : ''}</section>`;
+    return `<section class="skill-slot family-growth-panel"><div class="skill-slot-heading"><span>${f.rare ? '稀有 · 全队限一' : `培养 ${f.step}/3 · 累计 ${f.copies} 张`}</span><a href="/pokedex?q=${encodeURIComponent(f.entrance)}&stage=${f.step}&pool=${encodeURIComponent(state.arena.pool_version)}" target="_blank" rel="noopener">图鉴对比 ↗</a></div><p>商店一直出售 ${esc(f.entrance)} · 每张 ${f.cost} 金。${f.rare ? '单张即战力，不参与培养。' : '三只同档合成，满培养共需九张。'}</p>${routes.map(r=>`<p>${r.names.map(esc).join(' → ')}${r.names.length < 3 && !f.rare ? ' → 满培养' : ''}${f.routes.length > 1 ? `<br><strong>${esc(roleNames[r.role])} · ${esc(r.skill)}</strong><br>${esc(r.description)}${r.trait?.playstyle ? `<br><strong>${esc(r.trait.playstyle)} · ${esc(r.trait.name)}</strong><br>${esc(r.trait.description)}` : ""}` : ''}</p>`).join('')}${f.step > 1 && f.routes.length > 1 ? '<p>进化路线已锁定，之后仅同分支可合并。</p>' : ''}${choices ? `<p>集齐三只后选择进化方向，之后仅同分支可合并。当前持有 ${waiting} 只初始形态。</p><div class="detail-actions">${f.routes.map(r=>`<button data-family-evolve="${r.branch}" ${!canPrep() || waiting < 3 ? 'disabled' : ''}>进化为 ${esc(r.names[r.names.length-1])}</button>`).join('')}</div>` : ''}</section>`;
   }
   function renderDetail() {
     if (shopSelected != null) {
@@ -682,9 +685,9 @@
       html || '<p class="empty-copy">每轮结算获得随机装备、材料或技能机。</p>';
   }
   function setSystemTab(value) {
-    if (!["augments", "techniques", "items", "growth"].includes(value)) return;
+    if (!["augments", "techniques", "items", "research", "growth"].includes(value)) return;
     systemTab = value;
-    for (const name of ["augments", "techniques", "items", "growth"]) {
+    for (const name of ["augments", "techniques", "items", "research", "growth"]) {
       $(name + "-panel").hidden = name !== value;
       $(name + "-tab").setAttribute("aria-selected", String(name === value));
       $(name + "-tab").tabIndex = name === value ? 0 : -1;
@@ -727,7 +730,7 @@
       : state.techniques?.inventory || [];
     $("techniques-count").textContent = `${techniques.reduce((n, t) => n + (Number(t.count) || 0), 0)} 台`;
     $("techniques").innerHTML =
-      '<p class="system-note">每只精灵有一个固定原生位和一个学习位，两者可同时生效。学习技能每场最多触发一次；替换只改变学习位，不覆盖原生技能。优先消耗一台技能机免费学习，没有机器可花 2 金币；替换不返还旧技能。</p>' +
+      '<p class="system-note">每只精灵有一个固定原生位和一个学习位，两者可同时生效。常规技能机次数等于培养档，每次用后需 3 次有效普攻再装填；天气机每战一次。替换只改变学习位，不覆盖原生技能。优先消耗一台技能机免费学习，没有机器可花 2 金币；替换不返还旧技能。</p>' +
       techniques
         .map((t) => {
         const eligible = ownedLocations().filter(({ piece }) => piece.technique?.id !== t.id && (Array.isArray(piece.learnable)
@@ -748,8 +751,18 @@
         : "");
     $("items-count").textContent =
       state.items.finished.length + state.items.craftable.length;
+    renderResearch();
     renderGrowth();
     setSystemTab(systemTab);
+  }
+  function renderResearch() {
+    const data = state.arena?.research;
+    $('research-tab').hidden = !data;
+    if (!data) return;
+    const tracks = data.tracks || [];
+    $('research-count').textContent = `${tracks.reduce((n, r)=>n+r.stacks,0)} / ${tracks.reduce((n, r)=>n+r.limit,0)}`;
+    const last = data.last_round ? `最近在第 ${data.last_round} 轮获得：${tracks.filter(r=>(data.earned||[]).includes(r.id)).map(r=>r.name).join('、')}。` : '尚未积累研习；部署对应精灵并完成一次有效配合即可开始。';
+    $('research').innerHTML = `<p class="system-note">${esc(data.description)} 出售、进化与更换阵容保留本局积累，新对局清零。</p><p class="research-recent" role="status">${esc(last)}</p><div class="research-grid">${tracks.map(r=>`<article class="research-card"><div><h3>${esc(r.name)}</h3><b>${r.stacks} / ${r.limit}</b></div><p>${esc(r.condition)}</p><div class="research-meter" role="progressbar" aria-label="${esc(r.name)}" aria-valuenow="${r.stacks}" aria-valuemin="0" aria-valuemax="${r.limit}">${Array.from({length:r.limit},(_,i)=>`<i class="${i<r.stacks?'filled':''}"></i>`).join('')}</div><strong>${esc(r.reward)}</strong><p>每轮最多积累 1 层；满层后不再增加。</p><a href="/pokedex?q=${encodeURIComponent(r.id==='tempo'?'伊布':r.id==='sustain'?'水伊布':'伊布')}&stage=2" target="_blank" rel="noopener">查看相关战术 →</a></article>`).join('')}</div>`;
   }
   function renderGrowth() {
     const data = state.growth,
@@ -1139,7 +1152,7 @@
     return `<section id="scout-unit-detail" class="scout-unit-detail ${scoutSubject()?.human ? "own" : "enemy"}" aria-labelledby="scout-unit-title" tabindex="-1"><div class="scout-detail-heading"><img src="${spriteOf(p)}" alt=""><div><span class="scout-readonly">${scoutSubject()?.human ? "我方公开情报" : "敌方情报"} · 只读</span><h3 id="scout-unit-title">${esc(p.name)} <span class="detail-star">${"★".repeat(starsOf(p))}${p.shiny ? " ✦ 闪光" : ""}</span></h3><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · 射程 ${Number(p.range) || "—"} 格</p><p>${esc((p.types || []).join(" / "))}</p></div></div><p>${esc(p.role_description || "")}</p>${stats ? `<dl class="scout-base-stats">${facts.map(([key, name]) => `<div><dt>${name}</dt><dd>${statNumber(stats[key])}</dd></div>`).join("")}</dl><p class="scout-section-note">部署基础值 · 已计星级与角色；装备、羁绊、海克斯与战中增益另计，生命不是战中剩余值。</p>` : ""}${poolLine}${skillSlots(p, {readonly: true})}<section class="skill-slot scout-item-slot" aria-label="装备完整效果"><div class="skill-slot-heading"><span>携带装备</span><small>当前配置</small></div><strong>${p.item ? esc(p.item_name || p.item) : "未装备"}</strong><p>${p.item ? esc(p.item_effect || "这份快照未记录装备效果。") : "该精灵没有携带装备。"}</p></section></section>`;
   }
   function scoutAugments(p) {
-    return `<section class="scout-effects" aria-label="海克斯完整效果"><h3>海克斯强化 · 当前公开配置</h3>${(p.augments || []).map(a => `<details class="scout-effect"><summary><span>${esc(a.name || a)}</span><small>展开效果</small></summary>${a.current ? `<p class="augment-current">${esc(a.current)}</p>` : ""}<p>${esc(a.description || "这份快照未记录强化说明。")}</p></details>`).join("") || '<p class="empty-copy">尚未选择海克斯。</p>'}</section>`;
+    return `<section class="scout-effects" aria-label="海克斯完整效果"><h3>海克斯强化 · 当前公开配置</h3>${(p.research?.tracks || []).filter(r=>r.stacks).map(r=>`<p class="scout-effect"><strong>${esc(r.name)} · ${r.stacks} 层</strong> ${esc(r.reward)}</p>`).join("")}${(p.augments || []).map(a => `<details class="scout-effect"><summary><span>${esc(a.name || a)}</span><small>展开效果</small></summary>${a.current ? `<p class="augment-current">${esc(a.current)}</p>` : ""}<p>${esc(a.description || "这份快照未记录强化说明。")}</p></details>`).join("") || '<p class="empty-copy">尚未选择海克斯。</p>'}</section>`;
   }
   function scoutRecentReports(p) {
     const rows = p.recent_reports || [];
@@ -2074,14 +2087,14 @@
       if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
         return;
       event.preventDefault();
-      const tabs = ["augments", "techniques", "items", "growth"];
+      const tabs = ["augments", "techniques", "items", "research", "growth"].filter(name=>!$(name + "-tab").hidden);
       const index = tabs.indexOf(systemTab);
       setSystemTab(
         event.key === "Home"
           ? tabs[0]
           : event.key === "End"
-            ? tabs[3]
-            : tabs[(index + (event.key === "ArrowRight" ? 1 : 3)) % 4],
+            ? tabs[tabs.length - 1]
+            : tabs[(index + (event.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length],
       );
       $(systemTab + "-tab").focus();
     });

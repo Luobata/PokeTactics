@@ -58,6 +58,7 @@ import techniques as techniques_mod  # noqa: E402
 import tactics as tactics_mod  # noqa: E402
 import abilities as abilities_mod  # noqa: E402
 import arena as arena_mod  # noqa: E402
+import arena_research  # noqa: E402
 import arena_families as families_mod
 import arena_skills  # noqa: E402
 import metagame as metagame_mod  # noqa: E402
@@ -197,6 +198,7 @@ def _prepare_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
                             **battle_options)
             self.sim_result = battle.run()
             self.statistics = battle.statistics()
+            self.research_battle = battle
             super().__init__(a, b, 0, front, pal, font,
                              weather_name=weather_name, battle=battle,
                              hud_snapshot=hud_snapshot)
@@ -252,8 +254,12 @@ def _prepare_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
                             ('guard', 'energy_drain', 'energy', 'cleanse', 'knockback', 'pull',
                              'shield', 'absorb', 'expire', 'taunt', 'thorns', 'thorn_hit'))]}
     if anim.is_arena:
+        import arena_research
         teams = {unit.idx: unit.team for unit in anim.by_idx.values()}
         meta.update(_battle_effects(anim.events, teams))
+        meta['research'] = arena_research.review(anim.research_battle, 0)
+        meta['research_teams'] = [arena_research.review(anim.research_battle, team)
+                                  for team in (0, 1)]
         meta['loadout_highlights'] = _loadout_highlights(anim, teams)
 
     def render_job() -> float:
@@ -850,6 +856,7 @@ class Session:
         # and challenge ids first completed during this run for the result page.
         self.arena_unlocks = {'augments': [], 'traits': []}
         self.arena_run = {'kills': 0, 'bonds': [], 'combos': 0, 'streak': 0}
+        self.arena_research = arena_research.initial_state()
         self.arena_new_challenges = []
         for seat in self.seats:
             seat.inventory.ruleset = self.ruleset
@@ -1318,6 +1325,17 @@ class Session:
             result.update(_battle_effects([], {}))
         return result
 
+    def _battle_research(self, battle, seats=(0, 1)):
+        """Private per-seat evidence; underscore data never enters saved loot."""
+        if not self.is_arena:
+            return {}
+        teams = {0: [], 1: []}
+        for unit in battle.units:
+            if unit.team in teams:
+                teams[unit.team].append(unit)
+        return {seat: arena_research.review(battle, team)
+                for team, seat in enumerate(seats) if seat is not None}
+
     def _fight(self, r, battle_i, a, b, weather):
         """bot 对 bot：秒算，只留结果（与 match._pvp_round 同轨）。"""
         if tactics_mod.enabled(self.ruleset):
@@ -1332,9 +1350,10 @@ class Session:
         if self.is_arena:
             result['statistics'] = battle.statistics()
             result.update(_battle_effects(battle.events, {u.idx: u.team for u in battle.units}))
+            result['_research_by_seat'] = self._battle_research(battle, (a.seat, b.seat))
         return result
 
-    def _grant_arena_loot(self, seat, result):
+    def _grant_arena_loot(self, seat, result, research=None):
         """Settle each real seat once; loading and playback never issue resources."""
         if not self.is_arena:
             return
@@ -1342,6 +1361,8 @@ class Session:
         reward_id = f'{self.run_id}:r{self.round_no}:s{seat.seat}:loot'
         if any(row['id'] == reward_id for row in self.arena_loot):
             return
+        if research is not None:
+            arena_research.settle(self.arena_research, seat.seat, self.round_no, research)
         grants = roll_rewards(rng_mod.derive(self.seed, self.round_no, 'pve', 12000 + seat.seat), result)
         grant_rewards(seat, grants)
         self.arena_loot.append({'id': reward_id, 'round': self.round_no,
@@ -1463,8 +1484,11 @@ class Session:
                 # Rendered player fights always use player as team0.
                 scout_a, scout_b = ((p, b if a is p else a) if p in (a, b) else (a, b))
                 self._record_scouting_battle(r, scout_a, scout_b, scout_result, source=scout_source)
-            self._grant_arena_loot(a, 'draw' if winner is None else 'win' if winner == 0 else 'loss')
-            self._grant_arena_loot(b, 'draw' if winner is None else 'win' if winner == 1 else 'loss')
+            research = (scout_result or {}).get('_research_by_seat', {}) if scout_result is not None else {}
+            self._grant_arena_loot(a, 'draw' if winner is None else 'win' if winner == 0 else 'loss',
+                                   research.get(a.seat))
+            self._grant_arena_loot(b, 'draw' if winner is None else 'win' if winner == 1 else 'loss',
+                                   research.get(b.seat))
             for loser, opponent in ((a, b), (b, a)):
                 self._record_defeat_damage(loser, opponent.seat, opponent.name,
                                            dmg[id(loser)], r,
@@ -1496,6 +1520,7 @@ class Session:
                 if self.is_arena:
                     res['statistics'] = battle.statistics()
                     res.update(_battle_effects(battle.events, {u.idx: u.team for u in battle.units}))
+                    res['_research_by_seat'] = self._battle_research(battle, (odd.seat, None))
             else:   # 空场打幽灵：不战而败（保底掉血，Battle 空队会崩所以不走解算）
                 res = {"winner": 1,
                        "survivors": {0: 0, 1: len(self.ghost_src.battle_comp())}}
@@ -1516,7 +1541,8 @@ class Session:
             if odd is p:
                 self._say(f"幽灵战（{self.ghost_src.name} 镜像）："
                           + (f"平局 -{dmg}" if self.is_arena and res['winner'] is None else f"败 -{dmg}" if dmg else "胜"))
-            self._grant_arena_loot(odd, 'draw' if res['winner'] is None else 'win' if res['winner'] == 0 else 'loss')
+            self._grant_arena_loot(odd, 'draw' if res['winner'] is None else 'win' if res['winner'] == 0 else 'loss',
+                                   res.get('_research_by_seat', {}).get(odd.seat))
             self._record_defeat_damage(odd, self.ghost_src.seat, self.ghost_src.name, dmg, r,
                                        synergy=self._main_synergy_label(self.ghost_src),
                                        defeat_name=f"幽灵（{self.ghost_src.name} 镜像）")
@@ -1551,6 +1577,7 @@ class Session:
                     if self.is_arena:
                         res['statistics'] = battle.statistics()
                         res.update(_battle_effects(battle.events, {u.idx: u.team for u in battle.units}))
+                        res['_research_by_seat'] = self._battle_research(battle, (e.seat, None))
                 battle_i += 1
                 if res["winner"] == 0:
                     gold = rng_mod.derive(self.seed, r, "pve", i).randint(*PVE_GOLD)
@@ -1579,7 +1606,8 @@ class Session:
                 self._record_defeat_damage(e, -1, wave_name, dmg, r)
             self._record_scouting_battle(r, e, None, res, pve=True, source=scout_source,
                                          opp_name=(self.opp_view or {}).get('name', '野怪'))
-            self._grant_arena_loot(e, 'draw' if res['winner'] is None else 'win' if res['winner'] == 0 else 'loss')
+            self._grant_arena_loot(e, 'draw' if res['winner'] is None else 'win' if res['winner'] == 0 else 'loss',
+                                   res.get('_research_by_seat', {}).get(e.seat))
         if self.is_arena:
             return events
         # S5 组件掉落：人头保底 + 血量加权加发（pve 子流掉落段，同 match）
@@ -1694,6 +1722,12 @@ class Session:
         meta["headline"] = ("你 获胜！" if winner == 0 else
                             "你 失败……" if winner == 1 else "平局")
         self.last_battle = meta
+        if self.is_arena:
+            teams = meta.get('research_teams') or [meta.get('research', {}), {}]
+            research_by_seat = {me.seat: teams[0]}
+            if opp is not None and not ghost and not pve:
+                research_by_seat[opp.seat] = teams[1]
+            meta['_research_by_seat'] = research_by_seat
         self.player_battles += 1
         self.player_frames_total += meta["n"]
         return meta
@@ -1863,6 +1897,7 @@ def _deployment_stats(piece):
         context = object.__new__(Battle)
         context.units, context.arena_teams = [unit], [(), ()]
         context.arena_growth = [{}, {}]
+        context.arena_research = [{}, {}]
         Battle._apply_arena_stats(context)
         _DEPLOYMENT_STATS[key] = {'max_hp': unit.max_hp, 'atk': unit.attack,
                                  'sp_atk': unit.sp_attack, 'defense': unit.defense,
@@ -2339,7 +2374,8 @@ def state_json(sess) -> dict:
                                     'pool_total': (families_mod.pool_caps(sess.arena_pool) if sess.is_family else arena_mod.pool_caps())[sid]}
                                    for sid, piece in sess.templates.items()
                                    if not sess.is_family or sid in families_mod.families_for(sess.arena_pool)],
-                       'pool_version': sess.arena_pool}
+                       'pool_version': sess.arena_pool,
+                       'research': arena_research.view(sess.arena_research, 0)}
         st['augments'] = {'pending': copy.deepcopy(sess.arena_augments_pending),
                           'selected': augments_of(p)}
         from combination_view import preparation
@@ -2377,6 +2413,7 @@ def state_json(sess) -> dict:
                            'board': [_owned_view(o, sess.ruleset) for o in seat.board],
                            'bench': [_owned_view(o, sess.ruleset) for o in seat.bench],
                            'augments': augments_of(seat),
+                           'research': arena_research.view(sess.arena_research, seat.seat),
                            'recent_reports': copy.deepcopy(list(reversed(
                                sess.scouting_history['seats'][seat.seat]))) if sess.scouting_history else [],
                            'reports_recorded_from': sess.scouting_history['from_round'] if sess.scouting_history else None}

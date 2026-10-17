@@ -410,6 +410,13 @@ def battle_options(session, a, b):
                'arena_teams': [_keys(seat) if seat is not None else [] for seat in (a, b)],
                'arena_growth': [growth_stacks(seat, session.round_no) if seat is not None else {}
                                 for seat in (a, b)]}
+    if session.ruleset == RULESET:
+        from arena_research import stacks_for
+        research = getattr(session, 'arena_research', None)
+        if research is not None:
+            options['arena_research'] = [
+                stacks_for(research, seat.seat, before_round=session.round_no)
+                if seat is not None else {} for seat in (a, b)]
     if a is not None and a is not session.player:
         options['positions_a'] = positions_for(a.board, 0)
     if b is not None:

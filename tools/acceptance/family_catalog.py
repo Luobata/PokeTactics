@@ -8,6 +8,7 @@ from data import pokedex
 def catalog_view(version=families.VERSION):
     import demo
     import arena_bonds
+    import arena_research
     dex = pokedex()
     rows = []
     for fid, (cost, paths) in families.families_for(version).items():
@@ -27,6 +28,7 @@ def catalog_view(version=families.VERSION):
                          stock=families.POOL_BY_COST[cost], rare=fid in families.RARE,
                          generation=dex.generation_of(fid), branches=branches))
     return dict(ok=True, version=version, families=rows,
+                research_catalog=arena_research.catalog(),
                 bond_catalog=[dict(id=row['id'], name=row['name']) for row in arena_bonds.catalog()],
                 distribution=dict(Counter(row['cost'] for row in rows)),
                 forms=len(families.pool_caps(version)), total_stock=sum(row['stock'] for row in rows),

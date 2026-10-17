@@ -37,6 +37,7 @@ def downgrade_to_pre_legendary_pool(payload):
     """
     import arena
     from session_save import PRE_LEGENDARY_POOL_BY_COST
+    payload['arena'].pop('research', None)
     held = _held_counts(payload)
     later = set(arena.LEGENDARY_ROSTER) | set(arena.REBALANCE_ROSTER)
     payload['pool'] = {str(sid): PRE_LEGENDARY_POOL_BY_COST[arena.ROSTER[sid][0]] - held[sid]
@@ -86,6 +87,8 @@ def with_synergy_defaults(payload):
     # Arena growth meta is additive: old builds never wrote the unlock
     # snapshot, per-run challenge counters or new-challenge announcements.
     if 'arena' in expected:
+        from arena_research import initial_state
+        expected['arena'].setdefault('research', initial_state())
         expected['arena'].setdefault('meta', {
             'unlocks': {'augments': [], 'traits': []},
             'run': {'kills': 0, 'bonds': [], 'combos': 0, 'streak': 0},

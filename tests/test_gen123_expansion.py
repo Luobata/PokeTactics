@@ -129,6 +129,8 @@ class HoennSaveCompatibility(unittest.TestCase):
         current = codec.encode(restored)
         expected = copy.deepcopy(old)
         expected['rules'] = current['rules']
+        from arena_research import initial_state
+        expected['arena']['research'] = initial_state()
         self.assertEqual(current, expected)
         self.assertEqual(old, original)
         self.assertEqual(restored.arena_pool, families.FIRST_VERSION)

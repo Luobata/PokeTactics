@@ -278,6 +278,10 @@ def preparation(session):
                        fixed=len(arena_traits.options_for(owned.piece.species_id)) == 1,
                        present=['已选择：' + owned.piece.name + ' · ' + trait['name']],
                        battle_conditions=[trait['trigger']], configuration_only=True)
+            if trait.get('playstyle'):
+                row['present'].append('战术方向：' + trait['playstyle'])
+                row['battle_conditions'].extend(trait.get('synergy', []))
+                row['conflicts'].append('对手可应对：' + trait.get('counterplay', ''))
             if trait['id'] == 'trait_guts' and owned.item == 'grounding_cloak':
                 row['conflicts'].append('接地斗篷立即净化睡眠、麻痹或冰冻，会关闭这次毅力窗口；它不解除中毒或灼伤。')
             if trait['id'] == 'trait_sheer_force' and owned.item == 'contagion_orb':
@@ -402,7 +406,7 @@ def battle_summary(events, teams, team=0):
                  payload.get('recipient_idx', event[3]) if key in ('native_inspiration', 'bond_inspiration') else caster)
         if teams.get(owner) != team:
             continue
-        if effect not in ('energy', 'shield', 'absorb', 'charge', 'empowered_basic', 'vulnerability',
+        if effect not in ('energy', 'energy_drain', 'shield', 'absorb', 'charge', 'empowered_basic', 'vulnerability',
                           'spread', 'tempo', 'offense_buff', 'heal', 'cleanse', 'status',
                           'guard', 'absorb_damage', 'accuracy', 'weaken', 'empowered_hit'):
             continue
@@ -421,7 +425,15 @@ def battle_summary(events, teams, team=0):
         row = rows.setdefault(key, {'id': key, 'name': NAMES[key],
                                     **dict.fromkeys(counters, 0)})
         amount = max(0, int(payload.get('amount', 0)))
-        if effect in ('energy', 'shield'):
+        if effect == 'energy_drain':
+            # The trait's useful return is the energy actually received by its
+            # caster. Denied enemy energy is distinct and must not inflate it.
+            gained = max(0, int(payload.get('gained', 0)))
+            if gained <= 0:
+                continue
+            row['triggers'] += 1
+            row['energy'] += gained
+        elif effect in ('energy', 'shield'):
             row['triggers'] += 1
             row[effect] += amount
         elif effect == 'absorb':

@@ -72,13 +72,15 @@ class ArenaSpeciesTraits(unittest.TestCase):
         self.assertEqual({row['sid'] for row in rows}, set(arena.ROSTER))
         self.assertEqual(len({row['id'] for row in rows}), 65)
         self.assertEqual({row['category'] for row in rows}, {'attack', 'defense', 'support'})
+        tactical = {196, 197, 198}
         for row in rows:
             self.assertTrue(row['arena_only'])
             self.assertEqual(row['fixed'], row['sid'] not in (9, 34, 154))
             self.assertEqual(row['selectable'], row['sid'] in (9, 34, 154))
             self.assertTrue(row['limit'] is None or row['limit'] > 0)
             self.assertTrue(row['description'])
-            self.assertEqual(row['source_label'], '原作特性改编')
+            self.assertEqual(row['source_label'],
+                             '竞技战术设计' if row['sid'] in tactical else '原作特性改编')
         rows[0]['tags'].clear()
         self.assertTrue(traits.catalog()[0]['tags'])
         self.assertIsNone(traits.for_species(16))
@@ -847,10 +849,12 @@ class ArenaSpeciesTraits(unittest.TestCase):
                 self.assertEqual(source.combo_uses.get(key, 0), 0)
                 fields.apply_vulnerability(b, patient, patient, 1)
                 self.assertEqual(self.hit(b, source, patient, 100, 2, 'NORMAL'), expected)
-                self.assertEqual(source.combo_uses[key], 1)
+                # 196 now spends its charge on cast-time vulnerability setup;
+                # the conditional damage reward itself does not spend again.
+                self.assertEqual(source.combo_uses.get(key, 0), 0 if sid == 196 else 1)
                 patient.hp = 1000
                 self.assertEqual(self.hit(b, source, patient, 100, 6, 'NORMAL'), 100)
-                self.assertEqual(source.combo_uses[key], 1)
+                self.assertEqual(source.combo_uses.get(key, 0), 0 if sid == 196 else 1)
 
     def test_cast_window_opens_after_completed_native_cast_and_expires(self):
         for sid, key in ((106, 'trait_rising_kick'), (212, 'trait_sharpened_blades')):
@@ -867,7 +871,7 @@ class ArenaSpeciesTraits(unittest.TestCase):
                 self.assertEqual(rows[0][6]['damage_scope'], 'all')
 
     def test_cadence_self_heal_pulses_every_four_seconds_with_cap(self):
-        for sid, key in ((80, 'trait_regenerator'), (197, 'trait_moonlight')):
+        for sid, key in ((80, 'trait_regenerator'),):
             with self.subTest(sid=sid):
                 b = self.battle((sid,), (128,))
                 source, enemy = b.units

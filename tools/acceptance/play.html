@@ -534,6 +534,10 @@
                 >
                   道具装备 <span id="items-count">0</span>
                 </button>
+                <button id="research-tab" role="tab" aria-selected="false"
+                  aria-controls="research-panel" data-system="research" hidden>
+                  本局研习 <span id="research-count">0 / 15</span>
+                </button>
                 <button
                   id="growth-tab"
                   role="tab"
@@ -574,6 +578,8 @@
                 <p class="section-note"><a id="item-recipes-entry" href="/pokedex?tab=items&amp;view=recipes">查看装备合成图 ↗</a></p>
                 <div id="inventory"></div>
               </div>
+              <div id="research-panel" class="system-panel" role="tabpanel"
+                aria-labelledby="research-tab" hidden><div id="research"></div></div>
               <div
                 id="growth-panel"
                 class="system-panel"

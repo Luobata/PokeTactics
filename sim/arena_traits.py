@@ -145,9 +145,14 @@ TRAITS.update({
     127: {'id': 'trait_crushing_grip', 'name': '碎甲重钳', 'category': 'attack', 'cooldown': 3., 'limit': 3,
           'trigger': '目标带有未到期易伤时的直接命中', 'tags': ['易伤', '集火'], 'fraction': .12,
           'description': '目标带有未到期易伤时，自己的直接命中伤害提高12%。冷却3秒，每战最多3次；只有实际多扣生命或额外消耗护盾才消耗次数。'},
-    196: {'id': 'trait_weakness_read', 'name': '破绽洞悉', 'category': 'attack', 'cooldown': 3., 'limit': 3,
-          'trigger': '目标带有未到期易伤时的直接命中', 'tags': ['易伤', '集火'], 'fraction': .15,
-          'description': '目标带有未到期易伤时，自己的直接命中伤害提高15%。冷却3秒，每战最多3次；只有实际多扣生命或额外消耗护盾才消耗次数。'},
+    196: {'id': 'trait_weakness_read', 'name': '破绽洞悉', 'category': 'attack', 'cooldown': 5., 'limit': 2,
+          'trigger': '完成本命攻击铺设易伤；对易伤目标直接命中', 'tags': ['易伤', '集火', '铺垫'],
+          'fraction': .15, 'limit_scope': '铺垫',
+          'playstyle': '集火标记：先破防，再让全队和自身追击同一个目标',
+          'synergy': ['易伤/破甲体系', '单体爆发', '多次直接伤害'],
+          'counterplay': '等待易伤结束并分散集火，避免让残血核心持续暴露在太阳伊布射程内',
+          'source_label': '竞技战术设计',
+          'description': '完成本命攻击后，使存活目标进入4秒易伤；冷却5秒，每战最多2次。目标带有未到期易伤时，自己的直接命中伤害提高15%，条件收益不重复消耗次数。'},
     # 本命开窗：成功完成本命施法后开启短时增伤窗口。
     106: {'id': 'trait_rising_kick', 'name': '踢势', 'category': 'attack', 'cooldown': 5., 'limit': 2,
           'trigger': '成功完成本命施法', 'tags': ['施法', '增伤'], 'fraction': .15,
@@ -159,9 +164,14 @@ TRAITS.update({
     80: {'id': 'trait_regenerator', 'name': '再生力', 'category': 'defense', 'cooldown': 4., 'limit': 4,
          'trigger': '战斗中每四秒', 'tags': ['自疗'], 'fraction': .03,
          'description': '战斗中每四秒回复3%最大生命，每战最多4次，受封疗影响；实际回复成功才消耗次数。特性治疗不触发本命技能联动。'},
-    197: {'id': 'trait_moonlight', 'name': '月光滋养', 'category': 'defense', 'cooldown': 4., 'limit': 4,
-          'trigger': '战斗中每四秒', 'tags': ['自疗'], 'fraction': .03,
-          'description': '战斗中每四秒回复3%最大生命，每战最多4次，受封疗影响；实际回复成功才消耗次数。特性治疗不触发本命技能联动。'},
+    197: {'id': 'trait_moonlight', 'name': '月光庇护', 'category': 'defense', 'cooldown': 5., 'limit': 3,
+          'trigger': '完成本命施法且两格内有低血其他友军', 'tags': ['施法', '护盾', '守护'],
+          'fraction': .10,
+          'playstyle': '控能护卫：借本命控能节奏保护即将被集火的后排',
+          'synergy': ['控能/干扰阵容', '后排脆皮核心', '护盾吸收体系'],
+          'counterplay': '用连续多段伤害耗尽单槽护盾，并优先处理月亮伊布的施法节奏',
+          'source_label': '竞技战术设计',
+          'description': '完成本命施法后，为两格内生命比例不高于60%的生命比例最低其他友军提供10%最大生命的护盾，持续3秒。冷却5秒，每战最多3次；成功给出更强护盾才消耗次数。'},
     # 本命治疗接力：沿用治愈之心模板，改为护盾、自疗或减伤。
     108: {'id': 'trait_soothing_lick', 'name': '润泽之舌', 'category': 'support', 'cooldown': 4., 'limit': 3,
           'trigger': '本命对其他队友实际治疗至少患者最大生命的5%', 'tags': ['治疗', '护盾'], 'fraction': .08,
@@ -202,9 +212,13 @@ TRAITS.update({
     148: {'id': 'trait_shed_skin', 'name': '蜕皮', 'category': 'support', 'cooldown': 4., 'limit': 2,
           'trigger': '成功完成本命施法且自己仍有主要异常', 'tags': ['施法', '自净化'],
           'description': '成功完成本命施法后，清除自己的一个主要异常。冷却4秒，每战最多2次；空净化、教学、被阻止的施法不触发，保留短畏缩与控制保护。'},
-    198: {'id': 'trait_night_feed', 'name': '夜食', 'category': 'attack', 'cooldown': 4., 'limit': 3,
-          'trigger': '恶属性直接命中造成实际生命损失后存活', 'tags': ['恶', '回能'],
-          'description': '受到恶属性直接命中的实际生命伤害且仍存活时，获得最多8实际能量。冷却4秒，每战最多3次，实际回能成功才消耗次数。'},
+    198: {'id': 'trait_night_feed', 'name': '趁隙掠能', 'category': 'attack', 'cooldown': 4., 'limit': 3,
+          'trigger': '对敌方目标的有效直接命中；异常或易伤目标收益更高', 'tags': ['异常', '易伤', '掠能'],
+          'playstyle': '基础施法干扰：常态削弱节奏，异常与易伤体系强化为全额掠夺',
+          'synergy': ['灼伤/中毒/麻痹铺场', '易伤标记', '控能消耗战'],
+          'counterplay': '把关键目标命中前能量压到12以下，并避免异常与易伤标记叠加',
+          'source_label': '竞技战术设计',
+          'description': '对敌方目标的有效直接命中后可掠能：目标带主要异常或未到期易伤时掠取至多8能量，自身实际获得一半；否则命中前能量至少12时只掠取4点、实际获得2点。冷却4秒，每战最多3次；只有实际扣生命或耗盾且自身实际回能才消耗次数。'},
     200: {'id': 'trait_nightmare_touch', 'name': '梦魇之触', 'category': 'attack', 'cooldown': 5., 'limit': 2,
           'trigger': '邻格敌人普攻造成实际生命损失', 'tags': ['受击', '睡眠'],
           'description': '受到邻格敌人的有效生命普攻后，使该敌人睡眠。冷却5秒，每战最多2次；免疫、主要异常占槽或控制保护挡住时不消耗次数。'},
@@ -222,6 +236,40 @@ TRAITS.update({
           'description': '生命不高于最大生命的一半时，龙属性直接命中伤害提高20%。冷却3秒，每战最多3次；只有实际多扣生命或额外消耗护盾才消耗次数。'},
 })
 
+
+
+# Eevee branch identities are family defaults, not part of the frozen legacy
+# species catalog.  They remain reachable through family/family-v2 battles and
+# the tactical dex while catalog(include_families=False) keeps its old scope.
+_TACTICAL_DEFAULTS = {
+    134: {'id': 'trait_tidal_renewal', 'name': '潮汐续疗', 'category': 'support',
+          'cooldown': 5., 'limit': 3, 'fraction': .08,
+          'trigger': '完成本命施法且两格内有低血其他友军',
+          'tags': ['施法', '治疗', '续航'],
+          'playstyle': '守护型续航：用本命节奏持续拉回半血以下队友',
+          'synergy': ['治疗/护盾辅助', '前排承伤', '持久水系阵容'],
+          'counterplay': '拉开距离或压低水伊布施法频率，并用封疗抵消治疗',
+          'source_label': '竞技战术设计',
+          'description': '完成本命施法后，治疗两格内生命比例不高于50%的生命比例最低其他友军8%最大生命。冷却5秒，每战最多3次；实际治疗成功才消耗次数。'},
+    135: {'id': 'trait_charge_relay', 'name': '雷霆接力', 'category': 'support',
+          'cooldown': 5., 'limit': 3, 'energy': 10,
+          'trigger': '完成本命施法且两格内其他友军可回能',
+          'tags': ['施法', '回能', '接力'],
+          'playstyle': '节奏引擎：把雷伊布的施法节点转换成队友的下一发本命',
+          'synergy': ['攻击型施法者', '电系快攻', '高费爆发核心'],
+          'counterplay': '分散站位或先控住雷伊布，避免它连续替核心充能',
+          'source_label': '竞技战术设计',
+          'description': '完成本命施法后，为两格内一名未满能量的其他友军补充10实际能量，攻击型优先，再按能量从高到低选择。冷却5秒，每战最多3次；实际回能成功才消耗次数。'},
+    136: {'id': 'trait_ignite_pursuit', 'name': '引火追猎', 'category': 'attack',
+          'cooldown': 6., 'limit': 2, 'fraction': .25, 'limit_scope': '铺垫',
+          'trigger': '对灼伤目标的直接命中；完成本命攻击可为目标灼伤',
+          'tags': ['灼伤', '追击', '铺垫'],
+          'playstyle': '状态爆发：先铺灼伤，再把后续直接伤害转化为收割',
+          'synergy': ['灼伤/异常铺场', '火系范围输出', '多次直接伤害'],
+          'counterplay': '火属性免疫、净化灼伤或保持异常槽被其他状态占据',
+          'source_label': '竞技战术设计',
+          'description': '对已灼伤目标的直接命中伤害提高25%；该条件收益不重复消耗次数。完成本命攻击后，若存活目标异常槽为空且可承受灼伤，则施加灼伤。铺垫冷却6秒，每战最多2次。'},
+}
 
 ALTERNATIVES = {
     34: {'id': 'trait_sheer_force', 'name': '强行', 'category': 'attack',
@@ -261,8 +309,7 @@ _TYPED_ABSORB = {'trait_volt_absorb': ('ELECTRIC', .04, 4),
                  'trait_ice_body': ('ICE', .04, 4),
                  'trait_lightning_rod': ('ELECTRIC', 0., 8),
                  'trait_flame_body': ('FIRE', .04, 4),
-                 'trait_frost_absorb': ('ICE', .04, 4),
-                 'trait_night_feed': ('DARK', 0., 8)}
+                 'trait_frost_absorb': ('ICE', .04, 4)}
 # key -> (move type, hp divisor): boost while source.hp * divisor <= max_hp.
 _LOW_HP_BOOST = {'trait_blaze': ('FIRE', 3), 'trait_torrent': ('WATER', 2),
                  'trait_swarm': ('BUG', 3), 'trait_cornered': ('FIGHTING', 3),
@@ -270,7 +317,10 @@ _LOW_HP_BOOST = {'trait_blaze': ('FIRE', 3), 'trait_torrent': ('WATER', 2),
                  'trait_psychic_surge': ('PSYCHIC', 3),
                  'trait_overgrow': ('GRASS', 3),
                  'trait_outrage': ('DRAGON', 2)}
-_VULNERABLE_BOOST = {'trait_crushing_grip', 'trait_weakness_read'}
+_VULNERABLE_BOOST = {'trait_crushing_grip'}
+# These setup traits spend uses only when they create their condition.  The
+# follow-up damage bonus remains a condition reward and cannot strand the setup.
+_CONDITION_BOOST = {'trait_weakness_read', 'trait_ignite_pursuit'}
 # Offense windows open once (consuming a use) and boost until expiry; settle
 # never charges them per hit. Debuff-tied windows also end with the status.
 _DEBUFF_WINDOWS = {'trait_guts': 'physical', 'trait_competitive': 'special',
@@ -278,7 +328,7 @@ _DEBUFF_WINDOWS = {'trait_guts': 'physical', 'trait_competitive': 'special',
 _CAST_WINDOWS = {'trait_rising_kick', 'trait_sharpened_blades', 'trait_honed_claws'}
 _WINDOWS = {**_DEBUFF_WINDOWS, **{key: 'all' for key in _CAST_WINDOWS}}
 _OPENING_WEAKEN = {'trait_intimidate', 'trait_unnerve'}
-_CADENCE_HEAL = {'trait_regenerator', 'trait_moonlight', 'trait_verdant_rhythm'}
+_CADENCE_HEAL = {'trait_regenerator', 'trait_verdant_rhythm'}
 _LETHAL_GUARD = {'trait_sturdy', 'trait_stone_core', 'trait_steel_core', 'trait_safeguard',
                  'trait_shell_armor'}
 _ANTI_DODGE = {'trait_compound_eyes', 'trait_keen_eye'}
@@ -295,8 +345,10 @@ def _default(sid):
         return None
     if sid == 130:
         return TRAITS.get(59)
-    if sid in (133, 134, 135, 136):
-        return TRAITS.get({133: 162, 134: 131, 135: 26, 136: 6}[sid])
+    if sid in _TACTICAL_DEFAULTS:
+        return deepcopy(_TACTICAL_DEFAULTS[sid])
+    if sid == 133:
+        return TRAITS.get(162)
     return TRAITS.get(mentor(sid)) if sid in SPECIES_FAMILY else None
 
 
@@ -319,8 +371,8 @@ def _view(sid, spec):
     fixed = sid not in ALTERNATIVES
     default = spec['id'] == _default(sid)['id']
     return {**deepcopy(spec), 'sid': sid, 'species': sid,
-            'source_label': ('原作特性改编' if sid in TRAITS or sid in GEN3_TRAITS
-                          else '家族原型特性'), 'fixed': fixed,
+            'source_label': (spec.get('source_label', '原作特性改编' if sid in TRAITS or sid in GEN3_TRAITS
+                                      else '家族原型特性')), 'fixed': fixed,
             'selectable': not fixed, 'default': default,
             'choice': None if default else spec['id'],
             'unlock_challenge': TRAIT_LOCKS.get(spec['id']), 'arena_only': True}
@@ -601,15 +653,27 @@ def prepare_hit(battle, source, patient, damage, t, move, direct):
         return damage, None
     spec = _spec(battle, source)
     boost = None
-    if spec and _available(source, spec, t):
+    if spec:
         key = spec['id']
-        low_hp = _LOW_HP_BOOST.get(key)
-        eligible = bool(low_hp and move and move['type'] == low_hp[0]
-                        and source.hp * low_hp[1] <= source.max_hp)
-        if key in _VULNERABLE_BOOST:
-            eligible = bool(patient is not None and patient is not source
-                            and getattr(patient, 'vulnerable_until', 0.) > t + EPS)
-        if eligible or key == 'trait_sheer_force' and sheer_force_applies(battle, source, move):
+        vulnerable = bool(patient is not None and patient is not source
+                          and patient.team != source.team
+                          and getattr(patient, 'vulnerable_until', 0.) > t + EPS)
+        burned = bool(patient is not None and patient is not source
+                      and patient.team != source.team
+                      and getattr(getattr(patient, '_st', None), 'debuff', None) == 'burn')
+        eligible = False
+        if key in _CONDITION_BOOST:
+            eligible = ((key == 'trait_weakness_read' and vulnerable)
+                        or (key == 'trait_ignite_pursuit' and burned))
+        if _available(source, spec, t):
+            low_hp = _LOW_HP_BOOST.get(key)
+            eligible = eligible or bool(low_hp and move and move['type'] == low_hp[0]
+                                        and source.hp * low_hp[1] <= source.max_hp)
+            if key in _VULNERABLE_BOOST:
+                eligible = eligible or vulnerable
+            if key == 'trait_sheer_force' and sheer_force_applies(battle, source, move):
+                eligible = True
+        if eligible:
             boost = spec
     window_scope = _WINDOWS.get(spec['id']) if spec else None
     if (window_scope and getattr(source, spec['id'] + '_fraction', 0.)
@@ -624,7 +688,20 @@ def prepare_hit(battle, source, patient, damage, t, move, direct):
                 and t + EPS < source.trait_weaken_until and _physical(battle, source, move))
     final = int(boosted * (1. - source.trait_weaken_fraction)) if weakened else boosted
     baseline = int(damage * (1. - source.trait_weaken_fraction)) if weakened else damage
-    return final, {'boost': boost, 'baseline_damage': baseline, 'boosted_damage': boosted,
+    return final, {'boost': boost, 'baseline_damage': baseline,
+                   'energy_plunder': (spec if spec and spec['id'] == 'trait_night_feed'
+                                      and patient is not None and patient is not source
+                                      and patient.team != source.team else None),
+                   'plunder_energy_before': (patient.energy if spec and spec['id'] == 'trait_night_feed'
+                                             and patient is not None and patient is not source
+                                             and patient.team != source.team else None),
+                   'plunder_conditioned': bool(
+                       spec and spec['id'] == 'trait_night_feed'
+                       and patient is not None and patient is not source
+                       and patient.team != source.team
+                       and (getattr(getattr(patient, '_st', None), 'debuff', None) is not None
+                            or getattr(patient, 'vulnerable_until', 0.) > t + EPS)),
+                   'boosted_damage': boosted,
                    'final_damage': final, 'weakened': bool(weakened),
                    'weaken_source_idx': source.trait_weaken_source_idx,
                    'weaken_fraction': source.trait_weaken_fraction}
@@ -703,9 +780,31 @@ def settle_hit(battle, source, patient, context, t, action_index, actual_hp, abs
                          baseline_damage=baseline, baseline_actual=baseline_actual,
                          actual_total=actual_hp, action_index=action_index,
                          fraction=spec['fraction'], reason='settled_direct_extra'):
-                if spec['id'] not in _WINDOWS and spec['limit'] is not None:
+                if (spec['id'] not in _WINDOWS and spec['id'] not in _CONDITION_BOOST
+                        and spec['limit'] is not None):
                     _used_trait(source, spec, t)
                 battle._emit_state(source, t)
+    plunder = context.get('energy_plunder')
+    if (plunder is not None and source.alive and (actual_hp > 0 or absorbed > 0)
+            and _available(source, plunder, t)):
+        conditioned = context.get('plunder_conditioned')
+        energy_before = context.get('plunder_energy_before', patient.energy)
+        maximum = 8 if conditioned else (4 if energy_before >= 12 else 0)
+        space = max(0, ENERGY_MAX - source.energy)
+        stolen = min(maximum, patient.energy, space * 2)
+        gained = stolen // 2
+        if stolen >= 2 and gained > 0:
+            with _effect(battle, source, patient, plunder['id'], 'energy_drain', t,
+                         amount=gained, gained=gained, stolen=stolen,
+                         requested=maximum, conditioned=conditioned,
+                         action_index=action_index,
+                         reason=('conditioned_effective_direct_hit' if conditioned
+                                 else 'high_energy_fallback_direct_hit')):
+                patient.energy -= stolen
+                source.energy += gained
+                battle._emit_state(patient, t)
+                battle._emit_state(source, t)
+                _used_trait(source, plunder, t)
     if context['weakened']:
         prevented = max(0, expected(context['boosted_damage']) - actual_hp)
         source_owner = battle.units[context['weaken_source_idx']]
@@ -808,6 +907,95 @@ def after_native_cast(battle, source, t, cast_index):
             or battle.events[cast_index][4] != 'arena_' + source.ult_arch):
         return requested
     key = spec['id']
+
+    def nearby_friends(other=False):
+        return sorted((friend for friend in battle.units if friend.alive
+                       and friend.team == source.team
+                       and abs(friend.pos[0] - source.pos[0])
+                       + abs(friend.pos[1] - source.pos[1]) <= 2
+                       and (not other or friend is not source)),
+                      key=lambda friend: (friend.hp / friend.max_hp,
+                                          battle._target_key(source, friend)))
+
+    if key == 'trait_tidal_renewal':
+        candidates = [friend for friend in nearby_friends(other=True)
+                      if friend.hp * 2 <= friend.max_hp]
+        if not candidates:
+            return requested
+        patient = candidates[0]
+        requested_amount = int(patient.max_hp * spec['fraction'])
+        actual = battle._healing_amount(patient, requested_amount, t)[0]
+        if actual <= 0:
+            return requested
+        with _effect(battle, source, patient, key, 'heal', t, cast_index,
+                     amount=actual, requested=requested_amount,
+                     reason='completed_native_cast_low_ally'):
+            battle._heal(patient, requested_amount, t, source=source)
+            _used_trait(source, spec, t)
+        return requested
+    if key == 'trait_charge_relay':
+        candidates = sorted((friend for friend in nearby_friends(other=True)
+                             if friend.energy < ENERGY_MAX),
+                            key=lambda friend: (0 if friend.arena_role == 'attack' else 1,
+                                                -friend.energy,
+                                                battle._target_key(source, friend)))
+        if not candidates:
+            return requested
+        patient = candidates[0]
+        gained = min(spec['energy'], ENERGY_MAX - patient.energy)
+        if gained <= 0:
+            return requested
+        with _effect(battle, source, patient, key, 'energy', t, cast_index,
+                     amount=gained, requested=spec['energy'],
+                     reason='completed_native_cast_attack_relay'):
+            patient.energy += gained
+            battle._emit_state(patient, t)
+            _used_trait(source, spec, t)
+        return requested
+    if key == 'trait_moonlight':
+        candidates = [friend for friend in nearby_friends(other=True)
+                      if friend.hp * 5 <= friend.max_hp * 3]
+        if not candidates:
+            return requested
+        patient = candidates[0]
+        amount = int(patient.max_hp * spec['fraction'])
+        if not can_shield(patient, amount, t):
+            return requested
+        if grant_shield(battle, source, patient, amount, t, cast_index,
+                        source_kind='trait', source_key=key,
+                        reason='completed_native_cast_low_ally'):
+            _used_trait(source, spec, t)
+        return requested
+
+    if key in ('trait_ignite_pursuit', 'trait_weakness_read'):
+        target_idx = battle.events[cast_index][3]
+        target = battle.units[target_idx] if 0 <= target_idx < len(battle.units) else None
+        if (target is None or target.team == source.team or not target.alive
+                or battle.events[cast_index][6] <= 0):
+            return requested
+        if key == 'trait_ignite_pursuit':
+            st = getattr(target, '_st', None)
+            if (st is None or st.debuff is not None or not status.STATUS_ON
+                    or set(target.piece.types).intersection(status.IMMUNE_TYPES.get('burn', ()))):
+                return requested
+            with _effect(battle, source, target, key, 'status', t, cast_index,
+                         amount=0, status_kind='burn', applied=False,
+                         reason='completed_native_attack_ignite') as packet:
+                packet['applied'] = status.apply_debuff(battle, target, 'burn', t, source=source)
+                if packet['applied']:
+                    _used_trait(source, spec, t)
+            return requested
+        if target.vulnerable_until > t + EPS:
+            return requested
+        until = t + 4.
+        with _effect(battle, source, target, key, 'vulnerability', t, cast_index,
+                     amount=0, fraction=.12, duration=4., expires_at=until,
+                     reason='completed_native_attack_mark'):
+            target.vulnerable_until, target.vulnerability_source = until, source.idx
+            _used_trait(source, spec, t)
+            battle._emit_state(target, t)
+        return requested
+
     if key in ('trait_natural_cure', 'trait_shed_skin'):
         return _cleanse(battle, source, source, spec, t, cast_index,
                         'completed_native_self_cure') or requested

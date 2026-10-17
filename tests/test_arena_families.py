@@ -164,7 +164,7 @@ class FamilyPoolTests(unittest.TestCase):
 
     def test_verified_predecessor_keeps_species_rules(self):
         s=demo.Session(87,'arena_v1');s.begin_round(1);c=SessionCodec();payload=c.encode(s)
-        payload['rules']=PRE_FAMILY_FINGERPRINT;payload.pop('arena_pool',None)
+        payload['rules']=PRE_FAMILY_FINGERPRINT;payload.pop('arena_pool',None);payload['arena'].pop('research',None)
         r=c.decode(payload,5)
         self.assertFalse(r.is_family)
         self.assertEqual(set(r.templates),set(arena.ROSTER))
@@ -178,7 +178,7 @@ class FamilyPoolTests(unittest.TestCase):
                     b=Battle([p],[families.make_piece(131)],random.Random(5),ruleset='arena_v1',stat_mode='budget_v1')
                     # Deployment panels intentionally exclude bonds and opening passives.
                     unit=Unit(p,0,(0,0),stat_mode='budget_v1')
-                    ctx=object.__new__(Battle);ctx.units=[unit];ctx.arena_teams=[[],[]];ctx.arena_growth=[{},{}]
+                    ctx=object.__new__(Battle);ctx.units=[unit];ctx.arena_teams=[[],[]];ctx.arena_growth=[{},{}];ctx.arena_research=[{},{}]
                     ctx._apply_arena_stats()
                     self.assertEqual(stage['stats']['max_hp'],unit.max_hp)
                     self.assertEqual(stage['stats']['atk'],unit.attack)
