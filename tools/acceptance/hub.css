@@ -367,6 +367,16 @@ body.hub-body { margin: 0; color: var(--hub-forest); background: var(--hub-paper
 .trait-rules p { font-size: 12px; line-height: 1.8; margin: 7px 0; }
 .trait-rules a { font-size: 12px; font-weight: 700; color: inherit; }
 .trait-card .resource-icon { background: #f5edda; color: #91612e; }
+.trait-trigger { margin: 10px 0 0; color: #6d7d5e; font-size: 11px; line-height: 1.8; }
+.trait-trigger strong { display: block; color: var(--hub-ink); font-size: 11px; }
+.trait-family { margin-top: 15px; padding: 13px 14px; border: 1px solid #c8d7b3; border-left: 3px solid #7d9462; border-radius: 0 8px 8px 0; background: #f1f6e7; }
+.trait-family-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.trait-family-facts span { display: grid; gap: 2px; color: #6d7d5e; font-size: 9px; }
+.trait-family-facts strong { color: var(--hub-forest); font-size: 14px; line-height: 1.3; }
+.trait-family p { margin: 10px 0 0; color: #607251; font-size: 11px; line-height: 1.8; }
+.trait-family p strong { display: block; color: var(--hub-ink); font-size: 10px; }
+.trait-family > a { display: inline-flex; align-items: center; gap: 4px; margin-top: 12px; color: #55703d !important; font-size: 11px; font-weight: 700; text-decoration: none; }
+.trait-family > a:hover { color: #314b21 !important; }
 .trait-contract { padding: 12px 0; border-top: 1px solid var(--hub-line); margin-top: 16px; }
 .trait-contract p { color: var(--hub-muted); font-size: 11px; line-height: 1.8; }
 .trait-contract strong { display: block; font-size: 11px; color: var(--hub-ink); }

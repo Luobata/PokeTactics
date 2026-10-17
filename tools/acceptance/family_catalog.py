@@ -7,6 +7,7 @@ from data import pokedex
 @lru_cache(maxsize=2)
 def catalog_view(version=families.VERSION):
     import demo
+    import arena_bonds
     dex = pokedex()
     rows = []
     for fid, (cost, paths) in families.families_for(version).items():
@@ -26,6 +27,7 @@ def catalog_view(version=families.VERSION):
                          stock=families.POOL_BY_COST[cost], rare=fid in families.RARE,
                          generation=dex.generation_of(fid), branches=branches))
     return dict(ok=True, version=version, families=rows,
+                bond_catalog=[dict(id=row['id'], name=row['name']) for row in arena_bonds.catalog()],
                 distribution=dict(Counter(row['cost'] for row in rows)),
                 forms=len(families.pool_caps(version)), total_stock=sum(row['stock'] for row in rows),
                 note='面板来自实战计算，包含费用预算、培养与定位；不含装备、羁绊、海克斯及战中特性触发。面板不能代表胜率。')
