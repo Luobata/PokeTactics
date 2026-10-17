@@ -8,9 +8,14 @@ from data import ENERGY_MAX
 from items import FINISHED
 import status
 
+# Every arena-only finished item needs a visible carrier policy.  Otherwise
+# craftable component pairs can rot until a direct reward drops the finished
+# item, and even that reward cannot use the arena-specific assignment path.
 CRAFT_ORDER = ('relay_coil', 'dew_charm', 'storm_chime', 'torrent_orb',
                'drain_fang', 'pulse_band', 'tide_shell', 'grounding_cloak',
-               'damp_rock', 'heat_rock', 'life_orb')
+               'damp_rock', 'heat_rock', 'life_orb',
+               'heart_bell', 'ward_bracer', 'clarity_charm', 'contagion_orb',
+               'metronome', 'heavy_boots', 'trap_lens')
 
 
 def carrier_rank(owned, key):
@@ -18,8 +23,10 @@ def carrier_rank(owned, key):
     if key not in CRAFT_ORDER:
         return None
     from arena_skills import skill_of
+    from arena_traits import for_species
     piece = owned.piece
     sid, role = piece.species_id, getattr(piece, 'role_key', 'attack')
+    skill = skill_of(sid)
     if key in ('damp_rock', 'heat_rock'):
         return 3 if getattr(owned, 'technique', None) == (
             'rain_dance' if key == 'damp_rock' else 'sunny_day') else None
@@ -27,13 +34,34 @@ def carrier_rank(owned, key):
         return 4 if sid == 34 else 2 if role == 'attack' else None
     if key == 'relay_coil':
         return 3 if sid in (121, 171, 164) else None
+    if key == 'heart_bell':
+        return 3 if skill.get('category') in ('heal', 'lifesteal') else None
+    if key == 'ward_bracer':
+        return (2 if role == 'defense'
+                else 1 if skill.get('category') == 'shield' else None)
+    if key == 'clarity_charm':
+        return 3 if skill.get('category') == 'cleanse' else None
+    if key == 'contagion_orb':
+        trait = for_species(sid, getattr(owned, 'arena_trait', None))
+        if trait and trait['id'] == 'trait_sheer_force':
+            return None
+        if trait and trait['id'] == 'trait_ignite_pursuit':
+            return 2
+        return (3 if skill.get('category') == 'poison'
+                else 2 if getattr(owned, 'technique', None) == 'toxic' else None)
+    if key == 'metronome':
+        return 3 if role == 'attack' else None
+    if key == 'heavy_boots':
+        return 1 if role == 'defense' else None
+    if key == 'trap_lens':
+        return (3 if skill.get('category') == 'terrain'
+                else 2 if getattr(owned, 'technique', None) == 'stealth_rock' else None)
     if key == 'dew_charm':
         return 3 if sid in (3, 12, 40, 45, 108, 113, 154, 242) else None
     if key == 'storm_chime':
         return (3 if sid in (9, 68, 106, 128, 142, 160, 208, 248) else
                 1 if getattr(owned, 'technique', None) == 'roar' else None)
     if key == 'torrent_orb':
-        skill = skill_of(sid)
         return 3 if skill['targeting'] == 'enemy' and skill['power'] > 0 else None
     if key == 'tide_shell':
         return 3 if role == 'defense' else None
