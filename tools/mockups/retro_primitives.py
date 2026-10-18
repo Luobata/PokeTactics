@@ -4,7 +4,7 @@ All coordinates passed by renderers are actual screen positions. These helpers
 draw only; they never select recipients or read/write simulation state.
 """
 import math
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 PIXEL = 3
 _INKS = {
@@ -95,3 +95,42 @@ def burst(layer, position, colors, p, scale=1., density=1., kind='spark',count=1
             line(layer,(tail,(x,y)),colors[1],r)
             draw.rectangle((x-r,y-r,x+r,y+r),fill=colors[3])
             draw.rectangle((x,y-r,x+r,y),fill=colors[4])
+
+
+# Bloom keeps the 3px grid: a bright-only mask is widened and banded on the
+# coarse cell lattice, then stamped back with nearest-neighbour cells.
+BLOOM_STEPS = 4
+BLOOM_GAIN = 1.35
+BLOOM_CEIL = 150
+_BLOOM_WEIGHT = [0 if v < 70 else min(255, round((v-70)*1.5)) for v in range(256)]
+_BLOOM_BANDS = [min(BLOOM_CEIL, v*BLOOM_GAIN)//(BLOOM_CEIL/BLOOM_STEPS)*(BLOOM_CEIL/BLOOM_STEPS)
+                for v in range(256)]
+
+
+def bloom(fx, radius=2.):
+    """Return (glow, offset) for the bright pixels of transparent fx, or None.
+
+    Dark outlines and envelopes stay unglowing; only bright cores spill. Work
+    is confined to the padded, grid-aligned bounding box of the painted
+    pixels; the glow sits under fx and never changes fx itself.
+    """
+    box = fx.getchannel('A').getbbox()
+    if box is None:
+        return None
+    pad = PIXEL*(2*math.ceil(radius)+3)
+    left = max(0, (box[0]-pad)//PIXEL*PIXEL)
+    top = max(0, (box[1]-pad)//PIXEL*PIXEL)
+    right, bottom = min(fx.width, box[2]+pad), min(fx.height, box[3]+pad)
+    w, h = right-left, bottom-top
+    sw, sh = -(-w//PIXEL), -(-h//PIXEL)
+    small = fx.crop((left, top, left+sw*PIXEL, top+sh*PIXEL)).resize((sw, sh), Image.Resampling.BOX)
+    weight = ImageChops.multiply(small.getchannel('A'), small.convert('L').point(_BLOOM_WEIGHT))
+    if weight.getbbox() is None:
+        return None
+    spread = 2*math.ceil(radius)+1
+    rgb = small.convert('RGB').filter(ImageFilter.MaxFilter(spread))
+    alpha = weight.filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(radius))
+    alpha = alpha.point([round(v) for v in _BLOOM_BANDS])
+    glow = Image.merge('RGBA', (*rgb.split(), alpha))
+    glow = glow.resize((sw*PIXEL, sh*PIXEL), Image.Resampling.NEAREST).crop((0, 0, w, h))
+    return glow, (left, top)

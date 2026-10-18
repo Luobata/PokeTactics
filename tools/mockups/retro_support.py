@@ -9,9 +9,10 @@ protective planes exist only for actual authoritative outcome packets.
 from functools import lru_cache
 import math
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw
 
 from arena_skills import SKILLS
+from pixel_vfx import checker
 from retro_primitives import palette, settings, cel, put, line, point, burst
 
 SKILL_IDS = (
@@ -202,8 +203,17 @@ def _speck(layer, kind, position, colors, scale, variant=0, fade=0, *, turn=0):
 def _ring(layer, position, colors, radius, scale=1., flatten=.55, turn=0):
     image,d,(x,y)=cel(48)
     r=max(2,min(21,round(radius)))
-    d.ellipse((x-r,y-round(r*flatten),x+r,y+round(r*flatten)),outline=colors[2],width=2)
-    d.arc((x-r,y-round(r*flatten),x+r,y+round(r*flatten)),205,295,fill=colors[4],width=1)
+    box=(x-r,y-round(r*flatten),x+r,y+round(r*flatten))
+    # A tinted floor disc gives the ring body; only the near lip is bright,
+    # so it reads as energy lying on the ground rather than a selection box.
+    # 25% Bayer dither keeps contact cels strictly opaque pixels.
+    # The fill stays a flat near-half floor patch so it never veils the body.
+    disc=Image.new('L',image.size)
+    ImageDraw.Draw(disc).chord((x-r+2,y-round(r*flatten*.55),x+r-2,y+round(r*flatten)),0,180,fill=255)
+    image.paste(colors[1],mask=ImageChops.multiply(disc,checker(image.size,1)))
+    d.arc(box,180,360,fill=colors[2],width=1)
+    d.arc(box,0,180,fill=colors[3],width=2)
+    d.arc(box,35,145,fill=colors[4],width=1)
     if turn:
         image=image.rotate(turn,resample=Image.Resampling.NEAREST)
     put(layer,image,position,scale)
@@ -1059,15 +1069,20 @@ def draw_dome(layer, target, progress, config, *, quiet=False, element='ICE'):
     cy=y+2
     box=(x-16,cy+12-round(36*unfold),x+16,cy+12)
     # Translucent skin; the actor stays fully visible through the bubble.
-    d.ellipse(box,fill=(*colors[2],round(30*strength)))
-    # Thin dark back rim over the top, bright front lip below: readable volume.
-    d.arc(box,200,340,fill=(*colors[1],round(130*strength)),width=1)
-    d.arc(box,20,160,fill=(*colors[3],round(190*strength)),width=2)
-    d.arc(box,55,125,fill=(*colors[4],round(170*strength)),width=1)
-    # Ground ring anchors the bubble at the feet.
+    d.ellipse(box,fill=(*colors[2],round(44*strength)))
+    # A deeper lower half and a full rim give the skin glass thickness.
+    d.chord(box,15,165,fill=(*colors[1],round(34*strength)))
+    d.ellipse(box,outline=(*colors[2],round(150*strength)),width=2)
+    d.arc(box,20,160,fill=(*colors[3],round(210*strength)),width=2)
+    d.arc(box,55,125,fill=(*colors[4],round(190*strength)),width=1)
+    # Upper-left specular crescent sells the curved surface.
+    inner=(box[0]+4,box[1]+3,box[2]-4,box[3]-4)
+    if inner[3]-inner[1]>6:
+        d.arc(inner,200,255,fill=(*colors[4],round(200*strength)),width=2)
+    # Ground disc anchors the bubble at the feet.
     ground=(x-15,cy+8,x+15,cy+15)
-    d.ellipse(ground,outline=(*colors[2],round(110*strength)),width=1)
-    d.arc(ground,15,165,fill=(*colors[3],round(170*strength)),width=2)
+    d.ellipse(ground,fill=(*colors[1],round(60*strength)))
+    d.arc(ground,15,165,fill=(*colors[3],round(190*strength)),width=2)
     # Travelling sheen plus deterministic twinkling facets.
     sheen=(190+round(140*((p*1.4)%1.)))%360
     d.arc(box,sheen,sheen+46,fill=(*colors[4],round(210*strength)),width=2)

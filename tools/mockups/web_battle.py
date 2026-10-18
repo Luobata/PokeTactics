@@ -15,6 +15,7 @@ from PIL import Image, ImageDraw, ImageEnhance, ImageFont, ImageOps
 
 import arena_vfx
 import retro_native
+import retro_primitives as rp
 import family_vfx
 import retro_attacks
 import retro_feedback
@@ -2502,10 +2503,17 @@ class WebBattleRenderer:
         try:
             for _,au,x,y,pose in shown:
                 self._draw_unit(field,au,x,y,t)
-            self._draw_actions(field,t)
-            self._draw_impact_accents(field,t)
-            self._draw_ult_bursts(field,t)
-            self._draw_outcomes(field,t)
+            # Skill materials share one transparent layer so their bright
+            # cores can glow onto the field without touching units or HUD.
+            fx=Image.new('RGBA',field.size)
+            self._draw_actions(fx,t)
+            self._draw_impact_accents(fx,t)
+            self._draw_ult_bursts(fx,t)
+            self._draw_outcomes(fx,t)
+            glow=rp.bloom(fx)
+            if glow is not None:
+                field.alpha_composite(*glow)
+            field.alpha_composite(fx)
             self._draw_numbers(field,t)
             self._draw_ko_cards(field,t)
             self._draw_weather(field,t)
