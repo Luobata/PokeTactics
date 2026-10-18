@@ -401,6 +401,45 @@ def _moon_rays(layer, center, clock, colors, scale, *, strength=1):
                    max(0.,1-strength))
 
 
+def _crescent_moon(layer, at, life, config, scale):
+    """A pale crescent hangs over the patient while moonlight pours down."""
+    if not 0<=life<.78:return
+    moon=palette('ELECTRIC',config)
+    image,d,(x,y)=cel(32)
+    r=10
+    d.ellipse((x-r,y-r,x+r,y+r),fill=moon[1])
+    d.ellipse((x-r+1,y-r+1,x+r-1,y+r-1),fill=moon[3])
+    d.ellipse((x-r+4,y-r+2,x+r-6,y+r-6),fill=moon[4])
+    # Bite the disc into a crescent; the cut stays fully transparent.
+    d.ellipse((x-r+7,y-r-3,x+r+6,y+r-4),fill=(0,0,0,0))
+    rise=min(1.,life/.16)
+    image=_dissolve(image,max(0.,(life-.52)/.26))
+    put(layer,image,(at[0]-6*scale,at[1]-(52+8*(1-rise))*scale),scale*(.62+.18*rise))
+
+
+def _floor_bloom(layer, target, life, petals, leaves, scale):
+    """A five-petal flower opens flat under the patient, then wilts away."""
+    if not 0<=life<.82:return
+    image,d,(x,y)=cel(48)
+    bloom=min(1.,life/.22)
+    for i in range(5):
+        a=i*math.tau/5+.3
+        lx,ly=x+math.cos(a+.6)*15*bloom,y+math.sin(a+.6)*15*bloom
+        d.ellipse((lx-5,ly-3,lx+5,ly+3),fill=leaves[1])
+    for i in range(5):
+        a=i*math.tau/5
+        px,py=x+math.cos(a)*10*bloom,y+math.sin(a)*10*bloom
+        r=4+3*bloom
+        d.ellipse((px-r,py-r,px+r,py+r),fill=petals[1],outline=petals[0])
+        d.ellipse((px-r+2,py-r+1,px+r-3,py+r-3),fill=petals[2])
+        d.rectangle((px-1,py-2,px,py-1),fill=petals[4])
+    d.ellipse((x-4,y-4,x+4,y+4),fill=petals[3],outline=petals[0])
+    image=_dissolve(image,max(0.,(life-.55)/.27))
+    # Flatten onto the ground plane under the feet.
+    image=image.resize((image.width,image.height//2),Image.Resampling.NEAREST)
+    put(layer,image,(target[0],target[1]+34*scale),scale*.55)
+
+
 def _egg_shells(layer, target, life, colors, scale, density):
     if life>=.87:return
     for i in range(max(3,round(5*density))):
@@ -419,41 +458,47 @@ def _egg_shells(layer, target, life, colors, scale, density):
 
 def _music_ribbon(layer, source, target, progress, colors, scale, *, phase=0.,
                    width=9., strength=1.):
-    """SING/HEAL_BELL cast track: filled stave ribbons, not loose note glyphs."""
+    """SING/HEAL_BELL cast track: a train of sound crescents led by a note.
+
+    The old filled stave read as a fleshy tentacle. Separate crescents facing
+    the travel direction read as song at a glance, and grow toward the head.
+    """
     if strength<=0:return
     p=min(1.,max(0.,progress));distance=math.dist(source,target) or 1.
     ux,uy,nx,ny=_vec(source,target)
-    spine=[];widths=[]
-    for i in range(13):
-        q=i/12
-        sway=math.sin(q*math.tau-phase)*min(16.,distance*.065)*scale
-        spine.append((source[0]+ux*distance*q+nx*sway,
-                      source[1]+uy*distance*q+ny*sway))
-        # Root connects to the caster; the note-head end is deliberately broad.
-        widths.append((4.5+math.sin(q*math.pi)*width+q*4.5)*scale*strength)
-    def band(fraction, count):
-        pts=spine[:count];ws=widths[:count];left=[];right=[]
-        for i,(cx,cy) in enumerate(pts):
-            a=pts[max(0,i-1)];b=pts[min(len(pts)-1,i+1)]
-            dx,dy=b[0]-a[0],b[1]-a[1];dist=math.hypot(dx,dy) or 1.
-            w=ws[i]*fraction
-            left.append((round((cx-dy/dist*w)/3)*3,round((cy+dx/dist*w)/3)*3))
-            right.append((round((cx+dy/dist*w)/3)*3,round((cy-dx/dist*w)/3)*3))
-        return left+right[::-1]
     draw=ImageDraw.Draw(layer)
-    outer=band(1.,13)
-    draw.polygon(outer,fill=colors[1])
-    draw.line(outer+[outer[0]],fill=colors[0],width=1)
-    draw.polygon(band(.70,12),fill=colors[2])
-    draw.polygon(band(.38,10),fill=colors[3])
-    line(layer,spine[:4],colors[4],3*scale*strength)
-    # A compact bright beat marks the travelling note head without adding text.
-    head=spine[-1]
-    r=(3.5+2.5*math.sin(p*math.pi))*scale*strength
-    beat=[(head[0],head[1]-r),(head[0]+r*.66,head[1]),(head[0],head[1]+r),
-          (head[0]-r*.66,head[1])]
-    beat=[(round(x/3)*3,round(y/3)*3) for x,y in beat]
-    draw.polygon(beat,fill=colors[4]);draw.line(beat+[beat[0]],fill=colors[1],width=1)
+    snap=lambda x,y:(round(x/3)*3,round(y/3)*3)
+    pulses=max(3,min(6,round(distance/(26*scale))))
+    for i in range(pulses):
+        q=(i+1)/(pulses+1)
+        sway=math.sin(q*math.tau-phase)*min(12.,distance*.05)*scale
+        cx=source[0]+ux*distance*q+nx*sway
+        cy=source[1]+uy*distance*q+ny*sway
+        # Crescents widen toward the head and breathe on the phase clock.
+        radius=(5.+width*(.75+.75*q))*scale*strength*(.86+.14*math.sin(phase*2+i*1.7))
+        thick=max(3.,radius*.42)
+        outer=[];inner=[]
+        for j in range(9):
+            a=(-1.05+j/8*2.1)
+            ox,oy=math.cos(a),math.sin(a)
+            # Local frame: +x along travel, +y along the normal.
+            outer.append(snap(cx+(ux*ox+nx*oy)*radius,cy+(uy*ox+ny*oy)*radius))
+            inner.append(snap(cx+(ux*ox+nx*oy)*(radius-thick)-ux*thick*.35,
+                              cy+(uy*ox+ny*oy)*(radius-thick)-uy*thick*.35))
+        band=outer+inner[::-1]
+        draw.polygon(band,fill=colors[2])
+        draw.line(band+[band[0]],fill=colors[0],width=1)
+        draw.line(outer[2:7],fill=colors[4 if i==pulses-1 else 3],width=3)
+    # The head is a filled eighth note, not a generic diamond beat.
+    head=target
+    r=(6.+2.*math.sin(p*math.pi))*scale*strength+2
+    hx,hy=head
+    draw.ellipse((round(hx-r*1.15),round(hy-r*.8),round(hx+r*1.15),round(hy+r*.8)),
+                 fill=colors[3],outline=colors[0])
+    stem=(round(hx+r),round(hy-r*3.2))
+    line(layer,((hx+r,hy),stem),colors[1],3)
+    line(layer,(stem,(stem[0]+r*1.4,stem[1]+r*1.1)),colors[1],3)
+    draw.rectangle(snap(hx-r*.6,hy-r*.45)+snap(hx-r*.1,hy-r*.1),fill=colors[4])
 
 
 def _music_charge(layer, source, progress, colors, scale):
@@ -548,9 +593,9 @@ def _local_material(layer, key, target, life, colors, scale, density, *, source=
     fade=max(0.,(life-.52)/.40)
     if key=='healing_song':
         # Filled staves unwrap around the patient; the beat rises twice, then rests.
-        for i,side in enumerate((-1,0,1)[:max(1,round(3*density))]):
-            start=(target[0]-side*(42-life*13)*scale,target[1]+(9-i)*10*scale)
-            _music_ribbon(layer,start,target,min(1.,max(0.,(life-.03-i*.04)/.60)),
+        for i,side in enumerate((-1,1,0)[:max(1,round(3*density))]):
+            start=(target[0]-side*(56-life*13)*scale,target[1]-(16+i*9-life*20)*scale)
+            _music_ribbon(layer,start,(target[0]+side*14*scale,target[1]-34*scale),min(1.,max(0.,(life-.03-i*.04)/.60)),
                           colors,scale,phase=1.35+i*2.25,width=6.2-i*.7,
                           strength=max(0.,1-fade))
     elif key=='bliss_chorus':
@@ -563,6 +608,11 @@ def _local_material(layer, key, target, life, colors, scale, density, *, source=
                  target[1]+(-34+q*65)*scale)
             _speck(layer,'powder',pos,colors,scale*(.68 if i%4==0 else .48),i,
                    max(0.,(q-.58)/.40))
+        for i in range(round(5*density)):
+            q=(life-i*.05)/.8
+            if not 0<=q<1:continue
+            at=(target[0]+math.sin(q*6+i*1.9)*30*scale,target[1]+(-40+q*52)*scale)
+            _speck(layer,'sparkle',at,palette('ICE',config or {}),scale*.5,100+i,max(0.,(q-.6)/.4))
         if life<.34:
             # Contact puff: grains compress into a low cloud that spreads sideways.
             q=life/.34
@@ -579,6 +629,9 @@ def _local_material(layer, key, target, life, colors, scale, density, *, source=
             _speck(layer,'sparkle',(target[0]+(i-1)*25*scale,target[1]+(-35+q*70)*scale),
                    colors,scale*.48,i,fade)
     elif key in ('aroma_garden','verdant_sanctuary'):
+        if key=='aroma_garden':
+            _floor_bloom(layer,target,life,palette('FIRE',config or {}),colors,scale)
+            colors=palette('FIRE',config or {})
         count=7 if key=='aroma_garden' else 8
         for i in range(round(count*density)):
             angle=i*2.17+life*(4 if key=='aroma_garden' else -6)
@@ -886,11 +939,27 @@ def draw_assistance(layer, skill_id, source, target, phase, progress, config, *,
             # Tail Glow / Recover-style gathered energy follows a curved chain
             # of orbs, distinct from the old offensive water ray and zigzag hit.
             energy=palette('ELECTRIC' if skill_id=='beacon_relay' else 'PSYCHIC',config)
-            _stream(layer,source,target,p,energy,'orb',count=5,spread=16,wave=1.8,
-                    arc=18,scale=scale*.85,density=density)
             if skill_id=='star_resonance':
-                _speck(layer,'swift_star',(head[0],head[1]-math.sin(p*math.pi)*18*scale),
-                       palette('ELECTRIC',config),scale*.58,0,turn=p*100)
+                # Swift: three gold stars on staggered arcs, each dragging a
+                # short fading glitter tail; a few bubbles keep Starmie's water.
+                gold=palette('ELECTRIC',config)
+                for i in range(3):
+                    q=p-i*.11
+                    if q<0:continue
+                    lift=(16+i*11)*scale
+                    for k in range(3,-1,-1):
+                        qk=max(0.,q-k*.045)
+                        at=point(source,target,qk)
+                        at=(at[0],at[1]-math.sin(qk*math.pi)*lift)
+                        if k:
+                            _speck(layer,'sparkle',at,gold,scale*(.5-k*.1),i*4+k)
+                        else:
+                            _speck(layer,'swift_star',at,gold,scale*(.78-i*.08),i,turn=q*220+i*40)
+                _stream(layer,source,target,p,colors,'bubble',count=3,spread=12,wave=1.4,
+                        scale=scale*.7,density=density)
+            else:
+                _stream(layer,source,target,p,energy,'orb',count=5,spread=16,wave=1.8,
+                        arc=18,scale=scale*.85,density=density)
         elif skill_id=='healing_song':
             _music_ribbon(layer,source,head,p,colors,scale,phase=p*5.4,width=8.5)
             if density>=.75:
@@ -909,17 +978,36 @@ def draw_assistance(layer, skill_id, source, target, phase, progress, config, *,
                     arc=14,scale=scale,density=density)
             _speck(layer,'heal_star',(head[0],head[1]-math.sin(p*math.pi)*15*scale),
                    colors,scale*.62,0,turn=p*90)
+        elif skill_id=='cleansing_powder':
+            # Scale powder drifts as a loose glittering cloud, not a bead line.
+            _stream(layer,source,target,p,colors,'powder',count=11,spread=30,wave=2.2,arc=16,
+                    scale=scale,density=density)
+            ux,uy,nx,ny=_vec(source,target)
+            for i in range(round(5*density)):
+                q=p-i*.06
+                if q<0:continue
+                at=point(source,target,q)
+                side=math.sin(q*9+i*2.1)*26*scale
+                _speck(layer,'sparkle',(at[0]+nx*side,at[1]+ny*side-math.sin(q*math.pi)*16*scale),
+                       palette('ICE',config),scale*.5,100+i)
+        elif skill_id=='aroma_garden':
+            # Vileplume sheds its own red petals in a wide fluttering arc.
+            _stream(layer,source,target,p,palette('FIRE',config),'petal',count=7,spread=24,
+                    wave=1.7,arc=20,scale=scale*1.1,density=density)
         else:
-            kind={'cleansing_powder':'powder','aroma_garden':'petal',
-                  'verdant_sanctuary':'leaf'}[skill_id]
-            _stream(layer,source,target,p,colors,kind,count=9 if kind=='powder' else 5,
-                    spread=23 if kind=='powder' else 17,wave=1.5,arc=9,
+            _stream(layer,source,target,p,colors,'leaf',count=5,spread=17,wave=1.5,arc=9,
                     scale=scale,density=density)
         return True
     if phase not in ('impact','aftermath'):return False
     elapsed=p*CONTACT if phase=='impact' else CONTACT+p*(LIFETIME-CONTACT)
     life=elapsed/LIFETIME
     if life>=1:return True
+    if skill_id=='moon_blessing':
+        # Moonlight descends from a crescent before the real shield forms.
+        _crescent_moon(layer,target,life,config,scale)
+        if life<.70:
+            _moon_rays(layer,target,life*1.25,palette('ELECTRIC',config),scale*.82,
+                       strength=1-max(0.,(life-.38)/.32))
     if skill_id in ('moon_blessing','barrier_relay','frost_shelter'):
         # Arrival shards peel around the body. Actual shields alone draw walls.
         for i in range(round(4*density)):
@@ -929,6 +1017,13 @@ def draw_assistance(layer, skill_id, source, target, phase, progress, config, *,
             _speck(layer,kind,at,colors,scale*.43,i,max(0.,(life-.35)/.55),turn=life*70)
     elif skill_id in ('star_resonance','beacon_relay'):
         energy=palette('ELECTRIC' if skill_id=='beacon_relay' else 'PSYCHIC',config)
+        if skill_id=='star_resonance':
+            energy=palette('ELECTRIC',config)
+            if life<.22:
+                # Landing: one large star flares on the recipient and collapses.
+                q=life/.22
+                _speck(layer,'swift_star',(target[0],target[1]-12*scale),energy,
+                       scale*(1.25-.7*q),9,max(0.,(q-.55)/.45),turn=q*90)
         for i in range(round(5*density)):
             angle=i*math.tau/5-life*2;radius=(14+life*17)*scale
             at=(target[0]+math.cos(angle)*radius,target[1]+math.sin(angle)*radius*.72-life*20*scale)
@@ -1174,9 +1269,10 @@ def _healing_stars(layer, key, target, p, config, scale, density):
                                target[1]+math.sin(angle)*radius*.65),colors,scale*.3,i)
     # Native identities own a second readable silhouette, not just palette accents.
     if key=='healing_song':
-        for i,side in enumerate((-1,0,1)[:max(1,round(3*density))]):
-            start=(target[0]-side*(43-p*12)*scale,target[1]+(8-i)*10*scale)
-            _music_ribbon(layer,start,target,min(1.,max(0.,(p-.02-i*.04)/.62)),
+        for i,side in enumerate((-1,1,0)[:max(1,round(3*density))]):
+            start=(target[0]-side*(58-p*14)*scale,target[1]-(14+i*9-p*22)*scale)
+            # Notes resolve above the head; the patient's face stays clear.
+            _music_ribbon(layer,start,(target[0]+side*14*scale,target[1]-34*scale),min(1.,max(0.,(p-.02-i*.04)/.62)),
                           palette(_TYPES[key],config),scale,phase=1.2+i*2.2,
                           width=5.8-i*.6,strength=max(0.,1-max(0.,(p-.62)/.34)))
     elif key=='life_pulse':
@@ -1261,19 +1357,22 @@ def draw_outcome(layer, skill_id, effect, source, target, progress, config, deta
         if skill_id=='frost_shelter':
             _ring(layer,(target[0],target[1]+23*scale),colors,20+9*p,scale,flatten=.27)
         elif skill_id=='moon_blessing':
-            _moon_rays(layer,(target[0],target[1]-5*scale),p,colors,scale*.70,strength=1-max(0.,(p-.55)/.45))
+            _moon_rays(layer,(target[0],target[1]-5*scale),p,palette('ELECTRIC',config),scale*.70,strength=1-max(0.,(p-.55)/.45))
     elif effect=='absorb':
         draw_dome(layer,target,min(1.,p*1.4),config)
         burst(layer,target,palette('ICE',config),p,scale=scale*.62,density=density,kind='shard',count=8,seed=37)
     elif effect in ('energy','energy_drain'):
-        energy=palette('ELECTRIC' if skill_id=='beacon_relay' else 'PSYCHIC',config)
+        starlight=skill_id=='star_resonance'
+        energy=palette('ELECTRIC' if skill_id=='beacon_relay' or starlight else 'PSYCHIC',config)
         gained=effect=='energy_drain' and _positive(details,'gained')
         recipient=source if gained else target
         if effect=='energy' or gained:
             start,end=(target,source) if gained else (source,target)
             if start!=end and p<.52:
-                _stream(layer,start,end,min(1.,p/.52),energy,'orb',count=5,spread=15,
-                        wave=1.2,scale=scale*.85,density=density)
+                # Starlight energy travels as a few gold stars, not a bead chain.
+                _stream(layer,start,end,min(1.,p/.52),energy,'swift_star' if starlight else 'orb',
+                        count=3 if starlight else 5,spread=15,wave=1.2,arc=14 if starlight else 0,
+                        scale=scale*(1.2 if starlight else .85),density=density)
             if p>=.14:
                 _ring(layer,(recipient[0],recipient[1]+16*scale),energy,
                       21+10*math.sin(min(1.,p/.6)*math.pi),scale,flatten=.32)

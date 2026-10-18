@@ -233,12 +233,19 @@ def _lightning_route(layer, source, end, colors, scale, progress):
         points.append((source[0]+dx*index/12+nx*jitter,
                        source[1]+dy*index/12+ny*jitter))
     points[0], points[-1] = source, end
-    # A dark outer envelope carries the hot white-yellow core. Main chains call
-    # with a larger scale than side links, so one width table reads stronger.
-    rp.line(layer, points, colors[0], 14*scale)
-    rp.line(layer, points, colors[1], 9*scale)
-    rp.line(layer, points, colors[3], 6*scale)
-    rp.line(layer, points, colors[4], 3*scale)
+    # Side links used to shrink to a 3px thread. A width floor keeps every
+    # real link a solid bolt; main chains still read heavier.
+    body = max(scale, .7)
+    # A dark outer envelope carries the hot white-yellow core.
+    rp.line(layer, points, colors[0], 15*body)
+    rp.line(layer, points, colors[1], 10*body)
+    # A thinner counter-phase strand braids around the trunk.
+    braid = [points[0]]+[(x-nx*(1 if (i+tick) % 2 else -1)*6*body,
+                          y-ny*(1 if (i+tick) % 2 else -1)*6*body)
+                         for i, (x, y) in enumerate(points[1:-1], 1)]+[points[-1]]
+    rp.line(layer, braid, colors[2], 4*body)
+    rp.line(layer, points, colors[3], 6*body)
+    rp.line(layer, points, colors[4], 3*body)
     for joint, side in ((4, 1), (8, -1)):
         a = points[joint]
         branch = (a, _offset(a, nx*side*13*scale+ux*7*scale,
@@ -291,18 +298,34 @@ def _pressure_wave(layer, at, colors, age, scale, variant):
             _ribbon(b, path[:25], 2.5, colors[2])
             _ribbon(b, path[3:16], 1.1, colors[3])
     elif variant == 'psychic_blink':
-        # Two bowed pressure shoulders squeeze, then peel back from the actor.
-        pinch = math.sin(min(1., age/.26)*math.pi)*6
-        for sign in (-1, 1):
-            path = [(sign*(22-pinch+math.sin(j/22*math.pi)*6+q*5),
-                     -27+j/22*54) for j in range(23)]
-            widths = [5.6-math.sin(j/22*math.pi)*2.0 for j in range(23)]
-            _ribbon(b, path, [w+1.6 for w in widths], colors[0])
-            _ribbon(b, path, widths, colors[1])
-            _ribbon(b, path[2:21], 3.0, colors[2])
-            _ribbon(b, path[4:13], 1.2, colors[3])
-        for sign in (-1, 1):
-            b.line(((sign*10, -17-q*9), (sign*17, -21-q*7)), colors[3], 1)
+        # Psychic crush: three nested diamond fields close in on the actor
+        # and spin a little as they tighten; a hot four-point flash marks
+        # the instant the pressure lands.
+        squeeze = min(1., age/.30)
+        for index in range(3):
+            radius = (24-index*7)*(1-.30*squeeze)+math.sin(age*18+index)*1.2
+            turn = (index-1)*.10+q*.35*(1 if index % 2 else -1)
+            path = []
+            for j in range(33):
+                corner = j/32*4
+                side, f = int(corner) % 4, corner-int(corner)
+                a = side*math.pi/2+turn
+                a2 = a+math.pi/2
+                x = math.cos(a)*(1-f)+math.cos(a2)*f
+                y = math.sin(a)*(1-f)+math.sin(a2)*f
+                path.append((x*radius, y*radius*.82))
+            # Thin fields with open gaps keep the crushed actor readable.
+            width = 1.4-index*.2
+            _ribbon(b, path, width+.8, colors[0])
+            _ribbon(b, path, width, colors[2 if index == 0 else 1])
+            _ribbon(b, path[2:13], max(.9, width*.45), colors[4 if index == 0 else 3])
+        if age < .16:
+            flash = (1-age/.16)
+            r = 15*flash+4
+            star = [((r if j % 2 == 0 else r*.24)*math.cos(j*math.pi/4),
+                     (r if j % 2 == 0 else r*.24)*math.sin(j*math.pi/4)) for j in range(8)]
+            b.poly(star, colors[3])
+            b.poly([(x*.5, y*.5) for x, y in star], colors[4])
     elif variant == 'fracture_vision':
         # Future Sight is two offset slices. Their straight sheared bodies
         # deliberately differ from Confusion's lens and Psychic's weight.
@@ -381,18 +404,21 @@ def _electric_contact(layer, at, colors, age, scale, density, thunder=False):
             rp.line(layer, path, colors[1], 8*scale)
             rp.line(layer, path, colors[2], 5*scale)
             rp.line(layer, path, colors[4], 3*scale)
-            if index == 0 and local < .08:
-                # Compressed hot knot at the first touch; it shrinks in place.
-                image, draw, center = rp.cel(24)
+            if index == 0 and local < .10:
+                # The first touch flashes as an eight-point starburst that
+                # collapses in place; the bright core makes the hit land.
+                image, draw, center = rp.cel(32)
                 b = _Brush(draw, center)
-                radius = 9-local/.08*4
-                b.poly(((0, -radius), (radius*.7, 0), (0, radius),
-                        (-radius*.7, 0)), colors[1])
-                inner = radius*.5
-                b.poly(((0, -inner), (inner*.7, 0), (0, inner),
-                        (-inner*.7, 0)), colors[4])
-                rp.put(layer, image, _offset(at, 0, 2*scale),
-                       scale*(1.-local/.08*.4))
+                q = local/.10
+                radius = 13-q*6
+                # Flattened sideways: Spark Chain stays a low, wide family.
+                star = [((radius if j % 2 == 0 else radius*.38)*math.cos(j*math.pi/8)*1.15,
+                         (radius if j % 2 == 0 else radius*.38)*math.sin(j*math.pi/8)*.6)
+                        for j in range(16)]
+                b.poly(star, colors[1])
+                b.poly([(x*.68, y*.68) for x, y in star], colors[3])
+                b.poly([(x*.34, y*.34) for x, y in star], colors[4])
+                rp.put(layer, image, _offset(at, 0, 2*scale), scale*(1.-q*.35))
     # Each family owns a different terminal face.  The low chain stamp and
     # Thunder's ground plate never share the old generic crescent template.
     if thunder:
@@ -676,19 +702,27 @@ def _windup(layer, key, source, target, colors, scale, density, p, emitters):
                                            math.sin(a)*radius*.7), colors,
                     scale*.08, step+index)
     elif key == 'spark_chain':
-        # Three short jagged chain links converge on the actual caster.
-        for index in range(3):
-            side = -1 if index % 2 else 1
-            start = _offset(source, side*(29-p*12)*scale,
-                            (-20+index*11+p*7)*scale)
-            middle = _offset(source, side*(12-p*7)*scale,
-                             (-13+index*10-p*5)*scale)
-            end = _offset(source, side*(4-p*3)*scale,
-                          (-7+index*7+p*3)*scale)
-            path = (start, _offset(middle, side*5*scale, -4*scale), end)
-            rp.line(layer, path, colors[0], 8*scale)
-            rp.line(layer, path, colors[1], 5*scale)
-            rp.line(layer, path, colors[3], 2*scale)
+        # Four short arcs orbit and tighten into a growing hot core on the
+        # caster: the charge reads as one gathering cage, not loose scribbles.
+        tick = round(p*16)
+        radius = (30-p*12)*scale
+        for index in range(4):
+            angle = index*math.pi/2+p*2.6+(tick % 2)*.12
+            a = _offset(source, math.cos(angle)*radius, math.sin(angle)*radius*.8-6*scale)
+            mid = _offset(source, math.cos(angle+.42)*(radius+7*scale),
+                          math.sin(angle+.42)*(radius+7*scale)*.8-6*scale)
+            b = _offset(source, math.cos(angle+.84)*radius, math.sin(angle+.84)*radius*.8-6*scale)
+            rp.line(layer, (a, mid, b), colors[0], 9*scale)
+            rp.line(layer, (a, mid, b), colors[2], 5*scale)
+            rp.line(layer, (a, mid, b), colors[4], 2*scale)
+        image, draw, center = rp.cel(24)
+        core = _Brush(draw, center)
+        r = 3+p*6
+        spikes = [((r if j % 2 == 0 else r*.45)*math.cos(j*math.pi/4+p*3),
+                   (r if j % 2 == 0 else r*.45)*math.sin(j*math.pi/4+p*3)) for j in range(8)]
+        core.poly(spikes, colors[3])
+        core.poly([(x*.5, y*.5) for x, y in spikes], colors[4])
+        rp.put(layer, image, _offset(source, 0, -6*scale), scale*.9)
     elif key == 'storm_conductor':
         # Thunder's charge is a vertical conductor: five leaders descend into
         # one low coil, separate from Spark Chain's horizontal chain links.
