@@ -1049,25 +1049,41 @@ def _stance_material(layer, key, target, life, config, *, quiet=False):
     scale,density=settings(config);colors=palette('POISON' if key=='venom_armor' else 'FIRE',config)
     strength=.72 if quiet else 1.-max(0.,(life-.60)/.40)
     if strength<=0:return
-    for i in range(round((6 if key=='venom_armor' else 4)*density)):
-        if key=='venom_armor':
-            angle=i*math.tau/6+life*.55;radius=(23+math.sin(life*7)*2)*scale
-            pos=(target[0]+math.cos(angle)*radius,target[1]+math.sin(angle)*radius*.76)
-            image,d,(x,y)=cel(22)
-            d.polygon(((x-4,y+7),(x-3,y),(x,y-9),(x+3,y),(x+5,y+7)),fill=colors[1])
-            d.polygon(((x,y-9),(x+3,y),(x+2,y+5),(x,y+4)),fill=colors[3])
-            d.line(((x,y-9),(x+1,y-3)),fill=colors[4],width=1)
-            image=_dissolve(image,1-strength)
-            put(layer,image.rotate(round(-angle*180/math.pi+90),resample=Image.Resampling.NEAREST),pos,scale*.57)
-        else:
-            side=-1 if i%2 else 1
-            pos=(target[0]+side*(20+i//2*13)*scale,target[1]+(13-i//2*9)*scale)
-            image,d,(x,y)=cel(26)
-            body=[(x-5,y+7),(x-7,y+2),(x-4,y-3),(x-3,y+1),
-                  (x+1,y-11),(x+3,y-4),(x+6,y+2),(x+5,y+7)]
-            d.polygon(body,fill=colors[1]);d.polygon(((x-3,y+6),(x-3,y),(x+1,y-6),(x+3,y+2),(x+2,y+7)),fill=colors[3])
-            d.polygon(((x-1,y+6),(x,y+1),(x+2,y+5),(x+1,y+7)),fill=colors[4])
-            put(layer,_dissolve(image,1-strength),pos,scale*(.52+.05*math.sin(life*8+i)))
+    if key=='venom_armor':
+        # Toxic armour: four heavy curved thorns grow from shoulders and hips
+        # and point outward; venom beads run off them. Reads as spiked armour,
+        # not a radiating sun.
+        grow=1. if quiet else min(1.,life/.18)
+        breathe=1+.06*math.sin(life*9)
+        for i,(ox,oy,ang) in enumerate(((-31,-16,-140),(31,-16,-40),(-29,10,170),(29,10,10))):
+            image,d,(x,y)=cel(28)
+            body=[(x-6,y+7),(x-5,y),(x-2,y-6),(x+1,y-13),(x+3,y-5),(x+6,y+1),(x+6,y+7)]
+            d.polygon(body,fill=colors[1])
+            d.polygon(((x+1,y-13),(x+3,y-5),(x+6,y+1),(x+6,y+7),(x+1,y+7),(x,y-2)),fill=colors[2])
+            d.polygon(((x+1,y-13),(x+2,y-7),(x,y-4)),fill=colors[4])
+            d.line(((x-6,y+7),(x+6,y+7)),fill=colors[0],width=1)
+            d.line(((x-5,y),(x-2,y-6),(x+1,y-13)),fill=colors[0],width=1)
+            image=image.rotate(-ang-90,resample=Image.Resampling.NEAREST)
+            put(layer,_dissolve(image,1-strength),
+                (target[0]+ox*scale*grow,target[1]+oy*scale*grow),scale*.42*grow*breathe)
+        for i in range(round(3*density)):
+            q=(life*1.6+i*.37)%1.
+            ox,oy=((-31,-8),(31,-8),(0,16))[i]
+            image,d,(x,y)=cel(12)
+            d.polygon(((x,y-4),(x+3,y+1),(x+2,y+3),(x-2,y+3),(x-3,y+1)),fill=colors[2])
+            d.point((x-1,y),fill=colors[4])
+            put(layer,_dissolve(image,max(1-strength,q*.9)),
+                (target[0]+ox*scale,target[1]+(oy+q*18)*scale),scale*.5)
+        return
+    for i in range(round(4*density)):
+        side=-1 if i%2 else 1
+        pos=(target[0]+side*(20+i//2*13)*scale,target[1]+(13-i//2*9)*scale)
+        image,d,(x,y)=cel(26)
+        body=[(x-5,y+7),(x-7,y+2),(x-4,y-3),(x-3,y+1),
+              (x+1,y-11),(x+3,y-4),(x+6,y+2),(x+5,y+7)]
+        d.polygon(body,fill=colors[1]);d.polygon(((x-3,y+6),(x-3,y),(x+1,y-6),(x+3,y+2),(x+2,y+7)),fill=colors[3])
+        d.polygon(((x-1,y+6),(x,y+1),(x+2,y+5),(x+1,y+7)),fill=colors[4])
+        put(layer,_dissolve(image,1-strength),pos,scale*(.52+.05*math.sin(life*8+i)))
 
 
 def draw_stance(layer, key, source, phase, progress, config):
@@ -1108,10 +1124,40 @@ def draw_field_cast(layer, source, cells, phase, progress, config):
         q=p*.25 if phase=='impact' else .25+p*.75
         if q<1:
             for i,cell in enumerate(cells):
-                _ring(layer,cell,colors,11+q*22,scale*.7,flatten=.28)
+                _erupting_spikes(layer,cell,max(0.,q-i*.06),colors,scale)
                 burst(layer,cell,colors,q,scale=scale*.50,density=density,kind='dust',count=5,seed=i+3)
     else:return False
     return True
+
+
+def _erupting_spikes(layer, cell, q, colors, scale):
+    """Stone spikes burst out of the real cell, overshoot, then settle low.
+
+    Ground cracks open first; the persistent terrain owns the settled spikes,
+    so these cast spikes sink away instead of stacking a second set.
+    """
+    if not 0<=q<1:return
+    image,d,(x,y)=cel(64)
+    y+=14
+    crack=min(1.,q/.18)
+    for a in (-2.7,-2.2,-.95,-.4,.35):
+        ex,ey=x+math.cos(a)*24*crack,y+6+math.sin(a)*7*crack
+        d.line(((x,y+5),((x+ex)/2+2,(y+5+ey)/2),(ex,ey)),fill=colors[0],width=1)
+    rise=min(1.,q/.22)
+    # Ease-out with a small overshoot, then the cast spikes sink back.
+    height=(1-(1-rise)**3)*(1+.18*math.sin(min(1.,q/.32)*math.pi))
+    sink=max(0.,(q-.55)/.45)
+    for dx,h,w in ((-11,15,5),(1,22,6),(12,13,5)):
+        top=round(h*height*(1-sink))
+        if top<2:continue
+        bx=x+dx;by=y+4
+        tip=(bx+1,by-top)
+        d.polygon(((bx-w,by),tip,(bx+w,by)),fill=colors[2])
+        d.polygon((tip,(bx+w,by),(bx+1,by)),fill=colors[1])
+        d.polygon((tip,(bx-w,by),(bx-w+2,by)),fill=colors[3])
+        d.line(((bx-w,by),tip),fill=colors[4],width=1)
+        d.line(((bx-w-1,by+1),(bx+w+1,by+1)),fill=colors[0],width=1)
+    put(layer,image,(cell[0],cell[1]-14*scale),scale*.82)
 
 
 def draw_screen(layer, target, progress, config, *, kind='reflect', quiet=False):
@@ -1390,13 +1436,34 @@ def draw_outcome(layer, skill_id, effect, source, target, progress, config, deta
                        max(0.,(p-.60)/.38))
     elif effect=='taunt':
         # An actual taunted enemy receives a red attention bracket, not damage.
+        # Taunt reads as anger aimed at the caster: a pulsing anger mark over
+        # the head, and fire chevrons on the ground pointing back to the caster.
         fire=palette('FIRE',config)
-        _ring(layer,(target[0],target[1]-20*scale),fire,13+8*p,scale*.72,flatten=.5)
-        for side in (-1,1):
-            line(layer,((target[0]+side*20*scale,target[1]-24*scale),
-                        (target[0]+side*13*scale,target[1]-16*scale)),fire[3],3)
-        _speck(layer,'sparkle',(target[0],target[1]-26*scale-p*9*scale),fire,scale*.52,0,
-               max(0.,(p-.60)/.40))
+        image,d,(x,y)=cel(24)
+        pulse=1+.18*math.sin(min(1.,p/.5)*math.pi*3)
+        # Four arcs bow toward the centre with open gaps, the classic anger vein.
+        for sx,sy in ((-1,-1),(1,-1),(1,1),(-1,1)):
+            cx,cy=x+sx*8,y+sy*8
+            mid=math.degrees(math.atan2(-sy,-sx))
+            box=(cx-6,cy-6,cx+6,cy+6)
+            d.arc(box,mid-48,mid+48,fill=fire[0],width=4)
+            d.arc(box,mid-40,mid+40,fill=fire[2],width=2)
+        image=_dissolve(image,max(0.,(p-.62)/.36))
+        put(layer,image,(target[0]+16*scale,target[1]-46*scale),scale*.62*pulse)
+        if source!=target and p<.55:
+            ux,uy,nx,ny=_vec(target,source)
+            draw=ImageDraw.Draw(layer)
+            span=min(math.dist(source,target)*.55,90*scale)
+            for i in range(3):
+                q=((p*2.2+i/3)%1.)
+                cx=target[0]+ux*span*q;cy=target[1]+26*scale+uy*span*q
+                w=7*scale
+                tip=(cx+ux*w,cy+uy*w*.5)
+                left=(cx-ux*w*.4+nx*w,cy+(-uy*w*.4+ny*w)*.5)
+                right=(cx-ux*w*.4-nx*w,cy+(-uy*w*.4-ny*w)*.5)
+                pts=[(round(px/3)*3,round(py/3)*3) for px,py in (left,tip,right)]
+                draw.line(pts,fill=fire[1],width=6)
+                draw.line(pts,fill=fire[3],width=3)
     elif effect=='thorns':
         _stance_material(layer,'venom_armor',target,p,config)
     elif effect=='thorn_hit':

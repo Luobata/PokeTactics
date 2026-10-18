@@ -1054,38 +1054,35 @@ class WebBattleRenderer:
     @staticmethod
     @lru_cache(maxsize=2)
     def _rock_field_art(team):
-        """Low faceted hazards rooted in the cell, without a solid oval plate."""
-        tile = Image.new('RGBA',(36,20))
+        """Sharp faceted spikes rooted in the cell, without a solid oval plate."""
+        tile = Image.new('RGBA',(36,26))
         d = ImageDraw.Draw(tile)
         team_color = ALLY if team == 0 else ENEMY
-        # Broken soil and cracks sit beneath unequal three-faced stones. The
+        # Broken soil and cracks sit beneath unequal three-faced spikes. The
         # transparent gaps keep the board and its real cell boundary readable.
-        d.polygon(((3,10),(9,7),(17,8),(23,7),(32,10),(30,14),
-                   (23,15),(17,14),(8,15),(3,13)),fill=(31,37,30,115))
-        for path in (((4,11),(10,10),(15,12),(18,10),(27,11),(32,9)),
-                     ((10,10),(8,7),(5,6)),((18,10),(21,6),(26,5)),
-                     ((24,11),(27,14),(32,15)),((15,12),(12,15),(7,16))):
+        d.polygon(((3,16),(9,13),(17,14),(23,13),(32,16),(30,20),
+                   (23,21),(17,20),(8,21),(3,19)),fill=(31,37,30,115))
+        for path in (((4,17),(10,16),(15,18),(18,16),(27,17),(32,15)),
+                     ((10,16),(8,13),(5,12)),((24,17),(27,20),(32,21)),
+                     ((15,18),(12,21),(7,22))):
             d.line(path,fill=(39,38,29,210),width=1)
-        for x,y,height,width in ((9,12,7,4),(18,10,10,4),(27,13,6,5)):
-            tip=(x-1,y-height)
+        # Tall narrow spikes: the hazard reads as spikes, not a slab.
+        for x,y,height,width in ((9,18,11,3),(18,16,16,4),(27,19,9,3)):
+            tip=(x,y-height)
             d.polygon(((x-width-1,y),(x+width+1,y),(x+width,y+2),
                        (x-width+1,y+2)),fill=(21,29,23,180))
-            shape=((x-width,y-1),(x-2,y-height+2),tip,
-                   (x+width-1,y-3),(x+width,y),(x,y+1))
-            d.polygon(shape,fill=(145,125,96,255))
-            d.polygon((tip,(x,y-1),(x+width,y),(x+width-1,y-3)),
-                      fill=(89,87,73,255))
-            d.polygon((tip,(x-2,y-height+2),(x-width,y-1),(x,y-1)),
-                      fill=(180,158,116,255))
-            d.line(((x-width,y-1),tip,(x,y-1)),fill=(221,197,146,255),width=1)
-        for x,y in ((4,13),(13,8),(14,15),(23,14),(31,11)):
+            d.polygon(((x-width,y),tip,(x+width,y)),fill=(145,125,96,255))
+            d.polygon((tip,(x+width,y),(x+1,y)),fill=(89,87,73,255))
+            d.polygon((tip,(x-width,y),(x-width+1,y)),fill=(180,158,116,255))
+            d.line(((x-width,y),tip),fill=(221,197,146,255),width=1)
+        for x,y in ((4,19),(14,21),(23,20),(31,17)):
             d.polygon(((x-1,y),(x,y-2),(x+2,y),(x+1,y+1)),
                       fill=(124,112,88,235))
             d.point((x,y-1),fill=(198,175,129,255))
         # Short ground markers convey ownership without outlining a dome.
-        d.line(((3,14),(4,15),(6,15)),fill=(*team_color,235),width=1)
-        d.line(((30,15),(32,15),(33,14)),fill=(*team_color,235),width=1)
-        return tile.resize((108,60),Image.Resampling.NEAREST)
+        d.line(((3,20),(4,21),(6,21)),fill=(*team_color,235),width=1)
+        d.line(((30,21),(32,21),(33,20)),fill=(*team_color,235),width=1)
+        return tile.resize((108,78),Image.Resampling.NEAREST)
 
     def _draw_terrain(self,img,t):
         for field in self.view.active_rock_fields.values():
@@ -1110,7 +1107,7 @@ class WebBattleRenderer:
             img.alpha_composite(footprint)
             for col,row in field['cells']:
                 x,y = self.cell_point((col,row))
-                img.alpha_composite(tile,(round(x-54),round(y-30)))
+                img.alpha_composite(tile,(round(x-54),round(y-48)))
             if cells:
                 # One caption per recorded field, placed below its front cell.
                 col,row = max(cells,key=lambda cell:(cell[1],-cell[0]))
