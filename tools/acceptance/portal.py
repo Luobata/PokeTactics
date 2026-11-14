@@ -204,7 +204,26 @@ def catalog_view(demo, version='species_v1'):
                           **({'unlock_challenge': arena.AUGMENT_LOCKS[key]} if key in arena.AUGMENT_LOCKS else {}),
                           'scope': '本局全队生效'} for key in arena.AUGMENTS],
             'technique_advice': _technique_advice(),
-            'builds': build_views}
+            'builds': build_views,
+            'depth': _depth_catalog()}
+
+
+def _depth_catalog():
+    """arena_v2 rule content for the guide and future catalog tabs."""
+    import arena_depth
+    import items
+    return {'ruleset': arena_depth.RULESET,
+            'augments': [{'id': key, **{k: v for k, v in spec.items() if k != 'tags'},
+                          'tags': list(spec['tags'])} for key, spec in arena_depth.AUGMENTS.items()],
+            'removed_augments': sorted(arena_depth.V2_EXCLUDED),
+            'terrains': [arena_depth.terrain_view(key) for key in arena_depth.TERRAINS],
+            'mods': [arena_depth.mod_view(key) for key in arena_depth.MODS],
+            'bond_rules': [{'element': element, **arena_depth.bond_rule_view(element)}
+                           for element in arena_depth.BOND_RULES],
+            'items': [{'id': key, 'name': spec['name'], 'description': spec['description'],
+                       'recipe': [items.COMPONENT_NAMES[c] for c in spec['pairs'][0]]}
+                      for key, spec in arena_depth.DEPTH_ITEMS.items()],
+            'component_stats': {key: dict(value) for key, value in arena_depth.COMPONENT_STATS.items()}}
 
 
 def document_view(relative, source):

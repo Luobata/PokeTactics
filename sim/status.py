@@ -369,12 +369,7 @@ def _apply_debuff(battle, unit, kind: str, t: float, source=None, *, non_spreadi
         st.ctrl_until = t + DR_WINDOW
     battle.events.append((t, "status", unit.idx, kind, "apply", 0))
     if battle._arena_on and previous_kind is None:
-        from arena_equipment import after_debuff
-        after_debuff(battle, source, unit, kind, t)
-        from arena_traits import after_debuff as trait_after_debuff
-        trait_after_debuff(battle, source, unit, kind, t)
-        from arena_teaching import after_ally_debuff
-        after_ally_debuff(battle, source, unit, kind, t)
+        battle.fx.emit('debuff', source=source, target=unit, kind=kind, t=t)
 
 
 def _revert_debuff(unit, st: _UnitState) -> None:

@@ -172,7 +172,17 @@ def combine(board, bench, inventory=None, *, single=False, only_species=None):
             merged.arena_trait = arena_traits.validate_choice(p.species_id, group[0].arena_trait)
         except ValueError:
             merged.arena_trait = None
+        # arena_v2: keep earned skill modifiers and the core mark; second-slot
+        # items return to storage (the merged unit re-equips deliberately).
+        earned = next((list(o.skill_mods) for o in group if getattr(o, 'skill_mods', None)), None)
+        if earned:
+            merged.skill_mods = earned
+        if any(getattr(o, 'is_core', False) for o in group):
+            merged.is_core = True
         for o in group:
+            if getattr(o, 'extra_item', None) and inventory is not None:
+                inventory.finished.append(o.extra_item)
+                o.extra_item = None
             if o.item:
                 if merged.item is None:
                     merged.item = o.item

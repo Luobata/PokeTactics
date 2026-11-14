@@ -493,6 +493,7 @@
           ? `进度已自动保存 · 第 ${state.round} 轮`
           : "每次操作自动保存");
     $("battle-next").disabled = locked || ($("battle-dialog").open && playback.n > 0 && !playback.verdictShown);
+    window.PlayDepth?.render({state, api, canPrep, selected: () => selected, pieceAt});
   }
   function renderCombatStats(scope, stats, combatants, highlights) {
     const container = $(`${scope}-statistics`);
@@ -1557,6 +1558,7 @@
         stats: meta?.statistics, round: meta?.round || state.round}),
       meta?.winner === 0);
     showCombinationSummary(meta);
+    window.PlayDepth?.renderLedger(meta);
     $("battle-next").disabled = busy || needsResume;
     if (!playback.reportTabTouched) setBattleTab("statistics", false);
     updatePlaybackState();

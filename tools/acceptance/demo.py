@@ -61,6 +61,8 @@ import tactics as tactics_mod  # noqa: E402
 import abilities as abilities_mod  # noqa: E402
 import arena as arena_mod  # noqa: E402
 import arena_research  # noqa: E402
+import arena_depth  # noqa: E402
+import arena_session  # noqa: E402
 import arena_families as families_mod
 import arena_skills  # noqa: E402
 import metagame as metagame_mod  # noqa: E402
@@ -351,6 +353,9 @@ def _prepare_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
         meta['research_teams'] = [arena_research.review(anim.research_battle, team)
                                   for team in (0, 1)]
         meta['loadout_highlights'] = _loadout_highlights(anim, teams)
+        if getattr(anim.research_battle, 'depth', False):
+            meta['ledger'] = _ledger_view(anim.research_battle)
+            meta['terrain'] = arena_depth.terrain_view(anim.research_battle.arena_terrain)
         _write_battle_script(anim, out_dir, meta)
 
     def render_job() -> float:
@@ -670,6 +675,43 @@ def _loadout_highlights(anim, teams):
 
 
 
+_LEDGER_SOURCES = {'augment': '海克斯', 'bond': '羁绊断点', 'item': '装备', 'skill_mod': '技能强化',
+                   'terrain': '地形', 'edition': '规则', 'depth': '规则'}
+
+
+def _ledger_name(source, key):
+    if source == 'augment':
+        return arena_mod.ALL_AUGMENTS.get(key, {}).get('name', key)
+    if source == 'bond':
+        rule = next((r for r in arena_depth.BOND_RULES.values() if r[1] == key), None)
+        return rule[2] if rule else key
+    if source == 'skill_mod':
+        return arena_depth.MODS.get(key, {}).get('name', key)
+    if source == 'terrain':
+        return arena_depth.TERRAINS.get(key.replace('terrain_', ''), {}).get('name', key)
+    if source == 'edition':
+        return {'support_aura': '辅助庇护（邻格辅助减伤 6%）',
+                'cover': '前排掩护（远程受远程伤害 -12%）'}.get(key, key)
+    if source == 'item':
+        if key == 'component_damage':
+            return '组件属性（木炭）'
+        return items_mod.FINISHED.get(key, {}).get('name', key)
+    return key
+
+
+def _ledger_view(battle):
+    """Per-team benefit ledger of every arena_v2 rule that acted in this battle."""
+    rows = []
+    for team in (0, 1):
+        for row in battle.fx.ledger.view(team):
+            if not any(row[k] for k in ('triggers', 'damage', 'heal', 'shield', 'energy',
+                                        'prevented', 'estimated')):
+                continue
+            rows.append({**row, 'team': team, 'name': _ledger_name(row['source'], row['id']),
+                         'source_name': _LEDGER_SOURCES.get(row['source'], row['source'])})
+    return rows
+
+
 def _battle_effects(events, teams):
     """Both perspectives from the same committed combat, including real zeroes."""
     from combination_view import battle_summary, field_summary, technique_summary
@@ -931,6 +973,16 @@ def _fmt_event(anim, e: tuple) -> str:
         return f"<b>{name(e[2])}</b> {zh}·{act}{tail}"
     if kind == "end":
         return f"— 战斗结束 {'（你胜）' if e[2] == 0 else '（对方胜）' if e[2] == 1 else '（平局）'}"
+    if kind == "effect":
+        payload = e[5] if len(e) > 5 and isinstance(e[5], dict) else {}
+        label = payload.get('label', e[4])
+        owner = name(e[2]) if e[2] in anim.by_idx else ('我方' if payload.get('team') == 0 else '敌方')
+        value = payload.get('value') or 0
+        unit_text = {'damage': '伤害', 'heal': '治疗', 'shield': '护盾', 'energy': '能量'}.get(
+            payload.get('kind'), '')
+        return (f"<b>{owner} · {label}</b>"
+                + (f" → {name(e[3])}" if e[3] in anim.by_idx and e[3] != e[2] else '')
+                + (f"（{unit_text} {value}）" if value and unit_text else ''))
     return f"— {kind}"
 
 
@@ -977,10 +1029,12 @@ class PlayerSeat:
                    if o.piece.species_id == species_id)
 
     def pop(self) -> int:
+        if getattr(self.inventory, 'ruleset', None) == arena_session.RULESET:
+            return arena_session.population(self)
         return economy.pop_of(self.level)
 
     def battle_comp(self) -> list:
-        if getattr(self.inventory, 'ruleset', None) == arena_mod.RULESET:
+        if getattr(self.inventory, 'ruleset', None) in arena_mod.RULESETS:
             return arena_mod.battle_comp(self.board)
         return [o.piece if o.item is None else (o.piece, o.item)
                 for o in self.board]
@@ -998,7 +1052,9 @@ class PlayerSeat:
 class Session:
     def __init__(self, seed: int, ruleset=tactics_mod.BASE_RULESET, arena_pool='species_v1') -> None:
         self.ruleset = tactics_mod.validate_ruleset(ruleset)
-        self.is_arena = self.ruleset == 'arena_v1'
+        self.is_arena = tactics_mod.is_arena(self.ruleset)
+        self.is_depth = tactics_mod.is_depth(self.ruleset)
+        self.arena_draft = None
         if arena_pool not in (*families_mod.VERSIONS, families_mod.LEGACY_VERSION):
             raise ValueError('未知竞技卡池版本')
         self.arena_pool = arena_pool if self.is_arena else families_mod.LEGACY_VERSION
@@ -1284,13 +1340,24 @@ class Session:
     def combine_player(self) -> list:
         """玩家 3 合 1（复用 shop.try_combine；格位按对象身份回填）。"""
         p = self.player
+        if self.is_arena:
+            self.ensure_unit_ids()
         pos_map = {id(o): pos for pos, o in p.grid.items()}
+        uid_pos = {o.uid: pos for pos, o in p.grid.items() if o.uid is not None}
         board_list = list(p.board)
         logs = try_combine(board_list, p.bench, self.pool, self.templates,
                            p.inventory, respect_locks=tactics_mod.evolution_choices_enabled(self.ruleset))
         if logs:
             p.combines += len(logs)
             p.grid = {pos_map[id(o)]: o for o in board_list if id(o) in pos_map}
+            if self.is_arena:
+                # A merge that consumed a deployed copy takes that copy's cell back,
+                # instead of dropping the upgraded unit onto the bench.
+                for owned in list(p.bench):
+                    pos = uid_pos.get(owned.uid)
+                    if pos is not None and pos not in p.grid and len(p.grid) < p.pop():
+                        p.bench.remove(owned)
+                        p.grid[pos] = owned
         return logs
 
     def locate(self, loc: str):
@@ -1326,7 +1393,9 @@ class Session:
         if pacing.enabled(self.ruleset) and r >= pacing.DEFAULT_NATURAL_END_POLICY.start_round:
             self._say(f'终局压力：败方本轮至少扣 {pacing.DEFAULT_NATURAL_END_POLICY.minimum_loss} 生命；胜方不掉血')
         for e in self._alive():
-            e.gold += economy.round_income(e.gold, e.streak)
+            extra = (arena_session.extra_interest(e, e.gold + economy.BASE_INCOME)
+                     if self.is_depth else 0)
+            e.gold += economy.round_income(e.gold, e.streak) + extra
             e.gold += items_mod.lucky_egg_income(e)
             e.level, e.xp = economy.gain_round_xp(e.level, e.xp)
         p = self.player
@@ -1346,6 +1415,8 @@ class Session:
         self.teach_bots()
         if self.is_arena:
             arena_mod.begin_round(self)
+        if self.is_depth:
+            arena_session.begin_round(self)
         # 配对：复用 match 规则（无重复对手优先 + 奇数打幽灵），
         # pair 子流每轮现派生，prep 期算好供 UI 展示对手快照（battle 时原样使用）
         self.pairs = None
@@ -1372,7 +1443,9 @@ class Session:
         """与 team1 的 back 部署一致：team0 坐标旋转 180°。"""
         rows = [[None] * GRID_COLS for _ in range(self.grid_rows)]
         if self.is_arena:
-            for entry, (col, row) in zip(board, arena_mod.positions_for(board, 1)):
+            terrain = (arena_depth.terrain_for_round(self.seed, self.round_no)
+                       if self.is_depth and board and all(hasattr(e, 'piece') for e in board) else None)
+            for entry, (col, row) in zip(board, arena_mod.positions_for(board, 1, terrain)):
                 rows[row][col] = entry
             return rows
         for i, owned in enumerate(board[:2 * GRID_COLS]):
@@ -1416,8 +1489,11 @@ class Session:
         labels = arena_mod.PVE_LABELS if self.is_arena else PVE_LABELS
         wave_ids = waves[min(r // 5 - 1, len(waves) - 1)]
         label = labels[min(r // 5 - 1, len(labels) - 1)]
-        row = [_piece_view(make_piece(sid, arena_mod.build_templates() if self.is_arena else self.templates), ruleset=self.ruleset)
-               for sid in wave_ids]
+        pieces = [make_piece(sid, arena_mod.build_templates() if self.is_arena else self.templates)
+                  for sid in wave_ids]
+        if self.is_depth:
+            pieces = arena_depth.scale_pve(pieces, r)
+        row = [_piece_view(piece, ruleset=self.ruleset) for piece in pieces]
         rows = self._enemy_rows(row)
         return {"name": f"野怪轮 · {label}", "hp": None, "level": None,
                 "rows": rows, "bench": [], "pve": True}
@@ -1430,6 +1506,11 @@ class Session:
             raise DemoError('请先选择本轮海克斯强化，再开始战斗')
         if self.player.alive and any(row['seat'] == 0 and row['status'] == 'pending' for row in self.rewards):
             raise DemoError('还有待领取技能机，请先领取或明确放弃本次奖励')
+        if self.is_depth:
+            note = arena_session.finish_draft(self)
+            if note:
+                self._say('选秀自动选择：' + note)
+            arena_session.auto_mods(self.player)
         self.refresh_tactics()
         r = self.round_no
         self.observe(fielded=[o.piece.species_id for o in self.player.board])
@@ -1565,14 +1646,17 @@ class Session:
             return
         if research is not None:
             arena_research.settle(self.arena_research, seat.seat, self.round_no, research)
-        grants = roll_rewards(rng_mod.derive(self.seed, self.round_no, 'pve', 12000 + seat.seat), result)
+        loot_rng = rng_mod.derive(self.seed, self.round_no, 'pve', 12000 + seat.seat)
+        grants = (arena_session.roll_rewards(loot_rng, result, seat) if self.is_depth
+                  else roll_rewards(loot_rng, result))
         grant_rewards(seat, grants)
         self.arena_loot.append({'id': reward_id, 'round': self.round_no,
                                'seat': seat.seat, 'result': result, 'grants': grants})
         self._grant_arena_component_choice(seat)
         if seat is self.player:
             names = '、'.join(reward_view(grant)['name'] for grant in grants)
-            self._say(f'回合奖励已入仓：{names}（胜利2份，失败或平局1份）')
+            self._say(f'回合奖励已入仓：{names}' + ('（每场1份；连败3场起额外补1个组件）' if self.is_depth
+                                                  else '（胜利2份，失败或平局1份）'))
 
     def _grant_arena_component_choice(self, seat):
         from arena_rewards import (COMPONENT_CHOICE_ROUNDS, component_choice,
@@ -1757,6 +1841,8 @@ class Session:
         wave_name = f"野怪轮 · {labels[min(r // 5 - 1, len(labels) - 1)]}"
         wave_ids = waves[min(r // 5 - 1, len(waves) - 1)]
         wave = [make_piece(sid, arena_mod.build_templates() if self.is_arena else self.templates) for sid in wave_ids]
+        if self.is_depth:
+            wave = arena_depth.scale_pve(wave, r)
         events = []
         battle_i = 0
         p = self.player
@@ -1786,6 +1872,8 @@ class Session:
                     e.gold += gold
                     if e is p:
                         self._say(f"野怪轮胜（+{gold} 金）")
+                    if self.is_depth and arena_session.pve_bonus(self, e) and e is p:
+                        self._say('寻宝者：野怪轮胜利额外获得 1 个组件')
                 else:
                     dmg = self._loss_damage(r, res["survivors"][1])
                     if e is p:
@@ -1871,7 +1959,8 @@ class Session:
         t0 = time.time()
         battle_options = self.battle_options(me, opp)
         if self.is_arena:
-            battle_options['positions_b'] = arena_mod.positions_for(comp_b, 1)
+            battle_options['positions_b'] = arena_mod.positions_for(
+                comp_b, 1, battle_options.get('arena_terrain') if opp is not None else None)
         if opp is not None and self.opponent_learned is not None:
             battle_options.pop("learned_b", None)
             if any(self.opponent_learned):
@@ -2144,7 +2233,7 @@ def _piece_view(piece, item=None, ruleset=tactics_mod.BASE_RULESET):
         "item": item,
         "item_name": items_mod.FINISHED[item]["name"] if item else None,
     }
-    if ruleset == 'arena_v1':
+    if ruleset in arena_mod.RULESETS:
         import arena_bonds
         import arena_traits
         role = getattr(piece, 'role_key', 'attack')
@@ -2165,13 +2254,14 @@ def _piece_view(piece, item=None, ruleset=tactics_mod.BASE_RULESET):
                     learnable=[t['id'] for t in arena_mod.technique_catalog()
                                if techniques_mod.compatible_species(piece.species_id, t['id'], ruleset=ruleset)],
                     item_effect=_item_effect(item, 'budget_v1') if item else None,
-                    stat_scope='deployment_base', stats=_deployment_stats(piece),
+                    stat_scope='deployment_base',
+                    stats=_deployment_stats(piece, tactics_mod.is_depth(ruleset)),
                     family=families_mod.route_view(piece))
     return view
 
 
 def _owned_view(owned, ruleset=tactics_mod.BASE_RULESET):
-    piece = arena_mod.battle_piece(owned) if ruleset == arena_mod.RULESET else owned.piece
+    piece = arena_mod.battle_piece(owned) if ruleset in arena_mod.RULESETS else owned.piece
     view = {**_piece_view(piece, owned.item, ruleset), 'uid': owned.uid,
             'technique': techniques_mod.view(owned.technique, ruleset)}
     return view
@@ -2180,14 +2270,14 @@ def _owned_view(owned, ruleset=tactics_mod.BASE_RULESET):
 _DEPLOYMENT_STATS = {}
 
 
-def _deployment_stats(piece):
+def _deployment_stats(piece, depth=False):
     """Base deployment values, with star/role but without gear, bonds or augments.
 
     Reuse Unit and the simulator's deterministic arena modifier. No Battle is
     constructed, run, or randomized for a read-only panel.
     """
     key = (piece.species_id, piece.tier, piece.star, getattr(piece, 'family_id', None),
-           getattr(piece, 'arena_trait_key', None))
+           getattr(piece, 'arena_trait_key', None), depth)
     if key not in _DEPLOYMENT_STATS:
         from combat import Unit
         import stat_budget
@@ -2196,6 +2286,7 @@ def _deployment_stats(piece):
         context.units, context.arena_teams = [unit], [(), ()]
         context.arena_growth = [{}, {}]
         context.arena_research = [{}, {}]
+        context.depth = depth
         Battle._apply_arena_stats(context)
         _DEPLOYMENT_STATS[key] = {'max_hp': unit.max_hp, 'atk': unit.attack,
                                  'sp_atk': unit.sp_attack, 'defense': unit.defense,
@@ -2578,6 +2669,8 @@ def state_json(sess) -> dict:
         v["sell"] = sell_value(o)
         if tactics_mod.evolution_choices_enabled(sess.ruleset):
             v['evolution'] = _evolution_view(sess, o)
+        if sess.is_depth:
+            v.update(arena_session.owned_view_extras(o, p))
         board_rows[r][c] = v
     bench = []
     for o in p.bench:
@@ -2587,6 +2680,8 @@ def state_json(sess) -> dict:
         v["sell"] = sell_value(o)
         if tactics_mod.evolution_choices_enabled(sess.ruleset):
             v['evolution'] = _evolution_view(sess, o)
+        if sess.is_depth:
+            v.update(arena_session.owned_view_extras(o, p))
         bench.append(v)
     shop = []
     for i in range(sess.shop_slots):
@@ -2597,6 +2692,13 @@ def state_json(sess) -> dict:
             v = _piece_view(p.templates[sid], ruleset=sess.ruleset)
             v["price"] = p.templates[sid].tier
             if sess.is_arena:
+                template = p.templates[sid]
+                v['owned_copies'] = sum(1 for o in p.all_pieces()
+                                        if getattr(o.piece, 'family_id', o.piece.species_id)
+                                        == getattr(template, 'family_id', sid)
+                                        and getattr(o.piece, 'star', 1) == 1)
+                if families_mod.rare_piece(template) and arena_mod.holds_legendary(p.all_pieces()):
+                    v['blocked'] = '传说限一：已持有一只传说宝可梦'
                 v['pool_remaining'] = sess.pool.remaining[sid]
                 v['pool_total'] = (families_mod.pool_caps(sess.arena_pool) if sess.is_family else arena_mod.pool_caps())[sid]
             if tactics_mod.evolution_choices_enabled(sess.ruleset):
@@ -2635,7 +2737,8 @@ def state_json(sess) -> dict:
                 "on_board": len(p.grid), "streak": p.streak,
                 "alive": p.alive, "rank": p.rank, "combines": p.combines,
                 "stone_used": p.stone_used, "bench_cap": sess.bench_capacity,
-                "refresh_cost": economy.REFRESH_COST,
+                "refresh_cost": (arena_session.refresh_cost(p) if sess.is_depth
+                                 else economy.REFRESH_COST),
                 "shop_locked": p.shop_locked,
                 "xp_cost": economy.XP_BUY_COST},
         "weather": {"key": wkey,
@@ -2689,7 +2792,7 @@ def state_json(sess) -> dict:
         def augments_of(seat):
             return [arena_mod.augment_status(sess, seat, a['id'] if isinstance(a, dict) else a)
                     for a in seat.arena_augments_selected]
-        st['arena'] = {'version': 'arena_v1', 'shop_slots': sess.shop_slots,
+        st['arena'] = {'version': sess.ruleset, 'shop_slots': sess.shop_slots,
                        'combination_version': 1,
                        'bench_capacity': sess.bench_capacity, 'deployment_rows': sess.grid_rows,
                        'catalog': [{**_piece_view(piece, ruleset=sess.ruleset),
@@ -2746,6 +2849,12 @@ def state_json(sess) -> dict:
                           for seat in sess.seats]
         for i, standing in enumerate(st['standings']):
             standing['seat'] = i
+        alive_order = sorted((seat for seat in sess.seats if seat.alive),
+                             key=lambda seat: (-seat.hp, -seat.level, seat.seat))
+        for place, seat in enumerate(alive_order, 1):
+            st['standings'][seat.seat]['provisional_rank'] = place
+        if sess.is_depth:
+            st['depth'] = _depth_view(sess)
     if sess.phase == "over":
         st["over"] = {"ranking": [
             {"name": e.name, "rank": e.rank, "is_you": e is p,
@@ -2753,6 +2862,75 @@ def state_json(sess) -> dict:
             for e in sorted(sess.seats,
                             key=lambda e: (e.rank is None, e.rank))]}
     return st
+
+
+def _depth_view(sess):
+    """arena_v2 rules the prep screen needs: terrain, draft, costs, bond breakpoints."""
+    import arena_bonds
+    p = sess.player
+    terrain_key = arena_depth.terrain_for_round(sess.seed, sess.round_no)
+    stage_end = ((max(1, sess.round_no) - 1) // 5 + 1) * 5
+    next_key = arena_depth.terrain_for_round(sess.seed, stage_end + 1)
+    draft = getattr(sess, 'arena_draft', None)
+    draft_view = None
+    if draft and draft['round'] == sess.round_no:
+        order_names = [sess.seats[n].name for n in draft['order']]
+        position = draft['order'].index(p.seat) if p.seat in draft['order'] else None
+        draft_view = {
+            'status': draft['status'], 'round': draft['round'], 'order': order_names,
+            'your_position': None if position is None else position + 1,
+            'options': [{**{k: o[k] for k in ('index', 'family', 'species', 'name', 'cost')},
+                         'reward': arena_rewards_view(o['reward']),
+                         'taken_by': (None if o['taken_by'] is None else
+                                      '已回收' if o['taken_by'] == -1 else sess.seats[o['taken_by']].name),
+                         'taken_by_you': o['taken_by'] == p.seat}
+                        for o in draft['options']]}
+    counts = {}
+    if p.board:
+        counts = arena_bonds.count([o.piece for o in p.board])
+        core = next((o for o in p.board if getattr(o, 'is_core', False)), None)
+        if core is not None:
+            for element in core.piece.types:
+                if element in counts:
+                    counts[element] += 1
+        if arena_session.has(p, 'bond_resonance'):
+            for element in list(counts):
+                if element in arena_bonds.ELEMENT_TIERS:
+                    counts[element] += 1
+    bond_rules = []
+    for element, rule in arena_depth.BOND_RULES.items():
+        view = arena_depth.bond_rule_view(element)
+        bond_rules.append({**view, 'element': element, 'type_name': arena_bonds.TYPE_NAMES[element],
+                           'current': counts.get(element, 0),
+                           'active': counts.get(element, 0) >= rule[0]})
+    return {
+        'ruleset': sess.ruleset,
+        'terrain': {**arena_depth.terrain_view(terrain_key), 'stage_end': stage_end,
+                    'next': arena_depth.terrain_view(next_key)},
+        'draft': draft_view,
+        'refresh': {'cost': arena_session.refresh_cost(p),
+                    'free': arena_session.seat_state(p)['free_refreshes'],
+                    'targeted_cost': arena_session.targeted_cost(p),
+                    'types': arena_session.type_options(sess)},
+        'population_penalty': arena_depth.population_penalty(arena_session.augment_keys(p)),
+        'items': {'unequip_cost': arena_session.UNEQUIP_COST,
+                  'dismantle_cost': 0 if arena_session.has(p, 'salvage') else arena_session.DISMANTLE_COST,
+                  'sell_value': arena_session.ITEM_SELL_VALUE,
+                  'stats': {key: arena_depth.item_stats_text(key)
+                            for key in items_mod.catalog(sess.ruleset)}},
+        'bond_rules': bond_rules,
+        'mods': [arena_depth.mod_view(key) for key in arena_depth.MODS],
+        'core': next((o.uid for o in p.all_pieces() if getattr(o, 'is_core', False)), None),
+        'draft_rounds': list(arena_session.DRAFT_ROUNDS),
+        'simulation': (getattr(sess, 'last_simulation', None)
+                       if (getattr(sess, 'last_simulation', None) or {}).get('round') == sess.round_no else None),
+        'simulations_left': arena_session.SIMULATIONS_PER_ROUND - arena_session.seat_state(p)['sims'],
+    }
+
+
+def arena_rewards_view(grant):
+    from arena_rewards import reward_view
+    return reward_view(grant)
 
 
 # ---------------------------------------------------------------- 动作
@@ -2881,27 +3059,180 @@ def act_sell(sess, loc: str):
     if owned.technique is not None and not sess.is_arena:
         p.inventory.techniques[owned.technique] += 1
         owned.technique = None
+    if sess.is_depth and getattr(owned, 'extra_item', None):
+        p.inventory.finished.append(owned.extra_item)
+        owned.extra_item = None
     gold = shop_mod.sell_owned(owned, sess.pool)
     p.gold += gold
     if where == "bench":
         p.bench.remove(owned)
     else:
         del p.grid[key]
-    return f"卖出 {owned.piece.name}（+{gold} 金）"
+    bonus = arena_session.salvage_bonus(sess, p, owned) if sess.is_depth else None
+    return f"卖出 {owned.piece.name}（+{gold} 金）" + (
+        f"；回收专家获得{items_mod.COMPONENT_NAMES[bonus]}" if bonus else "")
 
 
 def act_refresh(sess):
     _guard_prep(sess)
     p = sess.player
-    if p.gold < economy.REFRESH_COST:
-        raise DemoError(f"金币不足（刷新需 {economy.REFRESH_COST} 金）")
-    p.gold -= economy.REFRESH_COST
+    cost = arena_session.refresh_cost(p) if sess.is_depth else economy.REFRESH_COST
+    if p.gold < cost:
+        raise DemoError(f"金币不足（刷新需 {cost} 金）")
+    if sess.is_depth:
+        arena_session.spend_refresh(p)
+    else:
+        p.gold -= economy.REFRESH_COST
     p.shop_locked = False
     p.refresh_j += 1
     sess._roll_player_shop(rng_mod.derive(
         sess.seed, sess.round_no, "shop",
         rng_mod.shop_counter(p.seat, p.refresh_j)))
     return "商店已刷新"
+
+
+def act_refresh_type(sess, element):
+    _guard_prep(sess)
+    if not sess.is_depth:
+        raise DemoError('当前规则不支持定向刷新')
+    p = sess.player
+    if element not in {row['id'] for row in arena_session.type_options(sess)}:
+        raise DemoError('请选择有效的属性')
+    cost = arena_session.targeted_cost(p)
+    if p.gold < cost:
+        raise DemoError(f'金币不足（定向刷新需 {cost} 金）')
+    p.gold -= cost
+    p.shop_locked = False
+    p.refresh_j += 1
+    arena_session.targeted_roll(sess, p, element, rng_mod.derive(
+        sess.seed, sess.round_no, 'shop', rng_mod.shop_counter(p.seat, p.refresh_j)))
+    import arena_bonds
+    return f'定向刷新：{arena_bonds.TYPE_NAMES[element]}系（-{cost} 金）'
+
+
+def act_simulate(sess):
+    """Preview this round's committed matchup on independent seeds (no rewards, no RNG use)."""
+    _guard_prep(sess)
+    if not sess.is_depth:
+        raise DemoError('当前规则不支持模拟对战')
+    p = sess.player
+    state = arena_session.seat_state(p)
+    if state['sims'] >= arena_session.SIMULATIONS_PER_ROUND:
+        raise DemoError(f'本轮模拟次数已用完（每轮 {arena_session.SIMULATIONS_PER_ROUND} 次）')
+    comp_a = p.battle_comp()
+    if not comp_a:
+        raise DemoError('先让宝可梦上场再模拟')
+    opp = None
+    if sess.ghost_seat is p:
+        opp = sess.ghost_src
+    for a, b in sess.pairs or []:
+        if a is p:
+            opp = b
+        elif b is p:
+            opp = a
+    r = sess.round_no
+    if r % 5 == 0:
+        waves = arena_mod.PVE_WAVES
+        wave = [make_piece(sid, arena_mod.build_templates()) for sid in waves[min(r // 5 - 1, len(waves) - 1)]]
+        comp_b = arena_depth.scale_pve(wave, r)
+        opp = None
+    elif sess.opponent_comp is not None:
+        comp_b = list(sess.opponent_comp)
+    elif opp is not None:
+        comp_b = opp.battle_comp()
+    else:
+        raise DemoError('本轮没有可模拟的对手')
+    if not comp_b:
+        raise DemoError('对手场上没有宝可梦')
+    options = sess.battle_options(p, opp)
+    options['positions_b'] = arena_mod.positions_for(
+        comp_b, 1, options.get('arena_terrain') if opp is not None else None)
+    if opp is not None and sess.opponent_learned is not None:
+        options.pop('learned_b', None)
+        if any(sess.opponent_learned):
+            options['learned_b'] = list(sess.opponent_learned)
+    import random as _random
+    wins = losses = draws = 0
+    ledger, damage = {}, {}
+    for k in range(arena_session.SIMULATION_BATTLES):
+        battle = Battle(copy.deepcopy(comp_a), copy.deepcopy(comp_b),
+                        _random.Random(f'sim:{sess.seed}:{r}:{k}'), layout='back',
+                        positions_a=p.battle_positions(), **options)
+        result = battle.run()
+        wins += result['winner'] == 0
+        losses += result['winner'] == 1
+        draws += result['winner'] is None
+        for row in _ledger_view(battle):
+            if row['team'] == 0:
+                entry = ledger.setdefault(row['name'], {'name': row['name'], 'triggers': 0, 'value': 0})
+                entry['triggers'] += row['triggers']
+                entry['value'] += (row['damage'] + row['heal'] + row['shield'] + row['energy']
+                                   + row['estimated'] + row['prevented'])
+        for unit in battle.units:
+            if unit.team == 0:
+                damage[unit.piece.name] = damage.get(unit.piece.name, 0) + unit.damage_dealt
+    state['sims'] += 1
+    n = arena_session.SIMULATION_BATTLES
+    top = sorted(ledger.values(), key=lambda row: -row['value'])[:4]
+    carry = max(damage.items(), key=lambda kv: kv[1]) if damage else None
+    sess.last_simulation = {'round': r, 'wins': wins, 'losses': losses, 'draws': draws, 'battles': n,
+                            'carry': carry and {'name': carry[0], 'damage': carry[1] // n},
+                            'ledger': [{**row, 'triggers': round(row['triggers'] / n, 1),
+                                        'value': row['value'] // n} for row in top],
+                            'remaining': arena_session.SIMULATIONS_PER_ROUND - state['sims']}
+    return f'模拟 {n} 场：胜 {wins} · 负 {losses}' + (f' · 平 {draws}' if draws else '') + \
+        (f'；主要输出 {carry[0]}（场均 {carry[1] // n}）' if carry else '')
+
+
+def act_dismantle(sess, key):
+    _guard_prep(sess)
+    if not sess.is_depth:
+        raise DemoError('当前规则不支持拆解装备')
+    try:
+        return arena_session.dismantle(sess.player, key)
+    except ValueError as exc:
+        raise DemoError(str(exc)) from exc
+
+
+def act_sell_item(sess, key):
+    _guard_prep(sess)
+    if not sess.is_depth:
+        raise DemoError('当前规则不支持出售装备')
+    try:
+        return arena_session.sell_item(sess.player, key)
+    except ValueError as exc:
+        raise DemoError(str(exc)) from exc
+
+
+def act_choose_mod(sess, loc, mod):
+    _guard_prep(sess)
+    if not sess.is_depth:
+        raise DemoError('当前规则没有技能强化')
+    owned, _where, _key = sess.locate(loc)
+    try:
+        return arena_session.choose_mod(owned, mod)
+    except ValueError as exc:
+        raise DemoError(str(exc)) from exc
+
+
+def act_core(sess, loc):
+    _guard_prep(sess)
+    if not sess.is_depth:
+        raise DemoError('当前规则没有核心标记')
+    owned, where, _key = sess.locate(loc)
+    if where != 'grid' and not getattr(owned, 'is_core', False):
+        raise DemoError('只能把场上的宝可梦设为核心')
+    return arena_session.set_core(sess.player, owned)
+
+
+def act_draft(sess, index):
+    _guard_prep(sess)
+    if not sess.is_depth:
+        raise DemoError('当前规则没有选秀')
+    try:
+        return arena_session.claim_draft(sess, index)
+    except ValueError as exc:
+        raise DemoError(str(exc)) from exc
 
 
 def act_levelup(sess):
@@ -2994,10 +3325,18 @@ def act_equip(sess, key: str, loc: str):
     _guard_prep(sess)
     p = sess.player
     if key not in p.inventory.finished:
+        if key in items_mod.COMPONENT_NAMES:
+            raise DemoError(f"{items_mod.COMPONENT_NAMES[key]}是组件，需要先与另一件组件合成成品才能装备")
         raise DemoError("仓库里没有这件装备（先合成）")
     owned, _where, _key = sess.locate(loc)
+    if owned.item is not None and sess.is_depth and arena_session.item_slots(owned, p) >= 2 \
+            and getattr(owned, 'extra_item', None) is None and key != 'evo_stone':
+        p.inventory.finished.remove(key)
+        owned.extra_item = key
+        return f"{owned.piece.name} 第二装备位装备了 {items_mod.FINISHED[key]['name']}"
     if owned.item is not None:
-        raise DemoError("该棋子已有装备（每单位 1 格），先卸下再换")
+        slots = arena_session.item_slots(owned, p) if sess.is_depth else 1
+        raise DemoError(f"该棋子装备位已满（每单位 {slots} 格），先卸下再换")
     if key == "evo_stone":
         if p.stone_used:
             raise DemoError("进化石每局只能触发一次通信进化")
@@ -3020,18 +3359,35 @@ def act_equip(sess, key: str, loc: str):
     return f"{owned.piece.name} 装备了 {items_mod.FINISHED[key]['name']}"
 
 
-def act_unequip(sess, loc: str):
+def act_unequip(sess, loc: str, slot='0'):
     _guard_prep(sess)
     p = sess.player
     owned, _where, _key = sess.locate(loc)
+    if sess.is_depth and slot == '1':
+        if not getattr(owned, 'extra_item', None):
+            raise DemoError("第二装备位是空的")
+        if p.gold < arena_session.UNEQUIP_COST:
+            raise DemoError(f"卸下装备需要 {arena_session.UNEQUIP_COST} 金币")
+        p.gold -= arena_session.UNEQUIP_COST
+        key = owned.extra_item
+        owned.extra_item = None
+        p.inventory.finished.append(key)
+        return f"卸下 {items_mod.FINISHED[key]['name']}（回仓库，-{arena_session.UNEQUIP_COST} 金）"
     if owned.item is None:
         raise DemoError("这个棋子没有装备")
+    if sess.is_depth:
+        if p.gold < arena_session.UNEQUIP_COST:
+            raise DemoError(f"卸下装备需要 {arena_session.UNEQUIP_COST} 金币")
+        p.gold -= arena_session.UNEQUIP_COST
     if owned.item == "evo_stone":
         raise DemoError("进化石已触发通信进化，不能卸下")
     p.inventory.finished.append(owned.item)
     key = owned.item
     owned.item = None
-    return f"卸下 {items_mod.FINISHED[key]['name']}（回仓库）"
+    if sess.is_depth and getattr(owned, 'extra_item', None):
+        owned.item, owned.extra_item = owned.extra_item, None
+    return f"卸下 {items_mod.FINISHED[key]['name']}（回仓库" + (
+        f"，-{arena_session.UNEQUIP_COST} 金）" if sess.is_depth else "）")
 
 
 def act_learn(sess, uid: str, technique: str, replace=False):
@@ -3116,7 +3472,9 @@ def _new_session(seed: int, params=None) -> Session:
     params = params or {}
     tactical = params.get('mode') == 'tactics'
     arena = params.get('mode') == 'arena'
-    sess = Session(seed, 'arena_v1' if arena else tactics_mod.CURRENT_TACTICS_RULESET if tactical else tactics_mod.BASE_RULESET,
+    arena_ruleset = (tactics_mod.ARENA_RULESET if params.get('edition') == 'v1'
+                     else tactics_mod.ARENA_DEPTH_RULESET)
+    sess = Session(seed, arena_ruleset if arena else tactics_mod.CURRENT_TACTICS_RULESET if tactical else tactics_mod.BASE_RULESET,
                    arena_pool=families_mod.VERSION if arena else families_mod.LEGACY_VERSION)
     if arena:
         # Challenge unlocks are options for the next run: snapshot once here.
@@ -3204,7 +3562,25 @@ def _apply_action(params: dict):
                 msg = act_equip(sess, params.get("item", ""),
                                 params.get("loc", ""))
             elif cmd == "unequip":
-                msg = act_unequip(sess, params.get("loc", ""))
+                msg = act_unequip(sess, params.get("loc", ""), params.get("slot", "0"))
+            elif cmd == "refresh_type":
+                msg = act_refresh_type(sess, params.get("type", ""))
+            elif cmd == "simulate":
+                msg = act_simulate(sess)
+            elif cmd == "dismantle":
+                msg = act_dismantle(sess, params.get("item", ""))
+            elif cmd == "sell_item":
+                msg = act_sell_item(sess, params.get("item", ""))
+            elif cmd == "choose_mod":
+                msg = act_choose_mod(sess, params.get("loc", ""), params.get("mod", ""))
+            elif cmd == "core":
+                msg = act_core(sess, params.get("loc", ""))
+            elif cmd == "draft":
+                try:
+                    index = int(params.get("index", -1))
+                except ValueError:
+                    raise DemoError("无效的选秀选项")
+                msg = act_draft(sess, index)
             elif cmd == "trait":
                 _guard_prep(sess)
                 if not sess.is_arena:

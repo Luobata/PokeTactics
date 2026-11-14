@@ -175,6 +175,10 @@ FINISHED: Dict[str, dict] = {
                       "description": "携带者通过晴天成功建立的晴天从12秒延长至16秒。不会自己制造天气；同天气不续时，同时雨晴抵消，之后其他天气可覆盖。占用装备位，不能同时携带输出或启动装备。"},
 }
 
+# arena_v2 depth items: the four component pairs that had no recipe in v1.
+from arena_depth import DEPTH_ITEMS as _DEPTH_ITEMS  # noqa: E402
+FINISHED.update(_DEPTH_ITEMS)
+
 # 进化石的通信进化名单（S2 §1.5：勇基拉→胡地、豪力→怪力、鬼斯通→耿鬼）
 STONE_TARGETS: Dict[int, int] = {64: 65, 67: 68, 93: 94}
 
@@ -192,9 +196,10 @@ PVE_BONUS_DROPS = 2
 def catalog(ruleset=tactics.BASE_RULESET):
     active = tactics.counters_enabled(ruleset)
     return {key: spec for key, spec in FINISHED.items()
-            if (key != "healing_needle" or active or ruleset == 'arena_v1')
-            and (not spec.get('arena_only') or ruleset == 'arena_v1')
-            and (key != "evo_stone" or ruleset != 'arena_v1')}
+            if (key != "healing_needle" or active or tactics.is_arena(ruleset))
+            and (not spec.get('arena_only') or tactics.is_arena(ruleset))
+            and (not spec.get('depth_only') or tactics.is_depth(ruleset))
+            and (key != "evo_stone" or not tactics.is_arena(ruleset))}
 
 
 def _pair_lookup(ruleset=tactics.BASE_RULESET) -> Dict[Tuple[str, str], str]:
@@ -212,7 +217,7 @@ _PAIR_TABLE = _pair_lookup()
 def craft_result(a: str, b: str, ruleset=tactics.BASE_RULESET) -> str:
     """两组件 → 成品 key：无特定配方的对子兜底为进化石。"""
     table = _pair_lookup(ruleset) if (tactics.counters_enabled(ruleset)
-                                    or ruleset == 'arena_v1') else _PAIR_TABLE
+                                    or tactics.is_arena(ruleset)) else _PAIR_TABLE
     return table.get(tuple(sorted((a, b))), "evo_stone")
 
 

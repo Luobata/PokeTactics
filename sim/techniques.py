@@ -83,7 +83,7 @@ _ARENA_EXTRA = {34: frozenset({'thunderbolt', 'ice_beam', 'thunder'})}
 
 def ids_for(ruleset=BASE_RULESET):
     validate_ruleset(ruleset)
-    if ruleset == 'arena_v1':
+    if ruleset in ('arena_v1', 'arena_v2'):
         return TECHNIQUE_IDS + tuple(_ARENA)
     return TECHNIQUE_IDS + tuple(_TACTICAL) if enabled(ruleset) else TECHNIQUE_IDS
 
@@ -97,16 +97,16 @@ def category_of(key):
 
 def catalog(ruleset=BASE_RULESET):
     ids = ids_for(ruleset)
-    definitions = {**_TACTICAL, **_ARENA} if ruleset == 'arena_v1' else _TACTICAL
+    definitions = {**_TACTICAL, **_ARENA} if ruleset in ('arena_v1', 'arena_v2') else _TACTICAL
     rows = techniques_catalog() + [{'id': key, **deepcopy(value)} for key, value in definitions.items()]
-    if ruleset == 'arena_v1':
+    if ruleset in ('arena_v1', 'arena_v2'):
         rows = [{**row, 'description': _ARENA_CLASSIC_DESCRIPTIONS[row['id']]}
                 if row['id'] in _ARENA_CLASSIC_DESCRIPTIONS else row for row in rows]
     return [{**row, 'learn_types': sorted(_TYPE_REQUIREMENTS[row['id']] or []),
              **({'extra_species': sorted(sid for sid, keys in _ARENA_EXTRA.items() if row['id'] in keys)}
-                if ruleset == 'arena_v1' else {}),
+                if ruleset in ('arena_v1', 'arena_v2') else {}),
              'compatibility': _COMPATIBILITY[row['id']] +
-                              ('；竞技尼多王也可学' if ruleset == 'arena_v1' and row['id'] in ('thunderbolt', 'ice_beam') else '')}
+                              ('；竞技尼多王也可学' if ruleset in ('arena_v1', 'arena_v2') and row['id'] in ('thunderbolt', 'ice_beam') else '')}
             for row in rows if row['id'] in ids]
 
 
@@ -117,7 +117,7 @@ def compatible_species(species_id, technique, ruleset=BASE_RULESET):
         return True
     if not isinstance(technique, str) or technique not in _TYPE_REQUIREMENTS:
         return False
-    if ruleset == 'arena_v1' and technique in _ARENA_EXTRA.get(species_id, ()):
+    if ruleset in ('arena_v1', 'arena_v2') and technique in _ARENA_EXTRA.get(species_id, ()):
         return True
     allowed = _TYPE_REQUIREMENTS[technique]
     return allowed is None or bool(allowed.intersection(pokedex().species_record(species_id)['types']))

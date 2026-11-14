@@ -11,17 +11,28 @@ ABILITIES_RULESET = "tactics_v2"
 COUNTERS_RULESET = "tactics_v3"
 PACING_RULESET = "tactics_v4"
 CURRENT_TACTICS_RULESET = "tactics_v5"
+ARENA_RULESET = "arena_v1"
+ARENA_DEPTH_RULESET = "arena_v2"
+ARENA_RULESETS = (ARENA_RULESET, ARENA_DEPTH_RULESET)
+
+
+def is_arena(value):
+    return value in ARENA_RULESETS
+
+
+def is_depth(value):
+    return value == ARENA_DEPTH_RULESET
 
 
 def validate_ruleset(value):
     if not isinstance(value, str) or value not in (BASE_RULESET, TACTICS_RULESET, ABILITIES_RULESET,
-                                                COUNTERS_RULESET, PACING_RULESET, CURRENT_TACTICS_RULESET, 'arena_v1'):
+                                                COUNTERS_RULESET, PACING_RULESET, CURRENT_TACTICS_RULESET, *ARENA_RULESETS):
         raise ValueError("unknown battle ruleset")
     return value
 
 
 def enabled(value):
-    return validate_ruleset(value) not in (BASE_RULESET, 'arena_v1')
+    return validate_ruleset(value) not in (BASE_RULESET, *ARENA_RULESETS)
 
 
 def entry_abilities_enabled(value):
@@ -29,7 +40,7 @@ def entry_abilities_enabled(value):
 
 
 def counters_enabled(value):
-    return validate_ruleset(value) in (COUNTERS_RULESET, PACING_RULESET, CURRENT_TACTICS_RULESET, 'arena_v1')
+    return validate_ruleset(value) in (COUNTERS_RULESET, PACING_RULESET, CURRENT_TACTICS_RULESET, *ARENA_RULESETS)
 
 
 def pacing_enabled(value):

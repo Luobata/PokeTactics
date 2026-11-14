@@ -7,6 +7,8 @@ import techniques
 import rng as rng_mod
 
 RULESET = 'arena_v1'
+DEPTH_RULESET = 'arena_v2'
+RULESETS = (RULESET, DEPTH_RULESET)
 ROLE_NAMES = {'attack': '攻击型', 'defense': '防守型', 'support': '辅助型'}
 ROLE_DESCRIPTIONS = {
     'attack': '攻击与特攻提高 12%，专注输出；需要队友保护。',
@@ -92,6 +94,10 @@ AUGMENTS = {
     'deep_reserves': {'name': '深厚储备', 'scope': 'team', 'brief': '全队最大生命 +8% · 开战能量 +10',
                       'description': '全队最大生命提高 8%，开战时获得 10 点能量。完成竞技挑战「竞技场冠军」后进入候选池。'},
 }
+import arena_depth as _depth  # noqa: E402
+# Every key a Battle may receive: v1 panels plus arena_v2 rule augments.
+ALL_AUGMENTS = {**AUGMENTS, **{key: {k: v for k, v in spec.items() if k != 'tags'}
+                               for key, spec in _depth.AUGMENTS.items()}}
 # Challenge-locked candidates: an option unlock for future runs, never a
 # permanent buff. Bots always draw from the base pool; the player's pool gains
 # unlocked entries from the run-start profile snapshot (session.arena_unlocks).
@@ -110,9 +116,12 @@ GROWTH_STACK_LIMIT = WAR_DRUM_CAP_ROUND
 
 
 def augment_view(key):
-    if key not in AUGMENTS:
+    if key not in ALL_AUGMENTS:
         raise ValueError('未知海克斯强化')
-    return {'id': key, **copy.deepcopy(AUGMENTS[key])}
+    view = {'id': key, **copy.deepcopy(ALL_AUGMENTS[key])}
+    if key in _depth.AUGMENTS or key in _depth.AUGMENT_TAGS:
+        view['tags'] = list(_depth.augment_tags(key))
+    return view
 
 
 def build_templates():
@@ -162,6 +171,9 @@ def augment_pool(session, seat):
     locked = set(AUGMENT_LOCKS)
     if seat is session.player:
         locked -= set(getattr(session, 'arena_unlocks', {}).get('augments', ()))
+    if getattr(session, 'ruleset', RULESET) == DEPTH_RULESET:
+        pool = (set(AUGMENTS) - _depth.V2_EXCLUDED) | set(_depth.AUGMENTS)
+        return sorted(pool - set(_keys(seat)) - locked)
     return sorted(set(AUGMENTS) - set(_keys(seat)) - locked)
 
 
@@ -223,6 +235,11 @@ def begin_round(session):
             if seat is session.player:
                 session.arena_augments_pending = [{'id': f'augment-r{r}', 'round': r, 'options': options,
                                                    'rerolled': False}]
+            elif session.ruleset == DEPTH_RULESET:
+                choice = bot_augment_choice(seat, options)
+                seat.arena_augments_selected.append(choice)
+                import arena_session
+                arena_session.on_augment_claimed(session, seat, choice['id'])
             else:
                 seat.arena_augments_selected.append(options[rng.randrange(3)])
     # One paid teaching per AI per round, after purchasing and deployment.
@@ -241,6 +258,29 @@ def begin_round(session):
                 owned.arena_trait = 'trait_sheer_force' if owned.item == 'life_orb' else None
             elif sid == 9:
                 owned.arena_trait = 'trait_rain_dish' if rain else None
+
+
+def bot_augment_choice(seat, options):
+    """arena_v2 bots score augments against their board instead of rolling dice."""
+    pieces = [owned.piece for owned in seat.board] or [owned.piece for owned in seat.bench]
+    roles = [getattr(p, 'role_key', 'attack') for p in pieces]
+    melee = sum(1 for p in pieces if getattr(p, 'distance', None) == MELEE)
+    ranged = len(pieces) - melee
+    import arena_bonds
+    counts = arena_bonds.count(pieces)
+
+    def score(option):
+        tags = set(_depth.augment_tags(option['id']))
+        value = 1.
+        value += 2. * ('melee' in tags) * (melee >= 3) + 2. * ('ranged' in tags) * (ranged >= 3)
+        value += 1.5 * ('support' in tags) * (roles.count('support') >= 2)
+        value += 1.5 * ('frontline' in tags) * (roles.count('defense') >= 2)
+        value += 1.5 * ('bonds' in tags) * (sum(1 for n in counts.values() if n >= 2) >= 3)
+        value += 1. * ('poison' in tags) * (counts.get('POISON', 0) >= 2)
+        value += 1. * ('items' in tags) * (len(seat.inventory.finished) >= 2)
+        value += .5 * ('economy' in tags) * (seat.level <= 5)
+        return (value, option['id'])
+    return max(options, key=score)
 
 
 # 类别 × 携带者定位匹配分：伤害给攻击位，控制/反制给前排，恢复/支援/启动给非攻击位。
@@ -331,7 +371,10 @@ def claim_augment(session, reward_id, choice):
         raise ValueError('请选择本轮提供的海克斯强化')
     session.player.arena_augments_selected.append(augment_view(choice))
     pending.remove(row)
-    return '获得海克斯：' + AUGMENTS[choice]['name']
+    if session.ruleset == DEPTH_RULESET:
+        import arena_session
+        arena_session.on_augment_claimed(session, session.player, choice)
+    return '获得海克斯：' + ALL_AUGMENTS[choice]['name']
 
 
 def reroll_augment(session, reward_id):
@@ -374,7 +417,7 @@ def learn(session, loc, key):
 def set_trait(session, loc, key):
     """One mutually exclusive species ability, chosen freely before combat."""
     import arena_traits
-    if session.ruleset != RULESET or session.phase != 'prep' or not session.player.alive:
+    if session.ruleset not in RULESETS or session.phase != 'prep' or not session.player.alive:
         raise ValueError('只能在竞技准备期选择特性')
     owned, _, _ = session.locate(loc)
     if isinstance(key, str) and key in arena_traits.TRAIT_LOCKS and key not in getattr(
@@ -394,6 +437,13 @@ def battle_piece(owned):
     piece = copy.copy(owned.piece)
     piece.arena_trait_key = arena_traits.validate_choice(
         piece.species_id, getattr(owned, 'arena_trait', None))
+    # arena_v2 owned state (absent on v1 pieces, which keeps v1 snapshots identical).
+    if getattr(owned, 'skill_mods', None):
+        piece.skill_mods = tuple(owned.skill_mods)
+    if getattr(owned, 'is_core', False):
+        piece.is_core = True
+    if getattr(owned, 'extra_item', None):
+        piece.extra_item = owned.extra_item
     return piece
 
 
@@ -406,26 +456,32 @@ def battle_comp(owned_pieces):
 
 
 def battle_options(session, a, b):
-    options = {'ruleset': RULESET, 'stat_mode': 'budget_v1',
+    ruleset = session.ruleset if session.ruleset in RULESETS else RULESET
+    options = {'ruleset': ruleset, 'stat_mode': 'budget_v1',
                'arena_teams': [_keys(seat) if seat is not None else [] for seat in (a, b)],
                'arena_growth': [growth_stacks(seat, session.round_no) if seat is not None else {}
                                 for seat in (a, b)]}
-    if session.ruleset == RULESET:
+    if ruleset == DEPTH_RULESET:
+        options['arena_terrain'] = _depth.terrain_for_round(session.seed, session.round_no)
+    if session.ruleset in RULESETS:
         from arena_research import stacks_for
         research = getattr(session, 'arena_research', None)
         if research is not None:
             options['arena_research'] = [
                 stacks_for(research, seat.seat, before_round=session.round_no)
                 if seat is not None else {} for seat in (a, b)]
+    terrain = options.get('arena_terrain')
     if a is not None and a is not session.player:
-        options['positions_a'] = positions_for(a.board, 0)
+        options['positions_a'] = positions_for(a.board, 0, terrain)
     if b is not None:
-        options['positions_b'] = positions_for(b.board, 1)
+        options['positions_b'] = positions_for(b.board, 1, terrain)
     return options
 
 
-def positions_for(comp, team):
+def positions_for(comp, team, terrain=None):
     """Place defenders toward the centre, support behind, with stable columns."""
+    if terrain is not None:
+        return _depth.formation(comp, team, terrain)
     occupied, positions = set(), []
     for entry in comp:
         if isinstance(entry, tuple):
