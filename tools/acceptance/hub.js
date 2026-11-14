@@ -494,6 +494,7 @@
   const toolGroups = [
     { id: 'animation', name: '动画与演出', note: '查看动作，调试节奏', items: [
       { href: '/anim?mode=arena&seed=7', name: '竞技战斗预览', description: '试玩同款 960×640 战场与关节动作，固定种子 7。', symbol: '▶' },
+      { href: '/animation-workbench', name: '战斗动画工作台', description: '浏览器渲染器同源预览：多轨时间线、关键帧缓动、A/B 对照与单调度仪表盘。', symbol: 'WB' },
       { href: '/animation-lab?mode=arena', name: '竞技动作实验室', description: '151 个竞技形态，按需预览六种动作与原生技能。', symbol: 'FX' },
       { href: '/animation-editor?mode=arena', name: '竞技动作编辑器', description: '当前战场双栏调参对照、逐帧定位与预设导入导出。', symbol: '↝' }
     ] },

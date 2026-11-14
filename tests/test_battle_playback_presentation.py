@@ -66,6 +66,12 @@ class BattlePlaybackPresentation(unittest.TestCase):
     def test_restored_reports_without_frames_still_show_saved_statistics(self):
         self.run_scenario('restored')
 
+    def test_script_rounds_use_the_browser_renderer_with_the_same_controls(self):
+        self.run_scenario('scriptRenderer')
+
+    def test_missing_battle_script_falls_back_to_png_frames(self):
+        self.run_scenario('scriptFallback')
+
 
 if __name__ == '__main__':
     unittest.main()

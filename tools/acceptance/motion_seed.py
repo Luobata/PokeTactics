@@ -397,8 +397,8 @@ def vfx_pack():
                   'storm_conductor': 'chain_lightning', 'four_arm_combo': 'combo_flurry'},
     }
     screen = {
-        'ult': {'zoom': 1.08, 'dim': .42, 'slowmo': .45, 'slowmo_s': .3, 'banner_s': .9, 'hitstop': .1},
-        'ko': {'zoom': 1.05, 'dim': .25, 'hitstop': .1, 'zoom_s': .55},
+        'ult': {'zoom': 1.08, 'dim': .5, 'slowmo': .45, 'slowmo_s': .3, 'banner_s': .9, 'hitstop': .1},
+        'ko': {'zoom': 1.06, 'dim': .38, 'hitstop': .1, 'zoom_s': .55},
         'crit': {'hitstop': .066, 'threshold': .22},
         'shake': {'base': 1.5, 'per_weight': 9, 'decay': .3, 'max': 12},
         'combo': {'window': .9, 'follow': .35},

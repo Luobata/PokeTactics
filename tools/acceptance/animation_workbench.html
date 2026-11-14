@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>战斗动画工作台 · PokeTactics</title>
+<link rel="stylesheet" href="/play/assets/animation_workbench.css">
+</head>
+<body class="wb">
+<header class="wb-top"><div class="wb-top-inner">
+  <div class="wb-brand"><span class="wb-pixel" aria-hidden="true"></span><div><div class="wb-eyebrow">POKETACTICS · BROWSER BATTLE WORKBENCH</div><strong>战斗动画工作台</strong></div></div>
+  <nav class="wb-links" aria-label="相关工具"><a href="/animation-editor?mode=arena">动作编辑器（Pillow）</a><a href="/animation-lab?mode=arena">动作实验室</a><a href="/reference?path=docs%2F58-browser-battle-renderer.md">使用说明</a></nav>
+</div></header>
+<main class="wb-main">
+  <div class="wb-intro"><h1>同一份战斗脚本，左右对照调动作</h1>
+    <p>左侧 A 使用已保存的 assets 数据，右侧 B 使用本页编辑中的数据；两边共用同一事件流、同一时间轴与同一渲染器（battle_renderer.js）。编辑只影响表现，不改模拟结果。</p></div>
+  <p id="wb-status" class="wb-status" role="status" aria-live="polite">正在读取动作数据…</p>
+
+  <div class="wb-grid">
+    <aside class="wb-panel wb-source" aria-labelledby="wb-source-title">
+      <div class="wb-panel-head"><h2 id="wb-source-title">01 / 战斗来源</h2><span>脚本即权威事件流</span></div>
+      <div class="wb-body">
+        <div class="wb-tabs" role="tablist" aria-label="来源类型">
+          <button type="button" role="tab" data-source="preview" aria-selected="true">单个动作</button>
+          <button type="button" role="tab" data-source="scenario" aria-selected="false">场景库</button>
+          <button type="button" role="tab" data-source="battle" aria-selected="false">真实对局</button>
+        </div>
+        <form id="wb-source-form" class="wb-form">
+          <div data-panel="preview">
+            <label class="wb-field"><span>宝可梦</span><select id="wb-species" disabled><option>读取中…</option></select></label>
+            <div class="wb-pair">
+              <label class="wb-field"><span>动作</span><select id="wb-kind">
+                <option value="attack">普通攻击</option><option value="cast">原生技能</option><option value="hit">受击</option>
+                <option value="death">退场</option><option value="move">移动</option><option value="idle">待机</option></select></label>
+              <label class="wb-field"><span>靶场</span><select id="wb-scene">
+                <option value="dummy">木桩</option><option value="melee">近战对手</option><option value="ranged">远程对手</option></select></label>
+            </div>
+          </div>
+          <div data-panel="scenario" hidden>
+            <label class="wb-field"><span>竞技场景</span><select id="wb-scenario" disabled><option>读取中…</option></select></label>
+          </div>
+          <div data-panel="battle" hidden>
+            <label class="wb-field"><span>对局 sid</span><input id="wb-sid" autocomplete="off" spellcheck="false" placeholder="12 位对局编号"></label>
+            <label class="wb-field"><span>轮次</span><input id="wb-round" type="number" min="1" max="999" value="1"></label>
+            <p class="wb-note">读取 /api/battle/script，只能查看本机仍保留的轮次。</p>
+          </div>
+          <label class="wb-field" data-seed><span>种子</span><input id="wb-seed" type="number" min="0" max="4294967295" value="7"></label>
+          <button id="wb-load" class="wb-button primary full" type="submit">载入战斗脚本</button>
+        </form>
+        <dl id="wb-script-meta" class="wb-meta"></dl>
+      </div>
+    </aside>
+
+    <section class="wb-stage" aria-labelledby="wb-stage-title">
+      <div class="wb-panel">
+        <div class="wb-panel-head"><h2 id="wb-stage-title">02 / A/B 对照预览</h2>
+          <label class="wb-toggle"><input id="wb-solo" type="checkbox"> 只看 B 大图</label></div>
+        <div id="wb-previews" class="wb-previews">
+          <figure class="wb-pane" data-pane="a"><figcaption><b>A · 已保存</b><span>assets/motion · assets/vfx 当前文件</span></figcaption>
+            <div class="wb-screen"><canvas id="wb-canvas-a" width="960" height="640" aria-label="A 已保存数据预览"></canvas><div class="wb-empty" id="wb-empty-a">载入战斗脚本后显示</div></div></figure>
+          <figure class="wb-pane" data-pane="b"><figcaption><b>B · 编辑中</b><span id="wb-dirty-note">与 A 相同</span></figcaption>
+            <div class="wb-screen"><canvas id="wb-canvas-b" width="960" height="640" aria-label="B 编辑中数据预览"></canvas><div class="wb-empty" id="wb-empty-b">载入战斗脚本后显示</div></div></figure>
+        </div>
+        <div class="wb-transport">
+          <div class="wb-buttons">
+            <button id="wb-prev" class="wb-button" type="button" title="后退 1/60 秒（←）" aria-label="后退一帧">◀︎</button>
+            <button id="wb-play" class="wb-button primary" type="button" disabled>播放</button>
+            <button id="wb-next" class="wb-button" type="button" title="前进 1/60 秒（→）" aria-label="前进一帧">▶︎</button>
+            <label class="wb-inline"><span>速度</span><select id="wb-speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label>
+            <label class="wb-inline"><input id="wb-loop" type="checkbox" checked> 循环</label>
+          </div>
+          <input id="wb-seek" type="range" min="0" max="1" step="0.001" value="0" disabled aria-label="播放位置">
+          <div class="wb-clock"><span id="wb-time">0.000 s</span><span id="wb-sim" class="wb-muted">模拟 0.000 s</span><span id="wb-dur" class="wb-muted">/ 0.00 s</span></div>
+        </div>
+      </div>
+
+      <div class="wb-panel">
+        <div class="wb-panel-head"><h2>03 / 多轨时间线</h2><span>B · 编辑后节奏；点击动作段选中并跳转</span>
+          <label class="wb-inline"><span>缩放</span><input id="wb-zoom" type="range" min="1" max="12" step="0.5" value="1"></label></div>
+        <div class="wb-legend" aria-hidden="true"><i class="lg-ant"></i>蓄力 <i class="lg-travel"></i>出手/飞行 <i class="lg-rec"></i>收招 <i class="lg-impact"></i>命中 <i class="lg-ult"></i>大招 <i class="lg-ko"></i>击倒 <i class="lg-cam"></i>镜头 <i class="lg-stop"></i>顿帧</div>
+        <div class="wb-timeline-box"><canvas id="wb-timeline" height="220" aria-label="多轨时间线"></canvas></div>
+        <p id="wb-selection" class="wb-note">尚未选择动作。</p>
+      </div>
+    </section>
+
+    <section class="wb-panel wb-editor" aria-labelledby="wb-editor-title">
+      <div class="wb-panel-head"><h2 id="wb-editor-title">04 / 编辑 B</h2><span id="wb-owner">—</span></div>
+      <div class="wb-tabs" role="tablist" aria-label="编辑内容">
+        <button type="button" role="tab" data-editor="keys" aria-selected="true">关键帧</button>
+        <button type="button" role="tab" data-editor="timing" aria-selected="false">节奏</button>
+        <button type="button" role="tab" data-editor="vfx" aria-selected="false">特效配方</button>
+      </div>
+      <div class="wb-body" data-editor-panel="keys">
+        <div class="wb-pair">
+          <label class="wb-field"><span>动作片段</span><select id="wb-clip"></select></label>
+          <label class="wb-field"><span>阶段</span><select id="wb-phase"></select></label>
+        </div>
+        <p id="wb-clip-note" class="wb-note"></p>
+        <div class="wb-table-wrap"><table class="wb-keys"><thead><tr><th>at</th><th>dx</th><th>dy</th><th>角度</th><th>sx%</th><th>sy%</th><th>显</th><th>缓动（到下一帧）</th><th></th></tr></thead><tbody id="wb-keys"></tbody></table></div>
+        <div class="wb-row">
+          <button id="wb-add-key" class="wb-button" type="button">＋ 插入关键帧</button>
+          <label class="wb-inline"><span>预设</span><select id="wb-ease-preset" aria-label="批量缓动预设">
+            <option value="">批量缓动…</option><option value="snappy">利落（OutExpo→OutBack）</option><option value="heavy">厚重（InCubic→OutBounce）</option><option value="soft">柔和（InOutQuad）</option><option value="linear">线性（对齐设备采样）</option></select></label>
+        </div>
+        <p id="wb-key-error" class="wb-error" role="alert" hidden></p>
+        <div class="wb-plots">
+          <figure><figcaption>选中帧缓动曲线</figcaption><canvas id="wb-ease-plot" width="180" height="110"></canvas></figure>
+          <figure><figcaption>本阶段位移 / 缩放（<b class="c-dx">dx</b> <b class="c-dy">dy</b> <b class="c-sy">sy</b>）</figcaption><canvas id="wb-pose-plot" width="300" height="110"></canvas></figure>
+        </div>
+      </div>
+      <div class="wb-body" data-editor-panel="timing" hidden>
+        <label class="wb-field"><span>定位原型（roles.json）</span><select id="wb-arche"><option value="melee">近战</option><option value="ranged">远程</option><option value="support">辅助</option><option value="tank">坦克</option></select></label>
+        <div id="wb-timing" class="wb-timing"></div>
+        <label class="wb-field"><span>选中单位物种体重（species.json）<output id="wb-weight-out"></output></span><input id="wb-weight" type="range" min="0" max="1" step="0.01" disabled></label>
+        <p class="wb-note">蓄力/收招 = 原型基准 ×（体重修正）+ 单位稳定偏移 + 单次抖动；命中时刻由时间轴固定，生命快照不移位。</p>
+      </div>
+      <div class="wb-body" data-editor-panel="vfx" hidden>
+        <label class="wb-field"><span>特效配方（core.json）</span><select id="wb-recipe"></select></label>
+        <textarea id="wb-recipe-json" class="wb-code" rows="14" spellcheck="false" aria-label="配方 JSON"></textarea>
+        <div class="wb-row"><button id="wb-recipe-apply" class="wb-button" type="button">应用到 B</button><span class="wb-note">layer: charge / projectile / trail / impact / ground / aura / screen</span></div>
+        <p id="wb-recipe-error" class="wb-error" role="alert" hidden></p>
+      </div>
+      <div class="wb-actions">
+        <button id="wb-save" class="wb-button primary" type="button" disabled>保存到 assets</button>
+        <button id="wb-export" class="wb-button" type="button">导出 JSON</button>
+        <button id="wb-revert" class="wb-button" type="button" disabled>还原 B</button>
+      </div>
+      <p id="wb-save-note" class="wb-note">保存仅限本机页面，服务端按 schema 校验后写入。</p>
+    </section>
+
+    <section class="wb-panel wb-dash" aria-labelledby="wb-dash-title">
+      <div class="wb-panel-head"><h2 id="wb-dash-title">05 / 单调度仪表盘</h2><span>A 已保存 · B 编辑中</span></div>
+      <div id="wb-dashboard" class="wb-body"><p class="wb-note">载入战斗脚本后计算。</p></div>
+    </section>
+  </div>
+</main>
+<script src="/play/assets/battle_renderer.js"></script>
+<script src="/play/assets/animation_workbench.js"></script>
+</body>
+</html>

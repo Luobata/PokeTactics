@@ -874,15 +874,15 @@
  "screen": {
   "ult": {
    "zoom": 1.08,
-   "dim": 0.42,
+   "dim": 0.5,
    "slowmo": 0.45,
    "slowmo_s": 0.3,
    "banner_s": 0.9,
    "hitstop": 0.1
   },
   "ko": {
-   "zoom": 1.05,
-   "dim": 0.25,
+   "zoom": 1.06,
+   "dim": 0.38,
    "hitstop": 0.1,
    "zoom_s": 0.55
   },

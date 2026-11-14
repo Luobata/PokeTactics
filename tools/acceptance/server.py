@@ -52,6 +52,7 @@ body{margin:0;background:#eeecdf;color:#29362e;font:14px/1.7 "PingFang SC",syste
 <a class="card" href="/scenarios?mode=arena"><b>竞技场景库</b><span>分件动作、岩钉击退、异常追击、治疗防守</span></a>
 <a class="card" href="/animation-lab?mode=arena"><b>动作实验室 / 靶场</b><span>当前 48 种精灵，六类动作实时样片</span></a>
 <a class="card" href="/animation-editor?mode=arena"><b>动画编辑器</b><span>默认 / 调参对照，真实命中帧与生命快照</span></a>
+<a class="card" href="/animation-workbench"><b>战斗动画工作台</b><span>浏览器渲染器 · 多轨时间线、关键帧缓动、A/B 与单调度</span></a>
 </div>
 <h2>检查重点</h2><ul><li>角色、原生技能和资源与试玩一致，一二世代共 48 种。</li>
 <li>怪力四臂、雷丘耳尾、巨钳螳螂双钳双翼，以及御三家已有分件动作；其余角色的覆盖按目录实际标注。</li>

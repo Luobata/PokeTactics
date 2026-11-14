@@ -24,6 +24,8 @@ SCRIPT_FILE = 'script.json'
 SID_PATTERN = re.compile(r'^[\w-]{1,64}$')
 _STATUS_ALIASES = {'para': 'paralysis', 'psn': 'poison', 'brn': 'burn', 'frz': 'freeze', 'slp': 'sleep'}
 _FORCED_MOVES = ('knockback', 'pull', 'breach', 'swap', 'displace', 'push')
+_LOG_SKILL_EFFECTS = ('guard', 'energy_drain', 'energy', 'cleanse', 'knockback', 'pull',
+                      'shield', 'absorb', 'expire', 'taunt', 'thorns', 'thorn_hit')
 
 
 def json_safe(value, digits=3):
@@ -249,8 +251,12 @@ def build_script(anim, *, source=None, log_formatter=None, playback_meta=None):
     deaths = [[_r(ev[0]), ev[2]] for ev in events if ev[1] == 'die']
     log = []
     if log_formatter is not None:
+        arena = getattr(anim, 'is_arena', False)
         for ev in anim.presentation_events:
-            if ev[1] in ('unit_state',):
+            # Same selection as the /play report log (demo._prepare_battle_frames).
+            if ev[1] == 'unit_state' or (arena and ev[1] == 'attack' and anim._terrain_attack(ev)):
+                continue
+            if ev[1] == 'skill_effect' and not (arena and ev[5] in _LOG_SKILL_EFFECTS):
                 continue
             try:
                 text = log_formatter(anim, ev)
