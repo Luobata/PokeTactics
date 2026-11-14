@@ -96,6 +96,11 @@ sim/combat.py Battle ──events──▶ AnimationTimeline（start/release/imp
 - **未知事件**
   - `(t,'effect',src,tgt,effect_id,payload)`：按 `payload.label/value/kind` 显示标签和对应类别的符号；`camera:'focus'` 时短暂聚焦。
   - 其它未知 kind 降级为目标或来源身上的小提示。
+- **arena_v2（深度版）**
+  - 新开竞技局默认 `arena_v2`。
+  - `effect` 事件的 source 和 target 都是 -1（例如冲锋号、先锋壁垒）时，按 `payload.team` 在全队头顶只弹一次大标签，并在每名队员脚下画环；`camera:'focus'` 推近整队。
+  - `kind:'move'`（开场跃进、撤退）只显示标签，不显示数值 0；位移本身由权威的 `move` 事件驱动。
+  - `meta.terrain` 的格子以 `(localRow, col)` 给出，脚本将其换算成全局 `[col, row, team]`：我方行号 = 3+localRow，敌方行号 = 2−localRow 且列号镜像为 5−col。棋盘按地形类型着色，并用虚线描边。
 
 ## 3. 数据格式
 
@@ -104,7 +109,7 @@ sim/combat.py Battle ──events──▶ AnimationTimeline（start/release/imp
 | 字段 | 内容 |
 | --- | --- |
 | `clock` | `duration`（时间轴总长）、`result_time`、`frame_dt`=0.05、`frames` |
-| `arena` | `cols`/`rows`（6×6），`team_rows`（我方 3–5 行，敌方 0–2 行），开场天气 |
+| `arena` | `cols`/`rows`（6×6），`team_rows`（我方 3–5 行，敌方 0–2 行），开场天气，`ruleset`（arena_v1 / arena_v2），`terrain`（深度版地形：id、name、description、全局格子 `[col,row,team]`） |
 | `units[]` | idx、team、sid、name、star、shiny、role、types、range、melee、pos、max_hp、item、technique、skill（id/name/type/category/arch/tags/power/targeting）、trait、sprite |
 | `actions[]` | 时间轴每个动作：i（原始事件序号）、kind、actor/target、start/release/impact/end、secondary/terrain、from/to、damage、cast 时的 move/eff/skill |
 | `states{idx}` | `[t, hp, energy, shield]` 演出时刻的权威快照 |

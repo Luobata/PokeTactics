@@ -79,12 +79,24 @@ const cases = {
     copy.events.push([t, t, 'effect', a, b, 'frost_mark', {label: '霜印', value: 12, kind: 'debuff', camera: 'focus'}]);
     copy.events.push([t, t, 'mystery_kind', a, b, {anything: [1, 2]}]);
     copy.events.push([t, t, 'effect', a, null, 'odd', 'not-a-dict']);
+    // arena_v2: team-wide effects use -1 for source and target.
+    copy.events.push([t, t, 'effect', -1, -1, 'charge_horn', {source: 'augment', team: 1, kind: 'shield', label: '冲锋号', value: 49}]);
+    copy.events.push([t, t, 'effect', a, a, 'charge_horn', {source: 'augment', team: 0, kind: 'move', label: '跃进', value: 0, origin: [1, 4], destination: [1, 3]}]);
+    copy.arena.terrain = {id: 'mana_spring', name: '能量泉', cells: [[2, 3, 0], [3, 2, 1]]};
     copy.events.sort((x, y) => x[0] - y[0]);
     const plan = R.compile(copy, R.mergePacks(packs));
     const list = R.frame(plan, R.toPlayback(plan, t + 0.2));
-    const labels = list.items.filter((it) => it.op === 'label').map((it) => it.text);
+    // Linked effects at one instant are staged one after another (chain beats),
+    // so collect the labels across the chain window.
+    const labels = [0.2, 0.45, 0.75].flatMap((dt) => R.frame(plan, R.toPlayback(plan, t + dt)).items)
+      .filter((it) => it.op === 'label').map((it) => it.text)
+      .filter((text, index, all) => all.indexOf(text) === index);
     assert.ok(labels.includes('霜印 12'), `effect label rendered: ${labels}`);
     assert.ok(labels.some((text) => /mystery/.test(text)), 'unknown kinds degrade to a generic pop');
+    assert.ok(labels.includes('冲锋号 +49'), `team-wide effect pops once: ${labels}`);
+    assert.equal(labels.filter((text) => text === '冲锋号 +49').length, 1);
+    assert.ok(labels.includes('跃进'), 'move effects show the label without a zero value');
+    assert.equal(list.items.filter((it) => it.op === 'cell').length, 2, 'terrain cells are tinted');
     assert.ok(plan.cameras.some((c) => c.kind === 'focus'), 'camera: focus payload is honoured');
     console.log('OK renderer unknown events');
   },

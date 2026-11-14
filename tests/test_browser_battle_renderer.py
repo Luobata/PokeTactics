@@ -82,6 +82,32 @@ class BattleScriptContract(unittest.TestCase):
         self.assertEqual(battle_script.json_safe({'a': (1, 2.0), 'b': {3}, 'c': float('nan'), 'd': object}),
                          {'a': [1, 2], 'b': [3], 'c': None, 'd': str(object)})
 
+    def test_depth_edition_effects_and_terrain_reach_the_script(self):
+        import combat
+        import arena_families as families
+        from render_battle_gif import BattleAnimation
+
+        def piece(fid, star=1):
+            return families.make_piece(fid, star, families.FAMILIES[fid][1][0][-1])
+        battle = combat.Battle([piece(66, 2), piece(66, 1)], [piece(1), piece(1)], random.Random(1),
+                               layout='back', ruleset='arena_v2', stat_mode='budget_v1',
+                               arena_teams=[['charge_horn'], []], arena_terrain='mana_spring',
+                               positions_a=[(0, 4), (1, 4)], positions_b=[(0, 1), (1, 1)])
+        battle.run()
+        anim = BattleAnimation([], [], 0, *demo._assets(), battle=battle)
+        script = battle_script.build_script(anim, source={'kind': 'fixture'},
+                                            log_formatter=demo._fmt_event, battle=battle)
+        self.assertEqual(battle_script.validate_script(script), [])
+        self.assertEqual(script['arena']['ruleset'], 'arena_v2')
+        terrain = script['arena']['terrain']
+        self.assertEqual(terrain['id'], 'mana_spring')
+        # localRow 0 (front) maps to row 3 for team 0 and row 2 / mirrored column for team 1.
+        self.assertIn([2, 3, 0], terrain['cells'])
+        self.assertIn([3, 2, 1], terrain['cells'])
+        effects = [row for row in script['events'] if row[2] == 'effect']
+        self.assertTrue(any(row[3] == -1 and row[6]['label'] == '冲锋号' for row in effects))
+        json.dumps(script)
+
 
 class ScriptPersistenceAndGating(unittest.TestCase):
     def setUp(self):

@@ -49,6 +49,41 @@ def _r(value):
     return round(float(value), 3)
 
 
+def _ruleset(anim, battle=None):
+    battle = battle or getattr(anim, 'research_battle', None)
+    ruleset = getattr(battle, 'ruleset', None)
+    if isinstance(ruleset, str):
+        return ruleset
+    return 'arena' if getattr(anim, 'is_arena', False) else 'classic'
+
+
+def _terrain(anim, meta=None, battle=None):
+    """Depth-edition terrain with cells in global [col, row, team] coordinates.
+
+    Terrain cells are authored per half as (localRow, col): localRow 0 is the
+    front line. Team 0 (near side) maps to row 3+localRow; team 1 mirrors to
+    row 2-localRow and column 5-col.
+    """
+    view = (meta or {}).get('terrain') if isinstance(meta, dict) else None
+    if view is None:
+        battle = battle or getattr(anim, 'research_battle', None)
+        key = getattr(battle, 'arena_terrain', None)
+        if not key or not getattr(battle, 'depth', False):
+            return None
+        try:
+            import arena_depth
+            view = arena_depth.terrain_view(key)
+        except (ImportError, KeyError):
+            return None
+    cells = []
+    for cell in view.get('cells') or ():
+        local_row, col = int(cell[0]), int(cell[1])
+        cells.append([col, 3 + local_row, 0])
+        cells.append([5 - col, 2 - local_row, 1])
+    return {'id': view.get('id'), 'name': view.get('name'), 'description': view.get('description'),
+            'cells': cells}
+
+
 def _skill_rows():
     import arena_skills
     return {'arena_' + row['id']: row for row in arena_skills.catalog(include_families=True)}
@@ -120,7 +155,7 @@ def _event_row(timeline, ev):
     return [_r(ev[0]), _r(sim_t), ev[1], *json_safe(list(ev[2:]))]
 
 
-def build_script(anim, *, source=None, log_formatter=None, playback_meta=None):
+def build_script(anim, *, source=None, log_formatter=None, playback_meta=None, battle=None):
     """Compile a BattleAnimation (arena) into the browser battle script dict."""
     timeline = anim.timeline
     rows = _skill_rows() if getattr(anim, 'is_arena', False) else {}
@@ -273,7 +308,8 @@ def build_script(anim, *, source=None, log_formatter=None, playback_meta=None):
                   'frame_dt': 0.05, 'frames': int(round(duration / 0.05)) + 1},
         'arena': {'cols': 6, 'rows': int(getattr(anim, 'battle_rows', 6)),
                   'team_rows': {'0': [3, 4, 5], '1': [0, 1, 2]},
-                  'ruleset': 'arena_v1' if getattr(anim, 'is_arena', False) else 'classic',
+                  'ruleset': _ruleset(anim, battle),
+                  'terrain': _terrain(anim, playback_meta, battle),
                   'weather': getattr(anim, '_initial_weather_name', None)},
         'units': units,
         'actions': actions,

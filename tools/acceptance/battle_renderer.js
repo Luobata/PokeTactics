@@ -301,7 +301,10 @@
     }
     for (const row of script.statuses || []) if (units[row.unit]) units[row.unit].statuses.push(row);
     for (const [t, idx] of script.deaths || []) if (units[idx]) units[idx].death = { t };
+    const terrain = script.arena && script.arena.terrain;
     const plan = { script, pack, units, order, rows, cols, duration, actions: [], hits: [], numbers: [], pops: [],
+      terrainCells: terrain && Array.isArray(terrain.cells) ? terrain.cells.filter((c) => Array.isArray(c) && c.length >= 2) : [],
+      terrainColor: terrainColor(terrain && terrain.id),
       chains: [], decals: [], cameras: [], banners: [], warp: null, weather: script.weather || [[0, null]] };
     const unitAt = (idx, t) => unitFoot(plan, units[idx], t);
 
@@ -433,6 +436,12 @@
     return plan;
   }
   const unitsOf = (units, idx) => units[idx];
+  const TERRAIN_COLORS = { highland: "#e8c98a", mana_spring: "#8fe0ff", brambles: "#7cc95a", sanctum: "#fff2a8", swamp: "#5aa08f", embers: "#ff8a4a" };
+  function terrainColor(id) {
+    if (!id) return "#e8d890";
+    for (const [key, color] of Object.entries(TERRAIN_COLORS)) if (String(id).includes(key)) return color;
+    return "#e8d890";
+  }
   const unitDeathOr = (unit, fallback) => (unit && unit.death ? unit.death.t : fallback);
 
   function pickRecipe(pack, { raw, skill, arche, supportive, melee, isCast }) {
@@ -504,8 +513,13 @@
         const [src, tgt, effectId, payload] = args;
         const p = payload && typeof payload === "object" ? payload : {};
         const look = EFFECT_KIND[p.kind] || ["✧", "#f4eecb"];
-        const value = p.value != null && p.value !== "" ? " " + (typeof p.value === "number" && p.value > 0 && ["heal", "shield", "energy"].includes(p.kind) ? "+" : "") + p.value : "";
-        pop = { t, unit: tgt != null ? tgt : src, from: src, text: (p.label || humanize(effectId)) + value, kind: "effect", glyph: look[0], color: look[1], camera: p.camera === "focus" };
+        const value = p.value != null && p.value !== "" && p.value !== 0 && p.kind !== "move" ? " " + (typeof p.value === "number" && p.value > 0 && ["heal", "shield", "energy"].includes(p.kind) ? "+" : "") + p.value : "";
+        // source/target may be -1 for team-wide effects (冲锋号, 先锋壁垒 …):
+        // those pop once over the whole team instead of a single body.
+        const unit = units[tgt] ? tgt : units[src] ? src : null;
+        const team = unit == null && (p.team === 0 || p.team === 1) ? p.team : null;
+        pop = { t, unit, team, from: units[src] ? src : null, text: (p.label || humanize(effectId)) + value, kind: team != null ? "team" : "effect",
+          glyph: look[0], color: look[1], camera: p.camera === "focus", source: p.source || null };
         linked.push(pop);
       } else if (!KNOWN_KINDS.has(kind)) {
         // Unknown future event: a small generic pop on its target or source.
@@ -514,7 +528,7 @@
         if (tgt == null) continue;
         pop = { t, unit: tgt, from: src, text: humanize(kind), kind: "unknown", glyph: "✧", color: "#e8e4c8" };
       }
-      if (pop && units[pop.unit]) { pop.seq = plan.pops.length; plan.pops.push(pop); }
+      if (pop && (units[pop.unit] || pop.team != null)) { pop.seq = plan.pops.length; plan.pops.push(pop); }
     }
     // chains: linked effects that fire close together get staged one after another
     const window = plan.pack.vfx.screen.combo?.window ?? 0.9;
@@ -696,7 +710,10 @@
       }
     }
     for (const c of plan.chains) cams.push({ t0: c.t0 - 0.05, t1: c.t1, kind: "chain", prio: 1, focus: c.units, beats: c.beats, zoom: 1.035, dim: 0 });
-    for (const p of plan.pops) if (p.camera) cams.push({ t0: p.t - 0.05, t1: p.t + 0.5, kind: "focus", prio: 1, focus: [p.unit], zoom: 1.05, dim: 0 });
+    for (const p of plan.pops) if (p.camera) {
+      const focus = p.team != null ? plan.order.filter((i) => plan.units[i].team === p.team) : [p.unit];
+      cams.push({ t0: p.t - 0.05, t1: p.t + 0.6, kind: "focus", prio: 1, focus, zoom: p.team != null ? 1.03 : 1.06, dim: 0 });
+    }
     plan.cameras = cams.sort((x, y) => x.t0 - y.t0);
   }
 
@@ -947,6 +964,7 @@
     const cam = cameraAt(plan, s, p);
     const weather = weatherAt(plan, s);
     items.push({ op: "bg", weather: weather.name });
+    for (const cell of plan.terrainCells) items.push({ op: "cell", col: cell[0], row: cell[1], color: plan.terrainColor, rows: plan.rows, cols: plan.cols, pulse: 0.5 + 0.5 * Math.sin(s * 2 + cell[0]), layer: 0 });
     // ground decals
     for (const d of plan.decals) {
       if (s < d.t || s > d.end + 0.4) continue;
@@ -1022,6 +1040,19 @@
       const at = pp.t + (pp.delay || 0);
       const age = s - at;
       if (age < 0 || age > 1.0) continue;
+      if (pp.team != null) {
+        // team-wide: one large label over the team's living bodies + a ring under each
+        const members = plan.order.map((i) => plan.units[i]).filter((u) => u.team === pp.team && (!u.death || u.death.t > at));
+        if (!members.length) continue;
+        const centers = members.map((u) => bodyCenter(plan, u, Math.min(s, at + 0.05), 0.5));
+        const cx = centers.reduce((sum, q) => sum + q.x, 0) / centers.length;
+        const top = Math.min(...centers.map((q) => q.y - q.size * 0.6));
+        const scale = age < 0.14 ? 0.5 + 0.5 * ease("easeOutBack", age / 0.14) : 1;
+        items.push({ op: "label", x: cx, y: top - 26 - ease("easeOutQuad", age) * 8, text: pp.text, glyph: pp.glyph, color: pp.color,
+          kind: "team", big: true, scale: scale * 1.25, alpha: clamp01((1.0 - age) / 0.3), layer: 10 });
+        for (const q of centers) items.push({ op: "ring", x: q.x, y: q.y + q.size * 0.5, r: 12 + 34 * ease("easeOutCubic", age / 0.45), color: pp.color, alpha: clamp01(0.85 - age / 0.45), width: 2.5, layer: 7 });
+        continue;
+      }
       const unit = plan.units[pp.unit];
       if (!unit) continue;
       const c = bodyCenter(plan, unit, Math.min(s, at + 0.05), 1.0);
@@ -1338,6 +1369,14 @@
           break;
         }
         case "decal": drawDecal(ctx, it); break;
+        case "cell": {
+          const a = cellCorner(it.col, it.row, it.rows, it.cols), b = cellCorner(it.col + 1, it.row, it.rows, it.cols);
+          const c = cellCorner(it.col + 1, it.row + 1, it.rows, it.cols), d = cellCorner(it.col, it.row + 1, it.rows, it.cols);
+          ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.lineTo(...c); ctx.lineTo(...d); ctx.closePath();
+          ctx.fillStyle = hexA(it.color, 0.16 + 0.06 * it.pulse); ctx.fill();
+          ctx.strokeStyle = hexA(it.color, 0.55); ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]); ctx.stroke(); ctx.setLineDash([]);
+          break;
+        }
         case "fx": drawFx(ctx, it); break;
         case "shadow": {
           ctx.fillStyle = `rgba(4,12,10,${it.alpha})`;
@@ -1783,7 +1822,7 @@
   function drawLabel(ctx, cam, it) {
     const [x, y] = worldToScreen(cam, it.x, it.y);
     ctx.save(); ctx.translate(x, y); ctx.scale(it.scale, it.scale); ctx.globalAlpha = it.alpha;
-    ctx.font = "700 13px 'PingFang SC', system-ui, sans-serif"; ctx.textAlign = "center";
+    ctx.font = `700 ${it.big ? 15 : 13}px 'PingFang SC', system-ui, sans-serif`; ctx.textAlign = "center";
     const text = (it.glyph ? it.glyph + " " : "") + it.text;
     const tw = ctx.measureText(text).width + 14;
     ctx.fillStyle = "rgba(10,18,20,0.82)"; roundRect(ctx, -tw / 2, -14, tw, 20, 10); ctx.fill();
