@@ -1385,7 +1385,7 @@
     if (state.phase === "over") return showResults();
     if (state.phase === "battle") return openBattle();
     if (!state.you.alive) {
-      const result = await api("next");
+      const result = await api("next", {renderer: rendererPreference()});
       if (result?.ok) state.phase === "over" ? showResults() : openBattle();
       return;
     }
@@ -1404,7 +1404,7 @@
       );
       return;
     }
-    const result = await api("end_prep");
+    const result = await api("end_prep", {renderer: rendererPreference()});
     if (result?.ok) openBattle();
   }
   function showResults() {
@@ -1480,7 +1480,8 @@
       : p.playing ? "回放中" : p.complete ? "已暂停" : "准备开战";
   }
   function stopPlayback() {
-    clearInterval(playback.timer);
+    if (playback.script && playback.timer != null && typeof cancelAnimationFrame === "function") cancelAnimationFrame(playback.timer);
+    else clearInterval(playback.timer);
     playback.timer = null;
     playback.playing = false;
     playback.intentPlaying = false;
@@ -1506,6 +1507,9 @@
     playback.backoff?.clear();
     playback.frames = [];
     playback.cached.clear();
+    playback.renderer?.destroy?.();
+    playback.renderer = null;
+    playback.script = false;
     if ($("battle-dialog").open) $("battle-dialog").close();
   }
   function pendingBattleReport() {
@@ -1562,7 +1566,7 @@
   }
   function updateTeamTelemetry() {
     const p = playback;
-    const frame = p.meta?.team_frames?.[p.current];
+    const frame = p.script ? p.renderer.teamTotals(p.time) : p.meta?.team_frames?.[p.current];
     const combatants = p.meta?.combatants || [];
     for (const [team, side] of [[0, "friendly"], [1, "enemy"]]) {
       const initial = combatants.filter((unit) => Number(unit.team) === team);
@@ -1574,7 +1578,7 @@
       bar.style.width = maxHp > 0 && health != null ? `${Math.max(0, Math.min(100, health / maxHp * 100))}%` : "0%";
       bar.parentElement.title = health == null ? "这份回放未记录队伍生命" : `剩余总生命 ${statNumber(health)} / ${statNumber(maxHp)}`;
     }
-    $("battle-clock").textContent = replayClock(p.current * p.dt, true);
+    $("battle-clock").textContent = replayClock(p.script ? p.time : p.current * p.dt, true);
   }
   function updateBattleTimeline() {
     const p = playback;
@@ -1583,8 +1587,8 @@
     seek.value = String(p.requested ?? p.current);
     seek.setAttribute("aria-valuetext", `${(p.current * p.dt).toFixed(1)} 秒，共 ${(total * p.dt).toFixed(1)} 秒`);
     seek.style.setProperty("--progress", `${total ? p.current / total * 100 : 0}%`);
-    let buffered = p.current;
-    while (buffered + 1 < p.n && p.frames[buffered + 1]?.naturalWidth) buffered++;
+    let buffered = p.script ? Math.max(0, p.n - 1) : p.current;
+    while (!p.script && buffered + 1 < p.n && p.frames[buffered + 1]?.naturalWidth) buffered++;
     seek.style.setProperty("--buffer", `${total ? buffered / total * 100 : 0}%`);
     $("battle-current-time").textContent = replayClock(p.current * p.dt);
     $("battle-total-time").textContent = replayClock(total * p.dt);
@@ -1595,8 +1599,9 @@
   }
   function updateBattleEvents() {
     const p = playback;
-    const occurred = (p.meta?.events || []).map((event, index) => ({event, index}))
-      .filter(({event}) => Number(event.t) <= p.current * p.dt + 0.000001);
+    const now = p.script ? p.time : p.current * p.dt;
+    const occurred = ((p.script ? p.scriptLog : p.meta?.events) || []).map((event, index) => ({event, index}))
+      .filter(({event}) => Number(event.t) <= now + 0.000001);
     const last = occurred.length ? occurred[occurred.length - 1].index : -1;
     if (last === p.lastEvent) return;
     p.lastEvent = last;
@@ -1607,6 +1612,10 @@
   }
   function showFrame(index) {
     const p = playback;
+    if (p.script) {
+      showScriptTime(Math.max(0, Math.min(p.n - 1, Number(index) || 0)) * p.dt);
+      return true;
+    }
     const next = Math.max(0, Math.min(p.n - 1, Number(index) || 0));
     const image = p.frames[next];
     if (!image?.naturalWidth) return false;
@@ -1732,6 +1741,7 @@
   }
   function startPlaybackTimer() {
     const p = playback;
+    if (p.script) return startScriptLoop();
     if (p.renderDead) return;
     if (["checking", "rendering", "unavailable"].includes(p.renderStatus)) return;
     if (!p.intentPlaying || p.timer || !p.complete || p.requested != null || document.hidden || $("scout-dialog").open || !$("battle-dialog").open) return;
@@ -1769,6 +1779,7 @@
   }
   function pumpReplayFrames(extra = 0) {
     const p = playback;
+    if (p.script) return;
     if (!p.n || !$("battle-dialog").open) return;
     if (["checking", "rendering", "unavailable"].includes(p.renderStatus)) return;
     const token = p.token;
@@ -1979,6 +1990,13 @@
     if (!p.n) return;
     stopPlayback();
     const target = Math.max(0, Math.min(p.n - 1, Math.round(Number(index) || 0)));
+    if (p.script) {
+      p.intentPlaying = resume;
+      if (target < p.n - 1) hideBattleDisclosure();
+      showScriptTime(target >= p.n - 1 ? p.renderer.duration : target * p.dt);
+      if (resume) startPlaybackTimer();
+      return;
+    }
     p.requested = target;
     p.revealOnFailure = revealOnFailure;
     p.intentPlaying = resume;
@@ -2092,9 +2110,110 @@
       showVerdict();
       return;
     }
+    if (meta?.script && rendererPreference() === "script" && await openScriptBattle(meta)) return;
     setBattleLoading("正在准备战场，画面就绪后开始回放…");
     playback.healTimer = setTimeout(healFailedFrames, 4000);
     pumpReplayFrames();
+  }
+
+  // Browser battle renderer (docs/58): script-backed arena rounds are drawn
+  // locally at display rate from the authoritative event stream and timeline.
+  // ?renderer=png keeps the server PNG frames; any load failure falls back.
+  function rendererPreference() {
+    try {
+      const query = typeof location !== "undefined" ? location.search : "";
+      return new URLSearchParams(query).get("renderer") === "png" ? "png" : "script";
+    } catch {
+      return "script";
+    }
+  }
+  let battleRendererLoad = null;
+  function loadBattleRenderer() {
+    if (window.PokeBattle) return Promise.resolve(window.PokeBattle);
+    battleRendererLoad ||= new Promise((resolve, reject) => {
+      const tag = document.createElement("script");
+      tag.src = "/play/assets/battle_renderer.js";
+      tag.onload = () => (window.PokeBattle ? resolve(window.PokeBattle) : reject(new Error("渲染器载入失败")));
+      tag.onerror = () => {
+        battleRendererLoad = null;
+        reject(new Error("渲染器载入失败"));
+      };
+      document.head.append(tag);
+    });
+    return battleRendererLoad;
+  }
+  async function openScriptBattle(meta) {
+    const p = playback, token = p.token;
+    if (typeof requestAnimationFrame !== "function") return false;
+    setBattleLoading("正在载入战斗脚本…");
+    try {
+      const engine = await loadBattleRenderer();
+      const [script, pack] = await Promise.all([
+        fetchJson(`/api/battle/script?sid=${encodeURIComponent(sid)}&round=${Number(meta.round)}`, {timeoutMs: 20000}),
+        engine.loadPack(),
+      ]);
+      if (token !== p.token || !$("battle-dialog").open) return true;
+      if (!script || script.ok === false || !Array.isArray(script.units)) throw new Error("战斗脚本无效");
+      const renderer = new engine.BattleRenderer($("battle-canvas"), script, {pack});
+      await Promise.race([renderer.ready, new Promise((resolve) => setTimeout(resolve, 3000))]);
+      if (token !== p.token || !$("battle-dialog").open) {
+        renderer.destroy();
+        return true;
+      }
+      Object.assign(p, {renderer, script: true, time: 0, requested: null,
+        n: Math.max(1, Math.round(renderer.duration / p.dt) + 1), scriptLog: renderer.log()});
+      $("battle-seek").max = String(p.n - 1);
+      $("battle-loading").hidden = true;
+      document.querySelector(".battle-screen").setAttribute("aria-busy", "false");
+      showScriptTime(0);
+      if (p.intentPlaying) startPlaybackTimer();
+      return true;
+    } catch (error) {
+      if (token !== p.token) return true;
+      Object.assign(p, {renderer: null, script: false});
+      return false;
+    }
+  }
+  function showScriptTime(seconds) {
+    const p = playback;
+    p.time = Math.max(0, Math.min(p.renderer.duration, Number(seconds) || 0));
+    const next = Math.min(p.n - 1, Math.floor(p.time / p.dt + 1e-6));
+    p.current = next;
+    p.requested = null;
+    p.complete = true;
+    p.buffering = false;
+    if (p.time < p.renderer.duration - 1e-6 && p.verdictShown) hideBattleDisclosure();
+    p.renderer.render(p.time);
+    updateTeamTelemetry();
+    updateBattleTimeline();
+    updateBattleEvents();
+    updatePlaybackState();
+    if (p.time >= p.renderer.duration - 1e-6) {
+      p.current = p.n - 1;
+      showVerdict();
+    }
+  }
+  function startScriptLoop() {
+    const p = playback;
+    if (!p.intentPlaying || p.timer != null || document.hidden || $("scout-dialog").open || !$("battle-dialog").open) return;
+    if (p.time >= p.renderer.duration - 1e-6) return;
+    p.playing = true;
+    updatePlaybackState();
+    const token = p.token;
+    let last = null;
+    const step = (now) => {
+      if (token !== p.token || !p.intentPlaying || !p.playing) return;
+      p.timer = null;
+      if (last != null) showScriptTime(p.time + Math.min(0.1, Math.max(0, now - last) / 1000) * p.speed);
+      last = now;
+      if (!p.playing || p.time >= p.renderer.duration - 1e-6) {
+        p.playing = false;
+        updatePlaybackState();
+        return;
+      }
+      p.timer = requestAnimationFrame(step);
+    };
+    p.timer = requestAnimationFrame(step);
   }
   async function nextRound() {
     if (busy) return;

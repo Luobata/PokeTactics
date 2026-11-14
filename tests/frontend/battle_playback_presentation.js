@@ -408,6 +408,83 @@ const cases = {
     assert.equal(p.element('battle-seek').disabled, true);
     assert.equal(p.events.fetches.length, 1); p.unchanged();
   },
+  async scriptRenderer() {
+    // Script-backed arena rounds draw in the browser: no PNG requests, a
+    // display-rate clock, and the same pause / speed / seek / ending flow.
+    let rafId = 0, now = 1000;
+    const rafs = new Map();
+    class FakeRenderer {
+      constructor(canvas, script, {pack}) {
+        assert.equal(canvas.id, 'battle-canvas'); assert.ok(pack);
+        Object.assign(this, {duration: 1, renders: [], ready: Promise.resolve(), script});
+        FakeRenderer.last = this;
+      }
+      render(t) {this.renders.push(Math.round(t * 1000) / 1000);}
+      teamTotals(t) {return {alive: [1, t >= 1 ? 0 : 1], hp: [100, Math.round(100 - t * 100)]};}
+      log() {return [{t: 0, text: '战斗开始'}, {t: 0.5, text: '雷丘击中怪力'}];}
+      destroy() {this.destroyed = true;}
+    }
+    const scriptFetches = [];
+    const p = await page(fixture({script: true, n: 21}), {...imageOptions,
+      window: {PokeBattle: {BattleRenderer: FakeRenderer, loadPack: async () => ({clips: {}})}},
+      globals: {requestAnimationFrame: (callback) => {const id = ++rafId; rafs.set(id, callback); return id;},
+        cancelAnimationFrame: (id) => rafs.delete(id)},
+      fetchResponder: async (request) => {scriptFetches.push(request.pathname + request.search); return {schema: 'poketactics.battle_script', units: [{idx: 0}]};}});
+    const frames = async (count, step = 1000 / 60) => {
+      for (let i = 0; i < count; i++) {
+        const batch = [...rafs.values()]; rafs.clear();
+        for (const callback of batch) callback(now);
+        now += step; await p.settle();
+      }
+    };
+    await p.click(p.element('fight-button'));
+    assert.equal(p.element('battle-dialog').open, true);
+    assert.equal(scriptFetches.length, 1);
+    assert.match(scriptFetches[0], /^\/api\/battle\/script\?sid=[^&]+&round=\d+$/);
+    assert.equal(p.events.images.length, 0, 'browser-rendered rounds never request PNG frames');
+    const renderer = FakeRenderer.last;
+    assert.equal(renderer.renders[0], 0);
+    assert.equal(p.element('battle-loading').hidden, true);
+    assert.equal(p.element('battle-seek').max, '20');
+    noFinalReport(p);
+    await frames(31);
+    const t = renderer.renders.at(-1);
+    assert.ok(t > 0.4 && t < 0.6, `about half a second played, got ${t}`);
+    assert.match(p.element('battle-current-event').textContent, /雷丘击中怪力/);
+    await p.click(p.element('battle-pause'));
+    assert.equal(rafs.size, 0, 'pause cancels the animation frame loop');
+    const drawn = renderer.renders.length;
+    await frames(5); assert.equal(renderer.renders.length, drawn, 'paused playback does not advance');
+    await p.change('battle-speed', 2);
+    await p.click(p.element('battle-pause'));
+    const before = renderer.renders.at(-1);
+    await frames(7);
+    assert.ok(renderer.renders.at(-1) - before > 0.17, '2x speed advances twice as fast');
+    await seek(p, 4);
+    assert.equal(renderer.renders.at(-1), 0.2);
+    assert.equal(rafs.size, 0, 'scrubbing pauses playback');
+    noFinalReport(p);
+    await p.click(p.element('battle-pause'));
+    await frames(80);
+    assert.equal(renderer.renders.at(-1), 1);
+    assert.equal(p.element('battle-verdict').hidden, false, 'the ending reveals the verdict');
+    assert.equal(p.element('battle-next').disabled, false);
+    await seek(p, 2);
+    assert.equal(p.element('battle-verdict').hidden, true, 'scrubbing back hides the verdict again');
+    await p.click(p.element('battle-close'));
+    assert.equal(renderer.destroyed, true);
+  },
+  async scriptFallback() {
+    // A missing script (404) or engine failure falls back to the PNG frames.
+    const p = await page(fixture({script: true}), {...imageOptions,
+      window: {PokeBattle: {BattleRenderer: class {}, loadPack: async () => ({})}},
+      globals: {requestAnimationFrame: () => 1, cancelAnimationFrame: () => {}},
+      fetchResponder: async () => ({ok: false, status: 404, error: 'missing'})});
+    await p.click(p.element('fight-button'));
+    assert.equal(p.element('battle-dialog').open, true);
+    assert.ok(p.events.images.length > 0, 'PNG frames load after the script fallback');
+    assert.equal(currentFrame(p), 0);
+  },
 };
 (async () => {assert.ok(cases[scenario], `Unknown scenario ${scenario}`); await cases[scenario]();
   console.log(`OK playback ${scenario}`);})()

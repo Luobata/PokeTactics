@@ -166,7 +166,8 @@ async function page(fixture, options = {}) {
   };
   parse(markup, root); document.body = root.querySelector('body');
   const serialized = JSON.stringify(fixture); freeze(fixture);
-  const context = vm.createContext({document, window: {matchMedia: () => ({matches: !!options.mobile})}, innerHeight: 900, URLSearchParams, Date: {now: options.clock || Date.now},
+  const context = vm.createContext({document, window: {matchMedia: () => ({matches: !!options.mobile}), ...(options.window || {})}, innerHeight: 900, URLSearchParams, Date: {now: options.clock || Date.now},
+    ...(options.globals || {}),
     localStorage: {getItem: key => storage.get(key) || null, setItem: (key, value) => storage.set(key, value)},
     AbortController,
     fetch: async (url, init = {}) => {
@@ -178,6 +179,10 @@ async function page(fixture, options = {}) {
           ? await options.renderStatusResponder(request, events.renderStatusFetches.length, init)
           : {ok: true, status: 'ready', frames: 9, total: 9, updated_at: 1, queued: false, error: null};
         return {ok: true, json: async () => result};
+      }
+      if (options.fetchResponder && request.pathname !== '/api/demo/action') {
+        const result = await options.fetchResponder(request, init);
+        return {ok: result?.ok !== false || result?.units != null, status: result?.status || 200, json: async () => result};
       }
       assert.equal(request.pathname, '/api/demo/action');
       assert.equal(query.get('sid'), fixture.sid); events.fetches.push(url);

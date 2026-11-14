@@ -1,0 +1,1158 @@
+{
+ "schema_version": 1,
+ "kind": "motion_pack",
+ "name": "families",
+ "description": "25 种家族整身动作模板（family_motion.py）转换为缓动关键帧。",
+ "clips": {
+  "fam.balloon.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 0, -4, 105, 93, 1, "easeInOutQuad"],
+     [0.667, -7, 2, -5, 110, 88, 1, "easeInOutQuad"],
+     [1.0, -7, 2, -5, 112, 86, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 2, -5, 112, 86, 1, "easeOutExpo"],
+     [0.333, 12, 0, 7, 110, 95, 1, "easeOutQuad"],
+     [0.667, 7, 0, 4, 107, 95, 1, "easeOutQuad"],
+     [1.0, 2, 0, 2, 102, 100, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 0, 2, 102, 100, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「balloon」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.balloon.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, 0, -2, 112, 86, 1, "easeInOutQuad"],
+     [0.667, -10, 0, -2, 117, 81, 1, "easeInOutQuad"],
+     [1.0, -10, 0, -2, 119, 78, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, 0, -2, 119, 78, 1, "easeOutExpo"],
+     [0.333, 0, 0, 2, 110, 95, 1, "easeOutQuad"],
+     [0.667, 0, 0, 0, 107, 98, 1, "easeOutQuad"],
+     [1.0, 0, 0, 0, 105, 100, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 105, 100, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 102, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「balloon」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.bird.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, -7, -16, 93, 107, 1, "easeInOutQuad"],
+     [0.667, -10, -10, -22, 88, 112, 1, "easeInOutQuad"],
+     [1.0, -10, -12, -23, 86, 114, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, -12, -23, 86, 114, 1, "easeOutExpo"],
+     [0.333, 17, 14, 20, 119, 88, 1, "easeOutQuad"],
+     [0.667, 12, 10, 14, 114, 93, 1, "easeOutQuad"],
+     [1.0, 5, 5, 5, 107, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 5, 5, 5, 107, 98, 1, "easeOutBack"],
+     [0.5, 0, -5, -4, 100, 102, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「bird」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.bird.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, -5, -9, 95, 105, 1, "easeInOutQuad"],
+     [0.667, -7, -7, -13, 90, 112, 1, "easeInOutQuad"],
+     [1.0, -7, -7, -13, 88, 114, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, -7, -13, 88, 114, 1, "easeOutExpo"],
+     [0.333, 2, 2, 7, 114, 86, 1, "easeOutQuad"],
+     [0.667, 5, 0, 5, 110, 93, 1, "easeOutQuad"],
+     [1.0, 2, 0, 2, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 0, 2, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, -2, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「bird」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.bug.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 2, -5, 93, 112, 1, "easeInOutQuad"],
+     [0.667, -7, 5, -7, 88, 117, 1, "easeInOutQuad"],
+     [1.0, -7, 5, -9, 86, 119, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 5, -9, 86, 119, 1, "easeOutExpo"],
+     [0.333, 10, 2, 7, 117, 88, 1, "easeOutQuad"],
+     [0.667, 7, 2, 5, 112, 93, 1, "easeOutQuad"],
+     [1.0, 2, 2, 2, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 2, 2, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 2, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「bug」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.bug.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -2, 5, -4, 95, 110, 1, "easeInOutQuad"],
+     [0.667, -5, 7, -5, 90, 117, 1, "easeInOutQuad"],
+     [1.0, -5, 7, -5, 88, 119, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -5, 7, -5, 88, 119, 1, "easeOutExpo"],
+     [0.333, 2, -2, 4, 112, 88, 1, "easeOutQuad"],
+     [0.667, 2, 0, 2, 107, 95, 1, "easeOutQuad"],
+     [1.0, 0, 0, 0, 102, 100, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 102, 100, 1, "easeOutBack"],
+     [0.5, 0, 2, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「bug」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.canine.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, 0, -11, 90, 114, 1, "easeInOutQuad"],
+     [0.667, -10, 2, -14, 86, 119, 1, "easeInOutQuad"],
+     [1.0, -10, 2, -16, 83, 122, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, 2, -16, 83, 122, 1, "easeOutExpo"],
+     [0.333, 17, 0, 16, 122, 83, 1, "easeOutQuad"],
+     [0.667, 12, 0, 11, 114, 90, 1, "easeOutQuad"],
+     [1.0, 5, 0, 5, 107, 95, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 5, 0, 5, 107, 95, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「canine」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.canine.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, -2, -5, 88, 117, 1, "easeInOutQuad"],
+     [0.667, -10, -2, -7, 83, 122, 1, "easeInOutQuad"],
+     [1.0, -10, -2, -7, 81, 124, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, -2, -7, 81, 124, 1, "easeOutExpo"],
+     [0.333, 0, 0, 5, 117, 88, 1, "easeOutQuad"],
+     [0.667, 0, 0, 4, 110, 95, 1, "easeOutQuad"],
+     [1.0, 0, 0, 2, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 2, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 102, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「canine」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.dark.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, 0, -13, 93, 110, 1, "easeInOutQuad"],
+     [0.667, -10, 0, -18, 90, 112, 1, "easeInOutQuad"],
+     [1.0, -10, 0, -20, 88, 114, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, 0, -20, 88, 114, 1, "easeOutExpo"],
+     [0.333, 14, 0, 18, 114, 90, 1, "easeOutQuad"],
+     [0.667, 10, 0, 11, 110, 95, 1, "easeOutQuad"],
+     [1.0, 5, 0, 4, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 5, 0, 4, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「dark」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.dark.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, -2, -7, 95, 107, 1, "easeInOutQuad"],
+     [0.667, -10, -2, -9, 93, 110, 1, "easeInOutQuad"],
+     [1.0, -10, -2, -9, 90, 112, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, -2, -9, 90, 112, 1, "easeOutExpo"],
+     [0.333, 0, 0, 7, 114, 90, 1, "easeOutQuad"],
+     [0.667, 0, 0, 4, 110, 95, 1, "easeOutQuad"],
+     [1.0, 0, 0, 2, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 2, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「dark」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.dragon.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, -2, -11, 93, 110, 1, "easeInOutQuad"],
+     [0.667, -10, -5, -14, 88, 114, 1, "easeInOutQuad"],
+     [1.0, -10, -5, -16, 86, 117, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, -5, -16, 86, 117, 1, "easeOutExpo"],
+     [0.333, 14, 2, 16, 119, 86, 1, "easeOutQuad"],
+     [0.667, 10, 2, 11, 114, 93, 1, "easeOutQuad"],
+     [1.0, 5, 0, 5, 107, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 5, 0, 5, 107, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「dragon」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.dragon.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, 0, -5, 90, 114, 1, "easeInOutQuad"],
+     [0.667, -10, 2, -7, 86, 119, 1, "easeInOutQuad"],
+     [1.0, -10, 2, -7, 83, 122, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, 2, -7, 83, 122, 1, "easeOutExpo"],
+     [0.333, 0, 0, 5, 117, 88, 1, "easeOutQuad"],
+     [0.667, 0, 0, 4, 110, 95, 1, "easeOutQuad"],
+     [1.0, 0, 0, 2, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 2, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 102, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「dragon」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.fairy.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, -5, -5, 95, 110, 1, "easeInOutQuad"],
+     [0.667, -5, -7, -7, 93, 114, 1, "easeInOutQuad"],
+     [1.0, -5, -7, -7, 90, 117, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -5, -7, -7, 90, 117, 1, "easeOutExpo"],
+     [0.333, 10, 2, 7, 117, 88, 1, "easeOutQuad"],
+     [0.667, 7, 2, 5, 112, 93, 1, "easeOutQuad"],
+     [1.0, 2, 0, 2, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 0, 2, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, -2, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「fairy」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.fairy.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -2, -7, -4, 105, 98, 1, "easeInOutQuad"],
+     [0.667, -2, -10, -4, 102, 105, 1, "easeInOutQuad"],
+     [1.0, -2, -10, -4, 100, 110, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -2, -10, -4, 100, 110, 1, "easeOutExpo"],
+     [0.333, 0, -2, 4, 114, 88, 1, "easeOutQuad"],
+     [0.667, 0, 0, 2, 110, 95, 1, "easeOutQuad"],
+     [1.0, 0, 0, 0, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, -2, 0, 102, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「fairy」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.fighter.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, 2, -5, 93, 114, 1, "easeInOutQuad"],
+     [0.667, -10, 5, -7, 88, 119, 1, "easeInOutQuad"],
+     [1.0, -10, 5, -9, 86, 122, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, 5, -9, 86, 122, 1, "easeOutExpo"],
+     [0.333, 14, 0, 13, 122, 86, 1, "easeOutQuad"],
+     [0.667, 10, 0, 7, 114, 93, 1, "easeOutQuad"],
+     [1.0, 5, 0, 4, 107, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 5, 0, 4, 107, 98, 1, "easeOutBack"],
+     [0.5, 0, 2, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「fighter」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.fighter.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, 5, -4, 90, 114, 1, "easeInOutQuad"],
+     [0.667, -10, 7, -4, 86, 119, 1, "easeInOutQuad"],
+     [1.0, -10, 7, -4, 83, 122, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, 7, -4, 83, 122, 1, "easeOutExpo"],
+     [0.333, 5, 0, 5, 117, 88, 1, "easeOutQuad"],
+     [0.667, 2, 0, 4, 110, 95, 1, "easeOutQuad"],
+     [1.0, 0, 0, 2, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 2, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 2, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「fighter」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.fish.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 0, -11, 95, 105, 1, "easeInOutQuad"],
+     [0.667, -7, 0, -14, 93, 107, 1, "easeInOutQuad"],
+     [1.0, -7, 0, -16, 90, 110, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 0, -16, 90, 110, 1, "easeOutExpo"],
+     [0.333, 12, 0, 18, 110, 93, 1, "easeOutQuad"],
+     [0.667, 7, 0, 5, 107, 95, 1, "easeOutQuad"],
+     [1.0, 2, 0, -5, 102, 100, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 0, -5, 102, 100, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「fish」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.fish.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 2, -5, 98, 102, 1, "easeInOutQuad"],
+     [0.667, -7, 5, -7, 95, 107, 1, "easeInOutQuad"],
+     [1.0, -7, 5, -7, 93, 110, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 5, -7, 93, 110, 1, "easeOutExpo"],
+     [0.333, 0, 0, 7, 112, 90, 1, "easeOutQuad"],
+     [0.667, 0, 0, 2, 107, 95, 1, "easeOutQuad"],
+     [1.0, 0, 0, 0, 102, 100, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 102, 100, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「fish」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.flame.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, -2, -9, 93, 110, 1, "easeInOutQuad"],
+     [0.667, -7, -5, -13, 88, 114, 1, "easeInOutQuad"],
+     [1.0, -7, -5, -14, 86, 117, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, -5, -14, 86, 117, 1, "easeOutExpo"],
+     [0.333, 14, 0, 14, 122, 83, 1, "easeOutQuad"],
+     [0.667, 10, 2, 9, 114, 90, 1, "easeOutQuad"],
+     [1.0, 5, 2, 4, 107, 93, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 5, 2, 4, 107, 93, 1, "easeOutBack"],
+     [0.5, 2, 0, 2, 105, 95, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「flame」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.flame.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, 0, -5, 86, 119, 1, "easeInOutQuad"],
+     [0.667, -10, 2, -7, 81, 124, 1, "easeInOutQuad"],
+     [1.0, -10, 2, -7, 78, 126, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, 2, -7, 78, 126, 1, "easeOutExpo"],
+     [0.333, 0, 2, 5, 117, 88, 1, "easeOutQuad"],
+     [0.667, -2, 5, 4, 110, 95, 1, "easeOutQuad"],
+     [1.0, 0, 2, 2, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 2, 2, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 102, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「flame」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.ghost.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, -2, -7, 95, 105, 1, "easeInOutQuad"],
+     [0.667, -7, -5, -11, 93, 110, 1, "easeInOutQuad"],
+     [1.0, -7, -5, -13, 90, 112, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, -5, -13, 90, 112, 1, "easeOutExpo"],
+     [0.333, 12, -2, 11, 119, 88, 1, "easeOutQuad"],
+     [0.667, 7, 0, 7, 112, 93, 1, "easeOutQuad"],
+     [1.0, 2, 0, 4, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 0, 4, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, -2, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「ghost」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.ghost.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, -2, -4, 88, 117, 1, "easeInOutQuad"],
+     [0.667, -10, -5, -5, 83, 122, 1, "easeInOutQuad"],
+     [1.0, -10, -5, -5, 81, 124, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, -5, -5, 81, 124, 1, "easeOutExpo"],
+     [0.333, 0, -5, 4, 112, 90, 1, "easeOutQuad"],
+     [0.667, 0, -2, 2, 107, 95, 1, "easeOutQuad"],
+     [1.0, 0, 0, 0, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, -2, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「ghost」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.horn.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, 0, -7, 93, 112, 1, "easeInOutQuad"],
+     [0.667, -10, 2, -9, 88, 117, 1, "easeInOutQuad"],
+     [1.0, -10, 2, -11, 86, 119, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, 2, -11, 86, 119, 1, "easeOutExpo"],
+     [0.333, 14, 0, 11, 119, 88, 1, "easeOutQuad"],
+     [0.667, 10, 0, 7, 112, 93, 1, "easeOutQuad"],
+     [1.0, 5, 0, 4, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 5, 0, 4, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「horn」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.horn.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 2, -4, 95, 110, 1, "easeInOutQuad"],
+     [0.667, -7, 5, -5, 90, 117, 1, "easeInOutQuad"],
+     [1.0, -7, 5, -5, 88, 119, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 5, -5, 88, 119, 1, "easeOutExpo"],
+     [0.333, 0, 0, 4, 117, 88, 1, "easeOutQuad"],
+     [0.667, 0, 0, 2, 110, 95, 1, "easeOutQuad"],
+     [1.0, 0, 0, 0, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 102, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「horn」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.jelly.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 2, -4, 93, 112, 1, "easeInOutQuad"],
+     [0.667, -7, 5, -5, 88, 117, 1, "easeInOutQuad"],
+     [1.0, -7, 5, -5, 86, 119, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 5, -5, 86, 119, 1, "easeOutExpo"],
+     [0.333, 10, 0, 5, 117, 88, 1, "easeOutQuad"],
+     [0.667, 7, 0, 4, 112, 93, 1, "easeOutQuad"],
+     [1.0, 2, 0, 2, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 0, 2, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「jelly」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.jelly.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 0, -2, 102, 98, 1, "easeInOutQuad"],
+     [0.667, -7, 0, -2, 107, 93, 1, "easeInOutQuad"],
+     [1.0, -7, 0, -2, 110, 90, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 0, -2, 110, 90, 1, "easeOutExpo"],
+     [0.333, 0, 0, 2, 110, 95, 1, "easeOutQuad"],
+     [0.667, 0, 0, 0, 107, 98, 1, "easeOutQuad"],
+     [1.0, 0, 0, 0, 105, 100, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 105, 100, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 102, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「jelly」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.kick.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, -5, -9, 90, 114, 1, "easeInOutQuad"],
+     [0.667, -10, -7, -13, 86, 119, 1, "easeInOutQuad"],
+     [1.0, -10, -7, -14, 83, 122, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, -7, -14, 83, 122, 1, "easeOutExpo"],
+     [0.333, 12, 17, 16, 119, 83, 1, "easeOutQuad"],
+     [0.667, 10, 12, 11, 114, 90, 1, "easeOutQuad"],
+     [1.0, 5, 7, 5, 107, 95, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 5, 7, 5, 107, 95, 1, "easeOutBack"],
+     [0.5, 0, -2, 0, 100, 102, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「kick」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.kick.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 0, -5, 88, 122, 1, "easeInOutQuad"],
+     [0.667, -7, 2, -7, 83, 126, 1, "easeInOutQuad"],
+     [1.0, -7, 2, -7, 81, 129, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 2, -7, 81, 129, 1, "easeOutExpo"],
+     [0.333, 2, 12, 9, 117, 86, 1, "easeOutQuad"],
+     [0.667, 0, 10, 5, 110, 93, 1, "easeOutQuad"],
+     [1.0, 0, 5, 2, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 5, 2, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, -2, 0, 100, 102, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「kick」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.lily.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 2, -4, 95, 110, 1, "easeInOutQuad"],
+     [0.667, -7, 5, -5, 90, 114, 1, "easeInOutQuad"],
+     [1.0, -7, 5, -5, 88, 117, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 5, -5, 88, 117, 1, "easeOutExpo"],
+     [0.333, 10, 0, 5, 117, 88, 1, "easeOutQuad"],
+     [0.667, 7, 0, 4, 112, 93, 1, "easeOutQuad"],
+     [1.0, 2, 0, 2, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 0, 2, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「lily」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.lily.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 0, -2, 105, 95, 1, "easeInOutQuad"],
+     [0.667, -7, 0, -2, 110, 90, 1, "easeInOutQuad"],
+     [1.0, -7, 0, -2, 112, 88, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 0, -2, 112, 88, 1, "easeOutExpo"],
+     [0.333, 0, -2, 2, 110, 95, 1, "easeOutQuad"],
+     [0.667, 0, 0, 0, 107, 98, 1, "easeOutQuad"],
+     [1.0, 0, 0, 0, 105, 100, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 105, 100, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 102, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「lily」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.metal.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 2, -5, 93, 114, 1, "easeInOutQuad"],
+     [0.667, -7, 5, -7, 88, 119, 1, "easeInOutQuad"],
+     [1.0, -7, 5, -9, 86, 122, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 5, -9, 86, 122, 1, "easeOutExpo"],
+     [0.333, 14, 0, 11, 122, 83, 1, "easeOutQuad"],
+     [0.667, 10, 0, 7, 117, 88, 1, "easeOutQuad"],
+     [1.0, 5, 0, 4, 107, 95, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 5, 0, 4, 107, 95, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「metal」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.metal.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -10, 0, -4, 83, 126, 1, "easeInOutQuad"],
+     [0.667, -12, 0, -4, 78, 131, 1, "easeInOutQuad"],
+     [1.0, -12, 0, -4, 76, 134, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -12, 0, -4, 76, 134, 1, "easeOutExpo"],
+     [0.333, 0, 0, 4, 119, 86, 1, "easeOutQuad"],
+     [0.667, 0, 0, 2, 112, 93, 1, "easeOutQuad"],
+     [1.0, 0, 0, 0, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 102, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「metal」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.psychic.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, -5, -5, 98, 105, 1, "easeInOutQuad"],
+     [0.667, -7, -7, -7, 95, 110, 1, "easeInOutQuad"],
+     [1.0, -7, -7, -7, 93, 112, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, -7, -7, 93, 112, 1, "easeOutExpo"],
+     [0.333, 10, -2, 7, 117, 88, 1, "easeOutQuad"],
+     [0.667, 7, 0, 5, 112, 93, 1, "easeOutQuad"],
+     [1.0, 2, 0, 2, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 0, 2, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, -2, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「psychic」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.psychic.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, 0, -5, -4, 102, 98, 1, "easeInOutQuad"],
+     [0.667, 0, -7, -4, 100, 105, 1, "easeInOutQuad"],
+     [1.0, 0, -10, -4, 98, 112, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, 0, -10, -4, 98, 112, 1, "easeOutExpo"],
+     [0.333, 0, -10, 4, 107, 93, 1, "easeOutQuad"],
+     [0.667, 0, -7, 2, 105, 98, 1, "easeOutQuad"],
+     [1.0, 0, -5, 0, 102, 102, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, -5, 0, 102, 102, 1, "easeOutBack"],
+     [0.5, 0, -2, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「psychic」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.rock.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 2, -5, 95, 112, 1, "easeInOutQuad"],
+     [0.667, -7, 5, -7, 90, 117, 1, "easeInOutQuad"],
+     [1.0, -7, 5, -9, 88, 119, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 5, -9, 88, 119, 1, "easeOutExpo"],
+     [0.333, 12, 2, 9, 122, 83, 1, "easeOutQuad"],
+     [0.667, 10, 2, 5, 117, 88, 1, "easeOutQuad"],
+     [1.0, 5, 0, 4, 107, 95, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 5, 0, 4, 107, 95, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「rock」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.rock.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, 2, -4, 90, 114, 1, "easeInOutQuad"],
+     [0.667, -10, 5, -4, 86, 119, 1, "easeInOutQuad"],
+     [1.0, -10, 5, -4, 83, 122, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, 5, -4, 83, 122, 1, "easeOutExpo"],
+     [0.333, 0, 5, 4, 119, 86, 1, "easeOutQuad"],
+     [0.667, 0, 2, 2, 112, 93, 1, "easeOutQuad"],
+     [1.0, 0, 0, 0, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 102, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「rock」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.rodent.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 2, -7, 93, 112, 1, "easeInOutQuad"],
+     [0.667, -7, 2, -11, 88, 117, 1, "easeInOutQuad"],
+     [1.0, -7, 2, -13, 86, 119, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 2, -13, 86, 119, 1, "easeOutExpo"],
+     [0.333, 12, 0, 11, 119, 88, 1, "easeOutQuad"],
+     [0.667, 7, 0, 7, 112, 93, 1, "easeOutQuad"],
+     [1.0, 2, 0, 4, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 0, 4, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「rodent」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.rodent.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, 0, -4, 90, 114, 1, "easeInOutQuad"],
+     [0.667, -10, 0, -5, 86, 119, 1, "easeInOutQuad"],
+     [1.0, -10, 0, -5, 83, 122, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, 0, -5, 83, 122, 1, "easeOutExpo"],
+     [0.333, 0, 0, 4, 114, 90, 1, "easeOutQuad"],
+     [0.667, 0, 0, 2, 110, 95, 1, "easeOutQuad"],
+     [1.0, 0, 0, 0, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 102, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「rodent」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.serpent.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, 0, -9, 98, 102, 1, "easeInOutQuad"],
+     [0.667, -10, 0, -13, 95, 105, 1, "easeInOutQuad"],
+     [1.0, -10, 0, -14, 93, 107, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, 0, -14, 93, 107, 1, "easeOutExpo"],
+     [0.333, 14, 0, 16, 112, 90, 1, "easeOutQuad"],
+     [0.667, 10, 0, 7, 107, 95, 1, "easeOutQuad"],
+     [1.0, 2, 0, -4, 102, 100, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 0, -4, 102, 100, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「serpent」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.serpent.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, -2, -5, 95, 107, 1, "easeInOutQuad"],
+     [0.667, -10, -2, -7, 93, 112, 1, "easeInOutQuad"],
+     [1.0, -10, -2, -7, 90, 114, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, -2, -7, 90, 114, 1, "easeOutExpo"],
+     [0.333, 0, 0, 5, 112, 90, 1, "easeOutQuad"],
+     [0.667, 0, 0, 2, 107, 95, 1, "easeOutQuad"],
+     [1.0, 0, 0, 0, 102, 100, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 102, 100, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「serpent」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.shell.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 2, -4, 90, 114, 1, "easeInOutQuad"],
+     [0.667, -7, 5, -5, 86, 119, 1, "easeInOutQuad"],
+     [1.0, -7, 5, -5, 83, 122, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 5, -5, 83, 122, 1, "easeOutExpo"],
+     [0.333, 12, 0, 5, 117, 88, 1, "easeOutQuad"],
+     [0.667, 7, 0, 4, 112, 93, 1, "easeOutQuad"],
+     [1.0, 2, 0, 2, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 0, 2, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「shell」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.shell.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, 5, -2, 88, 117, 1, "easeInOutQuad"],
+     [0.667, -10, 7, -2, 83, 124, 1, "easeInOutQuad"],
+     [1.0, -10, 7, -2, 81, 126, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, 7, -2, 81, 126, 1, "easeOutExpo"],
+     [0.333, -12, 2, -4, 122, 86, 1, "easeOutQuad"],
+     [0.667, -7, 5, -2, 114, 93, 1, "easeOutQuad"],
+     [1.0, -2, 2, 0, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, -2, 2, 0, 105, 98, 1, "easeOutBack"],
+     [0.5, -2, 0, 0, 102, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「shell」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.spark.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 0, -9, 90, 114, 1, "easeInOutQuad"],
+     [0.667, -7, 0, -13, 86, 119, 1, "easeInOutQuad"],
+     [1.0, -7, 0, -14, 83, 122, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 0, -14, 83, 122, 1, "easeOutExpo"],
+     [0.333, 12, 0, 13, 119, 86, 1, "easeOutQuad"],
+     [0.667, 7, 0, 7, 112, 93, 1, "easeOutQuad"],
+     [1.0, 2, 0, 4, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 0, 4, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「spark」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.spark.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, -2, -5, 83, 122, 1, "easeInOutQuad"],
+     [0.667, -10, -2, -7, 78, 126, 1, "easeInOutQuad"],
+     [1.0, -10, -2, -7, 76, 129, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, -2, -7, 76, 129, 1, "easeOutExpo"],
+     [0.333, 0, 0, 4, 122, 83, 1, "easeOutQuad"],
+     [0.667, 0, 0, 2, 114, 90, 1, "easeOutQuad"],
+     [1.0, 0, 0, 0, 107, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 107, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 102, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「spark」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.sprout.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 2, -7, 90, 112, 1, "easeInOutQuad"],
+     [0.667, -7, 5, -11, 86, 117, 1, "easeInOutQuad"],
+     [1.0, -7, 7, -13, 83, 119, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 7, -13, 83, 119, 1, "easeOutExpo"],
+     [0.333, 12, -2, 11, 119, 86, 1, "easeOutQuad"],
+     [0.667, 10, 0, 7, 114, 90, 1, "easeOutQuad"],
+     [1.0, 5, 0, 4, 107, 95, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 5, 0, 4, 107, 95, 1, "easeOutBack"],
+     [0.5, 2, 2, 2, 105, 98, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「sprout」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.sprout.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -2, 5, -4, 107, 88, 1, "easeInOutQuad"],
+     [0.667, -5, 7, -5, 100, 95, 1, "easeInOutQuad"],
+     [1.0, -5, 10, -5, 95, 102, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -5, 10, -5, 95, 102, 1, "easeOutExpo"],
+     [0.333, 2, -5, 5, 114, 83, 1, "easeOutQuad"],
+     [0.667, 5, -2, 4, 110, 90, 1, "easeOutQuad"],
+     [1.0, 2, 0, 2, 105, 95, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 0, 2, 105, 95, 1, "easeOutBack"],
+     [0.5, 0, 2, 0, 102, 98, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「sprout」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.star.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -2, -2, -11, 95, 105, 1, "easeInOutQuad"],
+     [0.667, -5, -2, -16, 93, 107, 1, "easeInOutQuad"],
+     [1.0, -5, -2, -18, 90, 110, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -5, -2, -18, 90, 110, 1, "easeOutExpo"],
+     [0.333, 12, 0, 14, 114, 88, 1, "easeOutQuad"],
+     [0.667, 7, 0, 9, 110, 93, 1, "easeOutQuad"],
+     [1.0, 2, 0, 4, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 0, 4, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「star」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.star.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, 0, -5, -7, 105, 95, 1, "easeInOutQuad"],
+     [0.667, 0, -7, -11, 102, 102, 1, "easeInOutQuad"],
+     [1.0, 0, -7, -11, 100, 107, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, 0, -7, -11, 100, 107, 1, "easeOutExpo"],
+     [0.333, 0, 0, 4, 117, 88, 1, "easeOutQuad"],
+     [0.667, 0, 0, 2, 110, 95, 1, "easeOutQuad"],
+     [1.0, 0, 0, 0, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 0, 0, 102, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「star」cast 模板转换（×2.4 夸张）"
+  },
+  "fam.torrent.attack": {
+   "slot": "attack_ranged",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -5, 2, -5, 93, 112, 1, "easeInOutQuad"],
+     [0.667, -7, 5, -7, 88, 117, 1, "easeInOutQuad"],
+     [1.0, -7, 5, -9, 86, 119, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, 5, -9, 86, 119, 1, "easeOutExpo"],
+     [0.333, 12, 0, 9, 117, 88, 1, "easeOutQuad"],
+     [0.667, 7, 2, 5, 112, 93, 1, "easeOutQuad"],
+     [1.0, 2, 2, 2, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 2, 2, 105, 98, 1, "easeOutBack"],
+     [0.5, 0, 2, 0, 100, 100, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「torrent」attack 模板转换（×2.4 夸张）"
+  },
+  "fam.torrent.cast": {
+   "slot": "cast",
+   "phases": {
+    "anticipation": [
+     [0, 0, 0, 0, 100, 100, 1, "easeOutCubic"],
+     [0.333, -7, 5, -4, 86, 119, 1, "easeInOutQuad"],
+     [0.667, -10, 7, -4, 81, 124, 1, "easeInOutQuad"],
+     [1.0, -10, 7, -4, 78, 126, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -10, 7, -4, 78, 126, 1, "easeOutExpo"],
+     [0.333, -12, 2, -5, 119, 86, 1, "easeOutQuad"],
+     [0.667, -7, 5, -4, 112, 93, 1, "easeOutQuad"],
+     [1.0, -2, 2, -2, 105, 98, 1, "easeOutQuad"]
+    ],
+    "recover": [
+     [0, -2, 2, -2, 105, 98, 1, "easeOutBack"],
+     [0.5, -2, 2, 0, 102, 98, 1, "easeInOutQuad"],
+     [1.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
+    ]
+   },
+   "note": "由 family_motion「torrent」cast 模板转换（×2.4 夸张）"
+  }
+ }
+}

@@ -1,0 +1,1469 @@
+{
+ "schema_version": 1,
+ "kind": "motion_pack",
+ "name": "species",
+ "description": "逐物种绑定：家族动作模板、手绘待机循环与体重（影响蓄力/收招时长）。",
+ "clips": {
+  "sp.3.idle": {
+   "slot": "idle",
+   "phases": {
+    "loop": [
+     [0.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.167, 0, 0, 2, 102, 98, 1, "easeInOutQuad"],
+     [0.333, 0, -2, 3, 104, 100, 1, "easeInOutQuad"],
+     [0.5, 0, 0, 0, 102, 102, 1, "easeInOutQuad"],
+     [0.667, 0, 2, -3, 100, 98, 1, "easeInOutQuad"],
+     [0.833, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1, 0, 0, 0, 100, 100, 1, "linear"]
+    ]
+   },
+   "period": 0.9,
+   "note": "由 motion.py 手绘待机循环转换"
+  },
+  "sp.6.idle": {
+   "slot": "idle",
+   "phases": {
+    "loop": [
+     [0.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.167, 0, -2, -2, 100, 96, 1, "easeInOutQuad"],
+     [0.333, 0, -5, 0, 96, 100, 1, "easeInOutQuad"],
+     [0.5, 0, -2, 2, 100, 100, 1, "easeInOutQuad"],
+     [0.667, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.833, 0, 0, 0, 100, 96, 1, "easeInOutQuad"],
+     [1, 0, 0, 0, 100, 100, 1, "linear"]
+    ]
+   },
+   "period": 0.9,
+   "note": "由 motion.py 手绘待机循环转换"
+  },
+  "sp.9.idle": {
+   "slot": "idle",
+   "phases": {
+    "loop": [
+     [0.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.167, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.333, 0, 0, -2, 102, 96, 1, "easeInOutQuad"],
+     [0.5, 0, 2, 0, 104, 93, 1, "easeInOutQuad"],
+     [0.667, 0, 0, 2, 102, 98, 1, "easeInOutQuad"],
+     [0.833, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1, 0, 0, 0, 100, 100, 1, "linear"]
+    ]
+   },
+   "period": 0.9,
+   "note": "由 motion.py 手绘待机循环转换"
+  },
+  "sp.26.idle": {
+   "slot": "idle",
+   "phases": {
+    "loop": [
+     [0.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.167, 2, 0, -3, 98, 102, 1, "easeInOutQuad"],
+     [0.333, -2, -2, 3, 102, 98, 1, "easeInOutQuad"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.667, 2, 0, 2, 100, 98, 1, "easeInOutQuad"],
+     [0.833, -2, 0, -2, 98, 100, 1, "easeInOutQuad"],
+     [1, 0, 0, 0, 100, 100, 1, "linear"]
+    ]
+   },
+   "period": 0.9,
+   "note": "由 motion.py 手绘待机循环转换"
+  },
+  "sp.31.idle": {
+   "slot": "idle",
+   "phases": {
+    "loop": [
+     [0.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.167, 0, 0, 0, 104, 96, 1, "easeInOutQuad"],
+     [0.333, 0, 2, -2, 102, 98, 1, "easeInOutQuad"],
+     [0.5, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.667, 0, 0, 2, 100, 102, 1, "easeInOutQuad"],
+     [0.833, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1, 0, 0, 0, 100, 100, 1, "linear"]
+    ]
+   },
+   "period": 0.9,
+   "note": "由 motion.py 手绘待机循环转换"
+  },
+  "sp.34.idle": {
+   "slot": "idle",
+   "phases": {
+    "loop": [
+     [0.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.2, 2, 0, 3, 100, 102, 1, "easeInOutQuad"],
+     [0.4, 0, -2, 0, 98, 104, 1, "easeInOutQuad"],
+     [0.6, -2, 0, -3, 102, 98, 1, "easeInOutQuad"],
+     [0.8, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1, 0, 0, 0, 100, 100, 1, "linear"]
+    ]
+   },
+   "period": 0.8,
+   "note": "由 motion.py 手绘待机循环转换"
+  },
+  "sp.59.idle": {
+   "slot": "idle",
+   "phases": {
+    "loop": [
+     [0.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.2, 0, -2, -2, 100, 102, 1, "easeInOutQuad"],
+     [0.4, 2, 0, 2, 102, 98, 1, "easeInOutQuad"],
+     [0.6, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.8, 0, 0, 0, 98, 102, 1, "easeInOutQuad"],
+     [1, 0, 0, 0, 100, 100, 1, "linear"]
+    ]
+   },
+   "period": 0.8,
+   "note": "由 motion.py 手绘待机循环转换"
+  },
+  "sp.65.idle": {
+   "slot": "idle",
+   "phases": {
+    "loop": [
+     [0.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.125, 0, -2, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.25, 0, -5, 0, 96, 104, 1, "easeInOutQuad"],
+     [0.375, 0, -5, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.5, 0, -2, 0, 104, 96, 1, "easeInOutQuad"],
+     [0.625, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.75, 0, 2, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.875, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1, 0, 0, 0, 100, 100, 1, "linear"]
+    ]
+   },
+   "period": 1.2,
+   "note": "由 motion.py 手绘待机循环转换"
+  },
+  "sp.76.idle": {
+   "slot": "idle",
+   "phases": {
+    "loop": [
+     [0.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.167, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.333, 0, 2, 0, 107, 93, 1, "easeInOutQuad"],
+     [0.5, 0, 0, -2, 102, 98, 1, "easeInOutQuad"],
+     [0.667, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.833, 0, 0, 2, 102, 98, 1, "easeInOutQuad"],
+     [1, 0, 0, 0, 100, 100, 1, "linear"]
+    ]
+   },
+   "period": 0.9,
+   "note": "由 motion.py 手绘待机循环转换"
+  },
+  "sp.94.idle": {
+   "slot": "idle",
+   "phases": {
+    "loop": [
+     [0.0, 0, 0, -3, 100, 100, 1, "easeInOutQuad"],
+     [0.2, 0, 2, 0, 107, 93, 1, "easeInOutQuad"],
+     [0.4, 0, 5, 3, 109, 91, 1, "easeInOutQuad"],
+     [0.6, 0, 2, 0, 102, 98, 1, "easeInOutQuad"],
+     [0.8, 0, -2, -2, 93, 107, 1, "easeInOutQuad"],
+     [1, 0, 0, 0, 100, 100, 1, "linear"]
+    ]
+   },
+   "period": 0.8,
+   "note": "由 motion.py 手绘待机循环转换"
+  },
+  "sp.95.idle": {
+   "slot": "idle",
+   "phases": {
+    "loop": [
+     [0.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.167, 2, 0, -2, 98, 104, 1, "easeInOutQuad"],
+     [0.333, 0, -2, 0, 96, 109, 1, "easeInOutQuad"],
+     [0.5, -2, 0, 2, 100, 102, 1, "easeInOutQuad"],
+     [0.667, 0, 2, 0, 104, 96, 1, "easeInOutQuad"],
+     [0.833, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1, 0, 0, 0, 100, 100, 1, "linear"]
+    ]
+   },
+   "period": 0.9,
+   "note": "由 motion.py 手绘待机循环转换"
+  },
+  "sp.130.idle": {
+   "slot": "idle",
+   "phases": {
+    "loop": [
+     [0.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.167, 2, -2, -3, 98, 104, 1, "easeInOutQuad"],
+     [0.333, 0, -5, 0, 96, 109, 1, "easeInOutQuad"],
+     [0.5, -2, -2, 3, 102, 102, 1, "easeInOutQuad"],
+     [0.667, 0, 0, 2, 104, 96, 1, "easeInOutQuad"],
+     [0.833, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1, 0, 0, 0, 100, 100, 1, "linear"]
+    ]
+   },
+   "period": 0.9,
+   "note": "由 motion.py 手绘待机循环转换"
+  },
+  "sp.131.idle": {
+   "slot": "idle",
+   "phases": {
+    "loop": [
+     [0.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.167, 0, 2, -2, 102, 98, 1, "easeInOutQuad"],
+     [0.333, 2, 0, 0, 100, 102, 1, "easeInOutQuad"],
+     [0.5, 0, -2, 2, 98, 104, 1, "easeInOutQuad"],
+     [0.667, -2, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.833, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1, 0, 0, 0, 100, 100, 1, "linear"]
+    ]
+   },
+   "period": 0.9,
+   "note": "由 motion.py 手绘待机循环转换"
+  },
+  "sp.149.idle": {
+   "slot": "idle",
+   "phases": {
+    "loop": [
+     [0.0, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [0.2, 0, -2, -3, 102, 98, 1, "easeInOutQuad"],
+     [0.4, 0, 0, 0, 100, 102, 1, "easeInOutQuad"],
+     [0.6, 0, -2, 3, 98, 100, 1, "easeInOutQuad"],
+     [0.8, 0, 0, 0, 100, 100, 1, "easeInOutQuad"],
+     [1, 0, 0, 0, 100, 100, 1, "linear"]
+    ]
+   },
+   "period": 0.8,
+   "note": "由 motion.py 手绘待机循环转换"
+  }
+ },
+ "species": {
+  "1": {
+   "family": "sprout",
+   "clips": {
+    "attack_ranged": "fam.sprout.attack",
+    "cast": "fam.sprout.cast"
+   },
+   "timing": {
+    "weight": 0.05
+   }
+  },
+  "2": {
+   "family": "sprout",
+   "clips": {
+    "attack_ranged": "fam.sprout.attack",
+    "cast": "fam.sprout.cast"
+   },
+   "timing": {
+    "weight": 0.16
+   }
+  },
+  "3": {
+   "clips": {
+    "idle": "sp.3.idle"
+   },
+   "timing": {
+    "weight": 0.31
+   }
+  },
+  "4": {
+   "family": "flame",
+   "clips": {
+    "attack_ranged": "fam.flame.attack",
+    "cast": "fam.flame.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "5": {
+   "family": "flame",
+   "clips": {
+    "attack_ranged": "fam.flame.attack",
+    "cast": "fam.flame.cast"
+   },
+   "timing": {
+    "weight": 0.01
+   }
+  },
+  "6": {
+   "clips": {
+    "idle": "sp.6.idle"
+   },
+   "timing": {
+    "weight": 0.16
+   }
+  },
+  "7": {
+   "family": "torrent",
+   "clips": {
+    "attack_ranged": "fam.torrent.attack",
+    "cast": "fam.torrent.cast"
+   },
+   "timing": {
+    "weight": 0.15
+   }
+  },
+  "8": {
+   "family": "torrent",
+   "clips": {
+    "attack_ranged": "fam.torrent.attack",
+    "cast": "fam.torrent.cast"
+   },
+   "timing": {
+    "weight": 0.27
+   }
+  },
+  "9": {
+   "clips": {
+    "idle": "sp.9.idle"
+   },
+   "timing": {
+    "weight": 0.42
+   }
+  },
+  "10": {
+   "family": "bug",
+   "clips": {
+    "attack_ranged": "fam.bug.attack",
+    "cast": "fam.bug.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "11": {
+   "family": "bug",
+   "clips": {
+    "attack_ranged": "fam.bug.attack",
+    "cast": "fam.bug.cast"
+   },
+   "timing": {
+    "weight": 0.19
+   }
+  },
+  "12": {
+   "timing": {
+    "weight": 0.03
+   }
+  },
+  "25": {
+   "family": "spark",
+   "clips": {
+    "attack_ranged": "fam.spark.attack",
+    "cast": "fam.spark.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "26": {
+   "clips": {
+    "idle": "sp.26.idle"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "29": {
+   "family": "horn",
+   "clips": {
+    "attack_ranged": "fam.horn.attack",
+    "cast": "fam.horn.cast"
+   },
+   "timing": {
+    "weight": 0.15
+   }
+  },
+  "30": {
+   "family": "horn",
+   "clips": {
+    "attack_ranged": "fam.horn.attack",
+    "cast": "fam.horn.cast"
+   },
+   "timing": {
+    "weight": 0.26
+   }
+  },
+  "31": {
+   "clips": {
+    "idle": "sp.31.idle"
+   },
+   "timing": {
+    "weight": 0.41
+   }
+  },
+  "32": {
+   "family": "horn",
+   "clips": {
+    "attack_ranged": "fam.horn.attack",
+    "cast": "fam.horn.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "33": {
+   "family": "horn",
+   "clips": {
+    "attack_ranged": "fam.horn.attack",
+    "cast": "fam.horn.cast"
+   },
+   "timing": {
+    "weight": 0.1
+   }
+  },
+  "34": {
+   "clips": {
+    "idle": "sp.34.idle"
+   },
+   "timing": {
+    "weight": 0.25
+   }
+  },
+  "35": {
+   "family": "fairy",
+   "clips": {
+    "attack_ranged": "fam.fairy.attack",
+    "cast": "fam.fairy.cast"
+   },
+   "timing": {
+    "weight": 0.25
+   }
+  },
+  "36": {
+   "timing": {
+    "weight": 0.44
+   }
+  },
+  "39": {
+   "family": "balloon",
+   "clips": {
+    "attack_ranged": "fam.balloon.attack",
+    "cast": "fam.balloon.cast"
+   },
+   "timing": {
+    "weight": 0.43
+   }
+  },
+  "40": {
+   "timing": {
+    "weight": 0.62
+   }
+  },
+  "43": {
+   "family": "sprout",
+   "clips": {
+    "attack_ranged": "fam.sprout.attack",
+    "cast": "fam.sprout.cast"
+   },
+   "timing": {
+    "weight": 0.16
+   }
+  },
+  "44": {
+   "family": "sprout",
+   "clips": {
+    "attack_ranged": "fam.sprout.attack",
+    "cast": "fam.sprout.cast"
+   },
+   "timing": {
+    "weight": 0.3
+   }
+  },
+  "45": {
+   "timing": {
+    "weight": 0.44
+   }
+  },
+  "58": {
+   "family": "canine",
+   "clips": {
+    "attack_ranged": "fam.canine.attack",
+    "cast": "fam.canine.cast"
+   },
+   "timing": {
+    "weight": 0.01
+   }
+  },
+  "59": {
+   "clips": {
+    "idle": "sp.59.idle"
+   },
+   "timing": {
+    "weight": 0.28
+   }
+  },
+  "63": {
+   "family": "psychic",
+   "clips": {
+    "attack_ranged": "fam.psychic.attack",
+    "cast": "fam.psychic.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "64": {
+   "family": "psychic",
+   "clips": {
+    "attack_ranged": "fam.psychic.attack",
+    "cast": "fam.psychic.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "65": {
+   "clips": {
+    "idle": "sp.65.idle"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "66": {
+   "family": "fighter",
+   "clips": {
+    "attack_ranged": "fam.fighter.attack",
+    "cast": "fam.fighter.cast"
+   },
+   "timing": {
+    "weight": 0.26
+   }
+  },
+  "67": {
+   "family": "fighter",
+   "clips": {
+    "attack_ranged": "fam.fighter.attack",
+    "cast": "fam.fighter.cast"
+   },
+   "timing": {
+    "weight": 0.4
+   }
+  },
+  "68": {
+   "timing": {
+    "weight": 0.47
+   }
+  },
+  "72": {
+   "family": "jelly",
+   "clips": {
+    "attack_ranged": "fam.jelly.attack",
+    "cast": "fam.jelly.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "73": {
+   "timing": {
+    "weight": 0.09
+   }
+  },
+  "74": {
+   "family": "rock",
+   "clips": {
+    "attack_ranged": "fam.rock.attack",
+    "cast": "fam.rock.cast"
+   },
+   "timing": {
+    "weight": 0.46
+   }
+  },
+  "75": {
+   "family": "rock",
+   "clips": {
+    "attack_ranged": "fam.rock.attack",
+    "cast": "fam.rock.cast"
+   },
+   "timing": {
+    "weight": 0.57
+   }
+  },
+  "76": {
+   "clips": {
+    "idle": "sp.76.idle"
+   },
+   "timing": {
+    "weight": 0.78
+   }
+  },
+  "79": {
+   "family": "psychic",
+   "clips": {
+    "attack_ranged": "fam.psychic.attack",
+    "cast": "fam.psychic.cast"
+   },
+   "timing": {
+    "weight": 0.58
+   }
+  },
+  "80": {
+   "timing": {
+    "weight": 0.82
+   }
+  },
+  "90": {
+   "family": "shell",
+   "clips": {
+    "attack_ranged": "fam.shell.attack",
+    "cast": "fam.shell.cast"
+   },
+   "timing": {
+    "weight": 0.3
+   }
+  },
+  "91": {
+   "timing": {
+    "weight": 0.78
+   }
+  },
+  "92": {
+   "family": "ghost",
+   "clips": {
+    "attack_ranged": "fam.ghost.attack",
+    "cast": "fam.ghost.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "93": {
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "94": {
+   "clips": {
+    "idle": "sp.94.idle"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "95": {
+   "clips": {
+    "idle": "sp.95.idle"
+   },
+   "timing": {
+    "weight": 0.56
+   }
+  },
+  "106": {
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "108": {
+   "timing": {
+    "weight": 0.57
+   }
+  },
+  "113": {
+   "timing": {
+    "weight": 1.0
+   }
+  },
+  "114": {
+   "timing": {
+    "weight": 0.51
+   }
+  },
+  "116": {
+   "family": "serpent",
+   "clips": {
+    "attack_ranged": "fam.serpent.attack",
+    "cast": "fam.serpent.cast"
+   },
+   "timing": {
+    "weight": 0.01
+   }
+  },
+  "117": {
+   "family": "serpent",
+   "clips": {
+    "attack_ranged": "fam.serpent.attack",
+    "cast": "fam.serpent.cast"
+   },
+   "timing": {
+    "weight": 0.2
+   }
+  },
+  "120": {
+   "family": "star",
+   "clips": {
+    "attack_ranged": "fam.star.attack",
+    "cast": "fam.star.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "121": {
+   "timing": {
+    "weight": 0.02
+   }
+  },
+  "122": {
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "123": {
+   "timing": {
+    "weight": 0.1
+   }
+  },
+  "124": {
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "125": {
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "127": {
+   "timing": {
+    "weight": 0.29
+   }
+  },
+  "128": {
+   "timing": {
+    "weight": 0.2
+   }
+  },
+  "129": {
+   "family": "fish",
+   "clips": {
+    "attack_ranged": "fam.fish.attack",
+    "cast": "fam.fish.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "130": {
+   "clips": {
+    "idle": "sp.130.idle"
+   },
+   "timing": {
+    "weight": 0.37
+   }
+  },
+  "131": {
+   "clips": {
+    "idle": "sp.131.idle"
+   },
+   "timing": {
+    "weight": 0.7
+   }
+  },
+  "133": {
+   "family": "fairy",
+   "clips": {
+    "attack_ranged": "fam.fairy.attack",
+    "cast": "fam.fairy.cast"
+   },
+   "timing": {
+    "weight": 0.07
+   }
+  },
+  "134": {
+   "family": "torrent",
+   "clips": {
+    "attack_ranged": "fam.torrent.attack",
+    "cast": "fam.torrent.cast"
+   },
+   "timing": {
+    "weight": 0.55
+   }
+  },
+  "135": {
+   "family": "spark",
+   "clips": {
+    "attack_ranged": "fam.spark.attack",
+    "cast": "fam.spark.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "136": {
+   "family": "flame",
+   "clips": {
+    "attack_ranged": "fam.flame.attack",
+    "cast": "fam.flame.cast"
+   },
+   "timing": {
+    "weight": 0.14
+   }
+  },
+  "142": {
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "144": {
+   "timing": {
+    "weight": 0.45
+   }
+  },
+  "145": {
+   "timing": {
+    "weight": 0.28
+   }
+  },
+  "146": {
+   "timing": {
+    "weight": 0.36
+   }
+  },
+  "147": {
+   "family": "dragon",
+   "clips": {
+    "attack_ranged": "fam.dragon.attack",
+    "cast": "fam.dragon.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "148": {
+   "timing": {
+    "weight": 0.12
+   }
+  },
+  "149": {
+   "clips": {
+    "idle": "sp.149.idle"
+   },
+   "timing": {
+    "weight": 0.45
+   }
+  },
+  "150": {
+   "timing": {
+    "weight": 0.26
+   }
+  },
+  "151": {
+   "timing": {
+    "weight": 0.44
+   }
+  },
+  "152": {
+   "family": "sprout",
+   "clips": {
+    "attack_ranged": "fam.sprout.attack",
+    "cast": "fam.sprout.cast"
+   },
+   "timing": {
+    "weight": 0.15
+   }
+  },
+  "153": {
+   "family": "sprout",
+   "clips": {
+    "attack_ranged": "fam.sprout.attack",
+    "cast": "fam.sprout.cast"
+   },
+   "timing": {
+    "weight": 0.26
+   }
+  },
+  "154": {
+   "timing": {
+    "weight": 0.41
+   }
+  },
+  "155": {
+   "family": "flame",
+   "clips": {
+    "attack_ranged": "fam.flame.attack",
+    "cast": "fam.flame.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "156": {
+   "family": "flame",
+   "clips": {
+    "attack_ranged": "fam.flame.attack",
+    "cast": "fam.flame.cast"
+   },
+   "timing": {
+    "weight": 0.01
+   }
+  },
+  "157": {
+   "timing": {
+    "weight": 0.16
+   }
+  },
+  "158": {
+   "family": "torrent",
+   "clips": {
+    "attack_ranged": "fam.torrent.attack",
+    "cast": "fam.torrent.cast"
+   },
+   "timing": {
+    "weight": 0.18
+   }
+  },
+  "159": {
+   "family": "torrent",
+   "clips": {
+    "attack_ranged": "fam.torrent.attack",
+    "cast": "fam.torrent.cast"
+   },
+   "timing": {
+    "weight": 0.3
+   }
+  },
+  "160": {
+   "timing": {
+    "weight": 0.45
+   }
+  },
+  "161": {
+   "family": "rodent",
+   "clips": {
+    "attack_ranged": "fam.rodent.attack",
+    "cast": "fam.rodent.cast"
+   },
+   "timing": {
+    "weight": 0.02
+   }
+  },
+  "162": {
+   "timing": {
+    "weight": 0.17
+   }
+  },
+  "163": {
+   "family": "bird",
+   "clips": {
+    "attack_ranged": "fam.bird.attack",
+    "cast": "fam.bird.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "164": {
+   "timing": {
+    "weight": 0.28
+   }
+  },
+  "170": {
+   "family": "spark",
+   "clips": {
+    "attack_ranged": "fam.spark.attack",
+    "cast": "fam.spark.cast"
+   },
+   "timing": {
+    "weight": 0.06
+   }
+  },
+  "171": {
+   "timing": {
+    "weight": 0.5
+   }
+  },
+  "172": {
+   "family": "spark",
+   "clips": {
+    "attack_ranged": "fam.spark.attack",
+    "cast": "fam.spark.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "173": {
+   "family": "fairy",
+   "clips": {
+    "attack_ranged": "fam.fairy.attack",
+    "cast": "fam.fairy.cast"
+   },
+   "timing": {
+    "weight": 0.1
+   }
+  },
+  "174": {
+   "family": "balloon",
+   "clips": {
+    "attack_ranged": "fam.balloon.attack",
+    "cast": "fam.balloon.cast"
+   },
+   "timing": {
+    "weight": 0.27
+   }
+  },
+  "179": {
+   "family": "spark",
+   "clips": {
+    "attack_ranged": "fam.spark.attack",
+    "cast": "fam.spark.cast"
+   },
+   "timing": {
+    "weight": 0.11
+   }
+  },
+  "180": {
+   "family": "spark",
+   "clips": {
+    "attack_ranged": "fam.spark.attack",
+    "cast": "fam.spark.cast"
+   },
+   "timing": {
+    "weight": 0.24
+   }
+  },
+  "181": {
+   "timing": {
+    "weight": 0.44
+   }
+  },
+  "194": {
+   "family": "torrent",
+   "clips": {
+    "attack_ranged": "fam.torrent.attack",
+    "cast": "fam.torrent.cast"
+   },
+   "timing": {
+    "weight": 0.24
+   }
+  },
+  "195": {
+   "timing": {
+    "weight": 0.64
+   }
+  },
+  "196": {
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "197": {
+   "timing": {
+    "weight": 0.64
+   }
+  },
+  "198": {
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "200": {
+   "timing": {
+    "weight": 0.01
+   }
+  },
+  "208": {
+   "timing": {
+    "weight": 1.0
+   }
+  },
+  "211": {
+   "timing": {
+    "weight": 0.14
+   }
+  },
+  "212": {
+   "timing": {
+    "weight": 0.42
+   }
+  },
+  "214": {
+   "timing": {
+    "weight": 0.23
+   }
+  },
+  "215": {
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "227": {
+   "timing": {
+    "weight": 0.62
+   }
+  },
+  "230": {
+   "timing": {
+    "weight": 0.33
+   }
+  },
+  "236": {
+   "family": "fighter",
+   "clips": {
+    "attack_ranged": "fam.fighter.attack",
+    "cast": "fam.fighter.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "237": {
+   "timing": {
+    "weight": 0.24
+   }
+  },
+  "238": {
+   "family": "psychic",
+   "clips": {
+    "attack_ranged": "fam.psychic.attack",
+    "cast": "fam.psychic.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "239": {
+   "family": "spark",
+   "clips": {
+    "attack_ranged": "fam.spark.attack",
+    "cast": "fam.spark.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "242": {
+   "timing": {
+    "weight": 1.0
+   }
+  },
+  "246": {
+   "family": "rock",
+   "clips": {
+    "attack_ranged": "fam.rock.attack",
+    "cast": "fam.rock.cast"
+   },
+   "timing": {
+    "weight": 0.11
+   }
+  },
+  "247": {
+   "family": "rock",
+   "clips": {
+    "attack_ranged": "fam.rock.attack",
+    "cast": "fam.rock.cast"
+   },
+   "timing": {
+    "weight": 0.31
+   }
+  },
+  "248": {
+   "timing": {
+    "weight": 0.69
+   }
+  },
+  "252": {
+   "family": "sprout",
+   "clips": {
+    "attack_ranged": "fam.sprout.attack",
+    "cast": "fam.sprout.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "253": {
+   "family": "sprout",
+   "clips": {
+    "attack_ranged": "fam.sprout.attack",
+    "cast": "fam.sprout.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "254": {
+   "family": "sprout",
+   "clips": {
+    "attack_ranged": "fam.sprout.attack",
+    "cast": "fam.sprout.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "255": {
+   "family": "kick",
+   "clips": {
+    "attack_ranged": "fam.kick.attack",
+    "cast": "fam.kick.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "256": {
+   "family": "kick",
+   "clips": {
+    "attack_ranged": "fam.kick.attack",
+    "cast": "fam.kick.cast"
+   },
+   "timing": {
+    "weight": 0.16
+   }
+  },
+  "257": {
+   "family": "kick",
+   "clips": {
+    "attack_ranged": "fam.kick.attack",
+    "cast": "fam.kick.cast"
+   },
+   "timing": {
+    "weight": 0.23
+   }
+  },
+  "258": {
+   "family": "torrent",
+   "clips": {
+    "attack_ranged": "fam.torrent.attack",
+    "cast": "fam.torrent.cast"
+   },
+   "timing": {
+    "weight": 0.11
+   }
+  },
+  "259": {
+   "family": "torrent",
+   "clips": {
+    "attack_ranged": "fam.torrent.attack",
+    "cast": "fam.torrent.cast"
+   },
+   "timing": {
+    "weight": 0.31
+   }
+  },
+  "260": {
+   "family": "torrent",
+   "clips": {
+    "attack_ranged": "fam.torrent.attack",
+    "cast": "fam.torrent.cast"
+   },
+   "timing": {
+    "weight": 0.57
+   }
+  },
+  "270": {
+   "family": "lily",
+   "clips": {
+    "attack_ranged": "fam.lily.attack",
+    "cast": "fam.lily.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "271": {
+   "family": "lily",
+   "clips": {
+    "attack_ranged": "fam.lily.attack",
+    "cast": "fam.lily.cast"
+   },
+   "timing": {
+    "weight": 0.12
+   }
+  },
+  "272": {
+   "family": "lily",
+   "clips": {
+    "attack_ranged": "fam.lily.attack",
+    "cast": "fam.lily.cast"
+   },
+   "timing": {
+    "weight": 0.28
+   }
+  },
+  "280": {
+   "family": "psychic",
+   "clips": {
+    "attack_ranged": "fam.psychic.attack",
+    "cast": "fam.psychic.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "281": {
+   "family": "psychic",
+   "clips": {
+    "attack_ranged": "fam.psychic.attack",
+    "cast": "fam.psychic.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "282": {
+   "family": "psychic",
+   "clips": {
+    "attack_ranged": "fam.psychic.attack",
+    "cast": "fam.psychic.cast"
+   },
+   "timing": {
+    "weight": 0.12
+   }
+  },
+  "285": {
+   "family": "sprout",
+   "clips": {
+    "attack_ranged": "fam.sprout.attack",
+    "cast": "fam.sprout.cast"
+   },
+   "timing": {
+    "weight": 0.26
+   }
+  },
+  "286": {
+   "family": "sprout",
+   "clips": {
+    "attack_ranged": "fam.sprout.attack",
+    "cast": "fam.sprout.cast"
+   },
+   "timing": {
+    "weight": 0.21
+   }
+  },
+  "304": {
+   "family": "rock",
+   "clips": {
+    "attack_ranged": "fam.rock.attack",
+    "cast": "fam.rock.cast"
+   },
+   "timing": {
+    "weight": 0.47
+   }
+  },
+  "305": {
+   "family": "rock",
+   "clips": {
+    "attack_ranged": "fam.rock.attack",
+    "cast": "fam.rock.cast"
+   },
+   "timing": {
+    "weight": 0.74
+   }
+  },
+  "306": {
+   "family": "rock",
+   "clips": {
+    "attack_ranged": "fam.rock.attack",
+    "cast": "fam.rock.cast"
+   },
+   "timing": {
+    "weight": 1.0
+   }
+  },
+  "333": {
+   "family": "bird",
+   "clips": {
+    "attack_ranged": "fam.bird.attack",
+    "cast": "fam.bird.cast"
+   },
+   "timing": {
+    "weight": 0.09
+   }
+  },
+  "334": {
+   "family": "bird",
+   "clips": {
+    "attack_ranged": "fam.bird.attack",
+    "cast": "fam.bird.cast"
+   },
+   "timing": {
+    "weight": 0.32
+   }
+  },
+  "349": {
+   "family": "fish",
+   "clips": {
+    "attack_ranged": "fam.fish.attack",
+    "cast": "fam.fish.cast"
+   },
+   "timing": {
+    "weight": 0.0
+   }
+  },
+  "350": {
+   "family": "fish",
+   "clips": {
+    "attack_ranged": "fam.fish.attack",
+    "cast": "fam.fish.cast"
+   },
+   "timing": {
+    "weight": 0.37
+   }
+  },
+  "359": {
+   "family": "dark",
+   "clips": {
+    "attack_ranged": "fam.dark.attack",
+    "cast": "fam.dark.cast"
+   },
+   "timing": {
+    "weight": 0.09
+   }
+  },
+  "371": {
+   "family": "dragon",
+   "clips": {
+    "attack_ranged": "fam.dragon.attack",
+    "cast": "fam.dragon.cast"
+   },
+   "timing": {
+    "weight": 0.09
+   }
+  },
+  "372": {
+   "family": "dragon",
+   "clips": {
+    "attack_ranged": "fam.dragon.attack",
+    "cast": "fam.dragon.cast"
+   },
+   "timing": {
+    "weight": 0.47
+   }
+  },
+  "373": {
+   "family": "dragon",
+   "clips": {
+    "attack_ranged": "fam.dragon.attack",
+    "cast": "fam.dragon.cast"
+   },
+   "timing": {
+    "weight": 0.28
+   }
+  },
+  "374": {
+   "family": "metal",
+   "clips": {
+    "attack_ranged": "fam.metal.attack",
+    "cast": "fam.metal.cast"
+   },
+   "timing": {
+    "weight": 0.29
+   }
+  },
+  "375": {
+   "family": "metal",
+   "clips": {
+    "attack_ranged": "fam.metal.attack",
+    "cast": "fam.metal.cast"
+   },
+   "timing": {
+    "weight": 0.44
+   }
+  },
+  "376": {
+   "family": "metal",
+   "clips": {
+    "attack_ranged": "fam.metal.attack",
+    "cast": "fam.metal.cast"
+   },
+   "timing": {
+    "weight": 0.65
+   }
+  }
+ }
+}
