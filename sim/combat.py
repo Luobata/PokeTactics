@@ -684,6 +684,17 @@ class Battle:
         if target is None:
             return
         dist = _manhattan(u.pos, target.pos)
+        if self.depth and dist > u.range and not (
+                u.taunt_source_idx is not None and u.taunt_until > t + 1e-9):
+            # arena_v2: engage an enemy already in reach rather than walking away
+            # from it toward a locked target (prevents two units dancing forever).
+            from arena_depth import untargetable
+            reach = [e for e in self.units if e.alive and e.team != u.team
+                     and _manhattan(u.pos, e.pos) <= u.range and not untargetable(e, t)]
+            if reach:
+                target = min(reach, key=lambda e: self._target_key(u, e))
+                u.target_idx = target.idx
+                dist = _manhattan(u.pos, target.pos)
         if dist <= u.range:
             self._strike(u, target, t)
             u.next_act = t + self._action_interval(u, t)
