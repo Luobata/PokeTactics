@@ -462,6 +462,8 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parsed = urllib.parse.urlparse(self.path)
+        if parsed.path == "/api/animation/pack/save":
+            return self._save_animation_pack()
         if parsed.path in ("/api/animation/preview", "/api/animation/preset/validate"):
             from animation_preview import MAX_REQUEST_BYTES, parse_request, normalize_preset, preview
             if self.headers.get("Origin") not in (None, f"http://{self.headers.get('Host')}"):
@@ -561,6 +563,9 @@ class Handler(SimpleHTTPRequestHandler):
                 "/play/assets/play.css": ("play.css", "text/css; charset=utf-8"),
                 "/play/assets/play.js": ("play.js", "text/javascript; charset=utf-8"),
                 "/play/assets/battle.css": ("battle.css", "text/css; charset=utf-8"),
+                "/play/assets/battle_renderer.js": ("battle_renderer.js", "text/javascript; charset=utf-8"),
+                "/play/assets/animation_workbench.js": ("animation_workbench.js", "text/javascript; charset=utf-8"),
+                "/play/assets/animation_workbench.css": ("animation_workbench.css", "text/css; charset=utf-8"),
             }
             asset = assets.get(parsed.path)
             if asset is None:
@@ -573,6 +578,40 @@ class Handler(SimpleHTTPRequestHandler):
             self._play_asset("animation_lab.html", "text/html; charset=utf-8")
         elif parsed.path == "/animation-editor":
             self._play_asset("animation_editor.html", "text/html; charset=utf-8")
+        elif parsed.path == "/animation-workbench":
+            self._play_asset("animation_workbench.html", "text/html; charset=utf-8")
+        elif parsed.path == "/api/battle/script":
+            # 浏览器战斗渲染：一场已提交战斗的事件流 + 时间轴 + 状态快照（docs/58）。
+            import battle_script
+            try:
+                round_no = int(qs.get("round", [""])[0])
+            except ValueError:
+                return self._json({"ok": False, "error": "无效的轮次"}, 400)
+            status, payload = battle_script.session_script(
+                demo_mod, qs.get("sid", [""])[0], round_no)
+            self._json(payload, status, {"Cache-Control": "no-store"})
+        elif parsed.path in ("/api/battle/script/preview", "/api/battle/script/scenario"):
+            import battle_script
+            try:
+                seed = int(qs.get("seed", ["7"])[0])
+                if not 0 <= seed <= 2**32 - 1:
+                    raise ValueError("种子必须为 0–4294967295 的整数")
+                with _LOCK:
+                    if parsed.path.endswith("/scenario"):
+                        key = qs.get("key", ["arena_showcase"])[0]
+                        if key not in ARENA_SCENARIOS:
+                            raise ValueError("未知竞技场景")
+                        payload = battle_script.scenario_script(key, seed)
+                    else:
+                        payload = battle_script.preview_script(
+                            int(qs.get("species", ["6"])[0]), qs.get("kind", ["attack"])[0],
+                            qs.get("scene", ["dummy"])[0], seed)
+            except ValueError as exc:
+                return self._json({"ok": False, "error": str(exc)}, 400)
+            self._json(payload, 200, {"Cache-Control": "no-store"})
+        elif parsed.path == "/api/animation/pack":
+            import motion_schema
+            self._json({"ok": True, **motion_schema.load_packs()}, 200, {"Cache-Control": "no-store"})
         elif parsed.path == "/api/animation/characters":
             from character_catalog import character_catalog
             try:
@@ -879,6 +918,33 @@ class Handler(SimpleHTTPRequestHandler):
             super().do_GET()
         else:
             super().do_GET()
+
+    def _save_animation_pack(self) -> None:
+        """Workbench save: schema-validated JSON into assets/motion|vfx (local only)."""
+        import motion_schema
+        if self.client_address[0] not in ("127.0.0.1", "::1"):
+            return self._json({"ok": False, "error": "只允许本机保存"}, 403)
+        if self.headers.get("Origin") not in (None, f"http://{self.headers.get('Host')}"):
+            return self._json({"ok": False, "error": "只允许本地页面保存"}, 403)
+        if self.headers.get("X-PokeTactics-Workbench") != "1":
+            return self._json({"ok": False, "error": "缺少工作台标记"}, 400)
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            return self._json({"ok": False, "error": "无效长度"}, 400)
+        if not 0 < length <= motion_schema.MAX_PACK_BYTES:
+            return self._json({"ok": False, "error": "动画数据必须非空且不超过 512KB"}, 413)
+        self.connection.settimeout(15)
+        raw = self.rfile.read(length)
+        try:
+            request = json.loads(raw)
+            if not isinstance(request, dict):
+                raise ValueError("请求必须是对象")
+            path = motion_schema.save_pack(request.get("group"), request.get("name"),
+                                           request.get("data"))
+        except ValueError as exc:
+            return self._json({"ok": False, "error": str(exc)}, 400)
+        self._json({"ok": True, "path": path})
 
     def _html(self, page) -> None:
         """Serve a page with consistent, route-aware global navigation."""

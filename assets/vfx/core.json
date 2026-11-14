@@ -1,0 +1,904 @@
+{
+ "schema_version": 1,
+ "kind": "vfx_pack",
+ "name": "core",
+ "description": "属性调色板与粒子材质、弹道家族、分层特效配方与镜头规则。",
+ "palettes": {
+  "NORMAL": ["#fffbe8", "#f4ecd0", "#d8cfae", "#8c8468"],
+  "FIRE": ["#fff6c4", "#ffc35a", "#ff7a2e", "#b8321a"],
+  "WATER": ["#effcff", "#9fe3ff", "#3fa7f0", "#1d5fa8"],
+  "ELECTRIC": ["#ffffff", "#fff27a", "#ffd21f", "#c08a00"],
+  "GRASS": ["#f4ffd8", "#b6f07a", "#58c24a", "#2c7a32"],
+  "ICE": ["#ffffff", "#d8f8ff", "#8fe0f5", "#4a9ec4"],
+  "FIGHTING": ["#fff0e0", "#ffb08a", "#e0623e", "#8c2c1e"],
+  "POISON": ["#f8e8ff", "#dba6ff", "#a85ae0", "#5e2a8c"],
+  "GROUND": ["#fff4dc", "#e8c98a", "#bf9550", "#6e5028"],
+  "FLYING": ["#ffffff", "#e2ecff", "#a8c2f5", "#5c78b8"],
+  "PSYCHIC": ["#fff0fa", "#ffaee0", "#f05aa8", "#9a2a6a"],
+  "BUG": ["#f8ffd8", "#d6ec7a", "#9ac23a", "#5a7a1c"],
+  "ROCK": ["#f6f0e0", "#d8c8a0", "#a8906a", "#5e4e36"],
+  "GHOST": ["#f4ecff", "#c4aef5", "#7e62c8", "#3e2c78"],
+  "DRAGON": ["#f0ecff", "#b8a8ff", "#6e58f0", "#38259c"],
+  "DARK": ["#f0e8e0", "#b0a090", "#6a5a50", "#2a2220"],
+  "STEEL": ["#ffffff", "#e0e6ee", "#a8b4c4", "#5c6878"],
+  "FAIRY": ["#fff4fc", "#ffd0f0", "#f59ad8", "#b0508e"],
+  "HEAL": ["#f4fff0", "#c4ffb8", "#6ee07a", "#2c9a48"],
+  "SHIELD": ["#ffffff", "#d8f6ff", "#8fd8f5", "#3c8cb8"],
+  "KO": ["#ffffff", "#fff2d0", "#ffcf6a", "#a8601e"]
+ },
+ "materials": {
+  "NORMAL": {
+   "particle": "sparkle",
+   "gravity": 30,
+   "drag": 0.9,
+   "count": 8,
+   "size": [2, 4],
+   "life": [0.25, 0.5],
+   "speed": [60, 160]
+  },
+  "FIRE": {
+   "particle": "ember",
+   "gravity": -120,
+   "drag": 0.86,
+   "count": 16,
+   "size": [2, 6],
+   "life": [0.3, 0.7],
+   "speed": [60, 220]
+  },
+  "WATER": {
+   "particle": "droplet",
+   "gravity": 420,
+   "drag": 0.95,
+   "count": 14,
+   "size": [2, 5],
+   "life": [0.3, 0.6],
+   "speed": [90, 260]
+  },
+  "ELECTRIC": {
+   "particle": "arc",
+   "gravity": 0,
+   "drag": 0.8,
+   "count": 10,
+   "size": [6, 16],
+   "life": [0.12, 0.3],
+   "speed": [80, 240]
+  },
+  "GRASS": {
+   "particle": "leaf",
+   "gravity": 60,
+   "drag": 0.9,
+   "count": 12,
+   "size": [3, 7],
+   "life": [0.4, 0.9],
+   "speed": [60, 200],
+   "spin": 6
+  },
+  "ICE": {
+   "particle": "shard",
+   "gravity": 200,
+   "drag": 0.92,
+   "count": 12,
+   "size": [3, 8],
+   "life": [0.3, 0.6],
+   "speed": [100, 280],
+   "spin": 4
+  },
+  "FIGHTING": {
+   "particle": "impact_ring",
+   "gravity": 0,
+   "drag": 0.8,
+   "count": 3,
+   "size": [10, 26],
+   "life": [0.15, 0.3],
+   "speed": [0, 30]
+  },
+  "POISON": {
+   "particle": "bubble",
+   "gravity": -70,
+   "drag": 0.9,
+   "count": 10,
+   "size": [3, 7],
+   "life": [0.4, 0.9],
+   "speed": [30, 120]
+  },
+  "GROUND": {
+   "particle": "dust",
+   "gravity": 140,
+   "drag": 0.85,
+   "count": 14,
+   "size": [3, 8],
+   "life": [0.35, 0.7],
+   "speed": [50, 180]
+  },
+  "FLYING": {
+   "particle": "gust",
+   "gravity": -10,
+   "drag": 0.9,
+   "count": 8,
+   "size": [8, 18],
+   "life": [0.25, 0.5],
+   "speed": [80, 220]
+  },
+  "PSYCHIC": {
+   "particle": "ring",
+   "gravity": 0,
+   "drag": 0.9,
+   "count": 5,
+   "size": [8, 26],
+   "life": [0.3, 0.6],
+   "speed": [0, 40]
+  },
+  "BUG": {
+   "particle": "mote",
+   "gravity": 20,
+   "drag": 0.9,
+   "count": 12,
+   "size": [2, 4],
+   "life": [0.3, 0.6],
+   "speed": [80, 220]
+  },
+  "ROCK": {
+   "particle": "debris",
+   "gravity": 520,
+   "drag": 0.96,
+   "count": 12,
+   "size": [3, 8],
+   "life": [0.4, 0.8],
+   "speed": [100, 300],
+   "spin": 5
+  },
+  "GHOST": {
+   "particle": "wisp",
+   "gravity": -60,
+   "drag": 0.9,
+   "count": 8,
+   "size": [4, 10],
+   "life": [0.5, 1.0],
+   "speed": [20, 100]
+  },
+  "DRAGON": {
+   "particle": "flame",
+   "gravity": -40,
+   "drag": 0.88,
+   "count": 14,
+   "size": [3, 8],
+   "life": [0.3, 0.7],
+   "speed": [80, 240]
+  },
+  "DARK": {
+   "particle": "slash",
+   "gravity": 0,
+   "drag": 0.85,
+   "count": 6,
+   "size": [8, 20],
+   "life": [0.15, 0.35],
+   "speed": [40, 160]
+  },
+  "STEEL": {
+   "particle": "spark",
+   "gravity": 380,
+   "drag": 0.94,
+   "count": 14,
+   "size": [1, 3],
+   "life": [0.2, 0.45],
+   "speed": [140, 380]
+  },
+  "FAIRY": {
+   "particle": "sparkle",
+   "gravity": -20,
+   "drag": 0.9,
+   "count": 12,
+   "size": [2, 5],
+   "life": [0.4, 0.8],
+   "speed": [40, 160]
+  }
+ },
+ "projectiles": {
+  "straight": {
+   "size": 9,
+   "trail": 0.8
+  },
+  "arc": {
+   "size": 10,
+   "arc": 0.45,
+   "trail": 0.5
+  },
+  "homing": {
+   "size": 8,
+   "wobble": 26,
+   "trail": 0.9
+  },
+  "beam": {
+   "width": 9,
+   "trail": 0
+  },
+  "ground": {
+   "size": 12,
+   "trail": 0.6
+  },
+  "volley": {
+   "size": 7,
+   "count": 3,
+   "stagger": 0.06,
+   "trail": 0.6
+  }
+ },
+ "recipes": {
+  "melee_slash": {
+   "layers": [
+    {
+     "layer": "trail",
+     "shape": "afterimage",
+     "at": "release",
+     "duration": 0.18
+    },
+    {
+     "layer": "impact",
+     "shape": "slash_arc",
+     "at": "impact",
+     "palette": "@type",
+     "size": 56,
+     "duration": 0.22,
+     "curve": "easeOutCubic"
+    },
+    {
+     "layer": "impact",
+     "shape": "sparks",
+     "at": "impact",
+     "palette": "@type",
+     "count": 10,
+     "duration": 0.35,
+     "particle": "@type"
+    },
+    {
+     "layer": "impact",
+     "shape": "flash",
+     "at": "impact",
+     "palette": "KO",
+     "size": 34,
+     "duration": 0.1
+    }
+   ]
+  },
+  "ranged_shot": {
+   "layers": [
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 16,
+     "duration": 0.2
+    },
+    {
+     "layer": "projectile",
+     "shape": "family",
+     "at": "release",
+     "family": "@type",
+     "palette": "@type",
+     "size": 9
+    },
+    {
+     "layer": "impact",
+     "shape": "burst",
+     "at": "impact",
+     "palette": "@type",
+     "size": 34,
+     "count": 12,
+     "duration": 0.32,
+     "particle": "@type"
+    },
+    {
+     "layer": "impact",
+     "shape": "ring",
+     "at": "impact",
+     "palette": "@type",
+     "size": 40,
+     "duration": 0.25,
+     "curve": "easeOutQuad"
+    }
+   ]
+  },
+  "cast_burst": {
+   "layers": [
+    {
+     "layer": "charge",
+     "shape": "converge",
+     "at": "anticipation",
+     "palette": "@type",
+     "count": 14,
+     "size": 46,
+     "particle": "@type"
+    },
+    {
+     "layer": "aura",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 46,
+     "intensity": 1.2
+    },
+    {
+     "layer": "projectile",
+     "shape": "family",
+     "at": "release",
+     "family": "@type",
+     "palette": "@type",
+     "size": 14
+    },
+    {
+     "layer": "impact",
+     "shape": "burst",
+     "at": "impact",
+     "palette": "@type",
+     "size": 64,
+     "count": 22,
+     "duration": 0.45,
+     "particle": "@type"
+    },
+    {
+     "layer": "impact",
+     "shape": "ring",
+     "at": "impact",
+     "palette": "@type",
+     "size": 86,
+     "duration": 0.4,
+     "curve": "easeOutCubic"
+    },
+    {
+     "layer": "ground",
+     "shape": "scorch",
+     "at": "impact",
+     "palette": "@type",
+     "size": 60,
+     "duration": 1.2,
+     "alpha": 0.5
+    },
+    {
+     "layer": "screen",
+     "shape": "flash",
+     "at": "impact",
+     "palette": "@type",
+     "duration": 0.12,
+     "alpha": 0.35
+    }
+   ]
+  },
+  "support_channel": {
+   "layers": [
+    {
+     "layer": "aura",
+     "shape": "ring_rise",
+     "at": "anticipation",
+     "palette": "HEAL",
+     "size": 40,
+     "duration": 0.5
+    },
+    {
+     "layer": "charge",
+     "shape": "spiral",
+     "at": "anticipation",
+     "palette": "@type",
+     "count": 10,
+     "size": 36,
+     "particle": "sparkle"
+    },
+    {
+     "layer": "projectile",
+     "shape": "family",
+     "at": "release",
+     "family": "homing",
+     "palette": "HEAL",
+     "size": 8
+    },
+    {
+     "layer": "aura",
+     "shape": "heal_plus",
+     "at": "impact",
+     "palette": "HEAL",
+     "count": 6,
+     "size": 34,
+     "duration": 0.7,
+     "target": "target"
+    }
+   ]
+  },
+  "tank_stomp": {
+   "layers": [
+    {
+     "layer": "impact",
+     "shape": "flash",
+     "at": "impact",
+     "palette": "KO",
+     "size": 40,
+     "duration": 0.1
+    },
+    {
+     "layer": "ground",
+     "shape": "shockwave",
+     "at": "impact",
+     "palette": "GROUND",
+     "size": 90,
+     "duration": 0.45,
+     "curve": "easeOutCubic"
+    },
+    {
+     "layer": "impact",
+     "shape": "shards",
+     "at": "impact",
+     "palette": "ROCK",
+     "count": 10,
+     "duration": 0.5,
+     "particle": "debris"
+    },
+    {
+     "layer": "ground",
+     "shape": "crack",
+     "at": "impact",
+     "palette": "GROUND",
+     "size": 46,
+     "duration": 1.4,
+     "alpha": 0.7
+    }
+   ]
+  },
+  "heal_channel": {
+   "layers": [
+    {
+     "layer": "aura",
+     "shape": "ring_rise",
+     "at": "anticipation",
+     "palette": "HEAL",
+     "size": 42,
+     "duration": 0.6
+    },
+    {
+     "layer": "projectile",
+     "shape": "family",
+     "at": "release",
+     "family": "homing",
+     "palette": "HEAL",
+     "size": 8
+    },
+    {
+     "layer": "aura",
+     "shape": "heal_plus",
+     "at": "impact",
+     "palette": "HEAL",
+     "count": 8,
+     "size": 40,
+     "duration": 0.8,
+     "target": "target"
+    },
+    {
+     "layer": "aura",
+     "shape": "sparkle_up",
+     "at": "impact",
+     "palette": "HEAL",
+     "count": 12,
+     "size": 40,
+     "duration": 0.8,
+     "target": "target"
+    }
+   ]
+  },
+  "shield_ring": {
+   "layers": [
+    {
+     "layer": "charge",
+     "shape": "ring",
+     "at": "anticipation",
+     "palette": "SHIELD",
+     "size": 40,
+     "duration": 0.35
+    },
+    {
+     "layer": "aura",
+     "shape": "shield_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 48,
+     "duration": 0.9,
+     "target": "target"
+    },
+    {
+     "layer": "impact",
+     "shape": "flash",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 30,
+     "duration": 0.12
+    }
+   ]
+  },
+  "area_quake": {
+   "layers": [
+    {
+     "layer": "charge",
+     "shape": "converge",
+     "at": "anticipation",
+     "palette": "@type",
+     "count": 12,
+     "size": 50,
+     "particle": "@type"
+    },
+    {
+     "layer": "ground",
+     "shape": "shockwave",
+     "at": "impact",
+     "palette": "@type",
+     "size": 130,
+     "duration": 0.55,
+     "curve": "easeOutCubic",
+     "target": "target"
+    },
+    {
+     "layer": "impact",
+     "shape": "burst",
+     "at": "impact",
+     "palette": "@type",
+     "size": 60,
+     "count": 20,
+     "duration": 0.5,
+     "particle": "@type"
+    },
+    {
+     "layer": "ground",
+     "shape": "crack",
+     "at": "impact",
+     "palette": "@type",
+     "size": 70,
+     "duration": 1.6,
+     "alpha": 0.6,
+     "target": "target"
+    }
+   ]
+  },
+  "terrain_spikes": {
+   "layers": [
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "ROCK",
+     "size": 30
+    },
+    {
+     "layer": "projectile",
+     "shape": "family",
+     "at": "release",
+     "family": "ground",
+     "palette": "ROCK",
+     "size": 12
+    },
+    {
+     "layer": "ground",
+     "shape": "spikes",
+     "at": "impact",
+     "palette": "ROCK",
+     "count": 7,
+     "size": 60,
+     "duration": 2.4,
+     "target": "target"
+    },
+    {
+     "layer": "impact",
+     "shape": "shards",
+     "at": "impact",
+     "palette": "ROCK",
+     "count": 14,
+     "duration": 0.6,
+     "particle": "debris"
+    }
+   ]
+  },
+  "root_vines": {
+   "layers": [
+    {
+     "layer": "projectile",
+     "shape": "family",
+     "at": "release",
+     "family": "ground",
+     "palette": "GRASS",
+     "size": 10
+    },
+    {
+     "layer": "ground",
+     "shape": "vines",
+     "at": "impact",
+     "palette": "GRASS",
+     "count": 6,
+     "size": 46,
+     "duration": 1.6,
+     "target": "target"
+    },
+    {
+     "layer": "impact",
+     "shape": "petals",
+     "at": "impact",
+     "palette": "GRASS",
+     "count": 10,
+     "duration": 0.6,
+     "particle": "leaf"
+    }
+   ]
+  },
+  "poison_cloud": {
+   "layers": [
+    {
+     "layer": "projectile",
+     "shape": "family",
+     "at": "release",
+     "family": "arc",
+     "palette": "POISON",
+     "size": 11
+    },
+    {
+     "layer": "ground",
+     "shape": "puddle",
+     "at": "impact",
+     "palette": "POISON",
+     "size": 58,
+     "duration": 1.6,
+     "alpha": 0.7,
+     "target": "target"
+    },
+    {
+     "layer": "impact",
+     "shape": "splash",
+     "at": "impact",
+     "palette": "POISON",
+     "count": 14,
+     "duration": 0.5,
+     "particle": "bubble"
+    }
+   ]
+  },
+  "chain_lightning": {
+   "layers": [
+    {
+     "layer": "charge",
+     "shape": "sparks",
+     "at": "anticipation",
+     "palette": "ELECTRIC",
+     "count": 10,
+     "size": 36,
+     "particle": "arc"
+    },
+    {
+     "layer": "projectile",
+     "shape": "family",
+     "at": "release",
+     "family": "beam",
+     "palette": "ELECTRIC",
+     "size": 8
+    },
+    {
+     "layer": "impact",
+     "shape": "cross",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 50,
+     "duration": 0.25
+    },
+    {
+     "layer": "impact",
+     "shape": "sparks",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "count": 14,
+     "duration": 0.35,
+     "particle": "arc"
+    },
+    {
+     "layer": "screen",
+     "shape": "flash",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "duration": 0.08,
+     "alpha": 0.3
+    }
+   ]
+  },
+  "drain_siphon": {
+   "layers": [
+    {
+     "layer": "projectile",
+     "shape": "family",
+     "at": "release",
+     "family": "beam",
+     "palette": "@type",
+     "size": 6
+    },
+    {
+     "layer": "impact",
+     "shape": "burst",
+     "at": "impact",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "duration": 0.35,
+     "particle": "@type"
+    },
+    {
+     "layer": "aura",
+     "shape": "heal_plus",
+     "at": "impact",
+     "palette": "HEAL",
+     "count": 4,
+     "size": 30,
+     "duration": 0.6,
+     "target": "actor"
+    }
+   ]
+  },
+  "combo_flurry": {
+   "layers": [
+    {
+     "layer": "trail",
+     "shape": "afterimage",
+     "at": "release",
+     "duration": 0.25
+    },
+    {
+     "layer": "impact",
+     "shape": "slash_arc",
+     "at": "impact",
+     "palette": "@type",
+     "size": 60,
+     "duration": 0.25
+    },
+    {
+     "layer": "impact",
+     "shape": "cross",
+     "at": "impact",
+     "palette": "@type",
+     "size": 46,
+     "duration": 0.3
+    },
+    {
+     "layer": "impact",
+     "shape": "sparks",
+     "at": "impact",
+     "palette": "@type",
+     "count": 16,
+     "duration": 0.4,
+     "particle": "@type"
+    }
+   ]
+  },
+  "displace_blast": {
+   "layers": [
+    {
+     "layer": "projectile",
+     "shape": "family",
+     "at": "release",
+     "family": "straight",
+     "palette": "@type",
+     "size": 14
+    },
+    {
+     "layer": "impact",
+     "shape": "ring",
+     "at": "impact",
+     "palette": "@type",
+     "size": 70,
+     "duration": 0.35
+    },
+    {
+     "layer": "trail",
+     "shape": "dust",
+     "at": "impact",
+     "palette": "GROUND",
+     "count": 10,
+     "duration": 0.5
+    }
+   ]
+  },
+  "generic_pop": {
+   "layers": [
+    {
+     "layer": "impact",
+     "shape": "ring",
+     "at": "impact",
+     "palette": "@type",
+     "size": 30,
+     "duration": 0.3
+    },
+    {
+     "layer": "impact",
+     "shape": "sparks",
+     "at": "impact",
+     "palette": "@type",
+     "count": 6,
+     "duration": 0.3,
+     "particle": "sparkle"
+    }
+   ]
+  }
+ },
+ "bindings": {
+  "archetype": {
+   "melee": "melee_slash",
+   "ranged": "ranged_shot",
+   "support": "ranged_shot",
+   "tank": "tank_stomp",
+   "cast": "cast_burst",
+   "support_cast": "support_channel"
+  },
+  "type_projectile": {
+   "NORMAL": "straight",
+   "FIRE": "straight",
+   "WATER": "beam",
+   "ELECTRIC": "homing",
+   "GRASS": "volley",
+   "ICE": "volley",
+   "FIGHTING": "straight",
+   "POISON": "arc",
+   "GROUND": "ground",
+   "FLYING": "homing",
+   "PSYCHIC": "beam",
+   "BUG": "volley",
+   "ROCK": "arc",
+   "GHOST": "homing",
+   "DRAGON": "beam",
+   "DARK": "homing",
+   "STEEL": "straight",
+   "FAIRY": "homing"
+  },
+  "category": {
+   "heal": "heal_channel",
+   "rescue": "heal_channel",
+   "cleanse": "heal_channel",
+   "shield": "shield_ring",
+   "guard": "shield_ring",
+   "area": "area_quake",
+   "terrain": "terrain_spikes",
+   "root": "root_vines",
+   "poison": "poison_cloud",
+   "chain": "chain_lightning",
+   "drain": "drain_siphon",
+   "lifesteal": "drain_siphon",
+   "combo": "combo_flurry",
+   "displacement": "displace_blast",
+   "energy": "support_channel"
+  },
+  "skill": {
+   "rock_spikes": "terrain_spikes",
+   "root_domain": "root_vines",
+   "spark_chain": "chain_lightning",
+   "storm_conductor": "chain_lightning",
+   "four_arm_combo": "combo_flurry"
+  }
+ },
+ "screen": {
+  "ult": {
+   "zoom": 1.08,
+   "dim": 0.42,
+   "slowmo": 0.45,
+   "slowmo_s": 0.3,
+   "banner_s": 0.9,
+   "hitstop": 0.1
+  },
+  "ko": {
+   "zoom": 1.05,
+   "dim": 0.25,
+   "hitstop": 0.1,
+   "zoom_s": 0.55
+  },
+  "crit": {
+   "hitstop": 0.066,
+   "threshold": 0.22
+  },
+  "shake": {
+   "base": 1.5,
+   "per_weight": 9,
+   "decay": 0.3,
+   "max": 12
+  },
+  "combo": {
+   "window": 0.9,
+   "follow": 0.35
+  }
+ }
+}

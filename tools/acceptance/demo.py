@@ -158,6 +158,7 @@ _RENDER_LOCK = threading.Lock()
 _RENDER_PARAMS = {}        # (sid, round) -> 渲染中断后重建 render_job 的参数快照
 _RENDER_RESTARTS = set()   # (sid, round) 已自动重启过一次；再崩判定 dead，防确定性崩溃死循环
 _RENDER_ACTIVE = {}        # (sid, round) -> 正在运行/排队的渲染线程
+_RENDER_LAZY = set()       # (sid, round) 浏览器脚本渲染：PNG 帧仅在首次被请求时才开渲
 _RENDER_PARAMS_LIMIT = 8
 _RENDER_HEARTBEAT_STALE_S = 30
 _RENDER_CONCURRENCY = 2
@@ -239,15 +240,13 @@ def _run_render_job(job, out_dir=None, key=None) -> None:
                     _RENDER_ACTIVE.pop(key, None)
 
 
-def _prepare_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
-                           positions_a=None, hud_snapshot=None, **battle_options):
-    """玩家战斗：DemoBattleAnimation（layout=back + 外部子流）权威解算。
+def _battle_animation(comp_a, comp_b, rng, weather_name, positions_a=None,
+                      hud_snapshot=None, **battle_options):
+    """权威解算一场玩家战斗并包装为 BattleAnimation（不画帧）。
 
-    返回 (meta, render_job)：meta 立即可用（胜者/统计/事件流/队伍遥测）；
-    render_job() 逐帧落盘并在最后写 meta.json（= 完整帧集的发布标记）。
+    Pillow 帧渲染与浏览器战斗脚本（battle_script.py）共用这一份解算。
     """
-    from render_battle_gif import AnimUnit, BattleAnimation
-    from data import pokedex
+    from render_battle_gif import BattleAnimation
 
     class _Anim(BattleAnimation):
         """适配包装：layout=back + 外部 battle 子流；渲染器 R1 新接口
@@ -265,7 +264,37 @@ def _prepare_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
                              hud_snapshot=hud_snapshot)
 
     front, pal, font = _assets()
-    anim = _Anim(comp_a, comp_b, rng, front, pal, font)
+    return _Anim(comp_a, comp_b, rng, front, pal, font)
+
+
+def _write_battle_script(anim, out_dir: Path, meta=None) -> None:
+    """浏览器渲染脚本与帧目录同址（.build/demo/<sid>/r<轮>/script.json）。
+
+    只是同一场解算的另一种导出；写入失败不影响战果与 PNG 帧。
+    """
+    if not getattr(anim, 'is_arena', False):
+        return
+    try:
+        import battle_script
+        script = battle_script.build_script(
+            anim, source={'kind': 'session', 'round': (meta or {}).get('round')},
+            log_formatter=_fmt_event, playback_meta=meta)
+        battle_script.write_script(out_dir / battle_script.SCRIPT_FILE, script)
+    except Exception:  # noqa: BLE001 —— 脚本缺失时播放端回退 PNG 帧
+        import traceback
+        traceback.print_exc()
+
+
+def _prepare_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
+                           positions_a=None, hud_snapshot=None, **battle_options):
+    """玩家战斗：DemoBattleAnimation（layout=back + 外部子流）权威解算。
+
+    返回 (meta, render_job)：meta 立即可用（胜者/统计/事件流/队伍遥测）；
+    render_job() 逐帧落盘并在最后写 meta.json（= 完整帧集的发布标记）。
+    竞技战斗同时写出浏览器渲染脚本 script.json（同一次解算）。
+    """
+    anim = _battle_animation(comp_a, comp_b, rng, weather_name, positions_a,
+                             hud_snapshot, **battle_options)
     renderer = make_renderer(anim, 'arena' if anim.is_arena else 'classic')
     res = anim.sim_result
     t_end = max(e[0] for e in anim.events)
@@ -322,6 +351,7 @@ def _prepare_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
         meta['research_teams'] = [arena_research.review(anim.research_battle, team)
                                   for team in (0, 1)]
         meta['loadout_highlights'] = _loadout_highlights(anim, teams)
+        _write_battle_script(anim, out_dir, meta)
 
     def render_job() -> float:
         t0 = time.time()
@@ -329,7 +359,7 @@ def _prepare_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
         # Keep ownership visible while replacing stale frames; another preview
         # process must not mistake this active directory for abandoned output.
         for old in out_dir.iterdir():
-            if old.is_file() and old.name != 'rendering.json':
+            if old.is_file() and old.name not in ('rendering.json', 'script.json'):
                 old.unlink(missing_ok=True)
         heartbeat = out_dir / "rendering.json"
 
@@ -447,6 +477,30 @@ def ensure_render_job(sid, round_no) -> str:
     if (directory / "meta.json").is_file():
         return "ready"
     key = (str(sid), int(round_no))
+    if key in _RENDER_LAZY:
+        # 浏览器渲染局默认不跑 Pillow；有人请求 PNG 帧（?renderer=png）时才
+        # 首次开渲。这不是崩溃重建，不消耗唯一一次重启额度。
+        with _render_store_guard():
+            params = _RENDER_PARAMS.get(key)
+            lazy_start = key in _RENDER_LAZY and params is not None
+            _RENDER_LAZY.discard(key)
+            if lazy_start:
+                _write_heartbeat(directory, frames=0, total=params.get('total'), queued=True)
+        if lazy_start:
+            try:
+                _, job = _prepare_battle_frames(
+                    params["comp_a"], params["comp_b"],
+                    rng_mod.derive(params["seed"], int(round_no), "battle", params["battle_i"]),
+                    params["weather_name"], params["out_dir"],
+                    positions_a=params["positions_a"], hud_snapshot=params["hud_snapshot"],
+                    **params["battle_options"])
+            except Exception:  # noqa: BLE001
+                import traceback
+                traceback.print_exc()
+                _write_render_error(directory, traceback.format_exc())
+                return "dead"
+            _start_render_job(job, params["out_dir"], key, f"battle-render-{sid}-r{round_no}")
+            return "rendering"
     with _render_store_guard():
         params = _RENDER_PARAMS.get(key)
         already = key in _RENDER_RESTARTS
@@ -1847,8 +1901,16 @@ class Session:
                     "battle_options": copy.deepcopy(battle_options),
                     "total": meta["n"]}
                 _RENDER_RESTARTS.discard((str(self.sid), int(r)))
-            _start_render_job(job, out_dir, (str(self.sid), int(r)),
-                              f"battle-render-{self.sid}-r{r}")
+                # 浏览器渲染（/play 默认）不预跑 Pillow 帧；PNG 回退或设备模式
+                # 请求帧时由 ensure_render_job 首次开渲。
+                lazy = self.is_arena and getattr(self, 'render_preference', None) == 'script'
+                if lazy:
+                    _RENDER_LAZY.add((str(self.sid), int(r)))
+                else:
+                    _RENDER_LAZY.discard((str(self.sid), int(r)))
+            if not lazy:
+                _start_render_job(job, out_dir, (str(self.sid), int(r)),
+                                  f"battle-render-{self.sid}-r{r}")
         else:
             meta = _render_battle_frames(
                 comp_a, comp_b, rng, weather, out_dir,
@@ -1860,6 +1922,9 @@ class Session:
         meta["round"] = r
         meta["pve"] = pve
         meta["ghost"] = ghost
+        if self.is_arena:
+            # 浏览器渲染脚本与帧目录同址；play.js 据此选择 JS 渲染器。
+            meta["script"] = (out_dir / "script.json").is_file()
         meta["opp_name"] = (opp.name if opp is not None else
                             (self.opp_view or {}).get("name", "野怪"))
         winner = meta["winner"]
@@ -2423,6 +2488,39 @@ def _annotate_trait_locks(view, sess):
             option['locked'] = option['id'] not in sess.arena_unlocks['traits']
 
 
+def _complete_frame_meta(directory, round_no, battle):
+    try:
+        meta = json.loads((directory / "meta.json").read_text())
+    except (OSError, ValueError):
+        return None
+    n = meta.get("n")
+    if type(n) is not int or not 0 < n <= 12000:
+        return None
+    if meta.get("round", round_no) != round_no or meta.get("winner") != battle.get("winner"):
+        return None
+    try:
+        if not all((directory / f"{i}.png").is_file() and (directory / f"{i}.png").stat().st_size
+                   for i in range(n)):
+            return None
+    except OSError:
+        return None
+    return meta
+
+
+def _script_playback_meta(directory, round_no, battle):
+    import battle_script
+    script = battle_script.read_script(directory / battle_script.SCRIPT_FILE)
+    meta = script.get("playback_meta") if script else None
+    if not isinstance(meta, dict):
+        return None
+    n = meta.get("n")
+    if type(n) is not int or not 0 < n <= 12000:
+        return None
+    if meta.get("round", round_no) != round_no or meta.get("winner") != battle.get("winner"):
+        return None
+    return {**meta, "script": True}
+
+
 def _restore_battle_replay(session):
     """存档只存结算摘要；恢复时若该轮帧仍完整保留在本机磁盘，接回完整回放。
 
@@ -2438,21 +2536,14 @@ def _restore_battle_replay(session):
     if type(round_no) is not int or not sid:
         return
     directory = ROOT / ".build" / "demo" / str(sid) / f"r{round_no}"
-    try:
-        meta = json.loads((directory / "meta.json").read_text())
-    except (OSError, ValueError):
+    meta = _complete_frame_meta(directory, round_no, battle)
+    if meta is None:
+        # 无完整 PNG 帧集时，浏览器渲染脚本（同一次解算导出）同样可接回回放。
+        meta = _script_playback_meta(directory, round_no, battle)
+    if meta is None:
         return
-    n = meta.get("n")
-    if type(n) is not int or not 0 < n <= 12000:
-        return
-    if meta.get("round", round_no) != round_no or meta.get("winner") != battle.get("winner"):
-        return
-    try:
-        if not all((directory / f"{i}.png").is_file() and (directory / f"{i}.png").stat().st_size
-                   for i in range(n)):
-            return
-    except OSError:
-        return
+    if (directory / "script.json").is_file():
+        meta = {**meta, "script": True}
     merged = {**meta, "round": round_no, "winner": battle.get("winner"),
               "pve": battle.get("pve", False), "ghost": battle.get("ghost", False),
               "opp_name": battle.get("opp_name"),
@@ -3157,12 +3248,15 @@ def _apply_action(params: dict):
             elif cmd == 'set_weather':
                 msg = act_set_tactical(sess, 'weather', params.get('uid', ''))
             elif cmd == "end_prep":
+                sess.render_preference = params.get("renderer") if params.get("renderer") in ("script", "png") else None
                 sess.end_prep()
                 msg = "战斗结算完成"
             elif cmd == "finish":
                 sess.finish_spectating()
                 msg = "观战结束，最终排名已生成"
             elif cmd == "next":
+                if params.get("renderer") in ("script", "png"):
+                    sess.render_preference = params["renderer"]
                 if sess.phase == "prep" and not sess.player.alive:
                     sess.end_prep()   # 淘汰后观战快进：跳过准备直接结算本轮
                 if sess.phase == "battle":
