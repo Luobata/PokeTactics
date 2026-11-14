@@ -560,6 +560,7 @@ class Handler(SimpleHTTPRequestHandler):
             assets = {
                 "/play/assets/play.css": ("play.css", "text/css; charset=utf-8"),
                 "/play/assets/play.js": ("play.js", "text/javascript; charset=utf-8"),
+                "/play/assets/play_depth.js": ("play_depth.js", "text/javascript; charset=utf-8"),
                 "/play/assets/battle.css": ("battle.css", "text/css; charset=utf-8"),
             }
             asset = assets.get(parsed.path)

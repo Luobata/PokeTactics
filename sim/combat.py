@@ -280,14 +280,25 @@ class Battle:
                  positions_a=None, positions_b=None, team_options=None,
                  stat_mode: str = "legacy", learned_a=None, learned_b=None,
                  ruleset=tactics_mod.BASE_RULESET, tactics_a=None, tactics_b=None,
-                 arena_teams=None, arena_growth=None, arena_research=None) -> None:
+                 arena_teams=None, arena_growth=None, arena_research=None,
+                 arena_terrain=None) -> None:
         # S11 天气按 Battle 实例持有（2026-09-14 修订：原 set_active 全局写
         # 在验收后台多线程下会交叉污染——/anim 与 /demo 并行时互改对方天气；
         # damage_mult 由 _final_damage 显式传 self.weather_name）
         self.weather_name = weather_name
         self.base_weather_name = weather_name
         self.ruleset = tactics_mod.validate_ruleset(ruleset)
-        self._arena_on = self.ruleset == arena_mod.RULESET
+        self._arena_on = tactics_mod.is_arena(self.ruleset)
+        # arena_v2 depth edition (sim/arena_depth.py); arena_v1 never takes these paths.
+        self.depth = tactics_mod.is_depth(self.ruleset)
+        if arena_terrain is not None and not self.depth:
+            raise ValueError('arena terrain requires arena_v2')
+        from arena_depth import TERRAINS
+        if arena_terrain is not None and arena_terrain not in TERRAINS:
+            raise ValueError('unknown arena terrain')
+        self.arena_terrain = (arena_terrain or 'plain') if self.depth else None
+        self._pending_deaths = []
+        self._flushing_deaths = False
         if self._arena_on:
             self.weather_name = self.base_weather_name = None
         self.cols = COLS
@@ -302,7 +313,7 @@ class Battle:
                 or any(not isinstance(row, (list, tuple)) for row in arena_teams)):
             raise ValueError('arena_teams must contain two augment lists')
         for row in arena_teams:
-            if (any(not isinstance(key, str) or key not in arena_mod.AUGMENTS for key in row)
+            if (any(not isinstance(key, str) or key not in arena_mod.ALL_AUGMENTS for key in row)
                     or len(set(row)) != len(row) or len(row) > 3):
                 raise ValueError('unknown, repeated, or excessive arena augments')
         self.arena_teams = tuple(tuple(sorted(row)) for row in arena_teams)
@@ -357,6 +368,9 @@ class Battle:
         self.units: list = []
         self.events: list = []
         self._stat_effect_source = None
+        if self._arena_on:
+            from arena_effects import EffectBus
+            self.fx = EffectBus(self)
         self.event_version = 3 if self._arena_on else 2
         self._dead = set()
         comps = (comp_a, comp_b)
@@ -416,6 +430,11 @@ class Battle:
         if self._arena_on:
             from arena_weather import init as init_arena_weather
             init_arena_weather(self)
+        if self.depth:
+            import arena_depth
+            self.depth_bond_counts = {0: {}, 1: {}}
+            self.depth_undying_used = [False, False]
+            arena_depth.setup(self)
         for unit in self.units:
             self._emit_state(unit, 0.0)
         if self._arena_on:
@@ -440,32 +459,19 @@ class Battle:
             from arena_traits import validate_choice
             validate_choice(piece.species_id, getattr(piece, 'arena_trait_key', None))
             unit.arena_role = role
-            from arena_skills import skill_of
-            unit.ult_arch = skill_of(piece.species_id)['arch']
+            from arena_skills import skill_for_piece
+            unit.ult_arch = skill_for_piece(piece)['arch']
             augments = self.arena_teams[unit.team]
             hp_mult = (1., 1.6, 2.5)[star - 1]
+            if getattr(self, 'depth', False):
+                from arena_depth import apply_stat_curve
+                hp_mult = apply_stat_curve(unit, star, piece.tier)
             atk_mult = hp_mult * {'attack': 1.12, 'defense': .85, 'support': .8}[role]
             if role == 'defense':
                 hp_mult *= 1.25
                 unit.arena_dr = .18
-            if 'sharp_focus' in augments:
-                atk_mult *= 1.12
-            if 'vitality' in augments:
-                hp_mult *= 1.15
-            if 'iron_wall' in augments:
-                unit.arena_dr = 1 - (1 - unit.arena_dr) * .92
-            if 'quick_step' in augments:
-                unit.attack_interval /= 1.12
-            if 'mana_flow' in augments:
-                unit.energy = min(ENERGY_MAX, unit.energy + 20)
-            if 'first_aid' in augments:
-                unit.arena_heal_mult = 1.3
-            if 'war_banner' in augments:
-                atk_mult *= 1.06
-                unit.attack_interval /= 1.06
-            if 'deep_reserves' in augments:
-                hp_mult *= 1.08
-                unit.energy = min(ENERGY_MAX, unit.energy + 10)
+            from arena_effects import apply_augment_modifiers
+            atk_mult, hp_mult = apply_augment_modifiers(unit, augments, atk_mult, hp_mult)
             growth = self.arena_growth[unit.team]
             atk_mult *= 1 + arena_mod.GROWTH_STAT_STEP * growth.get('growth_mark', 0)
             hp_mult *= 1 + arena_mod.GROWTH_STAT_STEP * growth.get('growth_bulwark', 0)
@@ -594,11 +600,24 @@ class Battle:
             piece, item_key = entry if isinstance(entry, tuple) else (entry, None)
             if item_key is not None and item_key not in items_mod.catalog(self.ruleset):
                 raise ValueError('equipment unavailable in this ruleset')
+            if self.depth:
+                from arena_depth import mentor_piece
+                piece = mentor_piece(piece)
             unit = Unit(piece, team, pos, stat_mode=self.stat_mode)
             unit.technique = self.learned[team][local_idx]
             if item_key is not None:   # S5 施加点（S3 synergy.apply 同模式）
                 items_mod.apply_to_unit(unit, item_key)
                 build_rules.apply_item_rules(unit, item_key)
+            if self.depth:
+                import arena_depth
+                arena_depth.unit_init(unit)
+                unit.depth_core = bool(getattr(piece, 'is_core', False))
+                unit.depth_mods = tuple(getattr(piece, 'skill_mods', ()) or ())
+                extra = getattr(piece, 'extra_item', None)
+                if extra is not None:
+                    if extra not in items_mod.catalog(self.ruleset):
+                        raise ValueError('equipment unavailable in this ruleset')
+                    arena_depth.apply_secondary_item(unit, extra)
             unit.next_act = next_act
             unit.initiative = initiative
             unit.local_idx = local_idx
@@ -616,6 +635,9 @@ class Battle:
                        if u.synergy_heal > 0 or u.item_heal > 0]
         next_regen = 1.0
         next_support = 1.0
+        if self.depth:
+            self.fx.emit('battle_start', t=0.0)
+            self._flush_deaths(0.0)
         while t <= MAX_BATTLE_SECONDS:
             self.duration = t
             alive_teams = {u.team for u in self.units if u.alive}
@@ -623,23 +645,7 @@ class Battle:
                 break
             self.flush_tactics(t)
             if self._arena_on:
-                from arena_combinations import expire
-                for unit in self.units:
-                    expire(self, unit, t)
-                from arena_offense import expire as expire_offense
-                for unit in self.units:
-                    expire_offense(self, unit, t)
-                from arena_fields import expire as expire_fields
-                expire_fields(self, t)
-                from arena_skills import expire as expire_identities
-                expire_identities(self, t)
-                from arena_interactions import expire as expire_interactions
-                expire_interactions(self, t)
-                from arena_traits import weather_tick
-                weather_tick(self, t)
-                from arena_traits import expire as expire_traits
-                for unit in self.units:
-                    expire_traits(self, unit, t)
+                self.fx.emit('tick', t=t)
             for u in sorted(self.units, key=lambda x: (x.next_act, x.initiative)):
                 if u.alive and t + 1e-9 >= u.next_act:
                     self._act(u, t)
@@ -653,6 +659,8 @@ class Battle:
                 self._arena_support(t)
                 next_support += 1.0
             status_mod.tick(self, t)  # S12：DOT/到期（默认无操作）
+            if self.depth:
+                self._flush_deaths(t)
             t += TICK
         return self._result()
 
@@ -667,8 +675,8 @@ class Battle:
             u.next_act = t + self._action_interval(u, t)
             return
         if self._arena_on and u.energy >= ENERGY_MAX:
-            from arena_skills import cast, skill_of
-            if skill_of(u.piece.species_id)['targeting'] in ('ally', 'self'):
+            from arena_skills import cast, skill_for_piece
+            if skill_for_piece(u.piece)['targeting'] in ('ally', 'self'):
                 if cast(self, u, None, t):
                     u.next_act = t + self._action_interval(u, t)
                     return
@@ -691,6 +699,10 @@ class Battle:
                 self.events.append((t, "move", u.idx, u.pos))
             step = MOVE_TICK * (melee_move_mult() if u.range == 1 else 1.0) \
                 * u.move_mult                      # R1 档案移速（卡比兽 0.85）
+            if self.depth and u.pos != origin:
+                from arena_depth import move_cost
+                u.moved = True
+                step *= move_cost(self, u, u.pos)
             u.next_act = t + step
 
     def _action_interval(self, u: Unit, t):
@@ -702,6 +714,9 @@ class Battle:
             interval *= chill_multiplier(self, u, t)
             from arena_traits import action_multiplier
             interval /= action_multiplier(self, u, t)
+        if self.depth:
+            from arena_depth import haste_multiplier
+            interval /= haste_multiplier(u, t)
         return interval
 
     def _target(self, u: Unit, t=None):
@@ -720,13 +735,20 @@ class Battle:
                 u.target_idx = None
             u.taunt_source_idx, u.taunt_until = None, 0.
         cur = self.units[u.target_idx] if u.target_idx is not None else None
-        if cur is not None and cur.alive and cur.team != u.team:
+        hidden = None
+        if self.depth:
+            from arena_depth import untargetable, prefer_target
+            hidden = lambda e: untargetable(e, now)  # noqa: E731
+        if (cur is not None and cur.alive and cur.team != u.team
+                and (hidden is None or not hidden(cur))):
             return cur
-        enemies = [e for e in self.units if e.alive and e.team != u.team]
+        enemies = [e for e in self.units if e.alive and e.team != u.team
+                   and (hidden is None or not hidden(e))]
         if not enemies:
             u.target_idx = None
             return None
-        near = min(enemies, key=lambda e: self._target_key(u, e))
+        near = (prefer_target(self, u, enemies, now) if self.depth else None) \
+            or min(enemies, key=lambda e: self._target_key(u, e))
         u.target_idx = near.idx
         return near
 
@@ -1064,10 +1086,8 @@ class Battle:
                                                basic_enhancement=enhancement)
                 if self._arena_on:
                     settle_basic(self, u, target, t, action_index, enhancement)
-                    from arena_offense import after_basic
-                    after_basic(self, u, target, t, action_index, actual_hp)
-                    from arena_equipment import after_basic as equipment_after_basic
-                    equipment_after_basic(self, u, target, t, action_index, actual_hp)
+                    self.fx.emit('basic_settled', unit=u, target=target, t=t,
+                                 action_index=action_index, actual_hp=actual_hp)
             if dmg > 0:
                 if self._arena_on:
                     self._partner_after_basic(u, target, t, actual_hp=actual_hp)
@@ -1267,14 +1287,24 @@ class Battle:
                                     hp_before, shield_before, sturdy_before, sash_before)
             arena_traits.emit_protection(self, target, protection, t, action_index)
             if direct:
-                arena_traits.after_direct_hit(self, attacker, target, actual_hp, t,
-                                             action_index, move, basic=primary and not cast)
-                from arena_bonds import after_direct_hit as after_bond_direct_hit
-                after_bond_direct_hit(self, attacker, target, actual_hp, t,
-                                      action_index, move, basic=primary and not cast)
-                from arena_teaching import after_hit_taken
-                after_hit_taken(self, target, attacker, actual_hp, t, action_index)
+                self.fx.emit('direct_hit', source=attacker, target=target, actual_hp=actual_hp,
+                             t=t, action_index=action_index, move=move,
+                             basic=primary and not cast)
+        if self.depth:
+            self._flush_deaths(t)
         return actual_hp
+
+    def _flush_deaths(self, t):
+        """Announce settled deaths (killer known) to depth effects, outside any packet."""
+        if self._flushing_deaths:
+            return
+        self._flushing_deaths = True
+        try:
+            while self._pending_deaths:
+                unit = self._pending_deaths.pop(0)
+                self.fx.emit('death', unit=unit, killer=unit._last_damage_source, t=t)
+        finally:
+            self._flushing_deaths = False
 
     def _partner_mates(self, unit, wounded=False):
         mates = [mate for mate in self.units if mate is not unit and mate.alive
@@ -1471,6 +1501,9 @@ class Battle:
         """
         healer = source if source is not None else self._stat_effect_source or unit
         healed, blocked, blocker = self._healing_amount(unit, amount, t)
+        if self.depth:
+            from arena_depth import on_heal
+            on_heal(self, unit, amount, healed + blocked, t)
         if blocked:
             self.events.append((t, 'tactical_effect', blocker['source'], unit.idx,
                                 'healing_prevented',
@@ -1554,8 +1587,14 @@ class Battle:
             target.item_sash_used = True
             target.hp = 1
             self.events.append((t, "sash", target.idx))
+        if target.hp <= 0 and self.depth:
+            from arena_depth import prevent_death
+            if prevent_death(self, target, t):
+                return
         if target.hp <= 0:
             target.hp = 0
+            if self.depth:
+                self._pending_deaths.append(target)
             if self._arena_on:
                 from arena_combinations import clear
                 clear(target)
@@ -1623,6 +1662,9 @@ class Battle:
                 dmg = int(dmg * (1.0 + u.item_type_dmg[move["type"]]))
             if target.synergy_ult_cap is not None:
                 dmg = min(dmg, int(target.max_hp * target.synergy_ult_cap))
+        if self.depth:
+            from arena_depth import damage_multiplier as depth_multiplier
+            dmg = int(dmg * depth_multiplier(self, u, target, move, self.duration, base=dmg))
         return int(dmg * (1.0 - target.synergy_dr) * (1.0 - target.item_dr)
                    * (1.0 - target.arena_dr))
 

@@ -539,7 +539,7 @@ class BattleAnimation:
         self.active_rock_fields = {}
         self.field_statuses = {}
         self.units = {u.idx: AnimUnit(u) for u in b.units}
-        self.is_arena = getattr(b, 'ruleset', None) == 'arena_v1'
+        self.is_arena = getattr(b, 'ruleset', None) in ('arena_v1', 'arena_v2')
         self.battle_rows = getattr(b, 'rows', 4)
         self.visual_rows = self.battle_rows + 2
         self.width = W

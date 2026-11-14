@@ -128,10 +128,8 @@ def move_unit(battle, target, destination, t, cast_index=None, source=None, reas
             payload['actual'] = battle._land_hit(caster, target, requested, t, direct=False)
             payload['absorbed'] = target.shield_absorbed - absorbed_before
     if reason == 'knockback':
-        from arena_combinations import after_knockback
-        after_knockback(battle, source, target, origin, t, cast_index, action_index)
-        from arena_equipment import after_knockback as equipment_after_knockback
-        equipment_after_knockback(battle, source, target, t, cast_index, action_index)
+        battle.fx.emit('knockback', source=source, target=target, origin=origin, t=t,
+                       cast_index=cast_index, action_index=action_index)
     return True
 
 

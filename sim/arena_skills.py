@@ -299,8 +299,24 @@ def catalog(include_families=False):
     return [dict(sid=sid, **skill_of(sid)) for sid in sorted(species_ids)]
 
 
+def skill_for_piece(piece):
+    """arena_v2 early forms borrow their final form's kit at 75% power.
+
+    ``native_mentor`` is set only by depth battles on pieces whose own kit is
+    the generic family strike; every other piece resolves exactly as before.
+    """
+    mentor = getattr(piece, 'native_mentor', None)
+    if mentor is None:
+        return skill_of(piece.species_id)
+    spec = skill_of(mentor)
+    spec['power'] = max(1, int(spec['power'] * .75))
+    if not spec['name'].startswith('初阶·'):
+        spec['name'] = '初阶·' + spec['name']
+    return spec
+
+
 def resolve_cast(piece):
-    skill = skill_of(piece.species_id)
+    skill = skill_for_piece(piece)
     return {'id': None, 'name': 'arena_' + skill['id'], 'name_zh': skill['name'],
             'type': skill['type'], 'power': skill['power'], 'accuracy': 100,
             'effect': None, 'targeting': skill['targeting'],
@@ -346,10 +362,8 @@ def _heal(battle, unit, patient, amount, t, cast_index):
     with battle._skill_effect(unit, patient, 'heal', t, cast_index,
                               amount=actual, requested=amount):
         actual = battle._heal(patient, amount, t)
-    from arena_equipment import after_native_heal
-    after_native_heal(battle, unit, patient, actual, t, cast_index)
-    from arena_traits import after_native_heal as trait_after_native_heal
-    trait_after_native_heal(battle, unit, patient, actual, t, cast_index)
+    battle.fx.emit('native_heal', unit=unit, patient=patient, actual=actual, t=t,
+                   cast_index=cast_index)
     return actual
 
 
@@ -442,12 +456,8 @@ def _energy(battle, unit, recipient, requested, t, cast_index):
                               amount=gained, requested=requested):
         recipient.energy += gained
         battle._emit_state(recipient, t)
-    from arena_offense import after_native_energy
-    after_native_energy(battle, unit, recipient, gained, t, cast_index)
-    from arena_bonds import after_native_support
-    after_native_support(battle, unit, recipient, gained, 'energy', t, cast_index)
-    from arena_equipment import after_native_energy as equipment_after_native_energy
-    equipment_after_native_energy(battle, unit, recipient, gained, t, cast_index)
+    battle.fx.emit('native_energy', unit=unit, recipient=recipient, gained=gained, t=t,
+                   cast_index=cast_index)
     return gained
 
 
@@ -582,10 +592,7 @@ def _support_cast(battle, unit, skill, t):
         from arena_bonds import after_native_support
         after_native_support(battle, unit, patient, 1, 'cleanse', t, cast_index)
     arena_combinations.after_native(battle, unit, target, t, cast_index, False, 0, heals)
-    from arena_traits import after_native_cast
-    after_native_cast(battle, unit, t, cast_index)
-    from arena_bonds import after_native_cast as bond_after_native_cast
-    bond_after_native_cast(battle, unit, t, cast_index)
+    battle.fx.emit('native_cast', unit=unit, t=t, cast_index=cast_index)
     return True
 
 
@@ -619,10 +626,7 @@ def _stance_cast(battle, unit, skill, t):
             unit.thorns_left, unit.thorns_until = 3, t + 3.
             unit.thorns_cast_index = cast_index
             battle._emit_state(unit, t)
-    from arena_traits import after_native_cast
-    after_native_cast(battle, unit, t, cast_index)
-    from arena_bonds import after_native_cast as bond_after_native_cast
-    bond_after_native_cast(battle, unit, t, cast_index)
+    battle.fx.emit('native_cast', unit=unit, t=t, cast_index=cast_index)
     return True
 
 
@@ -673,7 +677,7 @@ def _cast(battle, unit, target, t):
     """Resolve one native action; learned techniques retain their separate slot."""
     if not battle._arena_on or not unit.alive or unit.energy < ENERGY_MAX or status.stunned(unit, t):
         return False
-    skill = skill_of(unit.piece.species_id)
+    skill = skill_for_piece(unit.piece)
     if skill['targeting'] == 'ally':
         return _support_cast(battle, unit, skill, t)
     if skill['targeting'] == 'self':
@@ -691,10 +695,7 @@ def _cast(battle, unit, target, t):
         arena_fields.place_rocks(battle, unit, target, t, cast_index)
         battle._partner_after_cast(unit, target, t, target.pos, False)
         arena_combinations.after_native(battle, unit, target, t, cast_index, False, 0, [])
-        from arena_traits import after_native_cast
-        after_native_cast(battle, unit, t, cast_index)
-        from arena_bonds import after_native_cast as bond_after_native_cast
-        bond_after_native_cast(battle, unit, t, cast_index)
+        battle.fx.emit('native_cast', unit=unit, t=t, cast_index=cast_index)
         return True
     if key == 'shadow_siphon' and not taunted:
         candidates = [enemy for enemy in battle.units if enemy.alive
@@ -739,12 +740,8 @@ def _cast(battle, unit, target, t):
     damage, empower = prepare_native_primary(battle, unit, damage, t)
     lost_hp = battle._land_hit(unit, target, damage, t, move=move, primary=True, cast=True)
     settle_native_primary(battle, unit, target, empower, t, cast_index)
-    from arena_equipment import after_native_hit
-    after_native_hit(battle, unit, target, t, cast_index, lost_hp)
-    from arena_bonds import after_native_hit as bond_after_native_hit
-    bond_after_native_hit(battle, unit, target, t, cast_index, lost_hp)
-    from arena_interactions import after_primary
-    after_primary(battle, unit, target, move, lost_hp, t, cast_index)
+    battle.fx.emit('native_primary', unit=unit, target=target, t=t, cast_index=cast_index,
+                   lost_hp=lost_hp, move=move)
     if not unit.alive:
         # A stance reaction may defeat the caster during its primary hit.
         # Only that already settled hit survives; no new follow-up is launched.
@@ -910,8 +907,5 @@ def _cast(battle, unit, target, t):
     battle._request_weather(unit, t, cast_index)
     arena_combinations.after_native(battle, unit, target, t, cast_index,
                                     already_poisoned, lost_hp, heals)
-    from arena_traits import after_native_cast
-    after_native_cast(battle, unit, t, cast_index)
-    from arena_bonds import after_native_cast as bond_after_native_cast
-    bond_after_native_cast(battle, unit, t, cast_index)
+    battle.fx.emit('native_cast', unit=unit, t=t, cast_index=cast_index)
     return True

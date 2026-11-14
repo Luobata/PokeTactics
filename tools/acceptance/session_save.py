@@ -105,6 +105,9 @@ PRE_HOENN_FINGERPRINT = '3105c8e3f3386efe16c7b74e519a7b4acb2b770155a607a7e6af7d0
 PRE_REBALANCE_FINGERPRINT = '475e78b0bb4edc69f9a9c65dadf18c55dee202edf075ea7fd02bb7f9c110e822'
 # Verified families-v2 build immediately before in-match tactical research.
 PRE_TACTICAL_RESEARCH_FINGERPRINT = 'fd6a3572ba682a361a6edfb008f5fd4c0e1ae7a13cea85fac94f7fd5285e51ce'
+# Verified build immediately before the arena_v2 depth edition and effect bus.
+# arena_v1 rules, records and reports are byte-identical (tests/fixtures/arena_golden.json).
+PRE_DEPTH_EDITION_FINGERPRINT = 'af779aed8840e44251667f1b1a2329841612be1f2648f04c1b437cfb828e8a8b'
 # Verified build with the full research ledger, before deeper member bonds.
 PRE_BOND_DEPTH_FINGERPRINT = '771abf263e2c1603af3178e3ac321b43a963123d79b29159257f2ac97bf05638'
 PRE_SYNERGY_TECHNIQUES = frozenset({'cut', 'surf', 'rest', 'thunderbolt', 'ice_beam',
@@ -158,10 +161,14 @@ def sequence(value, maximum, label):
     return value
 
 
-def owned_record(owned, evolution_choices=False, arena=False):
+def owned_record(owned, evolution_choices=False, arena=False, depth=False):
     record = {"species": owned.piece.species_id, "item": owned.item,
             "uid": owned.uid, "technique": owned.technique,
             "sources": list(owned.sources), "invested": owned.invested}
+    if depth:
+        record['depth'] = {'mods': list(getattr(owned, 'skill_mods', None) or []),
+                           'core': bool(getattr(owned, 'is_core', False)),
+                           'extra_item': getattr(owned, 'extra_item', None)}
     if evolution_choices:
         record['evolution_locked'] = owned.evolution_locked
     trait_key = getattr(owned, 'arena_trait', None)
@@ -204,26 +211,30 @@ class SessionCodec:
     def encode(self, state):
         import tactics
         choices = tactics.evolution_choices_enabled(state.ruleset)
-        is_arena = state.ruleset == 'arena_v1'
+        is_arena = tactics.is_arena(state.ruleset)
+        is_depth = tactics.is_depth(state.ruleset)
         state.ensure_unit_ids()
         seats = []
         for seat in state.seats:
             data = {key: getattr(seat, key) for key in COMMON}
             data.update({"seat": seat.seat, "shop": list(seat.shop.slots),
-                         "board": [owned_record(o, choices, is_arena) for o in seat.board],
-                         "bench": [owned_record(o, choices, is_arena) for o in seat.bench],
+                         "board": [owned_record(o, choices, is_arena, is_depth) for o in seat.board],
+                         "bench": [owned_record(o, choices, is_arena, is_depth) for o in seat.bench],
                          "components": dict(seat.inventory.components),
                          "finished": list(seat.inventory.finished),
                          "techniques": dict(seat.inventory.techniques),
                          "last_opponent": getattr(getattr(seat, "_last_opp", None), "seat", None)})
             if seat.seat == 0:
-                data.update({"grid": [[r, c, owned_record(seat.grid[(r, c)], choices, is_arena)]
+                data.update({"grid": [[r, c, owned_record(seat.grid[(r, c)], choices, is_arena, is_depth)]
                                       for r, c in sorted(seat.grid)],
                              "refresh_j": seat.refresh_j, "shop_locked": seat.shop_locked})
             else:
                 data.update({"ability": seat.ability, "personality": seat.pers_key,
                              "target_types": list(seat.target_types),
                              "stats": {key: copy.deepcopy(getattr(seat, key)) for key in BOT_STATS}})
+            if is_depth:
+                import arena_session
+                data['depth'] = arena_session.copy_state(seat)
             seats.append(data)
         meta = state.last_battle
         summary = ({key: copy.deepcopy(meta[key]) for key in
@@ -288,6 +299,8 @@ class SessionCodec:
                          'run': copy.deepcopy(state.arena_run),
                          'new_challenges': list(state.arena_new_challenges)},
             }
+            if is_depth:
+                payload['arena']['draft'] = copy.deepcopy(state.arena_draft)
         if is_arena and state.scouting_history is not None:
             scout = copy.deepcopy(state.scouting_history)
             scout['seats'] = [[self._pack_report(row, compact_statistics=True) for row in rows]
@@ -324,6 +337,11 @@ class SessionCodec:
         fingerprint = data.get('rules')
         current_fingerprint = rules_fingerprint()
         loaded_fingerprint = fingerprint
+        if fingerprint == PRE_DEPTH_EDITION_FINGERPRINT:
+            # Identical arena_v1 layout and results; the depth edition did not exist yet.
+            if tactics.is_depth(ruleset):
+                raise ValueError('旧版存档不能包含深度竞技规则')
+            fingerprint = loaded_fingerprint = current_fingerprint
         allow_depth_bonds = loaded_fingerprint == current_fingerprint
         if fingerprint == PRE_BOND_DEPTH_FINGERPRINT:
             # Same pool, inventory and research schema; only future combats
@@ -358,7 +376,8 @@ class SessionCodec:
         if ruleset in (tactics.BASE_RULESET, tactics.TACTICS_RULESET, tactics.ABILITIES_RULESET):
             supported.add(LEGACY_ABILITIES_FINGERPRINT)
         choices = tactics.evolution_choices_enabled(ruleset)
-        is_arena = ruleset == 'arena_v1'
+        is_arena = tactics.is_arena(ruleset)
+        is_depth = tactics.is_depth(ruleset)
         pre_synergy_arena = is_arena and fingerprint == PRE_ARENA_SYNERGY_FINGERPRINT
         # The reroll and growth predecessors share the exact current record
         # layout; every current-format gate below accepts them. Only pending
@@ -490,6 +509,28 @@ class SessionCodec:
             if schema_version >= 3 and 'technique' not in record:
                 raise ValueError('棋子缺少教学记录')
             result.technique = learning(sid, record.get('technique'))
+            if is_depth:
+                extras = record.get('depth')
+                if not isinstance(extras, dict) or set(extras) != {'mods', 'core', 'extra_item'}:
+                    raise ValueError('深度竞技棋子缺少强化记录')
+                import arena_session
+                mods = sequence(extras['mods'], 2, 'skill mods')
+                result.skill_mods = []
+                for mod in mods:
+                    options = [row['id'] for row in arena_session.pending_mod_options(result)]
+                    if mod not in options:
+                        raise ValueError('技能强化与星级或定位不符')
+                    result.skill_mods.append(mod)
+                if type(extras['core']) is not bool:
+                    raise ValueError('核心标记无效')
+                result.is_core = extras['core']
+                extra = extras['extra_item']
+                if extra is not None and (extra not in demo.items_mod.catalog(ruleset)
+                                          or extra in ('evo_stone', 'lucky_egg') or item is None):
+                    raise ValueError('第二装备位无效')
+                result.extra_item = extra
+            elif 'depth' in record:
+                raise ValueError('旧规则不能包含深度竞技记录')
             if choices:
                 locked = record.get('evolution_locked')
                 if type(locked) is not bool:
@@ -545,7 +586,7 @@ class SessionCodec:
                     if is_arena:
                         normalized['arena_trait'] = selected_trait
                     normalized_board.append(normalized)
-                if [owned_record(o, choices, is_arena) for o in seat.board] != normalized_board:
+                if [owned_record(o, choices, is_arena, is_depth) for o in seat.board] != normalized_board:
                     raise ValueError("棋盘格位与棋子顺序不一致")
                 seat.refresh_j = integer(record["refresh_j"], 0, 1000000, "refresh_j")
                 if type(record["shop_locked"]) is not bool:
@@ -631,6 +672,19 @@ class SessionCodec:
             if not isinstance(machines, dict) or set(machines) != set(techniques.ids_for(ruleset)):
                 raise ValueError('技能机仓库字段无效')
             seat.inventory.techniques = {k: integer(v, 0, 1000, 'techniques') for k, v in machines.items()}
+            if is_depth:
+                counters = record.get('depth')
+                if not isinstance(counters, dict) or set(counters) != {'free_refreshes', 'relief', 'sims'}:
+                    raise ValueError('深度竞技席位计数无效')
+                seat.depth = {key: integer(counters[key], 0, 10, key) for key in counters}
+            elif 'depth' in record:
+                raise ValueError('旧规则不能包含深度竞技席位记录')
+        if is_depth:
+            draft = (data.get('arena') or {}).get('draft')
+            if draft is not None and isinstance(draft, dict) and draft.get('status') == 'pending':
+                for option in sequence(draft.get('options'), 8, 'draft options'):
+                    if option.get('taken_by') is None:
+                        held[integer(option.get('family'), 1, 65535, 'draft family')] += 1
         if len(ranks) != len(set(ranks)) or (state.phase == "over" and len(ranks) != 8):
             raise ValueError("名次重复或终局名次不完整")
         saved_pool = data['pool']
@@ -1422,7 +1476,12 @@ class SessionCodec:
         # The growth meta block is additive (kills/mvp-style): predecessors
         # simply omit it and decode with defaults; a forged block must validate.
         meta = self._decode_arena_meta(raw.get('meta'))
-        core = set(raw) - {'meta', 'research'}
+        is_depth = getattr(state, 'is_depth', False)
+        if is_depth != ('draft' in raw):
+            raise ValueError('选秀记录与竞技规则不一致')
+        if is_depth:
+            state.arena_draft = self._decode_draft(state, raw['draft'])
+        core = set(raw) - {'meta', 'research', 'draft'}
         if core == fields and migrating_components:
             # Only a known predecessor may omit both new fields. Partial fields
             # and a current-rules snapshot are never treated as an old save.
@@ -1447,7 +1506,8 @@ class SessionCodec:
             raise ValueError('竞技强化需要完整八个席位')
         for seat, selected in zip(state.seats, rows):
             keys = sequence(selected, available, 'selected augment ids')
-            if any(not isinstance(key, str) or key not in arena.AUGMENTS for key in keys) or len(keys) != len(set(keys)):
+            if any(not isinstance(key, str) or key not in (arena.ALL_AUGMENTS if is_depth else arena.AUGMENTS)
+                   for key in keys) or len(keys) != len(set(keys)):
                 raise ValueError('竞技强化未知或重复')
             seat.arena_augments_selected = [arena.augment_view(key) for key in keys]
         pending = sequence(raw['pending'], 1, 'pending augments')
@@ -1468,7 +1528,9 @@ class SessionCodec:
                 raise ValueError('待选竞技强化生命周期无效')
             keys = sequence(row['options'], 3, 'augment options')
             used = {a['id'] for a in state.player.arena_augments_selected}
-            if (len(keys) != 3 or any(not isinstance(key, str) or key not in arena.AUGMENTS or key in used for key in keys)
+            if (len(keys) != 3 or any(not isinstance(key, str)
+                                      or key not in (arena.ALL_AUGMENTS if is_depth else arena.AUGMENTS)
+                                      or key in used for key in keys)
                     or len(keys) != len(set(keys))):
                 raise ValueError('竞技强化候选无效')
             rebuilt.append({'id': row['id'], 'round': round_no,
@@ -1514,6 +1576,37 @@ class SessionCodec:
             state.arena_component_choice_start = state.round_no + (state.phase != 'prep')
         else:
             self._decode_arena_component_choices(state, raw)
+
+    @staticmethod
+    def _decode_draft(state, raw):
+        if raw is None:
+            return None
+        if not isinstance(raw, dict) or set(raw) != {'round', 'options', 'order', 'status'}:
+            raise ValueError('选秀记录字段无效')
+        import arena_session
+        round_no = integer(raw['round'], 1, state.round_no, 'draft round')
+        if round_no not in arena_session.DRAFT_ROUNDS or raw['status'] not in ('pending', 'done'):
+            raise ValueError('选秀轮次或状态无效')
+        if raw['status'] == 'pending' and (round_no != state.round_no or state.phase != 'prep'):
+            raise ValueError('选秀生命周期无效')
+        order = sequence(raw['order'], 8, 'draft order')
+        if len(set(order)) != len(order) or any(type(n) is not int or not 0 <= n < 8 for n in order):
+            raise ValueError('选秀顺序无效')
+        options = []
+        for index, option in enumerate(sequence(raw['options'], 8, 'draft options')):
+            if not isinstance(option, dict) or set(option) != {'index', 'family', 'species', 'name',
+                                                                'cost', 'reward', 'taken_by'}:
+                raise ValueError('选秀选项字段无效')
+            from arena_families import FAMILIES
+            if option['index'] != index or option['family'] not in FAMILIES:
+                raise ValueError('选秀选项无效')
+            taken = option['taken_by']
+            if taken is not None and (type(taken) is not int or not -1 <= taken < 8):
+                raise ValueError('选秀归属无效')
+            from arena_rewards import reward_view
+            reward_view(option['reward'])
+            options.append(copy.deepcopy(option))
+        return {'round': round_no, 'options': options, 'order': list(order), 'status': raw['status']}
 
     def _decode_arena_component_choices(self, state, raw):
         import items
@@ -1581,7 +1674,12 @@ class SessionCodec:
             if row['result'] not in ('win', 'loss', 'draw'):
                 raise ValueError('回合奖励胜负无效')
             grants = sequence(row['grants'], 2, 'loot grants')
-            if len(grants) != (2 if row['result'] == 'win' else 1):
+            if getattr(state, 'is_depth', False):
+                # arena_v2: one grant per battle; a lost battle may add one loss-streak component.
+                if not (len(grants) == 1 or len(grants) == 2 and row['result'] == 'loss'
+                        and grants[1].get('kind') == 'component'):
+                    raise ValueError('回合奖励数量与胜负不一致')
+            elif len(grants) != (2 if row['result'] == 'win' else 1):
                 raise ValueError('回合奖励数量与胜负不一致')
             for grant in grants:
                 if not isinstance(grant, dict) or set(grant) != {'kind', 'key'}:

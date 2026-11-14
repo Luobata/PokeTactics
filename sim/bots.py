@@ -181,6 +181,9 @@ class Bot:
         return _can_combine(species_id) and self.count_species(species_id) >= 2
 
     def pop(self) -> int:
+        if getattr(self.inventory, 'ruleset', None) == 'arena_v2':
+            import arena_session
+            return arena_session.population(self)
         return economy.pop_of(self.level)
 
     def reserve(self, round_no: int) -> int:
@@ -231,12 +234,12 @@ class Bot:
         #    石头已用则不烧进化石（组件留作后续特定配方）
         # 竞技场棋子按形态独立购买、不局内进化（docs/49）：进化石通道在
         # arena_v1 下整体关闭，93 鬼斯通入池也不激活通信进化。
-        stone_ok = (self.inventory.ruleset != 'arena_v1' and not self.stone_used
+        stone_ok = (self.inventory.ruleset not in ('arena_v1', 'arena_v2') and not self.stone_used
                     and any(o.piece.species_id in items_mod.STONE_TARGETS
                             for o in self.all_pieces()))
         behind = self._is_behind(others)   # 落后方：幸运蛋提前（追赶条款）
         priority = items_mod.craft_priority(self.pers_key, stone_ok, behind)
-        if self.inventory.ruleset == 'arena_v1':
+        if self.inventory.ruleset in ('arena_v1', 'arena_v2'):
             from arena_equipment import CRAFT_ORDER, carrier_rank
             ready = tuple(key for key in CRAFT_ORDER
                           if any(o.item is None and carrier_rank(o, key) is not None
@@ -249,7 +252,7 @@ class Bot:
                 and opponent is not None and self._healing_threat(opponent.board)):
             priority = ('healing_needle',) + priority
         craft_gate = self._craft_gate(round_no)
-        if self.inventory.ruleset == 'arena_v1':
+        if self.inventory.ruleset in ('arena_v1', 'arena_v2'):
             ordinary_gate = craft_gate
             craft_gate = lambda key: (ordinary_gate(key) and
                 (key not in CRAFT_ORDER or any(
@@ -266,7 +269,7 @@ class Bot:
         # 2) 进化石：装备到通信族中段形态上即触发通信进化（不消耗、每局一次；
         #    2026-09-14 裁定后的唯一通道——3 合 1 通道已删除）
         if ("evo_stone" in self.inventory.finished and not self.stone_used
-                and self.inventory.ruleset != 'arena_v1'):
+                and self.inventory.ruleset not in ('arena_v1', 'arena_v2')):
             for o in sorted(self.all_pieces(),
                             key=lambda x: -dex.bst(x.piece.species_id)):
                 nxt = items_mod.STONE_TARGETS.get(o.piece.species_id)
@@ -356,7 +359,7 @@ class Bot:
         free = [o for o in self.all_pieces() if o.item is None]
         if not free:
             return None
-        if self.inventory.ruleset == 'arena_v1':
+        if self.inventory.ruleset in ('arena_v1', 'arena_v2'):
             from arena_equipment import CRAFT_ORDER, carrier_rank
             if key in CRAFT_ORDER:
                 eligible = [(carrier_rank(o, key), o) for o in free]
@@ -394,6 +397,9 @@ class Bot:
         if owned.item is not None:
             self.inventory.finished.append(owned.item)
             owned.item = None
+        if getattr(owned, 'extra_item', None):   # arena_v2 second slot
+            self.inventory.finished.append(owned.extra_item)
+            owned.extra_item = None
         if owned.technique is not None:
             self.inventory.techniques[owned.technique] += 1
             owned.technique = None
@@ -538,7 +544,28 @@ class Bot:
             owned_counts = main_types(self.all_pieces())
             stack = {t: n for t, n in owned_counts}
             score += 60 * sum(min(stack.get(t, 0), 6) for t in piece.types)
+        if getattr(self.inventory, 'ruleset', None) == 'arena_v2' and hasattr(piece, 'family_id'):
+            score += self._breakpoint_bonus(piece)
         return score
+
+    def _breakpoint_bonus(self, piece) -> int:
+        """arena_v2: a new family that moves a type toward its depth breakpoint."""
+        import arena_bonds
+        from arena_depth import BOND_RULES
+        if any(getattr(o.piece, 'family_id', None) == piece.family_id for o in self.all_pieces()):
+            return 0
+        counts = arena_bonds.count([o.piece for o in self.board])
+        bonus = 0
+        for element in piece.types:
+            rule = BOND_RULES.get(element)
+            if rule is None:
+                continue
+            have = counts.get(element, 0)
+            if have + 1 == rule[0]:
+                bonus += 700          # completes a behaviour breakpoint
+            elif have + 1 < rule[0] and have >= 1:
+                bonus += 150 * have   # builds toward one already started
+        return bonus
 
     def _fits(self, piece) -> bool:
         """L1 规则经济（docs/03 §4.1「只买当前阵容族」）：
@@ -713,7 +740,7 @@ class Bot:
     # ---- 供 battle 用的 comp ----
     def battle_comp(self) -> list:
         """上场名单：带装备者传 (Piece, item_key) 二元组（S5 协议），空手传裸 Piece。"""
-        if self.inventory.ruleset == 'arena_v1':
+        if self.inventory.ruleset in ('arena_v1', 'arena_v2'):
             import arena
             return arena.battle_comp(self.board)
         return [o.piece if o.item is None else (o.piece, o.item)

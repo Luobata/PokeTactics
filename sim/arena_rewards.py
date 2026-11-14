@@ -71,7 +71,7 @@ def reward_view(grant):
         raise ValueError('奖励物品编号无效')
     if kind == 'component' and key in items.COMPONENT_NAMES:
         name, description = items.COMPONENT_NAMES[key], '装备组件，可与另一组件合成。'
-    elif kind == 'item' and key in items.catalog('arena_v1') and key not in ('lucky_egg', 'evo_stone'):
+    elif kind == 'item' and key in items.catalog('arena_v2') and key not in ('lucky_egg', 'evo_stone'):
         name, description = items.FINISHED[key]['name'], '成品装备，可直接装备到精灵。'
     elif kind == 'technique' and key in techniques.ids_for('arena_v1'):
         spec = techniques.view(key, 'arena_v1')
