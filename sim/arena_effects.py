@@ -209,7 +209,8 @@ class Ledger:
     energy gained, plus an ``estimated`` bucket for passive stat bonuses whose
     contribution is derived from settled damage rather than a discrete event.
     """
-    FIELDS = ('triggers', 'damage', 'heal', 'shield', 'energy', 'prevented', 'estimated')
+    FIELDS = ('triggers', 'damage', 'heal', 'shield', 'energy', 'prevented', 'estimated',
+              'idle', 'passive')
 
     def __init__(self):
         self.rows = ({}, {})
@@ -218,6 +219,9 @@ class Ledger:
         row = self.rows[team].setdefault((source, key), dict.fromkeys(self.FIELDS, 0))
         for name, value in values.items():
             row[name] += int(round(value))
+
+    def has(self, team, source, key):
+        return (source, key) in self.rows[team]
 
     def view(self, team):
         return [{'source': source, 'id': key, **row}

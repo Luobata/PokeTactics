@@ -86,6 +86,14 @@ class EffectTest(unittest.TestCase):
         rows = {(r['source'], r['id']): r for r in b.fx.ledger.view(0)}
         self.assertGreater(rows[('terrain', 'mana_spring')]['energy'], 0)
 
+    def test_installed_but_unused_effects_show_as_idle(self):
+        b = battle([piece(66)], [piece(1)], teams=[['chain_reaction', 'growth_mark'], []])
+        b.run()
+        rows = {(r['source'], r['id']): r for r in b.fx.ledger.view(0)}
+        self.assertEqual(rows[('augment', 'growth_mark')]['passive'], 1)
+        self.assertTrue(rows[('augment', 'chain_reaction')]['idle']
+                        or rows[('augment', 'chain_reaction')]['triggers'])
+
     def test_second_item_stacks_with_primary(self):
         b = battle([(piece(4, 2, is_core=True, extra_item='swift_feather'), 'choice_band')], [piece(1)])
         unit = b.units[0]
@@ -231,6 +239,44 @@ class SessionTest(unittest.TestCase):
         with self.assertRaises(self.demo.DemoError):
             self.demo.act_simulate(s)
         self.assertEqual((p.gold, s.pool.remaining), (gold, pool))
+
+    def test_targeted_refresh_cost_escalates_within_a_round(self):
+        s = self.new(91)
+        p = s.player
+        p.gold = 40
+        self.demo.act_refresh_type(s, 'FIRE')
+        self.assertEqual(arena_session.targeted_cost(p), 4)
+        self.demo.act_refresh_type(s, 'WATER')
+        self.assertEqual(arena_session.targeted_cost(p), 5)
+        self.assertEqual(p.gold, 40 - 3 - 4)
+
+    def test_drafted_unit_sells_for_zero_in_its_round(self):
+        s = self.new(77)
+        for _ in range(3):
+            s.end_prep()
+            s.next_round()
+            for reward in list(s.arena_augments_pending):
+                arena.claim_augment(s, reward['id'], reward['options'][0]['id'])
+        option = next(o for o in s.arena_draft['options'] if o['taken_by'] is None)
+        self.demo.act_draft(s, option['index'])
+        p = s.player
+        index = next(i for i, o in enumerate(p.bench) if o.uid == arena_session.seat_state(p)['draft_uid'])
+        gold = p.gold
+        self.demo.act_sell(s, f'b{index}')
+        self.assertEqual(p.gold, gold)
+
+    def test_fast_track_is_capped(self):
+        s = self.new(5)
+        p = s.player
+        p.arena_augments_selected.append(arena.augment_view('fast_track'))
+        arena_session.seat_state(p)['fast_track'] = arena_session.FAST_TRACK_LIMIT
+        self.assertEqual(arena_session.fast_track(s, p), [])
+
+    def test_shop_exposes_buyable_reason(self):
+        state = self.demo.state_json(self.new())
+        card = next(c for c in state['shop'] if c)
+        self.assertIn('buyable', card)
+        self.assertIn('reason', card)
 
     def test_pve_waves_scale_with_stage(self):
         wave = arena_depth.scale_pve([piece(66), piece(66)], 20)

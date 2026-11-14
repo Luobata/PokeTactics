@@ -689,6 +689,8 @@ def _ledger_name(source, key):
         return arena_depth.MODS.get(key, {}).get('name', key)
     if source == 'terrain':
         return arena_depth.TERRAINS.get(key.replace('terrain_', ''), {}).get('name', key)
+    if source == 'augment' and key not in arena_mod.ALL_AUGMENTS:
+        return key
     if source == 'edition':
         return {'support_aura': '辅助庇护（邻格辅助减伤 6%）',
                 'cover': '前排掩护（远程受远程伤害 -12%）'}.get(key, key)
@@ -705,7 +707,7 @@ def _ledger_view(battle):
     for team in (0, 1):
         for row in battle.fx.ledger.view(team):
             if not any(row[k] for k in ('triggers', 'damage', 'heal', 'shield', 'energy',
-                                        'prevented', 'estimated')):
+                                        'prevented', 'estimated', 'idle', 'passive')):
                 continue
             rows.append({**row, 'team': team, 'name': _ledger_name(row['source'], row['id']),
                          'source_name': _LEDGER_SOURCES.get(row['source'], row['source'])})
@@ -2699,6 +2701,8 @@ def state_json(sess) -> dict:
                                         and getattr(o.piece, 'star', 1) == 1)
                 if families_mod.rare_piece(template) and arena_mod.holds_legendary(p.all_pieces()):
                     v['blocked'] = '传说限一：已持有一只传说宝可梦'
+                v['buyable'] = 'blocked' not in v and p.gold >= v['price']
+                v['reason'] = v.get('blocked') or (None if p.gold >= v['price'] else f"金币不足（需要 {v['price']} 金）")
                 v['pool_remaining'] = sess.pool.remaining[sid]
                 v['pool_total'] = (families_mod.pool_caps(sess.arena_pool) if sess.is_family else arena_mod.pool_caps())[sid]
             if tactics_mod.evolution_choices_enabled(sess.ruleset):
@@ -3063,6 +3067,8 @@ def act_sell(sess, loc: str):
         p.inventory.finished.append(owned.extra_item)
         owned.extra_item = None
     gold = shop_mod.sell_owned(owned, sess.pool)
+    if sess.is_depth:
+        gold = arena_session.draft_sell_value(p, owned, gold)
     p.gold += gold
     if where == "bench":
         p.bench.remove(owned)
@@ -3102,6 +3108,7 @@ def act_refresh_type(sess, element):
     if p.gold < cost:
         raise DemoError(f'金币不足（定向刷新需 {cost} 金）')
     p.gold -= cost
+    arena_session.seat_state(p)['targeted'] += 1
     p.shop_locked = False
     p.refresh_j += 1
     arena_session.targeted_roll(sess, p, element, rng_mod.derive(

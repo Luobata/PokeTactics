@@ -662,6 +662,9 @@ class Battle:
             if self.depth:
                 self._flush_deaths(t)
             t += TICK
+        if self.depth:
+            from arena_depth import mark_idle
+            mark_idle(self)
         return self._result()
 
     def _act(self, u: Unit, t: float) -> None:

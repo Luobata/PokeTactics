@@ -14,6 +14,7 @@ import techniques
 
 RULESET = 'arena_v2'
 SIMULATIONS_PER_ROUND = 2
+FAST_TRACK_LIMIT = 3
 SIMULATION_BATTLES = 6
 TARGETED_REFRESH_COST = 3
 UNEQUIP_COST = 1
@@ -39,8 +40,11 @@ def seat_state(seat):
     """Per-seat v2 counters (persisted by session_save)."""
     state = getattr(seat, 'depth', None)
     if state is None:
-        state = {'free_refreshes': 0, 'relief': 0, 'sims': 0}
+        state = {}
         seat.depth = state
+    for key, value in (('free_refreshes', 0), ('relief', 0), ('sims', 0), ('targeted', 0),
+                       ('fast_track', 0), ('draft_uid', None)):
+        state.setdefault(key, value)
     return state
 
 
@@ -71,7 +75,9 @@ def spend_refresh(seat):
 
 
 def targeted_cost(seat):
-    return 1 if has(seat, 'free_roll') else TARGETED_REFRESH_COST
+    """Base 3 (1 with free_roll); each extra targeted roll in the same round costs +1."""
+    base = 1 if has(seat, 'free_roll') else TARGETED_REFRESH_COST
+    return base + seat_state(seat)['targeted']
 
 
 def type_options(session):
@@ -138,6 +144,12 @@ def dismantle(seat, key):
         seat.inventory.add_component(component)
     names = '、'.join(items.COMPONENT_NAMES[c] for c in components)
     return f'拆解{items.FINISHED[key]["name"]}，取回{names}' + (f'（-{cost} 金）' if cost else '')
+
+
+def draft_sell_value(seat, owned, value):
+    """A unit drafted this round sells for 0 (no free item laundering)."""
+    uid = seat_state(seat).get('draft_uid')
+    return 0 if uid is not None and owned.uid == uid else value
 
 
 def sell_item(seat, key):
@@ -252,7 +264,7 @@ def bot_core(seat):
 # ------------------------------------------------------------------ fast track
 def fast_track(session, seat):
     """Complete pairs of 1-2 cost families from the pool (deterministic order)."""
-    if not has(seat, 'fast_track'):
+    if not has(seat, 'fast_track') or seat_state(seat)['fast_track'] >= FAST_TRACK_LIMIT:
         return []
     from arena_families import FAMILIES, RARE
     logs = []
@@ -278,7 +290,10 @@ def fast_track(session, seat):
         gift = OwnedPiece(piece, piece.tier * need)
         gift.sources = [fid] * need
         seat.bench.append(gift)
-        logs.append(f'速成培育补入{piece.name}')
+        seat_state(seat)['fast_track'] += 1
+        logs.append(f'速成培育补入{piece.name}（本局 {seat_state(seat)["fast_track"]}/{FAST_TRACK_LIMIT}）')
+        if seat_state(seat)['fast_track'] >= FAST_TRACK_LIMIT:
+            break
     return logs
 
 
@@ -362,6 +377,9 @@ def _grant_draft(session, seat, option):
     capacity = getattr(seat, 'bench_capacity', 8)
     if len(seat.bench) < capacity:
         seat.bench.append(owned)
+        if session.player is seat:
+            session.ensure_unit_ids()
+            seat_state(seat)['draft_uid'] = owned.uid
         unit_note = piece.name
     else:
         session.pool.put(option['family'])
@@ -431,6 +449,8 @@ def begin_round(session):
             continue
         state = seat_state(seat)
         state['sims'] = 0
+        state['targeted'] = 0
+        state['draft_uid'] = None
         state['free_refreshes'] = 2 if has(seat, 'free_roll') else 0
         if seat.streak <= -LOSS_RELIEF_STREAK:
             state['free_refreshes'] += 1

@@ -674,9 +674,16 @@ class SessionCodec:
             seat.inventory.techniques = {k: integer(v, 0, 1000, 'techniques') for k, v in machines.items()}
             if is_depth:
                 counters = record.get('depth')
-                if not isinstance(counters, dict) or set(counters) != {'free_refreshes', 'relief', 'sims'}:
+                if not isinstance(counters, dict) or set(counters) != {
+                        'free_refreshes', 'relief', 'sims', 'targeted', 'fast_track', 'draft_uid'}:
                     raise ValueError('深度竞技席位计数无效')
-                seat.depth = {key: integer(counters[key], 0, 10, key) for key in counters}
+                draft_uid = counters['draft_uid']
+                if draft_uid is not None and (not isinstance(draft_uid, str)
+                                              or not re.fullmatch(r'u[0-9]{8}', draft_uid)):
+                    raise ValueError('选秀棋子编号无效')
+                seat.depth = {key: integer(counters[key], 0, 100, key)
+                              for key in counters if key != 'draft_uid'}
+                seat.depth['draft_uid'] = draft_uid
             elif 'depth' in record:
                 raise ValueError('旧规则不能包含深度竞技席位记录')
         if is_depth:

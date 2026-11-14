@@ -168,7 +168,7 @@
       row.damage ? `伤害 ${row.damage}` : "", row.estimated ? `增伤≈${row.estimated}` : "",
       row.heal ? `治疗 ${row.heal}` : "", row.shield ? `护盾 ${row.shield}` : "",
       row.energy ? `能量 ${row.energy}` : "", row.prevented ? `减伤≈${row.prevented}` : "",
-    ].filter(Boolean).join(" · ") || "已触发";
+    ].filter(Boolean).join(" · ") || (row.idle ? "未触发（条件未满足或站位不在范围内）" : row.passive ? "常驻加成（已计入面板）" : "已触发");
     const side = (team) => rows.filter((r) => r.team === team).map((r) => `<tr><td><i class="buff-src">${esc(r.source_name || sourceLabel(r.source))}</i>${esc(r.name)}</td><td>${Number(r.triggers) || "—"}</td><td>${esc(fmt(r))}</td></tr>`).join("");
     box.hidden = false;
     box.innerHTML = `<h3>收益账本${meta.terrain ? ` · 地形「${esc(meta.terrain.name)}」` : ""}</h3><p class="depth-note">每个规则来源在本场实际做了什么；“≈”为按真实伤害推算的被动加成。</p><table><thead><tr><th>我方来源</th><th>次数</th><th>收益</th></tr></thead><tbody>${side(0) || '<tr><td colspan="3">本场没有触发</td></tr>'}</tbody></table><table><thead><tr><th>敌方来源</th><th>次数</th><th>收益</th></tr></thead><tbody>${side(1) || '<tr><td colspan="3">本场没有触发</td></tr>'}</tbody></table>`;

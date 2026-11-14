@@ -120,7 +120,7 @@ def formation(comp, team, terrain):
 def scale_pve(wave, round_no):
     """arena_v2 wild rounds keep pace with the table: stars rise with the stage."""
     import copy
-    stars = {5: (1, 1), 10: (2, 1), 15: (2, 2), 20: (3, 2), 25: (3, 3)}
+    stars = {5: (2, 1), 10: (2, 2), 15: (3, 2), 20: (3, 2), 25: (3, 3)}
     high, low = stars.get(round_no, (3, 3) if round_no > 25 else (1, 1))
     scaled = []
     for index, piece in enumerate(wave):
@@ -188,11 +188,11 @@ AUGMENTS = {
                        'brief': '已激活的属性羁绊计数 +1，但人口上限 -1',
                        'description': '每个至少有 1 名成员的属性羁绊计数 +1（包括深度断点）；人口上限永久 -1。'},
     'fast_track': {'name': '速成培育', 'scope': 'session', 'tags': ('economy', 'stars'),
-                   'brief': '每轮开始，1–2 费家族的同星对子自动补齐第三张',
-                   'description': '每轮开始时，若你持有某个 1 或 2 费家族的两张同星棋子，且卡池仍有余量，自动从卡池补入第三张并升星。'},
+                   'brief': '每轮开始，1–2 费家族的同星对子自动补齐第三张（每局 3 次）',
+                   'description': '每轮开始时，若你持有某个 1 或 2 费家族的两张同星棋子，且卡池仍有余量，自动从卡池补入第三张并升星；每局最多补齐 3 次。'},
     'free_roll': {'name': '自由刷新', 'scope': 'session', 'tags': ('economy',),
-                  'brief': '每轮前两次刷新免费；定向刷新只需 1 金',
-                  'description': '每轮的前两次普通刷新免费，定向刷新费用从 3 金降为 1 金。'},
+                  'brief': '每轮前两次刷新免费；定向刷新基础价 1 金',
+                  'description': '每轮的前两次普通刷新免费，定向刷新的基础价从 3 金降为 1 金（同轮每多定向一次 +1 金）。'},
     'salvage': {'name': '回收专家', 'scope': 'session', 'tags': ('items', 'economy'),
                 'brief': '出售 2 星及以上棋子额外得到 1 个组件；拆解装备免费',
                 'description': '出售 2 星或 3 星棋子时，按棋子编号确定性地额外获得 1 个组件；拆解成品装备不再花费金币。'},
@@ -206,8 +206,8 @@ AUGMENTS = {
                     'brief': '开战时近战单位冲到最近敌人身边并获得 12% 护盾',
                     'description': '开战瞬间，所有近战单位跃到最近敌人旁边的空格，并获得 12% 最大生命护盾（3 秒）。'},
     'vanguard': {'name': '先锋壁垒', 'scope': 'battle', 'tags': ('frontline',),
-                 'brief': '开战时前排单位获得 25% 最大生命护盾',
-                 'description': '开战时站在己方前排的单位获得 25% 最大生命护盾（3 秒）。'},
+                 'brief': '开战时前排单位获得 20% 最大生命护盾',
+                 'description': '开战时站在己方前排的单位获得 20% 最大生命护盾（3 秒）。'},
     'sniper_nest': {'name': '狙击巢', 'scope': 'battle', 'tags': ('ranged',),
                     'brief': '后排远程单位射程 +1、攻击 +10%',
                     'description': '开战时站在己方后排的远程单位射程 +1，攻击与特攻提高 10%。'},
@@ -256,7 +256,7 @@ BOND_RULES = {
     'GHOST': (2, 'phase_out', '虚化', '成员第一次受到致命伤时保留 1 生命并在 1.5 秒内无法被选为目标。'),
     'WATER': (4, 'tidal_overflow', '潮涌', '成员受到的溢出治疗转化为护盾（最多 15% 最大生命）。'),
     'FIRE': (3, 'wildfire', '燎原', '成员每第 3 次有效普攻使无异常的目标灼伤。'),
-    'ELECTRIC': (4, 'arc_chain', '电弧', '成员每第 4 次有效普攻向目标 2 格内另外 2 名敌人传导 30% 伤害。'),
+    'ELECTRIC': (4, 'arc_chain', '电弧', '成员每第 4 次有效普攻向目标 2 格内另外 3 名敌人传导 45% 伤害。'),
     'GRASS': (4, 'thorn_snare', '荆棘缠绕', '成员首次降到 40% 生命以下时，定身所有相邻敌人 1.5 秒。'),
     'POISON': (4, 'venom_mark', '毒蚀', '中毒的敌人受到成员所在队伍的伤害 +12%（6 档 +20%）。'),
     'GROUND': (4, 'aftershock', '余震', '成员施放本命后使自身邻格敌人畏缩 0.6 秒。'),
@@ -265,7 +265,7 @@ BOND_RULES = {
     'PSYCHIC': (4, 'telekinesis', '念动', '成员本命主命中后将目标推开 1 格。'),
     'BUG': (4, 'molt', '蜕壳', '成员首次降到 35% 生命以下时净化异常并获得 20% 护盾。'),
     'ICE': (3, 'deep_freeze', '冰封', '成员对同一目标每第 5 次直接命中使其冰冻 1 秒。'),
-    'STEEL': (2, 'iron_reflect', '反甲', '成员把受到的直接伤害的 15% 反弹给攻击者。'),
+    'STEEL': (2, 'iron_reflect', '反甲', '成员把受到的直接伤害的 12% 反弹给攻击者。'),
     'DARK': (2, 'ambush', '伏击', '成员对每个目标的第一次直接命中伤害 +40%。'),
     'DRAGON': (2, 'dragon_scale', '龙鳞', '成员受到技能伤害 -15%。'),
 }
@@ -474,11 +474,13 @@ def setup(battle):
                 unit.range += 1
                 unit.attack += int(unit.attack * .10)
                 unit.sp_attack += int(unit.sp_attack * .10)
+                battle.fx.ledger.add(team, 'augment', 'sniper_nest', triggers=1)
             if (terrain == 'highland' and unit.range > 1
                     and unit.pos in battle.terrain_cells[team]):
                 unit.range += 1
                 unit.attack += int(unit.attack * .08)
                 unit.sp_attack += int(unit.sp_attack * .08)
+                battle.fx.ledger.add(team, 'terrain', 'highland', triggers=1)
             if 'amplify' in unit.depth_mods:
                 unit.synergy_ult_dmg += .30
                 unit.arena_heal_mult *= 1.3
@@ -490,7 +492,29 @@ def setup(battle):
         for spec in TEAM_SPECS:
             if spec.id in augments or spec.id == 'terrain_' + terrain:
                 instances.append(EffectInstance(spec, team, None))
+        for key in augments:
+            if key in PASSIVE_AUGMENTS:
+                battle.fx.ledger.add(team, 'augment', key, passive=1)
+        if 'elite_squad' in augments:
+            battle.fx.ledger.add(team, 'augment', 'elite_squad', passive=1)
     install(battle, instances)
+
+
+PASSIVE_AUGMENTS = frozenset({'growth_mark', 'growth_bulwark', 'war_drum', 'sharp_focus', 'vitality',
+                              'iron_wall', 'quick_step', 'mana_flow', 'first_aid', 'war_banner',
+                              'deep_reserves', 'dual_wield', 'bond_resonance'})
+
+
+def ledger_key(spec):
+    return spec.id[len('terrain_'):] if spec.id.startswith('terrain_') else spec.id
+
+
+def mark_idle(battle):
+    """After the battle: every installed effect without a ledger row shows as not triggered."""
+    for instance in getattr(battle, 'fx_instances', ()):
+        key = ledger_key(instance.spec)
+        if not battle.fx.ledger.has(instance.team, instance.spec.source, key):
+            battle.fx.ledger.add(instance.team, instance.spec.source, key, idle=1)
 
 
 def _scale_unit(unit, factor):
@@ -713,7 +737,7 @@ def _h_vanguard(battle, inst, t, **_):
     total = 0
     for unit in battle.units:
         if unit.team == inst.team and unit.alive and _local_row(battle, unit) == 0:
-            shield = int(unit.max_hp * .25)
+            shield = int(unit.max_hp * .20)
             if _shield(battle, unit, unit, shield, t, 'vanguard'):
                 total += shield
     fire(battle, inst, None, t, label='先锋壁垒', kind='shield', value=total)
@@ -799,8 +823,8 @@ def _h_arc_chain(battle, inst, unit, target, t, actual_hp, **_):
     if not _bond_basic_counter(battle, inst, unit, target, actual_hp, 4):
         return
     victims = sorted((v for v in battle.units if v.alive and v.team != unit.team and v is not target
-                      and _dist(v, target) <= 2), key=lambda v: (_dist(v, target), v.local_idx))[:2]
-    total = sum(_indirect_damage(battle, unit, v, actual_hp * .30, t) for v in victims)
+                      and _dist(v, target) <= 2), key=lambda v: (_dist(v, target), v.local_idx))[:3]
+    total = sum(_indirect_damage(battle, unit, v, actual_hp * .45, t) for v in victims)
     if total:
         fire(battle, inst, target, t, label='电弧', kind='damage', value=total, spend=False)
 
@@ -832,7 +856,7 @@ def _h_deep_freeze(battle, inst, source, target, actual_hp, t, **_):
 def _h_iron_reflect(battle, inst, source, target, actual_hp, t, **_):
     if target is not inst.unit or source is None or source.team == target.team or actual_hp <= 0:
         return
-    dealt = _indirect_damage(battle, target, source, actual_hp * .15, t)
+    dealt = _indirect_damage(battle, target, source, actual_hp * .12, t)
     if dealt:
         fire(battle, inst, source, t, label='反甲', kind='damage', value=dealt, spend=False)
 
@@ -1062,7 +1086,7 @@ def _h_terrain_spring(battle, inst, t, **_):
             gained = _energy(battle, unit, 6)
             if gained:
                 battle._emit_state(unit, t)
-                battle.fx.ledger.add(inst.team, 'terrain', 'mana_spring', triggers=1, energy=gained)
+                battle.fx.ledger.add(inst.team, 'terrain', ledger_key(inst.spec), triggers=1, energy=gained)
 
 
 def _h_terrain_brambles(battle, inst, t, **_):
