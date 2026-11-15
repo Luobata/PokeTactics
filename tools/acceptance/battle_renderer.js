@@ -153,6 +153,12 @@
     "fb.ko": { slot: "ko", phases: { fall: [K(0, 0, 0, 0, 100, 100), K(.3, -4, -6, -10, 92, 110, 1, "easeInQuad"), K(1, -10, 12, -80, 112, 60, 0)] } },
     "fb.victory": { slot: "victory", period: .6, phases: { loop: [K(0, 0, 0, 0, 100, 100, 1, "easeOutQuad"), K(.4, 0, -10, 0, 94, 108, 1, "easeInQuad"), K(1, 0, 0, 0, 100, 100)] } },
   };
+  const P = (at, lean, hx, hy, belly, wobble, e) => [at, lean, hx, hy, belly, wobble, e || "easeInOutQuad"];
+  const FALLBACK_PARTS = {
+    idle: { loop: [P(0, 0, 0, 0, 0, 0), P(0.5, 0, 0, 1.5, 4, 0), P(1, 0, 0, 0, 0, 0)] },
+    hit: { react: [P(0, 0, 0, 0, 0, 0, "easeOutExpo"), P(0.2, -5, -3, 0, -6, 4), P(1, 0, 0, 0, 0, 0)] },
+    ko: { fall: [P(0, 0, 0, 0, 0, 0), P(1, -6, -4, 3, 10, 0)] },
+  };
   const FALLBACK_SLOTS = { idle: "fb.idle", walk: "fb.walk", attack_melee: "fb.melee", attack_ranged: "fb.ranged", cast: "fb.cast", hit: "fb.hit", ko: "fb.ko", victory: "fb.victory" };
   const TYPE_COLORS = {
     NORMAL: ["#fffbe8", "#f4ecd0", "#d8cfae", "#8c8468"], FIRE: ["#fff6c4", "#ffc35a", "#ff7a2e", "#b8321a"],
@@ -280,15 +286,22 @@
       const speciesRow = pack.species[String(raw.sid)] || {};
       const timing = { ...FALLBACK_TIMING[arche], ...(archRow.timing || {}), ...(speciesRow.timing || {}) };
       const clips = {};
+      const parts = {}, partSource = {};
       for (const slot of Object.keys(FALLBACK_SLOTS)) {
         const id = (speciesRow.clips || {})[slot] || (archRow.clips || {})[slot] || FALLBACK_SLOTS[slot];
         clips[slot] = pack.clips[id] || FALLBACK_CLIPS[FALLBACK_SLOTS[slot]];
         clips[slot + "_id"] = pack.clips[id] ? id : FALLBACK_SLOTS[slot];
+        // Part deformation: the bound clip's own tracks, else the archetype's.
+        const roleId = (archRow.clips || {})[slot];
+        const own = clips[slot].parts;
+        const role = roleId && pack.clips[roleId] && pack.clips[roleId].parts;
+        parts[slot] = own || role || FALLBACK_PARTS[slot] || null;
+        partSource[slot] = own ? clips[slot + "_id"] : role ? roleId : null;
       }
       const weight = clamp(Number(timing.weight) || 0.4, 0, 1);
       const offset = (rand("unit", raw.idx, raw.sid) - 0.5) * 2 * (timing.offset_range ?? 0.06);
       const unit = {
-        ...raw, arche, timing, clips, weight, offset,
+        ...raw, arche, timing, clips, parts, partSource, weight, offset,
         phase: rand("phase", raw.idx, raw.sid),
         idlePeriod: (clips.idle.period || timing.idle_period || 1.6) * (0.92 + 0.16 * rand("period", raw.idx)),
         type: (raw.types && raw.types[0]) || "NORMAL",
@@ -426,8 +439,24 @@
       }
     }
 
-    // ---- event pops, chains, decals, weather beats
+    // ---- cause-linked outcomes: payload cast_index / action_index name the owning action
+    const byIndex = new Map(plan.actions.map((x) => [x.i, x]));
+    let oseq = 0;
+    for (const a of plan.actions) a.outcomes = [];
+    for (const row of script.events || []) {
+      const [t, , kind] = row;
+      if (!OUTCOME_KINDS.has(kind)) continue;
+      const args = row.slice(3);
+      const payload = kind === "effect" ? args[3] : args[4];
+      const p = payload && typeof payload === "object" ? payload : {};
+      const owner = causeOf(plan, byIndex, kind, args, p, t);
+      if (!owner) continue;
+      const sub = kind === "effect" ? (p.kind || "effect") : String(args[3]);
+      if (sub === "expire" || sub === "absorb") continue;
+      owner.outcomes.push({ t, kind, sub, key: args[2], src: args[0], tgt: args[1], origin: Number.isInteger(p.origin_idx) ? p.origin_idx : args[0], payload: p, seq: oseq++ });
+    }
     buildPops(plan);
+    buildChains(plan);
     buildDecals(plan);
     buildWarp(plan);
     buildCameras(plan);
@@ -461,17 +490,84 @@
   }
   function pickFamily(pack, { type, recipeId, melee }) {
     if (melee) return "melee";
-    const recipe = (pack.vfx.recipes || {})[recipeId];
-    const layer = recipe && recipe.layers.find((l) => l.layer === "projectile");
+    const recipe = resolveRecipe(pack, recipeId);
+    const layer = recipe.layers.find((l) => l.layer === "projectile");
     if (layer && layer.family && layer.family !== "@type") return layer.family;
     return (pack.vfx.bindings.type_projectile || {})[type] || "straight";
   }
+
+  const OUTCOME_KINDS = new Set(["skill_effect", "combo_effect", "field_effect", "effect", "partner_effect"]);
+  function causeOf(plan, byIndex, kind, args, p, t) {
+    const direct = byIndex.get(p.cast_index) || byIndex.get(p.action_index) || byIndex.get(p.source_cast_index);
+    if (direct) return direct;
+    if (kind !== "effect" && kind !== "partner_effect") return null;
+    // Bus effects without an index: the action whose impact lands on this
+    // instant and involves the effect's source or target.
+    let best = null;
+    for (const a of plan.actions) {
+      if (a.secondary || Math.abs(a.impact - t) > 0.051) continue;
+      if (a.actor === args[0] || a.target === args[1] || a.actor === args[1] || a.target === args[0]) { best = a; break; }
+    }
+    return best;
+  }
+  const SOURCE_LOOK = {
+    order: ["令", "#b8f08a"], quest: ["★", "#ffd86b"], augment: ["✦", "#ffcf7a"], bond: ["◆", "#ffe08a"],
+    item: ["◈", "#9fd8ff"], skill_mod: ["✧", "#f0b8ff"], terrain: ["▦", "#d8e8a8"], depth: ["➜", "#f0f4e8"],
+  };
+
+  /** Cause-linked choreography: every action's owned outcomes and pops are
+   *  staged in order (hop by hop) and followed by the camera when they span
+   *  two or more bodies. */
+  function buildChains(plan) {
+    const popsByCause = new Map();
+    for (const pop of plan.pops) if (pop.cause != null) (popsByCause.get(pop.cause) || popsByCause.set(pop.cause, []).get(pop.cause)).push(pop);
+    for (const a of plan.actions) {
+      const pops = popsByCause.get(a.i) || [];
+      if (!a.outcomes.length && !pops.length) continue;
+      const beats = [];
+      const outs = a.outcomes.slice().sort((x, y) => x.t - y.t || x.seq - y.seq);
+      const seen = new Map();
+      let k = 0;
+      for (const o of outs) {
+        const key = o.tgt + ":" + o.sub;
+        if (!seen.has(key)) { seen.set(key, Math.min(0.66, k * 0.12)); k++; }
+        o.delay = seen.get(key);
+        beats.push({ t: o.t + o.delay, unit: o.tgt, from: plan.units[o.origin] ? o.origin : a.actor, color: SUB_COLOR[o.sub] || "#ffe2a8" });
+      }
+      for (const pop of pops) {
+        const match = outs.find((o) => o.tgt === pop.unit && Math.abs(o.t - pop.t) < 0.06);
+        pop.delay = match ? match.delay : Math.min(0.66, (k++) * 0.12);
+      }
+      a.lastOutcome = Math.max(0, ...outs.map((o) => o.t + o.delay));
+      const units = [...new Set([a.target, ...beats.map((b) => b.unit)].filter((u) => plan.units[u]))];
+      if (beats.length >= 1 && units.length >= 2 && !a.secondary) {
+        beats.sort((x, y) => x.t - y.t);
+        plan.chains.push({ t0: a.impact, t1: beats[beats.length - 1].t + 0.45, beats: [{ t: a.impact, unit: a.target, from: a.actor, color: "#fff2c8" }, ...beats], units, cause: a.i, cast: a.isCast });
+      }
+    }
+    plan.chains.sort((x, y) => x.t0 - y.t0);
+    // lanes after staging so simultaneous labels never overprint
+    const lastByUnit = {};
+    for (const pp of plan.pops.slice().sort((x, y) => (x.t + (x.delay || 0)) - (y.t + (y.delay || 0)))) {
+      const at = pp.t + (pp.delay || 0);
+      const prev = lastByUnit[pp.unit];
+      pp.lane = prev && at - prev.at < 0.5 ? (prev.lane + 1) % 3 : 0;
+      lastByUnit[pp.unit] = { at, lane: pp.lane };
+    }
+  }
+  const SUB_COLOR = { side_hit: "#ffd9a0", chain: "#fff27a", heal: "#8dff9a", guard: "#9fe2ff", shield: "#9fe2ff", energy: "#ffe066",
+    energy_drain: "#d6a4ff", drain: "#d6a4ff", knockback: "#f0e0c0", pull: "#f0e0c0", root: "#9fe07a", taunt: "#ff9a6a", cleanse: "#f4fff0" };
 
   function buildPops(plan) {
     const { units, script } = plan;
     const trait = {};
     for (const u of script.units || []) if (u.trait) trait[u.trait.id] = u.trait.name;
-    const linked = [];
+    const known = new Set(plan.actions.map((a) => a.i));
+    const causeId = (payload) => {
+      if (!payload || typeof payload !== "object") return null;
+      for (const key of ["cast_index", "action_index", "source_cast_index"]) if (known.has(payload[key])) return payload[key];
+      return null;
+    };
     for (const row of script.events || []) {
       const [t, , kind] = row;
       const args = row.slice(3);
@@ -479,7 +575,7 @@
       if (kind === "skill_effect" || kind === "combo_effect" || kind === "field_effect") {
         const [src, tgt, key, sub, payload] = args;
         if (sub === "expire" || sub === "absorb" || sub === "side_hit" || sub === "heal" && kind === "skill_effect") {
-          if (sub === "side_hit") plan.pops.push({ t, unit: tgt, from: src, text: "", kind: "ring", glyph: "", color: "#ffd9a0", seq: plan.pops.length });
+          if (sub === "side_hit") plan.pops.push({ t, unit: tgt, from: src, text: "", kind: "ring", glyph: "", color: "#ffd9a0", seq: plan.pops.length, cause: causeId(payload) });
           continue;
         }
         if (key === "arena_weather") continue;
@@ -490,17 +586,15 @@
         else if (!text) text = subText || null;
         if (!text) continue;
         const color = kind === "combo_effect" ? (String(key).startsWith("bond") ? "#ffe08a" : String(key).startsWith("element") ? "#9fe8ff" : "#ffc98a") : "#f2f0d8";
-        pop = { t, unit: tgt != null ? tgt : src, from: src, text, kind: kind === "combo_effect" ? "combo" : "skill", glyph: kind === "combo_effect" ? "◆" : "", color, payload };
-        if (kind === "combo_effect" || kind === "field_effect" && sub !== "expire") linked.push(pop);
+        pop = { t, unit: tgt != null ? tgt : src, from: src, text, kind: kind === "combo_effect" ? "combo" : "skill", glyph: kind === "combo_effect" ? "◆" : "", color, payload,
+          cause: causeId(payload) };
       } else if (kind === "partner_effect") {
         const [src, tgt, partner, effect] = args;
-        pop = { t, unit: tgt, from: src, text: "搭档·" + (SUB_LABEL[effect] || effect || ""), kind: "combo", glyph: "◆", color: "#ffe08a" };
-        linked.push(pop);
+        pop = { t, unit: tgt, from: src, text: "搭档·" + (SUB_LABEL[effect] || effect || ""), kind: "combo", glyph: "◆", color: "#ffe08a", cause: causeId(args[4]) };
       } else if (kind === "tactical_effect") {
         const [src, tgt, effect] = args;
         if (/^weather/.test(effect)) continue;
-        pop = { t, unit: tgt, from: src, text: KEY_LABEL[effect] || SUB_LABEL[effect] || "战术", kind: "combo", glyph: "◇", color: "#c8f0a8" };
-        linked.push(pop);
+        pop = { t, unit: tgt, from: src, text: KEY_LABEL[effect] || SUB_LABEL[effect] || "战术", kind: "combo", glyph: "◇", color: "#c8f0a8", cause: causeId(args[3]) };
       } else if (kind === "miss") {
         pop = { t, unit: args[1], from: args[0], text: "闪避", kind: "miss", glyph: "", color: "#d8e0e8" };
       } else if (kind === "sash") {
@@ -512,15 +606,14 @@
       } else if (kind === "effect") {
         const [src, tgt, effectId, payload] = args;
         const p = payload && typeof payload === "object" ? payload : {};
-        const look = EFFECT_KIND[p.kind] || ["✧", "#f4eecb"];
+        const look = SOURCE_LOOK[p.source] && p.kind !== "move" ? [SOURCE_LOOK[p.source][0], (EFFECT_KIND[p.kind] || SOURCE_LOOK[p.source])[1]] : EFFECT_KIND[p.kind] || ["✧", "#f4eecb"];
         const value = p.value != null && p.value !== "" && p.value !== 0 && p.kind !== "move" ? " " + (typeof p.value === "number" && p.value > 0 && ["heal", "shield", "energy"].includes(p.kind) ? "+" : "") + p.value : "";
         // source/target may be -1 for team-wide effects (冲锋号, 先锋壁垒 …):
         // those pop once over the whole team instead of a single body.
         const unit = units[tgt] ? tgt : units[src] ? src : null;
         const team = unit == null && (p.team === 0 || p.team === 1) ? p.team : null;
         pop = { t, unit, team, from: units[src] ? src : null, text: (p.label || humanize(effectId)) + value, kind: team != null ? "team" : "effect",
-          glyph: look[0], color: look[1], camera: p.camera === "focus", source: p.source || null };
-        linked.push(pop);
+          glyph: look[0], color: look[1], camera: p.camera === "focus", source: p.source || null, cause: causeId(p) };
       } else if (!KNOWN_KINDS.has(kind)) {
         // Unknown future event: a small generic pop on its target or source.
         const src = Number.isInteger(args[0]) && units[args[0]] ? args[0] : null;
@@ -529,37 +622,6 @@
         pop = { t, unit: tgt, from: src, text: humanize(kind), kind: "unknown", glyph: "✧", color: "#e8e4c8" };
       }
       if (pop && (units[pop.unit] || pop.team != null)) { pop.seq = plan.pops.length; plan.pops.push(pop); }
-    }
-    // chains: linked effects that fire close together get staged one after another
-    const window = plan.pack.vfx.screen.combo?.window ?? 0.9;
-    linked.sort((a, b) => a.t - b.t || a.seq - b.seq);
-    let group = [];
-    const flush = () => {
-      const valid = group.filter((p) => units[p.unit]);
-      if (valid.length >= 2) {
-        const chain = { t0: valid[0].t, beats: [], units: [] };
-        valid.forEach((p, k) => {
-          p.delay = Math.min(0.6, k * 0.13);
-          chain.beats.push({ t: p.t + p.delay, unit: p.unit, from: p.from, color: p.color });
-          if (!chain.units.includes(p.unit)) chain.units.push(p.unit);
-        });
-        chain.t1 = chain.beats[chain.beats.length - 1].t + 0.45;
-        plan.chains.push(chain);
-      }
-      group = [];
-    };
-    for (const p of linked) {
-      if (group.length && p.t - group[0].t > window) flush();
-      group.push(p);
-    }
-    flush();
-    // per-unit stacking so simultaneous labels never overprint
-    const lastByUnit = {};
-    for (const p of plan.pops.slice().sort((a, b) => (a.t + (a.delay || 0)) - (b.t + (b.delay || 0)))) {
-      const at = p.t + (p.delay || 0);
-      const prev = lastByUnit[p.unit];
-      p.lane = prev && at - prev.at < 0.5 ? (prev.lane + 1) % 3 : 0;
-      lastByUnit[p.unit] = { at, lane: p.lane };
     }
     // Same-instant packets on one unit (side hits, multi-state rows) read as
     // one number; the strongest effectiveness wins the colour.
@@ -709,7 +771,7 @@
         cams.push({ t0: a.impact - 0.12, t1: (d ? d.t : a.impact) + (screen.ko?.zoom_s ?? 0.55), kind: "ko", prio: 3, focus: [a.target], zoom: screen.ko?.zoom ?? 1.05, dim: screen.ko?.dim ?? 0.25, dimFrom: a.impact - 0.05, dimTo: a.impact + 0.4 });
       }
     }
-    for (const c of plan.chains) cams.push({ t0: c.t0 - 0.05, t1: c.t1, kind: "chain", prio: 1, focus: c.units, beats: c.beats, zoom: 1.035, dim: 0 });
+    for (const c of plan.chains) if (c.beats.length >= 3 || c.cast) cams.push({ t0: c.t0 - 0.05, t1: c.t1, kind: "chain", prio: 1, focus: c.units, beats: c.beats, zoom: 1.035, dim: 0 });
     for (const p of plan.pops) if (p.camera) {
       const focus = p.team != null ? plan.order.filter((i) => plan.units[i].team === p.team) : [p.unit];
       cams.push({ t0: p.t - 0.05, t1: p.t + 0.6, kind: "focus", prio: 1, focus, zoom: p.team != null ? 1.03 : 1.06, dim: 0 });
@@ -759,6 +821,28 @@
     for (const st of unit.statuses) if (st.start <= s && s < st.end) out.push(st.kind);
     return out;
   }
+  const PART_FIELDS = ["lean", "head_x", "head_y", "belly", "wobble"];
+  const ZERO_PARTS = () => ({ lean: 0, head_x: 0, head_y: 0, belly: 0, wobble: 0 });
+  /** Part keys: [at, lean, head_x, head_y, belly, wobble, ease] (source px / %). */
+  function sampleParts(keys, progress) {
+    const out = ZERO_PARTS();
+    if (!keys || !keys.length) return out;
+    let a = keys[0], b = keys[0], mix = 0;
+    if (progress >= keys[keys.length - 1][0]) a = b = keys[keys.length - 1];
+    else if (progress > keys[0][0]) {
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (keys[i][0] <= progress && progress < keys[i + 1][0]) { a = keys[i]; b = keys[i + 1]; mix = ease(a[6] || "linear", (progress - a[0]) / (b[0] - a[0])); break; }
+      }
+    }
+    PART_FIELDS.forEach((f, i) => { out[f] = lerp(a[i + 1], b[i + 1], mix); });
+    return out;
+  }
+  function addParts(acc, part, w = 1) { for (const f of PART_FIELDS) acc[f] += (part[f] || 0) * w; return acc; }
+  function unitParts(unit, slot, phase, k) {
+    const track = unit.parts && unit.parts[slot] && unit.parts[slot][phase];
+    return sampleParts(track, clamp01(k));
+  }
+
   function clipPhase(clip, phase, k) {
     const keys = clip && clip.phases && clip.phases[phase];
     return keys ? sampleTrack(keys, clamp01(k)) : sampleTrack(null, 0);
@@ -773,6 +857,8 @@
     const asleep = statuses.includes("sleep");
     let facing = foot.x < W / 2 ? 1 : -1;
     let dash = null, acting = null, flash = 0, alpha = 1, dissolve = 0, ghosts = 0, glow = 0;
+    const parts = ZERO_PARTS();
+    let phaseName = null, phaseK = 0;
     // entrance drop
     const entry = (s - unit.entrance) / ENTRANCE;
     if (entry < 1) {
@@ -799,12 +885,12 @@
       if (Math.abs(tf.x - foot.x) > 4) facing = tf.x > foot.x ? 1 : -1;
       const clip = unit.clips[a.slot];
       let part;
-      if (s < a.release) part = clipPhase(clip, "anticipation", (s - a.start) / Math.max(1e-3, a.release - a.start));
+      if (s < a.release) [phaseName, phaseK] = ["anticipation", (s - a.start) / Math.max(1e-3, a.release - a.start)];
       else if (a.melee) {
         const contactHold = Math.min(0.07, a.recover * 0.4);
-        if (s < a.impact) part = clipPhase(clip, "dash", (s - a.release) / Math.max(1e-3, a.impact - a.release));
-        else if (s < a.impact + contactHold) part = clipPhase(clip, "contact", (s - a.impact) / contactHold * 0.5);
-        else part = clipPhase(clip, "recover", (s - a.impact - contactHold) / Math.max(1e-3, a.end - a.impact - contactHold));
+        if (s < a.impact) [phaseName, phaseK] = ["dash", (s - a.release) / Math.max(1e-3, a.impact - a.release)];
+        else if (s < a.impact + contactHold) [phaseName, phaseK] = ["contact", (s - a.impact) / contactHold * 0.5];
+        else [phaseName, phaseK] = ["recover", (s - a.impact - contactHold) / Math.max(1e-3, a.end - a.impact - contactHold)];
         // physical dash to contact and back
         const dir = { x: tf.x - foot.x, y: tf.y - foot.y };
         const len = Math.hypot(dir.x, dir.y) || 1;
@@ -817,8 +903,10 @@
         ghosts = s >= a.release && s < a.impact + 0.04 ? 1 : 0;
       } else if (s < a.impact) {
         const span = a.impact - a.release;
-        part = clipPhase(clip, "release", (s - a.release) / Math.max(1e-3, Math.min(span, 0.3)) * 0.6);
-      } else part = clipPhase(clip, "recover", (s - a.impact) / Math.max(1e-3, a.end - a.impact));
+        [phaseName, phaseK] = ["release", (s - a.release) / Math.max(1e-3, Math.min(span, 0.3)) * 0.6];
+      } else [phaseName, phaseK] = ["recover", (s - a.impact) / Math.max(1e-3, a.end - a.impact)];
+      part = clipPhase(clip, phaseName, phaseK);
+      addParts(parts, unitParts(unit, a.slot, phaseName, phaseK));
       if (s < a.release && a.isCast) glow = clamp01((s - a.start) / Math.max(1e-3, a.release - a.start));
       const k = foot.scale * SPRITE_SCALE * 0.55;
       const dirX = Math.abs(tf.x - foot.x) > 4 ? Math.sign(tf.x - foot.x) : facing;
@@ -826,6 +914,7 @@
       pose.angle += part.angle * dirX; pose.sx *= part.sx; pose.sy *= part.sy;
     }
     const idle = clipPhase(unit.clips.idle, "loop", idleK);
+    addParts(parts, unitParts(unit, "idle", "loop", idleK), idleWeight);
     pose.dx += idle.dx * idleWeight * foot.scale * SPRITE_SCALE * 0.55;
     pose.dy += idle.dy * idleWeight * foot.scale * SPRITE_SCALE * 0.55;
     pose.angle += idle.angle * idleWeight;
@@ -852,6 +941,10 @@
       pose.dx += away.x * push * kk - r.dx * 0; pose.dy += away.y * push * kk * 0.6;
       pose.angle += r.angle * (away.x >= 0 ? 1 : -1);
       pose.sx *= r.sx; pose.sy *= r.sy;
+      // Hit reaction deforms the body: head snaps back, a wobble rings out.
+      const hp = unitParts(unit, "hit", "react", age / 0.42);
+      addParts(parts, hp, 1 + clamp01(h.ratio * 3));
+      parts.wobble += (2 + 6 * clamp01(h.ratio * 4)) * (1 - age / 0.42);
       flash = Math.max(flash, age < 0.09 ? 1 - age / 0.09 * 0.4 : age < 0.14 ? 0.35 : 0);
       if (statuses.includes("paralysis")) pose.dx += Math.sin(s * 90) * 1.5;
     }
@@ -860,6 +953,7 @@
     if (unit.death && s >= unit.death.t) {
       const k = (s - unit.death.t) / DEATH_TIME;
       const ko = clipPhase(unit.clips.ko, "fall", k);
+      addParts(parts, unitParts(unit, "ko", "fall", k));
       pose.dx += ko.dx * foot.scale * SPRITE_SCALE * 0.55 * facing * -1;
       pose.dy += ko.dy * foot.scale * SPRITE_SCALE * 0.55;
       pose.angle += ko.angle * facing * -1; pose.sx *= ko.sx; pose.sy *= ko.sy;
@@ -880,8 +974,15 @@
     const box = plan.boxes && plan.boxes[unit.sprite];
     const content = box ? Math.max(box.w, box.h) : 48;
     const size = (30 + 0.5 * Math.min(64, content)) * SPRITE_SCALE * foot.scale * (1 + 0.05 * ((unit.star || 1) - 1));
-    return { foot, pose, facing, dash, acting, flash, alpha, dissolve, ghosts, glow, statuses, frozen, size };
+    if (frozen) { parts.wobble = 0; parts.head_y = 0; }
+    parts.phase = s * 22 + unit.phase * 6;
+    return { foot, pose, facing, dash, acting, flash, alpha, dissolve, ghosts, glow, statuses, frozen, size, parts, phaseName };
   }
+  const roundParts = (parts) => {
+    const out = {};
+    for (const f of [...PART_FIELDS, "phase"]) out[f] = Math.round((parts[f] || 0) * 100) / 100;
+    return out;
+  };
   function statusStart(unit, kind, s) {
     for (const st of unit.statuses) if (st.kind === kind && st.start <= s && s < st.end) return st.start;
     return s;
@@ -975,7 +1076,7 @@
     // recipe ground layers (scorch, cracks, shockwaves) and auras under bodies
     const vfx = [];
     for (const a of plan.actions) {
-      if (s < a.start - 0.05 || s > a.end + 2.6) continue;
+      if (s < a.start - 0.05 || s > Math.max(a.end, a.lastOutcome || 0) + 2.6) continue;
       emitAction(plan, a, s, p, items, vfx);
     }
     // bodies
@@ -1115,7 +1216,7 @@
     else if (st.includes("burn")) { tint = "#ff7a3a"; tintA = 0.2 + 0.08 * Math.sin(s * 9); }
     else if (st.includes("paralysis")) { tint = "#ffe45a"; tintA = rand("pz", unit.idx, Math.floor(s * 8)) < 0.3 ? 0.35 : 0.08; }
     else if (st.includes("wet")) { tint = "#5ab4ff"; tintA = 0.14; }
-    items.push({ op: "sprite", idx: unit.idx, x: body.x, y: body.y, w: b.size * b.pose.sx, h: b.size * b.pose.sy, angle: b.pose.angle,
+    items.push({ op: "sprite", idx: unit.idx, x: body.x, y: body.y, w: b.size * b.pose.sx, h: b.size * b.pose.sy, angle: b.pose.angle, parts: roundParts(b.parts),
       flip: b.facing > 0, alpha: b.alpha, flash: b.flash, tint, tintA, dissolve: b.dissolve, seed: unit.idx, layer });
     // status accents
     const top = body.y - b.size;
@@ -1148,63 +1249,119 @@
   }
 
   /** Recipe layers of one action -> vfx items (pure). */
+  /** Resolve `extends`/`add`/`drop`/overrides into a flat layer list (cached). */
+  function resolveRecipe(pack, id, depth = 0) {
+    const recipes = pack.vfx.recipes || {};
+    const cache = pack.vfx._resolved || (pack.vfx._resolved = {});
+    if (cache[id]) return cache[id];
+    const raw = recipes[id];
+    if (!raw || depth > 6) return { layers: [] };
+    let layers = raw.layers ? raw.layers.slice() : [];
+    if (raw.extends) layers = resolveRecipe(pack, raw.extends, depth + 1).layers.slice().concat(layers);
+    if (Array.isArray(raw.drop)) layers = layers.filter((l) => !raw.drop.includes(l.shape) && !raw.drop.includes(l.layer));
+    if (Array.isArray(raw.add)) layers = layers.concat(raw.add);
+    layers = layers.map((l) => {
+      const out = { ...l };
+      if (raw.palette && (!l.palette || l.palette === "@type")) out.palette = raw.palette;
+      if (raw.family && l.layer === "projectile") out.family = raw.family;
+      if (raw.scale && l.size) out.size = l.size * raw.scale;
+      if (raw.particle && (!l.particle || l.particle === "@type") && ["charge", "impact"].includes(l.layer)) out.particle = raw.particle;
+      return out;
+    });
+    return (cache[id] = { layers, family: raw.family || null });
+  }
+  const subMatches = (on, sub) => (Array.isArray(on) ? on.includes(sub) : on === sub || on === "*");
+
+  /** Recipe layers of one action -> vfx items (pure). Layers with `on` are
+   *  instanced once per cause-linked outcome (cast_index / action_index). */
   function emitAction(plan, a, s, p, items, out) {
-    const recipe = plan.pack.vfx.recipes[a.recipe] || plan.pack.vfx.recipes.generic_pop || { layers: [] };
+    const recipe = resolveRecipe(plan.pack, a.recipe);
     const actor = plan.units[a.actor], target = plan.units[a.target];
     if (!actor || !target) return;
     const anchors = { start: a.start, anticipation: a.start, release: a.release, impact: a.impact, recover: a.impact, end: a.end };
-    const src = () => bodyCenter(plan, actor, Math.min(s, a.impact), 0.5);
-    const dst = () => bodyCenter(plan, target, Math.min(s, a.impact + 0.02), 0.45);
+    const center = (u, at, lift = 0.45) => bodyCenter(plan, u, at, lift);
     const isSecondary = a.secondary || a.terrain;
     recipe.layers.forEach((layer, li) => {
       if (isSecondary && layer.layer !== "impact") return;
-      const t0 = anchors[layer.at || "impact"] + (layer.offset || 0);
-      let dur = layer.duration || (layer.at === "anticipation" ? a.release - a.start : 0.35);
-      if (layer.layer === "projectile") dur = a.impact - a.release + (a.family === "beam" ? 0.14 : 0);
-      if (layer.at === "anticipation" && layer.layer !== "ground") dur = Math.max(0.05, a.release - a.start);
-      const age = s - t0;
-      if (age < 0 || age > dur) return;
-      const k = age / Math.max(1e-3, dur);
-      const pal = paletteOf(plan, layer.palette, a.type);
-      const size = (layer.size || 30) * (isSecondary ? 0.6 : 1) * (a.ko ? 1.15 : 1);
-      const seed = hash(a.i, li);
-      const where = layer.target === "actor" ? src() : layer.target === "between" ? mid(src(), dst()) : layer.layer === "charge" || layer.layer === "aura" && layer.at === "anticipation" ? src() : dst();
-      const z = (layer.layer === "ground" || layer.layer === "aura" && layer.shape === "shield_dome") ? 2 : 6;
-      switch (layer.layer) {
-        case "charge":
-          out.push({ op: "fx", shape: layer.shape, x: where.x, y: where.y, size: size * where.scale, k: ease(layer.curve || "easeInQuad", k), pal, seed, count: layer.count || 10, particle: particleOf(plan, layer, a), layer: 6 });
-          break;
-        case "aura": {
-          const at = layer.at === "impact" ? (layer.target === "actor" ? src() : dst()) : src();
-          const tf = (layer.target === "actor" ? actor : layer.at === "impact" ? target : actor);
-          const foot = unitFoot(plan, tf, s);
-          out.push({ op: "fx", shape: layer.shape, x: at.x, y: at.y, fy: foot.y, size: size * at.scale, k, pal, seed, count: layer.count || 6, layer: z === 2 ? 2 : 6, alpha: layer.alpha ?? 1 });
-          break;
-        }
-        case "projectile":
-          projectileItems(plan, a, layer, s, k, pal, src(), dst(), out);
-          break;
-        case "trail":
-          if (layer.shape === "dust") {
-            const f = unitFoot(plan, target, s);
-            out.push({ op: "fx", shape: "dust", x: f.x, y: f.y, size: 30 * f.scale, k, pal: paletteOf(plan, "GROUND", "GROUND"), seed, count: layer.count || 8, layer: 6 });
+      let instances;
+      if (layer.on) {
+        instances = (a.outcomes || []).filter((o) => subMatches(layer.on, o.sub) && plan.units[o.tgt]).map((o) => ({
+          t0: o.t + (o.delay || 0) + (layer.offset || 0), tgt: plan.units[o.tgt],
+          from: layer.from === "origin" && plan.units[o.origin] ? plan.units[o.origin] : layer.from === "target" ? target : actor,
+          o, seed: hash(a.i, li, o.seq),
+        }));
+      } else {
+        instances = [{ t0: anchors[layer.at || "impact"] + (layer.offset || 0), tgt: target, from: actor, o: null, seed: hash(a.i, li) }];
+      }
+      for (const inst of instances) {
+        let dur = layer.duration || (layer.at === "anticipation" ? a.release - a.start : 0.35);
+        if (layer.layer === "projectile") dur = a.impact - a.release + (a.family === "beam" ? 0.14 : 0);
+        if (!layer.on && layer.at === "anticipation" && layer.layer !== "ground") dur = Math.max(0.05, a.release - a.start);
+        const age = s - inst.t0;
+        if (age < 0 || age > dur) continue;
+        const k = age / Math.max(1e-3, dur);
+        const pal = paletteOf(plan, layer.palette, a.type);
+        const size = (layer.size || 30) * (isSecondary ? 0.6 : 1) * (a.ko ? 1.15 : 1) * (inst.o ? 0.85 : 1);
+        const seed = inst.seed;
+        const hitAt = inst.o ? inst.t0 : a.impact;
+        const S = () => center(inst.from, Math.min(s, hitAt), 0.5);
+        const D = () => center(inst.tgt, Math.min(s, hitAt + 0.02), 0.45);
+        const onActor = layer.target === "actor" || (!inst.o && (layer.layer === "charge" || layer.layer === "aura" && layer.at === "anticipation"));
+        const bodyUnit = layer.target === "actor" ? actor : onActor ? actor : inst.tgt;
+        switch (layer.layer) {
+          case "charge": {
+            const w = layer.shape === "rune_circle" ? unitFoot(plan, actor, s) : S();
+            out.push({ op: "fx", shape: layer.shape, x: w.x, y: layer.shape === "rune_circle" ? w.y - 2 : w.y, size: size * (w.scale || 1), k: ease(layer.curve || "easeInQuad", k), raw: k,
+              pal, seed, count: layer.count || 10, particle: particleOf(plan, layer, a), layer: layer.shape === "rune_circle" ? 1 : 6 });
+            break;
           }
-          break;
-        case "impact": {
-          const c = dst();
-          const dir = Math.atan2(c.y - src().y, c.x - src().x);
-          out.push({ op: "fx", shape: layer.shape, x: c.x, y: c.y, size: size * c.scale, k: ease(layer.curve || "easeOutQuad", k), raw: k, pal, seed, dir,
-            count: Math.round((layer.count || 10) * (isSecondary ? 0.5 : 1) * (a.crit || a.ko ? 1.4 : 1)), particle: particleOf(plan, layer, a), material: materialOf(plan, a.type), layer: 6 });
-          break;
+          case "aura": {
+            const w = center(bodyUnit, Math.min(s, hitAt + 0.02), 0.45);
+            const foot = unitFoot(plan, bodyUnit, s);
+            const dome = ["shield_dome", "hex_dome", "thorn_shell"].includes(layer.shape);
+            out.push({ op: "fx", shape: layer.shape, x: w.x, y: w.y, fy: foot.y, size: size * w.scale, k, raw: k, pal, seed, count: layer.count || 6,
+              layer: dome ? 6 : 6, alpha: layer.alpha ?? 1, dir: Math.atan2(D().y - S().y, D().x - S().x) });
+            break;
+          }
+          case "link": {
+            const A = layer.from === "target" && !inst.o ? D() : S();
+            const B = layer.to === "actor" ? center(actor, Math.min(s, hitAt), 0.5) : layer.from === "target" && !inst.o ? S() : D();
+            out.push({ op: "fx", shape: layer.shape, x: A.x, y: A.y, bx: B.x, by: B.y, size: size * ((A.scale + B.scale) / 2), k: ease(layer.curve || "linear", k), raw: k,
+              pal, seed, count: layer.count || 10, particle: particleOf(plan, layer, a), layer: 6, frame: Math.floor(s * 30) });
+            break;
+          }
+          case "projectile":
+            projectileItems(plan, a, layer, s, k, pal, S(), D(), out);
+            break;
+          case "trail":
+            if (layer.shape === "dust") {
+              const f = unitFoot(plan, inst.tgt, s);
+              out.push({ op: "fx", shape: "dust", x: f.x, y: f.y, size: 30 * f.scale, k, pal: paletteOf(plan, "GROUND", "GROUND"), seed, count: layer.count || 8, layer: 6 });
+            }
+            break;
+          case "impact": {
+            const c = onActor ? S() : D();
+            let dir = Math.atan2(c.y - S().y, c.x - S().x);
+            const pl = inst.o && inst.o.payload;
+            if (pl && Array.isArray(pl.origin) && Array.isArray(pl.destination)) {
+              const o0 = project(pl.origin[0], pl.origin[1], plan.rows, plan.cols), o1 = project(pl.destination[0], pl.destination[1], plan.rows, plan.cols);
+              if (Math.hypot(o1.x - o0.x, o1.y - o0.y) > 1) dir = Math.atan2(o1.y - o0.y, o1.x - o0.x);
+            }
+            if (!inst.o && !Number.isFinite(dir) || (Math.abs(c.x - S().x) < 1 && Math.abs(c.y - S().y) < 1)) dir = actor.team ? Math.PI / 2 : -Math.PI / 2;
+            out.push({ op: "fx", shape: layer.shape, x: c.x, y: c.y, size: size * c.scale, k: ease(layer.curve || "easeOutQuad", k), raw: k, pal, seed, dir,
+              count: Math.round((layer.count || 10) * (isSecondary ? 0.5 : 1) * (a.crit || a.ko ? 1.4 : 1)), particle: particleOf(plan, layer, a), material: materialOf(plan, a.type), layer: 6 });
+            break;
+          }
+          case "ground": {
+            const f = unitFoot(plan, layer.target === "actor" ? actor : inst.tgt, hitAt);
+            items.push({ op: "fx", shape: layer.shape, x: f.x, y: f.y - 4, size: size * f.scale, k: ease(layer.curve || "easeOutQuad", k), raw: k, pal, seed, count: layer.count || 6,
+              alpha: (layer.alpha ?? 1) * clamp01((1 - k) / 0.3), layer: ["vines_grow", "debris"].includes(layer.shape) ? 6 : 1 });
+            break;
+          }
+          case "screen":
+            if (layer.shape === "flash" && !isSecondary) out.push({ op: "flash", color: pal[1], alpha: (layer.alpha ?? 0.3) * (1 - k), layer: 8 });
+            break;
         }
-        case "ground": {
-          const f = unitFoot(plan, layer.target === "actor" ? actor : target, a.impact);
-          items.push({ op: "fx", shape: layer.shape, x: f.x, y: f.y - 4, size: size * f.scale, k: ease(layer.curve || "easeOutQuad", k), raw: k, pal, seed, count: layer.count || 6, alpha: (layer.alpha ?? 1) * clamp01((1 - k) / 0.3), layer: 1 });
-          break;
-        }
-        case "screen":
-          if (layer.shape === "flash" && !isSecondary) out.push({ op: "flash", color: pal[1], alpha: (layer.alpha ?? 0.3) * (1 - k), layer: 8 });
-          break;
       }
     });
   }
@@ -1449,6 +1606,27 @@
     ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
   }
 
+  /** Band-mesh deformation of one cel: feet stay planted (bottom band), the
+   *  body leans/shears, the head band bobs, the belly widens, and a wobble
+   *  ripples through the bands. `parts` is in source pixels, +lean = forward. */
+  function drawBands(ctx, source, box, w, h, parts) {
+    const N = 12;
+    const headMask = (v) => (v < 0.38 ? 1 - smooth(v / 0.38) * 0.85 : Math.max(0, 0.15 * (1 - (v - 0.38) / 0.2)));
+    const bellyMask = (v) => Math.exp(-Math.pow((v - 0.58) / 0.22, 2));
+    const scale = w / box.w;
+    const offX = (v) => (-(parts.lean || 0) * (1 - v) - (parts.head_x || 0) * headMask(v) + (parts.wobble || 0) * Math.sin((parts.phase || 0) + v * 7) * (1 - v)) * scale;
+    const offY = (v) => (parts.head_y || 0) * headMask(v) * scale * (1 - v);
+    for (let b = 0; b < N; b++) {
+      const v0 = b / N, v1 = (b + 1) / N, vm = (v0 + v1) / 2;
+      const y0 = -h + v0 * h + offY(v0), y1 = -h + v1 * h + offY(v1);
+      const widen = 1 + (parts.belly || 0) / 100 * bellyMask(vm);
+      const bw = w * widen;
+      ctx.drawImage(source, box.x, box.y + box.h * v0, box.w, box.h / N, -bw / 2 + offX(vm), y0, bw, Math.max(0.5, y1 - y0) + 0.6);
+    }
+  }
+  const smooth = (x) => { const t = clamp01(x); return t * t * (3 - 2 * t); };
+  const partsActive = (parts) => !!parts && (Math.abs(parts.lean || 0) > 0.05 || Math.abs(parts.head_x || 0) > 0.05 || Math.abs(parts.head_y || 0) > 0.05 || Math.abs(parts.belly || 0) > 0.2 || Math.abs(parts.wobble || 0) > 0.05);
+
   function drawSprite(ctx, plan, it, images) {
     const unit = plan.units[it.idx];
     const img = images[unit.sprite];
@@ -1462,7 +1640,12 @@
       const box = (plan.boxes && plan.boxes[unit.sprite]) || { x: 0, y: 0, w: img.naturalWidth || img.width, h: img.naturalHeight || img.height };
       const content = Math.max(box.w, box.h);
       const w = box.w / content * it.w, h = box.h / content * it.h;
-      const draw = (source, alpha) => { ctx.globalAlpha = alpha; ctx.drawImage(source, box.x, box.y, box.w, box.h, -w / 2, -h, w, h); };
+      const bands = partsActive(it.parts);
+      const draw = (source, alpha) => {
+        ctx.globalAlpha = alpha;
+        if (bands) drawBands(ctx, source, box, w, h, it.parts);
+        else ctx.drawImage(source, box.x, box.y, box.w, box.h, -w / 2, -h, w, h);
+      };
       if (it.ghost) draw(spriteVariant(img, "tint", it.tint) || img, it.alpha);
       else {
         if (it.dissolve > 0) {
@@ -1628,8 +1811,294 @@
         for (let i = 0; i < 6; i++) { const ang = Math.PI + (i + 0.5) / 6 * Math.PI; ctx.beginPath(); ctx.moveTo(it.x, y - S * 0.5 - S * 0.85); ctx.lineTo(it.x + Math.cos(ang) * S * 0.75, y - S * 0.5 + Math.sin(ang) * S * 0.85); ctx.strokeStyle = hexA(pal[0], a * 0.35); ctx.lineWidth = 1; ctx.stroke(); }
         break;
       }
+      // ---- link silhouettes (A -> B)
+      case "fork": drawFork(ctx, it, pal, k); break;
+      case "stream": {
+        // particles run from A to B along a bowed curve (drain: target -> caster)
+        const n = it.count || 12, bow = Math.min(60, Math.hypot(it.bx - it.x, it.by - it.y) * 0.25);
+        for (let i = 0; i < n; i++) {
+          const q = ((k * 1.6) - i / n * 0.7);
+          if (q < 0 || q > 1) continue;
+          const wob = Math.sin(i * 2.3 + q * 6) * 8 * (1 - q);
+          const x = lerp(it.x, it.bx, q), y = lerp(it.y, it.by, q) - Math.sin(Math.PI * q) * bow + wob;
+          glowDot(ctx, x, y, 7 + 3 * (1 - q), pal[1], 0.45);
+          drawParticle(ctx, i % 3 ? "mote" : it.particle || "sparkle", x, y, 4 + 3 * (1 - q), pal[i % 2 ? 2 : 1], 0.95 * (1 - Math.abs(q - 0.5) * 0.5), q * 6);
+        }
+        glowDot(ctx, it.bx, it.by, it.size * 0.6 * clamp01(k * 2), pal[1], 0.5 * (1 - k));
+        break;
+      }
+      case "tether": {
+        const alpha = 1 - k;
+        ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.setLineDash([8, 6]); ctx.lineDashOffset = -k * 60;
+        ctx.strokeStyle = hexA(pal[1], alpha); ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(it.x, it.y); ctx.quadraticCurveTo((it.x + it.bx) / 2, Math.min(it.y, it.by) - 30, it.bx, it.by); ctx.stroke();
+        ctx.restore();
+        break;
+      }
+      case "hop_arc": {
+        const reach = clamp01(k * 1.8), mx = (it.x + it.bx) / 2, my = Math.min(it.y, it.by) - 46;
+        ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.strokeStyle = hexA(pal[1], 1 - k * 0.8); ctx.lineWidth = 3; ctx.lineCap = "round";
+        ctx.beginPath();
+        for (let i = 0; i <= 12; i++) { const q = i / 12 * reach; const x = (1 - q) * (1 - q) * it.x + 2 * (1 - q) * q * mx + q * q * it.bx, y = (1 - q) * (1 - q) * it.y + 2 * (1 - q) * q * my + q * q * it.by; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+        ctx.stroke(); ctx.restore();
+        break;
+      }
+      // ---- aura silhouettes
+      case "hex_dome": {
+        const a = (it.alpha ?? 1) * (k < 0.12 ? k / 0.12 : 1 - Math.max(0, (k - 0.65) / 0.35));
+        const R = S * 0.95 * (k < 0.12 ? 0.6 + 0.4 * ease("easeOutBack", k / 0.12) : 1), cy = (it.fy || it.y) - R * 0.95;
+        ctx.save(); ctx.globalCompositeOperation = "lighter";
+        for (let ring = 0; ring < 3; ring++) for (let i = 0; i < 6 + ring * 2; i++) {
+          const ang = Math.PI + (i + 0.5) / (6 + ring * 2) * Math.PI, rr = R * (0.45 + ring * 0.28);
+          const hx = it.x + Math.cos(ang) * rr, hy = cy + Math.sin(ang) * rr * 0.95 + R * 0.35;
+          hexPath(ctx, hx, hy, R * 0.17);
+          const lit = (Math.sin(it.raw * 9 + i + ring * 2) + 1) / 2;
+          ctx.fillStyle = hexA(pal[2], a * (0.1 + 0.18 * lit)); ctx.fill();
+          ctx.strokeStyle = hexA(pal[0], a * 0.85); ctx.lineWidth = 1.5; ctx.stroke();
+        }
+        ctx.strokeStyle = hexA(pal[1], a); ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.ellipse(it.x, cy + R * 0.35, R * 1.05, R * 0.3, 0, 0, Math.PI * 2); ctx.stroke();
+        ctx.restore();
+        break;
+      }
+      case "thorn_shell": {
+        const a = (it.alpha ?? 1) * (1 - Math.max(0, (k - 0.6) / 0.4));
+        const R = S * 0.6, cy = (it.fy || it.y) - S * 0.45;
+        ctx.fillStyle = hexA(pal[2], a);
+        for (let i = 0; i < 12; i++) {
+          const ang = i / 12 * Math.PI * 2 + it.raw * 1.5, grow = ease("easeOutBack", clamp01(k * 3));
+          const x0 = it.x + Math.cos(ang) * R, y0 = cy + Math.sin(ang) * R * 0.75;
+          const x1 = it.x + Math.cos(ang) * (R + 14 * grow), y1 = cy + Math.sin(ang) * (R + 14 * grow) * 0.75;
+          ctx.beginPath(); ctx.moveTo(x0 + Math.cos(ang + 1.57) * 4, y0 + Math.sin(ang + 1.57) * 3); ctx.lineTo(x1, y1); ctx.lineTo(x0 - Math.cos(ang + 1.57) * 4, y0 - Math.sin(ang + 1.57) * 3); ctx.closePath(); ctx.fill();
+        }
+        break;
+      }
+      case "cross_glyph": {
+        const kk = ease("easeOutBack", clamp01(k * 2.5)), a = 1 - Math.max(0, (k - 0.55) / 0.45), z = S * 0.32 * kk, y = it.y - k * S * 0.6;
+        ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = pal[2]; ctx.strokeStyle = pal[0]; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.rect(it.x - z, y - z / 3, z * 2, z / 1.5); ctx.rect(it.x - z / 3, y - z, z / 1.5, z * 2); ctx.fill(); ctx.stroke();
+        ctx.restore(); glowDot(ctx, it.x, y, z * 2.2, pal[1], 0.5 * a);
+        break;
+      }
+      case "motes_rise": {
+        for (let i = 0; i < (it.count || 10); i++) {
+          const r1 = rand(it.seed, i), r2 = rand(it.seed, i, 4), kk = clamp01(k * 1.3 - r2 * 0.3);
+          const x = it.x + Math.sin(r1 * 6 + kk * 5) * S * 0.45, y = (it.fy || it.y + S * 0.5) - kk * S * 1.6;
+          glowDot(ctx, x, y, 8, pal[1], (1 - kk) * 0.5);
+          drawParticle(ctx, "mote", x, y, 4 + 2 * r2, pal[i % 2 ? 1 : 0], (1 - kk), 0);
+        }
+        break;
+      }
+      case "cleanse_spiral": {
+        for (let i = 0; i < 14; i++) {
+          const q = clamp01(k * 1.4 - i / 14 * 0.4), ang = q * 9 + i * 0.45, r = S * 0.55 * (1 - q * 0.5);
+          drawParticle(ctx, "sparkle", it.x + Math.cos(ang) * r, (it.fy || it.y) - q * S * 1.5 + Math.sin(ang) * r * 0.3, 2.5, pal[0], 1 - q, 0);
+        }
+        // dark specks shaken off and falling
+        for (let i = 0; i < 6; i++) {
+          const q = clamp01(k * 1.5 - 0.2), ang = rand(it.seed, i) * Math.PI * 2;
+          drawParticle(ctx, "dust", it.x + Math.cos(ang) * S * 0.3 * (1 + q), it.y + Math.sin(ang) * S * 0.2 + q * q * 30, 2.5, "#4a3a58", 0.8 * (1 - q), 0);
+        }
+        break;
+      }
+      case "energy_orbs": {
+        for (let i = 0; i < 3; i++) {
+          const ang = it.raw * 8 + i * 2.09, r = S * 0.6 * (1 - ease("easeInQuad", k));
+          const x = it.x + Math.cos(ang) * r, y = it.y + Math.sin(ang) * r * 0.45;
+          glowDot(ctx, x, y, 7 + 4 * (1 - k), pal[1], 0.95); drawParticle(ctx, "arc", x, y, 10, pal[0], 0.7, ang * 3);
+        }
+        if (k > 0.75) glowDot(ctx, it.x, it.y, S * 0.7 * (k - 0.75) * 4, pal[0], (1 - k) * 4 * 0.6);
+        break;
+      }
+      case "shout_rings": {
+        // ")))" arcs on both sides of the body, travelling outward
+        ctx.save(); ctx.lineCap = "round";
+        for (let i = 0; i < 3; i++) {
+          const q = (k * 1.4 - i * 0.18); if (q < 0 || q > 1) continue;
+          const r = S * (0.35 + q * 0.9);
+          ctx.strokeStyle = hexA(pal[1], (1 - q)); ctx.lineWidth = 4 * (1 - q) + 1.5;
+          for (const side of [0, Math.PI]) { ctx.beginPath(); ctx.ellipse(it.x, it.y, r, r * 0.75, 0, side - 0.6, side + 0.6); ctx.stroke(); }
+        }
+        ctx.restore();
+        break;
+      }
+      case "mark": {
+        // targeting reticle that snaps shut
+        const kk = ease("easeOutCubic", clamp01(k * 2.2)), R = S * (0.75 - 0.3 * kk), a = 1 - Math.max(0, (k - 0.6) / 0.4);
+        ctx.save(); ctx.strokeStyle = hexA(pal[2], a); ctx.lineWidth = 2.5; ctx.translate(it.x, it.y); ctx.rotate((1 - kk) * 1.2);
+        ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.stroke();
+        for (let i = 0; i < 4; i++) { ctx.rotate(Math.PI / 2); ctx.beginPath(); ctx.moveTo(R * 0.55, 0); ctx.lineTo(R * 1.3, 0); ctx.stroke(); }
+        ctx.restore();
+        break;
+      }
+      case "buff_arrows": {
+        ctx.save(); ctx.lineWidth = 3; ctx.lineJoin = "round";
+        for (let i = 0; i < 3; i++) {
+          const q = clamp01(k * 1.3 - i * 0.15), x = it.x + (i - 1) * S * 0.35, y = (it.fy || it.y) - q * S * 1.3;
+          ctx.strokeStyle = hexA(pal[1], 1 - q); ctx.beginPath(); ctx.moveTo(x - 7, y + 6); ctx.lineTo(x, y - 2); ctx.lineTo(x + 7, y + 6); ctx.stroke();
+        }
+        ctx.restore();
+        break;
+      }
+      case "stun_stars": {
+        for (let i = 0; i < 4; i++) {
+          const ang = it.raw * 10 + i * Math.PI / 2;
+          drawParticle(ctx, "sparkle", it.x + Math.cos(ang) * S * 0.45, it.y - S * 0.45 + Math.sin(ang) * S * 0.12, 4, pal[0], 1 - k, 0);
+        }
+        break;
+      }
+      // ---- ground silhouettes
+      case "rune_circle": {
+        const a = Math.min(1, it.raw * 4) * (1 - Math.max(0, (it.raw - 0.8) / 0.2));
+        ctx.save(); ctx.translate(it.x, it.y); ctx.scale(1, 0.34); ctx.rotate(it.raw * 3);
+        ctx.strokeStyle = hexA(pal[1], a * 0.9); ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(0, 0, S, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0, 0, S * 0.72, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); for (let i = 0; i <= 6; i++) { const ang = i * 4 * Math.PI / 6; ctx.lineTo(Math.cos(ang) * S * 0.72, Math.sin(ang) * S * 0.72); } ctx.stroke();
+        ctx.restore();
+        break;
+      }
+      case "ring_expand": {
+        const kk = ease("easeOutCubic", it.raw ?? k), a = it.alpha ?? 1;
+        ctx.save();
+        ctx.fillStyle = hexA(pal[2], 0.22 * (1 - kk) * a);
+        ctx.beginPath(); ctx.ellipse(it.x, it.y, S * (0.3 + kk), S * (0.3 + kk) * 0.34, 0, 0, Math.PI * 2); ctx.fill();
+        for (const [f, w] of [[1, 6], [0.72, 3]]) { ctx.strokeStyle = hexA(pal[f === 1 ? 1 : 0], (1 - kk) * a); ctx.lineWidth = w * (1 - kk) + 1.5; ctx.beginPath(); ctx.ellipse(it.x, it.y, S * (0.2 + kk * f), S * (0.2 + kk * f) * 0.34, 0, 0, Math.PI * 2); ctx.stroke(); }
+        ctx.restore();
+        break;
+      }
+      case "debris": {
+        for (let i = 0; i < (it.count || 10); i++) {
+          const r1 = rand(it.seed, i), r2 = rand(it.seed, i, 2), q = clamp01((it.raw ?? k) * (0.9 + 0.3 * r2));
+          const ang = r1 * Math.PI * 2, d = S * (0.4 + 0.8 * r2) * q;
+          const x = it.x + Math.cos(ang) * d, y = it.y + Math.sin(ang) * d * 0.34 - Math.sin(Math.PI * q) * S * (0.5 + r2 * 0.6);
+          drawParticle(ctx, "debris", x, y, 3 + 4 * r2, pal[i % 2 ? 2 : 3], 1 - q * 0.7, q * 8 + r1 * 6);
+        }
+        break;
+      }
+      case "vines_grow": {
+        const grow = ease("easeOutBack", clamp01((it.raw ?? k) * 5)), a = Math.max(it.alpha ?? 1, 1 - Math.max(0, ((it.raw ?? k) - 0.7) / 0.3));
+        ctx.save(); ctx.lineCap = "round"; ctx.globalAlpha = clamp01(a);
+        for (let i = 0; i < 5; i++) {
+          const ang = i / 5 * Math.PI * 2 + rand(it.seed, i), bx = it.x + Math.cos(ang) * S * 0.55, by = it.y + Math.sin(ang) * S * 0.18;
+          const h = S * (0.7 + 0.5 * rand(it.seed, i, 3)) * grow, lean = (it.x - bx) * 0.6;
+          ctx.strokeStyle = pal[3]; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(bx, by); ctx.quadraticCurveTo(bx + lean * 0.2 + 10 * Math.sin(i), by - h * 0.6, bx + lean, by - h); ctx.stroke();
+          ctx.strokeStyle = pal[2]; ctx.lineWidth = 3; ctx.stroke();
+          ctx.fillStyle = pal[1]; ctx.beginPath(); ctx.ellipse(bx + lean * 0.6, by - h * 0.62, 5 * grow, 2.5 * grow, ang, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+        break;
+      }
+      // ---- impact silhouettes
+      case "shove": {
+        const dir = it.dir || 0, ux = Math.cos(dir), uy = Math.sin(dir);
+        ctx.save(); ctx.lineCap = "round"; ctx.globalCompositeOperation = "lighter";
+        for (let i = 0; i < 5; i++) {
+          const off = (i - 2) * 9, q = clamp01(k * 1.6 - i * 0.06);
+          const x0 = it.x - ux * S * 0.9 - uy * off, y0 = it.y - uy * S * 0.9 + ux * off;
+          ctx.strokeStyle = hexA(pal[i % 2 ? 1 : 0], (1 - q) * 0.9); ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.moveTo(x0 + ux * S * q, y0 + uy * S * q); ctx.lineTo(x0 + ux * S * (q + 0.7), y0 + uy * S * (q + 0.7)); ctx.stroke();
+        }
+        ctx.restore();
+        burst(ctx, { ...it, dir: dir + Math.PI, material: { gravity: 60, size: [3, 7] }, pal: TYPE_COLORS.GROUND }, "dust", 8, S * 0.9, { cone: 1.4, alpha: 0.6 });
+        break;
+      }
+      case "pierce_line": {
+        const dir = it.dir || 0, ux = Math.cos(dir), uy = Math.sin(dir), L = S * 2.2, reach = clamp01(k * 3);
+        ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.lineCap = "round";
+        for (const [w, c, al] of [[10, pal[2], 0.45], [4, pal[1], 0.9], [1.5, pal[0], 1]]) {
+          ctx.strokeStyle = hexA(c, al * (1 - k)); ctx.lineWidth = w;
+          ctx.beginPath(); ctx.moveTo(it.x - ux * L * 0.5, it.y - uy * L * 0.5); ctx.lineTo(it.x - ux * L * 0.5 + ux * L * reach, it.y - uy * L * 0.5 + uy * L * reach); ctx.stroke();
+        }
+        ctx.restore();
+        break;
+      }
+      case "execute_slash": {
+        ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.lineCap = "round";
+        const L = S * 0.9;
+        [[-0.8, 0], [0.8, 0.12]].forEach(([ang, lag]) => {
+          const q = clamp01((k - lag) * 3);
+          if (q <= 0) return;
+          for (const [w, c, al] of [[12, pal[2], 0.5], [5, pal[1], 0.9], [2, "#ffffff", 1]]) {
+            ctx.strokeStyle = hexA(c, al * (1 - k)); ctx.lineWidth = w;
+            ctx.beginPath(); ctx.moveTo(it.x - Math.cos(ang) * L, it.y - Math.sin(ang) * L); ctx.lineTo(it.x - Math.cos(ang) * L + Math.cos(ang) * 2 * L * q, it.y - Math.sin(ang) * L + Math.sin(ang) * 2 * L * q); ctx.stroke();
+          }
+        });
+        ctx.restore();
+        if (k > 0.25) glowDot(ctx, it.x, it.y, S * (k - 0.25) * 2, "#ffffff", (1 - k) * 0.9);
+        break;
+      }
+      case "multi_hit": {
+        const n = it.count || 4;
+        for (let i = 0; i < n; i++) {
+          const q = clamp01(k * n * 0.75 - i * 0.6);
+          if (q <= 0 || q >= 1) continue;
+          const ox = (rand(it.seed, i) - 0.5) * S * 0.9, oy = (rand(it.seed, i, 2) - 0.5) * S * 0.6;
+          glowDot(ctx, it.x + ox, it.y + oy, S * 0.35 * (1 - q) + 4, pal[0], 1 - q);
+          ctx.strokeStyle = hexA(pal[1], 1 - q); ctx.lineWidth = 3;
+          const ang = rand(it.seed, i, 3) * Math.PI;
+          ctx.beginPath(); ctx.moveTo(it.x + ox - Math.cos(ang) * S * 0.3, it.y + oy - Math.sin(ang) * S * 0.3); ctx.lineTo(it.x + ox + Math.cos(ang) * S * 0.3, it.y + oy + Math.sin(ang) * S * 0.3); ctx.stroke();
+        }
+        break;
+      }
+      case "bite": {
+        const close = ease("easeInCubic", clamp01(k * 2.2)), gap = S * 0.55 * (1 - close), a = 1 - Math.max(0, (k - 0.55) / 0.45);
+        ctx.save(); ctx.fillStyle = hexA(pal[0], a); ctx.strokeStyle = hexA(pal[3], a); ctx.lineWidth = 2;
+        for (const side of [-1, 1]) {
+          const y = it.y + side * (gap + 4);
+          ctx.beginPath(); ctx.moveTo(it.x - S * 0.5, y);
+          for (let i = 0; i <= 5; i++) ctx.lineTo(it.x - S * 0.5 + i * S * 0.2, y - side * (i % 2 ? 0 : 12));
+          ctx.lineTo(it.x + S * 0.5, y + side * 6); ctx.lineTo(it.x - S * 0.5, y + side * 6); ctx.closePath(); ctx.fill(); ctx.stroke();
+        }
+        ctx.restore();
+        break;
+      }
+      case "claw": {
+        ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.lineCap = "round";
+        for (let i = 0; i < 3; i++) {
+          const q = clamp01(k * 2.4 - i * 0.12), off = (i - 1) * S * 0.22;
+          ctx.strokeStyle = hexA(pal[1], 1 - k); ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.moveTo(it.x - S * 0.45 + off, it.y - S * 0.5); ctx.lineTo(it.x - S * 0.45 + off + S * 0.7 * q, it.y - S * 0.5 + S * q); ctx.stroke();
+        }
+        ctx.restore();
+        break;
+      }
       default: drawDecal(ctx, { ...it, grow: ease("easeOutBack", clamp01((it.raw ?? k) * 4)), alpha: it.alpha ?? 1 });
     }
+  }
+  function hexPath(ctx, x, y, r) {
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) { const ang = Math.PI / 6 + i * Math.PI / 3; i ? ctx.lineTo(x + Math.cos(ang) * r, y + Math.sin(ang) * r) : ctx.moveTo(x + Math.cos(ang) * r, y + Math.sin(ang) * r); }
+    ctx.closePath();
+  }
+  /** Forked lightning: a jagged main bolt with two branches, re-rolled every
+   *  other frame so it flickers, deterministic per (seed, frame). */
+  function drawFork(ctx, it, pal, k) {
+    const reach = clamp01(k * 2.5), alpha = 1 - Math.max(0, (k - 0.45) / 0.55);
+    const roll = Math.floor((it.frame || 0) / 2);
+    const bx = lerp(it.x, it.bx, reach), by = lerp(it.y, it.by, reach);
+    const bolt = (x0, y0, x1, y1, segs, jag, salt) => {
+      const pts = [[x0, y0]], dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy) || 1, nx = -dy / len, ny = dx / len;
+      for (let i = 1; i < segs; i++) { const q = i / segs, j = (rand(it.seed, salt, i, roll) - 0.5) * jag; pts.push([x0 + dx * q + nx * j, y0 + dy * q + ny * j]); }
+      pts.push([x1, y1]);
+      return pts;
+    };
+    const main = bolt(it.x, it.y, bx, by, 9, 26, 0);
+    ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.lineJoin = "round"; ctx.lineCap = "round";
+    const stroke = (pts, w) => {
+      for (const [ww, c, al] of [[w * 3, pal[2], 0.35], [w, pal[1], 0.95], [Math.max(1, w * 0.4), "#ffffff", 1]]) {
+        ctx.strokeStyle = hexA(c, al * alpha); ctx.lineWidth = ww; ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.stroke();
+      }
+    };
+    stroke(main, 3);
+    for (const [from, salt] of [[3, 1], [6, 2]]) {
+      if (main.length <= from) continue;
+      const [x0, y0] = main[from], ang = Math.atan2(by - it.y, bx - it.x) + (salt === 1 ? 0.7 : -0.6);
+      const L = Math.hypot(bx - it.x, by - it.y) * 0.3;
+      stroke(bolt(x0, y0, x0 + Math.cos(ang) * L, y0 + Math.sin(ang) * L, 4, 14, salt + 2), 1.6);
+    }
+    ctx.restore();
+    if (reach >= 1) glowDot(ctx, it.bx, it.by, it.size * 0.8, pal[1], alpha * 0.8);
   }
   function glowDot(ctx, x, y, r, color, alpha) {
     if (r <= 0 || alpha <= 0) return;
@@ -2040,5 +2509,6 @@
   return {
     W, H, EASE, ease, hash, rand, samplePortable, sampleTrack, mergePacks, compile, frame, paint, toSim, toPlayback,
     project, monotony, teamTotals, logEntries, unitPose, BattleRenderer, loadPack, TYPE_COLORS, STATUS_LOOK,
+    resolveRecipe, sampleParts, PART_FIELDS,
   };
 });

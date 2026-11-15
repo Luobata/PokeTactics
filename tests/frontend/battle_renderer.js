@@ -72,6 +72,69 @@ const cases = {
     }
     console.log('OK renderer invariants');
   },
+  causeLinks() {
+    const plan = freshPlan();
+    // Outcomes come only from payload cast_index / action_index ownership.
+    const byIndex = new Map(plan.actions.map((a) => [a.i, a]));
+    let linked = 0;
+    for (const row of script.events) {
+      if (!['skill_effect', 'combo_effect', 'field_effect'].includes(row[2])) continue;
+      const payload = row[7] || {};
+      const owner = byIndex.get(payload.cast_index) || byIndex.get(payload.action_index);
+      if (!owner || row[6] === 'expire' || row[6] === 'absorb') continue;
+      assert.ok(owner.outcomes.some((o) => o.t === row[0] && o.tgt === row[4] && o.sub === row[6]), `outcome of ${owner.i} missing`);
+      linked++;
+    }
+    assert.ok(linked > 10, 'fixture has cause-linked effects');
+    for (const chain of plan.chains) {
+      const owner = byIndex.get(chain.cause);
+      assert.ok(owner, 'every chain names its owning action');
+      for (const beat of chain.beats.slice(1)) assert.ok(owner.outcomes.some((o) => o.tgt === beat.unit), 'beats are owned outcomes');
+      for (let k = 1; k < chain.beats.length; k++) assert.ok(chain.beats[k].t >= chain.beats[k - 1].t - 1e-9, 'beats are staged in order');
+    }
+    console.log('OK renderer cause links', linked, plan.chains.length);
+  },
+  parts() {
+    const plan = freshPlan();
+    const melee = plan.actions.find((a) => a.melee && !a.secondary && a.release - a.start > 0.1);
+    const mid = R.toPlayback(plan, (melee.start + melee.release) / 2);
+    const sprite = R.frame(plan, mid).items.find((it) => it.op === 'sprite' && it.idx === melee.actor && !it.ghost);
+    assert.ok(Math.abs(sprite.parts.lean) > 1, `anticipation leans the body: ${JSON.stringify(sprite.parts)}`);
+    const bare = freshPlan();
+    for (const u of Object.values(bare.units)) u.parts = {};
+    const still = R.frame(bare, mid).items.find((it) => it.op === 'sprite' && it.idx === melee.actor && !it.ghost);
+    assert.equal(still.parts.lean, 0, 'without part tracks the body is not deformed');
+    const hit = plan.hits.find((h) => h.ratio > 0.05);
+    const hs = R.frame(plan, R.toPlayback(plan, hit.t + 0.05)).items.find((it) => it.op === 'sprite' && it.idx === hit.unit && !it.ghost);
+    assert.ok(hs.parts.wobble > 1, 'hits ring a wobble through the body');
+    console.log('OK renderer parts');
+  },
+  paintAll() {
+    // Every op and fx shape paints through a recording 2D context without throwing.
+    const calls = {n: 0};
+    const ctx = new Proxy({}, {get: (target, key) => {
+      if (key in target) return target[key];
+      if (key === 'createRadialGradient' || key === 'createLinearGradient') return () => ({addColorStop() {}});
+      if (key === 'measureText') return () => ({width: 10});
+      if (key === 'getImageData') return () => ({data: new Uint8ClampedArray(4)});
+      return () => { if (['fill', 'stroke', 'fillRect', 'drawImage', 'fillText', 'strokeText'].includes(key)) calls.n++; };
+    }, set: (target, key, value) => { target[key] = value; return true; }});
+    globalThis.OffscreenCanvas = class { constructor(w, h) { this.width = w; this.height = h; } getContext() { return ctx; } };
+    const plan = freshPlan();
+    for (let t = 0; t <= plan.playbackDuration; t += 0.25) R.paint(ctx, plan, R.frame(plan, t), {});
+    const shapes = JSON.parse(process.argv[4]);
+    const camera = {fx: 480, fy: 320, zoom: 1, shakeX: 0, shakeY: 0, dim: 0, focus: []};
+    const pal = R.TYPE_COLORS.FIRE;
+    for (const shape of shapes) {
+      for (const k of [0.1, 0.4]) {
+        const before = calls.n;
+        R.paint(ctx, plan, {camera, items: [{op: 'fx', shape, x: 400, y: 300, bx: 520, by: 260, fy: 330, size: 50, k, raw: k, pal, seed: 7,
+          count: 6, dir: 0.4, particle: 'ember', material: {gravity: 100, size: [2, 4]}, frame: 3, layer: 6}]}, {});
+        assert.ok(calls.n > before, `${shape} draws something at k=${k}`);
+      }
+    }
+    console.log('OK renderer paint', shapes.length);
+  },
   unknownEvents() {
     const copy = JSON.parse(JSON.stringify(script));
     const t = Math.min(2, copy.clock.duration / 2);

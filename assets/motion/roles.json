@@ -2,7 +2,7 @@
  "schema_version": 1,
  "kind": "motion_pack",
  "name": "roles",
- "description": "角色定位原型（近战/远程/辅助/坦克）动作片段与节奏；单位：源精灵像素，前进方向为 +dx。",
+ "description": "角色定位原型（近战/远程/辅助/坦克）动作片段、分件形变与节奏；单位：源精灵像素，前进方向为 +dx。",
  "clips": {
   "role.idle.breathe": {
    "slot": "idle",
@@ -14,7 +14,14 @@
     ]
    },
    "period": 1.6,
-   "note": "通用呼吸：吸气拉高、呼气压扁"
+   "note": "通用呼吸：吸气拉高、呼气压扁",
+   "parts": {
+    "loop": [
+     [0, 0, 0, 0, 0, 0, "easeInOutQuad"],
+     [0.5, 0, 0, 1.5, 5, 0, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.idle.heavy": {
    "slot": "idle",
@@ -26,7 +33,14 @@
     ]
    },
    "period": 2.3,
-   "note": "重型：慢速下沉呼吸"
+   "note": "重型：慢速下沉呼吸",
+   "parts": {
+    "loop": [
+     [0, 0, 0, 0, 0, 0, "easeInOutQuad"],
+     [0.55, 0, 0, 2, 9, 0, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.idle.float": {
    "slot": "idle",
@@ -40,7 +54,16 @@
     ]
    },
    "period": 1.3,
-   "note": "漂浮：上下浮动带轻摆"
+   "note": "漂浮：上下浮动带轻摆",
+   "parts": {
+    "loop": [
+     [0, 0, 0, 0, 0, 0, "easeInOutQuad"],
+     [0.25, 1.5, 1.5, -1, 0, 0, "easeInOutQuad"],
+     [0.5, 0, 0, -2, 3, 0, "easeInOutQuad"],
+     [0.75, -1.5, -1.5, -1, 0, 0, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.idle.bounce": {
    "slot": "idle",
@@ -53,7 +76,15 @@
     ]
    },
    "period": 0.9,
-   "note": "轻快：短促弹跳"
+   "note": "轻快：短促弹跳",
+   "parts": {
+    "loop": [
+     [0, 0, 0, 0, 0, 0, "easeOutQuad"],
+     [0.35, 0, 0, -2, -4, 0, "easeInQuad"],
+     [0.7, 0, 0, 2.5, 8, 0, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.walk.hop": {
    "slot": "walk",
@@ -67,7 +98,16 @@
     ]
    },
    "period": 0.36,
-   "note": "小跳步"
+   "note": "小跳步",
+   "parts": {
+    "loop": [
+     [0, 0, 0, 0, 0, 0, "easeInOutQuad"],
+     [0.25, 4, 2, -1, 0, 0, "easeInOutQuad"],
+     [0.5, 2, 0, 2, 6, 0, "easeInOutQuad"],
+     [0.75, 4, 2, -1, 0, 0, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.walk.stomp": {
    "slot": "walk",
@@ -81,7 +121,16 @@
     ]
    },
    "period": 0.5,
-   "note": "重步：左右摇摆"
+   "note": "重步：左右摇摆",
+   "parts": {
+    "loop": [
+     [0, 0, 0, 0, 0, 0, "easeInOutQuad"],
+     [0.25, 2, -2, 0, 4, 0, "easeInOutQuad"],
+     [0.5, 0, 0, 3, 10, 0, "easeInOutQuad"],
+     [0.75, 2, 2, 0, 4, 0, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.melee.attack": {
    "slot": "attack_melee",
@@ -106,7 +155,28 @@
      [1, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
     ]
    },
-   "note": "后撤蓄力→冲刺→命中挤压→回位"
+   "note": "后撤蓄力→冲刺→命中挤压→回位",
+   "parts": {
+    "anticipation": [
+     [0, 0, 0, 0, 0, 0, "easeOutCubic"],
+     [0.7, -9, -5, 2, 8, 0, "easeInOutQuad"],
+     [1, -10, -6, 2, 10, 0, "easeInQuad"]
+    ],
+    "dash": [
+     [0, -10, -6, 2, 10, 0, "easeInQuad"],
+     [1, 12, 6, -2, -8, 0, "easeInOutQuad"]
+    ],
+    "contact": [
+     [0, 12, 6, -2, -8, 0, "easeOutBack"],
+     [0.3, 14, 8, 2, 12, 4, "easeInOutQuad"],
+     [1, 5, 2, 0, 4, 2, "easeInOutQuad"]
+    ],
+    "recover": [
+     [0, 5, 2, 0, 4, 2, "easeOutQuad"],
+     [0.6, -2, -1, -1, -2, 0, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.ranged.attack": {
    "slot": "attack_ranged",
@@ -126,7 +196,22 @@
      [1, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
     ]
    },
-   "note": "后坐蓄力→射出反冲→回稳"
+   "note": "后坐蓄力→射出反冲→回稳",
+   "parts": {
+    "anticipation": [
+     [0, 0, 0, 0, 0, 0, "easeOutCubic"],
+     [1, -6, -4, 1, 6, 0, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -6, -4, 1, 6, 0, "easeOutExpo"],
+     [0.25, 7, 5, -1, -6, 2, "easeInOutQuad"],
+     [1, -4, -2, 0, 2, 0, "easeInOutQuad"]
+    ],
+    "recover": [
+     [0, -4, -2, 0, 2, 0, "easeOutBack"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.melee.cast": {
    "slot": "cast",
@@ -147,7 +232,23 @@
      [1, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
     ]
    },
-   "note": "下沉聚力→爆发前扑→回收"
+   "note": "下沉聚力→爆发前扑→回收",
+   "parts": {
+    "anticipation": [
+     [0, 0, 0, 0, 0, 0, "easeInOutQuad"],
+     [0.6, -6, -4, 3, 14, 0, "easeInOutQuad"],
+     [1, -7, -5, 4, 18, 1, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -7, -5, 4, 18, 1, "easeOutExpo"],
+     [0.3, 14, 8, -3, -10, 3, "easeInOutQuad"],
+     [1, 3, 1, 0, 2, 0, "easeInOutQuad"]
+    ],
+    "recover": [
+     [0, 3, 1, 0, 2, 0, "easeOutBack"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.ranged.cast": {
    "slot": "cast",
@@ -168,7 +269,23 @@
      [1, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
     ]
    },
-   "note": "升空蓄能→释放下压→回落"
+   "note": "升空蓄能→释放下压→回落",
+   "parts": {
+    "anticipation": [
+     [0, 0, 0, 0, 0, 0, "easeInOutQuad"],
+     [0.5, -2, -3, -3, 6, 0, "easeInOutQuad"],
+     [1, -3, -4, -4, 12, 1.5, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -3, -4, -4, 12, 1.5, "easeOutExpo"],
+     [0.3, 6, 5, 2, -8, 2, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 0, 0, "easeOutBack"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.support.cast": {
    "slot": "cast",
@@ -189,7 +306,24 @@
      [1, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
     ]
    },
-   "note": "漂浮引导→展开→柔和回落"
+   "note": "漂浮引导→展开→柔和回落",
+   "parts": {
+    "anticipation": [
+     [0, 0, 0, 0, 0, 0, "easeInOutQuad"],
+     [0.4, 0, 0, -3, 6, 1, "easeInOutQuad"],
+     [0.8, 0, 0, -4, 10, 2, "easeInOutQuad"],
+     [1, 0, 0, -4, 10, 2, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, 0, 0, -4, 10, 2, "easeOutBack"],
+     [0.35, 2, 2, 2, -4, 0, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 0, 0, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.support.attack": {
    "slot": "attack_ranged",
@@ -208,7 +342,22 @@
      [1, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
     ]
    },
-   "note": "轻点：小幅前送"
+   "note": "轻点：小幅前送",
+   "parts": {
+    "anticipation": [
+     [0, 0, 0, 0, 0, 0, "easeInOutQuad"],
+     [1, -3, -3, -1, 4, 0, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, -3, -3, -1, 4, 0, "easeOutBack"],
+     [0.3, 5, 4, 0, 0, 0, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 0, 0, 0, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.tank.attack": {
    "slot": "attack_melee",
@@ -232,7 +381,27 @@
      [1, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
     ]
    },
-   "note": "抬身→重踏冲撞→震地"
+   "note": "抬身→重踏冲撞→震地",
+   "parts": {
+    "anticipation": [
+     [0, 0, 0, 0, 0, 0, "easeInOutQuad"],
+     [0.6, -4, -2, -4, -6, 0, "easeInOutQuad"],
+     [1, -5, -3, -5, -8, 0, "easeInCubic"]
+    ],
+    "dash": [
+     [0, -5, -3, -5, -8, 0, "easeInCubic"],
+     [1, 8, 4, 2, 10, 0, "easeInOutQuad"]
+    ],
+    "contact": [
+     [0, 8, 4, 2, 10, 0, "easeOutBounce"],
+     [0.25, 6, 2, 6, 24, 5, "easeInOutQuad"],
+     [1, 2, 0, 1, 4, 0, "easeInOutQuad"]
+    ],
+    "recover": [
+     [0, 2, 0, 1, 4, 0, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.tank.cast": {
    "slot": "cast",
@@ -253,7 +422,24 @@
      [1, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
     ]
    },
-   "note": "蓄压下蹲→跃起→重踏冲击波"
+   "note": "蓄压下蹲→跃起→重踏冲击波",
+   "parts": {
+    "anticipation": [
+     [0, 0, 0, 0, 0, 0, "easeInOutQuad"],
+     [0.6, 0, 0, 4, 18, 0, "easeInOutQuad"],
+     [1, 0, 0, 5, 22, 0, "easeInOutQuad"]
+    ],
+    "release": [
+     [0, 0, 0, 5, 22, 0, "easeOutExpo"],
+     [0.3, 0, 0, -5, -12, 0, "easeInOutQuad"],
+     [0.55, 0, 0, 6, 26, 6, "easeOutBounce"],
+     [1, 0, 0, 1, 4, 0, "easeInOutQuad"]
+    ],
+    "recover": [
+     [0, 0, 0, 1, 4, 0, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.hit.react": {
    "slot": "hit",
@@ -265,7 +451,15 @@
      [1, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
     ]
    },
-   "note": "受击：后仰挤压→回弹"
+   "note": "受击：后仰挤压→回弹",
+   "parts": {
+    "react": [
+     [0, 0, 0, 0, 0, 0, "easeOutExpo"],
+     [0.18, -7, -6, 1, -8, 4, "easeInOutQuad"],
+     [0.55, -2, 2, 0, 6, 2, "easeOutBack"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.hit.heavy": {
    "slot": "hit",
@@ -276,7 +470,14 @@
      [1, 0, 0, 0, 100, 100, 1, "easeInOutQuad"]
     ]
    },
-   "note": "重型受击：小幅下沉"
+   "note": "重型受击：小幅下沉",
+   "parts": {
+    "react": [
+     [0, 0, 0, 0, 0, 0, "easeOutExpo"],
+     [0.2, -3, -3, 2, 10, 2, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.ko.topple": {
    "slot": "ko",
@@ -288,7 +489,15 @@
      [1, -10, 12, -80, 112, 60, 0, "easeInOutQuad"]
     ]
    },
-   "note": "倒下：后仰→侧倒→消散"
+   "note": "倒下：后仰→侧倒→消散",
+   "parts": {
+    "fall": [
+     [0, 0, 0, 0, 0, 0, "easeInOutQuad"],
+     [0.25, -4, -5, -2, -6, 3, "easeInQuad"],
+     [0.65, -12, -8, 4, 6, 1, "easeInOutQuad"],
+     [1, -16, -10, 6, 12, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.ko.sink": {
    "slot": "ko",
@@ -299,7 +508,14 @@
      [1, 0, 10, 0, 130, 50, 0, "easeInOutQuad"]
     ]
    },
-   "note": "沉没：压扁下沉消散"
+   "note": "沉没：压扁下沉消散",
+   "parts": {
+    "fall": [
+     [0, 0, 0, 0, 0, 0, "easeInOutQuad"],
+     [0.3, 0, 0, -3, -6, 2, "easeInCubic"],
+     [1, 0, 0, 8, 30, 0, "easeInOutQuad"]
+    ]
+   }
   },
   "role.victory.hop": {
    "slot": "victory",
@@ -312,7 +528,15 @@
     ]
    },
    "period": 0.6,
-   "note": "胜利小跳"
+   "note": "胜利小跳",
+   "parts": {
+    "loop": [
+     [0, 0, 0, 0, 0, 0, "easeOutQuad"],
+     [0.4, 2, 0, -4, -6, 0, "easeInQuad"],
+     [0.7, 0, 0, 3, 10, 0, "easeInOutQuad"],
+     [1, 0, 0, 0, 0, 0, "easeInOutQuad"]
+    ]
+   }
   }
  },
  "archetypes": {

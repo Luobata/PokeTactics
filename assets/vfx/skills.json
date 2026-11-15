@@ -1,0 +1,1887 @@
+{
+ "schema_version": 1,
+ "kind": "vfx_pack",
+ "name": "skills",
+ "description": "逐技能特效：每个原生技能 = 类别轮廓（cat.*）+ 标签附加层 + 威力缩放；由 motion_seed.py 生成，可在工作台逐条编辑。",
+ "recipes": {
+  "skill.alert_tail": {
+   "extends": "cat.execute",
+   "scale": 0.83,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "spiral",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "警戒尾击 · 残血收割"
+  },
+  "skill.ancient_mind": {
+   "extends": "cat.drain",
+   "scale": 1.17,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "energy_orbs",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.55,
+     "on": ["energy"]
+    },
+    {
+     "layer": "aura",
+     "shape": "stun_stars",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.7,
+     "on": ["flinch", "status"]
+    },
+    {
+     "layer": "charge",
+     "shape": "spiral",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "原始念力 · 汲能干扰"
+  },
+  "skill.armor_pincer": {
+   "extends": "cat.vulnerability",
+   "scale": 1.0,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "spiral",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "破甲夹击 · 破甲集火"
+  },
+  "skill.aroma_garden": {
+   "extends": "cat.cleanse",
+   "note": "初阶·芳香花域 · 群体解毒"
+  },
+  "skill.barrier_relay": {
+   "extends": "cat.guard",
+   "note": "屏障接力 · 屏障减伤"
+  },
+  "skill.beacon_relay": {
+   "extends": "cat.energy",
+   "note": "初阶·灯塔接力 · 攻击回能"
+  },
+  "skill.bliss_chorus": {
+   "extends": "cat.heal",
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    }
+   ],
+   "note": "幸福合唱 · 群体急救"
+  },
+  "skill.bull_rush": {
+   "extends": "cat.displacement",
+   "scale": 0.92,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    },
+    {
+     "layer": "charge",
+     "shape": "converge",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "蛮力冲阵 · 前排冲阵"
+  },
+  "skill.charged_beacon": {
+   "extends": "cat.chain",
+   "scale": 1.08,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "stun_stars",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.7,
+     "on": ["flinch", "status"]
+    }
+   ],
+   "note": "雷光信标 · 麻痹导电"
+  },
+  "skill.cinder_eruption": {
+   "extends": "cat.area",
+   "scale": 1.25,
+   "note": "烬火喷发 · 灼伤轰炸"
+  },
+  "skill.cleansing_powder": {
+   "extends": "cat.cleanse",
+   "note": "初阶·净化蝶粉 · 净化治疗"
+  },
+  "skill.cliff_swoop": {
+   "extends": "cat.clear",
+   "scale": 1.08,
+   "add": [
+    {
+     "layer": "impact",
+     "shape": "shove",
+     "at": "impact",
+     "palette": "@type",
+     "size": 56,
+     "duration": 0.4,
+     "on": ["knockback", "pull"]
+    },
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "悬崖掠袭 · 击退清场"
+  },
+  "skill.crag_citadel": {
+   "extends": "cat.terrain",
+   "scale": 0.92,
+   "add": [
+    {
+     "layer": "impact",
+     "shape": "shove",
+     "at": "impact",
+     "palette": "@type",
+     "size": 56,
+     "duration": 0.4,
+     "on": ["knockback", "pull"]
+    }
+   ],
+   "note": "岩崩壁垒 · 岩钉壁垒"
+  },
+  "skill.cross_bullet": {
+   "extends": "cat.combo",
+   "scale": 1.17,
+   "add": [
+    {
+     "layer": "impact",
+     "shape": "mark",
+     "at": "impact",
+     "palette": "FIGHTING",
+     "size": 50,
+     "duration": 0.55
+    },
+    {
+     "layer": "charge",
+     "shape": "spiral",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "交叉弹拳 · 破甲连击"
+  },
+  "skill.dragon_crosscurrent": {
+   "extends": "cat.pierce",
+   "scale": 1.25,
+   "note": "潮龙贯流 · 双属性贯穿"
+  },
+  "skill.dragon_dive": {
+   "extends": "cat.burst",
+   "scale": 1.42,
+   "family": "straight",
+   "add": [
+    {
+     "layer": "impact",
+     "shape": "shove",
+     "at": "impact",
+     "palette": "@type",
+     "size": 56,
+     "duration": 0.4,
+     "on": ["knockback", "pull"]
+    }
+   ],
+   "note": "神速俯冲 · 高威俯冲"
+  },
+  "skill.dragon_vein": {
+   "extends": "cat.energy",
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "motes_rise",
+     "at": "impact",
+     "palette": "HEAL",
+     "size": 42,
+     "count": 10,
+     "duration": 0.75,
+     "on": ["heal", "heal_bell", "regen"]
+    }
+   ],
+   "note": "龙脉回响 · 治疗回能"
+  },
+  "skill.family_strike_116": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "水枪 · 单体攻击"
+  },
+  "skill.family_strike_117": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "水枪 · 单体攻击"
+  },
+  "skill.family_strike_129": {
+   "extends": "cat.burst",
+   "scale": 0.8,
+   "note": "奋力跃击 · 单体攻击"
+  },
+  "skill.family_strike_130": {
+   "extends": "cat.burst",
+   "scale": 1.25,
+   "note": "怒涛冲撞 · 单体攻击"
+  },
+  "skill.family_strike_133": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "撞击 · 单体攻击"
+  },
+  "skill.family_strike_147": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "属性冲击 · 单体攻击"
+  },
+  "skill.family_strike_155": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "火花 · 单体攻击"
+  },
+  "skill.family_strike_156": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "火花 · 单体攻击"
+  },
+  "skill.family_strike_158": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "水枪 · 单体攻击"
+  },
+  "skill.family_strike_159": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "水枪 · 单体攻击"
+  },
+  "skill.family_strike_161": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "撞击 · 单体攻击"
+  },
+  "skill.family_strike_172": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "电击 · 单体攻击"
+  },
+  "skill.family_strike_179": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "电击 · 单体攻击"
+  },
+  "skill.family_strike_180": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "电击 · 单体攻击"
+  },
+  "skill.family_strike_194": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "水枪 · 单体攻击"
+  },
+  "skill.family_strike_236": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "碎岩 · 单体攻击"
+  },
+  "skill.family_strike_238": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "细雪 · 单体攻击"
+  },
+  "skill.family_strike_239": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "电击 · 单体攻击"
+  },
+  "skill.family_strike_246": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "落石 · 单体攻击"
+  },
+  "skill.family_strike_247": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "落石 · 单体攻击"
+  },
+  "skill.family_strike_25": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "电击 · 单体攻击"
+  },
+  "skill.family_strike_29": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "毒针 · 单体攻击"
+  },
+  "skill.family_strike_30": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "毒针 · 单体攻击"
+  },
+  "skill.family_strike_32": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "毒针 · 单体攻击"
+  },
+  "skill.family_strike_33": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "毒针 · 单体攻击"
+  },
+  "skill.family_strike_4": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "火花 · 单体攻击"
+  },
+  "skill.family_strike_5": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "火花 · 单体攻击"
+  },
+  "skill.family_strike_58": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "火花 · 单体攻击"
+  },
+  "skill.family_strike_63": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "念力 · 单体攻击"
+  },
+  "skill.family_strike_64": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "念力 · 单体攻击"
+  },
+  "skill.family_strike_66": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "碎岩 · 单体攻击"
+  },
+  "skill.family_strike_67": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "碎岩 · 单体攻击"
+  },
+  "skill.family_strike_7": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "水枪 · 单体攻击"
+  },
+  "skill.family_strike_72": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "水枪 · 单体攻击"
+  },
+  "skill.family_strike_74": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "落石 · 单体攻击"
+  },
+  "skill.family_strike_75": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "落石 · 单体攻击"
+  },
+  "skill.family_strike_79": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "水枪 · 单体攻击"
+  },
+  "skill.family_strike_8": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "水枪 · 单体攻击"
+  },
+  "skill.family_strike_90": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "水枪 · 单体攻击"
+  },
+  "skill.family_strike_92": {
+   "extends": "cat.burst",
+   "scale": 0.83,
+   "note": "惊吓 · 单体攻击"
+  },
+  "skill.flame_guard": {
+   "extends": "cat.taunt",
+   "note": "炽焰守护 · 嘲讽护卫"
+  },
+  "skill.flame_storm": {
+   "extends": "cat.area",
+   "scale": 1.17,
+   "family": "arc",
+   "note": "大字爆炎 · 范围轰炸"
+  },
+  "skill.four_arm_combo": {
+   "extends": "cat.combo",
+   "scale": 1.0,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "rune_circle",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "四臂连击 · 多段击退"
+  },
+  "skill.fracture_vision": {
+   "extends": "cat.pursuit",
+   "scale": 1.08,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "弱点预见 · 易伤追击"
+  },
+  "skill.frost_kiss": {
+   "extends": "cat.pursuit",
+   "scale": 1.0,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "stun_stars",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.7,
+     "on": ["flinch", "status"]
+    },
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "冰霜之吻 · 控场追击"
+  },
+  "skill.frost_shelter": {
+   "extends": "cat.shield",
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "cleanse_spiral",
+     "at": "impact",
+     "palette": "HEAL",
+     "size": 46,
+     "duration": 0.75,
+     "on": ["cleanse"]
+    }
+   ],
+   "note": "冰霜庇护 · 群体护盾"
+  },
+  "skill.gale_cross": {
+   "extends": "cat.pursuit",
+   "scale": 1.0,
+   "add": [
+    {
+     "layer": "impact",
+     "shape": "execute_slash",
+     "at": "impact",
+     "palette": "@type",
+     "size": 60,
+     "duration": 0.4,
+     "on": ["execute"]
+    },
+    {
+     "layer": "aura",
+     "shape": "stun_stars",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.7,
+     "on": ["flinch", "status"]
+    },
+    {
+     "layer": "charge",
+     "shape": "rune_circle",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "疾风十字 · 控制追击"
+  },
+  "skill.glacier_beam": {
+   "extends": "cat.area",
+   "scale": 1.25,
+   "note": "冰冻光束 · 冰系轰炸"
+  },
+  "skill.healing_song": {
+   "extends": "cat.heal",
+   "note": "初阶·治愈歌声 · 群体治疗"
+  },
+  "skill.hoenn_barrier_relay_281": {
+   "extends": "cat.guard",
+   "note": "心弦屏障 · 屏障减伤"
+  },
+  "skill.hoenn_bliss_chorus_272": {
+   "extends": "cat.heal",
+   "note": "欢雨庆典 · 群体急救"
+  },
+  "skill.hoenn_bliss_chorus_334": {
+   "extends": "cat.heal",
+   "note": "云龙圣歌 · 群体急救"
+  },
+  "skill.hoenn_bliss_chorus_350": {
+   "extends": "cat.heal",
+   "note": "鳞光抚流 · 群体急救"
+  },
+  "skill.hoenn_cliff_swoop_371": {
+   "extends": "cat.clear",
+   "scale": 0.8,
+   "add": [
+    {
+     "layer": "impact",
+     "shape": "shove",
+     "at": "impact",
+     "palette": "@type",
+     "size": 56,
+     "duration": 0.4,
+     "on": ["knockback", "pull"]
+    },
+    {
+     "layer": "charge",
+     "shape": "converge",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "龙头冲撞 · 击退清场"
+  },
+  "skill.hoenn_cliff_swoop_372": {
+   "extends": "cat.clear",
+   "scale": 0.92,
+   "add": [
+    {
+     "layer": "impact",
+     "shape": "shove",
+     "at": "impact",
+     "palette": "@type",
+     "size": 56,
+     "duration": 0.4,
+     "on": ["knockback", "pull"]
+    },
+    {
+     "layer": "charge",
+     "shape": "spiral",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "硬壳突击 · 击退清场"
+  },
+  "skill.hoenn_cross_bullet_252": {
+   "extends": "cat.combo",
+   "scale": 0.8,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "converge",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "新芽连射 · 连击破甲"
+  },
+  "skill.hoenn_cross_bullet_253": {
+   "extends": "cat.combo",
+   "scale": 0.92,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "spiral",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "叶刃双斩 · 连击破甲"
+  },
+  "skill.hoenn_cross_bullet_254": {
+   "extends": "cat.combo",
+   "scale": 1.17,
+   "add": [
+    {
+     "layer": "impact",
+     "shape": "execute_slash",
+     "at": "impact",
+     "palette": "@type",
+     "size": 60,
+     "duration": 0.4,
+     "on": ["execute"]
+    },
+    {
+     "layer": "charge",
+     "shape": "rune_circle",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "疾风叶刃 · 连击破甲"
+  },
+  "skill.hoenn_cross_bullet_256": {
+   "extends": "cat.combo",
+   "scale": 0.92,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "converge",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "双爪火舞 · 连击破甲"
+  },
+  "skill.hoenn_cross_bullet_286": {
+   "extends": "cat.combo",
+   "scale": 1.0,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "孢子拳连打 · 连击破甲"
+  },
+  "skill.hoenn_dragon_dive_373": {
+   "extends": "cat.burst",
+   "scale": 1.42,
+   "family": "straight",
+   "add": [
+    {
+     "layer": "impact",
+     "shape": "shove",
+     "at": "impact",
+     "palette": "@type",
+     "size": 56,
+     "duration": 0.4,
+     "on": ["knockback", "pull"]
+    }
+   ],
+   "note": "流星俯冲 · 高威俯冲"
+  },
+  "skill.hoenn_dragon_vein_270": {
+   "extends": "cat.energy",
+   "note": "雨露接力 · 治疗回能"
+  },
+  "skill.hoenn_flame_storm_255": {
+   "extends": "cat.area",
+   "scale": 0.8,
+   "family": "arc",
+   "note": "雏火飞散 · 范围轰炸"
+  },
+  "skill.hoenn_four_arm_combo_257": {
+   "extends": "cat.combo",
+   "scale": 1.25,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "rune_circle",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "烈焰爆连踢 · 多段击退"
+  },
+  "skill.hoenn_fracture_vision_359": {
+   "extends": "cat.pursuit",
+   "scale": 1.17,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "rune_circle",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "灾厄预兆 · 易伤追击"
+  },
+  "skill.hoenn_gale_cross_349": {
+   "extends": "cat.pursuit",
+   "scale": 0.8,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "converge",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "搁浅扑击 · 控制追击"
+  },
+  "skill.hoenn_iron_fault_304": {
+   "extends": "cat.displacement",
+   "scale": 0.8,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    },
+    {
+     "layer": "charge",
+     "shape": "converge",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "铁头初撞 · 重甲击退"
+  },
+  "skill.hoenn_iron_fault_305": {
+   "extends": "cat.displacement",
+   "scale": 0.83,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    },
+    {
+     "layer": "charge",
+     "shape": "spiral",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "钢甲冲撞 · 重甲击退"
+  },
+  "skill.hoenn_iron_fault_306": {
+   "extends": "cat.displacement",
+   "scale": 1.08,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "rune_circle",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "巨金重压 · 重甲击退"
+  },
+  "skill.hoenn_iron_fault_374": {
+   "extends": "cat.displacement",
+   "scale": 0.8,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    },
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "磁浮撞击 · 重甲击退"
+  },
+  "skill.hoenn_iron_fault_375": {
+   "extends": "cat.displacement",
+   "scale": 0.83,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    },
+    {
+     "layer": "charge",
+     "shape": "converge",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "钳臂震退 · 重甲击退"
+  },
+  "skill.hoenn_iron_fault_376": {
+   "extends": "cat.displacement",
+   "scale": 1.17,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "spiral",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "陨铁重拳 · 重甲击退"
+  },
+  "skill.hoenn_moon_blessing_282": {
+   "extends": "cat.shield",
+   "note": "圣洁守护 · 单体护盾"
+  },
+  "skill.hoenn_moon_blessing_333": {
+   "extends": "cat.shield",
+   "note": "云羽摇篮 · 单体护盾"
+  },
+  "skill.hoenn_mud_anchor_259": {
+   "extends": "cat.root",
+   "scale": 0.83,
+   "family": "ground",
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    },
+    {
+     "layer": "charge",
+     "shape": "rune_circle",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "泥沼锚定 · 定身阻截"
+  },
+  "skill.hoenn_star_resonance_271": {
+   "extends": "cat.energy",
+   "note": "水草共鸣 · 能量补给"
+  },
+  "skill.hoenn_twin_cannon_258": {
+   "extends": "cat.displacement",
+   "scale": 0.8,
+   "family": "beam",
+   "add": [
+    {
+     "layer": "impact",
+     "shape": "pierce_line",
+     "at": "impact",
+     "palette": "@type",
+     "size": 56,
+     "duration": 0.32
+    },
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "细流贯穿 · 贯穿击退"
+  },
+  "skill.hoenn_twin_cannon_260": {
+   "extends": "cat.displacement",
+   "scale": 1.08,
+   "family": "beam",
+   "add": [
+    {
+     "layer": "impact",
+     "shape": "pierce_line",
+     "at": "impact",
+     "palette": "@type",
+     "size": 56,
+     "duration": 0.32
+    },
+    {
+     "layer": "charge",
+     "shape": "converge",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "潮泥重炮 · 贯穿击退"
+  },
+  "skill.hoenn_venom_rush_285": {
+   "extends": "cat.poison",
+   "scale": 0.8,
+   "family": "arc",
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "孢子喷射 · 毒伤追击"
+  },
+  "skill.hoenn_watchful_lullaby_280": {
+   "extends": "cat.cleanse",
+   "note": "心铃安抚 · 解控回能"
+  },
+  "skill.horn_pressure": {
+   "extends": "cat.vulnerability",
+   "scale": 1.08,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "stun_stars",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.7,
+     "on": ["flinch", "status"]
+    },
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "破角突击 · 破甲压制"
+  },
+  "skill.icicle_aegis": {
+   "extends": "cat.area",
+   "scale": 0.83,
+   "family": "volley",
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    }
+   ],
+   "note": "冰棱铁壳 · 冰棱溅射"
+  },
+  "skill.iron_fault": {
+   "extends": "cat.displacement",
+   "scale": 0.83,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    },
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "钢尾震退 · 重甲击退"
+  },
+  "skill.life_pulse": {
+   "extends": "cat.heal",
+   "note": "生命脉冲 · 单体急救"
+  },
+  "skill.mind_shatter": {
+   "extends": "cat.burst",
+   "scale": 1.45,
+   "note": "精神强念 · 高威爆发"
+  },
+  "skill.moon_blessing": {
+   "extends": "cat.shield",
+   "note": "初阶·月光祝福 · 单体护盾"
+  },
+  "skill.moon_guard": {
+   "extends": "cat.drain",
+   "scale": 0.8,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    },
+    {
+     "layer": "aura",
+     "shape": "energy_orbs",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.55,
+     "on": ["energy"]
+    },
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "月影护幕 · 控能援护"
+  },
+  "skill.mud_anchor": {
+   "extends": "cat.root",
+   "scale": 0.8,
+   "family": "ground",
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    },
+    {
+     "layer": "charge",
+     "shape": "converge",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "泥沼锚定 · 定身阻截"
+  },
+  "skill.night_plunder": {
+   "extends": "cat.drain",
+   "scale": 1.0,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "energy_orbs",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.55,
+     "on": ["energy"]
+    },
+    {
+     "layer": "aura",
+     "shape": "stun_stars",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.7,
+     "on": ["flinch", "status"]
+    },
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "夜幕掠夺 · 掠能干扰"
+  },
+  "skill.phantom_hex": {
+   "extends": "cat.pursuit",
+   "scale": 1.0,
+   "add": [
+    {
+     "layer": "impact",
+     "shape": "multi_hit",
+     "at": "impact",
+     "palette": "@type",
+     "size": 54,
+     "count": 3,
+     "duration": 0.45
+    },
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "幽影咒爪 · 异常追击"
+  },
+  "skill.psychic_blink": {
+   "extends": "cat.assassin",
+   "scale": 1.17,
+   "note": "瞬移念力 · 瞬移收割"
+  },
+  "skill.razor_flurry": {
+   "extends": "cat.combo",
+   "scale": 0.92,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "spiral",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "冰爪连袭 · 双属性连击"
+  },
+  "skill.rescue_tongue": {
+   "extends": "cat.rescue",
+   "note": "救援舌 · 拉回救援"
+  },
+  "skill.rock_spikes": {
+   "extends": "cat.terrain",
+   "family": "ground",
+   "note": "岩钉场 · 地形布置"
+  },
+  "skill.root_domain": {
+   "extends": "cat.root",
+   "scale": 0.8,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "缠根之域 · 定身控场"
+  },
+  "skill.shadow_siphon": {
+   "extends": "cat.drain",
+   "scale": 1.08,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "energy_orbs",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.55,
+     "on": ["energy"]
+    },
+    {
+     "layer": "aura",
+     "shape": "stun_stars",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.7,
+     "on": ["flinch", "status"]
+    },
+    {
+     "layer": "charge",
+     "shape": "rune_circle",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "暗影汲能 · 锁定汲能"
+  },
+  "skill.sky_blaze": {
+   "extends": "cat.burst",
+   "scale": 1.45,
+   "note": "神鸟猛击 · 高威爆发"
+  },
+  "skill.slow_field": {
+   "extends": "cat.drain",
+   "scale": 0.8,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    },
+    {
+     "layer": "aura",
+     "shape": "energy_orbs",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.55,
+     "on": ["energy"]
+    },
+    {
+     "layer": "charge",
+     "shape": "converge",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "迟缓领域 · 范围控能"
+  },
+  "skill.solar_relay": {
+   "extends": "cat.lifesteal",
+   "scale": 1.08,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "motes_rise",
+     "at": "impact",
+     "palette": "HEAL",
+     "size": 42,
+     "count": 10,
+     "duration": 0.75,
+     "on": ["heal", "heal_bell", "regen"]
+    },
+    {
+     "layer": "charge",
+     "shape": "spiral",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "初阶·日光反哺 · 伤害反哺"
+  },
+  "skill.spark_chain": {
+   "extends": "cat.chain",
+   "scale": 1.08,
+   "family": "beam",
+   "add": [
+    {
+     "layer": "ground",
+     "shape": "ring_expand",
+     "at": "impact",
+     "palette": "@type",
+     "size": 110,
+     "duration": 0.55,
+     "target": "target"
+    }
+   ],
+   "note": "电流链 · 连锁输出"
+  },
+  "skill.spinning_cleanup": {
+   "extends": "cat.clear",
+   "scale": 0.8,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    },
+    {
+     "layer": "charge",
+     "shape": "spiral",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "旋转扫钉 · 地形清除"
+  },
+  "skill.spiteful_wail": {
+   "extends": "cat.drain",
+   "scale": 0.92,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "energy_orbs",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.55,
+     "on": ["energy"]
+    },
+    {
+     "layer": "aura",
+     "shape": "stun_stars",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.7,
+     "on": ["flinch", "status"]
+    },
+    {
+     "layer": "charge",
+     "shape": "converge",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "怨念尖啸 · 范围控能"
+  },
+  "skill.star_resonance": {
+   "extends": "cat.energy",
+   "note": "初阶·星光共鸣 · 能量补给"
+  },
+  "skill.steel_pinion": {
+   "extends": "cat.displacement",
+   "scale": 0.92,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    },
+    {
+     "layer": "ground",
+     "shape": "ring_expand",
+     "at": "impact",
+     "palette": "@type",
+     "size": 110,
+     "duration": 0.55,
+     "target": "target"
+    },
+    {
+     "layer": "charge",
+     "shape": "spiral",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "钢翼推阵 · 击退清场"
+  },
+  "skill.stone_pulse": {
+   "extends": "cat.control",
+   "scale": 0.83,
+   "add": [
+    {
+     "layer": "impact",
+     "shape": "shove",
+     "at": "impact",
+     "palette": "@type",
+     "size": 56,
+     "duration": 0.4,
+     "on": ["knockback", "pull"]
+    },
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    },
+    {
+     "layer": "charge",
+     "shape": "spiral",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "岩甲震波 · 震击控场"
+  },
+  "skill.storm_conductor": {
+   "extends": "cat.chain",
+   "scale": 0.92,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "stun_stars",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.7,
+     "on": ["flinch", "status"]
+    }
+   ],
+   "note": "雷暴导体 · 麻痹连锁"
+  },
+  "skill.storm_peck": {
+   "extends": "cat.drain",
+   "scale": 1.25,
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "energy_orbs",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.55,
+     "on": ["energy"]
+    },
+    {
+     "layer": "aura",
+     "shape": "stun_stars",
+     "at": "impact",
+     "palette": "ELECTRIC",
+     "size": 42,
+     "duration": 0.7,
+     "on": ["flinch", "status"]
+    },
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "雷鸣啄钻 · 单体汲能"
+  },
+  "skill.sweeping_kick": {
+   "extends": "cat.displacement",
+   "scale": 0.92,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "glow",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "扫堂飞踢 · 击退联动"
+  },
+  "skill.toxic_spines": {
+   "extends": "cat.poison",
+   "scale": 0.83,
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "converge",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "毒针散布 · 范围铺毒"
+  },
+  "skill.twin_cannon": {
+   "extends": "cat.displacement",
+   "scale": 0.92,
+   "family": "beam",
+   "add": [
+    {
+     "layer": "impact",
+     "shape": "pierce_line",
+     "at": "impact",
+     "palette": "@type",
+     "size": 56,
+     "duration": 0.32
+    },
+    {
+     "layer": "charge",
+     "shape": "rune_circle",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "双炮冲击 · 贯穿击退"
+  },
+  "skill.undertow_lock": {
+   "extends": "cat.root",
+   "scale": 0.92,
+   "add": [
+    {
+     "layer": "impact",
+     "shape": "shove",
+     "at": "impact",
+     "palette": "@type",
+     "size": 56,
+     "duration": 0.4,
+     "on": ["knockback", "pull"]
+    },
+    {
+     "layer": "charge",
+     "shape": "converge",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "潜流锁阵 · 定身推移"
+  },
+  "skill.venom_armor": {
+   "extends": "cat.retaliation",
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    },
+    {
+     "layer": "ground",
+     "shape": "puddle",
+     "at": "impact",
+     "palette": "POISON",
+     "size": 52,
+     "duration": 1.2,
+     "alpha": 0.6,
+     "target": "target"
+    },
+    {
+     "layer": "aura",
+     "shape": "thorn_shell",
+     "at": "impact",
+     "palette": "POISON",
+     "size": 54,
+     "duration": 0.7,
+     "on": ["thorns"]
+    }
+   ],
+   "note": "毒刺护甲 · 毒刺反击"
+  },
+  "skill.venom_rush": {
+   "extends": "cat.poison",
+   "scale": 1.08,
+   "family": "arc",
+   "add": [
+    {
+     "layer": "charge",
+     "shape": "rune_circle",
+     "at": "anticipation",
+     "palette": "@type",
+     "size": 40,
+     "count": 10,
+     "particle": "@type"
+    }
+   ],
+   "note": "毒角突袭 · 毒伤追击"
+  },
+  "skill.venom_tide": {
+   "extends": "cat.area",
+   "scale": 0.8,
+   "family": "arc",
+   "add": [
+    {
+     "layer": "aura",
+     "shape": "hex_dome",
+     "at": "impact",
+     "palette": "SHIELD",
+     "size": 64,
+     "duration": 0.85,
+     "on": ["guard", "shield", "protect", "protect_charge", "helping_hand"]
+    }
+   ],
+   "note": "毒潮屏障 · 毒潮压制"
+  },
+  "skill.verdant_sanctuary": {
+   "extends": "cat.cleanse",
+   "note": "初阶·清露花幕 · 群体净化"
+  },
+  "skill.watchful_lullaby": {
+   "extends": "cat.cleanse",
+   "note": "初阶·守夜安抚 · 解控回能"
+  }
+ },
+ "bindings": {
+  "skill": {
+   "alert_tail": "skill.alert_tail",
+   "ancient_mind": "skill.ancient_mind",
+   "armor_pincer": "skill.armor_pincer",
+   "aroma_garden": "skill.aroma_garden",
+   "barrier_relay": "skill.barrier_relay",
+   "beacon_relay": "skill.beacon_relay",
+   "bliss_chorus": "skill.bliss_chorus",
+   "bull_rush": "skill.bull_rush",
+   "charged_beacon": "skill.charged_beacon",
+   "cinder_eruption": "skill.cinder_eruption",
+   "cleansing_powder": "skill.cleansing_powder",
+   "cliff_swoop": "skill.cliff_swoop",
+   "crag_citadel": "skill.crag_citadel",
+   "cross_bullet": "skill.cross_bullet",
+   "dragon_crosscurrent": "skill.dragon_crosscurrent",
+   "dragon_dive": "skill.dragon_dive",
+   "dragon_vein": "skill.dragon_vein",
+   "family_strike_116": "skill.family_strike_116",
+   "family_strike_117": "skill.family_strike_117",
+   "family_strike_129": "skill.family_strike_129",
+   "family_strike_130": "skill.family_strike_130",
+   "family_strike_133": "skill.family_strike_133",
+   "family_strike_147": "skill.family_strike_147",
+   "family_strike_155": "skill.family_strike_155",
+   "family_strike_156": "skill.family_strike_156",
+   "family_strike_158": "skill.family_strike_158",
+   "family_strike_159": "skill.family_strike_159",
+   "family_strike_161": "skill.family_strike_161",
+   "family_strike_172": "skill.family_strike_172",
+   "family_strike_179": "skill.family_strike_179",
+   "family_strike_180": "skill.family_strike_180",
+   "family_strike_194": "skill.family_strike_194",
+   "family_strike_236": "skill.family_strike_236",
+   "family_strike_238": "skill.family_strike_238",
+   "family_strike_239": "skill.family_strike_239",
+   "family_strike_246": "skill.family_strike_246",
+   "family_strike_247": "skill.family_strike_247",
+   "family_strike_25": "skill.family_strike_25",
+   "family_strike_29": "skill.family_strike_29",
+   "family_strike_30": "skill.family_strike_30",
+   "family_strike_32": "skill.family_strike_32",
+   "family_strike_33": "skill.family_strike_33",
+   "family_strike_4": "skill.family_strike_4",
+   "family_strike_5": "skill.family_strike_5",
+   "family_strike_58": "skill.family_strike_58",
+   "family_strike_63": "skill.family_strike_63",
+   "family_strike_64": "skill.family_strike_64",
+   "family_strike_66": "skill.family_strike_66",
+   "family_strike_67": "skill.family_strike_67",
+   "family_strike_7": "skill.family_strike_7",
+   "family_strike_72": "skill.family_strike_72",
+   "family_strike_74": "skill.family_strike_74",
+   "family_strike_75": "skill.family_strike_75",
+   "family_strike_79": "skill.family_strike_79",
+   "family_strike_8": "skill.family_strike_8",
+   "family_strike_90": "skill.family_strike_90",
+   "family_strike_92": "skill.family_strike_92",
+   "flame_guard": "skill.flame_guard",
+   "flame_storm": "skill.flame_storm",
+   "four_arm_combo": "skill.four_arm_combo",
+   "fracture_vision": "skill.fracture_vision",
+   "frost_kiss": "skill.frost_kiss",
+   "frost_shelter": "skill.frost_shelter",
+   "gale_cross": "skill.gale_cross",
+   "glacier_beam": "skill.glacier_beam",
+   "healing_song": "skill.healing_song",
+   "hoenn_barrier_relay_281": "skill.hoenn_barrier_relay_281",
+   "hoenn_bliss_chorus_272": "skill.hoenn_bliss_chorus_272",
+   "hoenn_bliss_chorus_334": "skill.hoenn_bliss_chorus_334",
+   "hoenn_bliss_chorus_350": "skill.hoenn_bliss_chorus_350",
+   "hoenn_cliff_swoop_371": "skill.hoenn_cliff_swoop_371",
+   "hoenn_cliff_swoop_372": "skill.hoenn_cliff_swoop_372",
+   "hoenn_cross_bullet_252": "skill.hoenn_cross_bullet_252",
+   "hoenn_cross_bullet_253": "skill.hoenn_cross_bullet_253",
+   "hoenn_cross_bullet_254": "skill.hoenn_cross_bullet_254",
+   "hoenn_cross_bullet_256": "skill.hoenn_cross_bullet_256",
+   "hoenn_cross_bullet_286": "skill.hoenn_cross_bullet_286",
+   "hoenn_dragon_dive_373": "skill.hoenn_dragon_dive_373",
+   "hoenn_dragon_vein_270": "skill.hoenn_dragon_vein_270",
+   "hoenn_flame_storm_255": "skill.hoenn_flame_storm_255",
+   "hoenn_four_arm_combo_257": "skill.hoenn_four_arm_combo_257",
+   "hoenn_fracture_vision_359": "skill.hoenn_fracture_vision_359",
+   "hoenn_gale_cross_349": "skill.hoenn_gale_cross_349",
+   "hoenn_iron_fault_304": "skill.hoenn_iron_fault_304",
+   "hoenn_iron_fault_305": "skill.hoenn_iron_fault_305",
+   "hoenn_iron_fault_306": "skill.hoenn_iron_fault_306",
+   "hoenn_iron_fault_374": "skill.hoenn_iron_fault_374",
+   "hoenn_iron_fault_375": "skill.hoenn_iron_fault_375",
+   "hoenn_iron_fault_376": "skill.hoenn_iron_fault_376",
+   "hoenn_moon_blessing_282": "skill.hoenn_moon_blessing_282",
+   "hoenn_moon_blessing_333": "skill.hoenn_moon_blessing_333",
+   "hoenn_mud_anchor_259": "skill.hoenn_mud_anchor_259",
+   "hoenn_star_resonance_271": "skill.hoenn_star_resonance_271",
+   "hoenn_twin_cannon_258": "skill.hoenn_twin_cannon_258",
+   "hoenn_twin_cannon_260": "skill.hoenn_twin_cannon_260",
+   "hoenn_venom_rush_285": "skill.hoenn_venom_rush_285",
+   "hoenn_watchful_lullaby_280": "skill.hoenn_watchful_lullaby_280",
+   "horn_pressure": "skill.horn_pressure",
+   "icicle_aegis": "skill.icicle_aegis",
+   "iron_fault": "skill.iron_fault",
+   "life_pulse": "skill.life_pulse",
+   "mind_shatter": "skill.mind_shatter",
+   "moon_blessing": "skill.moon_blessing",
+   "moon_guard": "skill.moon_guard",
+   "mud_anchor": "skill.mud_anchor",
+   "night_plunder": "skill.night_plunder",
+   "phantom_hex": "skill.phantom_hex",
+   "psychic_blink": "skill.psychic_blink",
+   "razor_flurry": "skill.razor_flurry",
+   "rescue_tongue": "skill.rescue_tongue",
+   "rock_spikes": "skill.rock_spikes",
+   "root_domain": "skill.root_domain",
+   "shadow_siphon": "skill.shadow_siphon",
+   "sky_blaze": "skill.sky_blaze",
+   "slow_field": "skill.slow_field",
+   "solar_relay": "skill.solar_relay",
+   "spark_chain": "skill.spark_chain",
+   "spinning_cleanup": "skill.spinning_cleanup",
+   "spiteful_wail": "skill.spiteful_wail",
+   "star_resonance": "skill.star_resonance",
+   "steel_pinion": "skill.steel_pinion",
+   "stone_pulse": "skill.stone_pulse",
+   "storm_conductor": "skill.storm_conductor",
+   "storm_peck": "skill.storm_peck",
+   "sweeping_kick": "skill.sweeping_kick",
+   "toxic_spines": "skill.toxic_spines",
+   "twin_cannon": "skill.twin_cannon",
+   "undertow_lock": "skill.undertow_lock",
+   "venom_armor": "skill.venom_armor",
+   "venom_rush": "skill.venom_rush",
+   "venom_tide": "skill.venom_tide",
+   "verdant_sanctuary": "skill.verdant_sanctuary",
+   "watchful_lullaby": "skill.watchful_lullaby"
+  }
+ }
+}

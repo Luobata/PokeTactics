@@ -51,17 +51,28 @@ ARCHETYPE_ATTACKS = ('melee', 'ranged', 'support', 'tank')
 
 TYPES = ('NORMAL', 'FIRE', 'WATER', 'ELECTRIC', 'GRASS', 'ICE', 'FIGHTING', 'POISON', 'GROUND',
          'FLYING', 'PSYCHIC', 'BUG', 'ROCK', 'GHOST', 'DRAGON', 'DARK', 'STEEL', 'FAIRY')
-LAYERS = ('charge', 'projectile', 'trail', 'impact', 'ground', 'aura', 'screen')
+LAYERS = ('charge', 'projectile', 'trail', 'impact', 'ground', 'aura', 'link', 'screen')
 ANCHORS = ('start', 'anticipation', 'release', 'impact', 'recover', 'end')
 SHAPES = {
-    'charge': ('converge', 'glow', 'ring', 'spiral', 'sparks'),
+    'charge': ('converge', 'glow', 'ring', 'spiral', 'sparks', 'rune_circle'),
     'projectile': ('family',),
     'trail': ('streak', 'afterimage', 'dust', 'ribbon'),
-    'impact': ('burst', 'slash_arc', 'ring', 'shards', 'splash', 'sparks', 'flash', 'cross', 'petals'),
-    'ground': ('crack', 'ring_decal', 'spikes', 'puddle', 'shockwave', 'scorch', 'vines'),
-    'aura': ('glow', 'sparkle_up', 'ring_rise', 'shield_dome', 'heal_plus'),
+    'impact': ('burst', 'slash_arc', 'ring', 'shards', 'splash', 'sparks', 'flash', 'cross', 'petals',
+               'shove', 'pierce_line', 'execute_slash', 'multi_hit', 'bite', 'claw', 'mark', 'stun_stars'),
+    'ground': ('crack', 'ring_decal', 'spikes', 'puddle', 'shockwave', 'scorch', 'vines', 'vines_grow',
+               'ring_expand', 'debris', 'rune_circle'),
+    'aura': ('glow', 'sparkle_up', 'ring_rise', 'shield_dome', 'heal_plus', 'hex_dome', 'thorn_shell',
+             'cross_glyph', 'motes_rise', 'cleanse_spiral', 'energy_orbs', 'shout_rings', 'mark',
+             'buff_arrows', 'stun_stars'),
+    'link': ('fork', 'stream', 'tether', 'hop_arc'),
     'screen': ('flash', 'shake', 'tint'),
 }
+OUTCOME_PATTERN = re.compile(r'^(\*|[a-z][a-z0-9_]{0,31})$')
+RECIPE_FIELDS = {'layers', 'extends', 'add', 'drop', 'palette', 'family', 'scale', 'particle', 'note'}
+LAYER_FIELDS = {'layer', 'shape', 'at', 'palette', 'curve', 'family', 'duration', 'offset', 'size', 'count',
+                'alpha', 'intensity', 'particle', 'target', 'on', 'from', 'to'}
+PART_FIELDS = ('at', 'lean', 'head_x', 'head_y', 'belly', 'wobble', 'ease')
+PART_LIMITS = {'lean': (-24, 24), 'head_x': (-16, 16), 'head_y': (-16, 16), 'belly': (-30, 40), 'wobble': (0, 12)}
 PROJECTILE_FAMILIES = ('straight', 'arc', 'homing', 'beam', 'ground', 'volley')
 PARTICLES = ('ember', 'droplet', 'arc', 'leaf', 'shard', 'debris', 'wisp', 'ring', 'bubble',
              'flame', 'spark', 'sparkle', 'impact_ring', 'gust', 'mote', 'dust', 'slash')
@@ -94,6 +105,26 @@ def _keys(keys, path):
         raise SchemaError(str(exc)) from None
 
 
+def _part_keys(keys, path):
+    """Part-deformation keys: [at, lean, head_x, head_y, belly%, wobble, ease]."""
+    if not isinstance(keys, list) or not 2 <= len(keys) <= 16:
+        raise SchemaError(f'{path}: expected 2–16 part keys')
+    previous = -1
+    for index, key in enumerate(keys):
+        if not isinstance(key, list) or len(key) != len(PART_FIELDS):
+            raise SchemaError(f'{path}[{index}]: key must be {list(PART_FIELDS)}')
+        at = key[0]
+        if type(at) not in (int, float) or not 0 <= at <= 1 or at <= previous:
+            raise SchemaError(f'{path}: part key times must increase strictly within 0–1')
+        previous = at
+        for name, value in zip(PART_FIELDS[1:-1], key[1:-1]):
+            _number(value, *PART_LIMITS[name], f'{path}[{index}].{name}')
+        if key[-1] not in EASES:
+            raise SchemaError(f'{path}[{index}]: unknown ease {key[-1]!r}')
+    if keys[0][0] != 0 or keys[-1][0] != 1:
+        raise SchemaError(f'{path}: part track must include endpoints 0 and 1')
+
+
 def validate_motion_pack(pack, *, path='motion'):
     """Validate one motion pack; raises SchemaError with a readable path."""
     if not isinstance(pack, dict):
@@ -116,8 +147,15 @@ def validate_motion_pack(pack, *, path='motion'):
         slot = clip.get('slot')
         if slot not in CLIP_SLOTS:
             raise SchemaError(f'{here}.slot: expected one of {CLIP_SLOTS}')
-        if set(clip) - {'slot', 'phases', 'period', 'note'}:
-            raise SchemaError(f'{here}: unknown fields {sorted(set(clip) - {"slot", "phases", "period", "note"})}')
+        if set(clip) - {'slot', 'phases', 'period', 'note', 'parts'}:
+            raise SchemaError(f'{here}: unknown fields {sorted(set(clip) - {"slot", "phases", "period", "note", "parts"})}')
+        parts = clip.get('parts', {})
+        if not isinstance(parts, dict):
+            raise SchemaError(f'{here}.parts: expected object')
+        for name, keys in parts.items():
+            if name not in SLOT_PHASES[slot]:
+                raise SchemaError(f'{here}.parts.{name}: slot {slot} allows {SLOT_PHASES[slot]}')
+            _part_keys(keys, f'{here}.parts.{name}')
         phases = clip.get('phases')
         if not isinstance(phases, dict) or not phases:
             raise SchemaError(f'{here}.phases: expected object')
@@ -156,9 +194,43 @@ def validate_motion_pack(pack, *, path='motion'):
 
 
 def _palette_ref(value, palettes, path):
-    if value == '@type' or value in palettes or (isinstance(value, str) and HEX.match(value)):
+    if value == '@type' or value in palettes or value in TYPES or value in ('HEAL', 'SHIELD', 'KO') \
+            or (isinstance(value, str) and HEX.match(value)):
         return
     raise SchemaError(f'{path}: palette must be @type, a palette name or #rrggbb')
+
+
+def _validate_layer(layer, where, palettes):
+    if not isinstance(layer, dict) or layer.get('layer') not in LAYERS:
+        raise SchemaError(f'{where}.layer: expected one of {LAYERS}')
+    if layer.get('shape') not in SHAPES[layer['layer']]:
+        raise SchemaError(f'{where}.shape: {layer["layer"]} allows {SHAPES[layer["layer"]]}')
+    if layer.get('at', 'impact') not in ANCHORS:
+        raise SchemaError(f'{where}.at: expected one of {ANCHORS}')
+    if set(layer) - LAYER_FIELDS:
+        raise SchemaError(f'{where}: unknown layer fields {sorted(set(layer) - LAYER_FIELDS)}')
+    if 'palette' in layer:
+        _palette_ref(layer['palette'], palettes, f'{where}.palette')
+    if 'curve' in layer and layer['curve'] not in EASES:
+        raise SchemaError(f'{where}.curve: unknown ease')
+    if 'family' in layer and layer['family'] not in PROJECTILE_FAMILIES + ('@type',):
+        raise SchemaError(f'{where}.family: unknown projectile family')
+    for key, (lo, hi) in {'duration': (0.02, 3), 'offset': (-1, 1), 'size': (1, 240),
+                          'count': (0, 48), 'alpha': (0, 1), 'intensity': (0, 3)}.items():
+        if key in layer:
+            _number(layer[key], lo, hi, f'{where}.{key}')
+    if 'particle' in layer and layer['particle'] not in PARTICLES + ('@type',):
+        raise SchemaError(f'{where}.particle: unknown particle')
+    if 'target' in layer and layer['target'] not in ('actor', 'target', 'between', 'targets'):
+        raise SchemaError(f'{where}.target: expected actor/target/between/targets')
+    if 'on' in layer:
+        subs = layer['on'] if isinstance(layer['on'], list) else [layer['on']]
+        if not subs or not all(isinstance(v, str) and OUTCOME_PATTERN.match(v) for v in subs):
+            raise SchemaError(f'{where}.on: expected outcome name(s) such as heal / side_hit / knockback')
+    if layer.get('from', 'actor') not in ('actor', 'target', 'origin'):
+        raise SchemaError(f'{where}.from: expected actor/target/origin')
+    if layer.get('to', 'target') not in ('actor', 'target'):
+        raise SchemaError(f'{where}.to: expected actor/target')
 
 
 def validate_vfx_pack(pack, *, path='vfx'):
@@ -203,34 +275,33 @@ def validate_vfx_pack(pack, *, path='vfx'):
     recipes = pack.get('recipes', {})
     for name, recipe in recipes.items():
         here = f'{path}.recipes.{name}'
-        if not ID_PATTERN.match(name) or not isinstance(recipe, dict) \
-                or not isinstance(recipe.get('layers'), list) or not recipe['layers']:
-            raise SchemaError(f'{here}: expected {{"layers": [...]}}')
-        for index, layer in enumerate(recipe['layers']):
-            where = f'{here}.layers[{index}]'
-            if not isinstance(layer, dict) or layer.get('layer') not in LAYERS:
-                raise SchemaError(f'{where}.layer: expected one of {LAYERS}')
-            if layer.get('shape') not in SHAPES[layer['layer']]:
-                raise SchemaError(f'{where}.shape: {layer["layer"]} allows {SHAPES[layer["layer"]]}')
-            if layer.get('at', 'impact') not in ANCHORS:
-                raise SchemaError(f'{where}.at: expected one of {ANCHORS}')
-            if 'palette' in layer:
-                _palette_ref(layer['palette'], palettes, f'{where}.palette')
-            if 'curve' in layer and layer['curve'] not in EASES:
-                raise SchemaError(f'{where}.curve: unknown ease')
-            if 'family' in layer and layer['family'] not in PROJECTILE_FAMILIES + ('@type',):
-                raise SchemaError(f'{where}.family: unknown projectile family')
-            for key, (lo, hi) in {'duration': (0.02, 3), 'offset': (-1, 1), 'size': (1, 240),
-                                  'count': (0, 48), 'alpha': (0, 1), 'intensity': (0, 3)}.items():
-                if key in layer:
-                    _number(layer[key], lo, hi, f'{where}.{key}')
-            if set(layer) - {'layer', 'shape', 'at', 'palette', 'curve', 'family', 'duration',
-                             'offset', 'size', 'count', 'alpha', 'intensity', 'particle', 'target'}:
-                raise SchemaError(f'{where}: unknown layer fields')
-            if 'particle' in layer and layer['particle'] not in PARTICLES + ('@type',):
-                raise SchemaError(f'{where}.particle: unknown particle')
-            if 'target' in layer and layer['target'] not in ('actor', 'target', 'between', 'targets'):
-                raise SchemaError(f'{where}.target: expected actor/target/between/targets')
+        if not ID_PATTERN.match(name) or not isinstance(recipe, dict):
+            raise SchemaError(f'{here}: expected a recipe object')
+        if set(recipe) - RECIPE_FIELDS:
+            raise SchemaError(f'{here}: unknown fields {sorted(set(recipe) - RECIPE_FIELDS)}')
+        if 'extends' in recipe:
+            if not isinstance(recipe['extends'], str) or not ID_PATTERN.match(recipe['extends']):
+                raise SchemaError(f'{here}.extends: expected a recipe id')
+        elif not isinstance(recipe.get('layers'), list) or not recipe['layers']:
+            raise SchemaError(f'{here}: expected {{"layers": [...]}} or {{"extends": ...}}')
+        for group in ('layers', 'add'):
+            if group in recipe and not isinstance(recipe[group], list):
+                raise SchemaError(f'{here}.{group}: expected list')
+        if 'drop' in recipe and (not isinstance(recipe['drop'], list)
+                                 or not all(isinstance(v, str) for v in recipe['drop'])):
+            raise SchemaError(f'{here}.drop: expected list of shape or layer names')
+        if 'palette' in recipe:
+            _palette_ref(recipe['palette'], palettes, f'{here}.palette')
+        if 'family' in recipe and recipe['family'] not in PROJECTILE_FAMILIES:
+            raise SchemaError(f'{here}.family: unknown projectile family')
+        if 'scale' in recipe:
+            _number(recipe['scale'], .3, 3, f'{here}.scale')
+        if 'particle' in recipe and recipe['particle'] not in PARTICLES:
+            raise SchemaError(f'{here}.particle: unknown particle')
+        layers = [(f'{here}.layers[{i}]', layer) for i, layer in enumerate(recipe.get('layers', []))] \
+            + [(f'{here}.add[{i}]', layer) for i, layer in enumerate(recipe.get('add', []))]
+        for where, layer in layers:
+            _validate_layer(layer, where, palettes)
     bindings = pack.get('bindings', {})
     if not isinstance(bindings, dict) or set(bindings) - {'archetype', 'type_projectile', 'category',
                                                            'skill', 'type_recipe'}:
@@ -268,6 +339,18 @@ def check_references(motion_packs, vfx_packs):
                     elif clip['slot'] != slot:
                         problems.append(f'{pack["name"]}.{group}.{key}.{slot}: clip {clip_id} is a {clip["slot"]} clip')
     for pack in vfx_packs:
+        for name, recipe in pack.get('recipes', {}).items():
+            seen, current = {name}, recipe
+            while isinstance(current, dict) and current.get('extends'):
+                parent = current['extends']
+                if parent not in recipes:
+                    problems.append(f'{pack["name"]}.recipes.{name}: extends missing recipe {parent}')
+                    break
+                if parent in seen:
+                    problems.append(f'{pack["name"]}.recipes.{name}: extends cycle')
+                    break
+                seen.add(parent)
+                current = recipes[parent]
         for group, rows in pack.get('bindings', {}).items():
             if group == 'type_projectile':
                 continue

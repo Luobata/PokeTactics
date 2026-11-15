@@ -287,6 +287,78 @@ class MotionSchema(unittest.TestCase):
             self.assertEqual(json.loads(path.read_text()), json.loads(motion_schema.dump_pack(data)),
                              f'{path} differs from motion_seed.py; rerun the seed or update the generator')
 
+    def test_every_native_skill_has_its_own_recipe(self):
+        import arena_skills
+        packs = motion_schema.load_packs()['vfx']
+        recipes = {name: recipe for pack in packs.values() for name, recipe in pack.get('recipes', {}).items()}
+        bindings = packs['skills']['bindings']['skill']
+        catalog = arena_skills.catalog(include_families=True)
+        self.assertEqual({row['id'] for row in catalog}, set(bindings))
+        categories = {row['category'] for row in catalog}
+        for category in categories:
+            self.assertIn('cat.' + category, recipes, category)
+            self.assertEqual(packs['core']['bindings']['category'][category], 'cat.' + category)
+        for skill_id, recipe_id in bindings.items():
+            self.assertEqual(recipe_id, 'skill.' + skill_id)
+            self.assertIn(recipes[recipe_id]['extends'], recipes)
+
+    def test_category_silhouettes_are_distinct_not_recolours(self):
+        core = motion_schema.load_packs()['vfx']['core']['recipes']
+        def silhouette(name):
+            recipe = core[name]
+            layers = list(recipe.get('layers', [])) + list(recipe.get('add', []))
+            if recipe.get('extends'):
+                layers += [layer for layer in silhouette_layers(recipe['extends'])
+                           if layer['shape'] not in recipe.get('drop', [])]
+            return frozenset((layer['layer'], layer['shape']) for layer in layers
+                             if layer['layer'] not in ('projectile', 'screen'))
+        def silhouette_layers(name):
+            recipe = core[name]
+            return list(recipe.get('layers', [])) + list(recipe.get('add', []))
+        primary = ['cat.burst', 'cat.area', 'cat.chain', 'cat.combo', 'cat.drain', 'cat.energy', 'cat.heal',
+                   'cat.shield', 'cat.cleanse', 'cat.displacement', 'cat.root', 'cat.pursuit', 'cat.taunt',
+                   'cat.terrain', 'cat.poison', 'cat.vulnerability', 'cat.execute', 'cat.pierce',
+                   'cat.retaliation', 'cat.control']
+        shapes = {name: silhouette(name) for name in primary}
+        self.assertEqual(len(set(shapes.values())), len(primary))
+        signature = {'cat.chain': ('link', 'fork'), 'cat.drain': ('link', 'stream'), 'cat.shield': ('aura', 'hex_dome'),
+                     'cat.heal': ('aura', 'cross_glyph'), 'cat.root': ('ground', 'vines_grow'),
+                     'cat.taunt': ('aura', 'shout_rings'), 'cat.displacement': ('impact', 'shove'),
+                     'cat.area': ('ground', 'ring_expand')}
+        for name, shape in signature.items():
+            self.assertIn(shape, shapes[name], name)
+
+    def test_every_recipe_shape_has_a_drawing(self):
+        source = (ROOT / 'tools/acceptance/battle_renderer.js').read_text()
+        packs = motion_schema.load_packs()['vfx']
+        used = {layer['shape'] for pack in packs.values() for recipe in pack.get('recipes', {}).values()
+                for layer in recipe.get('layers', []) + recipe.get('add', [])
+                if layer['layer'] not in ('projectile', 'screen', 'trail')}
+        for shape in used:
+            self.assertIn(f'"{shape}"', source, f'{shape} is used by a recipe but never drawn')
+
+    def test_part_tracks_and_recipe_inheritance_are_validated(self):
+        roles = json.loads((ROOT / 'assets/motion/roles.json').read_text())
+        self.assertTrue(all('parts' in clip for clip in roles['clips'].values()))
+        for mutate in (lambda k: k[1].__setitem__(1, 40), lambda k: k[0].__setitem__(0, .2),
+                       lambda k: k[1].__setitem__(6, 'wobbly'), lambda k: k[1].pop()):
+            pack = copy.deepcopy(roles)
+            mutate(pack['clips']['role.melee.attack']['parts']['dash'])
+            with self.assertRaises(motion_schema.SchemaError):
+                motion_schema.validate_motion_pack(pack)
+        pack = copy.deepcopy(roles)
+        pack['clips']['role.idle.breathe']['parts']['dash'] = pack['clips']['role.idle.breathe']['parts']['loop']
+        with self.assertRaises(motion_schema.SchemaError):
+            motion_schema.validate_motion_pack(pack)
+        cyc = {'schema_version': 1, 'kind': 'vfx_pack', 'name': 'cyc',
+               'recipes': {'a': {'extends': 'b'}, 'b': {'extends': 'a'}}}
+        motion_schema.validate_vfx_pack(cyc)
+        self.assertTrue(any('cycle' in p for p in motion_schema.check_references([], [cyc])))
+        bad = copy.deepcopy(cyc)
+        bad['recipes']['a'] = {'extends': 'b', 'add': [{'layer': 'link', 'shape': 'fork', 'on': ['Heal!']}]}
+        with self.assertRaises(motion_schema.SchemaError):
+            motion_schema.validate_vfx_pack(bad)
+
     def test_invalid_motion_and_vfx_are_rejected(self):
         base = json.loads((ROOT / 'assets/motion/roles.json').read_text())
         def broken(mutate):
@@ -315,6 +387,16 @@ class MotionSchema(unittest.TestCase):
 
 @unittest.skipUnless(NODE, 'Node.js runs the browser renderer contracts')
 class BrowserRendererNode(unittest.TestCase):
+    def test_outcomes_and_chains_follow_cast_and_action_indices(self):
+        self.assertIn('OK renderer cause links', self.run_case('causeLinks'))
+
+    def test_part_tracks_deform_the_body_on_actions_and_hits(self):
+        self.assertIn('OK renderer parts', self.run_case('parts'))
+
+    def test_every_vfx_shape_paints(self):
+        shapes = sorted({shape for layer, names in motion_schema.SHAPES.items()
+                         if layer not in ('projectile', 'trail', 'screen') for shape in names})
+        self.assertIn('OK renderer paint', self.run_case('paintAll', json.dumps(shapes)))
     @classmethod
     def setUpClass(cls):
         _, script = showcase_script()
