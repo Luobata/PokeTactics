@@ -62,6 +62,8 @@
 ```sh
 # 统一入口（游戏试玩 / 精灵图鉴 / 玩法指南 / 调试工具）
 python3 tools/acceptance/server.py --port 8799
+# 让同网段其他机器访问（例如开发机）：加 --host 0.0.0.0，用机器名或 IP 打开
+# python3 tools/acceptance/server.py --host 0.0.0.0 --port 8799
 # 浏览器打开 http://127.0.0.1:8799/
 # 全新游戏试玩界面（森林棋盘、精灵商店、布阵、装备与战斗回放）
 #   http://127.0.0.1:8799/play

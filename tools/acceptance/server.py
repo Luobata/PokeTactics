@@ -1036,8 +1036,10 @@ class Handler(SimpleHTTPRequestHandler):
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", type=int, default=8799)
+    ap.add_argument("--host", default="127.0.0.1",
+                    help="监听地址；0.0.0.0 让局域网内其他机器访问（工作台保存仍只允许本机）")
     args = ap.parse_args()
-    url = f"http://127.0.0.1:{args.port}/"
+    url = f"http://{'127.0.0.1' if args.host in ('0.0.0.0', '::') else args.host}:{args.port}/"
     print(f"PokeTactics 统一入口：{url}（Ctrl-C 退出）")
     # 开战只等权威解算，帧后台流式落盘；播放端按播放进度逐帧拉取。
     demo_mod.DEFER_RENDER = True
@@ -1045,7 +1047,7 @@ def main() -> None:
         # 回放预取 + 精灵图 + API 会在瞬间开出十余条并发连接，默认 5 的
         # listen backlog 溢出会被系统直接 RST（浏览器表现为图片载入失败）。
         request_queue_size = 128
-    srv = Server(("127.0.0.1", args.port), Handler)
+    srv = Server((args.host, args.port), Handler)
     demo_mod.start_render_housekeeping()
     try:
         srv.serve_forever()
