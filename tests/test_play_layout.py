@@ -46,7 +46,7 @@ class PlayLayoutPresentation(unittest.TestCase):
 
 class PlayLayoutStatic(unittest.TestCase):
     def test_page_and_styles_load_nothing_from_the_network(self):
-        for name in ('play.html', 'play.css', 'play_layout.css', 'battle.css'):
+        for name in ('play.html', 'play.css', 'play_layout.css', 'play_interactions.css', 'battle.css'):
             text = (ACCEPTANCE / name).read_text()
             with self.subTest(asset=name):
                 self.assertNotIn('fonts.googleapis', text)

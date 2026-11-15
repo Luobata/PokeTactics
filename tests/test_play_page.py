@@ -52,7 +52,9 @@ class PlayPageRoutes(unittest.TestCase):
                                ("play.js", "text/javascript"),
                                ("play_depth.js", "text/javascript"),
                                ("play_layout.js", "text/javascript"),
-                               ("play_layout.css", "text/css")):
+                               ("play_layout.css", "text/css"),
+                               ("play_interactions.js", "text/javascript"),
+                               ("play_interactions.css", "text/css")):
             with self.subTest(filename=filename), self.get("/play/assets/" + filename) as response:
                 expected = (ROOT / "tools" / "acceptance" / filename).read_bytes()
                 self.assertEqual(response.read(), expected)

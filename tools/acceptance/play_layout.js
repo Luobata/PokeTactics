@@ -65,10 +65,14 @@
 
   function open(panel, options = {}) {
     if (!Object.hasOwn(PANELS, panel)) return false;
+    const changed = panel !== current;
     current = panel;
     size = options.size || (isPhone() ? (panel === "shop" ? "peek" : "half") : "half");
     if (!isPhone() && !options.transient) writePref(panel);
     applyPanel();
+    // A different panel starts at its top. Reset after showing the drawer: a
+    // display:none scroller ignores scrollTop and later restores its old offset.
+    if (changed && $("drawer-body")) $("drawer-body").scrollTop = 0;
     if (options.focus) $("drawer-title")?.focus?.();
     drawBoardCues();
     return true;
@@ -219,7 +223,8 @@
       const gold = Number(s.you?.gold) || 0;
       const short = Number(p.price) > gold;
       mode = "shop";
-      html = `<img src="${sprite(p)}" alt=""><span class="context-main"><b>${esc(p.name)} <em>${Number(p.price)} 金</em></b><small>${selectionSummary(p)}${p.trait ? ` · ◎${esc(p.trait.name)}` : ""}</small></span><span class="context-actions"><button type="button" data-layout-detail>详情</button><button type="button" class="context-primary" data-shop-buy="${Number(shopIndex)}" ${!prep || short ? "disabled" : ""}>${short ? `还差 ${Number(p.price) - gold} 金` : `招募 · ${Number(p.price)} 金`}</button><button type="button" class="context-close" data-action="cancel-select" aria-label="取消选择">×</button></span>`;
+      const merge = p.merge_note || (p.star_progress?.merges_now ? `买下即升 ${Number(p.star_progress.next_star) || 2}★` : "");
+      html = `<img src="${sprite(p)}" alt=""><span class="context-main"><b>${esc(p.name)} <em>${Number(p.price)} 金</em></b><small>${merge ? `<span class="context-merge">⇪ ${esc(merge)}</span> · ` : ""}${selectionSummary(p)}${p.trait ? ` · ◎${esc(p.trait.name)}` : ""}</small></span><span class="context-actions"><button type="button" data-layout-detail>详情</button><button type="button" class="context-primary" data-shop-buy="${Number(shopIndex)}" ${!prep || short ? "disabled" : ""}>${short ? `还差 ${Number(p.price) - gold} 金` : `招募 · ${Number(p.price)} 金`}</button><button type="button" class="context-close" data-action="cancel-select" aria-label="取消选择">×</button></span>`;
     } else if (loc) {
       const p = ctx.pieceAt(loc);
       if (p) {
@@ -230,7 +235,7 @@
         const early = onBoard ? s.depth?.threat?.early?.[p.uid] : null;
         const hits = onBoard ? Number(s.depth?.threat?.counts?.[p.uid]) || 0 : 0;
         const pressure = early ? ` · ${hits ? `⚔${hits} · ` : ""}${Number(s.depth.threat.window) || 5}秒承伤 ${Math.round((Number(early.share) || 0) * 100)}%${Number(early.falls) ? " · 可能倒下" : ""}` : "";
-        html = `<img src="${sprite(p)}" alt=""><span class="context-main"><b>${p.is_core ? "♛ " : ""}${esc(p.name)} <em>${"★".repeat(Math.max(1, Math.min(3, Number(p.star) || 1)))}</em></b><small>${onBoard ? "" : "备战席 · "}${selectionSummary(p)}${pressure}</small></span><span class="context-actions"><button type="button" data-layout-detail>详情</button>${mods ? `<button type="button" class="context-primary" data-layout-detail>技能强化 ${mods}</button>` : ""}${depth ? `<button type="button" data-depth-core ${!prep || (!onBoard && !p.is_core) ? "disabled" : ""}>${p.is_core ? "取消核心" : "设为核心"}</button>` : ""}${p.item ? `<button type="button" data-action="unequip" ${!prep ? "disabled" : ""}>卸装</button>` : ""}<button type="button" class="context-sell" data-action="sell" ${!prep ? "disabled" : ""}>出售 +${Number(p.sell) || 0}</button><button type="button" class="context-close" data-action="cancel-select" aria-label="取消选择">×</button></span>`;
+        html = `<img src="${sprite(p)}" alt=""><span class="context-main"><b>${p.is_core ? "♛ " : ""}${esc(p.name)} <em>${"★".repeat(Math.max(1, Math.min(3, Number(p.star) || 1)))}</em></b><small>${onBoard ? "" : "备战席 · "}${selectionSummary(p)}${pressure}</small></span><span class="context-actions"><button type="button" data-layout-detail>详情</button>${mods ? `<button type="button" class="context-primary" data-layout-detail>技能强化 ${mods}</button>` : ""}${depth ? `<button type="button" data-depth-core ${!prep || (!onBoard && !p.is_core) ? "disabled" : ""}>${p.is_core ? "取消核心" : "设为核心"}</button>` : ""}${p.item ? `<button type="button" data-action="unequip" ${!prep ? "disabled" : ""}>卸装${depth ? ` · ${Number(depth.items?.unequip_cost) || 1}金` : ""}</button>` : ""}<button type="button" class="context-sell" data-action="sell" ${!prep ? "disabled" : ""}>出售 +${Number(p.sell) || 0}</button><button type="button" class="context-close" data-action="cancel-select" aria-label="取消选择">×</button></span>`;
       }
     }
     bar.hidden = !html;
@@ -378,7 +383,9 @@
     renderBoostMods(s);
     renderDraft(s);
     const augments = (s.augments?.pending || []).length;
-    if (augments && ctx.playable() && augmentShownRound !== s.round && !document.body.classList.contains("draft-open")) {
+    // With the interaction layer loaded, a pending augment opens its own pick moment instead.
+    if (augments && !window.PlayInteractions && ctx.playable() && augmentShownRound !== s.round
+        && !document.body.classList.contains("draft-open")) {
       augmentShownRound = s.round;
       open("boost", {transient: true});
     }

@@ -1551,6 +1551,11 @@ class Session:
             })
             if self.is_arena:
                 self._track_arena_progress(meta)
+            # Prep-screen read-out only (docs/62): last_battle is cleared when the
+            # next round starts, so keep our rule ledger rows in memory. Not saved.
+            if self.is_depth and isinstance(meta.get('ledger'), list):
+                self.last_rule_ledger = {'round': r, 'rows': copy.deepcopy(
+                    [row for row in meta['ledger'] if row.get('team') == 0])}
 
     def _track_arena_progress(self, meta):
         """Fold one committed player battle into the run's challenge counters."""
@@ -2919,6 +2924,13 @@ def state_json(sess) -> dict:
             st['standings'][seat.seat]['provisional_rank'] = place
         if sess.is_depth:
             st['depth'] = _depth_view(sess)
+        # Read-only explanations for the prep moments (docs/62): augment fit,
+        # machine learners, skill cards, recipe matrix, equip carriers.
+        try:
+            import interaction_view
+            st['interactions'] = interaction_view.build(sess)
+        except Exception as exc:  # the prep screen must stay playable
+            st['interactions'] = {'version': 1, 'error': f'{type(exc).__name__}: {exc}'}
     if sess.phase == "over":
         st["over"] = {"ranking": [
             {"name": e.name, "rank": e.rank, "is_you": e is p,

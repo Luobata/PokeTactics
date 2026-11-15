@@ -510,6 +510,7 @@
       shopSelected: () => shopSelected, equipItem: () => equipItem, busy: () => busy || deploying};
     window.PlayDepth?.render(layoutContext);
     window.PlayLayout?.render(layoutContext);
+    window.PlayInteractions?.render(layoutContext);
   }
   // Reveal a preparation panel: the drawer/sheet when the layout is loaded, else scroll.
   function revealPanel(panel, fallback) {
@@ -1418,7 +1419,7 @@
     }
     if (state.augments?.pending?.length) {
       setSystemTab("augments");
-      revealPanel("boost", ".preparation-section");
+      if (!window.PlayInteractions?.openAugments?.()) revealPanel("boost", ".preparation-section");
       toast("先选择本轮海克斯强化，再开始战斗。");
       return;
     }

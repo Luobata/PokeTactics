@@ -260,27 +260,59 @@ def begin_round(session):
                 owned.arena_trait = 'trait_rain_dish' if rain else None
 
 
-def bot_augment_choice(seat, options):
-    """arena_v2 bots score augments against their board instead of rolling dice."""
+def augment_signals(seat):
+    """Visible team facts the augment scorer reads (board first, bench when empty)."""
     pieces = [owned.piece for owned in seat.board] or [owned.piece for owned in seat.bench]
     roles = [getattr(p, 'role_key', 'attack') for p in pieces]
     melee = sum(1 for p in pieces if getattr(p, 'distance', None) == MELEE)
-    ranged = len(pieces) - melee
     import arena_bonds
-    counts = arena_bonds.count(pieces)
+    return {'pieces': pieces, 'roles': roles, 'melee': melee, 'ranged': len(pieces) - melee,
+            'counts': arena_bonds.count(pieces), 'finished': len(seat.inventory.finished),
+            'level': seat.level}
 
-    def score(option):
-        tags = set(_depth.augment_tags(option['id']))
-        value = 1.
-        value += 2. * ('melee' in tags) * (melee >= 3) + 2. * ('ranged' in tags) * (ranged >= 3)
-        value += 1.5 * ('support' in tags) * (roles.count('support') >= 2)
-        value += 1.5 * ('frontline' in tags) * (roles.count('defense') >= 2)
-        value += 1.5 * ('bonds' in tags) * (sum(1 for n in counts.values() if n >= 2) >= 3)
-        value += 1. * ('poison' in tags) * (counts.get('POISON', 0) >= 2)
-        value += 1. * ('items' in tags) * (len(seat.inventory.finished) >= 2)
-        value += .5 * ('economy' in tags) * (seat.level <= 5)
-        return (value, option['id'])
-    return max(options, key=score)
+
+def augment_fit(seat, key, signals=None):
+    """Bot score for one augment plus the human reasons behind each term.
+
+    The numeric value is exactly what arena_v2 bots maximise (golden-checked);
+    the reasons let the prep UI explain the same read-out to the player."""
+    s = signals or augment_signals(seat)
+    tags = set(_depth.augment_tags(key))
+    roles, counts = s['roles'], s['counts']
+    value = 1.
+    reasons = []
+
+    def term(tag, bonus, ok, good, bad):
+        nonlocal value
+        if tag not in tags:
+            return
+        value += bonus * ok
+        reasons.append((good if ok else bad, bool(ok)))
+
+    term('melee', 2., s['melee'] >= 3, f'你有 {s["melee"]} 只近战 → 全员触发',
+         f'近战只有 {s["melee"]} 只（3 只起才划算）')
+    term('ranged', 2., s['ranged'] >= 3, f'你有 {s["ranged"]} 只远程 → 全员吃到加成',
+         f'远程只有 {s["ranged"]} 只（3 只起才划算）')
+    term('support', 1.5, roles.count('support') >= 2, f'{roles.count("support")} 名辅助型可以触发',
+         f'辅助型只有 {roles.count("support")} 名（2 名起才稳定）')
+    term('frontline', 1.5, roles.count('defense') >= 2, f'{roles.count("defense")} 名防守型站前排',
+         f'防守型只有 {roles.count("defense")} 名（2 名起才划算）')
+    pairs = sum(1 for n in counts.values() if n >= 2)
+    term('bonds', 1.5, pairs >= 3, f'{pairs} 组属性已有 2 名成员 → 每组 +1',
+         f'只有 {pairs} 组属性凑到 2 名（3 组起才划算）')
+    term('poison', 1., counts.get('POISON', 0) >= 2, f'毒系 {counts.get("POISON", 0)} 名 → 中毒稳定',
+         f'毒系只有 {counts.get("POISON", 0)} 名')
+    term('items', 1., s['finished'] >= 2, f'仓库 {s["finished"]} 件成品 → 立刻用上',
+         f'仓库只有 {s["finished"]} 件成品')
+    term('economy', .5, s['level'] <= 5, f'Lv.{s["level"]}，经济收益还能滚很多轮',
+         f'Lv.{s["level"]}，经济类收益期已不长')
+    return value, reasons
+
+
+def bot_augment_choice(seat, options):
+    """arena_v2 bots score augments against their board instead of rolling dice."""
+    signals = augment_signals(seat)
+    return max(options, key=lambda option: (augment_fit(seat, option['id'], signals)[0], option['id']))
 
 
 # 类别 × 携带者定位匹配分：伤害给攻击位，控制/反制给前排，恢复/支援/启动给非攻击位。
@@ -293,6 +325,80 @@ _BOT_ROLE_MATCH = {
     'support': {'support': 3, 'defense': 1},
     'startup': {'support': 3, 'defense': 1, 'attack': 1},
 }
+_ROLE_ZH = {'attack': '攻击型', 'defense': '防守型', 'support': '辅助型'}
+_TM_CATEGORY_ZH = {'damage': '伤害', 'control': '控制', 'counter': '反制', 'recovery': '恢复',
+                   'survival': '生存', 'support': '支援', 'startup': '启动'}
+
+
+def teaching_context(board):
+    """Board-wide facts the machine scorer reads (weather pairs, known machines)."""
+    known = {owned.technique for owned in board}
+    types = [set(owned.piece.types) for owned in board]
+    return {
+        'board': board, 'known': known,
+        'weather_known': bool(known.intersection({'rain_dance', 'sunny_day'})),
+        'wants_rain': (any('WATER' in row for row in types)
+                       and (any('ELECTRIC' in row for row in types)
+                            or any(owned.piece.species_id == 230 for owned in board))),
+        'wants_sun': (sum(bool(row.intersection({'GRASS', 'FIRE'})) for row in types) >= 2
+                      and any(owned.piece.species_id == 3 for owned in board)),
+    }
+
+
+def teaching_fit(ctx, owned, key):
+    """Bot value of teaching `key` to `owned`, plus the reasons (prep UI)."""
+    board, known = ctx['board'], ctx['known']
+    role = getattr(owned.piece, 'role_key', 'attack')
+    category = techniques.category_of(key) or ''
+    value = _BOT_ROLE_MATCH.get(category, {}).get(role, 0)
+    reasons = []
+    if value >= 3:
+        reasons.append(f'{_TM_CATEGORY_ZH.get(category, category)}招式最适合{_ROLE_ZH.get(role, role)}')
+    elif value:
+        reasons.append(f'{_ROLE_ZH.get(role, role)}也能用好{_TM_CATEGORY_ZH.get(category, category)}招式')
+    # 既有特判保留为加分项：天气对、雨后打雷连招、强行尼多王冰光。
+    if key == 'rain_dance' and ctx['wants_rain'] or key == 'sunny_day' and ctx['wants_sun']:
+        value += 4
+        reasons.append('队里有' + ('水系 + 电系，开雨天直接联动' if key == 'rain_dance' else '草/火系与妙蛙花，晴天联动'))
+    if key == 'thunder' and 'rain_dance' in known and 'thunder' not in known:
+        value += 4
+        reasons.append('已经有人会求雨 → 雨天打雷必中')
+    if key == 'ice_beam' and owned.piece.species_id == 34 and owned.item == 'life_orb':
+        value += 4
+        reasons.append('强行尼多王 + 生命宝珠 → 冰光吃满加成')
+    # 机制机的阵容适配加分：守住给承伤前排，帮助要有攻击核心可标记，
+    # 治愈铃声要有足够队友可净化。
+    if key == 'protect' and role == 'defense':
+        value += 1
+        reasons.append('防守型承伤时守住收益最高')
+    if key == 'helping_hand' and any(
+            mate is not owned and getattr(mate.piece, 'role_key', 'attack') == 'attack'
+            for mate in board):
+        value += 2
+        reasons.append('场上有攻击型可以接受帮助')
+    if key == 'heal_bell' and len(board) >= 3:
+        value += 2
+        reasons.append(f'场上 {len(board)} 名队友都能被净化')
+    # 兜底偏好：没有任何定位分时，维持 rest/surf/cut 的现有偏好序。
+    if not value:
+        if key == 'rest' and role != 'attack':
+            value = 1
+        elif key == 'surf' and 'WATER' in owned.piece.types:
+            value = 1
+        elif key == 'cut':
+            value = 1
+        if value:
+            reasons.append('通用兜底选择')
+    return value, reasons
+
+
+def teaching_learner(candidates, key):
+    """The bots' preferred compatible carrier: supports first, attackers last."""
+    eligible = [owned for owned in candidates if techniques.compatible_species(
+        owned.piece.species_id, key, RULESET)]
+    return min(eligible, key=lambda owned: (
+        owned.piece.role_key != 'support', owned.piece.role_key == 'attack',
+        owned.piece.species_id), default=None)
 
 
 def bot_teaching_choice(board):
@@ -300,60 +406,15 @@ def bot_teaching_choice(board):
     unused = [owned for owned in board if owned.technique is None]
     if not unused:
         return None, None
-    known = {owned.technique for owned in board}
-    types = [set(owned.piece.types) for owned in board]
-    weather_known = bool(known.intersection({'rain_dance', 'sunny_day'}))
-    wants_rain = (any('WATER' in row for row in types)
-                  and (any('ELECTRIC' in row for row in types)
-                       or any(owned.piece.species_id == 230 for owned in board)))
-    wants_sun = (sum(bool(row.intersection({'GRASS', 'FIRE'})) for row in types) >= 2
-                 and any(owned.piece.species_id == 3 for owned in board))
-
-    def learner(key):
-        eligible = [owned for owned in unused if techniques.compatible_species(
-            owned.piece.species_id, key, RULESET)]
-        return min(eligible, key=lambda owned: (
-            owned.piece.role_key != 'support', owned.piece.role_key == 'attack',
-            owned.piece.species_id), default=None)
-
-    def score(owned, key):
-        role = getattr(owned.piece, 'role_key', 'attack')
-        value = _BOT_ROLE_MATCH.get(techniques.category_of(key) or '', {}).get(role, 0)
-        # 既有特判保留为加分项：天气对、雨后打雷连招、强行尼多王冰光。
-        if key == 'rain_dance' and wants_rain or key == 'sunny_day' and wants_sun:
-            value += 4
-        if key == 'thunder' and 'rain_dance' in known and 'thunder' not in known:
-            value += 4
-        if key == 'ice_beam' and owned.piece.species_id == 34 and owned.item == 'life_orb':
-            value += 4
-        # 机制机的阵容适配加分：守住给承伤前排，帮助要有攻击核心可标记，
-        # 治愈铃声要有足够队友可净化。
-        if key == 'protect' and role == 'defense':
-            value += 1
-        if key == 'helping_hand' and any(
-                mate is not owned and getattr(mate.piece, 'role_key', 'attack') == 'attack'
-                for mate in board):
-            value += 2
-        if key == 'heal_bell' and len(board) >= 3:
-            value += 2
-        # 兜底偏好：没有任何定位分时，维持 rest/surf/cut 的现有偏好序。
-        if not value:
-            if key == 'rest' and role != 'attack':
-                value = 1
-            elif key == 'surf' and 'WATER' in owned.piece.types:
-                value = 1
-            elif key == 'cut':
-                value = 1
-        return value
-
+    ctx = teaching_context(board)
     best_owned, best_key, best_score = None, None, 0
     for key in techniques.ids_for(RULESET):
-        if key in ('rain_dance', 'sunny_day') and weather_known:
+        if key in ('rain_dance', 'sunny_day') and ctx['weather_known']:
             continue
-        owned = learner(key)
+        owned = teaching_learner(unused, key)
         if owned is None:
             continue
-        value = score(owned, key)
+        value = teaching_fit(ctx, owned, key)[0]
         if value > best_score:
             best_owned, best_key, best_score = owned, key, value
     if best_owned is None:

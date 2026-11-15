@@ -12,7 +12,9 @@
     <link rel="stylesheet" href="/play/assets/play.css" />
     <link rel="stylesheet" href="/play/assets/battle.css" />
     <link rel="stylesheet" href="/play/assets/play_layout.css" />
+    <link rel="stylesheet" href="/play/assets/play_interactions.css" />
     <script src="/play/assets/play_layout.js" defer></script>
+    <script src="/play/assets/play_interactions.js" defer></script>
     <script src="/play/assets/play_depth.js" defer></script>
     <script src="/play/assets/play.js" defer></script>
   </head>
@@ -378,7 +380,8 @@
                     ><button type="button" class="hud-chip hud-terrain" id="hud-terrain" data-open-panel="orders" hidden></button
                     ><button type="button" class="hud-chip hud-order" id="hud-order" data-open-panel="orders" hidden></button
                     ><button type="button" class="hud-chip hud-sim" id="hud-sim" data-open-panel="orders" hidden></button
-                    ><button type="button" class="hud-chip hud-draft" id="hud-draft" data-open-draft hidden></button>
+                    ><button type="button" class="hud-chip hud-draft" id="hud-draft" data-open-draft hidden></button
+                  ><button type="button" class="hud-chip hud-augment accent" id="hud-augment" data-ix-open-augment hidden></button>
                   </div>
                   <button id="scout-resume" class="scout-resume" type="button" data-scout-resume hidden>继续侦察 →</button>
                   <button type="button" class="scout-entry" data-scout-overview aria-haspopup="dialog">
@@ -417,6 +420,7 @@
                 </div>
                 <div class="map-coordinate"><span id="stage-title">常青森林</span> · VIRIDIAN</div>
                 <div class="context-bar" id="context-bar" role="region" aria-label="选中操作" hidden></div>
+                <div class="ix-target-bar" id="ix-target-bar" role="status" aria-live="polite" hidden></div>
               </div>
             </div>
 
@@ -434,6 +438,7 @@
                 <svg><use href="#i-swords" /></svg><span>开始战斗</span
                 ><svg><use href="#i-arrow" /></svg>
               </button>
+              <div class="ix-augment-strip" id="ix-augment-strip" aria-label="已选海克斯" hidden></div>
               <nav class="stage-dock" id="stage-dock" aria-label="准备入口">
                 <button type="button" class="dock-button" data-open-panel="shop" aria-controls="stage-drawer" aria-expanded="false"
                   ><svg aria-hidden="true"><use href="#i-ball" /></svg><span>商店</span><b class="dock-badge" data-badge="shop" hidden></b></button
@@ -534,8 +539,10 @@
                     选中装备，再点击棋盘或备战席上的精灵。装备和技能可以同时携带。
                   </p>
                   <p class="section-note"><a id="item-recipes-entry" href="/pokedex?tab=items&amp;view=recipes">查看装备合成图 ↗</a></p>
-                  <div id="inventory"></div>
+                  <div id="ix-items" class="ix-items" aria-label="成品装备"></div>
+                  <details class="ix-legacy-list"><summary>列表方式（装备 / 合成 / 拆解）</summary><div id="inventory"></div></details>
                 </div>
+                <section id="ix-recipes" class="ix-recipes" aria-label="组件合成图"></section>
               </section>
 
               <section class="drawer-panel preparation-section" data-panel="boost" id="panel-boost" aria-label="强化与技能" hidden>
@@ -597,7 +604,8 @@
                   aria-labelledby="techniques-tab"
                   hidden
                 >
-                  <div id="techniques"></div>
+                  <div id="ix-tm-rack" class="ix-tm-rack" aria-label="技能机"></div>
+                  <details class="ix-legacy-list"><summary>列表方式学习</summary><div id="techniques"></div></details>
                 </div>
                 <div id="research-panel" class="system-panel" role="tabpanel"
                   aria-labelledby="research-tab" hidden><div id="research"></div></div>
@@ -704,6 +712,23 @@
           ><button id="resume-button" class="footer-resume">继续存档</button>
         </footer>
       </main>
+    </div>
+
+    <div id="ix-augment" class="ix-augment" hidden>
+      <div class="ix-augment-stage" role="dialog" aria-modal="true" aria-labelledby="ix-augment-title">
+        <header class="ix-augment-head">
+          <div><span class="eyebrow" id="ix-augment-eyebrow">HEXTECH AUGMENT</span><h2 id="ix-augment-title">海克斯强化</h2><p id="ix-augment-note"></p></div>
+          <div class="ix-augment-tools"><span id="ix-augment-reroll"></span><button type="button" class="secondary-button" data-ix-augment-later>先看看棋盘</button></div>
+        </header>
+        <div id="ix-augment-cards" class="ix-augment-cards"></div>
+      </div>
+    </div>
+
+    <div id="ix-sheet" class="ix-sheet" hidden>
+      <div class="ix-sheet-card" role="dialog" aria-modal="false" aria-labelledby="ix-sheet-title">
+        <header class="ix-sheet-head"><h2 id="ix-sheet-title"></h2><button type="button" class="icon-button" data-ix-close aria-label="关闭"><svg><use href="#i-close" /></svg></button></header>
+        <div id="ix-sheet-body" class="ix-sheet-body"></div>
+      </div>
     </div>
 
     <div id="draft-overlay" class="draft-overlay" hidden>

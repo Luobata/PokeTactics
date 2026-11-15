@@ -616,6 +616,8 @@ class Handler(SimpleHTTPRequestHandler):
                 "/play/assets/play_depth.js": ("play_depth.js", "text/javascript; charset=utf-8"),
                 "/play/assets/play_layout.js": ("play_layout.js", "text/javascript; charset=utf-8"),
                 "/play/assets/play_layout.css": ("play_layout.css", "text/css; charset=utf-8"),
+                "/play/assets/play_interactions.js": ("play_interactions.js", "text/javascript; charset=utf-8"),
+                "/play/assets/play_interactions.css": ("play_interactions.css", "text/css; charset=utf-8"),
                 "/play/assets/battle.css": ("battle.css", "text/css; charset=utf-8"),
                 "/play/assets/battle_renderer.js": ("battle_renderer.js", "text/javascript; charset=utf-8"),
                 "/play/assets/animation_workbench.js": ("animation_workbench.js", "text/javascript; charset=utf-8"),
