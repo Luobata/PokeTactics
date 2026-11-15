@@ -186,11 +186,17 @@ def order_view(key):
     return {'id': key, **ORDERS[key]}
 
 
-def bot_order(board):
-    """Deterministic bot order from its board composition."""
+def bot_order(board, enemy_board=None):
+    """Deterministic bot order from its board and (when known) the opponent's."""
     roles = [getattr(o.piece, 'role_key', 'attack') for o in board]
     if not roles:
         return 'none'
+    enemy_roles = [getattr(o.piece, 'role_key', 'attack') for o in enemy_board or ()]
+    if enemy_roles.count('support') >= 2:
+        return 'cut_supply'
+    if (enemy_roles.count('attack') >= max(4, len(enemy_roles) // 2 + 1)
+            and roles.count('defense') >= 2):
+        return 'hold'
     if any(getattr(o, 'is_core', False) for o in board) and roles.count('defense') >= 2:
         return 'protect_core'
     if roles.count('attack') >= max(3, len(roles) // 2 + 1):

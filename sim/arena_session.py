@@ -54,8 +54,19 @@ def order_of(session, seat):
     if seat is None:
         return 'none'
     if seat is not session.player:
-        return arena_depth.bot_order(seat.board)
+        return arena_depth.bot_order(seat.board, _opponent_board(session, seat))
     return seat_state(seat)['order']
+
+
+def _opponent_board(session, seat):
+    for a, b in getattr(session, 'pairs', None) or []:
+        if a is seat:
+            return b.board
+        if b is seat:
+            return a.board
+    if getattr(session, 'ghost_seat', None) is seat and session.ghost_src is not None:
+        return session.ghost_src.board
+    return None
 
 
 def set_order(seat, key):
