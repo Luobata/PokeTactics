@@ -396,7 +396,7 @@ const cases = {
     assert.deepEqual(ranking(p), [0, 1, 3, 2]); // Equal damage uses the unit index, regardless of input order.
     assert.match(stats.innerHTML, /阵亡喷火龙/); assert.match(stats.innerHTML, /含阵亡精灵/);
     assert.match(stats.innerHTML, /卡比&lt;&amp;&quot;&#39;&gt;兽/); assert.doesNotMatch(stats.innerHTML, /卡比<&/);
-    assert.match(stats.innerHTML, /\/demo\/sprite\/143\.png\?shiny=1/); assert.match(stats.innerHTML, /携带装备/);
+    assert.match(stats.innerHTML, /\/(demo\/sprite|pmd\/thumb)\/143\.png\?shiny=1/); assert.match(stats.innerHTML, /携带装备/);
     assert.deepEqual(metrics.map(metric => button(p, 'history', 'metric', metric).querySelector('strong').textContent),
       ['780', '140', '980', '100']);
     selected(p, 'history', 'team', '0'); selected(p, 'history', 'metric', 'damage_dealt');
