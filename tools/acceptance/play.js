@@ -91,8 +91,19 @@
     Object.hasOwn(roleNames, p?.role_key) ? p.role_key : "attack";
   const starsOf = (p) => Math.max(1, Math.min(3, Number(p?.star) || 1));
   const attackStyle = (p) => p?.ranged ? "远程" : "近战";
-  const spriteOf = (p) =>
-    `/demo/sprite/${Number(p.sid)}.png${p.shiny ? "?shiny=1" : ""}`;
+  // Prep-screen sprites follow the battle art style (docs/60): ?sprites= > saved choice > PMD.
+  const prepSpriteStyle = () => {
+    try {
+      const forced = new URLSearchParams(location.search).get("sprites");
+      if (forced === "pmd" || forced === "classic") return forced;
+      return localStorage.getItem("poketactics.sprite.style") === "classic" ? "classic" : "pmd";
+    } catch (_) { return "pmd"; }
+  };
+  const spriteUrl = (sid, shiny = false) => prepSpriteStyle() === "pmd"
+    ? `/pmd/thumb/${Number(sid)}.png${shiny ? "?shiny=1" : ""}`
+    : `/demo/sprite/${Number(sid)}.png${shiny ? "?shiny=1" : ""}`;
+  window.pokeSpriteUrl = spriteUrl;
+  const spriteOf = (p) => spriteUrl(p.sid, p.shiny);
   const nativeOf = (p) => p.native_skill || {
     name: p.skill_name, type: p.skill_type, description: p.skill_description, tags: [],
   };
@@ -1301,7 +1312,7 @@
       .sort((a, b) => b.hp - a.hp || (a.rank ?? 0) - (b.rank ?? 0))
       .map(
         (p, i) =>
-          `<button class="trainer-row${p.is_you ? " you" : ""}${!p.alive ? " eliminated" : ""}" data-scout="${p.seat}" aria-label="侦察${p.is_you ? "我方" : esc(trainerName(p.name))}阵容"><span class="trainer-rank">${p.rank || i + 1}</span><span class="trainer-avatar"><img src="/demo/sprite/${p.portrait}.png" alt=""></span><span class="trainer-info"><span class="trainer-name">${p.is_you ? "新叶训练家" : esc(trainerName(p.name))}</span><small>${p.is_you ? "就是你" : "Lv." + p.level}${!p.alive ? " · 已淘汰" : ""} · 侦察 ↗</small><span class="mini-health"><i style="width:${Math.max(0, Math.min(100, p.hp))}%"></i></span></span><span class="trainer-hp">${p.hp}<span class="mini-heart">♡</span></span></button>`,
+          `<button class="trainer-row${p.is_you ? " you" : ""}${!p.alive ? " eliminated" : ""}" data-scout="${p.seat}" aria-label="侦察${p.is_you ? "我方" : esc(trainerName(p.name))}阵容"><span class="trainer-rank">${p.rank || i + 1}</span><span class="trainer-avatar"><img src="${spriteUrl(p.portrait)}" alt=""></span><span class="trainer-info"><span class="trainer-name">${p.is_you ? "新叶训练家" : esc(trainerName(p.name))}</span><small>${p.is_you ? "就是你" : "Lv." + p.level}${!p.alive ? " · 已淘汰" : ""} · 侦察 ↗</small><span class="mini-health"><i style="width:${Math.max(0, Math.min(100, p.hp))}%"></i></span></span><span class="trainer-hp">${p.hp}<span class="mini-heart">♡</span></span></button>`,
       )
       .join("");
   }
@@ -2198,6 +2209,7 @@
     select.onchange = async () => {
       const p = playback, next = select.value === "classic" ? "classic" : "pmd";
       engine.saveSpriteStyle?.(next);
+      render();  // prep-screen sprites follow the same style
       if (!p.renderer?.setStyle) return;
       const token = p.token;
       if (next === "pmd" && !p.pmdBundle && engine.loadPmd) p.pmdBundle = await engine.loadPmd(p.renderer.script);

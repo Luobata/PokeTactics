@@ -429,6 +429,27 @@ def run_experiment(name: str) -> str:
 
 
 PMD_ROOT = ROOT / "assets" / "pmd"
+_PMD_THUMBS = {}
+
+
+def _render_pmd_thumb(sid, shiny=False, scale=3):
+    import io
+    manifest_path = PMD_ROOT / f"{sid:04d}.json"
+    if not manifest_path.is_file():
+        return None
+    from PIL import Image
+    manifest = json.loads(manifest_path.read_text())
+    idle = manifest["anims"].get("Idle")
+    if not idle:
+        return None
+    atlas_name = manifest.get("shiny_atlas") if shiny and manifest.get("shiny_atlas") else manifest["atlas"]
+    (x, y), (w, h) = idle["dirs"]["0"]["xy"][0], idle["tile"]
+    with Image.open(PMD_ROOT / atlas_name) as atlas:
+        frame = atlas.convert("RGBA").crop((x, y, x + w, y + h))
+    frame = frame.resize((w * scale, h * scale), Image.NEAREST)
+    out = io.BytesIO()
+    frame.save(out, "PNG", optimize=True)
+    return out.getvalue()
 
 
 def _pmd_manifest(species: str) -> dict:
@@ -645,6 +666,8 @@ class Handler(SimpleHTTPRequestHandler):
             # species; anything not imported falls back to the classic cel.
             return self._json(_pmd_manifest(qs.get("species", [""])[0]), 200,
                               {"Cache-Control": "no-cache"})
+        elif parsed.path.startswith("/pmd/thumb/"):
+            return self._pmd_thumb(parsed.path[len("/pmd/thumb/"):], qs.get("shiny", ["0"])[0] == "1")
         elif parsed.path.startswith("/pmd/"):
             return self._pmd_asset(parsed.path[len("/pmd/"):])
         elif parsed.path == "/api/animation/pack":
@@ -973,6 +996,32 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header("Cache-Control", "public, max-age=86400")
         self.send_header("ETag", '"' + hashlib.sha1(body).hexdigest()[:16] + '"')
         self.send_header("X-Content-Type-Options", "nosniff")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _pmd_thumb(self, name: str, shiny: bool) -> None:
+        """Prep-screen portrait: first Idle frame facing the viewer, 3x pixel-crisp.
+
+        Falls back to the classic sprite when a species has no PMD sheet (docs/60).
+        """
+        match = re.fullmatch(r"(\d{1,4})\.png", name)
+        if not match:
+            return self.send_error(404)
+        sid = int(match.group(1))
+        key = (sid, shiny)
+        body = _PMD_THUMBS.get(key)
+        if body is None:
+            body = _render_pmd_thumb(sid, shiny)
+            if body is None:
+                self.send_response(302)
+                self.send_header("Location", f"/demo/sprite/{sid}.png" + ("?shiny=1" if shiny else ""))
+                self.end_headers()
+                return
+            _PMD_THUMBS[key] = body
+        self.send_response(200)
+        self.send_header("Content-Type", "image/png")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "public, max-age=86400")
         self.end_headers()
         self.wfile.write(body)
 

@@ -84,7 +84,7 @@
     const mine = draft.options.find((o) => o.taken_by_you);
     panel.innerHTML = `<div class="depth-draft-head"><b>共享选秀 · 第 ${Number(draft.round)} 轮</b><span>血量低者先选。你是第 ${draft.your_position ?? "—"} 位；顺序：${draft.order.map(esc).join(" → ")}</span></div><div class="depth-draft-options">${draft.options.map((o) => {
       const taken = o.taken_by && !o.taken_by_you;
-      return `<button type="button" class="depth-draft-card${taken ? " taken" : ""}${o.taken_by_you ? " mine" : ""}" data-depth-draft="${o.index}" ${taken || mine || !ctx.canPrep() ? "disabled" : ""}><img src="/demo/sprite/${Number(o.species)}.png" alt=""><strong>${esc(o.name)}</strong><small>${Number(o.cost)} 费</small><span class="depth-draft-reward">+ ${esc(o.reward?.name || "")}</span>${taken ? `<em>${esc(o.taken_by)} 已选</em>` : ""}</button>`;
+      return `<button type="button" class="depth-draft-card${taken ? " taken" : ""}${o.taken_by_you ? " mine" : ""}" data-depth-draft="${o.index}" ${taken || mine || !ctx.canPrep() ? "disabled" : ""}><img src="${window.pokeSpriteUrl ? window.pokeSpriteUrl(o.species) : `/demo/sprite/${Number(o.species)}.png`}" alt=""><strong>${esc(o.name)}</strong><small>${Number(o.cost)} 费</small><span class="depth-draft-reward">+ ${esc(o.reward?.name || "")}</span>${taken ? `<em>${esc(o.taken_by)} 已选</em>` : ""}</button>`;
     }).join("")}</div><p class="depth-note">未选择时，开战会自动拿走剩余第一个选项。</p>`;
   }
 
