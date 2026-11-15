@@ -78,6 +78,13 @@ class BattleScriptContract(unittest.TestCase):
                 current = [row for row in rows if row[0] <= t + 1e-9][-1]
                 self.assertEqual(current[1], states[unit['idx']]['hp'], f'unit {unit["idx"]} at {t}')
 
+    def test_shared_skill_ids_keep_each_species_name(self):
+        for species, name in ((26, '电流链'), (135, '雷电接力')):
+            script = battle_script.preview_script(species, 'cast')
+            casts = [a for a in script['actions'] if a['kind'] == 'cast' and a['actor'] == 0]
+            self.assertEqual(casts[0]['skill']['name'], name)
+            self.assertEqual(script['units'][0]['skill']['name'], name)
+
     def test_unknown_payloads_stay_json_safe(self):
         self.assertEqual(battle_script.json_safe({'a': (1, 2.0), 'b': {3}, 'c': float('nan'), 'd': object}),
                          {'a': [1, 2], 'b': [3], 'c': None, 'd': str(object)})
