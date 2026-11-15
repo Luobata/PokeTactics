@@ -17,6 +17,7 @@
     <script src="/play/assets/play_interactions.js" defer></script>
     <link rel="stylesheet" href="/play/assets/play_feedback.css" />
     <script src="/play/assets/play_feedback.js" defer></script>
+    <script src="/play/assets/play_music.js" defer></script>
     <script src="/play/assets/play_depth.js" defer></script>
     <script src="/play/assets/play.js" defer></script>
   </head>
@@ -192,6 +193,14 @@
               <div class="hud-stat hud-streak" id="hud-streak" hidden></div>
               <div class="hud-tools">
                 <button
+                  id="music-button"
+                  class="icon-button music-button"
+                  type="button"
+                  aria-pressed="true"
+                  aria-label="背景音乐开关"
+                  title="背景音乐"
+                ><span aria-hidden="true">♪</span></button
+                ><button
                   id="mobile-help-button"
                   class="icon-button mobile-help-button"
                   title="玩法指南"

@@ -257,7 +257,16 @@
     return {x: box.left - origin.left + box.width / 2, y: box.top - origin.top + box.height / 2};
   }
 
+  // Geometry reads force a full layout; batch them into the next frame so a
+  // render + cue update costs one layout (shared with paint) instead of two.
+  let cueFrame = 0;
   function drawBoardCues() {
+    if (typeof requestAnimationFrame !== "function") return drawBoardCuesNow();
+    if (cueFrame) cancelAnimationFrame(cueFrame);
+    cueFrame = requestAnimationFrame(() => { cueFrame = 0; drawBoardCuesNow(); });
+  }
+
+  function drawBoardCuesNow() {
     const s = state();
     const ally = $("ally-board");
     const enemy = $("enemy-board");

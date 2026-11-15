@@ -144,3 +144,10 @@
 }
 .stage-ui .board-grid .tile.selected { animation: fb-selected-glow 1.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .stage-ui #bench .bench-slot.selected, .stage-ui .board-grid .tile.selected { animation: none; } }
+/* the unit being moved fades on its old cell while the optimistic flight runs */
+.fb-lifting img { opacity: .35; transition: opacity .1s; }
+.music-button span { font-size: 17px; font-weight: 900; line-height: 1; }
+.music-button.muted span { opacity: .45; text-decoration: line-through; }
+/* light busy state while a request is in flight (no full re-render) */
+body.is-busy { cursor: progress; }
+body.is-busy #fight-button { opacity: .7; }

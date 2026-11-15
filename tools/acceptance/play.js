@@ -230,8 +230,9 @@
     const before = ownedSnapshot(state);
     let upgrades = [];
     busy = true;
-    render();
+    markBusy(true);
     const query = new URLSearchParams({ cmd, sid, ...params });
+    if (state?.arena && !LITE_EXCLUDED.has(cmd)) query.set("lite", "1");
     if (
       state?.save?.sequence != null &&
       !["new", "state", "resume"].includes(cmd)
@@ -258,7 +259,7 @@
       }
       if (result.state) {
         if (["new", "resume"].includes(cmd) || state && (state.sid !== result.state.sid || state.round !== result.state.round || state.phase !== result.state.phase)) resetScout();
-        state = result.state;
+        state = mergeLite(result.state, state);
         if (!["state", "resume", "new"].includes(cmd))
           upgrades = ownedSnapshot(state).filter((p) =>
             before.some((old) => old.uid === p.uid && old.star < p.star));
@@ -284,12 +285,40 @@
       return null;
     } finally {
       busy = false;
+      markBusy(false);
       render();
       for (const piece of upgrades) animateUpgrade(piece, before);
       if (feedback) window.PlayFeedback.after(feedback, outcome || {ok: false}, state);
     }
   }
 
+  // Prep mutations return a slim state (docs/63 §5): keep static catalogs and the
+  // other trainers' scouting rows from the previous full state.
+  const LITE_EXCLUDED = new Set(["new", "state", "resume", "next", "end_prep", "finish", "save"]);
+  function mergeLite(next, prev) {
+    if (!next?.lite || !prev?.arena) return next;
+    const arena = {...prev.arena, ...next.arena};
+    const pool = next.arena?.pool_remaining || {};
+    arena.catalog = (prev.arena.catalog || []).map((row) =>
+      pool[row.sid] != null && pool[row.sid] !== row.pool_remaining ? {...row, pool_remaining: pool[row.sid]} : row);
+    arena.bond_catalog = prev.arena.bond_catalog;
+    arena.trait_catalog = prev.arena.trait_catalog;
+    delete arena.pool_remaining;
+    const mine = new Map((next.scouting || []).map((row) => [row.seat, row]));
+    const scouting = (prev.scouting || []).map((row) => mine.get(row.seat) || row);
+    const merged = {...next, arena, scouting};
+    delete merged.lite;
+    return merged;
+  }
+  // A full render costs ~80ms; while a request is in flight only the busy cues change.
+  function markBusy(on) {
+    document.body.classList.toggle("is-busy", on);
+    const fight = $("fight-button");
+    if (fight && on) {
+      fight.classList.add("busy");
+      fight.disabled = true;
+    }
+  }
   function ownedSnapshot(value) {
     return [...(value?.board || []).flat(), ...(value?.bench || [])]
       .filter(Boolean).map((p) => {
@@ -517,6 +546,8 @@
     window.PlayLayout?.render(layoutContext);
     window.PlayInteractions?.render(layoutContext);
     window.PlayFeedback?.selection({selected, shopSelected, equipItem});
+    window.PlayMusic?.update({phase: state.phase, round: Number(state.round) || 1, hp: state.you?.hp,
+                              alive: state.you?.alive, pve: Boolean(state.opponent?.pve)});
   }
   // Reveal a preparation panel: the drawer/sheet when the layout is loaded, else scroll.
   function revealPanel(panel, fallback) {
@@ -1360,9 +1391,39 @@
       await api("move", { from: selected, to: loc });
       return;
     }
+    // Double-click / double-tap a unit: bench → best free board cell, board → bench.
+    const now = Date.now();
+    if (p && lastCellTap.loc === loc && now - lastCellTap.at < 450) {
+      lastCellTap = {loc: null, at: 0};
+      selected = null;
+      await quickPlace(loc, p);
+      return;
+    }
+    lastCellTap = {loc, at: now};
     selected = selected === loc ? null : p ? loc : null;
     shopSelected = null;
     render();
+  }
+  let lastCellTap = {loc: null, at: 0};
+  function bestBoardCell(p) {
+    const rows = roleOf(p) === "defense" ? [0, 1, 2] : p.ranged || roleOf(p) === "support" ? [2, 1, 0] : [1, 0, 2];
+    for (const r of rows) for (const c of [2, 3, 1, 4, 0, 5]) if (!state.board[r]?.[c]) return `g${r},${c}`;
+    return null;
+  }
+  async function quickPlace(loc, p) {
+    if (loc[0] === "b") {
+      if (state.you.on_board >= state.you.pop) {
+        toast(`上场人口已满（${state.you.pop}）：先升级或撤下一只`, true);
+        window.PlayFeedback?.shakeLoc?.(loc);
+        return;
+      }
+      const to = bestBoardCell(p);
+      if (to) await api("move", { from: loc, to });
+    } else {
+      const free = Array.from({length: state.you.bench_cap || 8}, (_, i) => i).find((i) => !state.bench[i]);
+      if (free == null) toast("备战席已满", true);
+      else await api("move", { from: loc, to: `b${state.bench.filter(Boolean).length}` });
+    }
   }
   async function autoDeploy() {
     if (!canPrep()) return;
@@ -1583,6 +1644,7 @@
     playback.verdictShown = true;
     const meta = playback.meta;
     const kind = meta?.winner === 0 ? "win" : meta?.winner === 1 ? "loss" : "draw";
+    window.PlayMusic?.jingle(kind === "win" ? "victory" : kind === "loss" ? "defeat" : null);
     const overlay = $("battle-verdict");
     overlay.className = `battle-verdict ${kind}`;
     overlay.querySelector(".verdict-symbol").textContent = kind === "win" ? "✦" : kind === "loss" ? "◇" : "＝";
@@ -2292,6 +2354,19 @@
     };
     p.timer = requestAnimationFrame(step);
   }
+  // Closing the replay (×, Esc) or pressing the main button in the battle phase
+  // moves straight on; replays stay available from the journal (上轮战果).
+  async function advanceRound() {
+    closeBattle();
+    if (!state || busy) return;
+    if (state.phase === "over" || (!state.you.alive && state.phase !== "battle")) return showResults();
+    if (state.phase !== "battle") return;
+    const result = await api("next", {renderer: rendererPreference()});
+    if (result?.ok) {
+      if (state.phase === "over" || !state.you.alive) showResults();
+      else window.PlayFeedback?.banner(`第 ${state.round} 轮 · 准备阶段`, "商店已刷新，调整阵容后开战");
+    }
+  }
   async function nextRound() {
     if (busy) return;
     if (state.phase === "over") {
@@ -2313,7 +2388,7 @@
       await api("family_evolve", {loc: selected, branch: target.dataset.familyEvolve});
     } else if (target.dataset.shop != null) {
       const i = Number(target.dataset.shop);
-      if (shopSelected === i) {
+      if (shopSelected === i || event.detail >= 2) {
         // 再次点击已选中的卡片等同于点「招募」，沿用旧的一步买入习惯。
         if (canPrep() && state.you.gold >= (state.shop[i]?.price ?? Infinity))
           await api("buy", { i });
@@ -2522,8 +2597,8 @@
     const rows = state?.battle_history || [];
     if (rows.length) openHistoryReport(rows.at(-1).round);
   };
-  $("battle-close").onclick = closeBattle;
-  $("battle-dialog").addEventListener("cancel", closeBattle);
+  $("battle-close").onclick = advanceRound;
+  $("battle-dialog").addEventListener("cancel", (event) => { event.preventDefault(); advanceRound(); });
   $("battle-pause").onclick = () => playback.intentPlaying ? stopPlayback() : play();
   $("battle-skip").onclick = () => requestBattleFrame(playback.n - 1, {revealOnFailure: true});
   $("battle-replay").onclick = () => requestBattleFrame(0, {resume: true});

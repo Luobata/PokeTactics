@@ -62,8 +62,39 @@
     const itemKey = params?.item;
     const itemRect = itemKey ? rectOf(document.querySelector(`[data-ix-equip="${CSS.escape(itemKey)}"], [data-equip="${CSS.escape(itemKey)}"], [data-ix-cell][data-item="${CSS.escape(itemKey)}"]`)) : null;
     const clickRect = rectOf(lastClick);
-    return {cmd, params: {...params}, prev: state, unitRects, shopRect, itemRect,
-            click: lastClick, clickRect, pending: pendingMark(clickRect)};
+    const token = {cmd, params: {...params}, prev: state, unitRects, shopRect, itemRect,
+                   click: lastClick, clickRect, pending: pendingMark(clickRect), optimistic: false};
+    optimistic(token);
+    return token;
+  }
+
+  /** Start the motion at once (before the server answers) for the two most frequent actions. */
+  function optimistic(token) {
+    if (reduced()) return;
+    if (token.cmd === "buy" && token.shopRect) {
+      const card = document.querySelector(`#shop [data-shop="${CSS.escape(String(token.params.i))}"]`);
+      const sprite = card?.querySelector("img")?.getAttribute("src");
+      const slot = document.querySelector("#bench .bench-slot.empty, #bench .bench-slot:not([data-uid])");
+      if (sprite && slot) {
+        token.optimistic = true;
+        fly(token.shopRect, rectOf(slot), {sprite, kind: "unit"});
+      }
+    } else if (token.cmd === "move" && token.params.from && token.params.to) {
+      const from = document.querySelector(`[data-loc="${CSS.escape(token.params.from)}"]`);
+      const to = document.querySelector(`[data-loc="${CSS.escape(token.params.to)}"]`);
+      const sprite = from?.querySelector("img")?.getAttribute("src");
+      if (sprite && to) {
+        token.optimistic = true;
+        from.classList.add("fb-lifting");
+        fly(rectOf(from), rectOf(to), {sprite, kind: "unit"});
+      }
+    }
+  }
+
+  function shakeLoc(loc) {
+    shake(document.querySelector(`[data-loc="${CSS.escape(loc)}"]`));
+    vibrate([20, 40, 20]);
+    sound("error");
   }
 
   /** Immediate press acknowledgement, independent of re-rendering, until the server answers. */
@@ -239,7 +270,9 @@
       const rect = rectOf(el);
       if (!old) {
         const from = token.cmd === "buy" ? token.shopRect : token.clickRect;
-        fly(from, rect, {sprite: spriteOf(p), kind: "unit"}).then(() => { ring(unitEl(uid), "good"); float(centre(rectOf(unitEl(uid))), `+ ${p.name}`, "good"); });
+        const land = () => { ring(unitEl(uid), "good"); float(centre(rectOf(unitEl(uid))), `+ ${p.name}`, "good"); };
+        if (token.optimistic) land();
+        else fly(from, rect, {sprite: spriteOf(p), kind: "unit"}).then(land);
         mark(token.cmd === "buy" ? "buy" : "good");
         continue;
       }
@@ -307,6 +340,7 @@
     if ((Number(state.you?.level) || 0) > (Number(prev.you?.level) || 0)) {
       bump($("level")?.closest(".hud-stat"));
       banner(`升级！Lv.${state.you.level}`, `上场人口 ${state.you.pop}`);
+      window.PlayMusic?.jingle?.("levelup");
       mark("level");
     } else if (token.cmd === "levelup") {
       const xpEl = $("xp-fill")?.closest(".hud-stat") || $("xp-fill");
@@ -420,5 +454,5 @@
     vibrate(8);
   }
 
-  window.PlayFeedback = {before, after, selection, float, ring, bump, fly, banner};
+  window.PlayFeedback = {before, after, selection, float, ring, bump, fly, banner, shakeLoc};
 })();

@@ -2699,7 +2699,14 @@ def _restore_battle_replay(session):
     session.last_battle = merged
 
 
-def state_json(sess) -> dict:
+# Prep-phase mutations only change the player's own data; the static catalogs
+# (species, bonds, traits) and other trainers' scouting rows are reused by the
+# client. ``lite`` responses carry ``lite: true`` and a pool_remaining map instead.
+LITE_SAFE_PHASES = ('prep',)
+
+
+def state_json(sess, lite=False) -> dict:
+    lite = bool(lite) and sess.is_arena and sess.phase in LITE_SAFE_PHASES
     sess.ensure_unit_ids()
     _restore_battle_replay(sess)
     p = sess.player
@@ -2864,7 +2871,7 @@ def state_json(sess) -> dict:
         st['arena'] = {'version': sess.ruleset, 'shop_slots': sess.shop_slots,
                        'combination_version': 1,
                        'bench_capacity': sess.bench_capacity, 'deployment_rows': sess.grid_rows,
-                       'catalog': [{**_piece_view(piece, ruleset=sess.ruleset),
+                       'catalog': None if lite else [{**_piece_view(piece, ruleset=sess.ruleset),
                                     'cost': piece.tier,
                                     'pool_remaining': sess.pool.remaining[sid],
                                     'pool_total': (families_mod.pool_caps(sess.arena_pool) if sess.is_family else arena_mod.pool_caps())[sid]}
@@ -2878,12 +2885,19 @@ def state_json(sess) -> dict:
         st['combinations'] = preparation(sess)
         import arena_bonds
         st['bonds'] = arena_bonds.preparation([o.piece for o in p.board], sess.templates.values())
-        from bond_view import catalog_for_templates
-        st['arena']['bond_catalog'] = (catalog_for_templates(sess.templates)
-                                      if sess.is_family else arena_bonds.catalog())
-        import arena_traits
-        st['arena']['trait_catalog'] = arena_traits.catalog(
-                        include_families=True, species_ids=sess.templates)
+        if lite:
+            st['lite'] = True
+            del st['arena']['catalog']
+            st['arena']['pool_remaining'] = {str(sid): sess.pool.remaining[sid] for sid in sess.templates
+                                             if not sess.is_family
+                                             or sid in families_mod.families_for(sess.arena_pool)}
+        else:
+            from bond_view import catalog_for_templates
+            st['arena']['bond_catalog'] = (catalog_for_templates(sess.templates)
+                                          if sess.is_family else arena_bonds.catalog())
+            import arena_traits
+            st['arena']['trait_catalog'] = arena_traits.catalog(
+                            include_families=True, species_ids=sess.templates)
         try:
             st['growth'] = _growth_view(sess)
         except Exception as exc:
@@ -2915,7 +2929,7 @@ def state_json(sess) -> dict:
                            'recent_reports': copy.deepcopy(list(reversed(
                                sess.scouting_history['seats'][seat.seat]))) if sess.scouting_history else [],
                            'reports_recorded_from': sess.scouting_history['from_round'] if sess.scouting_history else None}
-                          for seat in sess.seats]
+                          for seat in (sess.seats if not lite else [p])]
         for i, standing in enumerate(st['standings']):
             standing['seat'] = i
         alive_order = sorted((seat for seat in sess.seats if seat.alive),
@@ -3789,7 +3803,7 @@ def _apply_action(params: dict):
                     raise DemoError("种子必须是整数")
                 sess = _new_session(seed, params)
                 return {"ok": True, "sid": sess.sid,
-                        "state": state_json(sess)}
+                        **({} if params.get("__defer_state") else {"state": state_json(sess)})}
             sid = params.get("sid", "")
             sess = SESSIONS.get(sid)
             if sess is None:
@@ -3918,7 +3932,9 @@ def _apply_action(params: dict):
                 invalidated = sess.refresh_tactics()
                 if invalidated:
                     msg = '；'.join(([msg] if msg else []) + invalidated)
-            out = {"ok": True, "state": state_json(sess)}
+            # api_action rebuilds the state after saving (new sequence); skip the duplicate here.
+            out = {"ok": True} if params.get("__defer_state") else \
+                {"ok": True, "state": state_json(sess, lite=params.get("lite") == "1")}
             if msg:
                 out["msg"] = msg
             return out
@@ -3973,7 +3989,7 @@ def api_action(params: dict):
                 checkpoint = {"checkpoint_state": SESSIONS[sid]} if sid in SESSIONS else {}
                 loaded = store.import_backup(raw, **checkpoint)
                 return _publish_loaded(loaded, sid)
-            result = _apply_action(params)
+            result = _apply_action({**params, "__defer_state": cmd != "state"})
             if not result.get("ok"):
                 if before is not None:
                     SESSIONS[sid] = before
@@ -3985,7 +4001,7 @@ def api_action(params: dict):
                 info = _save_store(sid).save(session)
                 session.save_sequence = info.sequence
                 sync_profile(session)
-                result["state"] = state_json(session)
+                result["state"] = state_json(session, lite=params.get("lite") == "1")
             elif sid in SESSIONS and not getattr(SESSIONS[sid], "save_blocked", False):
                 sync_profile(SESSIONS[sid])
                 result["state"] = state_json(SESSIONS[sid])

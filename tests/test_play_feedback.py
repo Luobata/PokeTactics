@@ -1,4 +1,5 @@
 """Action feedback layer: node scenarios + served assets."""
+import json
 import subprocess
 import unittest
 from pathlib import Path
@@ -27,3 +28,51 @@ class PlayFeedbackTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class LiteStateTest(unittest.TestCase):
+    def test_prep_mutations_return_a_slim_state(self):
+        import sys
+        for path in (ROOT / 'sim', ROOT / 'tools' / 'acceptance', ROOT / 'tools' / 'mockups'):
+            if str(path) not in sys.path:
+                sys.path.insert(0, str(path))
+        import json
+        import demo
+        session = demo._new_session(91, {'mode': 'arena'})
+        full = demo.state_json(session)
+        lite = demo.state_json(session, lite=True)
+        self.assertTrue(lite['lite'])
+        self.assertNotIn('catalog', lite['arena'])
+        self.assertNotIn('trait_catalog', lite['arena'])
+        self.assertEqual([row['seat'] for row in lite['scouting']], [0])
+        self.assertEqual(set(lite['arena']['pool_remaining']), {str(row['sid']) for row in full['arena']['catalog']})
+        self.assertLess(len(json.dumps(lite, ensure_ascii=False)), len(json.dumps(full, ensure_ascii=False)) / 4)
+        session.phase = 'battle'
+        self.assertNotIn('lite', demo.state_json(session, lite=True))
+
+
+class MusicTest(unittest.TestCase):
+    def test_tracks_follow_the_phase(self):
+        script = r'''
+const fs = require("fs"), vm = require("vm");
+const dialogs = {"battle-dialog": {open: false}, "result-dialog": {open: false}};
+const document = {readyState: "complete", hidden: false, getElementById: (id) => dialogs[id] || null,
+  addEventListener() {}};
+const window = {};
+vm.createContext(Object.assign(window, {window, document, localStorage: {getItem: () => null, setItem() {}},
+  setTimeout, setInterval, clearInterval, console}));
+vm.runInContext(fs.readFileSync(process.argv[1], "utf8"), window);
+const m = window.PlayMusic, out = [];
+m.update({phase: "prep", round: 3, hp: 100}); out.push(m.desired());
+m.update({round: 12}); out.push(m.desired());
+m.update({round: 22}); out.push(m.desired());
+dialogs["battle-dialog"].open = true; m.update({round: 10, pve: true}); out.push(m.desired());
+m.update({pve: false, round: 21}); out.push(m.desired());
+dialogs["battle-dialog"].open = false; m.update({phase: "over"}); out.push(m.desired());
+console.log(JSON.stringify(out));
+'''
+        result = subprocess.run(['node', '-e', script, str(ROOT / 'tools' / 'acceptance' / 'play_music.js')],
+                                capture_output=True, text=True, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout), ['prep_calm', 'prep_mid', 'prep_tense', 'battle_wild',
+                                                     'battle_final', 'results'])

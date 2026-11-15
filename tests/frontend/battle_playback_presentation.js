@@ -46,6 +46,12 @@ async function loadAllPending(p) {
   }
   assert.fail('Image prefetch did not settle within the bounded fixture');
 }
+// Closing the replay (×) now advances to the next round (docs/63 §6); the mock
+// server answers that one mutation with the same battle-phase state.
+const acceptNext = (state) => ({mutationResponder: (query) => {
+  assert.equal(query.get('cmd'), 'next', 'Closing the replay only issues the next-round request');
+  return {ok: true, sid: state.sid, state};
+}});
 async function openManual(options = {}, pageOptions = {}) {
   const p = await page(fixture(options), {...imageOptions, manualImages: true, ...pageOptions});
   const opening = await p.startClick(p.element('fight-button'));
@@ -175,7 +181,7 @@ const cases = {
     p.unchanged();
   },
   async failure() {
-    const {p, opening} = await openManual();
+    const {p, opening} = await openManual({}, acceptNext(fixture()));
     imagesFor(p, 0)[0].fail(); await p.settle();
     assert.equal(p.element('battle-retry').hidden, true, 'A first failure silently schedules an automatic retry');
     await p.expireTimeouts(1200);
@@ -192,7 +198,8 @@ const cases = {
     await loadAllPending(p); await p.settle(); assert.equal(currentFrame(p), 0); noFinalReport(p);
     await p.tick(2); assert.equal(currentFrame(p), 2);
     await p.click(p.element('battle-close')); assert.equal(p.element('battle-dialog').open, false);
-    assert.equal(intervals(p).length, 0); assert.equal(p.events.fetches.length, 1); p.unchanged();
+    assert.equal(intervals(p).length, 0); assert.equal(p.events.fetches.length, 2);
+    assert.match(p.events.fetches[1], /cmd=next/, 'Closing the replay advances to the next round'); p.unchanged();
   },
   async autoRetryRecovery() {
     const {p, opening} = await openManual();
@@ -244,7 +251,7 @@ const cases = {
     assert.equal(intervals(p).length, 0); assert.equal(p.events.fetches.length, 1); p.unchanged();
   },
   async staleLoads() {
-    const {p, opening} = await openManual();
+    const {p, opening} = await openManual({}, acceptNext(fixture()));
     const old = [...liveImages(p)];
     const callbacks = old.map(record => ({record, onload: record.image.onload, onerror: record.image.onerror}));
     const oldTimeouts = [...p.timers.values()].filter(timer => timer.kind === 'timeout' && timer.delay >= 10000);

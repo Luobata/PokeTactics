@@ -20,6 +20,7 @@ function element(tag = "div", id = null) {
     setAttribute(k, v) { this.attrs[k] = v; }, getAttribute(k) { return this.attrs[k] ?? null; },
     getBoundingClientRect() { return {left: 100, top: 100, width: 40, height: 40}; },
     closest() { return this; }, get offsetWidth() { return 40; },
+    querySelector() { return null; },
     animate() { return {finished: Promise.resolve()}; },
   };
   return el;
