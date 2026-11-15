@@ -48,6 +48,7 @@
     }
   }
   const trainerName = (value) => String(value ?? "").replace(/L[123]\b/g, "");
+  window.PlaySound = {enabled: () => sound};
   const SLOT_KEY = "poketactics.play.arena.slot";
   let state = null,
     sid = "",
@@ -224,6 +225,8 @@
   }
   async function api(cmd, params = {}, quiet = false) {
     if (busy) return null;
+    const feedback = window.PlayFeedback?.before(cmd, params, state) || null;
+    let outcome = null;
     const before = ownedSnapshot(state);
     let upgrades = [];
     busy = true;
@@ -236,6 +239,7 @@
       query.set("expected_sequence", String(state.save.sequence));
     try {
       const result = await fetchJson(`/api/demo/action?${query}`);
+      outcome = result;
       if (!result.ok) {
         if (result.recovery_sid) {
           sid = result.recovery_sid;
@@ -247,7 +251,7 @@
         )
           needsResume = true;
         toast(result.error || "操作未完成，请重试", true);
-        tone(false);
+        if (!window.PlayFeedback) tone(false);
         if (needsResume)
           $("save-status").textContent = "请点击「继续存档」重新核对进度。";
         return result;
@@ -267,7 +271,7 @@
           toast("浏览器无法记住进度，请下载存档保留这场冒险。", true);
       }
       if (result.msg && !quiet) toast(result.msg);
-      if (!quiet && !["state", "resume", "new"].includes(cmd)) tone();
+      if (!quiet && !["state", "resume", "new"].includes(cmd) && !window.PlayFeedback) tone();
       return result;
     } catch (error) {
       // A lost mutation response is uncertain: reload disk before another purchase.
@@ -282,6 +286,7 @@
       busy = false;
       render();
       for (const piece of upgrades) animateUpgrade(piece, before);
+      if (feedback) window.PlayFeedback.after(feedback, outcome || {ok: false}, state);
     }
   }
 
@@ -511,6 +516,7 @@
     window.PlayDepth?.render(layoutContext);
     window.PlayLayout?.render(layoutContext);
     window.PlayInteractions?.render(layoutContext);
+    window.PlayFeedback?.selection({selected, shopSelected, equipItem});
   }
   // Reveal a preparation panel: the drawer/sheet when the layout is loaded, else scroll.
   function revealPanel(panel, fallback) {

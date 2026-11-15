@@ -5,6 +5,7 @@ team-wide synergy table. Tactical hooks consume settled facts and never launch
 another attack, heal or cast. All counters belong to this battle's units.
 """
 import copy
+import functools
 
 import arena
 import arena_families as families
@@ -132,10 +133,14 @@ def _tactic_members(spec):
 
 
 def memberships(species_id):
-    """Stable bond identifiers for one legal arena species."""
-    sid = _species_id(species_id)
+    """Stable bond identifiers for one legal arena species (memoized, static data)."""
+    return list(_memberships(_species_id(species_id)))
+
+
+@functools.lru_cache(maxsize=None)
+def _memberships(sid):
     if sid not in arena.ROSTER and sid not in families.SPECIES_FAMILY:
-        return []
+        return ()
     from data import pokedex
     origin = sid if sid in arena.ROSTER else families.mentor(sid)
     extra = ()
@@ -143,9 +148,9 @@ def memberships(species_id):
         from arena_gen3 import BONDS
         extra = BONDS.get(sid, ())
     types = set(pokedex().species_record(sid)['types'])
-    return ([key for key in ELEMENT_TIERS if key in types]
-            + [key for key, spec in TACTICS.items()
-               if origin in spec['members'] or key in extra or set(spec.get('types', ())) & types])
+    return tuple([key for key in ELEMENT_TIERS if key in types]
+                 + [key for key, spec in TACTICS.items()
+                    if origin in spec['members'] or key in extra or set(spec.get('types', ())) & types])
 
 
 def count(comp):
