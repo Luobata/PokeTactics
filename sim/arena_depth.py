@@ -147,6 +147,117 @@ def mentor_piece(piece):
     return clone
 
 
+STREAK_PVE_THRESHOLD = 4
+
+
+def streak_wave(wave, streak):
+    """Win streak >= 4: every wild unit gains one star (max 3)."""
+    if streak < STREAK_PVE_THRESHOLD:
+        return wave
+    import copy
+    stronger = []
+    for piece in wave:
+        clone = copy.copy(piece)
+        clone.star = min(3, getattr(piece, 'star', 1) + 1)
+        clone.shiny = clone.star == 3
+        stronger.append(clone)
+    return stronger
+
+
+# --------------------------------------------------------------- tactical orders
+# One per team per battle, chosen in prep. Each has an upside and a cost.
+ORDERS = {
+    'none': {'name': '自由作战', 'brief': '不下达指令', 'description': '按默认索敌与站位作战。'},
+    'protect_core': {'name': '护驾', 'brief': '核心开场获得 20% 护盾，相邻防守型嘲讽 2 格内敌人 2 秒',
+                     'description': '需要指定核心。开战时核心获得 20% 最大生命护盾；与核心相邻的防守型宝可梦嘲讽 2 格内的敌人 2 秒。代价：核心之外的单位开场能量 -10。'},
+    'focus_fire': {'name': '集火', 'brief': '全队开场锁定敌方核心（无核心则最低生命者）',
+                   'description': '开战时全队把目标锁定为敌方核心；敌方没有核心时锁定最大生命最低的敌人。射程内已有敌人时近战仍会先打眼前的目标。代价：远程不再自动挑残血。'},
+    'cut_supply': {'name': '断补给', 'brief': '全队开场锁定敌方辅助型，对辅助伤害 +15%',
+                   'description': '开战时全队锁定最近的敌方辅助型，并对辅助型造成的伤害提高 15%。敌方没有辅助时无效果。'},
+    'hold': {'name': '稳守', 'brief': '前排开场 5 秒减伤 25%，后排首次行动延后 0.6 秒',
+             'description': '开战后 5 秒内己方前排受到伤害降低 25%；后排单位的首次行动延后 0.6 秒。'},
+    'blitz': {'name': '突袭', 'brief': '全队开场 +25 能量，但前 5 秒受到伤害 +12%',
+              'description': '开战时全队获得 25 能量，更早释放本命；代价是前 5 秒受到的伤害提高 12%。'},
+}
+ORDER_WINDOW = 5.
+
+
+def order_view(key):
+    return {'id': key, **ORDERS[key]}
+
+
+def bot_order(board):
+    """Deterministic bot order from its board composition."""
+    roles = [getattr(o.piece, 'role_key', 'attack') for o in board]
+    if not roles:
+        return 'none'
+    if any(getattr(o, 'is_core', False) for o in board) and roles.count('defense') >= 2:
+        return 'protect_core'
+    if roles.count('attack') >= max(3, len(roles) // 2 + 1):
+        return 'blitz'
+    if roles.count('defense') >= 3:
+        return 'hold'
+    return 'focus_fire'
+
+
+def _apply_orders(battle, t, **_):
+    from arena_combinations import grant_shield
+    for team in (0, 1):
+        order = battle.arena_orders[team]
+        mates = [u for u in battle.units if u.team == team and u.alive]
+        enemies = [u for u in battle.units if u.team != team and u.alive]
+        if order == 'none' or not mates:
+            continue
+        if order == 'protect_core':
+            core = next((u for u in mates if u.depth_core), None)
+            if core is None:
+                continue
+            amount = int(core.max_hp * .20)
+            grant_shield(battle, core, core, amount, t, None, source_kind='combo',
+                         source_key='protect_core', reason='order_protect_core')
+            taunted = 0
+            for guard in mates:
+                if guard is core or guard.arena_role != 'defense' or _dist(guard, core) != 1:
+                    continue
+                for enemy in enemies:
+                    if _dist(enemy, guard) <= 2:
+                        enemy.taunt_source_idx, enemy.taunt_until = guard.idx, t + 2.
+                        enemy.target_idx = guard.idx
+                        taunted += 1
+            for unit in mates:
+                if unit is not core:
+                    unit.energy = max(0, unit.energy - 10)
+            _event(battle, core, core, 'protect_core', t, 'order', '护驾', 'shield', amount, team=team,
+                   taunted=taunted)
+        elif order in ('focus_fire', 'cut_supply'):
+            if order == 'focus_fire':
+                target = next((e for e in enemies if e.depth_core), None) or min(
+                    enemies, key=lambda e: (e.max_hp, e.local_idx), default=None)
+            else:
+                supports = [e for e in enemies if e.arena_role == 'support']
+                target = min(supports, key=lambda e: (min(_dist(e, m) for m in mates), e.local_idx),
+                             default=None)
+            if target is None:
+                continue
+            for unit in mates:
+                unit.target_idx = target.idx
+                unit.order_locked = True
+            _event(battle, mates[0], target, order, t, 'order', ORDERS[order]['name'], 'debuff', 0,
+                   team=team, camera='focus')
+        elif order == 'hold':
+            for unit in mates:
+                if _local_row(battle, unit) == 2:
+                    unit.next_act += .6
+            _event(battle, mates[0], mates[0], 'hold', t, 'order', '稳守', 'buff', 0, team=team)
+        elif order == 'blitz':
+            for unit in mates:
+                unit.energy = min(ENERGY_MAX, unit.energy + 25)
+            _event(battle, mates[0], mates[0], 'blitz', t, 'order', '突袭', 'energy', 25 * len(mates),
+                   team=team)
+        for unit in mates:
+            battle._emit_state(unit, t)
+
+
 # --------------------------------------------------------------- skill mods
 MODS = {
     'amplify': {'name': '强化', 'description': '本命与技能机伤害、治疗 +30%。'},
@@ -179,8 +290,8 @@ def mod_view(key):
 # 'battle' rows are resolved by handlers below; 'session' rows by demo/session code.
 AUGMENTS = {
     'dual_wield': {'name': '双持专精', 'scope': 'session', 'tags': ('items',),
-                   'brief': '每只宝可梦有 2 个装备位，但战斗中技能机失效',
-                   'description': '所有棋子获得第二个装备位；作为代价，已学习的技能机在战斗中不会触发。适合装备充足、以本命技能为核心的阵容。'},
+                   'brief': '每只宝可梦有 2 个装备位并立即获得 2 个组件，但战斗中技能机失效',
+                   'description': '所有棋子获得第二个装备位，选取时立即获得 2 个组件；作为代价，已学习的技能机在战斗中不会触发。适合以本命技能为核心的阵容。'},
     'elite_squad': {'name': '精兵简政', 'scope': 'session', 'tags': ('stats', 'small_team'),
                     'brief': '人口上限 -1，全队生命与攻击 +22%',
                     'description': '人口上限永久 -1；作为补偿，全队最大生命与攻击、特攻提高 22%。'},
@@ -203,8 +314,8 @@ AUGMENTS = {
                         'brief': '利息上限 5 → 8',
                         'description': '每 10 金 1 利息的上限从 5 提高到 8（80 金吃满）。'},
     'charge_horn': {'name': '冲锋号', 'scope': 'battle', 'tags': ('melee', 'opening'),
-                    'brief': '开战时近战单位冲到最近敌人身边并获得 12% 护盾',
-                    'description': '开战瞬间，所有近战单位跃到最近敌人旁边的空格，并获得 12% 最大生命护盾（3 秒）。'},
+                    'brief': '开战时近战单位冲到最近敌人身边，获得 20% 护盾与 15 能量',
+                    'description': '开战瞬间，所有近战单位跃到最近敌人旁边的空格，获得 20% 最大生命护盾（3 秒）与 15 能量。'},
     'vanguard': {'name': '先锋壁垒', 'scope': 'battle', 'tags': ('frontline',),
                  'brief': '开战时前排单位获得 20% 最大生命护盾',
                  'description': '开战时站在己方前排的单位获得 20% 最大生命护盾（3 秒）。'},
@@ -265,7 +376,7 @@ BOND_RULES = {
     'PSYCHIC': (4, 'telekinesis', '念动', '成员本命主命中后将目标推开 1 格。'),
     'BUG': (4, 'molt', '蜕壳', '成员首次降到 35% 生命以下时净化异常并获得 20% 护盾。'),
     'ICE': (3, 'deep_freeze', '冰封', '成员对同一目标每第 5 次直接命中使其冰冻 1 秒。'),
-    'STEEL': (2, 'iron_reflect', '反甲', '成员把受到的直接伤害的 12% 反弹给攻击者。'),
+    'STEEL': (2, 'iron_reflect', '反甲', '成员把受到的直接伤害的 10% 反弹给攻击者。'),
     'DARK': (2, 'ambush', '伏击', '成员对每个目标的第一次直接命中伤害 +40%。'),
     'DRAGON': (2, 'dragon_scale', '龙鳞', '成员受到技能伤害 -15%。'),
 }
@@ -413,6 +524,7 @@ def unit_init(unit):
     unit.depth_dr = 0.
     unit.depth_rules = set()
     unit.depth_mods = ()
+    unit.order_locked = False
     unit.depth_core = False
     unit.extra_item_key = getattr(unit, 'extra_item_key', None)
     unit.untargetable_until = 0.
@@ -498,6 +610,7 @@ def setup(battle):
         if 'elite_squad' in augments:
             battle.fx.ledger.add(team, 'augment', 'elite_squad', passive=1)
     install(battle, instances)
+    battle.fx.subscribe('battle_start', _apply_orders)
 
 
 PASSIVE_AUGMENTS = frozenset({'growth_mark', 'growth_bulwark', 'war_drum', 'sharp_focus', 'vitality',
@@ -507,6 +620,17 @@ PASSIVE_AUGMENTS = frozenset({'growth_mark', 'growth_bulwark', 'war_drum', 'shar
 
 def ledger_key(spec):
     return spec.id[len('terrain_'):] if spec.id.startswith('terrain_') else spec.id
+
+
+def contributed_rules(battle, team):
+    """Bond breakpoints that actually produced value for ``team`` in this battle."""
+    if not getattr(battle, 'depth', False):
+        return []
+    rules = {rule[1] for rule in BOND_RULES.values()}
+    return sorted(row['id'] for row in battle.fx.ledger.view(team)
+                  if row['source'] == 'bond' and row['id'] in rules
+                  and any(row[k] for k in ('triggers', 'damage', 'heal', 'shield', 'energy',
+                                            'prevented', 'estimated')))
 
 
 def mark_idle(battle):
@@ -573,6 +697,15 @@ def damage_multiplier(battle, attacker, target, move, t, base=0):
             factors.append((attacker.team, 'terrain', 'embers', 1.08))
     if terrain == 'brambles' and move is None and attacker.pos in battle.terrain_cells[attacker.team]:
         factors.append((attacker.team, 'terrain', 'brambles', 1.15))
+    order = battle.arena_orders[attacker.team]
+    if order == 'cut_supply' and getattr(target, 'arena_role', None) == 'support':
+        factors.append((attacker.team, 'order', 'cut_supply', 1.15))
+    their_order = battle.arena_orders[target.team]
+    if t < ORDER_WINDOW:
+        if their_order == 'blitz':
+            factors.append((attacker.team, 'order', 'blitz_exposed', 1.12))
+        if their_order == 'hold' and _local_row(battle, target) == 0:
+            factors.append((target.team, 'order', 'hold', .75))
     # ---- target-side reductions
     if terrain == 'swamp' and target.pos in battle.terrain_cells[target.team]:
         factors.append((target.team, 'terrain', 'swamp', .90))
@@ -607,7 +740,7 @@ def damage_multiplier(battle, attacker, target, move, t, base=0):
 
 def prefer_target(battle, unit, enemies, t):
     """Ranged units pick the weakest enemy already in range; assassins hunt cores."""
-    if unit.range > 1:
+    if unit.range > 1 and not getattr(unit, 'order_locked', False):
         in_range = [e for e in enemies if _dist(unit, e) <= unit.range]
         if in_range:
             return min(in_range, key=lambda e: (e.hp / e.max_hp, battle._target_key(unit, e)))
@@ -727,9 +860,10 @@ def _h_charge_horn(battle, inst, t, **_):
         if _dist(unit, nearest) > 1:
             _leap(battle, unit, _free_cell_adjacent(battle, nearest.pos, unit.team), t, 'charge_horn')
         unit.target_idx = nearest.idx
-        shield = int(unit.max_hp * .12)
+        shield = int(unit.max_hp * .20)
         if _shield(battle, unit, unit, shield, t, 'charge_horn'):
             total += shield
+        unit.energy = min(ENERGY_MAX, unit.energy + 15)
     fire(battle, inst, None, t, label='冲锋号', kind='shield', value=total, camera='focus')
 
 
@@ -856,7 +990,7 @@ def _h_deep_freeze(battle, inst, source, target, actual_hp, t, **_):
 def _h_iron_reflect(battle, inst, source, target, actual_hp, t, **_):
     if target is not inst.unit or source is None or source.team == target.team or actual_hp <= 0:
         return
-    dealt = _indirect_damage(battle, target, source, actual_hp * .12, t)
+    dealt = _indirect_damage(battle, target, source, actual_hp * .10, t)
     if dealt:
         fire(battle, inst, source, t, label='反甲', kind='damage', value=dealt, spend=False)
 

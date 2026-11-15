@@ -39,11 +39,34 @@
     const simCard = sim
       ? `<div class="depth-sim-result"><b>模拟 ${Number(sim.battles)} 场：胜 ${Number(sim.wins)} · 负 ${Number(sim.losses)}${sim.draws ? ` · 平 ${Number(sim.draws)}` : ""}</b>${sim.carry ? `<span>主要输出 ${esc(sim.carry.name)} · 场均 ${Number(sim.carry.damage)}</span>` : ""}${(sim.ledger || []).map((row) => `<span>${esc(row.name)} · 场均触发 ${row.triggers} · 收益 ${Number(row.value)}</span>`).join("")}</div>`
       : "";
-    strip.innerHTML = `<div class="depth-terrain terrain-${esc(terrain.id)}" title="${esc(terrain.description)}"><b>地形 · ${esc(terrain.name)}</b><span>${esc(terrain.description)}</span>${next}</div><div class="depth-rules-hint"><span>选秀轮：${esc(draftRounds)}</span><span>升 2★/3★ 选择技能强化</span><span>可指定 1 名核心</span><button type="button" class="depth-sim-button" data-depth-simulate ${!ctx.canPrep() || depth.simulations_left <= 0 ? "disabled" : ""} title="对本轮对手模拟 6 场（固定的独立种子，调整阵容前后可直接对比），不影响正式结果">模拟对战 · 剩 ${Number(depth.simulations_left)} 次</button></div>${simCard}`;
+    strip.innerHTML = `<div class="depth-terrain terrain-${esc(terrain.id)}" title="${esc(terrain.description)}"><b>地形 · ${esc(terrain.name)}</b><span>${esc(terrain.description)}</span>${next}</div><div class="depth-rules-hint"><span>选秀轮：${esc(draftRounds)}</span><span>升 2★/3★ 选择技能强化</span><span>可指定 1 名核心</span><button type="button" class="depth-sim-button" data-depth-simulate ${!ctx.canPrep() || depth.simulations_left <= 0 ? "disabled" : ""} title="对本轮对手模拟 6 场（固定的独立种子，调整阵容前后可直接对比），不影响正式结果">模拟对战 · 剩 ${Number(depth.simulations_left)} 次</button></div>${orderBar(depth)}${simCard}${depth.streak_pve ? '<p class="depth-note depth-warn">你正在连胜：野怪轮的每只野怪都会 +1 星。</p>' : ""}`;
     const cells = new Set((terrain.cells || []).map(([r, c]) => `g${r},${c}`));
     document.querySelectorAll("#ally-board [data-loc]").forEach((tile) => {
       tile.classList.toggle("terrain-cell", cells.has(tile.dataset.loc));
       tile.classList.toggle(`terrain-${terrain.id}`, cells.has(tile.dataset.loc));
+    });
+  }
+
+  function orderBar(depth) {
+    const current = depth.order || "none";
+    const options = depth.orders || [];
+    const chosen = options.find((o) => o.id === current);
+    return `<div class="depth-orders" role="group" aria-label="战术指令"><b>战术指令</b>${options.map((o) => `<button type="button" class="depth-order${o.id === current ? " on" : ""}" data-depth-order="${esc(o.id)}" title="${esc(o.description)}" ${!ctx.canPrep() ? "disabled" : ""}>${esc(o.name)}</button>`).join("")}<span class="depth-order-brief">${esc(chosen?.brief || "")}</span></div>`;
+  }
+
+  function renderThreat(depth) {
+    const threat = depth.threat;
+    document.querySelectorAll("#ally-board [data-loc]").forEach((tile) => {
+      tile.querySelector(".depth-threat")?.remove();
+      const p = ctx.pieceAt(tile.dataset.loc);
+      const n = p && threat?.counts?.[p.uid];
+      if (n) tile.insertAdjacentHTML("beforeend", `<span class="depth-threat" title="开战时有 ${n} 名敌人首先攻击它">⚔${n}</span>`);
+    });
+    const byLoc = new Map((threat?.enemies || []).map((e) => [e.loc, e]));
+    document.querySelectorAll("#enemy-board [data-enemy-loc]").forEach((tile) => {
+      const row = byLoc.get(tile.dataset.enemyLoc);
+      tile.classList.toggle("depth-threat-source", Boolean(row));
+      if (row) tile.title = `${row.name} 开战首先攻击：${row.target}`;
     });
   }
 
@@ -81,6 +104,8 @@
         card.classList.add("blocked");
         card.title = p.blocked;
       }
+      card.querySelector(".depth-merge")?.remove();
+      if (p.merge_note) card.querySelector(".shop-info")?.insertAdjacentHTML("beforeend", `<div class="depth-merge">${esc(p.merge_note)}</div>`);
     });
     const refresh = $("refresh-button");
     if (refresh && depth.refresh.free > 0)
@@ -147,10 +172,13 @@
     const list = $("synergy-list");
     const box = ensure("depth-bond-rules", "div", list, "afterend", "depth-bond-rules");
     if (!box) return;
+    const quests = (depth.quests || []).map((q) => `<span class="depth-quest${q.done ? " done" : ""}">${esc(q.name)} ${q.done ? "✓ 已完成" : `${Number(q.progress)}/${Number(q.goal)}`}</span>`).join("");
+    const questBox = `<p class="depth-note">羁绊任务：断点在本场产生收益并获胜计 1 次，满 ${Number(depth.quest_goal || 3)} 次奖励 2 金 + 1 组件（每个断点一次）。</p>${quests ? `<div class="depth-quests">${quests}</div>` : ""}`;
     const relevant = depth.bond_rules.filter((r) => r.current > 0);
     box.innerHTML = relevant.length
       ? `<p class="bond-group-title">深度断点 · 改变打法</p>${relevant.map((r) => `<div class="depth-bond${r.active ? " on" : ""}"><strong>${esc(r.type_name)} ${Number(r.current)}/${Number(r.count)} · ${esc(r.name)}</strong><span>${esc(r.effect)}</span></div>`).join("")}`
       : '<p class="depth-note">上场同属性伙伴达到门槛后，会解锁改变战斗行为的深度断点（如飞行 4 俯冲后排、岩石 4 掩护邻格）。</p>';
+    box.insertAdjacentHTML("beforeend", questBox);
   }
 
   // ------------------------------------------------------------ battle ledger
@@ -176,11 +204,12 @@
 
   // ------------------------------------------------------------ events
   document.addEventListener("click", async (event) => {
-    const target = event.target.closest("[data-depth-simulate],[data-depth-draft],[data-depth-refresh-type],[data-depth-dismantle],[data-depth-sell-item],[data-depth-mod],[data-depth-core],[data-depth-unequip-extra]");
+    const target = event.target.closest("[data-depth-order],[data-depth-simulate],[data-depth-draft],[data-depth-refresh-type],[data-depth-dismantle],[data-depth-sell-item],[data-depth-mod],[data-depth-core],[data-depth-unequip-extra]");
     if (!target || !ctx || !ctx.canPrep()) return;
     event.preventDefault();
     event.stopPropagation();
-    if (target.hasAttribute("data-depth-simulate")) await ctx.api("simulate");
+    if (target.dataset.depthOrder) await ctx.api("order", {key: target.dataset.depthOrder});
+    else if (target.hasAttribute("data-depth-simulate")) await ctx.api("simulate");
     else if (target.dataset.depthDraft != null) await ctx.api("draft", {index: target.dataset.depthDraft});
     else if (target.hasAttribute("data-depth-refresh-type")) await ctx.api("refresh_type", {type: target.previousElementSibling.value});
     else if (target.dataset.depthDismantle) await ctx.api("dismantle", {item: target.dataset.depthDismantle});
@@ -206,6 +235,11 @@
     decorateCells(state);
     renderDetail(state, depth);
     renderBondRules(depth);
+    renderThreat(depth);
+    const level = $("levelup-button");
+    if (level && depth.xp_gold != null) level.title = `升到下一级还需约 ${depth.xp_gold} 金币的经验`;
+    const xp = $("xp-text");
+    if (xp && depth.xp_gold != null && !xp.textContent.includes("金")) xp.textContent += ` · 约 ${depth.xp_gold} 金升级`;
   }
 
   window.PlayDepth = {render, renderLedger};

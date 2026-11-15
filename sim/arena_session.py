@@ -43,9 +43,68 @@ def seat_state(seat):
         state = {}
         seat.depth = state
     for key, value in (('free_refreshes', 0), ('relief', 0), ('sims', 0), ('targeted', 0),
-                       ('fast_track', 0), ('draft_uid', None)):
+                       ('fast_track', 0), ('draft_uid', None), ('order', 'none'),
+                       ('quests', {}), ('quests_done', [])):
         state.setdefault(key, value)
     return state
+
+
+# ------------------------------------------------------------------ orders
+def order_of(session, seat):
+    if seat is None:
+        return 'none'
+    if seat is not session.player:
+        return arena_depth.bot_order(seat.board)
+    return seat_state(seat)['order']
+
+
+def set_order(seat, key):
+    if key not in arena_depth.ORDERS:
+        raise ValueError('未知战术指令')
+    if key == 'protect_core' and not any(getattr(o, 'is_core', False) for o in seat.board):
+        raise ValueError('「护驾」需要先在场上指定核心')
+    seat_state(seat)['order'] = key
+    return f'战术指令：{arena_depth.ORDERS[key]["name"]}'
+
+
+# ------------------------------------------------------------------ bond quests
+QUEST_WINS = 3
+QUEST_GOLD = 2
+
+
+def rule_name(rule):
+    return next((r[2] for r in arena_depth.BOND_RULES.values() if r[1] == rule), rule)
+
+
+def update_quests(session, seat, result, rules):
+    """Win QUEST_WINS battles in which a depth breakpoint contributed -> one-time reward."""
+    if result != 'win' or not rules:
+        return []
+    state = seat_state(seat)
+    messages = []
+    for rule in sorted(rules):
+        if rule in state['quests_done']:
+            continue
+        state['quests'][rule] = state['quests'].get(rule, 0) + 1
+        if state['quests'][rule] >= QUEST_WINS:
+            state['quests_done'].append(rule)
+            order = items.COMPONENT_ORDER
+            component = order[(session.seed + session.round_no + seat.seat + len(rule)) % len(order)]
+            seat.inventory.add_component(component)
+            seat.gold += QUEST_GOLD
+            messages.append(f'羁绊任务完成「{rule_name(rule)}」：+{QUEST_GOLD} 金、{items.COMPONENT_NAMES[component]}')
+    return messages
+
+
+def quest_view(seat):
+    state = seat_state(seat)
+    rows = []
+    for element, rule in arena_depth.BOND_RULES.items():
+        key = rule[1]
+        if key in state['quests'] or key in state['quests_done']:
+            rows.append({'id': key, 'name': rule[2], 'progress': min(QUEST_WINS, state['quests'].get(key, 0)),
+                         'goal': QUEST_WINS, 'done': key in state['quests_done']})
+    return rows
 
 
 # ------------------------------------------------------------------ economy
@@ -435,7 +494,7 @@ def player_draft_pending(session):
 
 # ------------------------------------------------------------------ round hooks
 def on_augment_claimed(session, seat, key):
-    if key == 'treasure_hunter':
+    if key in ('treasure_hunter', 'dual_wield'):
         order = items.COMPONENT_ORDER
         base = (session.seed + seat.seat * 7 + session.round_no) % len(order)
         for offset in (0, 3):

@@ -674,16 +674,7 @@ class SessionCodec:
             seat.inventory.techniques = {k: integer(v, 0, 1000, 'techniques') for k, v in machines.items()}
             if is_depth:
                 counters = record.get('depth')
-                if not isinstance(counters, dict) or set(counters) != {
-                        'free_refreshes', 'relief', 'sims', 'targeted', 'fast_track', 'draft_uid'}:
-                    raise ValueError('深度竞技席位计数无效')
-                draft_uid = counters['draft_uid']
-                if draft_uid is not None and (not isinstance(draft_uid, str)
-                                              or not re.fullmatch(r'u[0-9]{8}', draft_uid)):
-                    raise ValueError('选秀棋子编号无效')
-                seat.depth = {key: integer(counters[key], 0, 100, key)
-                              for key in counters if key != 'draft_uid'}
-                seat.depth['draft_uid'] = draft_uid
+                seat.depth = self._decode_depth_seat(counters)
             elif 'depth' in record:
                 raise ValueError('旧规则不能包含深度竞技席位记录')
         if is_depth:
@@ -1583,6 +1574,36 @@ class SessionCodec:
             state.arena_component_choice_start = state.round_no + (state.phase != 'prep')
         else:
             self._decode_arena_component_choices(state, raw)
+
+    @staticmethod
+    def _decode_depth_seat(counters):
+        """Per-seat arena_v2 state. Keys added later default when absent."""
+        import arena_depth
+        numeric = ('free_refreshes', 'relief', 'sims', 'targeted', 'fast_track')
+        known = set(numeric) | {'draft_uid', 'order', 'quests', 'quests_done'}
+        if not isinstance(counters, dict) or not {'free_refreshes', 'relief', 'sims'} <= set(counters) \
+                or set(counters) - known:
+            raise ValueError('深度竞技席位计数无效')
+        state = {key: integer(counters.get(key, 0), 0, 100, key) for key in numeric}
+        draft_uid = counters.get('draft_uid')
+        if draft_uid is not None and (not isinstance(draft_uid, str)
+                                      or not re.fullmatch(r'u[0-9]{8}', draft_uid)):
+            raise ValueError('选秀棋子编号无效')
+        state['draft_uid'] = draft_uid
+        order = counters.get('order', 'none')
+        if order not in arena_depth.ORDERS:
+            raise ValueError('战术指令无效')
+        state['order'] = order
+        rules = {rule[1] for rule in arena_depth.BOND_RULES.values()}
+        quests = counters.get('quests', {})
+        done = counters.get('quests_done', [])
+        if (not isinstance(quests, dict) or any(k not in rules for k in quests)
+                or not isinstance(done, list) or any(k not in rules for k in done)
+                or len(set(done)) != len(done)):
+            raise ValueError('羁绊任务记录无效')
+        state['quests'] = {k: integer(v, 0, 100, 'quest') for k, v in quests.items()}
+        state['quests_done'] = list(done)
+        return state
 
     @staticmethod
     def _decode_draft(state, raw):

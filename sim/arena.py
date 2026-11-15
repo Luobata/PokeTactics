@@ -463,6 +463,8 @@ def battle_options(session, a, b):
                                 for seat in (a, b)]}
     if ruleset == DEPTH_RULESET:
         options['arena_terrain'] = _depth.terrain_for_round(session.seed, session.round_no)
+        import arena_session
+        options['arena_orders'] = [arena_session.order_of(session, seat) for seat in (a, b)]
     if session.ruleset in RULESETS:
         from arena_research import stacks_for
         research = getattr(session, 'arena_research', None)

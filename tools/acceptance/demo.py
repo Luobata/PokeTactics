@@ -354,6 +354,8 @@ def _prepare_battle_frames(comp_a, comp_b, rng, weather_name, out_dir: Path,
                                   for team in (0, 1)]
         meta['loadout_highlights'] = _loadout_highlights(anim, teams)
         if getattr(anim.research_battle, 'depth', False):
+            meta['_depth_bonds'] = [arena_depth.contributed_rules(anim.research_battle, team)
+                                    for team in (0, 1)]
             meta['ledger'] = _ledger_view(anim.research_battle)
             meta['terrain'] = arena_depth.terrain_view(anim.research_battle.arena_terrain)
         _write_battle_script(anim, out_dir, meta)
@@ -1494,7 +1496,7 @@ class Session:
         pieces = [make_piece(sid, arena_mod.build_templates() if self.is_arena else self.templates)
                   for sid in wave_ids]
         if self.is_depth:
-            pieces = arena_depth.scale_pve(pieces, r)
+            pieces = arena_depth.streak_wave(arena_depth.scale_pve(pieces, r), self.player.streak)
         row = [_piece_view(piece, ruleset=self.ruleset) for piece in pieces]
         rows = self._enemy_rows(row)
         return {"name": f"野怪轮 · {label}", "hp": None, "level": None,
@@ -1636,9 +1638,12 @@ class Session:
             result['statistics'] = battle.statistics()
             result.update(_battle_effects(battle.events, {u.idx: u.team for u in battle.units}))
             result['_research_by_seat'] = self._battle_research(battle, (a.seat, b.seat))
+            if self.is_depth:
+                result['_bonds_by_seat'] = {a.seat: arena_depth.contributed_rules(battle, 0),
+                                            b.seat: arena_depth.contributed_rules(battle, 1)}
         return result
 
-    def _grant_arena_loot(self, seat, result, research=None):
+    def _grant_arena_loot(self, seat, result, research=None, bonds=None):
         """Settle each real seat once; loading and playback never issue resources."""
         if not self.is_arena:
             return
@@ -1652,6 +1657,10 @@ class Session:
         grants = (arena_session.roll_rewards(loot_rng, result, seat) if self.is_depth
                   else roll_rewards(loot_rng, result))
         grant_rewards(seat, grants)
+        if self.is_depth:
+            for line in arena_session.update_quests(self, seat, result, bonds or []):
+                if seat is self.player:
+                    self._say(line)
         self.arena_loot.append({'id': reward_id, 'round': self.round_no,
                                'seat': seat.seat, 'result': result, 'grants': grants})
         self._grant_arena_component_choice(seat)
@@ -1715,6 +1724,10 @@ class Session:
                         dmg[id(me)] = self._loss_damage(r, surv[1])
                         dmg[id(opp)] = self._loss_damage(r, surv[0])
                         note = "平局双伤"
+                    if w == 0:
+                        self._streak_bounty(me, opp)
+                    elif w == 1:
+                        self._streak_bounty(opp, me)
                     self._streak(me, w == 0)
                     self._streak(opp, w == 1)
                     my = dmg[id(p)]
@@ -1734,6 +1747,10 @@ class Session:
                         dmg[id(a)] = self._loss_damage(r, res["survivors"][1])
                         dmg[id(b)] = self._loss_damage(r, res["survivors"][0])
                         note = "平局双伤"
+                    if res["winner"] == 0:
+                        self._streak_bounty(a, b)
+                    elif res["winner"] == 1:
+                        self._streak_bounty(b, a)
                     self._streak(a, res["winner"] == 0)
                     self._streak(b, res["winner"] == 1)
                     if note:
@@ -1773,10 +1790,11 @@ class Session:
                 scout_a, scout_b = ((p, b if a is p else a) if p in (a, b) else (a, b))
                 self._record_scouting_battle(r, scout_a, scout_b, scout_result, source=scout_source)
             research = (scout_result or {}).get('_research_by_seat', {}) if scout_result is not None else {}
+            bonds = (scout_result or {}).get('_bonds_by_seat', {}) if scout_result is not None else {}
             self._grant_arena_loot(a, 'draw' if winner is None else 'win' if winner == 0 else 'loss',
-                                   research.get(a.seat))
+                                   research.get(a.seat), bonds.get(a.seat))
             self._grant_arena_loot(b, 'draw' if winner is None else 'win' if winner == 1 else 'loss',
-                                   research.get(b.seat))
+                                   research.get(b.seat), bonds.get(b.seat))
             for loser, opponent in ((a, b), (b, a)):
                 self._record_defeat_damage(loser, opponent.seat, opponent.name,
                                            dmg[id(loser)], r,
@@ -1809,6 +1827,8 @@ class Session:
                     res['statistics'] = battle.statistics()
                     res.update(_battle_effects(battle.events, {u.idx: u.team for u in battle.units}))
                     res['_research_by_seat'] = self._battle_research(battle, (odd.seat, None))
+                    if self.is_depth:
+                        res['_bonds_by_seat'] = {odd.seat: arena_depth.contributed_rules(battle, 0)}
             else:   # 空场打幽灵：不战而败（保底掉血，Battle 空队会崩所以不走解算）
                 res = {"winner": 1,
                        "survivors": {0: 0, 1: len(self.ghost_src.battle_comp())}}
@@ -1830,7 +1850,8 @@ class Session:
                 self._say(f"幽灵战（{self.ghost_src.name} 镜像）："
                           + (f"平局 -{dmg}" if self.is_arena and res['winner'] is None else f"败 -{dmg}" if dmg else "胜"))
             self._grant_arena_loot(odd, 'draw' if res['winner'] is None else 'win' if res['winner'] == 0 else 'loss',
-                                   res.get('_research_by_seat', {}).get(odd.seat))
+                                   res.get('_research_by_seat', {}).get(odd.seat),
+                                   res.get('_bonds_by_seat', {}).get(odd.seat))
             self._record_defeat_damage(odd, self.ghost_src.seat, self.ghost_src.name, dmg, r,
                                        synergy=self._main_synergy_label(self.ghost_src),
                                        defeat_name=f"幽灵（{self.ghost_src.name} 镜像）")
@@ -1845,12 +1866,15 @@ class Session:
         wave = [make_piece(sid, arena_mod.build_templates() if self.is_arena else self.templates) for sid in wave_ids]
         if self.is_depth:
             wave = arena_depth.scale_pve(wave, r)
+        base_wave = wave
         events = []
         battle_i = 0
         p = self.player
         alive = self._alive()
         for i, e in enumerate(alive):
             scout_source = 'battle'
+            # arena_v2: a seat on a long win streak meets a tougher wild wave.
+            wave = arena_depth.streak_wave(base_wave, e.streak) if self.is_depth else base_wave
             if e.battle_comp():
                 if e is p:
                     meta = self._fight_rendered(r, battle_i, e, None, weather,
@@ -1868,6 +1892,8 @@ class Session:
                         res['statistics'] = battle.statistics()
                         res.update(_battle_effects(battle.events, {u.idx: u.team for u in battle.units}))
                         res['_research_by_seat'] = self._battle_research(battle, (e.seat, None))
+                        if self.is_depth:
+                            res['_bonds_by_seat'] = {e.seat: arena_depth.contributed_rules(battle, 0)}
                 battle_i += 1
                 if res["winner"] == 0:
                     gold = rng_mod.derive(self.seed, r, "pve", i).randint(*PVE_GOLD)
@@ -1899,7 +1925,8 @@ class Session:
             self._record_scouting_battle(r, e, None, res, pve=True, source=scout_source,
                                          opp_name=(self.opp_view or {}).get('name', '野怪'))
             self._grant_arena_loot(e, 'draw' if res['winner'] is None else 'win' if res['winner'] == 0 else 'loss',
-                                   res.get('_research_by_seat', {}).get(e.seat))
+                                   res.get('_research_by_seat', {}).get(e.seat),
+                                   res.get('_bonds_by_seat', {}).get(e.seat))
         if self.is_arena:
             return events
         # S5 组件掉落：人头保底 + 血量加权加发（pve 子流掉落段，同 match）
@@ -2030,9 +2057,24 @@ class Session:
             if opp is not None and not ghost and not pve:
                 research_by_seat[opp.seat] = teams[1]
             meta['_research_by_seat'] = research_by_seat
+            bonds = meta.get('_depth_bonds')
+            if bonds:
+                bonds_by_seat = {me.seat: bonds[0]}
+                if opp is not None and not ghost and not pve:
+                    bonds_by_seat[opp.seat] = bonds[1]
+                meta['_bonds_by_seat'] = bonds_by_seat
         self.player_battles += 1
         self.player_frames_total += meta["n"]
         return meta
+
+    def _streak_bounty(self, winner, loser):
+        """arena_v2: ending a win streak of 3+ pays the winner (streak - 1) gold, at most 4."""
+        if not self.is_depth or loser.streak < 3:
+            return
+        bonus = min(4, loser.streak - 1)
+        winner.gold += bonus
+        if winner is self.player:
+            self._say(f'终结 {loser.name} 的 {loser.streak} 连胜：赏金 +{bonus} 金')
 
     @staticmethod
     def _streak(seat, won: bool) -> None:
@@ -2701,6 +2743,14 @@ def state_json(sess) -> dict:
                                         and getattr(o.piece, 'star', 1) == 1)
                 if families_mod.rare_piece(template) and arena_mod.holds_legendary(p.all_pieces()):
                     v['blocked'] = '传说限一：已持有一只传说宝可梦'
+                if sess.is_depth and v['owned_copies'] == 2:
+                    fid = getattr(template, 'family_id', sid)
+                    pair = [o for o in p.all_pieces() if getattr(o.piece, 'family_id', None) == fid
+                            and o.piece.star == 1][:2]
+                    held = [o.item for o in pair if o.item]
+                    returning = held[1:] + [o.extra_item for o in pair if getattr(o, 'extra_item', None)]
+                    v['merge_note'] = ('买入即升星' + ('；' + '、'.join(items_mod.FINISHED[k]['name'] for k in returning)
+                                                     + ' 将回到仓库' if returning else ''))
                 v['buyable'] = 'blocked' not in v and p.gold >= v['price']
                 v['reason'] = v.get('blocked') or (None if p.gold >= v['price'] else f"金币不足（需要 {v['price']} 金）")
                 v['pool_remaining'] = sess.pool.remaining[sid]
@@ -2929,6 +2979,14 @@ def _depth_view(sess):
         'simulation': (getattr(sess, 'last_simulation', None)
                        if (getattr(sess, 'last_simulation', None) or {}).get('round') == sess.round_no else None),
         'simulations_left': arena_session.SIMULATIONS_PER_ROUND - arena_session.seat_state(p)['sims'],
+        'order': arena_session.seat_state(p)['order'],
+        'orders': [arena_depth.order_view(key) for key in arena_depth.ORDERS],
+        'quests': arena_session.quest_view(p),
+        'quest_goal': arena_session.QUEST_WINS,
+        'threat': _threat_preview(sess),
+        'xp_gold': (-(-(economy.xp_to_next(p.level) - p.xp) // economy.XP_BUY_AMOUNT) * economy.XP_BUY_COST
+                    if economy.xp_to_next(p.level) else None),
+        'streak_pve': p.streak >= arena_depth.STREAK_PVE_THRESHOLD,
     }
 
 
@@ -3117,18 +3175,12 @@ def act_refresh_type(sess, element):
     return f'定向刷新：{arena_bonds.TYPE_NAMES[element]}系（-{cost} 金）'
 
 
-def act_simulate(sess):
-    """Preview this round's committed matchup on independent seeds (no rewards, no RNG use)."""
-    _guard_prep(sess)
-    if not sess.is_depth:
-        raise DemoError('当前规则不支持模拟对战')
+def _committed_matchup(sess):
+    """(comp_a, comp_b, battle options) of the player's committed matchup this round."""
     p = sess.player
-    state = arena_session.seat_state(p)
-    if state['sims'] >= arena_session.SIMULATIONS_PER_ROUND:
-        raise DemoError(f'本轮模拟次数已用完（每轮 {arena_session.SIMULATIONS_PER_ROUND} 次）')
     comp_a = p.battle_comp()
     if not comp_a:
-        raise DemoError('先让宝可梦上场再模拟')
+        raise DemoError('先让宝可梦上场')
     opp = None
     if sess.ghost_seat is p:
         opp = sess.ghost_src
@@ -3141,14 +3193,14 @@ def act_simulate(sess):
     if r % 5 == 0:
         waves = arena_mod.PVE_WAVES
         wave = [make_piece(sid, arena_mod.build_templates()) for sid in waves[min(r // 5 - 1, len(waves) - 1)]]
-        comp_b = arena_depth.scale_pve(wave, r)
+        comp_b = arena_depth.streak_wave(arena_depth.scale_pve(wave, r), p.streak)
         opp = None
     elif sess.opponent_comp is not None:
         comp_b = list(sess.opponent_comp)
     elif opp is not None:
         comp_b = opp.battle_comp()
     else:
-        raise DemoError('本轮没有可模拟的对手')
+        raise DemoError('本轮没有对手')
     if not comp_b:
         raise DemoError('对手场上没有宝可梦')
     options = sess.battle_options(p, opp)
@@ -3158,6 +3210,70 @@ def act_simulate(sess):
         options.pop('learned_b', None)
         if any(sess.opponent_learned):
             options['learned_b'] = list(sess.opponent_learned)
+    return comp_a, comp_b, options
+
+
+def _threat_preview(sess):
+    """First target of every enemy unit (after opening effects), keyed for the prep UI."""
+    p = sess.player
+    if not sess.is_depth or sess.phase != 'prep' or not p.alive or not p.board:
+        return None
+    try:
+        comp_a, comp_b, options = _committed_matchup(sess)
+    except DemoError:
+        return None
+    signature = repr((sess.round_no, [(o.uid, o.piece.species_id, o.piece.star, o.item,
+                                       getattr(o, 'extra_item', None), getattr(o, 'is_core', False),
+                                       tuple(getattr(o, 'skill_mods', None) or ()))
+                                      for o in p.board], p.battle_positions(),
+                      arena_session.seat_state(p)['order'], arena_session.augment_keys(p)))
+    cached = getattr(sess, '_threat_cache', None)
+    if cached and cached[0] == signature:
+        return cached[1]
+    import random as _random
+    battle = Battle(copy.deepcopy(comp_a), copy.deepcopy(comp_b), _random.Random('threat'),
+                    layout='back', positions_a=p.battle_positions(), **options)
+    start = {u.idx: u.pos for u in battle.units}
+    battle.fx.emit('battle_start', t=0.0)
+    board = p.board
+    counts, enemies = {}, []
+    for unit in battle.units:
+        if unit.team != 1:
+            continue
+        target = battle._target(unit, 0.0)
+        if target is None or target.team != 0:
+            continue
+        uid = board[target.local_idx].uid
+        counts[uid] = counts.get(uid, 0) + 1
+        col, row = start[unit.idx]
+        enemies.append({'loc': f'g{row},{col}', 'name': unit.piece.name,
+                        'target_uid': uid, 'target': target.piece.name})
+    view = {'counts': counts, 'enemies': enemies}
+    sess._threat_cache = (signature, view)
+    return view
+
+
+def act_order(sess, key):
+    _guard_prep(sess)
+    if not sess.is_depth:
+        raise DemoError('当前规则没有战术指令')
+    try:
+        return arena_session.set_order(sess.player, key)
+    except ValueError as exc:
+        raise DemoError(str(exc)) from exc
+
+
+def act_simulate(sess):
+    """Preview this round's committed matchup on independent seeds (no rewards, no RNG use)."""
+    _guard_prep(sess)
+    if not sess.is_depth:
+        raise DemoError('当前规则不支持模拟对战')
+    p = sess.player
+    state = arena_session.seat_state(p)
+    if state['sims'] >= arena_session.SIMULATIONS_PER_ROUND:
+        raise DemoError(f'本轮模拟次数已用完（每轮 {arena_session.SIMULATIONS_PER_ROUND} 次）')
+    comp_a, comp_b, options = _committed_matchup(sess)
+    r = sess.round_no
     import random as _random
     wins = losses = draws = 0
     ledger, damage = {}, {}
@@ -3572,6 +3688,8 @@ def _apply_action(params: dict):
                 msg = act_unequip(sess, params.get("loc", ""), params.get("slot", "0"))
             elif cmd == "refresh_type":
                 msg = act_refresh_type(sess, params.get("type", ""))
+            elif cmd == "order":
+                msg = act_order(sess, params.get("key", ""))
             elif cmd == "simulate":
                 msg = act_simulate(sess)
             elif cmd == "dismantle":

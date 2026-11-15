@@ -109,6 +109,33 @@ class EffectTest(unittest.TestCase):
         self.assertEqual(run(), run())
 
 
+class OrderTest(unittest.TestCase):
+    def test_focus_fire_locks_lowest_hp_enemy(self):
+        b = combat.Battle([piece(66), piece(4)], [piece(74, 2), piece(10)], random.Random(1),
+                          layout='back', ruleset='arena_v2', stat_mode='budget_v1',
+                          positions_a=[(0, 4), (5, 4)], positions_b=[(2, 1), (3, 1)],
+                          arena_orders=['focus_fire', 'none'])
+        weakest = min((u for u in b.units if u.team == 1), key=lambda u: u.max_hp)
+        b.fx.emit('battle_start', t=0.0)
+        self.assertTrue(all(u.target_idx == weakest.idx for u in b.units if u.team == 0))
+
+    def test_blitz_grants_energy_and_exposes(self):
+        b = battle([piece(66), piece(4)], [piece(1)])
+        b.arena_orders = ('blitz', 'none')
+        b.fx.emit('battle_start', t=0.0)
+        self.assertTrue(all(u.energy >= 25 for u in b.units if u.team == 0))
+        self.assertTrue(effects(b, 'blitz'))
+
+    def test_orders_rejected_outside_v2(self):
+        with self.assertRaises(ValueError):
+            combat.Battle([piece(66)], [piece(1)], random.Random(1), ruleset='arena_v1',
+                          stat_mode='budget_v1', arena_orders=['blitz', 'none'])
+
+    def test_streak_wave_adds_a_star(self):
+        self.assertEqual([p.star for p in arena_depth.streak_wave([piece(66), piece(66, 3)], 4)], [2, 3])
+        self.assertEqual([p.star for p in arena_depth.streak_wave([piece(66)], 3)], [1])
+
+
 class EarlyFormKitTest(unittest.TestCase):
     def test_generic_strike_forms_borrow_final_kit_in_v2_only(self):
         import arena_skills
@@ -277,6 +304,36 @@ class SessionTest(unittest.TestCase):
         card = next(c for c in state['shop'] if c)
         self.assertIn('buyable', card)
         self.assertIn('reason', card)
+
+    def test_order_threat_and_quest_flow(self):
+        s = self.new(77)
+        p = s.player
+        for i in range(5):
+            if p.shop.slots[i] is not None and p.gold >= p.shop.price(i):
+                self.demo.act_buy(s, i)
+        self.demo.act_move(s, 'b0', 'g0,0')
+        with self.assertRaises(self.demo.DemoError):
+            self.demo.act_order(s, 'protect_core')
+        self.demo.act_order(s, 'hold')
+        depth = self.demo.state_json(s)['depth']
+        self.assertEqual(depth['order'], 'hold')
+        self.assertTrue(depth['threat']['counts'])
+        messages = []
+        for _ in range(arena_session.QUEST_WINS):
+            messages += arena_session.update_quests(s, p, 'win', ['sky_dive'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(arena_session.update_quests(s, p, 'win', ['sky_dive']), [])
+        from session_save import SessionCodec
+        codec = SessionCodec()
+        encoded = codec.encode(s)
+        self.assertEqual(codec.encode(codec.decode(encoded, 5)), encoded)
+
+    def test_streak_bounty_pays_the_streak_breaker(self):
+        s = self.new(5)
+        winner, loser = s.player, s.bots[0]
+        loser.streak, gold = 4, winner.gold
+        s._streak_bounty(winner, loser)
+        self.assertEqual(winner.gold, gold + 3)
 
     def test_pve_waves_scale_with_stage(self):
         wave = arena_depth.scale_pve([piece(66), piece(66)], 20)
