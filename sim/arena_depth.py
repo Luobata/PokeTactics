@@ -120,12 +120,13 @@ def formation(comp, team, terrain):
 def scale_pve(wave, round_no):
     """arena_v2 wild rounds keep pace with the table: stars rise with the stage."""
     import copy
-    stars = {5: (2, 1), 10: (2, 2), 15: (3, 2), 20: (3, 2), 25: (3, 3)}
-    high, low = stars.get(round_no, (3, 3) if round_no > 25 else (1, 1))
+    # (leader star, others) — one 3-star leader first, whole 3-star waves only late.
+    stars = {5: (2, 1), 10: (2, 2), 15: (2, 2), 20: (3, 2), 25: (3, 2), 30: (3, 3)}
+    high, low = stars.get(round_no, (3, 3) if round_no > 30 else (1, 1))
     scaled = []
     for index, piece in enumerate(wave):
         clone = copy.copy(piece)
-        clone.star = high if index % 2 == 0 else low
+        clone.star = high if index == 0 else low
         clone.shiny = clone.star == 3
         scaled.append(clone)
     return scaled
@@ -147,11 +148,11 @@ def mentor_piece(piece):
     return clone
 
 
-STREAK_PVE_THRESHOLD = 4
+STREAK_PVE_THRESHOLD = 5
 
 
 def streak_wave(wave, streak):
-    """Win streak >= 4: every wild unit gains one star (max 3)."""
+    """Win streak >= 5: every wild unit gains one star (max 3)."""
     if streak < STREAK_PVE_THRESHOLD:
         return wave
     import copy

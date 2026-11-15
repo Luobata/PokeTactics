@@ -631,7 +631,9 @@ class Battle:
             self.events.append((0.0, "deploy", unit.idx, pos))
 
     # ---- 主循环 ----
-    def run(self) -> dict:
+    def run(self, until=None) -> dict:
+        """Resolve the battle; ``until`` (seconds) stops early for previews only."""
+        limit = MAX_BATTLE_SECONDS if until is None else min(until, MAX_BATTLE_SECONDS)
         t = 0.0
         if not self._arena_on and combo_mod.combos_on():  # Classic opening volley.
             self._opening_volley()
@@ -643,7 +645,7 @@ class Battle:
         if self.depth:
             self.fx.emit('battle_start', t=0.0)
             self._flush_deaths(0.0)
-        while t <= MAX_BATTLE_SECONDS:
+        while t <= limit:
             self.duration = t
             alive_teams = {u.team for u in self.units if u.alive}
             if len(alive_teams) <= 1:

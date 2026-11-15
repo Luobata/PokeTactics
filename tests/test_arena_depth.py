@@ -132,8 +132,8 @@ class OrderTest(unittest.TestCase):
                           stat_mode='budget_v1', arena_orders=['blitz', 'none'])
 
     def test_streak_wave_adds_a_star(self):
-        self.assertEqual([p.star for p in arena_depth.streak_wave([piece(66), piece(66, 3)], 4)], [2, 3])
-        self.assertEqual([p.star for p in arena_depth.streak_wave([piece(66)], 3)], [1])
+        self.assertEqual([p.star for p in arena_depth.streak_wave([piece(66), piece(66, 3)], 5)], [2, 3])
+        self.assertEqual([p.star for p in arena_depth.streak_wave([piece(66)], 4)], [1])
 
 
 class EarlyFormKitTest(unittest.TestCase):
@@ -261,8 +261,14 @@ class SessionTest(unittest.TestCase):
                 self.demo.act_buy(s, i)
         self.demo.act_move(s, 'b0', 'g0,0')
         gold, pool = p.gold, dict(s.pool.remaining)
-        first = self.demo.act_simulate(s)
-        self.assertEqual(first, self.demo.act_simulate(s))
+        self.demo.act_simulate(s)
+        first = dict(s.last_simulation)
+        self.demo.act_simulate(s)
+        self.assertTrue(s.last_simulation['extended'])
+        self.assertEqual(s.last_simulation['battles'], 2 * first['battles'])
+        low, high = s.last_simulation['win_rate_range']
+        self.assertLessEqual(low, s.last_simulation['win_rate'])
+        self.assertLessEqual(s.last_simulation['win_rate'], high)
         with self.assertRaises(self.demo.DemoError):
             self.demo.act_simulate(s)
         self.assertEqual((p.gold, s.pool.remaining), (gold, pool))
@@ -336,8 +342,22 @@ class SessionTest(unittest.TestCase):
         self.assertEqual(winner.gold, gold + 3)
 
     def test_pve_waves_scale_with_stage(self):
-        wave = arena_depth.scale_pve([piece(66), piece(66)], 20)
-        self.assertEqual([p.star for p in wave], [3, 2])
+        wave = arena_depth.scale_pve([piece(66), piece(66), piece(66)], 20)
+        self.assertEqual([p.star for p in wave], [3, 2, 2])
+        self.assertEqual([p.star for p in arena_depth.scale_pve([piece(66)] * 2, 15)], [2, 2])
+
+    def test_threat_preview_reports_early_pressure_and_order_hints(self):
+        s = self.new(77)
+        p = s.player
+        for i in range(5):
+            if p.shop.slots[i] is not None and p.gold >= p.shop.price(i):
+                self.demo.act_buy(s, i)
+        self.demo.act_move(s, 'b0', 'g0,0')
+        depth = self.demo.state_json(s)['depth']
+        uid = p.grid[(0, 0)].uid
+        self.assertIn(uid, depth['threat']['early'])
+        self.assertIn('targets', depth['order_hints']['cut_supply'])
+        self.assertFalse(depth['order_hints']['protect_core']['has_core'])
 
 
 if __name__ == '__main__':

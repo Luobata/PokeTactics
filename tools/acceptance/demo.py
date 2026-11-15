@@ -2743,6 +2743,16 @@ def state_json(sess) -> dict:
                                         and getattr(o.piece, 'star', 1) == 1)
                 if families_mod.rare_piece(template) and arena_mod.holds_legendary(p.all_pieces()):
                     v['blocked'] = '传说限一：已持有一只传说宝可梦'
+                if sess.is_depth and hasattr(template, 'family_id') and not families_mod.rare_piece(template):
+                    fid = template.family_id
+                    base = sum(len(o.sources) for o in p.all_pieces()
+                               if getattr(o.piece, 'family_id', None) == fid)
+                    stars = sorted((o.piece.star for o in p.all_pieces()
+                                    if getattr(o.piece, 'family_id', None) == fid), reverse=True)
+                    target = 3 if base < 3 else 9 if base < 9 else None
+                    v['star_progress'] = {'owned_copies': base, 'next_star': 2 if target == 3 else 3 if target else None,
+                                          'copies_to_next_star': (target - base) if target else 0,
+                                          'merges_now': v['owned_copies'] == 2, 'stars': stars}
                 if sess.is_depth and v['owned_copies'] == 2:
                     fid = getattr(template, 'family_id', sid)
                     pair = [o for o in p.all_pieces() if getattr(o.piece, 'family_id', None) == fid
@@ -2976,12 +2986,13 @@ def _depth_view(sess):
         'mods': [arena_depth.mod_view(key) for key in arena_depth.MODS],
         'core': next((o.uid for o in p.all_pieces() if getattr(o, 'is_core', False)), None),
         'draft_rounds': list(arena_session.DRAFT_ROUNDS),
-        'simulation': (getattr(sess, 'last_simulation', None)
+        'simulation': ({k: v for k, v in sess.last_simulation.items() if not k.startswith('_')}
                        if (getattr(sess, 'last_simulation', None) or {}).get('round') == sess.round_no else None),
         'simulations_left': arena_session.SIMULATIONS_PER_ROUND - arena_session.seat_state(p)['sims'],
         'order': arena_session.seat_state(p)['order'],
         'orders': [arena_depth.order_view(key) for key in arena_depth.ORDERS],
-        'quests': arena_session.quest_view(p),
+        'quests': _quest_rows(sess),
+        'order_hints': _order_hints(sess),
         'quest_goal': arena_session.QUEST_WINS,
         'threat': _threat_preview(sess),
         'xp_gold': (-(-(economy.xp_to_next(p.level) - p.xp) // economy.XP_BUY_AMOUNT) * economy.XP_BUY_COST
@@ -3213,8 +3224,12 @@ def _committed_matchup(sess):
     return comp_a, comp_b, options
 
 
+THREAT_WINDOW = 5.
+
+
 def _threat_preview(sess):
-    """First target of every enemy unit (after opening effects), keyed for the prep UI."""
+    """Opening threat for the prep UI: each enemy's first target plus 5 s of
+    simulated pressure (median of 3 independent seeds) per own unit."""
     p = sess.player
     if not sess.is_depth or sess.phase != 'prep' or not p.alive or not p.board:
         return None
@@ -3222,21 +3237,19 @@ def _threat_preview(sess):
         comp_a, comp_b, options = _committed_matchup(sess)
     except DemoError:
         return None
-    signature = repr((sess.round_no, [(o.uid, o.piece.species_id, o.piece.star, o.item,
-                                       getattr(o, 'extra_item', None), getattr(o, 'is_core', False),
-                                       tuple(getattr(o, 'skill_mods', None) or ()))
-                                      for o in p.board], p.battle_positions(),
-                      arena_session.seat_state(p)['order'], arena_session.augment_keys(p)))
+    signature = _matchup_signature(sess)
     cached = getattr(sess, '_threat_cache', None)
     if cached and cached[0] == signature:
         return cached[1]
     import random as _random
+    import statistics as _stats
+    board = p.board
     battle = Battle(copy.deepcopy(comp_a), copy.deepcopy(comp_b), _random.Random('threat'),
                     layout='back', positions_a=p.battle_positions(), **options)
     start = {u.idx: u.pos for u in battle.units}
     battle.fx.emit('battle_start', t=0.0)
-    board = p.board
-    counts, enemies = {}, []
+    counts, enemies, past_front = {}, [], 0
+    front_row = min(pos[1] for pos in p.battle_positions())  # own rows 3..5; 3 faces the enemy
     for unit in battle.units:
         if unit.team != 1:
             continue
@@ -3245,12 +3258,83 @@ def _threat_preview(sess):
             continue
         uid = board[target.local_idx].uid
         counts[uid] = counts.get(uid, 0) + 1
+        if unit.range > 1 and start[target.idx][1] != front_row:
+            past_front += 1
         col, row = start[unit.idx]
-        enemies.append({'loc': f'g{row},{col}', 'name': unit.piece.name,
+        enemies.append({'loc': f'g{row},{col}', 'name': unit.piece.name, 'ranged': unit.range > 1,
                         'target_uid': uid, 'target': target.piece.name})
-    view = {'counts': counts, 'enemies': enemies}
+    samples = {o.uid: [] for o in board}
+    for k in range(3):
+        trial = Battle(copy.deepcopy(comp_a), copy.deepcopy(comp_b), _random.Random(f'threat:{k}'),
+                       layout='back', positions_a=p.battle_positions(), **options)
+        trial.run(until=THREAT_WINDOW)
+        for unit in trial.units:
+            if unit.team == 0:
+                samples[board[unit.local_idx].uid].append(
+                    {'taken': unit.damage_taken, 'max_hp': unit.max_hp, 'dead': not unit.alive})
+    early = {}
+    for uid, rows in samples.items():
+        if not rows:
+            continue
+        taken = int(_stats.median(r['taken'] for r in rows))
+        early[uid] = {'taken': taken, 'share': round(taken / max(1, rows[0]['max_hp']), 2),
+                      'falls': sum(r['dead'] for r in rows)}
+    view = {'counts': counts, 'enemies': enemies, 'early': early, 'window': THREAT_WINDOW,
+            'ranged_past_front': past_front, 'sequence': getattr(sess, 'save_sequence', None),
+            'note': '首个目标为开战瞬间索敌；前 5 秒承伤为 3 次独立模拟的中位数，开战后会转火、溅射，仅供参考。'}
     sess._threat_cache = (signature, view)
     return view
+
+
+def _last_bond_triggers(sess):
+    meta = sess.last_battle or {}
+    rows = meta.get('ledger') or []
+    return {row['id']: {'triggers': row['triggers'], 'idle': bool(row.get('idle'))}
+            for row in rows if row.get('team') == 0 and row.get('source') == 'bond'}
+
+
+def _quest_rows(sess):
+    """Quest progress plus what each breakpoint did in the last battle (or why not)."""
+    last = _last_bond_triggers(sess)
+    rows = arena_session.quest_view(sess.player)
+    for row in rows:
+        info = last.get(row['id'])
+        row['last_round'] = (sess.last_battle or {}).get('round')
+        row['last_triggers'] = info['triggers'] if info else 0
+        row['last_reason'] = (None if info and info['triggers'] else
+                              '上一战已上场但没有满足触发条件' if info else '上一战未激活该断点')
+    return rows
+
+
+def _order_hints(sess):
+    """How much each tactical order can actually do against this round's opponent."""
+    p = sess.player
+    try:
+        _comp_a, comp_b, _options = _committed_matchup(sess)
+    except DemoError:
+        comp_b = []
+    pieces = [entry[0] if isinstance(entry, tuple) else entry for entry in comp_b]
+    supports = sum(1 for piece in pieces if getattr(piece, 'role_key', None) == 'support')
+    enemy_core = next((piece.name for piece in pieces if getattr(piece, 'is_core', False)), None)
+    weakest = min(pieces, key=lambda piece: piece.tier, default=None)
+    core_pos = next((pos for pos, o in p.grid.items() if getattr(o, 'is_core', False)), None)
+    guards = 0 if core_pos is None else sum(
+        1 for pos, o in p.grid.items()
+        if abs(pos[0] - core_pos[0]) + abs(pos[1] - core_pos[1]) == 1
+        and getattr(o.piece, 'role_key', None) == 'defense')
+    return {
+        'cut_supply': {'targets': supports,
+                       'note': f'对手有 {supports} 名辅助' if supports else '对手没有辅助：本指令无效'},
+        'protect_core': {'has_core': core_pos is not None, 'guards': guards,
+                         'note': ('需要先指定核心' if core_pos is None else
+                                  f'核心护盾 20% · 相邻防守型 {guards} 名可嘲讽' if guards else
+                                  '核心旁没有防守型：只有 20% 护盾，没有嘲讽')},
+        'focus_fire': {'target': enemy_core or (weakest.name if weakest else None),
+                       'note': (f'锁定敌方核心 {enemy_core}' if enemy_core else
+                                '敌方没有核心：锁定最大生命最低者' if pieces else '本轮没有对手')},
+        'hold': {'note': '前排前 5 秒减伤 25%，后排首动延后 0.6 秒'},
+        'blitz': {'note': '全队 +25 能量，前 5 秒受伤 +12%'},
+    }
 
 
 def act_order(sess, key):
@@ -3263,8 +3347,23 @@ def act_order(sess, key):
         raise DemoError(str(exc)) from exc
 
 
+def _matchup_signature(sess):
+    p = sess.player
+    return repr((sess.round_no, [(o.uid, o.piece.species_id, o.piece.star, o.item,
+                                  getattr(o, 'extra_item', None), getattr(o, 'is_core', False),
+                                  tuple(getattr(o, 'skill_mods', None) or ()), o.technique)
+                                 for o in p.board], p.battle_positions(),
+                 arena_session.seat_state(p)['order'], arena_session.augment_keys(p)))
+
+
 def act_simulate(sess):
-    """Preview this round's committed matchup on independent seeds (no rewards, no RNG use)."""
+    """Preview this round's committed matchup on fixed independent seeds.
+
+    The first run of a lineup uses seeds 0..N-1 (so different lineups compare
+    on identical luck); repeating it unchanged extends the same sample with
+    seeds N..2N-1 instead of returning the same numbers. Never touches the
+    session RNG, rewards or the real battle seed.
+    """
     _guard_prep(sess)
     if not sess.is_depth:
         raise DemoError('当前规则不支持模拟对战')
@@ -3274,10 +3373,23 @@ def act_simulate(sess):
         raise DemoError(f'本轮模拟次数已用完（每轮 {arena_session.SIMULATIONS_PER_ROUND} 次）')
     comp_a, comp_b, options = _committed_matchup(sess)
     r = sess.round_no
+    signature = _matchup_signature(sess)
+    previous = getattr(sess, 'last_simulation', None) or {}
+    extend = previous.get('round') == r and previous.get('_signature') == signature
+    n = arena_session.SIMULATION_BATTLES
+    offset = previous.get('battles', 0) if extend else 0
     import random as _random
-    wins = losses = draws = 0
-    ledger, damage = {}, {}
-    for k in range(arena_session.SIMULATION_BATTLES):
+    import statistics as _stats
+    totals = dict(previous.get('_totals', {})) if extend else {}
+    wins, losses, draws = (previous.get('wins', 0), previous.get('losses', 0),
+                           previous.get('draws', 0)) if extend else (0, 0, 0)
+    survivors = list(previous.get('_survivors', [])) if extend else []
+    core_taken = list(previous.get('_core_taken', [])) if extend else []
+    core_uid = next((o.uid for o in p.board if getattr(o, 'is_core', False)), None)
+    core_local = next((i for i, o in enumerate(p.board) if getattr(o, 'is_core', False)), None)
+    ledger = {k: dict(v) for k, v in previous.get('_ledger', {}).items()} if extend else {}
+    damage = dict(previous.get('_damage', {})) if extend else {}
+    for k in range(offset, offset + n):
         battle = Battle(copy.deepcopy(comp_a), copy.deepcopy(comp_b),
                         _random.Random(f'sim:{sess.seed}:{r}:{k}'), layout='back',
                         positions_a=p.battle_positions(), **options)
@@ -3285,6 +3397,10 @@ def act_simulate(sess):
         wins += result['winner'] == 0
         losses += result['winner'] == 1
         draws += result['winner'] is None
+        survivors.append(result['survivors'][0])
+        if core_local is not None:
+            core = next(u for u in battle.units if u.team == 0 and u.local_idx == core_local)
+            core_taken.append(core.damage_taken)
         for row in _ledger_view(battle):
             if row['team'] == 0:
                 entry = ledger.setdefault(row['name'], {'name': row['name'], 'triggers': 0, 'value': 0})
@@ -3295,16 +3411,35 @@ def act_simulate(sess):
             if unit.team == 0:
                 damage[unit.piece.name] = damage.get(unit.piece.name, 0) + unit.damage_dealt
     state['sims'] += 1
-    n = arena_session.SIMULATION_BATTLES
+    total = offset + n
+    rate = wins / total
+    # Wilson 80% interval: honest about how little a small sample can say.
+    z = 1.2816
+    centre = (rate + z * z / (2 * total)) / (1 + z * z / total)
+    spread = z * ((rate * (1 - rate) / total + z * z / (4 * total * total)) ** .5) / (1 + z * z / total)
     top = sorted(ledger.values(), key=lambda row: -row['value'])[:4]
     carry = max(damage.items(), key=lambda kv: kv[1]) if damage else None
-    sess.last_simulation = {'round': r, 'wins': wins, 'losses': losses, 'draws': draws, 'battles': n,
-                            'carry': carry and {'name': carry[0], 'damage': carry[1] // n},
-                            'ledger': [{**row, 'triggers': round(row['triggers'] / n, 1),
-                                        'value': row['value'] // n} for row in top],
-                            'remaining': arena_session.SIMULATIONS_PER_ROUND - state['sims']}
-    return f'模拟 {n} 场：胜 {wins} · 负 {losses}' + (f' · 平 {draws}' if draws else '') + \
-        (f'；主要输出 {carry[0]}（场均 {carry[1] // n}）' if carry else '')
+    opponent = (sess.opp_view or {}).get('name')
+    sess.last_simulation = {
+        'round': r, 'wins': wins, 'losses': losses, 'draws': draws, 'battles': total,
+        'extended': extend, 'opponent': opponent,
+        'win_rate': round(rate, 2),
+        'win_rate_range': [round(max(0., centre - spread), 2), round(min(1., centre + spread), 2)],
+        'median_survivors': _stats.median(survivors) if survivors else 0,
+        'core': ({'uid': core_uid, 'avg_damage_taken': int(_stats.mean(core_taken))}
+                 if core_taken else None),
+        'carry': carry and {'name': carry[0], 'damage': carry[1] // total},
+        'ledger': [{**row, 'triggers': round(row['triggers'] / total, 1),
+                    'value': row['value'] // total} for row in top],
+        'remaining': arena_session.SIMULATIONS_PER_ROUND - state['sims'],
+        '_signature': signature, '_totals': totals, '_survivors': survivors,
+        '_core_taken': core_taken, '_ledger': ledger, '_damage': damage}
+    low, high = sess.last_simulation['win_rate_range']
+    return (f'模拟 {total} 场' + ('（同阵容追加样本）' if extend else '') +
+            f'：胜 {wins} · 负 {losses}' + (f' · 平 {draws}' if draws else '') +
+            f'；胜率约 {round(rate * 100)}%（大致区间 {round(low * 100)}–{round(high * 100)}%）' +
+            f'，存活中位数 {sess.last_simulation["median_survivors"]}' +
+            (f'；主要输出 {carry[0]}' if carry else ''))
 
 
 def act_dismantle(sess, key):

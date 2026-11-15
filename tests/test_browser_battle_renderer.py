@@ -444,5 +444,19 @@ class BrowserRendererNode(unittest.TestCase):
             'portableSampler', json.dumps({'keys': keys, 'samples': samples})))
 
 
+class CauseBindingTest(unittest.TestCase):
+    def test_orphan_cause_indices_rebind_or_go_global(self):
+        actions = [{'i': 10, 'actor': 1, 'target': 4}, {'i': 20, 'actor': 2, 'target': 5}]
+        rows = [[1.0, 1.0, 'combo_effect', 1, 4, 'x', 'absorb', {'cast_index': 14}],
+                [1.0, 1.0, 'combo_effect', 7, 8, 'x', 'energy', {'action_index': 15}],
+                [1.0, 1.0, 'skill_effect', 2, 5, 'x', 'heal', {'cast_index': 20}]]
+        battle_script._bind_causes(rows, actions)
+        self.assertEqual(rows[0][-1]['cast_index'], 10)
+        self.assertEqual(rows[0][-1]['raw_cast_index'], 14)
+        self.assertIsNone(rows[1][-1]['action_index'])
+        self.assertEqual(rows[1][-1]['anchor'], 'global')
+        self.assertEqual(rows[2][-1]['cast_index'], 20)
+
+
 if __name__ == '__main__':
     unittest.main()

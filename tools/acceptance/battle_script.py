@@ -157,6 +157,47 @@ def _event_row(timeline, ev):
     return [_r(ev[0]), _r(sim_t), ev[1], *json_safe(list(ev[2:]))]
 
 
+_CAUSE_KEYS = ('cast_index', 'action_index', 'source_cast_index')
+
+
+def _bind_causes(rows, actions):
+    """Point every effect payload's cause index at a real action ``i``.
+
+    Some hooks record the index of the raw event that triggered them (a move,
+    an absorb packet, an earlier effect) rather than of the attack/cast. Such an
+    index is rebound to the closest preceding action by the same source or
+    target; if none qualifies the index is dropped and ``anchor: 'global'`` set,
+    so the renderer never follows a dangling link.
+    """
+    from bisect import bisect_right
+    known = sorted(row['i'] for row in actions if row['i'] is not None)
+    by_i = {row['i']: row for row in actions}
+    for row in rows:
+        payload = row[-1] if row and isinstance(row[-1], dict) else None
+        if payload is None or len(row) < 5:
+            continue
+        people = {value for value in row[3:5] if isinstance(value, int)}
+        for key in _CAUSE_KEYS:
+            index = payload.get(key)
+            if not isinstance(index, int) or index in by_i:
+                continue
+            payload.setdefault('raw_' + key, index)
+            pos = bisect_right(known, index) - 1
+            bound = None
+            while pos >= 0 and index - known[pos] <= 64:
+                action = by_i[known[pos]]
+                if action['actor'] in people or action['target'] in people:
+                    bound = action['i']
+                    break
+                pos -= 1
+            if bound is None:
+                payload[key] = None
+                payload['anchor'] = 'global'
+            else:
+                payload[key] = bound
+    return rows
+
+
 def build_script(anim, *, source=None, log_formatter=None, playback_meta=None, battle=None):
     """Compile a BattleAnimation (arena) into the browser battle script dict."""
     timeline = anim.timeline
@@ -322,7 +363,7 @@ def build_script(anim, *, source=None, log_formatter=None, playback_meta=None, b
         'statuses': statuses,
         'weather': weather,
         'deaths': deaths,
-        'events': [_event_row(timeline, ev) for ev in events],
+        'events': _bind_causes([_event_row(timeline, ev) for ev in events], actions),
         'log': log,
         'result': {'winner': json_safe(end[2]) if end else None,
                    't': _r(end[0]) if end else duration},
