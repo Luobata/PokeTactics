@@ -2154,7 +2154,13 @@
       ]);
       if (token !== p.token || !$("battle-dialog").open) return true;
       if (!script || script.ok === false || !Array.isArray(script.units)) throw new Error("战斗脚本无效");
-      const renderer = new engine.BattleRenderer($("battle-canvas"), script, {pack});
+      // Sprite style (docs/60): ?sprites= > localStorage > PMD frame sprites.
+      const style = typeof engine.spriteStyle === "function" ? engine.spriteStyle() : "pmd";
+      const pmd = style === "pmd" && typeof engine.loadPmd === "function" ? await engine.loadPmd(script) : null;
+      if (token !== p.token || !$("battle-dialog").open) return true;
+      const renderer = new engine.BattleRenderer($("battle-canvas"), script, {pack, style, pmd});
+      p.pmdBundle = pmd;
+      ensureSpriteToggle(engine, style);
       await Promise.race([renderer.ready, new Promise((resolve) => setTimeout(resolve, 3000))]);
       if (token !== p.token || !$("battle-dialog").open) {
         renderer.destroy();
@@ -2173,6 +2179,32 @@
       Object.assign(p, {renderer: null, script: false});
       return false;
     }
+  }
+  function ensureSpriteToggle(engine, style) {
+    let select = $("battle-sprite-style");
+    if (!select) {
+      const speed = $("battle-speed")?.closest("label");
+      if (!speed?.parentElement) return;
+      const label = document.createElement("label");
+      label.className = "speed-control sprite-style-control";
+      label.setAttribute("for", "battle-sprite-style");
+      label.title = "PMD 帧动画 / 经典正面立绘";
+      label.innerHTML = '画风 <select id="battle-sprite-style"><option value="pmd">PMD 动画</option><option value="classic">经典</option></select>';
+      speed.parentElement.append(label);
+      select = label.querySelector("select");
+    }
+    select.value = style;
+    select.disabled = false;
+    select.onchange = async () => {
+      const p = playback, next = select.value === "classic" ? "classic" : "pmd";
+      engine.saveSpriteStyle?.(next);
+      if (!p.renderer?.setStyle) return;
+      const token = p.token;
+      if (next === "pmd" && !p.pmdBundle && engine.loadPmd) p.pmdBundle = await engine.loadPmd(p.renderer.script);
+      if (token !== p.token || !p.renderer) return;
+      await p.renderer.setStyle(next, p.pmdBundle);
+      if (token === p.token && p.renderer) showScriptTime(p.time);
+    };
   }
   function showScriptTime(seconds) {
     const p = playback;

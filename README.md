@@ -15,6 +15,10 @@
 
 > **2026-11-15 起只支持浏览器**：ESP32 设备模式与像素对账不再维护（见 docs/01 修宪说明）。
 >
+> **浏览器战斗演出**：/play 竞技回放由浏览器渲染器按权威事件流以显示器刷新率绘制（[docs/58](docs/58-browser-battle-renderer.md)），
+> 默认使用 PMD SpriteCollab 逐帧动画精灵，可切回经典立绘（`?sprites=classic` 或对话框「画风」，[docs/60](docs/60-pmd-sprites.md)）。
+> PMD 精灵仅限非商业使用，署名见 `assets/pmd/CREDITS.md`。
+>
 > **2026-11 深度版**：新开竞技局默认使用 `arena_v2`——阶段地形、升星技能强化、
 > 规则型海克斯、羁绊深度断点、核心单位、共享选秀、组件属性与拆解经济、定向刷新、
 > 收益账本，以及统一的效果总线（旧 `arena_v1` 逐事件冻结、旧存档继续可读）。
@@ -190,3 +194,6 @@ python3 sim/prototype.py --games 300
 提取链（详见 `data/*.json` 内的 `source` 字段）；每只宝可梦的属性组合为
 `tools/species_types_gen2.py` 中手工整理的金银世代属性表。
 本项目为同人玩法原型，不将原作素材声称为本项目原创。
+浏览器战斗使用的 PMD 帧动画精灵来自 [PMD SpriteCollab](https://github.com/PMDCollab/SpriteCollab)（固定提交，见
+`assets/pmd/SOURCES.json`）：官方素材 © The Pokémon Company / Nintendo / Spike Chunsoft，社区素材按 CC BY-NC 4.0 授权，
+逐物种署名见 `assets/pmd/CREDITS.md`；仅限非商业用途，商业化须替换全部美术。

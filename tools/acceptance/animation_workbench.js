@@ -143,8 +143,11 @@
     stop();
     state.script = script;
     state.rendA?.destroy(); state.rendB?.destroy();
-    state.rendA = new PB.BattleRenderer($("wb-canvas-a"), script, { pack: state.mergedA });
-    state.rendB = new PB.BattleRenderer($("wb-canvas-b"), script, { pack: state.mergedB });
+    // Sprite style (docs/60): starts classic, swaps to PMD frames once the
+    // manifests arrive; both previews always share one style.
+    state.rendA = new PB.BattleRenderer($("wb-canvas-a"), script, { pack: state.mergedA, style: "classic" });
+    state.rendB = new PB.BattleRenderer($("wb-canvas-b"), script, { pack: state.mergedB, style: "classic" });
+    applySpriteStyle(script);
     $("wb-empty-a").hidden = $("wb-empty-b").hidden = true;
     state.p = 0;
     $("wb-seek").max = String(duration());
@@ -162,6 +165,26 @@
     seek(0);
     drawTimeline();
     renderDashboard();
+  }
+
+  async function applySpriteStyle(script) {
+    const style = state.spriteStyle || (state.spriteStyle = PB.spriteStyle ? PB.spriteStyle() : "classic");
+    if ($("wb-sprite-style")) $("wb-sprite-style").value = style;
+    if (style !== "pmd" || !PB.loadPmd) return;
+    const pmd = state.pmdFor === script ? state.pmd : await PB.loadPmd(script);
+    if (state.script !== script || !state.rendA) return;
+    state.pmd = pmd; state.pmdFor = script;
+    await Promise.all([state.rendA.setStyle("pmd", pmd), state.rendB.setStyle("pmd", pmd)]);
+    if (state.script === script) { seek(state.p); drawTimeline(); }
+  }
+  async function changeSpriteStyle(style) {
+    state.spriteStyle = style === "classic" ? "classic" : "pmd";
+    PB.saveSpriteStyle?.(state.spriteStyle);
+    if (!state.rendA) return;
+    if (state.spriteStyle === "classic") {
+      await Promise.all([state.rendA.setStyle("classic"), state.rendB.setStyle("classic")]);
+      seek(state.p); drawTimeline();
+    } else applySpriteStyle(state.script);
   }
 
   // ------------------------------------------------------------ transport
@@ -975,6 +998,7 @@
     $("wb-next").addEventListener("click", () => { stop(); seek(state.p + FRAME); });
     $("wb-seek").addEventListener("input", () => { stop(); seek(Number($("wb-seek").value)); });
     $("wb-speed").addEventListener("change", () => { state.speed = Number($("wb-speed").value) || 1; });
+    $("wb-sprite-style")?.addEventListener("change", () => changeSpriteStyle($("wb-sprite-style").value));
     $("wb-zoom").addEventListener("input", drawTimeline);
     $("wb-solo").addEventListener("change", () => { $("wb-previews").classList.toggle("solo", $("wb-solo").checked); });
     $("wb-timeline").addEventListener("click", timelineClick);

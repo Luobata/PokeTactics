@@ -408,6 +408,37 @@ const cases = {
     assert.equal(p.element('battle-seek').disabled, true);
     assert.equal(p.events.fetches.length, 1); p.unchanged();
   },
+  async spriteStyle() {
+    // The engine's stored style (PMD by default) reaches the renderer; the
+    // dialog toggle persists and switches style without reloading the script.
+    const saved = [], styles = [];
+    class StyledRenderer {
+      constructor(canvas, script, options) {
+        Object.assign(this, {duration: 1, ready: Promise.resolve(), script, options, renders: []});
+        styles.push(options.style); StyledRenderer.last = this;
+      }
+      render(t) {this.renders.push(t);}
+      teamTotals() {return {alive: [1, 1], hp: [100, 100]};}
+      log() {return [];}
+      async setStyle(style, pmd) {styles.push(style); this.pmd = pmd;}
+      destroy() {}
+    }
+    const bundle = {base: '/pmd/', species: {26: {}}};
+    const p = await page(fixture({script: true, n: 21}), {...imageOptions,
+      window: {PokeBattle: {BattleRenderer: StyledRenderer, loadPack: async () => ({clips: {}}),
+        spriteStyle: () => 'pmd', loadPmd: async () => bundle, saveSpriteStyle: (style) => saved.push(style)}},
+      globals: {requestAnimationFrame: () => 1, cancelAnimationFrame: () => {}},
+      fetchResponder: async () => ({schema: 'poketactics.battle_script', units: [{idx: 0, sid: 26}]})});
+    await p.click(p.element('fight-button'));
+    assert.equal(StyledRenderer.last.options.style, 'pmd');
+    assert.equal(StyledRenderer.last.options.pmd, bundle);
+    const select = p.element('battle-sprite-style');
+    assert.equal(select.value, 'pmd');
+    await p.change('battle-sprite-style', 'classic');
+    assert.deepEqual(saved, ['classic']);
+    assert.deepEqual(styles, ['pmd', 'classic']);
+    assert.equal(p.events.images.length, 0, 'style changes never fall back to PNG frames');
+  },
   async scriptRenderer() {
     // Script-backed arena rounds draw in the browser: no PNG requests, a
     // display-rate clock, and the same pause / speed / seek / ending flow.

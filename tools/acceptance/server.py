@@ -428,6 +428,35 @@ def run_experiment(name: str) -> str:
     return _EXP_CACHE[key]
 
 
+PMD_ROOT = ROOT / "assets" / "pmd"
+
+
+def _pmd_manifest(species: str) -> dict:
+    """Index + per-species manifests; unknown or missing species fall back to classic."""
+    try:
+        index = json.loads((PMD_ROOT / "index.json").read_text())
+    except (OSError, ValueError):
+        index = {"species": {}, "fallback": {}}
+    try:
+        actions = json.loads((PMD_ROOT / "actions.json").read_text())
+    except (OSError, ValueError):
+        actions = None
+    wanted = [token for token in species.split(",") if token.strip().isdigit()][:64]
+    rows, fallback = {}, {}
+    for token in wanted:
+        key = str(int(token))
+        row = index.get("species", {}).get(key)
+        if row is None:
+            fallback[key] = index.get("fallback", {}).get(key) or {"style": "classic", "reason": "未导入 PMD 精灵"}
+            continue
+        try:
+            rows[key] = json.loads((PMD_ROOT / row["file"]).read_text())
+        except (OSError, ValueError, KeyError):
+            fallback[key] = {"style": "classic", "reason": "PMD 清单缺失"}
+    return {"ok": True, "base": "/pmd/", "commit": index.get("commit"), "license": index.get("license"),
+            "species": rows, "fallback": fallback, "actions": actions}
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, directory=str(ROOT), **kwargs)
@@ -611,6 +640,13 @@ class Handler(SimpleHTTPRequestHandler):
             except ValueError as exc:
                 return self._json({"ok": False, "error": str(exc)}, 400)
             self._json(payload, 200, {"Cache-Control": "no-store"})
+        elif parsed.path == "/api/pmd/manifest":
+            # PMD SpriteCollab frame sprites (docs/60): manifests for the requested
+            # species; anything not imported falls back to the classic cel.
+            return self._json(_pmd_manifest(qs.get("species", [""])[0]), 200,
+                              {"Cache-Control": "no-cache"})
+        elif parsed.path.startswith("/pmd/"):
+            return self._pmd_asset(parsed.path[len("/pmd/"):])
         elif parsed.path == "/api/animation/pack":
             import motion_schema
             self._json({"ok": True, **motion_schema.load_packs()}, 200, {"Cache-Control": "no-store"})
@@ -920,6 +956,25 @@ class Handler(SimpleHTTPRequestHandler):
             super().do_GET()
         else:
             super().do_GET()
+
+    def _pmd_asset(self, name: str) -> None:
+        if not re.fullmatch(r"(portrait/)?\d{4}(-shiny)?\.(png|json)|index\.json|actions\.json|CREDITS\.md", name):
+            return self.send_error(404)
+        path = PMD_ROOT / name
+        if not path.is_file():
+            return self.send_error(404)
+        body = path.read_bytes()
+        kind = {"png": "image/png", "json": "application/json; charset=utf-8",
+                "md": "text/markdown; charset=utf-8"}[name.rsplit(".", 1)[1]]
+        self.send_response(200)
+        self.send_header("Content-Type", kind)
+        self.send_header("Content-Length", str(len(body)))
+        # Content is pinned to one SpriteCollab commit; re-imports change the ETag.
+        self.send_header("Cache-Control", "public, max-age=86400")
+        self.send_header("ETag", '"' + hashlib.sha1(body).hexdigest()[:16] + '"')
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.end_headers()
+        self.wfile.write(body)
 
     def _save_animation_pack(self) -> None:
         """Workbench save: schema-validated JSON into assets/motion|vfx (local only)."""

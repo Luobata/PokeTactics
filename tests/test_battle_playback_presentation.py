@@ -72,6 +72,9 @@ class BattlePlaybackPresentation(unittest.TestCase):
     def test_missing_battle_script_falls_back_to_png_frames(self):
         self.run_scenario('scriptFallback')
 
+    def test_sprite_style_toggle_persists_and_restyles_in_place(self):
+        self.run_scenario('spriteStyle')
+
 
 if __name__ == '__main__':
     unittest.main()

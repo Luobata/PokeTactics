@@ -394,6 +394,8 @@ class MotionSchema(unittest.TestCase):
 
 @unittest.skipUnless(NODE, 'Node.js runs the browser renderer contracts')
 class BrowserRendererNode(unittest.TestCase):
+    def test_pmd_frames_align_hit_frame_to_impact_and_stay_deterministic(self):
+        self.assertIn('OK renderer pmd', self.run_case('pmd'))
     def test_outcomes_and_chains_follow_cast_and_action_indices(self):
         self.assertIn('OK renderer cause links', self.run_case('causeLinks'))
 

@@ -275,8 +275,10 @@
     return unit.melee ? "melee" : "ranged";
   }
 
-  function compile(script, packInput) {
+  function compile(script, packInput, options = {}) {
     const pack = packInput && packInput.clips ? packInput : mergePacks(packInput);
+    const style = options.style === "classic" ? "classic" : "pmd";
+    const pmd = options.pmd || null;
     const rows = script.arena?.rows || 6, cols = script.arena?.cols || 6;
     const duration = Number(script.clock?.duration) || 0;
     const units = {}, order = [];
@@ -309,13 +311,25 @@
         states: (script.states || {})[raw.idx] || [[0, raw.max_hp, 0, 0]],
         statuses: [], hits: [], actions: [], numbers: [], death: null, entrance: 0.03 * (order.length % 6) + (raw.team ? 0 : 0.08),
       };
+      // PMD frame animation replaces the clip transforms of the single cel:
+      // frames already animate, so only physical motion (dash, knockback,
+      // entrance) and a subtle hit wobble remain.
+      const manifest = style === "pmd" && pmd && pmd.species ? pmd.species[String(raw.sid)] : null;
+      if (manifest) {
+        unit.pmd = manifest;
+        unit.clips = neutralClips(unit.clips);
+        unit.parts = {};
+        unit.pmdShiny = !!(manifest.shiny_atlas && (raw.shiny || (raw.star || 1) >= 3));
+        unit.pmdScale = pmdScaleOf(manifest);
+      }
       units[raw.idx] = unit;
       order.push(raw.idx);
     }
     for (const row of script.statuses || []) if (units[row.unit]) units[row.unit].statuses.push(row);
     for (const [t, idx] of script.deaths || []) if (units[idx]) units[idx].death = { t };
     const terrain = script.arena && script.arena.terrain;
-    const plan = { script, pack, units, order, rows, cols, duration, actions: [], hits: [], numbers: [], pops: [],
+    const plan = { script, pack, units, order, rows, cols, duration, actions: [], hits: [], numbers: [], pops: [], style,
+      pmd, pmdActions: (pmd && pmd.actions) || DEFAULT_PMD_ACTIONS,
       terrainCells: terrain && Array.isArray(terrain.cells) ? terrain.cells.filter((c) => Array.isArray(c) && c.length >= 2) : [],
       terrainColor: terrainColor(terrain && terrain.id),
       chains: [], decals: [], cameras: [], banners: [], warp: null, weather: script.weather || [[0, null]] };
@@ -457,6 +471,7 @@
     }
     buildPops(plan);
     buildChains(plan);
+    for (const a of plan.actions) a.pmdAnim = pmdActionAnims(plan, a);
     buildDecals(plan);
     buildWarp(plan);
     buildCameras(plan);
@@ -976,7 +991,14 @@
     const size = (30 + 0.5 * Math.min(64, content)) * SPRITE_SCALE * foot.scale * (1 + 0.05 * ((unit.star || 1) - 1));
     if (frozen) { parts.wobble = 0; parts.head_y = 0; }
     parts.phase = s * 22 + unit.phase * 6;
-    return { foot, pose, facing, dash, acting, flash, alpha, dissolve, ghosts, glow, statuses, frozen, size, parts, phaseName };
+    const out = { foot, pose, facing, dash, acting, flash, alpha, dissolve, ghosts, glow, statuses, frozen, size, parts, phaseName };
+    if (unit.pmd) {
+      out.pmd = pmdFrame(plan, unit, s, out);
+      out.size = out.pmd.bodyHeight;
+      parts.wobble *= 0.35;
+      for (const f of ["lean", "head_x", "head_y", "belly"]) parts[f] = 0;
+    }
+    return out;
   }
   const roundParts = (parts) => {
     const out = {};
@@ -987,11 +1009,189 @@
     for (const st of unit.statuses) if (st.kind === kind && st.start <= s && s < st.end) return st.start;
     return s;
   }
-  function bodyCenter(plan, unit, s, lift = 0.5) {
+  function bodyCenter(plan, unit, s, lift = 0.5, marker = null) {
     const b = unitPose(plan, unit, s);
     const x = b.foot.x + b.pose.dx + (b.dash ? b.dash.x : 0);
     const y = b.foot.y + b.pose.dy + (b.dash ? b.dash.y : 0) - b.size * lift;
+    if (b.pmd) {
+      // Offsets sheet markers: head = projectile origin, center = hit point.
+      const point = pmdPoint(plan, b.pmd, marker || (lift >= 0.8 ? "head" : "center"));
+      if (point && lift < 0.9) return { x: x + point[0], y: y + b.size * lift + point[1], size: b.size, scale: b.foot.scale };
+    }
     return { x, y, size: b.size, scale: b.foot.scale };
+  }
+
+  // ------------------------------------------------------------------ PMD
+  /** Default action mapping; assets/pmd/actions.json overrides it (docs/60). */
+  const DEFAULT_PMD_ACTIONS = {
+    basic: { melee: ["Attack", "Strike", "Swing"], ranged: ["Shoot", "Attack"], tank: ["Attack", "Swing", "Strike"], support: ["Shoot", "Attack"] },
+    cast: { windup: "Charge", default: ["Attack", "Shoot"], support: ["Rotate", "Hop", "Charge"], by_category: {} },
+    hit: "Hurt", stun: "Sleep", stun_statuses: ["sleep"], ko: ["Faint", "Hurt"], idle: "Idle", walk: "Walk", knockback: "Hurt", victory: ["Hop", "Idle"],
+    species: {}, scale: 2.5,
+  };
+  const PMD_OCT_TO_DIR = [2, 1, 0, 7, 6, 5, 4, 3];   // screen octant (0 = right, clockwise) -> PMD row
+  function neutralClips(clips) {
+    const out = {};
+    for (const [key, value] of Object.entries(clips)) {
+      out[key] = typeof value === "object" && value ? { slot: value.slot, period: value.period, phases: {} } : value;
+    }
+    return out;
+  }
+  function pmdScaleOf(manifest) {
+    const idle = manifest.anims.Idle || manifest.anims.Walk || Object.values(manifest.anims)[0];
+    const dir = idle.dirs["0"] || Object.values(idle.dirs)[0];
+    return { bodyHeight: dir.anchor[0] ? dir.anchor[0][1] : idle.tile[1] };
+  }
+  function pmdHas(unit, name) { return !!(unit.pmd && unit.pmd.anims[name]); }
+  function pmdPick(plan, unit, list, salt) {
+    const options = (Array.isArray(list) ? list : [list]).filter((name) => pmdHas(unit, name));
+    if (!options.length) return null;
+    return options[hash(salt, unit.sid) % options.length];
+  }
+  /** Main anim (+ optional windup anim) of one action, from the data mapping. */
+  function pmdActionAnims(plan, a) {
+    const unit = plan.units[a.actor];
+    if (!unit || !unit.pmd) return null;
+    const map = plan.pmdActions;
+    const override = (map.species || {})[String(unit.sid)] || {};
+    if (a.isCast) {
+      const category = a.skill && a.skill.category;
+      const list = override.cast || (a.supportive ? map.cast.support : (map.cast.by_category || {})[category]) || map.cast.default;
+      const main = pmdPick(plan, unit, list, "cast" + (category || "")) || pmdPick(plan, unit, map.cast.default, "cast");
+      const windup = pmdHas(unit, override.windup || map.cast.windup) ? (override.windup || map.cast.windup) : null;
+      return { main, windup };
+    }
+    const kind = a.melee ? (unit.arche === "tank" ? "tank" : "melee") : unit.arche === "support" ? "support" : "ranged";
+    const list = override["basic_" + kind] || override.basic || map.basic[kind] || map.basic.melee;
+    return { main: pmdPick(plan, unit, list, "basic" + kind) || pmdPick(plan, unit, ["Attack"], "basic"), windup: null };
+  }
+  const ticks = (anim) => anim.durations.reduce((sum, d) => sum + d, 0);
+  function loopFrame(anim, t) {
+    const total = ticks(anim);
+    let tick = ((Math.floor(t * 60) % total) + total) % total;
+    for (let i = 0; i < anim.durations.length; i++) { tick -= anim.durations[i]; if (tick < 0) return i; }
+    return 0;
+  }
+  function holdFrame(anim, t) {
+    let tick = Math.floor(t * 60);
+    for (let i = 0; i < anim.durations.length; i++) { tick -= anim.durations[i]; if (tick < 0) return i; }
+    return anim.durations.length - 1;
+  }
+  /** Frame inside [from, to) of a segment of frames, warped to fill [t0, t1). */
+  function segmentFrame(anim, from, to, t0, t1, s) {
+    if (to <= from) return Math.min(from, anim.durations.length - 1);
+    const weights = anim.durations.slice(from, to);
+    const total = weights.reduce((a, b) => a + b, 0) || 1;
+    let target = clamp01((s - t0) / Math.max(1e-6, t1 - t0)) * total;
+    for (let i = 0; i < weights.length; i++) { target -= weights[i]; if (target < 0) return from + i; }
+    return to - 1;
+  }
+  /** Timeline phase -> frame. HitFrame lands exactly at the authoritative
+   *  impact; RushFrame at release; ReturnFrame..end fills the recovery. */
+  function actionFrame(anim, a, s, windup) {
+    const n = anim.durations.length;
+    const hit = Number.isInteger(anim.hit) ? clamp(anim.hit, 0, n - 1) : Math.max(0, Math.round(n * 0.55) - 1);
+    const rush = Number.isInteger(anim.rush) ? clamp(anim.rush, 0, hit) : Math.min(hit, Math.round(hit / 2));
+    if (s >= a.impact) return segmentFrame(anim, hit, n, a.impact, a.end, s);
+    // Never show the hit frame before the authoritative impact.
+    const early = (f) => (hit > 0 ? Math.min(f, hit - 1) : 0);
+    if (windup) return early(segmentFrame(anim, 0, hit, a.release, a.impact, s));
+    if (s < a.release) return early(segmentFrame(anim, 0, rush, a.start, a.release, s));
+    return early(segmentFrame(anim, rush, hit, a.release, a.impact, s));
+  }
+  function screenDir(dx, dy) {
+    const oct = ((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) % 8) + 8) % 8;
+    return PMD_OCT_TO_DIR[oct];
+  }
+  function currentTarget(plan, unit, s) {
+    let last = null, next = null;
+    for (const a of unit.actions) {
+      if (a.secondary || a.terrain) continue;
+      if (a.start <= s) last = a; else { next = a; break; }
+    }
+    const pick = (a) => a && plan.units[a.target] && a.target !== unit.idx ? plan.units[a.target] : null;
+    const chosen = (last && s <= last.end ? pick(last) : null) || pick(next) || pick(last);
+    if (chosen && (!chosen.death || chosen.death.t > s)) return chosen;
+    let best = null, bestD = 1e9;
+    const here = unitFoot(plan, unit, s);
+    for (const idx of plan.order) {
+      const other = plan.units[idx];
+      if (other.team === unit.team || (other.death && other.death.t <= s)) continue;
+      const f = unitFoot(plan, other, s), d = Math.hypot(f.x - here.x, f.y - here.y);
+      if (d < bestD) { best = other; bestD = d; }
+    }
+    return best || chosen;
+  }
+  function pmdFrame(plan, unit, s, b) {
+    const map = plan.pmdActions, m = unit.pmd;
+    let name = null, frame = 0, dirVec = null, loopT = s + unit.phase * 3;
+    const a = b.acting;
+    // facing: toward the current target; walking faces the movement
+    const target = currentTarget(plan, unit, s);
+    if (target) {
+      const f = unitFoot(plan, target, Math.min(s, a ? a.impact : s));
+      dirVec = [f.x - b.foot.x, f.y - b.foot.y];
+    }
+    const pos = unit.positions, i = Math.max(0, bsearchLast(pos, s));
+    if (b.foot.moving > 0 && i > 0) {
+      const p0 = project(pos[i - 1][1], pos[i - 1][2], plan.rows, plan.cols), p1 = project(pos[i][1], pos[i][2], plan.rows, plan.cols);
+      if (Math.hypot(p1.x - p0.x, p1.y - p0.y) > 1) dirVec = [p1.x - p0.x, p1.y - p0.y];
+    }
+    const recentHit = unit.hits.filter((h) => h.t <= s && s - h.t < 0.32).pop();
+    const statuses = b.statuses || [];
+    if (unit.death && s >= unit.death.t) {
+      name = pmdPick(plan, unit, map.ko, "ko");
+      if (name) frame = holdFrame(m.anims[name], s - unit.death.t);
+    } else if (b.frozen) {
+      name = pmdHas(unit, map.hit) ? map.hit : map.idle; frame = 0;
+    } else if (statuses.some((k) => (map.stun_statuses || ["sleep"]).includes(k)) && pmdHas(unit, map.stun) && !a) {
+      name = map.stun; frame = loopFrame(m.anims[name], loopT);
+    } else if (a && a.pmdAnim && a.pmdAnim.main && !(recentHit && s < a.release)) {
+      const main = m.anims[a.pmdAnim.main];
+      if (a.pmdAnim.windup && s < a.release) {
+        name = a.pmdAnim.windup;
+        frame = segmentFrame(m.anims[name], 0, m.anims[name].durations.length, a.start, a.release, s);
+      } else {
+        name = a.pmdAnim.main;
+        frame = actionFrame(main, a, s, !!a.pmdAnim.windup);
+      }
+    } else if (recentHit && pmdHas(unit, map.knockback)) {
+      name = map.knockback; frame = holdFrame(m.anims[name], s - recentHit.t);
+    } else if (b.foot.moving > 0 && pmdHas(unit, map.walk)) {
+      name = map.walk; frame = loopFrame(m.anims[name], loopT);
+    } else {
+      const result = plan.script.result;
+      const won = result && result.winner === unit.team && s > (result.t || plan.duration) - 0.6;
+      name = (won ? pmdPick(plan, unit, map.victory, "win") : null) || (pmdHas(unit, map.idle) ? map.idle : Object.keys(m.anims)[0]);
+      frame = loopFrame(m.anims[name], loopT);
+    }
+    if (!name) name = Object.keys(m.anims)[0];
+    const anim = m.anims[name];
+    let dir = dirVec ? screenDir(dirVec[0], dirVec[1]) : (unit.team ? 0 : 4);
+    let flip = false;
+    if (anim.single_dir) dir = 0;
+    else if (m.mirror[String(dir)] != null) { flip = true; dir = m.mirror[String(dir)]; }
+    if (!anim.dirs[String(dir)]) dir = Number(Object.keys(anim.dirs)[0]);
+    frame = clamp(frame, 0, anim.durations.length - 1);
+    const scale = pmdPixelScale(plan, b.foot.scale);
+    return { sid: unit.sid, anim: name, dir, frame, flip, shiny: unit.pmdShiny, scale,
+      bodyHeight: unit.pmdScale.bodyHeight * scale };
+  }
+  function pmdPixelScale(plan, depth) {
+    // ~2x integer near the camera; quantised to quarter steps to stay crisp
+    return Math.round((plan.pmdActions.scale || 2.25) * depth * 4) / 4;
+  }
+  function pmdPoint(plan, f, key) {
+    const unit = Object.values(plan.units).find((u) => u.sid === f.sid && u.pmd);
+    if (!unit) return null;
+    const dirRow = unit.pmd.anims[f.anim].dirs[String(f.dir)];
+    const p = dirRow && dirRow[key] && dirRow[key][f.frame], anchor = dirRow && dirRow.anchor[f.frame];
+    if (!p || !anchor) return null;
+    return [(p[0] - anchor[0]) * f.scale * (f.flip ? -1 : 1), (p[1] - anchor[1]) * f.scale];
+  }
+  function pmdAtlasUrl(plan, unit, shiny) {
+    const base = (plan.pmd && plan.pmd.base) || "/pmd/";
+    return base + (shiny ? unit.pmd.shiny_atlas : unit.pmd.atlas);
   }
 
   // ------------------------------------------------------------------ frame
@@ -1200,7 +1400,7 @@
         const gs = s - g * 0.03;
         if (gs < b.acting.release) break;
         const gb = unitPose(plan, unit, gs);
-        items.push({ op: "sprite", idx: unit.idx, ghost: true, x: gb.foot.x + gb.pose.dx + (gb.dash ? gb.dash.x : 0), y: gb.foot.y + gb.pose.dy + (gb.dash ? gb.dash.y : 0),
+        items.push({ op: "sprite", idx: unit.idx, ghost: true, pmd: gb.pmd || null, x: gb.foot.x + gb.pose.dx + (gb.dash ? gb.dash.x : 0), y: gb.foot.y + gb.pose.dy + (gb.dash ? gb.dash.y : 0),
           w: b.size * gb.pose.sx, h: b.size * gb.pose.sy, angle: gb.pose.angle, flip: b.facing > 0, alpha: 0.32 / g, tint: paletteOf(plan, b.acting.type, b.acting.type)[2], tintA: 0.8, layer });
       }
     }
@@ -1216,7 +1416,7 @@
     else if (st.includes("burn")) { tint = "#ff7a3a"; tintA = 0.2 + 0.08 * Math.sin(s * 9); }
     else if (st.includes("paralysis")) { tint = "#ffe45a"; tintA = rand("pz", unit.idx, Math.floor(s * 8)) < 0.3 ? 0.35 : 0.08; }
     else if (st.includes("wet")) { tint = "#5ab4ff"; tintA = 0.14; }
-    items.push({ op: "sprite", idx: unit.idx, x: body.x, y: body.y, w: b.size * b.pose.sx, h: b.size * b.pose.sy, angle: b.pose.angle, parts: roundParts(b.parts),
+    items.push({ op: "sprite", idx: unit.idx, x: body.x, y: body.y, w: b.size * b.pose.sx, h: b.size * b.pose.sy, angle: b.pose.angle, parts: roundParts(b.parts), pmd: b.pmd || null,
       flip: b.facing > 0, alpha: b.alpha, flash: b.flash, tint, tintA, dissolve: b.dissolve, seed: unit.idx, layer });
     // status accents
     const top = body.y - b.size;
@@ -1627,7 +1827,46 @@
   const smooth = (x) => { const t = clamp01(x); return t * t * (3 - 2 * t); };
   const partsActive = (parts) => !!parts && (Math.abs(parts.lean || 0) > 0.05 || Math.abs(parts.head_x || 0) > 0.05 || Math.abs(parts.head_y || 0) > 0.05 || Math.abs(parts.belly || 0) > 0.2 || Math.abs(parts.wobble || 0) > 0.05);
 
+  function drawPmdSprite(ctx, plan, it, images) {
+    const unit = plan.units[it.idx], f = it.pmd;
+    const img = images[pmdAtlasUrl(plan, unit, f.shiny)] || images[pmdAtlasUrl(plan, unit, false)];
+    if (!img) return false;
+    const anim = unit.pmd.anims[f.anim], row = anim.dirs[String(f.dir)];
+    const [sx, sy] = row.xy[f.frame], [tw, th] = anim.tile, anchor = row.anchor[f.frame];
+    const sc = f.scale * (it.w / Math.max(1e-6, f.bodyHeight) || 1);
+    ctx.save();
+    ctx.translate(Math.round(it.x), Math.round(it.y));
+    ctx.rotate((it.angle || 0) * Math.PI / 180);
+    if (f.flip) ctx.scale(-1, 1);
+    ctx.imageSmoothingEnabled = false;
+    const box = { x: sx, y: sy, w: tw, h: th };
+    const dx = -anchor[0] * sc, dy = -anchor[1] * sc, w = tw * sc, h = th * sc;
+    const bands = partsActive(it.parts);
+    const draw = (source, alpha) => {
+      ctx.globalAlpha = alpha;
+      if (bands) { ctx.save(); ctx.translate(dx + w / 2, dy + h); drawBands(ctx, source, box, w, h, it.parts); ctx.restore(); }
+      else ctx.drawImage(source, sx, sy, tw, th, dx, dy, w, h);
+    };
+    if (it.ghost) draw(spriteVariant(img, "tint", it.tint) || img, it.alpha);
+    else {
+      if (it.dissolve > 0) {
+        const n = 10;
+        for (let b = 0; b < n; b++) {
+          if (rand("dis", it.seed, b) * 0.6 + (b / n) * 0.4 < it.dissolve) continue;
+          ctx.globalAlpha = it.alpha;
+          ctx.drawImage(img, sx, sy + th * b / n, tw, th / n, dx + it.dissolve * (rand("dx", b) - 0.5) * 20, dy + h * b / n - it.dissolve * 12 * rand("dy", b), w, h / n + 0.5);
+        }
+      } else draw(img, it.alpha);
+      if (unit.pmdShiny && !unit.pmd.shiny_atlas) draw(spriteVariant(img, "tint", "#ffe08a"), it.alpha * 0.18);
+      if (it.tint && it.tintA > 0 && !it.dissolve) draw(spriteVariant(img, "tint", it.tint), it.alpha * it.tintA);
+      if (it.flash > 0 && !it.dissolve) draw(spriteVariant(img, "white"), it.alpha * it.flash);
+    }
+    ctx.restore();
+    return true;
+  }
+
   function drawSprite(ctx, plan, it, images) {
+    if (it.pmd && drawPmdSprite(ctx, plan, it, images)) return;
     const unit = plan.units[it.idx];
     const img = images[unit.sprite];
     ctx.save();
@@ -2316,9 +2555,20 @@
     // speed lines
     ctx.strokeStyle = hexA(it.pal[0], 0.35); ctx.lineWidth = 2;
     for (let i = 0; i < 9; i++) { const ly = y + 12 + i * 8, off = (k * 900 + i * 137) % W; ctx.beginPath(); ctx.moveTo(off, ly); ctx.lineTo(off + 120, ly - 4); ctx.stroke(); }
-    const img = images[unit.sprite];
+    const portrait = unit.pmd && unit.pmd.portrait ? images[((plan.pmd && plan.pmd.base) || "/pmd/") + unit.pmd.portrait] : null;
+    const img = portrait || images[unit.sprite];
     const px = ally ? 210 : W - 210;
-    if (img && (img.naturalWidth || img.width)) {
+    if (portrait && (portrait.naturalWidth || portrait.width)) {
+      // PMD 40x40 portrait: an integer-scaled framed card (no mirroring; the
+      // portrait art faces the viewer).
+      const size = 120, pulse = 1 + 0.03 * Math.sin(k * 20), x = px - size / 2, top = y + h / 2 - size / 2 - 6;
+      ctx.save(); ctx.imageSmoothingEnabled = false;
+      ctx.translate(px, top + size / 2); ctx.scale(pulse, pulse); ctx.translate(-px, -(top + size / 2));
+      ctx.fillStyle = hexA(it.pal[3], 0.95); roundRect(ctx, x - 6, top - 6, size + 12, size + 12, 10); ctx.fill();
+      ctx.strokeStyle = "#fffbe8"; ctx.lineWidth = 3; ctx.stroke();
+      ctx.drawImage(portrait, x, top, size, size);
+      ctx.restore();
+    } else if (img && (img.naturalWidth || img.width)) {
       ctx.save(); ctx.beginPath(); ctx.rect(0, y - 40, W, h + 40); ctx.clip();
       ctx.imageSmoothingEnabled = false;
       const size = 168, pulse = 1 + 0.04 * Math.sin(k * 20);
@@ -2401,6 +2651,8 @@
       this.images = {};
       this.hover = null;
       this.selected = null;
+      this.style = options.style === "classic" ? "classic" : "pmd";
+      this.pmd = options.pmd || null;
       this.setScript(script, options.pack);
       this._onMove = (ev) => {
         const rect = canvas.getBoundingClientRect();
@@ -2415,20 +2667,36 @@
     setScript(script, pack) {
       this.script = script;
       this.pack = pack ? (pack.clips ? pack : mergePacks(pack)) : (this.pack || mergePacks(null));
-      this.plan = compile(script, this.pack);
+      this.plan = compile(script, this.pack, { style: this.style, pmd: this.pmd });
       this.plan.boxes = this.boxes ||= {};
       this.ready = this._loadImages();
     }
     setPack(pack) {
       this.pack = pack.clips ? pack : mergePacks(pack);
-      this.plan = compile(this.script, this.pack);
+      this.plan = compile(this.script, this.pack, { style: this.style, pmd: this.pmd });
       this.plan.boxes = this.boxes ||= {};
       if (this.lastT != null) this.render(this.lastT);
+    }
+    /** Switch sprite style ('pmd' | 'classic') without touching the timeline. */
+    setStyle(style, pmd) {
+      this.style = style === "classic" ? "classic" : "pmd";
+      if (pmd !== undefined) this.pmd = pmd;
+      this.plan = compile(this.script, this.pack, { style: this.style, pmd: this.pmd });
+      this.plan.boxes = this.boxes ||= {};
+      this.ready = this._loadImages();
+      if (this.lastT != null) this.render(this.lastT);
+      return this.ready;
     }
     get duration() { return this.plan.playbackDuration; }
     _loadImages() {
       const urls = [...new Set((this.script.units || []).map((u) => u.sprite))];
-      return Promise.all(urls.map((url) => this.images[url] ? Promise.resolve() : new Promise((resolve) => {
+      for (const unit of Object.values(this.plan.units)) {
+        if (!unit.pmd) continue;
+        urls.push(pmdAtlasUrl(this.plan, unit, false));
+        if (unit.pmdShiny) urls.push(pmdAtlasUrl(this.plan, unit, true));
+        if (unit.pmd.portrait) urls.push(((this.pmd && this.pmd.base) || "/pmd/") + unit.pmd.portrait);
+      }
+      return Promise.all([...new Set(urls)].map((url) => this.images[url] ? Promise.resolve() : new Promise((resolve) => {
         if (typeof Image !== "function") return resolve();
         const img = new Image();
         img.onload = () => {
@@ -2495,6 +2763,35 @@
     }
   }
 
+  /** Sprite style: ?sprites=classic|pmd beats localStorage 'poketactics.sprite.style'; default pmd. */
+  const STYLE_KEY = "poketactics.sprite.style";
+  function spriteStyle(search) {
+    try {
+      const query = new URLSearchParams(search != null ? search : (typeof location !== "undefined" ? location.search : ""));
+      const asked = query.get("sprites");
+      if (asked === "classic" || asked === "pmd") return asked;
+      const saved = typeof localStorage !== "undefined" ? localStorage.getItem(STYLE_KEY) : null;
+      if (saved === "classic" || saved === "pmd") return saved;
+    } catch (error) { /* storage blocked: default */ }
+    return "pmd";
+  }
+  function saveSpriteStyle(style) {
+    try { if (typeof localStorage !== "undefined") localStorage.setItem(STYLE_KEY, style === "classic" ? "classic" : "pmd"); } catch (error) { /* ignore */ }
+  }
+  /** Manifests for the species in a script (one request; missing species fall back to classic). */
+  async function loadPmd(script, fetchImpl = typeof fetch === "function" ? fetch : null) {
+    if (!fetchImpl) return null;
+    const ids = [...new Set((script.units || []).map((u) => u.sid))].join(",");
+    try {
+      const response = await fetchImpl(`/api/pmd/manifest?species=${ids}`, { cache: "force-cache" });
+      if (!response.ok) throw new Error(String(response.status));
+      const data = await response.json();
+      return { base: data.base || "/pmd/", species: data.species || {}, fallback: data.fallback || {}, actions: data.actions || null };
+    } catch (error) {
+      return null;
+    }
+  }
+
   async function loadPack(fetchImpl = typeof fetch === "function" ? fetch : null) {
     if (!fetchImpl) return mergePacks(null);
     try {
@@ -2509,6 +2806,6 @@
   return {
     W, H, EASE, ease, hash, rand, samplePortable, sampleTrack, mergePacks, compile, frame, paint, toSim, toPlayback,
     project, monotony, teamTotals, logEntries, unitPose, BattleRenderer, loadPack, TYPE_COLORS, STATUS_LOOK,
-    resolveRecipe, sampleParts, PART_FIELDS,
+    resolveRecipe, sampleParts, PART_FIELDS, loadPmd, spriteStyle, saveSpriteStyle, STYLE_KEY, DEFAULT_PMD_ACTIONS,
   };
 });

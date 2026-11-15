@@ -1,0 +1,58 @@
+{
+ "schema_version": 1,
+ "kind": "pmd_actions",
+ "description": "战斗时间轴阶段 → PMD 动画的映射。列表按优先级给出候选，渲染器只在该物种已导入的动画里按物种稳定挑选一个；缺失时回退到下一项（docs/60）。",
+ "scale": 2.5,
+ "basic": {
+  "melee": ["Attack", "Strike", "Swing"],
+  "tank": ["Attack", "Swing", "Strike"],
+  "ranged": ["Shoot", "Attack"],
+  "support": ["Shoot", "Attack"]
+ },
+ "cast": {
+  "windup": "Charge",
+  "default": ["Attack", "Shoot"],
+  "support": ["Rotate", "Hop", "Charge"],
+  "by_category": {
+   "burst": ["Shoot", "Attack"],
+   "technique": ["Shoot", "Attack"],
+   "area": ["Shoot", "Rotate"],
+   "chain": ["Shoot"],
+   "combo": ["Double", "Attack"],
+   "drain": ["Shoot"],
+   "lifesteal": ["Shoot"],
+   "energy": ["Rotate", "Shoot"],
+   "heal": ["Rotate", "Hop"],
+   "rescue": ["Hop", "Rotate"],
+   "cleanse": ["Rotate", "Hop"],
+   "clear": ["Rotate", "Swing"],
+   "shield": ["Rotate", "Charge"],
+   "guard": ["Rotate", "Charge"],
+   "displacement": ["Strike", "Attack"],
+   "root": ["Swing", "Shoot"],
+   "terrain": ["Rotate", "Shoot"],
+   "pursuit": ["Strike", "Attack"],
+   "assassin": ["Strike", "Swing"],
+   "execute": ["Strike", "Swing"],
+   "taunt": ["Hop", "Rotate"],
+   "pierce": ["Shoot"],
+   "poison": ["Shoot"],
+   "vulnerability": ["Strike", "Attack"],
+   "retaliation": ["Rotate", "Charge"],
+   "control": ["Shoot", "Swing"]
+  }
+ },
+ "hit": "Hurt",
+ "knockback": "Hurt",
+ "stun": "Sleep",
+ "stun_statuses": ["sleep"],
+ "ko": ["Faint", "Hurt"],
+ "idle": "Idle",
+ "walk": "Walk",
+ "victory": ["Hop", "Idle"],
+ "species": {
+  "68": {"basic_melee": ["Double", "Strike"], "note": "怪力四臂：连打"},
+  "106": {"basic_melee": ["Strike", "Attack"], "note": "飞腿郎：踢击"},
+  "65": {"windup": "Charge", "cast": ["Rotate", "Shoot"], "note": "胡地：念力旋转"}
+ }
+}

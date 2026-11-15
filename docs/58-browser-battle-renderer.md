@@ -103,6 +103,13 @@ sim/combat.py Battle ──events──▶ AnimationTimeline（start/release/imp
   - `kind:'move'`（开场跃进、撤退）只显示标签，不显示数值 0；位移本身由权威的 `move` 事件驱动。
   - `meta.terrain` 的格子以 `(localRow, col)` 给出，脚本将其换算成全局 `[col, row, team]`：我方行号 = 3+localRow，敌方行号 = 2−localRow 且列号镜像为 5−col。棋盘按地形类型着色，并用虚线描边。
 
+### 2.3 精灵画风（docs/60）
+
+- 默认使用 PMD SpriteCollab 的逐帧动画精灵（`style: 'pmd'`），可以切换回经典正面立绘（`style: 'classic'`）。
+- `compile(script, pack, {style, pmd})`：PMD 单位改为逐帧动画，HitFrame 对齐 impact，按 8 个方向朝向目标，用 Offsets 锚点定位特效；时间轴不变。
+- 切换方式：`/play` 战斗对话框的「画风」下拉、`?sprites=`、`localStorage['poketactics.sprite.style']`。
+- 数据、映射与扩展方式见 [docs/60](60-pmd-sprites.md)。
+
 ### 2.2 第二轮（2026-11-15）：逐技能特效、分件形变、因果编排
 
 **因果结果（outcomes）**

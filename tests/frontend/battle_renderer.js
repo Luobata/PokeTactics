@@ -13,6 +13,20 @@ const packs = {motion: readDir('assets/motion'), vfx: readDir('assets/vfx')};
 const script = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 const scenario = process.argv[3];
 const freshPlan = () => R.compile(JSON.parse(JSON.stringify(script)), R.mergePacks(JSON.parse(JSON.stringify(packs))));
+/** PMD bundle straight from assets/pmd (what /api/pmd/manifest serves). */
+function pmdBundle() {
+  const dir = path.join(root, 'assets/pmd');
+  const index = JSON.parse(fs.readFileSync(path.join(dir, 'index.json'), 'utf8'));
+  const species = {}, fallback = {};
+  for (const unit of script.units) {
+    const row = index.species[String(unit.sid)];
+    if (row) species[unit.sid] = JSON.parse(fs.readFileSync(path.join(dir, row.file), 'utf8'));
+    else fallback[unit.sid] = index.fallback[String(unit.sid)] || {style: 'classic', reason: 'missing'};
+  }
+  const actions = JSON.parse(fs.readFileSync(path.join(dir, 'actions.json'), 'utf8'));
+  return {base: '/pmd/', species, fallback, actions};
+}
+const pmdPlan = () => R.compile(JSON.parse(JSON.stringify(script)), R.mergePacks(JSON.parse(JSON.stringify(packs))), {style: 'pmd', pmd: pmdBundle()});
 
 const cases = {
   determinism() {
@@ -71,6 +85,53 @@ const cases = {
       assert.equal(totals.hp[team], hp);
     }
     console.log('OK renderer invariants');
+  },
+  pmd() {
+    const bundle = pmdBundle();
+    const plan = pmdPlan();
+    // every unit resolves to PMD frames or an explicit classic fallback
+    for (const unit of script.units) {
+      assert.ok(plan.units[unit.idx].pmd || bundle.fallback[unit.sid], `#${unit.sid} has neither PMD nor a fallback`);
+    }
+    const pmdUnits = Object.values(plan.units).filter((u) => u.pmd);
+    assert.ok(pmdUnits.length >= script.units.length - 1, 'nearly every arena unit has PMD frames');
+    // HitFrame lands exactly on the authoritative impact (impacts never move)
+    const byIndex = new Map(script.actions.map((a) => [a.i, a]));
+    let checked = 0;
+    for (const a of plan.actions) {
+      const unit = plan.units[a.actor];
+      if (!unit.pmd || a.secondary || a.terrain || !a.pmdAnim || !a.pmdAnim.main) continue;
+      assert.equal(a.impact, byIndex.get(a.i).impact);
+      const anim = unit.pmd.anims[a.pmdAnim.main];
+      if (!Number.isInteger(anim.hit) || unit.death && unit.death.t <= a.end) continue;
+      const at = R.unitPose(plan, unit, a.impact);
+      if (!at.pmd || at.pmd.anim !== a.pmdAnim.main) continue;
+      assert.equal(at.pmd.frame, anim.hit, `action ${a.i}: hit frame at impact`);
+      if (anim.hit > 0) {
+        const before = R.unitPose(plan, unit, a.impact - 1e-4);
+        if (before.pmd.anim === a.pmdAnim.main) assert.ok(before.pmd.frame < anim.hit, `action ${a.i}: before impact`);
+      }
+      checked++;
+    }
+    assert.ok(checked >= 10, `checked ${checked} actions`);
+    // determinism with style: scrubbing order does not change draw lists
+    const times = [0.2, 1.1, plan.duration * 0.4, plan.duration * 0.75];
+    const fwd = times.map((t) => JSON.stringify(R.frame(plan, t)));
+    const other = pmdPlan();
+    const back = times.slice().reverse().map((t) => JSON.stringify(R.frame(other, t))).reverse();
+    assert.deepEqual(fwd, back);
+    const sprites = JSON.parse(fwd[1]).items.filter((it) => it.op === 'sprite' && it.pmd);
+    assert.ok(sprites.length > 0 && sprites.every((it) => it.pmd.dir >= 0 && it.pmd.dir <= 4), 'stored directions only');
+    // style switch keeps the timeline: same actions/impacts, classic sprites
+    const classic = freshPlan();
+    assert.deepEqual(classic.actions.map((a) => [a.i, a.start, a.release, a.impact, a.end]),
+      plan.actions.map((a) => [a.i, a.start, a.release, a.impact, a.end]));
+    assert.ok(R.frame(classic, times[1]).items.filter((it) => it.op === 'sprite').every((it) => !it.pmd));
+    // style param
+    assert.equal(R.spriteStyle('?sprites=classic'), 'classic');
+    assert.equal(R.spriteStyle('?sprites=pmd'), 'pmd');
+    assert.equal(R.spriteStyle(''), 'pmd');
+    console.log('OK renderer pmd', pmdUnits.length, checked);
   },
   causeLinks() {
     const plan = freshPlan();
