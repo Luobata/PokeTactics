@@ -49,7 +49,10 @@ class PlayPageRoutes(unittest.TestCase):
 
     def test_source_assets_are_served_with_their_exact_mime_types(self):
         for filename, mime in (("play.css", "text/css"),
-                               ("play.js", "text/javascript")):
+                               ("play.js", "text/javascript"),
+                               ("play_depth.js", "text/javascript"),
+                               ("play_layout.js", "text/javascript"),
+                               ("play_layout.css", "text/css")):
             with self.subTest(filename=filename), self.get("/play/assets/" + filename) as response:
                 expected = (ROOT / "tools" / "acceptance" / filename).read_bytes()
                 self.assertEqual(response.read(), expected)

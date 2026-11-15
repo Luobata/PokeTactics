@@ -2,7 +2,7 @@
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#202c29" />
     <meta
       name="description"
@@ -11,10 +11,12 @@
     <title>PokeTactics — 精灵战术实验室</title>
     <link rel="stylesheet" href="/play/assets/play.css" />
     <link rel="stylesheet" href="/play/assets/battle.css" />
+    <link rel="stylesheet" href="/play/assets/play_layout.css" />
+    <script src="/play/assets/play_layout.js" defer></script>
     <script src="/play/assets/play_depth.js" defer></script>
     <script src="/play/assets/play.js" defer></script>
   </head>
-  <body>
+  <body class="stage-ui">
     <svg
       class="icon-library"
       aria-hidden="true"
@@ -88,6 +90,41 @@
       <symbol id="i-plus" viewBox="0 0 24 24">
         <path d="M12 4v16M4 12h16" />
       </symbol>
+      <symbol id="i-mountain" viewBox="0 0 24 24">
+        <path d="m2 20 7-12 4 6 3-4 6 10H2Z" />
+      </symbol>
+      <symbol id="i-bag" viewBox="0 0 24 24">
+        <path d="M5 8h14l-1 12H6L5 8Zm4 0V6a3 3 0 0 1 6 0v2" />
+      </symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24">
+        <path d="M12 2v6m0 8v6M2 12h6m8 0h6M5 5l4 4m6 6 4 4M19 5l-4 4m-6 6-4 4" />
+      </symbol>
+      <symbol id="i-link" viewBox="0 0 24 24">
+        <path d="M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1m2 4a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1" />
+      </symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24">
+        <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" />
+        <circle cx="12" cy="12" r="3" />
+      </symbol>
+      <symbol id="i-flag" viewBox="0 0 24 24">
+        <path d="M5 21V4m0 0h11l-2 4 2 4H5" />
+      </symbol>
+      <symbol id="i-scroll" viewBox="0 0 24 24">
+        <path d="M7 3h11a2 2 0 0 1 2 2v2h-4M7 3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7M9 9h5m-5 4h5m-5 4h3" />
+      </symbol>
+      <symbol id="i-close" viewBox="0 0 24 24">
+        <path d="m6 6 12 12M18 6 6 18" />
+      </symbol>
+      <symbol id="i-crown" viewBox="0 0 24 24">
+        <path d="m3 8 4 4 5-7 5 7 4-4-2 11H5L3 8Z" />
+      </symbol>
+      <symbol id="i-info" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 11v6m0-9.5v.5" />
+      </symbol>
+      <symbol id="i-expand" viewBox="0 0 24 24">
+        <path d="m6 15 6-6 6 6" />
+      </symbol>
     </svg>
 
     <nav class="rail" aria-label="主要导航">
@@ -120,142 +157,58 @@
     </nav>
 
     <div class="app">
-      <header class="topbar">
-        <a href="/" class="wordmark"
-          >POKÉ<span>TACTICS</span><span class="beta">试玩版</span></a
-        >
-        <div class="topbar-right">
-          <span class="local-badge"><i></i> 单人冒险 · 7 位 AI 对手</span
-          ><button
-            id="mobile-help-button"
-            class="icon-button mobile-help-button"
-            title="玩法指南"
-            aria-label="打开玩法指南"
-          >
-            <svg><use href="#i-book" /></svg></button
-          ><button
-            id="backup-button"
-            class="icon-button"
-            title="下载当前对局存档"
-            aria-label="下载当前对局存档"
-          >
-            <svg><use href="#i-download" /></svg></button
-          ><button id="new-button" class="text-button" data-restart>
-            <svg><use href="#i-refresh" /></svg> 重开一局
-          </button>
-        </div>
-      </header>
-
-      <main>
-        <section class="page-heading">
-          <div>
-            <div class="eyebrow">YOUR NEXT GREAT ADVENTURE</div>
-            <h1>小精灵，大策略<span class="title-dot">.</span></h1>
-            <p>招募你的伙伴，让每一次相遇成为制胜的一步。</p>
-          </div>
-          <div class="round-card">
-            <div class="round-icon">
-              <svg><use href="#i-swords" /></svg>
-            </div>
-            <div>
-              <span class="round-label">ROUND <b id="round-number">01</b></span
-              ><span class="phase" id="phase-label">准备阶段</span>
-            </div>
-            <span class="phase-dot"></span>
-          </div>
-        </section>
-
-        <div class="game-layout">
-          <aside class="left-column">
-            <section class="trainer-card" aria-label="训练家状态">
-              <div class="trainer-identity">
-                <div class="player-avatar">
-                  <img
-                    src="/demo/sprite/25.png"
-                    alt="皮卡丘"
-                    width="56"
-                    height="56"
-                  />
-                </div>
-                <div>
-                  <span class="mini-label">TRAINER</span>
-                  <h2>新叶训练家</h2>
-                  <span class="player-badge">就是你</span>
-                </div>
+      <main class="stage-main">
+        <h1 class="sr-only">PokeTactics 宝可梦自走棋 · 准备阶段</h1>
+        <div class="game-layout stage-shell" id="stage-shell" data-panel="">
+          <section class="center-column stage" aria-label="棋盘与准备入口">
+            <header class="stage-hud" aria-label="对局状态">
+              <div class="hud-round round-card" title="当前回合与阶段">
+                <span class="round-label">R<b id="round-number">01</b></span
+                ><span class="phase" id="phase-label">准备阶段</span>
               </div>
-              <div class="health-row">
-                <span
-                  ><svg class="icon"><use href="#i-heart" /></svg> 生命值</span
-                ><strong><span id="hp">—</span><small> / 100</small></strong>
+              <div class="hud-stat hud-hp" title="生命值（满 100）">
+                <svg class="icon" aria-hidden="true"><use href="#i-heart" /></svg
+                ><strong id="hp">—</strong
+                ><span class="hud-meter" aria-hidden="true"><i id="hp-fill"></i></span>
+                <span class="sr-only">生命值</span>
               </div>
-              <div class="health-track"><i id="hp-fill"></i></div>
-              <div class="trainer-stats">
-                <div>
-                  <svg class="icon coin-icon"><use href="#i-coin" /></svg
-                  ><strong id="gold">—</strong><span>金币</span>
-                </div>
-                <div>
-                  <svg class="icon"><use href="#i-users" /></svg
-                  ><strong id="pop">—</strong><span>上场 / 容量</span>
-                </div>
+              <div class="hud-stat hud-gold" title="金币">
+                <svg class="icon coin-icon" aria-hidden="true"><use href="#i-coin" /></svg
+                ><strong id="gold">—</strong><span class="sr-only">金币</span>
               </div>
-              <div class="level-line">
-                <span>训练家 <b id="level">Lv.1</b></span
-                ><span id="xp-text">0 / 2 XP</span>
+              <div class="hud-stat hud-level" title="训练家等级与经验">
+                <b id="level">Lv.1</b
+                ><span class="hud-meter hud-xp" aria-hidden="true"><i id="xp-fill"></i></span
+                ><small id="xp-text">0 / 2 XP</small>
               </div>
-              <div class="xp-track"><i id="xp-fill"></i></div>
-              <button id="levelup-button" class="upgrade-button">
-                <svg><use href="#i-plus" /></svg> 购买经验 <span>4 金币</span>
-              </button>
-            </section>
-
-            <section class="side-section synergies">
-              <div class="section-heading">
-                <h2>队伍羁绊</h2>
-                <span class="tiny-label">SYNERGIES</span>
+              <div class="hud-stat hud-pop" title="上场 / 人口容量">
+                <svg class="icon" aria-hidden="true"><use href="#i-users" /></svg
+                ><strong id="pop">—</strong><span class="sr-only">上场 / 容量</span>
               </div>
-              <div id="synergy-list">
-                <p class="empty-copy">上场精灵，点亮你的第一组羁绊。</p>
-              </div>
-              <p id="bond-note" class="section-note">上场的不同物种计数；同种不同星级只记一次。</p>
-              <a class="bond-directory-link" href="/pokedex?tab=bonds">属性与战术羁绊目录 ↗</a>
-            </section>
-
-            <section class="side-section unit-section">
-              <div class="section-heading">
-                <h2>精灵情报</h2>
-                <span class="tiny-label">POKÉDEX</span>
-              </div>
-              <div id="unit-detail">
-                <div class="empty-detail">
-                  <svg><use href="#i-ball" /></svg>
-                  <p>点击一只精灵<br />了解它的战斗风格</p>
-                </div>
-              </div>
-            </section>
-          </aside>
-
-          <section class="center-column" aria-label="游戏棋盘和商店">
-            <div class="arena">
-              <header class="arena-header">
-                <div>
-                  <span class="map-marker"></span>
-                  <h2 id="stage-title">常青森林</h2>
-                  <span class="map-subtitle">VIRIDIAN FOREST</span>
-                </div>
-                <div class="weather-pill" title="本轮天气效果">
-                  <svg><use href="#i-sun" /></svg
-                  ><span id="weather-label">晴朗</span>
-                </div>
-              </header>
-              <div class="scout-entry-bar">
-                <p>准备时侦察阵容，开战前调整站位。</p>
-                <button id="scout-resume" class="scout-resume" type="button" data-scout-resume hidden>继续侦察 →</button>
-                <button class="scout-entry" data-scout-overview aria-haspopup="dialog">
-                  <svg aria-hidden="true"><use href="#i-users" /></svg>全场阵容 <span>↗</span>
+              <div class="hud-stat hud-streak" id="hud-streak" hidden></div>
+              <div class="hud-tools">
+                <button
+                  id="mobile-help-button"
+                  class="icon-button mobile-help-button"
+                  title="玩法指南"
+                  aria-label="打开玩法指南"
+                >
+                  <svg><use href="#i-book" /></svg></button
+                ><button
+                  id="backup-button"
+                  class="icon-button"
+                  title="下载当前对局存档"
+                  aria-label="下载当前对局存档"
+                >
+                  <svg><use href="#i-download" /></svg></button
+                ><button id="new-button" class="icon-button" data-restart title="重开一局" aria-label="重开一局">
+                  <svg><use href="#i-refresh" /></svg>
                 </button>
               </div>
-              <div class="board-scene">
+            </header>
+
+            <div class="arena stage-board">
+              <div class="board-scene" id="board-scene">
                 <svg
                   class="forest-art"
                   viewBox="0 0 680 436"
@@ -412,65 +365,121 @@
                     opacity=".7"
                   />
                 </svg>
-                <div class="opponent-tag">
-                  <i></i><span id="opponent-kind">野生遭遇</span
-                  ><span class="opponent-separator">/</span
-                  ><b id="opponent-name">等待对手</b>
+                <div class="board-topline">
+                  <div class="opponent-tag">
+                    <i></i><span id="opponent-kind">野生遭遇</span
+                    ><span class="opponent-separator">/</span
+                    ><b id="opponent-name">等待对手</b>
+                  </div>
+                  <div class="hud-chips" id="hud-chips">
+                    <span class="hud-chip weather-pill" title="本轮天气效果"
+                      ><svg aria-hidden="true"><use href="#i-sun" /></svg
+                      ><span id="weather-label">晴朗</span></span
+                    ><button type="button" class="hud-chip hud-terrain" id="hud-terrain" data-open-panel="orders" hidden></button
+                    ><button type="button" class="hud-chip hud-order" id="hud-order" data-open-panel="orders" hidden></button
+                    ><button type="button" class="hud-chip hud-sim" id="hud-sim" data-open-panel="orders" hidden></button
+                    ><button type="button" class="hud-chip hud-draft" id="hud-draft" data-open-draft hidden></button>
+                  </div>
+                  <button id="scout-resume" class="scout-resume" type="button" data-scout-resume hidden>继续侦察 →</button>
+                  <button type="button" class="scout-entry" data-scout-overview aria-haspopup="dialog">
+                    <svg aria-hidden="true"><use href="#i-users" /></svg>全场阵容 <span>↗</span>
+                  </button>
                 </div>
-                <div class="battlefield">
+                <div class="battlefield" id="battlefield">
                   <div class="team-banner enemy-banner">
                     敌方 · <span id="enemy-team-name">当轮对手</span>
                   </div>
-                  <div
-                    id="enemy-board"
-                    class="board-grid enemy-grid"
-                    aria-label="敌方阵容"
-                  ></div>
-                  <div class="board-divider">
+                  <div class="board-half enemy-half">
+                    <div class="row-labels" aria-hidden="true"><span>后</span><span>中</span><span>前</span></div>
+                    <div
+                      id="enemy-board"
+                      class="board-grid enemy-grid"
+                      aria-label="敌方阵容"
+                    ></div>
+                  </div>
+                  <div class="board-divider" aria-hidden="true">
                     <span></span><b>VS</b><span></span>
                   </div>
+                  <div class="board-half ally-half">
+                    <div class="row-labels" aria-hidden="true"><span>前排</span><span>中排</span><span>后排</span></div>
+                    <div
+                      id="ally-board"
+                      class="board-grid ally-grid"
+                      aria-label="我方阵容：第一行前排，第三行后排"
+                    ></div>
+                  </div>
                   <div class="team-banner ally-banner">我方 · 新叶训练家</div>
-                  <div
-                    id="ally-board"
-                    class="board-grid ally-grid"
-                    aria-label="我方阵容"
-                  ></div>
+                  <svg class="board-overlay" id="board-overlay" aria-hidden="true"></svg>
                 </div>
                 <div class="field-caption">
                   <span><i></i> 我方三排部署区</span
                   ><span>近战前排 · 远程中排 · 辅助后排</span>
                 </div>
-                <div class="map-coordinate">01 / VIRIDIAN</div>
+                <div class="map-coordinate"><span id="stage-title">常青森林</span> · VIRIDIAN</div>
+                <div class="context-bar" id="context-bar" role="region" aria-label="选中操作" hidden></div>
               </div>
+            </div>
+
+            <div class="stage-controls">
               <div class="bench-area">
                 <div class="bench-heading">
-                  <h3>备战席 <span>BENCH</span></h3>
-                  <button id="deploy-button">
+                  <h3>备战席 <span id="bench-count">0 / 8</span></h3>
+                  <button id="deploy-button" type="button">
                     一键上场 <svg><use href="#i-arrow" /></svg>
                   </button>
                 </div>
                 <div id="bench" class="bench-grid" aria-label="备战席"></div>
               </div>
+              <button id="fight-button" class="fight-button">
+                <svg><use href="#i-swords" /></svg><span>开始战斗</span
+                ><svg><use href="#i-arrow" /></svg>
+              </button>
+              <nav class="stage-dock" id="stage-dock" aria-label="准备入口">
+                <button type="button" class="dock-button" data-open-panel="shop" aria-controls="stage-drawer" aria-expanded="false"
+                  ><svg aria-hidden="true"><use href="#i-ball" /></svg><span>商店</span><b class="dock-badge" data-badge="shop" hidden></b></button
+                ><button type="button" class="dock-button" data-open-panel="bag" aria-controls="stage-drawer" aria-expanded="false"
+                  ><svg aria-hidden="true"><use href="#i-bag" /></svg><span>背包</span><b class="dock-badge" data-badge="bag" hidden></b></button
+                ><button type="button" class="dock-button" data-open-panel="boost" aria-controls="stage-drawer" aria-expanded="false"
+                  ><svg aria-hidden="true"><use href="#i-spark" /></svg><span>强化</span><b class="dock-badge" data-badge="boost" hidden></b></button
+                ><button type="button" class="dock-button" data-open-panel="bonds" aria-controls="stage-drawer" aria-expanded="false"
+                  ><svg aria-hidden="true"><use href="#i-link" /></svg><span>羁绊</span><b class="dock-badge" data-badge="bonds" hidden></b></button
+                ><button type="button" class="dock-button" data-open-panel="scout" aria-controls="stage-drawer" aria-expanded="false"
+                  ><svg aria-hidden="true"><use href="#i-eye" /></svg><span>对手</span><b class="dock-badge" data-badge="scout" hidden></b></button
+                ><button type="button" class="dock-button dock-orders" data-open-panel="orders" aria-controls="stage-drawer" aria-expanded="false"
+                  ><svg aria-hidden="true"><use href="#i-flag" /></svg><span>指令</span><b class="dock-badge" data-badge="orders" hidden></b></button
+                ><button type="button" class="dock-button" data-open-panel="journal" aria-controls="stage-drawer" aria-expanded="false"
+                  ><svg aria-hidden="true"><use href="#i-scroll" /></svg><span>战报</span><b class="dock-badge" data-badge="journal" hidden></b></button>
+              </nav>
             </div>
-
-            <div class="side-stack">
             <div class="tutorial-hint">
-              <span class="hint-spark">✦</span>
+              <span class="hint-spark" aria-hidden="true">✦</span>
               <p id="tutorial-hint">
                 冒险从一次相遇开始。点击商店中的精灵，把它招募到备战席。
               </p>
-              <span class="hint-step">TRAINER TIP</span>
+              <span class="hint-step">拖动或先点精灵再点格子布阵 · 空格开战</span>
             </div>
+          </section>
 
-            <section class="shop-section" aria-label="精灵商店">
-              <div class="shop-heading">
-                <div>
-                  <h2>
-                    寻找新伙伴 <span id="shop-count" class="shop-count">5</span>
-                  </h2>
-                  <p id="pool-summary">
-                    家族招募 · 固定费用 · 进化与培养
-                  </p>
+          <aside class="stage-drawer" id="stage-drawer" aria-label="准备面板" data-size="half">
+            <div class="drawer-grip" data-drawer-grip aria-hidden="true"><span></span></div>
+            <header class="drawer-header">
+              <h2 id="drawer-title">商店</h2>
+              <div class="drawer-actions">
+                <button type="button" class="icon-button drawer-size" data-drawer-size aria-label="展开面板" title="展开 / 收起高度"><svg><use href="#i-expand" /></svg></button
+                ><button type="button" class="icon-button drawer-close" data-close-panel aria-label="收起面板" title="收起面板（Esc）"><svg><use href="#i-close" /></svg></button>
+              </div>
+            </header>
+            <div class="drawer-body" id="drawer-body">
+              <section class="drawer-panel shop-section" data-panel="shop" id="panel-shop" aria-label="精灵商店" hidden>
+                <div class="shop-heading">
+                  <div>
+                    <h2>
+                      寻找新伙伴 <span id="shop-count" class="shop-count">5</span>
+                    </h2>
+                    <p id="pool-summary">
+                      家族招募 · 固定费用 · 进化与培养
+                    </p>
+                  </div>
                 </div>
                 <div class="shop-controls">
                   <button
@@ -485,129 +494,197 @@
                     <span
                       >2 <svg><use href="#i-coin" /></svg
                     ></span>
+                  </button
+                  ><button id="levelup-button" class="upgrade-button">
+                    <svg><use href="#i-plus" /></svg> 购买经验 <span>4 金币</span>
                   </button>
                 </div>
-              </div>
-              <div id="shop" class="shop-grid"></div>
-            </section>
-            <section class="preparation-section" aria-label="战前准备系统">
-              <div id="round-loot" class="round-loot" hidden></div>
-              <div class="preparation-heading">
-                <div>
-                  <span class="eyebrow">BUILD YOUR STRATEGY</span>
-                  <h2>战前准备</h2>
+                <div class="shop-subtools" id="shop-subtools"></div>
+                <div id="shop" class="shop-grid"></div>
+                <p class="section-note shop-tip">点卡片预览，再点一次或点棋盘上方操作条的「招募」。面板保持打开，可以连续购买。</p>
+              </section>
+
+              <section class="drawer-panel unit-section" data-panel="detail" id="panel-detail" aria-label="精灵情报" hidden>
+                <div class="section-heading">
+                  <h2>精灵情报</h2>
+                  <span class="tiny-label">POKÉDEX</span>
                 </div>
-                <button id="catalog-button" class="text-button">
-                  精灵图鉴 ↗
-                </button>
-              </div>
-              <section id="component-choices" class="component-choices" aria-label="定向组件补给" hidden></section>
-              <details class="combination-check" id="combination-check">
-                <summary>联动检查 <span id="combination-count">基础战法与额外强化</span></summary>
-                <div id="combinations"></div>
-                <a href="/pokedex?tab=builds">查看搭配参考 ↗</a>
-              </details>
-              <div class="system-tabs" role="tablist" aria-label="战前系统">
-                <button
-                  id="augments-tab"
-                  role="tab"
-                  aria-selected="true"
-                  aria-controls="augments-panel"
-                  data-system="augments"
+                <div id="unit-detail">
+                  <div class="empty-detail">
+                    <svg><use href="#i-ball" /></svg>
+                    <p>点击一只精灵<br />了解它的战斗风格</p>
+                  </div>
+                </div>
+              </section>
+
+              <section class="drawer-panel bag-section" data-panel="bag" id="panel-bag" aria-label="背包与装备" hidden>
+                <div id="round-loot" class="round-loot" hidden></div>
+                <section id="component-choices" class="component-choices" aria-label="定向组件补给" hidden></section>
+                <div class="section-heading">
+                  <h2 id="items-tab" aria-controls="items-panel">道具装备 <span id="items-count">0</span></h2>
+                  <span class="tiny-label">INVENTORY</span>
+                </div>
+                <div
+                  id="items-panel"
+                  class="system-panel"
+                  role="region"
+                  aria-labelledby="items-tab"
                 >
-                  海克斯强化 <span id="augments-count">0</span>
-                </button>
-                <button
-                  id="techniques-tab"
-                  role="tab"
-                  aria-selected="false"
-                  aria-controls="techniques-panel"
-                  data-system="techniques"
+                  <p class="section-note">
+                    选中装备，再点击棋盘或备战席上的精灵。装备和技能可以同时携带。
+                  </p>
+                  <p class="section-note"><a id="item-recipes-entry" href="/pokedex?tab=items&amp;view=recipes">查看装备合成图 ↗</a></p>
+                  <div id="inventory"></div>
+                </div>
+              </section>
+
+              <section class="drawer-panel preparation-section" data-panel="boost" id="panel-boost" aria-label="强化与技能" hidden>
+                <div class="preparation-heading">
+                  <div>
+                    <span class="eyebrow">BUILD YOUR STRATEGY</span>
+                    <h2>强化 · 技能</h2>
+                  </div>
+                  <button id="catalog-button" class="text-button">
+                    精灵图鉴 ↗
+                  </button>
+                </div>
+                <div id="boost-mods" class="boost-mods" hidden></div>
+                <div class="system-tabs" role="tablist" aria-label="强化系统">
+                  <button
+                    id="augments-tab"
+                    role="tab"
+                    aria-selected="true"
+                    aria-controls="augments-panel"
+                    data-system="augments"
+                  >
+                    海克斯强化 <span id="augments-count">0</span>
+                  </button>
+                  <button
+                    id="techniques-tab"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="techniques-panel"
+                    data-system="techniques"
+                  >
+                    技能学习 <span id="techniques-count">0</span>
+                  </button>
+                  <button id="research-tab" role="tab" aria-selected="false"
+                    aria-controls="research-panel" data-system="research" hidden>
+                    本局研习 <span id="research-count">0 / 15</span>
+                  </button>
+                  <button
+                    id="growth-tab"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="growth-panel"
+                    data-system="growth"
+                  >
+                    挑战成长 <span id="growth-count">0</span>
+                  </button>
+                </div>
+                <div
+                  id="augments-panel"
+                  class="system-panel"
+                  role="tabpanel"
+                  aria-labelledby="augments-tab"
                 >
-                  技能学习 <span id="techniques-count">0</span>
-                </button>
-                <button
-                  id="items-tab"
-                  role="tab"
-                  aria-selected="false"
-                  aria-controls="items-panel"
-                  data-system="items"
+                  <div id="augments"></div>
+                </div>
+                <div
+                  id="techniques-panel"
+                  class="system-panel"
+                  role="tabpanel"
+                  aria-labelledby="techniques-tab"
+                  hidden
                 >
-                  道具装备 <span id="items-count">0</span>
-                </button>
-                <button id="research-tab" role="tab" aria-selected="false"
-                  aria-controls="research-panel" data-system="research" hidden>
-                  本局研习 <span id="research-count">0 / 15</span>
-                </button>
-                <button
-                  id="growth-tab"
-                  role="tab"
-                  aria-selected="false"
-                  aria-controls="growth-panel"
-                  data-system="growth"
+                  <div id="techniques"></div>
+                </div>
+                <div id="research-panel" class="system-panel" role="tabpanel"
+                  aria-labelledby="research-tab" hidden><div id="research"></div></div>
+                <div
+                  id="growth-panel"
+                  class="system-panel"
+                  role="tabpanel"
+                  aria-labelledby="growth-tab"
+                  hidden
                 >
-                  挑战成长 <span id="growth-count">0</span>
+                  <div id="growth"></div>
+                </div>
+                <details class="combination-check" id="combination-check">
+                  <summary>联动检查 <span id="combination-count">基础战法与额外强化</span></summary>
+                  <div id="combinations"></div>
+                  <a href="/pokedex?tab=builds">查看搭配参考 ↗</a>
+                </details>
+              </section>
+
+              <section class="drawer-panel side-section synergies" data-panel="bonds" id="panel-bonds" aria-label="队伍羁绊" hidden>
+                <div class="section-heading">
+                  <h2>队伍羁绊</h2>
+                  <span class="tiny-label">SYNERGIES</span>
+                </div>
+                <div id="synergy-list">
+                  <p class="empty-copy">上场精灵，点亮你的第一组羁绊。</p>
+                </div>
+                <p id="bond-note" class="section-note">上场的不同物种计数；同种不同星级只记一次。</p>
+                <a class="bond-directory-link" href="/pokedex?tab=bonds">属性与战术羁绊目录 ↗</a>
+              </section>
+
+              <section class="drawer-panel right-column" data-panel="scout" id="right-column" aria-label="对手与侦察" hidden>
+                <div id="threat-summary" class="threat-summary" hidden></div>
+                <section class="side-section lobby">
+                  <div class="section-heading">
+                    <h2>训练家们</h2>
+                    <span class="lobby-count"><i></i> 8</span>
+                  </div>
+                  <div class="lobby-subtitle">阵容与站位公开可见，点击训练家侦察。</div>
+                  <button class="scout-lobby-entry" data-scout-overview aria-haspopup="dialog">查看全场阵容 <span>→</span></button>
+                  <div id="standings" class="standings"></div>
+                </section>
+                <button
+                  id="lobby-toggle"
+                  class="lobby-toggle"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="right-column"
+                  hidden
+                >
+                  <svg><use href="#i-users" /></svg> 对手 · 笔记
                 </button>
-              </div>
-              <div
-                id="augments-panel"
-                class="system-panel"
-                role="tabpanel"
-                aria-labelledby="augments-tab"
-              >
-                <div id="augments"></div>
-              </div>
-              <div
-                id="techniques-panel"
-                class="system-panel"
-                role="tabpanel"
-                aria-labelledby="techniques-tab"
-                hidden
-              >
-                <div id="techniques"></div>
-              </div>
-              <div
-                id="items-panel"
-                class="system-panel"
-                role="tabpanel"
-                aria-labelledby="items-tab"
-                hidden
-              >
-                <p class="section-note">
-                  选中装备，再点击一只精灵。装备和技能可以同时携带。
-                </p>
-                <p class="section-note"><a id="item-recipes-entry" href="/pokedex?tab=items&amp;view=recipes">查看装备合成图 ↗</a></p>
-                <div id="inventory"></div>
-              </div>
-              <div id="research-panel" class="system-panel" role="tabpanel"
-                aria-labelledby="research-tab" hidden><div id="research"></div></div>
-              <div
-                id="growth-panel"
-                class="system-panel"
-                role="tabpanel"
-                aria-labelledby="growth-tab"
-                hidden
-              >
-                <div id="growth"></div>
-              </div>
-            </section>
+              </section>
+
+              <section class="drawer-panel orders-section" data-panel="orders" id="panel-orders" aria-label="地形与战术指令" hidden>
+                <div class="section-heading">
+                  <h2>地形 · 指令 · 模拟</h2>
+                  <span class="tiny-label">TACTICS</span>
+                </div>
+                <div id="orders-host" class="orders-host">
+                  <p class="empty-copy orders-empty">当前对局规则没有地形、战术指令与模拟对战。新开竞技对局即可使用。</p>
+                </div>
+              </section>
+
+              <section class="drawer-panel side-section journal" data-panel="journal" id="panel-journal" aria-label="冒险记录" hidden>
+                <div class="section-heading">
+                  <h2>冒险记录</h2>
+                  <span class="tiny-label">JOURNAL</span>
+                </div>
+                <div class="battle-history-heading">
+                  <h3>本局战报</h3><span id="battle-history-count">0 场</span>
+                </div>
+                <button id="last-result-button" class="last-result-entry" type="button" aria-haspopup="dialog" hidden>上轮战果 <span id="last-result-round"></span><span aria-hidden="true">→</span></button>
+                <p class="battle-history-note">每场结算后保留，可随时回看。</p>
+                <div id="battle-career" class="battle-career" aria-label="同名伙伴跨轮生涯小计"></div>
+                <div id="battle-history" class="battle-history" aria-label="本局已结束回合战报"></div>
+                <div id="battle-log" class="journal-list">
+                  <p class="empty-copy">新的故事，等你写下。</p>
+                </div>
+                <div class="journal-actions">
+                  <button id="restart-button" class="secondary-button restart-button" data-restart>
+                    <svg><use href="#i-refresh" /></svg> 重开一局
+                  </button>
+                </div>
+              </section>
             </div>
-            <div class="bottom-actions">
-              <p>
-                <span class="shortcut">↗</span>
-                拖动精灵布阵，或点击精灵再点击空格
-              </p>
-              <div class="match-actions">
-                <button id="restart-button" class="secondary-button restart-button" data-restart>
-                  <svg><use href="#i-refresh" /></svg> 重开一局
-                </button>
-                <button id="fight-button" class="fight-button">
-                  <svg><use href="#i-swords" /></svg><span>开始战斗</span
-                  ><svg><use href="#i-arrow" /></svg>
-                </button>
-              </div>
-            </div>
-          </section>
+          </aside>
 
     <dialog id="scout-dialog" class="modal scout-modal" aria-labelledby="scout-title" aria-describedby="scout-timing">
       <span class="eyebrow">KNOW YOUR OPPONENT</span>
@@ -617,67 +694,6 @@
       <div id="scout-tabs" class="scout-tabs" role="group" aria-label="侦察训练家"></div>
       <div id="scout-content"></div>
     </dialog>
-
-          <button
-            id="lobby-toggle"
-            class="lobby-toggle"
-            type="button"
-            aria-expanded="false"
-            aria-controls="right-column"
-          >
-            <svg><use href="#i-users" /></svg> 对手 · 笔记
-          </button>
-          <aside class="right-column" id="right-column">
-            <section class="side-section lobby">
-              <div class="section-heading">
-                <h2>训练家们</h2>
-                <span class="lobby-count"><i></i> 8</span>
-              </div>
-              <div class="lobby-subtitle">阵容与站位公开可见，点击训练家侦察。</div>
-              <button class="scout-lobby-entry" data-scout-overview aria-haspopup="dialog">查看全场阵容 <span>→</span></button>
-              <div id="standings" class="standings"></div>
-            </section>
-            <section class="field-notes">
-              <span class="mini-label">FIELD NOTES / 01</span>
-              <div class="notes-illustration">
-                <img
-                  src="/demo/sprite/1.png"
-                  alt="妙蛙种子"
-                  width="68"
-                  height="68"
-                /><span>✦</span
-                ><svg viewBox="0 0 64 64" aria-hidden="true">
-                  <path
-                    d="M10 53C15 37 49 42 51 9 21 11 14 20 19 37m-9 16 26-30"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  />
-                </svg>
-              </div>
-              <h3>让每个伙伴各司其职。</h3>
-              <p>
-                攻击型输出，防守型消耗，辅助型回复。先搭一套互相照应的阵容，再决定追星或升级。
-              </p>
-              <span class="notes-footer">慢慢来，准备阶段不限时。</span>
-            </section>
-            <section class="side-section journal">
-              <div class="section-heading">
-                <h2>冒险记录</h2>
-                <span class="tiny-label">JOURNAL</span>
-              </div>
-              <div class="battle-history-heading">
-                <h3>本局战报</h3><span id="battle-history-count">0 场</span>
-              </div>
-              <button id="last-result-button" class="last-result-entry" type="button" aria-haspopup="dialog" hidden>上轮战果 <span id="last-result-round"></span><span aria-hidden="true">→</span></button>
-              <p class="battle-history-note">每场结算后保留，可随时回看。</p>
-              <div id="battle-career" class="battle-career" aria-label="同名伙伴跨轮生涯小计"></div>
-              <div id="battle-history" class="battle-history" aria-label="本局已结束回合战报"></div>
-              <div id="battle-log" class="journal-list">
-                <p class="empty-copy">新的故事，等你写下。</p>
-              </div>
-            </section>
-          </aside>
         </div>
 
         <footer class="page-footer">
@@ -688,6 +704,16 @@
           ><button id="resume-button" class="footer-resume">继续存档</button>
         </footer>
       </main>
+    </div>
+
+    <div id="draft-overlay" class="draft-overlay" hidden>
+      <div class="draft-sheet" role="dialog" aria-modal="false" aria-labelledby="draft-title">
+        <header class="draft-sheet-head">
+          <div><span class="eyebrow">SHARED DRAFT</span><h2 id="draft-title">共享选秀</h2></div>
+          <button type="button" class="secondary-button" data-draft-later>稍后再选</button>
+        </header>
+        <div id="draft-host" class="draft-host"></div>
+      </div>
     </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>

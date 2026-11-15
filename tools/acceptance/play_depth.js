@@ -27,19 +27,34 @@
   }
 
   // ------------------------------------------------------------ terrain + draft
+  // docs/61: terrain, orders and simulation live in the 指令 panel (HUD chips mirror
+  // them); the draft opens as a sheet; targeted refresh gets its own shop row.
+  const hostOr = (id, fallback, fallbackWhere) => $(id) ? [$(id), "beforeend"] : [fallback, fallbackWhere];
+
   function renderTerrain(depth) {
-    const scene = document.querySelector(".board-scene");
-    const strip = ensure("depth-strip", "section", scene, "beforebegin", "depth-strip");
+    const [anchor, where] = hostOr("orders-host", document.querySelector(".board-scene"), "beforebegin");
+    const strip = ensure("depth-strip", "section", anchor, where, "depth-strip");
     if (!strip) return;
     const terrain = depth.terrain;
     const next = terrain.next && terrain.next.id !== terrain.id
       ? `<span class="depth-next">第 ${Number(terrain.stage_end) + 1} 轮起：${esc(terrain.next.name)}</span>` : "";
     const draftRounds = (depth.draft_rounds || []).join(" / ");
     const sim = depth.simulation;
+    const unchanged = simulationUnchanged(sim);
+    const runSize = simulationRunSize(sim);
+    const pct = (value) => Math.round(Number(value) * 100);
+    const range = Array.isArray(sim?.win_rate_range) ? sim.win_rate_range : null;
+    const meter = sim?.win_rate != null && range
+      ? `<span class="depth-sim-meter" role="img" aria-label="胜率约 ${pct(sim.win_rate)}%，区间 ${pct(range[0])}–${pct(range[1])}%"><i style="left:${pct(range[0])}%;width:${Math.max(2, pct(range[1]) - pct(range[0]))}%"></i><b style="left:${pct(sim.win_rate)}%"></b></span>` : "";
+    const coreName = sim?.core ? (state().board || []).flat().find((p) => p?.uid === sim.core.uid)?.name || "核心" : "";
     const simCard = sim
-      ? `<div class="depth-sim-result"><b>模拟 ${Number(sim.battles)} 场：胜 ${Number(sim.wins)} · 负 ${Number(sim.losses)}${sim.draws ? ` · 平 ${Number(sim.draws)}` : ""}</b>${sim.carry ? `<span>主要输出 ${esc(sim.carry.name)} · 场均 ${Number(sim.carry.damage)}</span>` : ""}${(sim.ledger || []).map((row) => `<span>${esc(row.name)} · 场均触发 ${row.triggers} · 收益 ${Number(row.value)}</span>`).join("")}</div>`
+      ? `<div class="depth-sim-result${unchanged ? "" : " stale"}"><b>模拟 ${Number(sim.battles)} 场${sim.extended ? "（同阵容追加样本）" : ""}${sim.opponent ? ` · 对 ${esc(sim.opponent)}` : ""}：胜 ${Number(sim.wins)} · 负 ${Number(sim.losses)}${sim.draws ? ` · 平 ${Number(sim.draws)}` : ""}</b>${sim.win_rate != null ? `<strong class="depth-sim-rate">胜率约 ${pct(sim.win_rate)}%${range ? `（区间 ${pct(range[0])}–${pct(range[1])}%）` : ""}</strong>` : ""}${meter}<span class="depth-sim-facts">${sim.median_survivors != null ? `<span>存活中位数 ${esc(sim.median_survivors)}</span>` : ""}${sim.core ? `<span>核心${coreName ? ` ${esc(coreName)}` : ""}平均承伤 ${Number(sim.core.avg_damage_taken)}</span>` : ""}${sim.carry ? `<span>主要输出 ${esc(sim.carry.name)} · 场均 ${Number(sim.carry.damage)}</span>` : ""}</span>${(sim.ledger || []).map((row) => `<span>${esc(row.name)} · 场均触发 ${row.triggers} · 收益 ${Number(row.value)}</span>`).join("")}${unchanged ? "" : '<em class="depth-sim-stale">阵容已调整（或刷新了页面）：再次模拟会换一套全新样本，方便对比前后。</em>'}</div>`
       : "";
-    strip.innerHTML = `<div class="depth-terrain terrain-${esc(terrain.id)}" title="${esc(terrain.description)}"><b>地形 · ${esc(terrain.name)}</b><span>${esc(terrain.description)}</span>${next}</div><div class="depth-rules-hint"><span>选秀轮：${esc(draftRounds)}</span><span>升 2★/3★ 选择技能强化</span><span>可指定 1 名核心</span><button type="button" class="depth-sim-button" data-depth-simulate ${!ctx.canPrep() || depth.simulations_left <= 0 ? "disabled" : ""} title="对本轮对手模拟 6 场（固定的独立种子，调整阵容前后可直接对比），不影响正式结果">模拟对战 · 剩 ${Number(depth.simulations_left)} 次</button></div>${orderBar(depth)}${simCard}${depth.streak_pve ? '<p class="depth-note depth-warn">你正在连胜：野怪轮的每只野怪都会 +1 星。</p>' : ""}`;
+    const simLabel = unchanged ? `追加 ${runSize} 场` : "模拟对战";
+    const simTitle = unchanged
+      ? `阵容未变：在已有 ${Number(sim.battles)} 场之外再模拟 ${runSize} 场，缩小胜率区间。不影响正式结果。`
+      : `对本轮对手模拟 ${runSize} 场（固定的独立种子，调整阵容前后可直接对比），不影响正式结果。`;
+    strip.innerHTML = `<div class="depth-terrain terrain-${esc(terrain.id)}" title="${esc(terrain.description)}"><b>地形 · ${esc(terrain.name)}</b><span>${esc(terrain.description)}</span>${next}</div><div class="depth-rules-hint"><span>选秀轮：${esc(draftRounds)}</span><span>升 2★/3★ 选择技能强化</span><span>可指定 1 名核心</span><button type="button" class="depth-sim-button" data-depth-simulate ${!ctx.canPrep() || depth.simulations_left <= 0 ? "disabled" : ""} title="${esc(simTitle)}">${simLabel} · 剩 ${Number(depth.simulations_left)} 次</button></div>${orderBar(depth)}${simCard}${depth.streak_pve ? '<p class="depth-note depth-warn">你正在连胜：野怪轮的每只野怪都会 +1 星。</p>' : ""}`;
     const cells = new Set((terrain.cells || []).map(([r, c]) => `g${r},${c}`));
     document.querySelectorAll("#ally-board [data-loc]").forEach((tile) => {
       tile.classList.toggle("terrain-cell", cells.has(tile.dataset.loc));
@@ -50,29 +65,76 @@
   function orderBar(depth) {
     const current = depth.order || "none";
     const options = depth.orders || [];
+    const hints = depth.order_hints || {};
     const chosen = options.find((o) => o.id === current);
-    return `<div class="depth-orders" role="group" aria-label="战术指令"><b>战术指令</b>${options.map((o) => `<button type="button" class="depth-order${o.id === current ? " on" : ""}" data-depth-order="${esc(o.id)}" title="${esc(o.description)}" ${!ctx.canPrep() ? "disabled" : ""}>${esc(o.name)}</button>`).join("")}<span class="depth-order-brief">${esc(chosen?.brief || "")}</span></div>`;
+    // A hint that says the order cannot do anything this round dims the button (still selectable).
+    const weak = (id) => (id === "cut_supply" && hints.cut_supply && !Number(hints.cut_supply.targets))
+      || (id === "protect_core" && hints.protect_core && !hints.protect_core.has_core);
+    return `<div class="depth-orders" role="group" aria-label="战术指令"><b>战术指令</b><div class="depth-order-list">${options.map((o) => {
+      const note = hints[o.id]?.note || (o.id === "none" ? o.brief : "");
+      return `<button type="button" class="depth-order${o.id === current ? " on" : ""}${weak(o.id) ? " weak" : ""}" data-depth-order="${esc(o.id)}" title="${esc(o.description)}" aria-pressed="${o.id === current}" ${!ctx.canPrep() ? "disabled" : ""}><strong>${esc(o.name)}</strong>${note ? `<small>${esc(note)}</small>` : ""}</button>`;
+    }).join("")}</div><span class="depth-order-brief">${esc(chosen?.brief || "")}</span></div>`;
   }
+
+  // Simulation sample bookkeeping: the server extends an unchanged lineup's sample,
+  // so the button says "追加" only while the lineup still matches the simulated one.
+  const simSignatures = new Map();
+  let simRun = 10;
+  let justSimulated = false;
+  const state = () => ctx.state;
+  function lineupSignature(s) {
+    const board = (s.board || []).flatMap((row, r) => row.map((p, c) => p
+      ? [r, c, p.uid, p.star, p.item, p.extra_item, p.is_core, (p.skill_mods || []).map((m) => m.id || m.name).join("+"), p.technique?.id || ""].join(":") : "")).join("|");
+    return [s.round, board, s.depth?.order, (s.augments?.selected || []).map((a) => a.id).join("+")].join("#");
+  }
+  const simKey = (s, sim) => `${s.sid}:${sim.round ?? s.round}:${sim.battles}:${sim.wins}:${sim.losses}`;
+  function rememberSimulation(s) {
+    const sim = s.depth?.simulation;
+    if (!sim) return;
+    if (!sim.extended && Number(sim.battles) > 0) simRun = Number(sim.battles);
+    const key = simKey(s, sim);
+    if (simSignatures.get(key)) return;
+    let stored = null;
+    try { stored = sessionStorage.getItem(`poketactics.sim.${key}`); } catch (_) { /* no storage */ }
+    const signature = stored || (justSimulated ? lineupSignature(s) : null);
+    simSignatures.set(key, signature);
+    if (signature && !stored) try { sessionStorage.setItem(`poketactics.sim.${key}`, signature); } catch (_) { /* no storage */ }
+  }
+  function simulationUnchanged(sim) {
+    if (!sim) return false;
+    const signature = simSignatures.get(simKey(state(), sim));
+    return Boolean(signature) && signature === lineupSignature(state());
+  }
+  const simulationRunSize = () => simRun;
 
   function renderThreat(depth) {
     const threat = depth.threat;
+    const early = threat?.early || {};
+    const windowSec = Number(threat?.window) || 5;
     document.querySelectorAll("#ally-board [data-loc]").forEach((tile) => {
       tile.querySelector(".depth-threat")?.remove();
+      tile.querySelector(".depth-pressure")?.remove();
       const p = ctx.pieceAt(tile.dataset.loc);
       const n = p && threat?.counts?.[p.uid];
       if (n) tile.insertAdjacentHTML("beforeend", `<span class="depth-threat" title="开战时有 ${n} 名敌人首先攻击它">⚔${n}</span>`);
+      const row = p && early[p.uid];
+      if (row && (Number(row.taken) > 0 || Number(row.falls) > 0)) {
+        const share = Math.max(0, Math.min(1, Number(row.share) || 0));
+        const falls = Number(row.falls) || 0;
+        tile.insertAdjacentHTML("beforeend", `<span class="depth-pressure${falls ? " falls" : share >= 0.5 ? " heavy" : ""}" style="--share:${Math.round(share * 100)}%" title="前 ${windowSec} 秒承伤约 ${Math.round(share * 100)}% 生命（${Number(row.taken)}）${falls ? `；3 次模拟中 ${falls} 次倒下` : ""}"><i></i>${falls ? "<b>!</b>" : ""}</span>`);
+      }
     });
     const byLoc = new Map((threat?.enemies || []).map((e) => [e.loc, e]));
     document.querySelectorAll("#enemy-board [data-enemy-loc]").forEach((tile) => {
       const row = byLoc.get(tile.dataset.enemyLoc);
       tile.classList.toggle("depth-threat-source", Boolean(row));
-      if (row) tile.title = `${row.name} 开战首先攻击：${row.target}`;
+      if (row) tile.title = `${row.name}${row.ranged ? "（远程）" : ""} 开战首先攻击：${row.target}`;
     });
   }
 
   function renderDraft(depth) {
-    const strip = $("depth-strip");
-    const panel = ensure("depth-draft", "section", strip, "afterend", "depth-draft");
+    const [anchor, where] = hostOr("draft-host", $("depth-strip"), "afterend");
+    const panel = ensure("depth-draft", "section", anchor, where, "depth-draft");
     if (!panel) return;
     const draft = depth.draft;
     if (!draft || draft.status !== "pending") {
@@ -105,15 +167,24 @@
         card.title = p.blocked;
       }
       card.querySelector(".depth-merge")?.remove();
+      card.querySelector(".depth-star-progress")?.remove();
       if (p.merge_note) card.querySelector(".shop-info")?.insertAdjacentHTML("beforeend", `<div class="depth-merge">${esc(p.merge_note)}</div>`);
+      const star = p.star_progress;
+      if (star && (Number(star.owned_copies) > 0 || star.merges_now)) {
+        const text = star.merges_now ? `买下即升 ${Number(star.next_star) || 2}★`
+          : star.next_star ? `已有 ${Number(star.owned_copies)} 张 · 还差 ${Number(star.copies_to_next_star)} 张到 ${Number(star.next_star)}★`
+          : "已满培养";
+        card.querySelector(".shop-info")?.insertAdjacentHTML("beforeend", `<div class="depth-star-progress${star.merges_now ? " now" : ""}">${text}</div>`);
+      }
     });
     const refresh = $("refresh-button");
     if (refresh && depth.refresh.free > 0)
       refresh.querySelector("span") && (refresh.querySelector("span").textContent = `免费 ×${depth.refresh.free}`);
-    const host = ensure("depth-targeted", "div", refresh, "afterend", "depth-targeted");
+    const [anchor, where] = hostOr("shop-subtools", refresh, "afterend");
+    const host = ensure("depth-targeted", "div", anchor, where, "depth-targeted");
     if (!host) return;
     const current = host.querySelector("select")?.value || "";
-    host.innerHTML = `<select aria-label="定向刷新属性" ${!ctx.canPrep() ? "disabled" : ""}>${depth.refresh.types.map((t) => `<option value="${esc(t.id)}" ${t.id === current ? "selected" : ""}>${esc(t.name)}系</option>`).join("")}</select><button type="button" data-depth-refresh-type ${!ctx.canPrep() || state.you.gold < depth.refresh.targeted_cost ? "disabled" : ""}>定向刷新 · ${Number(depth.refresh.targeted_cost)} 金</button>`;
+    host.innerHTML = `<span class="depth-targeted-label">按属性刷新</span><select aria-label="定向刷新属性" ${!ctx.canPrep() ? "disabled" : ""}>${depth.refresh.types.map((t) => `<option value="${esc(t.id)}" ${t.id === current ? "selected" : ""}>${esc(t.name)}系</option>`).join("")}</select><button type="button" data-depth-refresh-type ${!ctx.canPrep() || state.you.gold < depth.refresh.targeted_cost ? "disabled" : ""}>定向刷新 · ${Number(depth.refresh.targeted_cost)} 金</button>`;
   }
 
   // ------------------------------------------------------------ inventory
@@ -172,7 +243,11 @@
     const list = $("synergy-list");
     const box = ensure("depth-bond-rules", "div", list, "afterend", "depth-bond-rules");
     if (!box) return;
-    const quests = (depth.quests || []).map((q) => `<span class="depth-quest${q.done ? " done" : ""}">${esc(q.name)} ${q.done ? "✓ 已完成" : `${Number(q.progress)}/${Number(q.goal)}`}</span>`).join("");
+    const quests = (depth.quests || []).map((q) => {
+      const last = q.last_round == null ? "" : Number(q.last_triggers) > 0
+        ? `第 ${Number(q.last_round)} 轮触发 ${Number(q.last_triggers)} 次` : `第 ${Number(q.last_round)} 轮：${esc(q.last_reason || "未触发")}`;
+      return `<span class="depth-quest${q.done ? " done" : ""}"><b>${esc(q.name)}</b> ${q.done ? "✓ 已完成" : `${Number(q.progress)}/${Number(q.goal)}`}${last ? `<small>${last}</small>` : ""}</span>`;
+    }).join("");
     const questBox = `<p class="depth-note">羁绊任务：断点在本场产生收益并获胜计 1 次，满 ${Number(depth.quest_goal || 3)} 次奖励 2 金 + 1 组件（每个断点一次）。</p>${quests ? `<div class="depth-quests">${quests}</div>` : ""}`;
     const relevant = depth.bond_rules.filter((r) => r.current > 0);
     box.innerHTML = relevant.length
@@ -209,7 +284,10 @@
     event.preventDefault();
     event.stopPropagation();
     if (target.dataset.depthOrder) await ctx.api("order", {key: target.dataset.depthOrder});
-    else if (target.hasAttribute("data-depth-simulate")) await ctx.api("simulate");
+    else if (target.hasAttribute("data-depth-simulate")) {
+      justSimulated = true;
+      try { await ctx.api("simulate"); } finally { justSimulated = false; }
+    }
     else if (target.dataset.depthDraft != null) await ctx.api("draft", {index: target.dataset.depthDraft});
     else if (target.hasAttribute("data-depth-refresh-type")) await ctx.api("refresh_type", {type: target.previousElementSibling.value});
     else if (target.dataset.depthDismantle) await ctx.api("dismantle", {item: target.dataset.depthDismantle});
@@ -228,6 +306,7 @@
       for (const id of ["depth-strip", "depth-draft", "depth-targeted", "depth-bond-rules"]) $(id)?.remove();
       return;
     }
+    rememberSimulation(state);
     renderTerrain(depth);
     renderDraft(depth);
     renderShop(state, depth);

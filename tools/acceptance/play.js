@@ -459,9 +459,9 @@
       : equipItem
         ? "已选择装备：点击棋盘或备战席中的精灵，为它装备。"
         : shopSelected != null
-          ? "已选中商店伙伴。在详情里点「招募」加入备战席，再点一次卡片也可以直接招募。"
+          ? "已选中商店伙伴。点棋盘上方操作条的「招募」加入备战席，再点一次卡片也可以直接招募。"
           : selected
-            ? "伙伴已选中。点击目标格移动或交换，在左侧可出售、卸下装备。"
+            ? "伙伴已选中。点击目标格移动或交换，棋盘上方操作条可出售、卸下装备或查看详情。"
           : state.phase === "over"
             ? "每一场冒险，都会让下一次相遇更有把握。再来一场吧。"
             : !y.alive
@@ -504,7 +504,17 @@
           ? `进度已自动保存 · 第 ${state.round} 轮`
           : "每次操作自动保存");
     $("battle-next").disabled = locked || ($("battle-dialog").open && playback.n > 0 && !playback.verdictShown);
-    window.PlayDepth?.render({state, api, canPrep, selected: () => selected, pieceAt});
+    // Depth edition decorates panels first; the board-centric layout (docs/61)
+    // then mirrors the result into the HUD, dock badges and contextual bar.
+    const layoutContext = {state, api, canPrep, playable, pieceAt, selected: () => selected,
+      shopSelected: () => shopSelected, equipItem: () => equipItem, busy: () => busy || deploying};
+    window.PlayDepth?.render(layoutContext);
+    window.PlayLayout?.render(layoutContext);
+  }
+  // Reveal a preparation panel: the drawer/sheet when the layout is loaded, else scroll.
+  function revealPanel(panel, fallback) {
+    if (window.PlayLayout?.open) window.PlayLayout.open(panel);
+    else document.querySelector(fallback)?.scrollIntoView({behavior: "smooth", block: "nearest"});
   }
   function renderCombatStats(scope, stats, combatants, highlights) {
     const container = $(`${scope}-statistics`);
@@ -736,10 +746,16 @@
     $("inventory").innerHTML =
       html || '<p class="empty-copy">每轮结算获得随机装备、材料或技能机。</p>';
   }
+  // Items live in their own 背包 panel (docs/61); the tablist keeps the other systems.
+  const SYSTEM_TABS = ["augments", "techniques", "research", "growth"];
   function setSystemTab(value) {
-    if (!["augments", "techniques", "items", "research", "growth"].includes(value)) return;
+    if (value === "items") {
+      window.PlayLayout?.open?.("bag");
+      return;
+    }
+    if (!SYSTEM_TABS.includes(value)) return;
     systemTab = value;
-    for (const name of ["augments", "techniques", "items", "research", "growth"]) {
+    for (const name of SYSTEM_TABS) {
       $(name + "-panel").hidden = name !== value;
       $(name + "-tab").setAttribute("aria-selected", String(name === value));
       $(name + "-tab").tabIndex = name === value ? 0 : -1;
@@ -1402,7 +1418,7 @@
     }
     if (state.augments?.pending?.length) {
       setSystemTab("augments");
-      document.querySelector(".preparation-section").scrollIntoView({behavior: "smooth", block: "center"});
+      revealPanel("boost", ".preparation-section");
       toast("先选择本轮海克斯强化，再开始战斗。");
       return;
     }
@@ -2305,9 +2321,7 @@
     else if (target.dataset.system) setSystemTab(target.dataset.system);
     else if (target.dataset.openSystem) {
       setSystemTab(target.dataset.openSystem);
-      document
-        .querySelector(".preparation-section")
-        .scrollIntoView({ behavior: "smooth", block: "nearest" });
+      if (target.dataset.openSystem !== "items") revealPanel("boost", ".preparation-section");
     } else if (target.dataset.augment && canPrep())
       await api("claim_augment", {
         id: target.dataset.reward,
@@ -2459,7 +2473,7 @@
       if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
         return;
       event.preventDefault();
-      const tabs = ["augments", "techniques", "items", "research", "growth"].filter(name=>!$(name + "-tab").hidden);
+      const tabs = SYSTEM_TABS.filter(name=>!$(name + "-tab").hidden);
       const index = tabs.indexOf(systemTab);
       setSystemTab(
         event.key === "Home"
