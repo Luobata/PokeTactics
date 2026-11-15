@@ -339,8 +339,8 @@
   }
   function render() {
     const locked = busy || deploying;
-    for (const id of ["new-confirm", "result-new", "resume-button", "backup-button"])
-      $(id).disabled = locked || (id === "backup-button" && !sid);
+    for (const id of ["new-confirm", "result-new", "resume-button", "backup-button", "new-backup"])
+      $(id).disabled = locked || ((id === "backup-button" || id === "new-backup") && !sid);
     for (const button of document.querySelectorAll("[data-restart]"))
       button.disabled = locked;
     if (!state) {
@@ -774,6 +774,27 @@
     });
     return rows;
   }
+  // Augment progress (docs/61): one node per milestone — chosen, choosable now, or upcoming.
+  const AUGMENT_MILESTONES = [[1, "银色"], [7, "金色"], [13, "彩色"]];
+  const AUGMENT_GLYPH = {economy: "◎", rule: "§", battle: "⚔", condition: "⚡", growth: "↗"};
+  function augmentTrack(pending, picked) {
+    const cats = new Map((state.interactions?.augments?.selected || []).map((row) => [row.id, row]));
+    const round = Number(state.round) || 1;
+    const nodes = AUGMENT_MILESTONES.map(([at, tier], index) => {
+      const chosen = picked[index];
+      const open = pending.find((reward) => Number(reward.round) === at);
+      if (chosen) {
+        const cat = cats.get(chosen.id) || {};
+        return `<li class="aug-node done tier-${index}"><span class="aug-pin">${AUGMENT_GLYPH[cat.category] || "✦"}</span><button type="button" class="aug-card" data-ix-augment-info="${esc(chosen.id)}"><span class="aug-meta">第 ${at} 轮 · ${tier}${cat.category_name ? " · " + esc(cat.category_name) : ""}</span><strong>${esc(chosen.name)}</strong><span class="aug-brief">${esc(chosen.current || chosen.brief || chosen.description || "")}</span><span class="aug-more">查看效果与上一战收益 →</span></button></li>`;
+      }
+      if (open) {
+        return `<li class="aug-node now tier-${index}"><span class="aug-pin">✦</span><div class="aug-card"><span class="aug-meta">第 ${at} 轮 · ${tier}海克斯</span><strong>三选一，等你决定</strong><span class="aug-brief">${open.options.map((o) => esc(o.name)).join(" · ")}</span><button type="button" class="aug-open" data-ix-open-augment ${!canPrep() ? "disabled" : ""}>立即选择</button></div></li>`;
+      }
+      const missed = at < round || !state.you.alive;
+      return `<li class="aug-node ${missed ? "missed" : "next"} tier-${index}"><span class="aug-pin">${index + 1}</span><div class="aug-card"><span class="aug-meta">第 ${at} 轮 · ${tier}海克斯</span><strong>${missed ? "本局未领取" : at - round === 0 ? "本轮开放" : `还有 ${at - round} 轮`}</strong><span class="aug-brief">${missed ? "旧存档或已结束的对局不会补发。" : "到时从三张候选中选一张，本局持续生效；卡片会显示与你阵容的适配度。"}</span></div></li>`;
+    }).join("");
+    return `<p class="aug-intro">每局三次海克斯，分别在第 1、7、13 轮。已选的强化本局一直生效。</p><ol class="aug-track">${nodes}</ol>`;
+  }
   function renderSystems() {
     const pending = state.augments?.pending || [];
     const picked = state.augments?.selected || [];
@@ -781,19 +802,7 @@
       ? `${pending.length} 待选`
       : picked.length;
     $("augments-count").classList.toggle("pending", pending.length > 0);
-    $("augments").innerHTML =
-      pending
-        .map(
-          (reward) =>
-            `<p class="system-note">第 ${Number(reward.round)} 轮 · 选择一项，本局持续生效</p><div class="augment-options">${reward.options.map((option) => `<button class="augment-card" data-augment="${esc(option.id)}" data-reward="${esc(reward.id)}" ${!canPrep() ? "disabled" : ""}><span class="augment-sigil">✦</span><strong>${esc(option.name)}</strong><p>${esc(option.description)}</p><span class="augment-pick">选择强化 ↗</span></button>`).join("")}</div><button class="augment-reroll" data-augment-reroll="${esc(reward.id)}" ${!canPrep() || reward.rerolled ? "disabled" : ""}>${reward.rerolled ? "已换过一批 · 每轮限一次" : "换一批 ↻"}</button>`,
-        )
-        .join("") +
-      (picked.length
-        ? `<div class="selected-augments">${picked.map((option) => `<div><strong>✦ ${esc(option.name)}</strong>${option.current ? `<span class="augment-current">${esc(option.current)}</span>` : ""}<p>${esc(option.description)}</p></div>`).join("")}</div>`
-        : "") +
-      (!pending.length && !picked.length
-        ? '<p class="empty-copy">海克斯在第 1、7、13 轮提供三选一强化。</p>'
-        : "");
+    $("augments").innerHTML = augmentTrack(pending, picked);
     const techniques = Array.isArray(state.techniques)
       ? state.techniques
       : state.techniques?.inventory || [];
@@ -1389,7 +1398,8 @@
     systemTab = "augments";
     roleFilter = "all";
     resetScout();
-    const result = await api("new", { mode: "arena" });
+    const edition = document.querySelector('input[name="new-edition"]:checked')?.value === "v1" ? "v1" : "v2";
+    const result = await api("new", { mode: "arena", edition });
     if (result?.ok) {
       $("new-dialog").close();
       toast("新的冒险开始了。先从商店招募一位伙伴吧。");
@@ -2435,6 +2445,7 @@
   for (const button of document.querySelectorAll("[data-restart]"))
     button.onclick = requestRestart;
   $("new-cancel").onclick = () => $("new-dialog").close();
+  $("new-backup").onclick = () => $("backup-button").click();
   $("new-confirm").onclick = newGame;
   $("result-new").onclick = newGame;
   $("result-close").onclick = () => $("result-dialog").close();

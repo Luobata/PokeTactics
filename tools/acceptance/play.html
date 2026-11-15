@@ -203,8 +203,8 @@
                   aria-label="下载当前对局存档"
                 >
                   <svg><use href="#i-download" /></svg></button
-                ><button id="new-button" class="icon-button" data-restart title="重开一局" aria-label="重开一局">
-                  <svg><use href="#i-refresh" /></svg>
+                ><button id="new-button" class="new-game-button" data-restart title="新开一局" aria-label="新开一局">
+                  <svg aria-hidden="true"><use href="#i-plus" /></svg><span>新开一局</span>
                 </button>
               </div>
             </header>
@@ -546,15 +546,6 @@
               </section>
 
               <section class="drawer-panel preparation-section" data-panel="boost" id="panel-boost" aria-label="强化与技能" hidden>
-                <div class="preparation-heading">
-                  <div>
-                    <span class="eyebrow">BUILD YOUR STRATEGY</span>
-                    <h2>强化 · 技能</h2>
-                  </div>
-                  <button id="catalog-button" class="text-button">
-                    精灵图鉴 ↗
-                  </button>
-                </div>
                 <div id="boost-mods" class="boost-mods" hidden></div>
                 <div class="system-tabs" role="tablist" aria-label="强化系统">
                   <button
@@ -623,6 +614,12 @@
                   <div id="combinations"></div>
                   <a href="/pokedex?tab=builds">查看搭配参考 ↗</a>
                 </details>
+                <nav class="boost-links" aria-label="参考资料">
+                  <button id="catalog-button" class="boost-link" type="button">精灵图鉴</button
+                  ><a class="boost-link" href="/pokedex?tab=augments">海克斯目录</a
+                  ><a class="boost-link" href="/pokedex?tab=techniques">技能机目录</a
+                  ><a class="boost-link" href="/pokedex?tab=builds">搭配参考</a>
+                </nav>
               </section>
 
               <section class="drawer-panel side-section synergies" data-panel="bonds" id="panel-bonds" aria-label="队伍羁绊" hidden>
@@ -685,9 +682,10 @@
                 <div id="battle-log" class="journal-list">
                   <p class="empty-copy">新的故事，等你写下。</p>
                 </div>
-                <div class="journal-actions">
+                <div class="journal-actions game-card">
+                  <div><strong>这场冒险</strong><small>进度每次操作自动保存</small></div>
                   <button id="restart-button" class="secondary-button restart-button" data-restart>
-                    <svg><use href="#i-refresh" /></svg> 重开一局
+                    <svg><use href="#i-plus" /></svg> 新开一局
                   </button>
                 </div>
               </section>
@@ -791,17 +789,25 @@
       </div>
     </dialog>
 
-    <dialog id="new-dialog" class="modal confirm-modal">
+    <dialog id="new-dialog" class="modal confirm-modal new-game-modal">
       <span class="eyebrow">A FRESH START</span>
-      <h2>重开一局？</h2>
+      <h2>新开一局</h2>
       <p>
-        新对局将从第 1
-        轮开始，页面会记录新的进度。想保留这场冒险，可以先下载存档。
+        新对局从第 1 轮开始，并替换当前进度。想保留这场冒险，可以先下载存档。
       </p>
+      <fieldset class="edition-choice" aria-label="选择规则">
+        <label class="edition-card"><input type="radio" name="new-edition" value="v2" checked />
+          <span class="edition-title">深度版 <em>推荐</em></span>
+          <span class="edition-desc">地形、战术指令、选秀、技能强化、规则型海克斯与羁绊断点</span></label>
+        <label class="edition-card"><input type="radio" name="new-edition" value="v1" />
+          <span class="edition-title">经典竞技</span>
+          <span class="edition-desc">原版竞技规则，节奏更简单，适合熟悉基础玩法</span></label>
+      </fieldset>
       <div class="modal-actions">
-        <button id="new-cancel" class="secondary-button">继续当前冒险</button
+        <button id="new-backup" class="text-button" type="button">先下载当前存档</button
+        ><button id="new-cancel" class="secondary-button">继续当前冒险</button
         ><button id="new-confirm" class="primary-button">
-          确认重开 <svg><use href="#i-arrow" /></svg>
+          开始新冒险 <svg><use href="#i-arrow" /></svg>
         </button>
       </div>
     </dialog>
