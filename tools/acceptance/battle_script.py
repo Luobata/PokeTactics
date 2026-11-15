@@ -119,7 +119,9 @@ def _unit_rows(anim, rows):
         shiny = bool(getattr(piece, 'shiny', False))
         try:
             native = arena_skills.skill_of(sid)
-            skill = _skill_meta(anim, 'arena_' + native['id'], rows)
+            # Several species share one skill id with different names; the
+            # species' own kit is authoritative for its label.
+            skill = _skill_meta(anim, 'arena_' + native['id'], {'arena_' + native['id']: native})
         except (ValueError, KeyError):
             skill = None
         trait = None
@@ -188,7 +190,8 @@ def build_script(anim, *, source=None, log_formatter=None, playback_meta=None, b
         if ev[1] == 'cast':
             row['move'] = ev[4]
             row['eff'] = json_safe(ev[5])
-            row['skill'] = _skill_meta(anim, ev[4], rows)
+            own = by_idx.get(timing.attacker, {}).get('skill')
+            row['skill'] = dict(own) if own and own.get('move') == ev[4] else _skill_meta(anim, ev[4], rows)
             row['technique'] = ev[4] == by_idx.get(timing.attacker, {}).get('technique')
         actions.append(row)
 

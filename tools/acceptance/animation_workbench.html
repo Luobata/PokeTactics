@@ -23,6 +23,7 @@
           <button type="button" role="tab" data-source="preview" aria-selected="true">单个动作</button>
           <button type="button" role="tab" data-source="scenario" aria-selected="false">场景库</button>
           <button type="button" role="tab" data-source="battle" aria-selected="false">真实对局</button>
+          <button type="button" role="tab" data-source="gallery" aria-selected="false">技能库</button>
         </div>
         <form id="wb-source-form" class="wb-form">
           <div data-panel="preview">
@@ -42,6 +43,18 @@
             <label class="wb-field"><span>对局 sid</span><input id="wb-sid" autocomplete="off" spellcheck="false" placeholder="12 位对局编号"></label>
             <label class="wb-field"><span>轮次</span><input id="wb-round" type="number" min="1" max="999" value="1"></label>
             <p class="wb-note">读取 /api/battle/script，只能查看本机仍保留的轮次。</p>
+          </div>
+          <div data-panel="gallery" hidden>
+            <label class="wb-field"><span>类别</span><select id="wb-g-cat"><option value="">全部类别</option></select></label>
+            <label class="wb-field"><span>搜索<output id="wb-g-count"></output></span><input id="wb-g-search" type="search" autocomplete="off" placeholder="技能名 / id / 宝可梦"></label>
+            <select id="wb-g-list" class="wb-g-list" size="11" aria-label="原生技能列表"></select>
+            <div class="wb-pair">
+              <button id="wb-g-prev" class="wb-button" type="button">上一个</button>
+              <button id="wb-g-next" class="wb-button" type="button">下一个</button>
+            </div>
+            <label class="wb-field"><span>靶场</span><select id="wb-g-scene">
+              <option value="dummy">木桩（带受伤友军）</option><option value="melee">近战对手</option><option value="ranged">远程对手</option></select></label>
+            <p class="wb-note">用持有该技能的宝可梦做一次真实施放（四个木桩 + 两名受伤友军），在施放窗口内循环播放。</p>
           </div>
           <label class="wb-field" data-seed><span>种子</span><input id="wb-seed" type="number" min="0" max="4294967295" value="7"></label>
           <button id="wb-load" class="wb-button primary full" type="submit">载入战斗脚本</button>
@@ -80,6 +93,20 @@
         <div class="wb-timeline-box"><canvas id="wb-timeline" height="220" aria-label="多轨时间线"></canvas></div>
         <p id="wb-selection" class="wb-note">尚未选择动作。</p>
       </div>
+
+      <div id="wb-g-panel" class="wb-panel" hidden>
+        <div class="wb-panel-head"><h2>技能特效详情</h2><span id="wb-g-title">—</span></div>
+        <div class="wb-body wb-g-body">
+          <div>
+            <h3>解析后的配方层 <small id="wb-g-recipe" class="wb-muted"></small></h3>
+            <div class="wb-table-wrap"><table class="wb-keys wb-g-layers"><thead><tr><th>#</th><th>来源</th><th>layer</th><th>shape</th><th>at</th><th>on（逐结果）</th><th>palette</th><th>时长</th></tr></thead><tbody id="wb-g-layers"></tbody></table></div>
+          </div>
+          <div>
+            <h3>本次施放的因果结果 <small class="wb-muted">cast_index / action_index 关联</small></h3>
+            <ul id="wb-g-outcomes" class="wb-g-outcomes"></ul>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="wb-panel wb-editor" aria-labelledby="wb-editor-title">
@@ -106,6 +133,21 @@
           <figure><figcaption>选中帧缓动曲线</figcaption><canvas id="wb-ease-plot" width="180" height="110"></canvas></figure>
           <figure><figcaption>本阶段位移 / 缩放（<b class="c-dx">dx</b> <b class="c-dy">dy</b> <b class="c-sy">sy</b>）</figcaption><canvas id="wb-pose-plot" width="300" height="110"></canvas></figure>
         </div>
+        <h3 class="wb-sub">分件形变（parts）<small class="wb-muted">单张精灵按水平条带形变：脚底固定，身体前倾、头部点动、腹部鼓起、波动从头传到脚</small></h3>
+        <div class="wb-pair">
+          <label class="wb-field"><span>形变轨道所在片段</span><select id="wb-parts-clip"></select></label>
+          <div class="wb-field"><span>状态</span><output id="wb-parts-note" class="wb-parts-note">—</output></div>
+        </div>
+        <div class="wb-table-wrap"><table class="wb-keys"><thead><tr><th>at</th><th>前倾 lean</th><th>头 x</th><th>头 y</th><th>腹宽 %</th><th>摆动</th><th>缓动（到下一帧）</th><th></th></tr></thead><tbody id="wb-parts"></tbody></table></div>
+        <div class="wb-row">
+          <button id="wb-parts-add" class="wb-button" type="button">＋ 插入形变帧</button>
+          <button id="wb-parts-new" class="wb-button" type="button">新建本阶段轨道</button>
+          <button id="wb-parts-copy" class="wb-button" type="button">从角色原型复制</button>
+        </div>
+        <p id="wb-parts-error" class="wb-error" role="alert" hidden></p>
+        <div class="wb-plots">
+          <figure><figcaption>本阶段形变曲线（<b class="c-lean">前倾</b> <b class="c-hx">头x</b> <b class="c-hy">头y</b> <b class="c-belly">腹宽</b> <b class="c-wob">摆动</b>）</figcaption><canvas id="wb-parts-plot" width="420" height="110"></canvas></figure>
+        </div>
       </div>
       <div class="wb-body" data-editor-panel="timing" hidden>
         <label class="wb-field"><span>定位原型（roles.json）</span><select id="wb-arche"><option value="melee">近战</option><option value="ranged">远程</option><option value="support">辅助</option><option value="tank">坦克</option></select></label>
@@ -114,9 +156,9 @@
         <p class="wb-note">蓄力/收招 = 原型基准 ×（体重修正）+ 单位稳定偏移 + 单次抖动；命中时刻由时间轴固定，生命快照不移位。</p>
       </div>
       <div class="wb-body" data-editor-panel="vfx" hidden>
-        <label class="wb-field"><span>特效配方（core.json）</span><select id="wb-recipe"></select></label>
+        <label class="wb-field"><span>特效配方 <output id="wb-recipe-owner"></output></span><select id="wb-recipe"></select></label>
         <textarea id="wb-recipe-json" class="wb-code" rows="14" spellcheck="false" aria-label="配方 JSON"></textarea>
-        <div class="wb-row"><button id="wb-recipe-apply" class="wb-button" type="button">应用到 B</button><span class="wb-note">layer: charge / projectile / trail / impact / ground / aura / screen</span></div>
+        <div class="wb-row"><button id="wb-recipe-apply" class="wb-button" type="button">应用到 B</button><span class="wb-note">layers / extends + add / drop；layer: charge projectile trail impact ground aura link screen；on = 逐结果触发</span></div>
         <p id="wb-recipe-error" class="wb-error" role="alert" hidden></p>
       </div>
       <div class="wb-actions">

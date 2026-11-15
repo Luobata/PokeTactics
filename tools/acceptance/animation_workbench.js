@@ -23,7 +23,18 @@
     script: null, rendA: null, rendB: null, p: 0, playing: false, speed: 1, raf: 0, last: 0,
     sel: { unit: null, action: null }, clipId: null, phase: null, keyRow: 0, editor: "keys",
     timelineRows: [], characters: {},
+    partsClipId: null, partsRow: 0, loop: null, gallery: [], galleryShown: [], gallerySkill: null,
   };
+  const PART_LIMITS = { lean: [-24, 24], head_x: [-16, 16], head_y: [-16, 16], belly: [-30, 40], wobble: [0, 12] };
+  const PART_COLS = ["lean", "head_x", "head_y", "belly", "wobble"];
+  const PART_COLORS = ["#3d7fb0", "#a04c3d", "#c2732f", "#6a9a5c", "#7b5cc8"];
+  const CATEGORY_ZH = { burst: "爆发", technique: "技能机", area: "范围", chain: "连锁", combo: "连击", drain: "汲取", lifesteal: "伤害转治疗",
+    energy: "回能", heal: "治疗", rescue: "救援", shield: "护盾", guard: "守护", cleanse: "净化", clear: "清场", displacement: "位移",
+    root: "定身", pursuit: "追击", assassin: "刺杀", taunt: "嘲讽", terrain: "地形", poison: "中毒", vulnerability: "易伤",
+    execute: "处决", pierce: "贯穿", retaliation: "反击", control: "控制" };
+  const SUB_ZH = { side_hit: "溅射命中", chain: "连锁跳跃", heal: "治疗", guard: "守护", shield: "护盾", knockback: "击退", pull: "拉拽",
+    energy: "回能", energy_drain: "夺能", drain: "汲取", cleanse: "净化", taunt: "嘲讽", root: "定身", apply: "施加", thorns: "反伤",
+    thorn_hit: "反伤命中", execute: "处决", flinch: "畏缩", status: "异常", vulnerability: "易伤", tempo: "节拍", wet: "潮湿" };
 
   // ------------------------------------------------------------ helpers
   function status(text, error = false) {
@@ -76,6 +87,8 @@
     for (const b of document.querySelectorAll("[data-source]")) b.setAttribute("aria-selected", String(b.dataset.source === kind));
     for (const panel of document.querySelectorAll("[data-panel]")) panel.hidden = panel.dataset.panel !== kind;
     document.querySelector("[data-seed]").hidden = kind === "battle";
+    $("wb-load").textContent = kind === "gallery" ? "施放所选技能" : "载入战斗脚本";
+    if (kind !== "gallery") { state.loop = null; $("wb-g-panel").hidden = true; }
   }
   async function loadCatalogs() {
     try {
@@ -100,17 +113,24 @@
     const seed = clamp(Math.round(Number($("wb-seed").value) || 0), 0, 4294967295);
     if (state.source === "scenario") return `/api/battle/script/scenario?${new URLSearchParams({ key: $("wb-scenario").value, seed })}`;
     if (state.source === "battle") return `/api/battle/script?${new URLSearchParams({ sid: $("wb-sid").value.trim(), round: $("wb-round").value })}`;
+    if (state.source === "gallery") {
+      const skill = state.gallery.find((g) => g.id === $("wb-g-list").value);
+      if (!skill) return null;
+      return `/api/battle/script/preview?${new URLSearchParams({ species: skill.species, kind: "cast", scene: $("wb-g-scene").value, seed })}`;
+    }
     return `/api/battle/script/preview?${new URLSearchParams({ species: $("wb-species").value, kind: $("wb-kind").value, scene: $("wb-scene").value, seed })}`;
   }
   async function loadScript(event) {
     event?.preventDefault();
     const url = scriptUrl();
+    if (!url) { status("先在技能库中选择一个技能。", true); return; }
     $("wb-load").disabled = true;
     status("正在生成战斗脚本（真实模拟，不写入存档）…");
     try {
       const script = await getJson(url);
       if (script.schema !== "poketactics.battle_script") throw new Error("返回的不是战斗脚本");
       useScript(script);
+      if (state.source === "gallery") enterGallery($("wb-g-list").value);
       const src = script.source || {};
       status(`已载入：${src.kind === "scenario" ? "场景 " + src.scenario : src.kind === "preview" ? "单个动作 #" + src.species + " · " + src.action : "对局 " + (src.sid || "") + " 第 " + (src.round || "") + " 轮"}，${script.units.length} 名单位、${script.actions.length} 个动作。`);
     } catch (error) {
@@ -160,6 +180,7 @@
     const dt = Math.min(0.1, (now - state.last) / 1000);
     state.last = now;
     let next = state.p + dt * state.speed;
+    if (state.loop && $("wb-loop").checked && (next >= state.loop.to || next < state.loop.from - 0.5)) next = state.loop.from;
     if (next >= duration()) {
       if ($("wb-loop").checked) next = 0;
       else { seek(duration()); stop(); return; }
@@ -169,7 +190,7 @@
   }
   function play() {
     if (!state.rendB) return;
-    if (state.p >= duration() - 1e-6) state.p = 0;
+    if (state.p >= duration() - 1e-6) state.p = state.loop ? state.loop.from : 0;
     state.playing = true;
     state.last = performance.now();
     $("wb-play").textContent = "暂停";
@@ -330,6 +351,7 @@
     state.sel = { unit: action.actor, action: action.i };
     const unit = pl.units[action.actor];
     const phase = action.slot === "attack_melee" ? "dash" : "anticipation";
+    state.partsClipId = (unit.partSource && unit.partSource[action.slot]) || unit.clips[action.slot + "_id"];
     setClip(unit.clips[action.slot + "_id"], phase);
     $("wb-arche").value = unit.arche;
     const zhKind = action.isCast ? (action.skill?.name || "技能") : "普攻";
@@ -345,6 +367,7 @@
     if (!unit) return;
     state.sel = { unit: idx, action: null };
     const chosen = slot || "idle";
+    state.partsClipId = (unit.partSource && unit.partSource[chosen]) || unit.clips[chosen + "_id"];
     setClip(unit.clips[chosen + "_id"], null);
     $("wb-arche").value = unit.arche;
     $("wb-selection").innerHTML = `<b>${esc(unit.name)}</b> · ${esc(ROLE_ZH[unit.role] || unit.role)} · 原型 ${esc(unit.arche)} · 体重 ${unit.weight.toFixed(2)} · 稳定偏移 ${unit.offset >= 0 ? "+" : ""}${unit.offset.toFixed(3)}s · 待机周期 ${unit.idlePeriod.toFixed(2)}s`;
@@ -374,7 +397,10 @@
     const owner = stemOwning("motion", id, "clips");
     $("wb-owner").textContent = owner ? `编辑 assets/motion/${owner}.json` : "内置后备片段（只读）";
     $("wb-clip-note").textContent = `${SLOT_ZH[clip.slot] || clip.slot}${clip.period ? " · 周期 " + clip.period + "s" : ""}${clip.note ? " · " + clip.note : ""}。单位为源精灵像素，前进方向为 +dx；角度顺时针；缩放 100 为原尺寸。`;
+    if (!state.partsClipId || state.mergedB.clips[state.partsClipId]?.slot !== clip.slot) state.partsClipId = id;
     renderKeys();
+    partsClipOptions();
+    renderParts();
   }
   function editableClip() {
     const owner = stemOwning("motion", state.clipId, "clips");
@@ -512,6 +538,241 @@
     }
   }
 
+  // ------------------------------------------------------------ part deformation
+  function partsClipOptions() {
+    const clips = state.mergedB.clips;
+    const slot = clips[state.clipId]?.slot;
+    const ids = Object.keys(clips).filter((id) => clips[id].slot === slot).sort();
+    $("wb-parts-clip").innerHTML = ids.map((id) => `<option value="${esc(id)}"${id === state.partsClipId ? " selected" : ""}>${esc(id)}${clips[id].parts ? " ●" : ""}</option>`).join("");
+  }
+  function editablePartsClip() {
+    const owner = stemOwning("motion", state.partsClipId, "clips");
+    return owner ? { owner, clip: state.packsB.motion[owner].clips[state.partsClipId] } : null;
+  }
+  function roleClipFor(slot) {
+    const pl = plan();
+    const unit = pl && state.sel.unit != null ? pl.units[state.sel.unit] : null;
+    const arche = unit ? unit.arche : $("wb-arche").value;
+    const id = state.mergedB.archetypes[arche]?.clips?.[slot];
+    return id && state.mergedB.clips[id] ? { id, clip: state.mergedB.clips[id], arche } : null;
+  }
+  function renderParts() {
+    const clip = state.mergedB.clips[state.partsClipId];
+    const keys = clip?.parts?.[state.phase] || [];
+    const edit = editablePartsClip();
+    const role = clip ? roleClipFor(clip.slot) : null;
+    const pl = plan();
+    const unit = pl && state.sel.unit != null ? pl.units[state.sel.unit] : null;
+    let note;
+    if (!clip) note = "—";
+    else if (keys.length) note = `${edit ? "可编辑 · assets/motion/" + edit.owner + ".json" : "内置（只读）"}${unit && unit.partSource && Object.values(unit.partSource).includes(state.partsClipId) ? " · 选中单位正在使用" : ""}`;
+    else if (clip.parts) note = `该片段没有「${PHASE_ZH[state.phase] || state.phase}」阶段的形变轨道（此阶段不形变）。`;
+    else note = role && role.clip.parts ? `该片段没有形变轨道，渲染时沿用原型 ${role.id}。` : "该片段没有形变轨道。";
+    $("wb-parts-note").textContent = note;
+    $("wb-parts").innerHTML = keys.map((k, r) => `<tr data-row="${r}"${r === state.partsRow ? ' class="selected"' : ""}><td><input type="number" data-f="0" min="0" max="1" step="0.01" value="${k[0]}"${edit ? "" : " disabled"}${r === 0 || r === keys.length - 1 ? ' readonly title="端点固定为 0 与 1"' : ""} aria-label="at"></td>${PART_COLS.map((name, i) => `<td><input type="number" data-f="${i + 1}" min="${PART_LIMITS[name][0]}" max="${PART_LIMITS[name][1]}" step="0.5" value="${k[i + 1]}"${edit ? "" : " disabled"} aria-label="${name}"></td>`).join("")}<td><select data-f="6"${edit ? "" : " disabled"} aria-label="缓动">${EASES.map((e) => `<option${e === k[6] ? " selected" : ""}>${e}</option>`).join("")}</select></td><td>${edit && keys.length > 2 && r > 0 && r < keys.length - 1 ? `<button type="button" data-premove="${r}" aria-label="删除形变帧">✕</button>` : ""}</td></tr>`).join("") || `<tr><td colspan="8" class="wb-note">无关键帧</td></tr>`;
+    $("wb-parts-add").disabled = !edit || keys.length < 2 || keys.length >= 16;
+    $("wb-parts-new").disabled = !edit || keys.length > 0 || !clip?.phases?.[state.phase];
+    $("wb-parts-copy").disabled = !edit || !!clip?.parts || !(role && role.clip.parts && role.id !== state.partsClipId);
+    $("wb-parts-copy").title = role ? `复制 ${role.id} 的全部形变轨道` : "";
+    drawPartsPlot();
+  }
+  function validateParts(keys) {
+    if (!Array.isArray(keys) || keys.length < 2 || keys.length > 16) return "每个阶段需要 2–16 个形变帧";
+    if (keys[0][0] !== 0 || keys[keys.length - 1][0] !== 1) return "首尾形变帧时间必须是 0 和 1";
+    for (let i = 0; i < keys.length; i++) {
+      const k = keys[i];
+      if (k.length !== 7) return `第 ${i + 1} 帧字段数应为 7`;
+      if (i && !(k[0] > keys[i - 1][0])) return `第 ${i + 1} 帧时间必须严格递增`;
+      for (const [j, name] of PART_COLS.entries()) {
+        const [lo, hi] = PART_LIMITS[name];
+        if (!Number.isFinite(k[j + 1]) || k[j + 1] < lo || k[j + 1] > hi) return `第 ${i + 1} 帧 ${name} 超出 ${lo}…${hi}`;
+      }
+      if (!EASES.includes(k[6])) return `第 ${i + 1} 帧缓动未知`;
+    }
+    return null;
+  }
+  function partsInput(event) {
+    const target = event.target;
+    const row = target.closest("tr")?.dataset.row;
+    if (row == null || target.dataset.f == null) return;
+    const edit = editablePartsClip();
+    if (!edit) return;
+    const keys = edit.clip.parts[state.phase];
+    const r = Number(row), f = Number(target.dataset.f);
+    state.partsRow = r;
+    let value = target.value;
+    if (f !== 6) {
+      value = Number(value);
+      if (!Number.isFinite(value)) { target.classList.add("bad"); return; }
+      value = f === 0 ? Math.round(value * 1000) / 1000 : Math.round(value * 10) / 10;
+    }
+    const before = keys[r][f];
+    keys[r][f] = value;
+    const problem = validateParts(keys);
+    $("wb-parts-error").hidden = !problem;
+    $("wb-parts-error").textContent = problem || "";
+    target.classList.toggle("bad", !!problem);
+    if (problem) { keys[r][f] = before; setTimeout(() => { target.value = String(before); target.classList.remove("bad"); }, 1600); return; }
+    markDirty("motion", edit.owner);
+    drawPartsPlot();
+  }
+  function addPartKey() {
+    const edit = editablePartsClip();
+    const keys = edit?.clip.parts?.[state.phase];
+    if (!keys || keys.length >= 16) return;
+    const r = Math.min(state.partsRow, keys.length - 2);
+    const a = keys[r], b = keys[r + 1];
+    const at = Math.round((a[0] + b[0]) / 2 * 1000) / 1000;
+    if (!(at > a[0] && at < b[0])) return;
+    const v = PB.sampleParts(keys, at);
+    keys.splice(r + 1, 0, [at, ...PART_COLS.map((name) => Math.round(v[name] * 10) / 10), a[6]]);
+    state.partsRow = r + 1;
+    markDirty("motion", edit.owner);
+    renderParts();
+  }
+  function removePartKey(r) {
+    const edit = editablePartsClip();
+    const keys = edit?.clip.parts?.[state.phase];
+    if (!keys || keys.length <= 2 || r <= 0 || r >= keys.length - 1) return;
+    keys.splice(r, 1);
+    state.partsRow = Math.max(0, r - 1);
+    markDirty("motion", edit.owner);
+    renderParts();
+  }
+  function newPartsTrack() {
+    const edit = editablePartsClip();
+    if (!edit || !edit.clip.phases?.[state.phase]) return;
+    edit.clip.parts = edit.clip.parts || {};
+    if (edit.clip.parts[state.phase]) return;
+    // start from what the renderer currently uses for this slot/phase
+    const role = roleClipFor(edit.clip.slot);
+    const fallback = role?.clip.parts?.[state.phase];
+    edit.clip.parts[state.phase] = fallback ? clone(fallback) : [[0, 0, 0, 0, 0, 0, "easeInOutQuad"], [1, 0, 0, 0, 0, 0, "easeInOutQuad"]];
+    state.partsRow = 0;
+    markDirty("motion", edit.owner);
+    partsClipOptions();
+    renderParts();
+  }
+  function copyRoleParts() {
+    const edit = editablePartsClip();
+    if (!edit || edit.clip.parts) return;
+    const role = roleClipFor(edit.clip.slot);
+    if (!role || !role.clip.parts) return;
+    edit.clip.parts = clone(role.clip.parts);
+    for (const phase of Object.keys(edit.clip.parts)) if (!edit.clip.phases[phase]) delete edit.clip.parts[phase];
+    state.partsRow = 0;
+    markDirty("motion", edit.owner);
+    partsClipOptions();
+    renderParts();
+    $("wb-save-note").textContent = `已把 ${role.id} 的形变轨道复制到 ${state.partsClipId}（B）。`;
+  }
+  function drawPartsPlot() {
+    const c = $("wb-parts-plot"), g = c.getContext("2d");
+    const keys = state.mergedB.clips[state.partsClipId]?.parts?.[state.phase] || [];
+    g.clearRect(0, 0, c.width, c.height);
+    const pad = 10, w = c.width - pad * 2, h = c.height - pad * 2, mid = pad + h / 2;
+    g.strokeStyle = "#d6d8c6"; g.beginPath(); g.moveTo(pad, mid); g.lineTo(pad + w, mid); g.stroke();
+    if (!keys.length) { g.fillStyle = "#62715d"; g.font = "11px sans-serif"; g.fillText("无形变轨道", pad + 4, mid - 6); return; }
+    PART_COLS.forEach((name, i) => {
+      const span = Math.max(Math.abs(PART_LIMITS[name][0]), Math.abs(PART_LIMITS[name][1]));
+      g.strokeStyle = PART_COLORS[i]; g.lineWidth = 2; g.beginPath();
+      for (let j = 0; j <= 80; j++) {
+        const q = j / 80, v = PB.sampleParts(keys, q)[name] / span;
+        const px = pad + q * w, py = mid - clamp(v, -1, 1) * h / 2;
+        j ? g.lineTo(px, py) : g.moveTo(px, py);
+      }
+      g.stroke();
+    });
+    g.lineWidth = 1;
+    for (const [i, k] of keys.entries()) { g.fillStyle = i === state.partsRow ? "#a04c3d" : "#283d34"; g.fillRect(pad + k[0] * w - 2, pad + h - 6, 4, 6); }
+  }
+
+  // ------------------------------------------------------------ skill gallery
+  function buildGallery() {
+    const merged = state.mergedB;
+    const bindings = merged.vfx.bindings.skill || {};
+    const owners = {};
+    for (const c of Object.values(state.characters)) {
+      const id = c.skill && c.skill.native_id;
+      if (id) (owners[id] ||= []).push(c);
+    }
+    state.gallery = Object.entries(bindings).map(([id, recipeId]) => {
+      const recipe = merged.vfx.recipes[recipeId] || {};
+      const category = String(recipe.extends || "").replace(/^cat\./, "") || "—";
+      const holders = (owners[id] || []).sort((a, b) => a.species - b.species);
+      const name = holders[0]?.skill?.name || String(recipe.note || id).split(" · ")[0];
+      return { id, recipe: recipeId, category, name, note: recipe.note || "", species: holders[0]?.species ?? null,
+        holder: holders[0]?.name || "", holders: holders.map((c) => `#${c.species} ${c.name}`) };
+    }).filter((g) => g.species != null).sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name, "zh"));
+    const cats = [...new Set(state.gallery.map((g) => g.category))].sort();
+    const current = $("wb-g-cat").value;
+    $("wb-g-cat").innerHTML = `<option value="">全部类别（${state.gallery.length}）</option>` + cats.map((c) => `<option value="${esc(c)}"${c === current ? " selected" : ""}>${esc(CATEGORY_ZH[c] || c)} · ${esc(c)}（${state.gallery.filter((g) => g.category === c).length}）</option>`).join("");
+    renderGalleryList();
+  }
+  function renderGalleryList() {
+    const cat = $("wb-g-cat").value, q = $("wb-g-search").value.trim().toLowerCase();
+    const keep = $("wb-g-list").value;
+    state.galleryShown = state.gallery.filter((g) => (!cat || g.category === cat)
+      && (!q || [g.id, g.name, g.note, ...g.holders].some((t) => String(t).toLowerCase().includes(q))));
+    const groups = {};
+    for (const g of state.galleryShown) (groups[g.category] ||= []).push(g);
+    $("wb-g-list").innerHTML = Object.entries(groups).map(([c, rows]) => `<optgroup label="${esc(CATEGORY_ZH[c] || c)}">${rows.map((g) => `<option value="${esc(g.id)}"${g.id === keep ? " selected" : ""}>${esc(g.name)} · ${esc(g.holder)}${g.holders.length > 1 ? " 等" + g.holders.length : ""}</option>`).join("")}</optgroup>`).join("");
+    $("wb-g-count").textContent = `${state.galleryShown.length} 个`;
+  }
+  function stepGallery(delta) {
+    if (!state.galleryShown.length) return;
+    const i = state.galleryShown.findIndex((g) => g.id === $("wb-g-list").value);
+    const next = state.galleryShown[(i < 0 ? 0 : (i + delta + state.galleryShown.length) % state.galleryShown.length)];
+    $("wb-g-list").value = next.id;
+    if (state.source !== "gallery") setSource("gallery");
+    loadScript();
+  }
+  function galleryCast() {
+    const pl = plan();
+    if (!pl) return null;
+    return pl.actions.find((a) => a.kind === "cast" && a.actor === state.script.units[0].idx && !a.secondary)
+      || pl.actions.find((a) => a.kind === "cast" && !a.secondary) || null;
+  }
+  function enterGallery(skillId) {
+    state.gallerySkill = state.gallery.find((g) => g.id === skillId) || null;
+    const cast = galleryCast();
+    if (!cast) { state.loop = null; $("wb-g-panel").hidden = true; return; }
+    const pl = plan();
+    const from = Math.max(0, PB.toPlayback(pl, cast.start - 0.2));
+    const to = Math.min(duration(), PB.toPlayback(pl, Math.max(cast.end, cast.lastOutcome || 0) + 0.9));
+    state.loop = { from, to };
+    selectAction(cast, false);
+    // open the recipe editor on the skill's own recipe
+    const tab = document.querySelector('[data-editor="vfx"]');
+    if (tab) tab.click();
+    selectRecipe(state.gallerySkill && state.mergedB.vfx.recipes[state.gallerySkill.recipe] ? state.gallerySkill.recipe : cast.recipe);
+    $("wb-g-panel").hidden = false;
+    renderGalleryInfo();
+    seek(from);
+    play();
+  }
+  function renderGalleryInfo() {
+    const cast = galleryCast();
+    const pl = plan();
+    if (!cast || !pl) return;
+    const merged = state.mergedB;
+    const raw = merged.vfx.recipes[cast.recipe] || {};
+    const resolved = PB.resolveRecipe(merged, cast.recipe).layers;
+    const nAdd = (raw.add || []).length, nOwn = (raw.layers || []).length, nBase = resolved.length - nAdd - nOwn;
+    const skill = state.gallerySkill;
+    $("wb-g-title").textContent = `${skill?.name || cast.skill?.name || ""} · ${CATEGORY_ZH[cast.skill?.category] || cast.skill?.category || ""} · 施放者 ${pl.units[cast.actor].name}`;
+    $("wb-g-recipe").textContent = `${cast.recipe}${raw.extends ? " ← " + raw.extends : ""}${raw.scale ? " · 缩放 ×" + raw.scale : ""}${raw.family ? " · 弹道 " + raw.family : ""}`;
+    $("wb-g-layers").innerHTML = resolved.map((l, i) => {
+      const from = i < nBase ? ["cat", raw.extends || "类别"] : i < nBase + nOwn ? ["own", "技能"] : ["add", "技能附加"];
+      const on = l.on ? (Array.isArray(l.on) ? l.on : [l.on]).map((x) => SUB_ZH[x] || x).join(" / ") : "—";
+      return `<tr class="${from[0]}"><td>${i + 1}</td><td><span class="wb-tag ${from[0]}">${esc(from[1])}</span></td><td>${esc(l.layer)}</td><td>${esc(l.shape)}</td><td>${esc(l.at || "impact")}${l.offset ? "+" + l.offset : ""}</td><td>${esc(on)}${l.from ? " · 从 " + esc(l.from) : ""}${l.to ? " → " + esc(l.to) : ""}</td><td>${esc(l.palette || "@type")}</td><td>${l.duration != null ? l.duration + "s" : "—"}</td></tr>`;
+    }).join("");
+    const outs = (cast.outcomes || []).slice().sort((a, b) => a.t + (a.delay || 0) - (b.t + (b.delay || 0)));
+    const matched = (o) => resolved.some((l) => l.on && (Array.isArray(l.on) ? l.on.includes(o.sub) : l.on === o.sub || l.on === "*"));
+    $("wb-g-outcomes").innerHTML = outs.map((o) => `<li><span>${esc(SUB_ZH[o.sub] || o.sub)} <code>${esc(o.sub)}</code></span><span>→ ${esc(pl.units[o.tgt]?.name || "#" + o.tgt)}${pl.units[o.origin] && o.origin !== cast.actor ? "（自 " + esc(pl.units[o.origin].name) + "）" : ""}${matched(o) ? "" : ' <span class="wb-tag">无配方层</span>'}</span><span class="wb-muted">+${(o.delay || 0).toFixed(2)}s</span></li>`).join("")
+      || '<li><span class="wb-muted">本次施放没有附带结果事件（纯伤害）。</span><span></span><span></span></li>';
+  }
+
   // ------------------------------------------------------------ timing + vfx
   function renderTiming() {
     const arche = $("wb-arche").value;
@@ -567,6 +828,8 @@
     $("wb-recipe").value = id;
     $("wb-recipe-json").value = JSON.stringify(state.mergedB.vfx.recipes[id], null, 1);
     $("wb-recipe-error").hidden = true;
+    const owner = stemOwning("vfx", id, "recipes");
+    $("wb-recipe-owner").textContent = owner ? `assets/vfx/${owner}.json` : "内置（只读）";
   }
   function applyRecipe() {
     const id = $("wb-recipe").value;
@@ -575,13 +838,21 @@
     if (!owner) return error("该配方不属于任何 assets/vfx 文件，无法编辑。");
     let value;
     try { value = JSON.parse($("wb-recipe-json").value); } catch (e) { return error("JSON 解析失败：" + e.message); }
-    if (!value || !Array.isArray(value.layers) || !value.layers.length) return error("配方需要非空 layers 数组。");
-    const layers = ["charge", "projectile", "trail", "impact", "ground", "aura", "screen"];
-    const bad = value.layers.findIndex((l) => !l || !layers.includes(l.layer) || typeof l.shape !== "string");
-    if (bad >= 0) return error(`第 ${bad + 1} 层缺少有效的 layer / shape。`);
+    if (!value || typeof value !== "object") return error("配方必须是对象。");
+    if (value.extends != null && !state.mergedB.vfx.recipes[value.extends]) return error(`extends 指向不存在的配方 ${value.extends}。`);
+    if (value.extends === id) return error("配方不能继承自身。");
+    if (value.extends == null && (!Array.isArray(value.layers) || !value.layers.length)) return error("配方需要非空 layers 数组，或用 extends 继承类别配方。");
+    const layers = ["charge", "projectile", "trail", "impact", "ground", "aura", "link", "screen"];
+    for (const group of ["layers", "add"]) {
+      if (value[group] == null) continue;
+      if (!Array.isArray(value[group])) return error(`${group} 必须是数组。`);
+      const bad = value[group].findIndex((l) => !l || !layers.includes(l.layer) || typeof l.shape !== "string");
+      if (bad >= 0) return error(`${group} 第 ${bad + 1} 层缺少有效的 layer / shape。`);
+    }
     state.packsB.vfx[owner].recipes[id] = value;
     $("wb-recipe-error").hidden = true;
     markDirty("vfx", owner);
+    if (state.source === "gallery" && state.gallerySkill) renderGalleryInfo();
   }
 
   // ------------------------------------------------------------ save/export
@@ -595,6 +866,10 @@
           for (const [phase, keys] of Object.entries(clip.phases)) {
             const problem = validateKeys(keys);
             if (problem) { $("wb-save-note").textContent = `未保存：${id} · ${PHASE_ZH[phase] || phase}：${problem}`; return; }
+          }
+          for (const [phase, keys] of Object.entries(clip.parts || {})) {
+            const problem = validateParts(keys);
+            if (problem) { $("wb-save-note").textContent = `未保存：${id} · 形变 ${PHASE_ZH[phase] || phase}：${problem}`; return; }
           }
         }
       }
@@ -641,7 +916,7 @@
     state.packsB = clone(state.packsA);
     state.dirty.clear();
     remergeB();
-    clipOptions(); recipeOptions();
+    clipOptions(); recipeOptions(); buildGallery();
     setClip(state.clipId, state.phase);
     renderTiming();
     selectRecipe($("wb-recipe").value);
@@ -703,8 +978,29 @@
     $("wb-zoom").addEventListener("input", drawTimeline);
     $("wb-solo").addEventListener("change", () => { $("wb-previews").classList.toggle("solo", $("wb-solo").checked); });
     $("wb-timeline").addEventListener("click", timelineClick);
-    $("wb-clip").addEventListener("change", () => setClip($("wb-clip").value, null));
-    $("wb-phase").addEventListener("change", () => { state.phase = $("wb-phase").value; state.keyRow = 0; renderKeys(); });
+    $("wb-clip").addEventListener("change", () => {
+      const id = $("wb-clip").value;
+      if (state.mergedB.clips[id]?.parts) state.partsClipId = id;
+      setClip(id, null);
+    });
+    $("wb-parts-clip").addEventListener("change", () => { state.partsClipId = $("wb-parts-clip").value; state.partsRow = 0; renderParts(); });
+    $("wb-parts").addEventListener("change", partsInput);
+    $("wb-parts").addEventListener("click", (event) => {
+      const remove = event.target.closest("[data-premove]");
+      if (remove) return removePartKey(Number(remove.dataset.premove));
+      const tr = event.target.closest("tr[data-row]");
+      if (tr) { state.partsRow = Number(tr.dataset.row); for (const row of $("wb-parts").children) row.classList.toggle("selected", row === tr); }
+    });
+    $("wb-parts-add").addEventListener("click", addPartKey);
+    $("wb-parts-new").addEventListener("click", newPartsTrack);
+    $("wb-parts-copy").addEventListener("click", copyRoleParts);
+    $("wb-g-cat").addEventListener("change", () => renderGalleryList());
+    $("wb-g-search").addEventListener("input", () => renderGalleryList());
+    $("wb-g-list").addEventListener("change", () => loadScript());
+    $("wb-g-prev").addEventListener("click", () => stepGallery(-1));
+    $("wb-g-next").addEventListener("click", () => stepGallery(1));
+    $("wb-g-scene").addEventListener("change", () => { if ($("wb-g-list").value) loadScript(); });
+    $("wb-phase").addEventListener("change", () => { state.phase = $("wb-phase").value; state.keyRow = 0; state.partsRow = 0; renderKeys(); renderParts(); });
     $("wb-keys").addEventListener("change", keyInput);
     $("wb-keys").addEventListener("click", (event) => {
       const remove = event.target.closest("[data-remove]");
@@ -751,12 +1047,17 @@
       return;
     }
     await loadCatalogs();
+    buildGallery();
+    if (q.get("skill")) {
+      const hit = state.gallery.find((g) => g.id === q.get("skill"));
+      if (hit) { setSource("gallery"); $("wb-g-list").value = hit.id; }
+    }
     if (q.get("species") && state.characters[q.get("species")]) $("wb-species").value = q.get("species");
     if (q.get("kind")) $("wb-kind").value = q.get("kind");
     if (q.get("scenario")) $("wb-scenario").value = q.get("scenario");
     drawTimeline();
-    if (q.get("autoload") !== "0" && (q.get("sid") || q.get("scenario") || q.get("species"))) loadScript();
+    if (q.get("autoload") !== "0" && (q.get("sid") || q.get("scenario") || q.get("species") || (q.get("skill") && state.source === "gallery"))) loadScript();
   }
-  window.WB = { state, seek, play, stop, selectAction, loadScript, save };
+  window.WB = { state, seek, play, stop, selectAction, loadScript, save, setSource, stepGallery, renderParts };
   init();
 })();

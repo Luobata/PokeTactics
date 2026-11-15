@@ -96,3 +96,19 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .wb-compare .head{font-size:11px;color:var(--muted)}
 .wb-chip{display:inline-block;padding:1px 7px;border-radius:9px;background:#e8e9da;margin:2px 4px 2px 0;font-size:11px}
 .wb-chip.ok{background:#dcebd3}.wb-chip.warn{background:#f3dfcf}
+.wb-source .wb-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:8px;border-bottom:1px solid var(--line)}.wb-source .wb-tabs button{border:1px solid var(--line);border-radius:4px;padding:4px 6px;min-height:30px;background:#fffdf3}.wb-source .wb-tabs button[aria-selected=true]{background:var(--green);border-color:#203a2b;color:#f3f4da;margin:0}
+.wb-g-list{width:100%;border:1px solid var(--line);border-radius:4px;background:#fffdf3;font-size:12px;padding:2px}
+.wb-g-list option{padding:3px 4px}.wb-g-list optgroup{font-style:normal;color:var(--muted)}
+.wb-g-body{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px}
+@media(max-width:1000px){.wb-g-body{grid-template-columns:1fr}}
+.wb-g-body h3,.wb-sub{font-size:12px;font-weight:650;margin:0 0 6px}.wb-sub{margin-top:16px}
+.wb-g-body small,.wb-sub small{font-weight:400;font-size:11px;margin-left:6px}
+.wb-g-layers td{font-family:ui-monospace,monospace;font-size:11px;white-space:nowrap}
+.wb-g-layers tr.add td{background:#f2ead0}.wb-g-layers tr.own td{background:#e6eedc}
+.wb-tag{display:inline-block;padding:0 6px;border-radius:8px;font-size:10px;background:#e8e9da;font-family:inherit}
+.wb-tag.cat{background:#dfe6ef}.wb-tag.add{background:#f3dfb8}.wb-tag.own{background:#d6e9cc}
+.wb-g-outcomes{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:12px}
+.wb-g-outcomes li{display:grid;grid-template-columns:96px 1fr auto;gap:8px;padding:4px 8px;border:1px solid #e1e3d2;border-radius:4px;background:#fffdf3}
+.wb-g-outcomes code{font-size:11px}
+.wb-parts-note{font-size:12px;color:var(--ink);min-height:34px;display:flex;align-items:center}
+.c-lean{color:#3d7fb0}.c-hx{color:#a04c3d}.c-hy{color:#c2732f}.c-belly{color:#6a9a5c}.c-wob{color:#7b5cc8}

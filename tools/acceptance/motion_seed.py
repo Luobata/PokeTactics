@@ -157,9 +157,68 @@ def role_pack():
             'timing': {'anticipation': .30, 'recover': .30, 'cast_anticipation': .52, 'cast_recover': .36,
                        'weight': .8, 'dash_speed': 650, 'offset_range': .06, 'idle_period': 2.2}},
     }
+    for clip_id, parts in ROLE_PARTS.items():
+        clips[clip_id]['parts'] = parts
     return {'schema_version': 1, 'kind': 'motion_pack', 'name': 'roles',
-            'description': '角色定位原型（近战/远程/辅助/坦克）动作片段与节奏；单位：源精灵像素，前进方向为 +dx。',
+            'description': '角色定位原型（近战/远程/辅助/坦克）动作片段、分件形变与节奏；单位：源精灵像素，前进方向为 +dx。',
             'clips': clips, 'archetypes': archetypes}
+
+
+def pk(at, lean=0, head_x=0, head_y=0, belly=0, wobble=0, ease=E):
+    """Part-deformation key: [at, lean, head_x, head_y, belly%, wobble, ease] (source px)."""
+    r = lambda v: round(v, 1)
+    return [round(at, 3), r(lean), r(head_x), r(head_y), r(belly), r(wobble), ease]
+
+
+# Band-mesh deformation of the single cel: feet stay planted, the body leans
+# (+ = toward the target), the head band bobs, the belly widens, wobble ripples.
+ROLE_PARTS = {
+    'role.idle.breathe': {'loop': [pk(0), pk(.5, 0, 0, 1.5, 5), pk(1)]},
+    'role.idle.heavy': {'loop': [pk(0), pk(.55, 0, 0, 2, 9), pk(1)]},
+    'role.idle.float': {'loop': [pk(0), pk(.25, 1.5, 1.5, -1), pk(.5, 0, 0, -2, 3), pk(.75, -1.5, -1.5, -1), pk(1)]},
+    'role.idle.bounce': {'loop': [pk(0, ease='easeOutQuad'), pk(.35, 0, 0, -2, -4, 0, 'easeInQuad'), pk(.7, 0, 0, 2.5, 8), pk(1)]},
+    'role.walk.hop': {'loop': [pk(0), pk(.25, 4, 2, -1), pk(.5, 2, 0, 2, 6), pk(.75, 4, 2, -1), pk(1)]},
+    'role.walk.stomp': {'loop': [pk(0), pk(.25, 2, -2, 0, 4), pk(.5, 0, 0, 3, 10), pk(.75, 2, 2, 0, 4), pk(1)]},
+    'role.melee.attack': {
+        'anticipation': [pk(0, ease='easeOutCubic'), pk(.7, -9, -5, 2, 8), pk(1, -10, -6, 2, 10, 0, 'easeInQuad')],
+        'dash': [pk(0, -10, -6, 2, 10, 0, 'easeInQuad'), pk(1, 12, 6, -2, -8)],
+        'contact': [pk(0, 12, 6, -2, -8, 0, 'easeOutBack'), pk(.3, 14, 8, 2, 12, 4), pk(1, 5, 2, 0, 4, 2)],
+        'recover': [pk(0, 5, 2, 0, 4, 2, 'easeOutQuad'), pk(.6, -2, -1, -1, -2), pk(1)]},
+    'role.ranged.attack': {
+        'anticipation': [pk(0, ease='easeOutCubic'), pk(1, -6, -4, 1, 6)],
+        'release': [pk(0, -6, -4, 1, 6, 0, 'easeOutExpo'), pk(.25, 7, 5, -1, -6, 2), pk(1, -4, -2, 0, 2)],
+        'recover': [pk(0, -4, -2, 0, 2, 0, 'easeOutBack'), pk(1)]},
+    'role.melee.cast': {
+        'anticipation': [pk(0), pk(.6, -6, -4, 3, 14), pk(1, -7, -5, 4, 18, 1)],
+        'release': [pk(0, -7, -5, 4, 18, 1, 'easeOutExpo'), pk(.3, 14, 8, -3, -10, 3), pk(1, 3, 1, 0, 2)],
+        'recover': [pk(0, 3, 1, 0, 2, 0, 'easeOutBack'), pk(1)]},
+    'role.ranged.cast': {
+        'anticipation': [pk(0), pk(.5, -2, -3, -3, 6), pk(1, -3, -4, -4, 12, 1.5)],
+        'release': [pk(0, -3, -4, -4, 12, 1.5, 'easeOutExpo'), pk(.3, 6, 5, 2, -8, 2), pk(1)],
+        'recover': [pk(0, ease='easeOutBack'), pk(1)]},
+    'role.support.cast': {
+        'anticipation': [pk(0), pk(.4, 0, 0, -3, 6, 1), pk(.8, 0, 0, -4, 10, 2), pk(1, 0, 0, -4, 10, 2)],
+        'release': [pk(0, 0, 0, -4, 10, 2, 'easeOutBack'), pk(.35, 2, 2, 2, -4), pk(1)],
+        'recover': [pk(0), pk(1)]},
+    'role.support.attack': {
+        'anticipation': [pk(0), pk(1, -3, -3, -1, 4)],
+        'release': [pk(0, -3, -3, -1, 4, 0, 'easeOutBack'), pk(.3, 5, 4), pk(1)],
+        'recover': [pk(0), pk(1)]},
+    'role.tank.attack': {
+        'anticipation': [pk(0), pk(.6, -4, -2, -4, -6), pk(1, -5, -3, -5, -8, 0, 'easeInCubic')],
+        'dash': [pk(0, -5, -3, -5, -8, 0, 'easeInCubic'), pk(1, 8, 4, 2, 10)],
+        'contact': [pk(0, 8, 4, 2, 10, 0, 'easeOutBounce'), pk(.25, 6, 2, 6, 24, 5), pk(1, 2, 0, 1, 4)],
+        'recover': [pk(0, 2, 0, 1, 4), pk(1)]},
+    'role.tank.cast': {
+        'anticipation': [pk(0), pk(.6, 0, 0, 4, 18), pk(1, 0, 0, 5, 22)],
+        'release': [pk(0, 0, 0, 5, 22, 0, 'easeOutExpo'), pk(.3, 0, 0, -5, -12), pk(.55, 0, 0, 6, 26, 6, 'easeOutBounce'), pk(1, 0, 0, 1, 4)],
+        'recover': [pk(0, 0, 0, 1, 4), pk(1)]},
+    'role.hit.react': {'react': [pk(0, ease='easeOutExpo'), pk(.18, -7, -6, 1, -8, 4), pk(.55, -2, 2, 0, 6, 2, 'easeOutBack'), pk(1)]},
+    'role.hit.heavy': {'react': [pk(0, ease='easeOutExpo'), pk(.2, -3, -3, 2, 10, 2), pk(1)]},
+    'role.ko.topple': {'fall': [pk(0), pk(.25, -4, -5, -2, -6, 3, 'easeInQuad'), pk(.65, -12, -8, 4, 6, 1), pk(1, -16, -10, 6, 12)]},
+    'role.ko.sink': {'fall': [pk(0), pk(.3, 0, 0, -3, -6, 2, 'easeInCubic'), pk(1, 0, 0, 8, 30)]},
+    'role.victory.hop': {'loop': [pk(0, ease='easeOutQuad'), pk(.4, 2, 0, -4, -6, 0, 'easeInQuad'), pk(.7, 0, 0, 3, 10), pk(1)]},
+}
 
 
 # ------------------------------------------------------------- family templates
@@ -384,17 +443,12 @@ def vfx_pack():
             L('impact', 'ring', 'impact', palette='@type', size=30, duration=.3),
             L('impact', 'sparks', 'impact', palette='@type', count=6, duration=.3, particle='sparkle')]},
     }
+    recipes.update(CATEGORY_RECIPES)
     bindings = {
         'archetype': {'melee': 'melee_slash', 'ranged': 'ranged_shot', 'support': 'ranged_shot',
                       'tank': 'tank_stomp', 'cast': 'cast_burst', 'support_cast': 'support_channel'},
         'type_projectile': TYPE_PROJECTILE,
-        'category': {'heal': 'heal_channel', 'rescue': 'heal_channel', 'cleanse': 'heal_channel',
-                     'shield': 'shield_ring', 'guard': 'shield_ring', 'area': 'area_quake',
-                     'terrain': 'terrain_spikes', 'root': 'root_vines', 'poison': 'poison_cloud',
-                     'chain': 'chain_lightning', 'drain': 'drain_siphon', 'lifesteal': 'drain_siphon',
-                     'combo': 'combo_flurry', 'displacement': 'displace_blast', 'energy': 'support_channel'},
-        'skill': {'rock_spikes': 'terrain_spikes', 'root_domain': 'root_vines', 'spark_chain': 'chain_lightning',
-                  'storm_conductor': 'chain_lightning', 'four_arm_combo': 'combo_flurry'},
+        'category': {name: 'cat.' + name for name in CATEGORY_NAMES},
     }
     screen = {
         'ult': {'zoom': 1.08, 'dim': .5, 'slowmo': .45, 'slowmo_s': .3, 'banner_s': .9, 'hitstop': .1},
@@ -416,9 +470,220 @@ def vfx_pack():
             'recipes': recipes, 'bindings': bindings, 'screen': screen}
 
 
+# Category recipes: one distinct silhouette per skill category. Layers with
+# `on` fire once per cause-linked outcome of the cast (cast_index/action_index).
+HEAL_ON = ['heal', 'heal_bell', 'regen']
+GUARD_ON = ['guard', 'shield', 'protect', 'protect_charge', 'helping_hand']
+CATEGORY_RECIPES = {
+    'cat.burst': {'layers': [
+        L('charge', 'converge', 'anticipation', palette='@type', count=14, size=46, particle='@type'),
+        L('projectile', 'family', 'release', family='@type', palette='@type', size=13),
+        L('impact', 'burst', 'impact', palette='@type', size=62, count=20, duration=.45, particle='@type'),
+        L('impact', 'ring', 'impact', palette='@type', size=80, duration=.4, curve='easeOutCubic'),
+        L('ground', 'scorch', 'impact', palette='@type', size=56, duration=1.2, alpha=.5),
+        L('screen', 'flash', 'impact', palette='@type', duration=.1, alpha=.28),
+        L('impact', 'burst', 'impact', palette='@type', size=34, count=8, on='side_hit', particle='@type')]},
+    'cat.technique': {'extends': 'cat.burst', 'drop': ['converge'], 'add': [
+        L('charge', 'rune_circle', 'anticipation', palette='@type', size=46)]},
+    'cat.area': {'layers': [
+        L('charge', 'rune_circle', 'anticipation', palette='@type', size=50),
+        L('projectile', 'family', 'release', family='arc', palette='@type', size=14),
+        L('ground', 'ring_expand', 'impact', palette='@type', size=130, duration=.6, target='target'),
+        L('ground', 'debris', 'impact', palette='ROCK', size=60, count=12, duration=.7, target='target'),
+        L('impact', 'burst', 'impact', palette='@type', size=58, count=16, duration=.4, particle='@type'),
+        L('ground', 'crack', 'impact', palette='@type', size=70, duration=1.6, alpha=.6, target='target'),
+        L('impact', 'shards', 'impact', palette='@type', count=8, duration=.45, on='side_hit')]},
+    'cat.chain': {'layers': [
+        L('charge', 'sparks', 'anticipation', palette='@type', count=10, size=36, particle='arc'),
+        L('projectile', 'family', 'release', family='beam', palette='@type', size=8),
+        L('impact', 'cross', 'impact', palette='@type', size=50, duration=.25),
+        L('link', 'fork', 'impact', palette='@type', size=40, duration=.35, on=['side_hit', 'chain'], **{'from': 'origin'}),
+        L('impact', 'sparks', 'impact', palette='@type', count=12, duration=.35, particle='arc', on=['side_hit', 'chain']),
+        L('screen', 'flash', 'impact', palette='@type', duration=.08, alpha=.25)]},
+    'cat.combo': {'layers': [
+        L('trail', 'afterimage', 'release', duration=.25),
+        L('impact', 'multi_hit', 'impact', palette='@type', size=60, count=4, duration=.5),
+        L('impact', 'slash_arc', 'impact', palette='@type', size=62, duration=.25),
+        L('impact', 'claw', 'impact', palette='@type', size=54, duration=.3, offset=.12),
+        L('impact', 'shove', 'impact', palette='@type', size=50, duration=.4, on=['knockback', 'pull'])]},
+    'cat.drain': {'layers': [
+        L('projectile', 'family', 'release', family='homing', palette='@type', size=9),
+        L('impact', 'burst', 'impact', palette='@type', size=42, count=10, duration=.35, particle='@type'),
+        L('link', 'stream', 'impact', palette='@type', size=40, count=14, duration=.6, offset=.05, **{'from': 'target', 'to': 'actor'}),
+        L('aura', 'motes_rise', 'impact', palette='HEAL', size=40, count=8, duration=.7, offset=.35, target='actor'),
+        L('link', 'stream', 'impact', palette='@type', size=36, count=10, duration=.55, on=['energy_drain', 'drain'], **{'from': 'target', 'to': 'actor'})]},
+    'cat.lifesteal': {'extends': 'cat.drain', 'add': [
+        L('link', 'stream', 'impact', palette='HEAL', size=36, count=12, duration=.6, on=HEAL_ON, **{'from': 'origin'}),
+        L('aura', 'cross_glyph', 'impact', palette='HEAL', size=46, duration=.7, on=HEAL_ON)]},
+    'cat.energy': {'layers': [
+        L('charge', 'spiral', 'anticipation', palette='ELECTRIC', count=10, size=38, particle='spark'),
+        L('projectile', 'family', 'release', family='homing', palette='ELECTRIC', size=8),
+        L('aura', 'energy_orbs', 'impact', palette='ELECTRIC', size=46, duration=.6, on=['energy']),
+        L('link', 'stream', 'impact', palette='ELECTRIC', size=36, count=12, duration=.55, on=['energy_drain'], **{'from': 'target', 'to': 'actor'}),
+        L('impact', 'burst', 'impact', palette='@type', size=36, count=8, duration=.3, particle='spark')]},
+    'cat.heal': {'layers': [
+        L('aura', 'ring_rise', 'anticipation', palette='HEAL', size=42, duration=.6),
+        L('projectile', 'family', 'release', family='homing', palette='HEAL', size=8),
+        L('aura', 'motes_rise', 'impact', palette='HEAL', size=44, count=12, duration=.8, on=HEAL_ON),
+        L('aura', 'cross_glyph', 'impact', palette='HEAL', size=48, duration=.75, on=HEAL_ON),
+        L('aura', 'cleanse_spiral', 'impact', palette='HEAL', size=44, duration=.7, on=['cleanse'])]},
+    'cat.rescue': {'extends': 'cat.heal', 'add': [
+        L('link', 'tether', 'impact', palette='HEAL', size=30, duration=.5, on=['pull', 'rescue'], **{'from': 'actor'}),
+        L('impact', 'shove', 'impact', palette='HEAL', size=44, duration=.4, on=['pull'])]},
+    'cat.shield': {'layers': [
+        L('charge', 'ring', 'anticipation', palette='SHIELD', size=40, duration=.35),
+        L('projectile', 'family', 'release', family='homing', palette='SHIELD', size=8),
+        L('aura', 'hex_dome', 'impact', palette='SHIELD', size=70, duration=.95, on=GUARD_ON),
+        L('impact', 'flash', 'impact', palette='SHIELD', size=30, duration=.12)]},
+    'cat.guard': {'extends': 'cat.shield', 'add': [
+        L('aura', 'buff_arrows', 'impact', palette='SHIELD', size=40, duration=.6, on=GUARD_ON)]},
+    'cat.cleanse': {'layers': [
+        L('aura', 'ring_rise', 'anticipation', palette='HEAL', size=42, duration=.6),
+        L('projectile', 'family', 'release', family='homing', palette='@type', size=8),
+        L('aura', 'cleanse_spiral', 'impact', palette='HEAL', size=48, duration=.8, on=['cleanse']),
+        L('aura', 'motes_rise', 'impact', palette='HEAL', size=40, count=8, duration=.7, on=HEAL_ON),
+        L('aura', 'energy_orbs', 'impact', palette='ELECTRIC', size=40, duration=.55, on=['energy'])]},
+    'cat.clear': {'extends': 'cat.cleanse', 'add': [
+        L('ground', 'ring_expand', 'impact', palette='HEAL', size=110, duration=.6, target='actor')]},
+    'cat.displacement': {'layers': [
+        L('projectile', 'family', 'release', family='straight', palette='@type', size=14),
+        L('impact', 'ring', 'impact', palette='@type', size=64, duration=.32),
+        L('impact', 'shove', 'impact', palette='@type', size=60, duration=.45, on=['knockback', 'pull']),
+        L('trail', 'dust', 'impact', palette='GROUND', count=10, duration=.5, on=['knockback', 'pull'])]},
+    'cat.root': {'layers': [
+        L('projectile', 'family', 'release', family='ground', palette='GRASS', size=10),
+        L('ground', 'vines_grow', 'impact', palette='GRASS', size=50, duration=1.4, target='target'),
+        L('ground', 'vines_grow', 'impact', palette='GRASS', size=44, duration=1.3, on=['root', 'apply']),
+        L('impact', 'petals', 'impact', palette='GRASS', count=10, duration=.55, particle='leaf')]},
+    'cat.pursuit': {'layers': [
+        L('trail', 'afterimage', 'release', duration=.22),
+        L('impact', 'mark', 'release', palette='@type', size=50, duration=.3),
+        L('impact', 'bite', 'impact', palette='@type', size=56, duration=.35),
+        L('impact', 'claw', 'impact', palette='@type', size=50, duration=.3, offset=.08),
+        L('impact', 'burst', 'impact', palette='@type', size=36, count=8, duration=.3, on='side_hit')]},
+    'cat.assassin': {'extends': 'cat.pursuit', 'add': [
+        L('charge', 'spiral', 'anticipation', palette='GHOST', count=10, size=36, particle='wisp'),
+        L('impact', 'execute_slash', 'impact', palette='@type', size=64, duration=.45, on=['execute'])]},
+    'cat.taunt': {'layers': [
+        L('aura', 'shout_rings', 'release', palette='FIGHTING', size=70, duration=.6, target='actor'),
+        L('aura', 'mark', 'impact', palette='FIGHTING', size=48, duration=.55, on=['taunt']),
+        L('aura', 'hex_dome', 'impact', palette='SHIELD', size=66, duration=.8, on=GUARD_ON),
+        L('impact', 'ring', 'impact', palette='@type', size=50, duration=.3)]},
+    'cat.terrain': {'layers': [
+        L('charge', 'rune_circle', 'anticipation', palette='@type', size=46),
+        L('projectile', 'family', 'release', family='ground', palette='@type', size=12),
+        L('ground', 'spikes', 'impact', palette='@type', count=7, size=60, duration=2.0, target='target'),
+        L('ground', 'ring_expand', 'impact', palette='@type', size=96, duration=.5, target='target'),
+        L('impact', 'shards', 'impact', palette='@type', count=12, duration=.55, particle='debris')]},
+    'cat.poison': {'layers': [
+        L('projectile', 'family', 'release', family='arc', palette='POISON', size=11),
+        L('ground', 'puddle', 'impact', palette='POISON', size=58, duration=1.5, alpha=.7, target='target'),
+        L('impact', 'splash', 'impact', palette='POISON', count=14, duration=.5, particle='bubble'),
+        L('impact', 'splash', 'impact', palette='POISON', count=8, duration=.45, particle='bubble', on=['poison', 'status', 'side_hit'])]},
+    'cat.vulnerability': {'layers': [
+        L('projectile', 'family', 'release', family='straight', palette='@type', size=11),
+        L('impact', 'mark', 'impact', palette='@type', size=54, duration=.6),
+        L('impact', 'shards', 'impact', palette='STEEL', count=12, duration=.5),
+        L('impact', 'burst', 'impact', palette='@type', size=40, count=8, duration=.3, particle='@type'),
+        L('aura', 'mark', 'impact', palette='FIGHTING', size=44, duration=.5, on=['vulnerability'])]},
+    'cat.execute': {'layers': [
+        L('impact', 'mark', 'release', palette='@type', size=56, duration=.3),
+        L('trail', 'afterimage', 'release', duration=.2),
+        L('impact', 'execute_slash', 'impact', palette='@type', size=70, duration=.45),
+        L('screen', 'flash', 'impact', palette='KO', duration=.1, alpha=.3),
+        L('impact', 'execute_slash', 'impact', palette='KO', size=60, duration=.4, on=['execute'])]},
+    'cat.pierce': {'layers': [
+        L('charge', 'converge', 'anticipation', palette='@type', count=10, size=36, particle='@type'),
+        L('projectile', 'family', 'release', family='beam', palette='@type', size=8),
+        L('impact', 'pierce_line', 'impact', palette='@type', size=60, duration=.35),
+        L('impact', 'sparks', 'impact', palette='@type', count=10, duration=.3, particle='spark'),
+        L('impact', 'pierce_line', 'impact', palette='@type', size=50, duration=.3, on=['side_hit', 'knockback'])]},
+    'cat.retaliation': {'layers': [
+        L('aura', 'thorn_shell', 'release', palette='POISON', size=58, duration=.8, target='actor'),
+        L('aura', 'hex_dome', 'impact', palette='POISON', size=60, duration=.7, on=['thorns']),
+        L('impact', 'shards', 'impact', palette='POISON', count=10, duration=.45, on=['thorn_hit'])]},
+    'cat.control': {'layers': [
+        L('projectile', 'family', 'release', family='homing', palette='@type', size=9),
+        L('impact', 'ring', 'impact', palette='@type', size=56, duration=.35),
+        L('impact', 'stun_stars', 'impact', palette='ELECTRIC', size=50, duration=.8),
+        L('aura', 'stun_stars', 'impact', palette='ELECTRIC', size=46, duration=.8, on=['flinch', 'status', 'apply'])]},
+}
+CATEGORY_NAMES = sorted(name[4:] for name in CATEGORY_RECIPES)
+
+# Tag -> extra layers. A skill recipe = its category silhouette + its tags.
+TAG_LAYERS = [
+    (('击退', '震击'), L('impact', 'shove', 'impact', palette='@type', size=56, duration=.4, on=['knockback', 'pull'])),
+    (('连击',), L('impact', 'multi_hit', 'impact', palette='@type', size=54, count=3, duration=.45)),
+    (('护盾', '保护', '护卫', '群体护盾', '援护', '减伤'), L('aura', 'hex_dome', 'impact', palette='SHIELD', size=64, duration=.85, on=GUARD_ON)),
+    (('回复', '群体治疗', '伤害转治疗', '救援'), L('aura', 'motes_rise', 'impact', palette='HEAL', size=42, count=10, duration=.75, on=HEAL_ON)),
+    (('回能', '汲能', '攻击回能', '控能'), L('aura', 'energy_orbs', 'impact', palette='ELECTRIC', size=42, duration=.55, on=['energy'])),
+    (('净化', '解毒', '群体净化', '解控', '解冻'), L('aura', 'cleanse_spiral', 'impact', palette='HEAL', size=46, duration=.75, on=['cleanse'])),
+    (('定身', '控制铺垫'), L('ground', 'vines_grow', 'impact', palette='GRASS', size=44, duration=1.2, on=['root', 'apply'])),
+    (('嘲讽',), L('aura', 'shout_rings', 'release', palette='FIGHTING', size=64, duration=.55, target='actor')),
+    (('连锁',), L('link', 'fork', 'impact', palette='@type', size=40, duration=.35, on=['side_hit', 'chain'], **{'from': 'origin'})),
+    (('范围', '轰炸', '溅射', '清场', '密集阵容'), L('ground', 'ring_expand', 'impact', palette='@type', size=110, duration=.55, target='target')),
+    (('贯穿',), L('impact', 'pierce_line', 'impact', palette='@type', size=56, duration=.32)),
+    (('易伤', '易伤追击', '集火'), L('impact', 'mark', 'impact', palette='FIGHTING', size=50, duration=.55)),
+    (('收割', '残血收割'), L('impact', 'execute_slash', 'impact', palette='@type', size=60, duration=.4, on=['execute'])),
+    (('中毒', '铺毒'), L('ground', 'puddle', 'impact', palette='POISON', size=52, duration=1.2, alpha=.6, target='target')),
+    (('瞬移',), L('charge', 'spiral', 'anticipation', palette='PSYCHIC', count=12, size=40, particle='ring')),
+    (('反击',), L('aura', 'thorn_shell', 'impact', palette='POISON', size=54, duration=.7, on=['thorns'])),
+    (('麻痹联动', '控制追击', '干扰'), L('aura', 'stun_stars', 'impact', palette='ELECTRIC', size=42, duration=.7, on=['flinch', 'status'])),
+    (('高威爆发', '高威俯冲'), L('screen', 'flash', 'impact', palette='KO', duration=.12, alpha=.32)),
+]
+BEHAVIOR_FAMILY = {'高威俯冲': 'straight', '范围轰炸': 'arc', '贯穿击退': 'beam', '连锁输出': 'beam', '毒伤追击': 'arc',
+                   '冰棱溅射': 'volley', '毒潮压制': 'arc', '地形布置': 'ground', '定身阻截': 'ground'}
+CHARGE_VARIANTS = ('converge', 'spiral', 'rune_circle', 'glow')
+
+
+def _layer_key(layer):
+    on = layer.get('on')
+    return (layer['layer'], layer['shape'], tuple(on) if isinstance(on, list) else on)
+
+
+def skills_pack():
+    """Every native skill (gen1-3 family kits) gets its own recipe."""
+    import arena_skills
+    rows = {}
+    for row in arena_skills.catalog(include_families=True):
+        rows.setdefault(row['id'], row)
+    recipes, bindings = {}, {}
+    for skill_id, row in sorted(rows.items()):
+        category = row.get('category') if row.get('category') in CATEGORY_NAMES else 'burst'
+        base = CATEGORY_RECIPES['cat.' + category]
+        resolved = list(base.get('layers', [])) + list(CATEGORY_RECIPES.get(base.get('extends', ''), {}).get('layers', [])) \
+            + list(base.get('add', []))
+        have = {_layer_key(layer) for layer in resolved}
+        add = []
+        for tags, layer in TAG_LAYERS:
+            if any(tag in row.get('tags', ()) for tag in tags) and _layer_key(layer) not in have:
+                add.append(dict(layer))
+                have.add(_layer_key(layer))
+        # A stable per-skill charge silhouette breaks same-category sameness.
+        variant = CHARGE_VARIANTS[sum(map(ord, skill_id)) % len(CHARGE_VARIANTS)]
+        if not any(layer['layer'] == 'charge' for layer in resolved + add) and row.get('targeting') == 'enemy':
+            add.append(L('charge', variant, 'anticipation', palette='@type', size=40, count=10, particle='@type'))
+        recipe = {'extends': 'cat.' + category}
+        power = row.get('power') or 0
+        if power:
+            recipe['scale'] = round(max(.8, min(1.45, power / 60)), 2)
+        family = BEHAVIOR_FAMILY.get(row.get('behavior'))
+        if family:
+            recipe['family'] = family
+        if add:
+            recipe['add'] = add
+        recipe['note'] = f"{row['name']} · {row.get('behavior') or category}"
+        recipes['skill.' + skill_id] = recipe
+        bindings[skill_id] = 'skill.' + skill_id
+    return {'schema_version': 1, 'kind': 'vfx_pack', 'name': 'skills',
+            'description': '逐技能特效：每个原生技能 = 类别轮廓（cat.*）+ 标签附加层 + 威力缩放；由 motion_seed.py 生成，可在工作台逐条编辑。',
+            'recipes': recipes, 'bindings': {'skill': bindings}}
+
+
 def packs():
     return {('motion', 'roles'): role_pack(), ('motion', 'families'): family_pack(),
-            ('motion', 'species'): species_pack(), ('vfx', 'core'): vfx_pack()}
+            ('motion', 'species'): species_pack(), ('vfx', 'core'): vfx_pack(),
+            ('vfx', 'skills'): skills_pack()}
 
 
 def main(argv):
