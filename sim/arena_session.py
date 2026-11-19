@@ -43,7 +43,7 @@ def seat_state(seat):
         state = {}
         seat.depth = state
     for key, value in (('free_refreshes', 0), ('relief', 0), ('sims', 0), ('targeted', 0),
-                       ('fast_track', 0), ('awakened', 0), ('draft_uid', None), ('order', 'none'),
+                       ('fast_track', 0), ('awakened', 0), ('climate_swap', 0), ('draft_uid', None), ('order', 'none'),
                        ('quests', {}), ('quests_done', [])):
         state.setdefault(key, value)
     return state
@@ -214,6 +214,23 @@ def dismantle(seat, key):
         seat.inventory.add_component(component)
     names = '、'.join(items.COMPONENT_NAMES[c] for c in components)
     return f'拆解{items.FINISHED[key]["name"]}，取回{names}' + (f'（-{cost} 金）' if cost else '')
+
+
+def swap_climate(session, seat):
+    """Pay to fight this round's battle in the forecast's alternative weather."""
+    import arena_climate
+    state = seat_state(seat)
+    preview = arena_climate.swap_preview(session.seed, session.round_no)
+    if not preview['available']:
+        raise ValueError('本轮天气无法改变')
+    if state['climate_swap'] == session.round_no:
+        raise ValueError('本轮已经改变过天气')
+    if seat.gold < arena_climate.SWAP_COST:
+        raise ValueError(f'改变天气需要 {arena_climate.SWAP_COST} 金币')
+    seat.gold -= arena_climate.SWAP_COST
+    state['climate_swap'] = session.round_no
+    return (f"祈天成功：本轮你的战斗改为{preview['to']['name']}"
+            f"（原{preview['from']['name']}，-{arena_climate.SWAP_COST} 金）")
 
 
 def awaken_options(seat, round_no):

@@ -350,7 +350,7 @@ def _h_res_status_4(battle, inst, unit, killer, t, **_):
                           and _d()._dist(v, unit) <= 2 and _debuff_of(v) is None),
                          key=lambda v: (_d()._dist(v, unit), v.local_idx)):
         spreader = killer if killer is not None and killer.team == inst.team else None
-        if status.apply_debuff(battle, victim, kind, t, source=spreader):
+        if status.apply_debuff(battle, victim, kind, t, source=spreader or unit):
             fire(battle, inst, victim, t, label='异常传染', kind='debuff', spend=False)
             return
 

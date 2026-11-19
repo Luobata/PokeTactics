@@ -110,8 +110,8 @@ PRE_TACTICAL_RESEARCH_FINGERPRINT = 'fd6a3572ba682a361a6edfb008f5fd4c0e1ae7a13ce
 PRE_DEPTH_EDITION_FINGERPRINT = 'af779aed8840e44251667f1b1a2329841612be1f2648f04c1b437cfb828e8a8b'
 # Verified build with the full research ledger, before deeper member bonds.
 PRE_BOND_DEPTH_FINGERPRINT = '771abf263e2c1603af3178e3ac321b43a963123d79b29159257f2ac97bf05638'
-# Depth-edition builds from tactical orders (26de0ec) through the save-path perf
-# work (b3ff56c) share this exact codec; only combat, items and the UI changed.
+# Depth-edition builds from tactical orders (26de0ec) on share this codec; later
+# builds only add optional seat counters (awakened, climate_swap) that default to 0.
 # Their snapshots load as current: committed reports stay verbatim and the new
 # item synergies only act in later battles.
 SAME_LAYOUT_DEPTH_FINGERPRINTS = frozenset({
@@ -122,6 +122,7 @@ SAME_LAYOUT_DEPTH_FINGERPRINTS = frozenset({
     '18ca7f8970f4dd3161d6b969230aa19bbc280e74834a98cdff4db4ce2c3e51a5',  # 0652ee3 feedback layer
     '3cc45a816f570f518877f556c3355c4cff391f158e8547d75b68bd23e845b8d4',  # 8caaebc mechanic items
     '21e05a7b845ee045ba2990d1a1a06fa3e45e5731c04bc07be927a353a3b24bc6',  # b3ff56c save perf
+    '69b917b1fc838da3fe2a51a3ac5d0ac2e70bc38a2acedcfb827b6d17cf2b49b3',  # b2dd5a4 item synergy (awakened counter)
 })
 PRE_SYNERGY_TECHNIQUES = frozenset({'cut', 'surf', 'rest', 'thunderbolt', 'ice_beam',
                                      'toxic', 'earthquake', 'roar', 'rapid_spin'})
@@ -1594,7 +1595,7 @@ class SessionCodec:
     def _decode_depth_seat(counters):
         """Per-seat arena_v2 state. Keys added later default when absent."""
         import arena_depth
-        numeric = ('free_refreshes', 'relief', 'sims', 'targeted', 'fast_track', 'awakened')
+        numeric = ('free_refreshes', 'relief', 'sims', 'targeted', 'fast_track', 'awakened', 'climate_swap')
         known = set(numeric) | {'draft_uid', 'order', 'quests', 'quests_done'}
         if not isinstance(counters, dict) or not {'free_refreshes', 'relief', 'sims'} <= set(counters) \
                 or set(counters) - known:

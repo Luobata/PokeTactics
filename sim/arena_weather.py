@@ -23,15 +23,19 @@ def init(battle):
 
 
 def active(battle, t):
+    """Effective weather: a rain/sun window if one is active, else arena_v2 stage weather."""
     if (not battle._arena_on or t + EPS >= getattr(battle, 'arena_weather_until', 0.)
             or t + EPS < getattr(battle, 'arena_weather_started_at', 0.)):
+        if getattr(battle, 'arena_climate', None):
+            from arena_climate import climate_at
+            return climate_at(battle, t)
         return None
     return getattr(battle, 'arena_weather_name', None)
 
 
 def damage_multiplier(battle, move, t):
     kind = active(battle, t)
-    if move is None or kind is None or move['type'] not in ('WATER', 'FIRE'):
+    if move is None or kind not in ('rain', 'sun') or move['type'] not in ('WATER', 'FIRE'):
         return 1.
     stronger = 'WATER' if kind == 'rain' else 'FIRE'
     return 1.15 if move['type'] == stronger else .90
@@ -96,11 +100,16 @@ def _change(battle, source, kind, at, duration, requests, reason):
             battle._emit_state(unit, at)
     # Keep weather-dependent action speed legible in the ordinary combo stream.
     from arena_traits import _spec
+    climate = None
+    if getattr(battle, 'arena_climate', None):
+        from arena_climate import climate_at
+        climate = climate_at(battle, at)
     for unit in battle.units:
         spec = _spec(battle, unit)
         if not spec or spec['id'] not in ('trait_swift_swim', 'trait_chlorophyll'):
             continue
-        was, now = old_kind == spec['weather'], kind == spec['weather']
+        was = (old_kind or climate) == spec['weather']
+        now = (kind or climate) == spec['weather']
         if was == now:
             continue
         with _effect(battle, unit, unit, spec['id'], 'tempo' if now else 'expire', at,

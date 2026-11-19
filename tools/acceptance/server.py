@@ -614,6 +614,8 @@ class Handler(SimpleHTTPRequestHandler):
                 "/play/assets/play.css": ("play.css", "text/css; charset=utf-8"),
                 "/play/assets/play.js": ("play.js", "text/javascript; charset=utf-8"),
                 "/play/assets/play_depth.js": ("play_depth.js", "text/javascript; charset=utf-8"),
+                "/play/assets/play_weather.js": ("play_weather.js", "text/javascript; charset=utf-8"),
+                "/play/assets/play_weather.css": ("play_weather.css", "text/css; charset=utf-8"),
                 "/play/assets/play_layout.js": ("play_layout.js", "text/javascript; charset=utf-8"),
                 "/play/assets/play_layout.css": ("play_layout.css", "text/css; charset=utf-8"),
                 "/play/assets/play_interactions.js": ("play_interactions.js", "text/javascript; charset=utf-8"),

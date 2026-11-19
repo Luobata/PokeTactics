@@ -1,0 +1,91 @@
+/* arena_v2 stage weather (docs/69): chip, forecast popover, board ambience, unit badges */
+.weather-pill.wx-live { cursor: pointer; font-weight: 700; transition: box-shadow .2s, background .2s; }
+.weather-pill.wx-live:hover, .weather-pill.wx-live[aria-expanded="true"] { box-shadow: 0 0 0 2px rgba(255, 236, 170, .55); }
+.weather-pill.wx-sun { background: #f6d77a; color: #4a3507; }
+.weather-pill.wx-rain { background: #7fb3e3; color: #0d2a44; }
+.weather-pill.wx-sand { background: #dcc189; color: #4a3a12; }
+.weather-pill.wx-snow { background: #e4f1fb; color: #23455e; }
+.weather-pill.wx-storm { background: #4d5a86; color: #f2f4ff; }
+.weather-pill.wx-fog { background: #c9d1cd; color: #313b37; }
+.weather-pill.wx-gale { background: #b7dca2; color: #22401a; }
+.weather-pill.wx-aurora { background: linear-gradient(90deg, #7ff0c8, #a9a0ff, #ff9ede); color: #1d1f3f; }
+
+.weather-pop {
+  position: fixed; z-index: 70; display: grid; gap: 8px; padding: 12px 14px 14px; overflow: auto;
+  border-radius: 16px; background: #fffdf5; color: #263c33; border: 1px solid #e3dcc2;
+  box-shadow: 0 14px 40px rgba(10, 25, 20, .28); font-size: 12px; animation: wx-pop .16s ease-out;
+}
+.weather-pop[hidden] { display: none; }
+@keyframes wx-pop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.weather-pop > header { display: flex; align-items: center; justify-content: space-between; }
+.weather-pop h3 { margin: 0; font-size: 15px; }
+.weather-pop .wx-close { min-width: 36px; min-height: 36px; border: 0; border-radius: 10px; background: #efe9d4; font-size: 18px; cursor: pointer; }
+.weather-pop .wx-note { margin: 0; color: #66745c; }
+.weather-pop .wx-cards { display: grid; gap: 6px; }
+.wx-card { padding: 8px 10px; border-radius: 12px; border: 1px solid #e3dcc2; background: #fbfaf3; opacity: .85; }
+.wx-card.current { opacity: 1; border-width: 2px; border-color: #c9a64a; background: #fffaf0; }
+.wx-card header { display: flex; align-items: center; gap: 6px; }
+.wx-card header b { font-size: 14px; }
+.wx-card header small { margin-left: auto; color: #66745c; font-weight: 700; }
+.wx-glyph { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 8px; background: #efe9d4; font-size: 14px; }
+.wx-card.wx-sun .wx-glyph { background: #f6d77a; } .wx-card.wx-rain .wx-glyph { background: #7fb3e3; }
+.wx-card.wx-sand .wx-glyph { background: #dcc189; } .wx-card.wx-snow .wx-glyph { background: #e4f1fb; }
+.wx-card.wx-storm .wx-glyph { background: #4d5a86; color: #fff; } .wx-card.wx-fog .wx-glyph { background: #c9d1cd; }
+.wx-card.wx-gale .wx-glyph { background: #b7dca2; } .wx-card.wx-aurora .wx-glyph { background: linear-gradient(135deg, #7ff0c8, #a9a0ff); }
+.wx-types { display: block; margin-top: 4px; font-weight: 700; color: #2f5a1f; }
+.wx-card ul { margin: 4px 0 0; padding-left: 16px; color: #4b5a44; }
+.wx-shift { margin: 6px 0 0; padding: 4px 8px; border-radius: 8px; background: #f1ecdb; color: #5d5130; }
+.wx-swap { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 12px; background: #f3f7ec; border: 1px dashed #9cc08a; }
+.wx-swap div { display: grid; gap: 2px; flex: 1; }
+.wx-swap button { min-height: 40px; padding: 4px 12px; border-radius: 10px; border: 0; background: #33573b; color: #fff; font-weight: 800; white-space: nowrap; cursor: pointer; }
+.wx-swap button:disabled { opacity: .45; cursor: default; }
+.wx-swap-note { margin: 0; font-weight: 700; color: #2f5a1f; }
+
+/* Board ambience during prep: three CSS layers, pointer-events off, GPU-only animation. */
+#battlefield { position: relative; }
+.field-weather { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; border-radius: inherit; }
+.field-weather[hidden] { display: none; }
+.field-weather i { position: absolute; inset: -40%; will-change: transform, opacity; }
+.fw-rain i:nth-child(1) { background: repeating-linear-gradient(105deg, transparent 0 14px, rgba(150, 195, 235, .35) 14px 15px, transparent 15px 34px); animation: fw-fall .55s linear infinite; }
+.fw-rain i:nth-child(2) { background: rgba(40, 80, 120, .10); inset: 0; }
+.fw-storm i:nth-child(1) { background: repeating-linear-gradient(108deg, transparent 0 12px, rgba(170, 190, 235, .42) 12px 13px, transparent 13px 28px); animation: fw-fall .42s linear infinite; }
+.fw-storm i:nth-child(2) { inset: 0; background: rgba(15, 20, 45, .20); }
+.fw-storm i:nth-child(3) { inset: 0; background: rgba(230, 236, 255, .5); opacity: 0; animation: fw-flash 5s steps(1) infinite; }
+.fw-snow i:nth-child(1), .fw-snow i:nth-child(2) {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, .9) 0 1.6px, transparent 2.2px), radial-gradient(circle, rgba(255, 255, 255, .7) 0 1.1px, transparent 1.7px);
+  background-size: 46px 46px, 31px 31px; background-position: 0 0, 15px 20px; animation: fw-snow 7s linear infinite;
+}
+.fw-snow i:nth-child(2) { animation-duration: 11s; opacity: .7; }
+.fw-snow i:nth-child(3) { inset: 0; background: rgba(215, 235, 255, .14); }
+.fw-sand i:nth-child(1) { background: repeating-linear-gradient(170deg, transparent 0 18px, rgba(222, 186, 120, .30) 18px 20px, transparent 20px 44px); animation: fw-blow 1.4s linear infinite; }
+.fw-sand i:nth-child(2) { inset: 0; background: rgba(200, 160, 90, .16); }
+.fw-fog i:nth-child(1), .fw-fog i:nth-child(2) {
+  background: radial-gradient(ellipse 30% 22% at 30% 40%, rgba(235, 240, 236, .55), transparent 70%),
+              radial-gradient(ellipse 28% 20% at 72% 62%, rgba(235, 240, 236, .45), transparent 70%);
+  animation: fw-drift 16s ease-in-out infinite alternate;
+}
+.fw-fog i:nth-child(2) { animation-duration: 23s; animation-direction: alternate-reverse; }
+.fw-fog i:nth-child(3) { inset: 0; background: rgba(215, 222, 218, .16); }
+.fw-gale i:nth-child(1) { background: repeating-linear-gradient(178deg, transparent 0 36px, rgba(240, 250, 235, .32) 36px 37px, transparent 37px 70px); animation: fw-blow .9s linear infinite; }
+.fw-gale i:nth-child(2) { background: radial-gradient(circle, rgba(140, 200, 100, .8) 0 2.5px, transparent 3px); background-size: 120px 90px; animation: fw-blow 2.2s linear infinite; }
+.fw-sun i:nth-child(1) { inset: 0; background: radial-gradient(circle at 88% -6%, rgba(255, 236, 160, .55), transparent 46%); animation: fw-pulse 4s ease-in-out infinite alternate; }
+.fw-sun i:nth-child(2) { inset: 0; background: rgba(255, 220, 140, .07); }
+.fw-aurora i:nth-child(1) { inset: 0 0 55% 0; background: linear-gradient(100deg, rgba(90, 255, 190, .0), rgba(90, 255, 190, .28), rgba(150, 130, 255, .26), rgba(255, 130, 220, .18), rgba(90, 255, 190, 0)); background-size: 200% 100%; filter: blur(6px); animation: fw-aurora 9s ease-in-out infinite alternate; }
+.fw-aurora i:nth-child(2) { inset: 0; background: rgba(40, 40, 110, .10); }
+@keyframes fw-fall { from { transform: translate3d(0, -34px, 0); } to { transform: translate3d(-9px, 0, 0); } }
+@keyframes fw-blow { from { transform: translate3d(-120px, 0, 0); } to { transform: translate3d(0, 0, 0); } }
+@keyframes fw-snow { from { transform: translate3d(0, -46px, 0); } to { transform: translate3d(12px, 0, 0); } }
+@keyframes fw-drift { from { transform: translate3d(-6%, 0, 0); } to { transform: translate3d(6%, 2%, 0); } }
+@keyframes fw-pulse { from { opacity: .7; } to { opacity: 1; } }
+@keyframes fw-flash { 0%, 93% { opacity: 0; } 94% { opacity: .9; } 95% { opacity: 0; } 96% { opacity: .6; } 97%, 100% { opacity: 0; } }
+@keyframes fw-aurora { from { background-position: 0% 0; transform: translate3d(0, 0, 0); } to { background-position: 100% 0; transform: translate3d(0, 8px, 0); } }
+@media (prefers-reduced-motion: reduce) { .field-weather i { animation: none !important; } }
+
+/* Units favoured / hindered by the current weather */
+[data-uid].wx-boost, #shop [data-shop].wx-boost { position: relative; }
+[data-uid].wx-boost::after, #shop [data-shop].wx-boost::after, [data-uid].wx-weak::after, #shop [data-shop].wx-weak::after {
+  content: attr(data-wx); position: absolute; right: 2px; bottom: 2px; z-index: 2; min-width: 16px; height: 16px; padding: 0 3px;
+  display: grid; place-items: center; border-radius: 6px; font-size: 11px; font-weight: 800; line-height: 1; pointer-events: none;
+}
+[data-uid].wx-boost::after, #shop [data-shop].wx-boost::after { background: #f6d77a; color: #4a3507; box-shadow: 0 0 0 1px rgba(74, 53, 7, .25), 0 0 8px rgba(255, 220, 120, .7); }
+[data-uid].wx-weak::after, #shop [data-shop].wx-weak::after { background: #d9dfe3; color: #5a6670; }

@@ -62,6 +62,7 @@ PURPOSE_SALTS = {
     # arena_v2 depth edition streams (independent of every v1 stream)
     "terrain": b"K_TERRAIN",
     "draft": b"K_DRAFT",
+    "climate": b"K_CLIMATE",
 }
 
 # 商店子流 counter 打包步长：counter = seat × 256 + refresh_count。

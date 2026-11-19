@@ -629,6 +629,8 @@ def setup(battle):
             battle.fx.ledger.add(team, 'augment', 'elite_squad', passive=1)
     install(battle, instances)
     battle.fx.subscribe('battle_start', _apply_orders)
+    import arena_climate
+    arena_climate.setup(battle)
 
 
 PASSIVE_AUGMENTS = frozenset({'growth_mark', 'growth_bulwark', 'war_drum', 'sharp_focus', 'vitality',
@@ -711,6 +713,8 @@ def damage_multiplier(battle, attacker, target, move, t, base=0):
             and any(u.team == attacker.team and 'venom_mark' in u.depth_rules for u in battle.units)):
         count = battle.depth_bond_counts[attacker.team].get('POISON', 0)
         factors.append((attacker.team, 'bond', 'venom_mark', 1.20 if count >= 6 else 1.12))
+    import arena_climate
+    factors.extend(arena_climate.damage_factors(battle, attacker, target, t))
     terrain = battle.arena_terrain
     if terrain == 'embers':
         if attacker.pos in battle.terrain_cells[attacker.team]:

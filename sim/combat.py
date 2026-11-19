@@ -281,7 +281,7 @@ class Battle:
                  stat_mode: str = "legacy", learned_a=None, learned_b=None,
                  ruleset=tactics_mod.BASE_RULESET, tactics_a=None, tactics_b=None,
                  arena_teams=None, arena_growth=None, arena_research=None,
-                 arena_terrain=None, arena_orders=None) -> None:
+                 arena_terrain=None, arena_orders=None, arena_climate=None) -> None:
         # S11 天气按 Battle 实例持有（2026-09-14 修订：原 set_active 全局写
         # 在验收后台多线程下会交叉污染——/anim 与 /demo 并行时互改对方天气；
         # damage_mult 由 _final_damage 显式传 self.weather_name）
@@ -302,6 +302,10 @@ class Battle:
                                          or any(o not in ORDERS for o in arena_orders)):
             raise ValueError('arena orders require arena_v2 and two known orders')
         self.arena_orders = tuple(arena_orders) if arena_orders is not None else ('none', 'none')
+        if arena_climate is not None and not self.depth:
+            raise ValueError('arena climate requires arena_v2')
+        from arena_climate import validate_schedule
+        self.arena_climate = validate_schedule(arena_climate) if arena_climate is not None else None
         self._pending_deaths = []
         self._flushing_deaths = False
         if self._arena_on:

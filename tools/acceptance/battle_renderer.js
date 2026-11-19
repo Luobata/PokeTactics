@@ -257,7 +257,11 @@
   };
   const KNOWN_KINDS = new Set(["deploy", "unit_state", "move", "attack", "cast", "status", "die", "regen", "end",
     "skill_effect", "combo_effect", "field_effect", "partner_effect", "tactical_effect", "arena_heal", "combo", "miss", "sash"]);
-  const WEATHER_ZH = { rain: "雨天", sun: "晴天", sand: "沙暴", hail: "冰雹" };
+  const WEATHER_ZH = { rain: "☂ 暴雨", sun: "☀ 烈日", sand: "≋ 沙暴", hail: "❄ 冰雹", snow: "❄ 暴雪", storm: "ϟ 雷暴",
+    fog: "☁ 浓雾", gale: "➶ 狂风", aurora: "✺ 极光" };
+  const WEATHER_HINT = { rain: "水、电系强化 · 水系回复", sun: "火、草系强化 · 草系光合", sand: "岩地钢强化 · 风沙磨损",
+    snow: "冰系强化 · 严寒磨损", storm: "电系强化 · 落雷", fog: "幽灵、恶系强化 · 远程射程 -1",
+    gale: "飞行、龙系强化 · 击退更远", aurora: "超能、妖精强化 · 施法返能" };
 
   // ------------------------------------------------------------------ compile
   function bsearchLast(rows, t, key = 0) {
@@ -527,7 +531,7 @@
   }
   const SOURCE_LOOK = {
     order: ["令", "#b8f08a"], quest: ["★", "#ffd86b"], augment: ["✦", "#ffcf7a"], bond: ["◆", "#ffe08a"],
-    item: ["◈", "#9fd8ff"], resonance: ["❖", "#8ff0d8"], skill_mod: ["✧", "#f0b8ff"], terrain: ["▦", "#d8e8a8"], depth: ["➜", "#f0f4e8"],
+    item: ["◈", "#9fd8ff"], resonance: ["❖", "#8ff0d8"], weather: ["☁", "#cfe6ff"], skill_mod: ["✧", "#f0b8ff"], terrain: ["▦", "#d8e8a8"], depth: ["➜", "#f0f4e8"],
   };
 
   /** Cause-linked choreography: every action's owned outcomes and pops are
@@ -627,8 +631,10 @@
         // those pop once over the whole team instead of a single body.
         const unit = units[tgt] ? tgt : units[src] ? src : null;
         const team = unit == null && (p.team === 0 || p.team === 1) ? p.team : null;
+        // Weather changes are announced by the weather banner, not by a pop over one body.
+        if (p.source === "weather" && /^天气转为/.test(p.label || "")) continue;
         pop = { t, unit, team, from: units[src] ? src : null, text: (p.label || humanize(effectId)) + value, kind: team != null ? "team" : "effect",
-          glyph: look[0], color: look[1], camera: p.camera === "focus", source: p.source || null, cause: causeId(p) };
+          glyph: look[0], color: look[1], camera: p.camera === "focus", source: p.source || null, cause: causeId(p), bolt: !!p.bolt };
       } else if (!KNOWN_KINDS.has(kind)) {
         // Unknown future event: a small generic pop on its target or source.
         const src = Number.isInteger(args[0]) && units[args[0]] ? args[0] : null;
@@ -1361,6 +1367,10 @@
         items.push({ op: "ring", x: c.x, y: c.y + c.size * 0.45, r: 10 + 40 * ease("easeOutCubic", age / 0.35), color: pp.color, alpha: clamp01(1 - age / 0.35), width: 3, layer: 7 });
         continue;
       }
+      if (pp.bolt && age < 0.4) {
+        items.push({ op: "bolt", x: c.x, y: c.y, age, seed: pp.seq, layer: 9 });
+        if (age < 0.12) items.push({ op: "flash", color: "#e8f0ff", alpha: 0.22 * (1 - age / 0.12), layer: 8 });
+      }
       const scale = age < 0.12 ? 0.6 + 0.4 * ease("easeOutBack", age / 0.12) : 1;
       items.push({ op: "label", x: c.x, y: c.y - 34 - pp.lane * 21 - ease("easeOutQuad", age) * 8, text: pp.text, glyph: pp.glyph,
         color: pp.color, kind: pp.kind, scale, alpha: clamp01((1.0 - age) / 0.3), layer: 10 });
@@ -1620,7 +1630,8 @@
     const c = makeCanvas(W, H), g = c.getContext("2d");
     const sky = g.createLinearGradient(0, 0, 0, H);
     const warm = weather === "sun";
-    sky.addColorStop(0, warm ? "#2f4a33" : weather === "rain" ? "#14262c" : "#17332d");
+    sky.addColorStop(0, warm ? "#2f4a33" : weather === "rain" ? "#14262c" : weather === "storm" ? "#10161f"
+      : weather === "snow" ? "#2a3a44" : weather === "fog" ? "#2b3633" : weather === "aurora" ? "#121a2e" : weather === "sand" ? "#3a3420" : "#17332d");
     sky.addColorStop(0.35, warm ? "#22392a" : "#112822");
     sky.addColorStop(1, "#0b1d1b");
     g.fillStyle = sky; g.fillRect(0, 0, W, H);
@@ -1650,7 +1661,10 @@
       if (r < rows / 2) base = base.map((v, i) => v + [10, 2, 0][i]); else base = base.map((v, i) => v + [0, 4, 8][i]);
       if (weather === "rain") base = [base[0] - 10, base[1] - 3, base[2] + 8];
       else if (weather === "sand") base = [base[0] + 22, base[1] + 8, base[2] - 6];
-      else if (weather === "hail") base = [base[0] + 10, base[1] + 14, base[2] + 20];
+      else if (weather === "hail" || weather === "snow") base = [base[0] + 34, base[1] + 40, base[2] + 46];
+      else if (weather === "storm") base = [base[0] - 18, base[1] - 12, base[2] - 2];
+      else if (weather === "fog") base = [base[0] + 12, base[1] + 12, base[2] + 12];
+      else if (weather === "aurora") base = [base[0] - 8, base[1] - 4, base[2] + 14];
       else if (weather === "sun") base = [base[0] + 14, base[1] + 10, base[2] - 2];
       const depth = 0.86 + 0.14 * (r / rows);
       g.fillStyle = `rgb(${base.map((v) => Math.round(v * depth)).join(",")})`;
@@ -1777,6 +1791,7 @@
         }
         case "weather": drawWeather(ctx, it); break;
         case "flash": ctx.fillStyle = hexA(it.color, it.alpha); ctx.fillRect(0, 0, W, H); break;
+        case "bolt": drawBolt(ctx, it); break;
         case "bar": drawBar(ctx, cam, it); break;
         case "number": drawNumber(ctx, cam, it); break;
         case "label": drawLabel(ctx, cam, it); break;
@@ -2467,15 +2482,90 @@
       ctx.fillStyle = "rgba(235,245,255,0.8)";
       for (let i = 0; i < 50; i++) { const x = (rand("hx", i) * W + t * 60) % W, y = (rand("hy", i) * H + t * 520) % H; ctx.fillRect(x, y, 3, 3); }
       ctx.fillStyle = "rgba(200,225,255,0.08)"; ctx.fillRect(0, 0, W, H);
+    } else if (it.name === "snow") {
+      ctx.fillStyle = "rgba(210,232,255,0.10)"; ctx.fillRect(0, 0, W, H);
+      for (let i = 0; i < 110; i++) {
+        const r = 1.2 + rand("snr", i) * 2.6, sp = 40 + rand("sns", i) * 70;
+        const x = (rand("snx", i) * W + Math.sin(t * 1.3 + i) * 18 + t * 25) % W, y = (rand("sny", i) * H + t * sp) % H;
+        ctx.fillStyle = `rgba(250,252,255,${0.55 + rand("sna", i) * 0.4})`; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      }
+    } else if (it.name === "storm") {
+      ctx.fillStyle = "rgba(10,14,30,0.22)"; ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = "rgba(160,190,230,0.38)"; ctx.lineWidth = 1.3;
+      for (let i = 0; i < 90; i++) {
+        const x = (rand("stx", i) * (W + 260) + t * 420) % (W + 260) - 130, y = (rand("sty", i) * H + t * 1200) % H;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 10, y + 22); ctx.stroke();
+      }
+      const cycle = (t * 0.37) % 1;
+      if (cycle < 0.04) { ctx.fillStyle = `rgba(220,230,255,${0.25 * (1 - cycle / 0.04)})`; ctx.fillRect(0, 0, W, H); }
+    } else if (it.name === "fog") {
+      for (let i = 0; i < 9; i++) {
+        const x = ((rand("fgx", i) * (W + 400) + t * (14 + i * 3)) % (W + 400)) - 200, y = 60 + rand("fgy", i) * (H - 80);
+        const g = ctx.createRadialGradient(x, y, 10, x, y, 260);
+        g.addColorStop(0, "rgba(225,232,228,0.28)"); g.addColorStop(1, "rgba(225,232,228,0)");
+        ctx.fillStyle = g; ctx.fillRect(x - 260, y - 260, 520, 520);
+      }
+      ctx.fillStyle = "rgba(210,218,214,0.10)"; ctx.fillRect(0, 0, W, H);
+    } else if (it.name === "gale") {
+      ctx.lineCap = "round";
+      for (let i = 0; i < 26; i++) {
+        const y = rand("gly", i) * H, len = 60 + rand("gll", i) * 120, x = (rand("glx", i) * (W + 300) + t * (520 + i * 9)) % (W + 300) - 150;
+        ctx.strokeStyle = `rgba(235,245,230,${0.18 + rand("gla", i) * 0.22})`; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + len * 0.5, y - 8 * Math.sin(t * 2 + i), x + len, y); ctx.stroke();
+      }
+      ctx.fillStyle = "rgba(150,200,110,0.8)";
+      for (let i = 0; i < 14; i++) {
+        const x = (rand("lfx", i) * W + t * 380) % W, y = (rand("lfy", i) * H + Math.sin(t * 3 + i) * 30) % H;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(t * 4 + i); ctx.fillRect(-4, -1.5, 8, 3); ctx.restore();
+      }
+    } else if (it.name === "aurora") {
+      ctx.globalCompositeOperation = "lighter";
+      const bands = [["rgba(90,255,190,0.16)", 0], ["rgba(140,120,255,0.13)", 1.7], ["rgba(255,120,220,0.09)", 3.1]];
+      for (const [color, ph] of bands) {
+        ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(0, 0);
+        for (let x = 0; x <= W; x += 24) ctx.lineTo(x, 70 + 40 * Math.sin(x / 140 + t * 0.6 + ph) + 26 * Math.sin(x / 57 - t * 0.9));
+        ctx.lineTo(W, 0); ctx.closePath(); ctx.fill();
+      }
+      for (let i = 0; i < 40; i++) {
+        const a = 0.3 + 0.5 * Math.abs(Math.sin(t * 2 + i));
+        ctx.fillStyle = `rgba(230,240,255,${a})`; ctx.fillRect(rand("aux", i) * W, rand("auy", i) * H * 0.6, 2, 2);
+      }
+      ctx.globalCompositeOperation = "source-over";
     }
     ctx.restore();
-    if (it.s - it.since < 1.4 && it.since > 0) {
-      const k = (it.s - it.since) / 1.4;
-      ctx.save(); ctx.globalAlpha = clamp01((1 - k) / 0.4);
-      ctx.fillStyle = "rgba(10,20,24,0.7)"; roundRect(ctx, W / 2 - 70, 40, 140, 30, 15); ctx.fill();
-      ctx.fillStyle = "#f3f4da"; ctx.font = "700 15px system-ui, sans-serif"; ctx.textAlign = "center"; ctx.fillText(WEATHER_ZH[it.name] || it.name, W / 2, 61);
+    // Opening and every change: a banner with the weather and what it favours.
+    const shown = it.since > 0 ? 2.2 : 2.6;
+    if (it.s - it.since < shown) {
+      const k = (it.s - it.since) / shown;
+      const hint = WEATHER_HINT[it.name] || "";
+      const w = Math.max(190, 26 + 9 * hint.length);
+      ctx.save(); ctx.globalAlpha = clamp01(Math.min(k / 0.08, (1 - k) / 0.3));
+      ctx.fillStyle = "rgba(10,20,24,0.78)"; roundRect(ctx, W / 2 - w / 2, 36, w, hint ? 52 : 32, 14); ctx.fill();
+      ctx.fillStyle = "#f3f4da"; ctx.font = "800 17px system-ui, sans-serif"; ctx.textAlign = "center";
+      ctx.fillText((it.since > 0 ? "天气转为 " : "") + (WEATHER_ZH[it.name] || it.name), W / 2, 59);
+      if (hint) { ctx.fillStyle = "#cfe0c8"; ctx.font = "600 12px system-ui, sans-serif"; ctx.fillText(hint, W / 2, 78); }
       ctx.restore();
     }
+  }
+
+  function drawBolt(ctx, it) {
+    const k = it.age / 0.4;
+    ctx.save(); ctx.globalAlpha = clamp01(1 - k);
+    ctx.globalCompositeOperation = "lighter";
+    for (const [width, color] of [[9, "rgba(150,180,255,0.35)"], [3.2, "rgba(245,248,255,0.95)"]]) {
+      ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineJoin = "round";
+      ctx.beginPath(); let x = it.x + (rand("bx", it.seed) - 0.5) * 60, y = it.y - 360; ctx.moveTo(x, y);
+      for (let i = 1; i <= 9; i++) {
+        y = it.y - 360 + i * 40;
+        x = i === 9 ? it.x : x + (rand("bj", it.seed * 16 + i) - 0.5) * 46;
+        ctx.lineTo(x, Math.min(y, it.y));
+      }
+      ctx.stroke();
+    }
+    const g = ctx.createRadialGradient(it.x, it.y, 0, it.x, it.y, 46);
+    g.addColorStop(0, "rgba(230,240,255,0.8)"); g.addColorStop(1, "rgba(230,240,255,0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(it.x, it.y, 46, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
   }
 
   function drawBar(ctx, cam, it) {

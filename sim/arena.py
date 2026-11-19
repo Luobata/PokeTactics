@@ -525,6 +525,11 @@ def battle_options(session, a, b):
     if ruleset == DEPTH_RULESET:
         options['arena_terrain'] = _depth.terrain_for_round(session.seed, session.round_no)
         import arena_session
+        import arena_climate
+        swapped = any(seat is not None and seat is session.player
+                      and arena_session.seat_state(seat).get('climate_swap') == session.round_no
+                      for seat in (a, b))
+        options['arena_climate'] = arena_climate.schedule_for(session.seed, session.round_no, swapped)
         options['arena_orders'] = [arena_session.order_of(session, seat) for seat in (a, b)]
     if session.ruleset in RULESETS:
         from arena_research import stacks_for

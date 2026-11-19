@@ -598,6 +598,7 @@
     renderInventory();
     const ctx = layoutContext("selection");
     window.PlayDepth?.render(ctx);
+    window.PlayWeather?.render(ctx);
     window.PlayLayout?.render(ctx);
     window.PlayInteractions?.render(ctx);
     window.PlayFeedback?.selection({selected, shopSelected, equipItem});
@@ -693,6 +694,7 @@
     // then mirrors the result into the HUD, dock badges and contextual bar.
     const context = layoutContext();
     window.PlayDepth?.render(context);
+    window.PlayWeather?.render(context);
     window.PlayLayout?.render(context);
     window.PlayInteractions?.render(context);
     window.PlayFeedback?.selection({selected, shopSelected, equipItem});

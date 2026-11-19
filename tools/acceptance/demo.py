@@ -678,6 +678,7 @@ def _loadout_highlights(anim, teams):
 
 
 _LEDGER_SOURCES = {'augment': '海克斯', 'bond': '羁绊断点', 'item': '装备', 'resonance': '装备共鸣',
+                   'weather': '天气',
                    'skill_mod': '技能强化',
                    'terrain': '地形', 'edition': '规则', 'depth': '规则'}
 
@@ -690,6 +691,9 @@ def _ledger_name(source, key):
         return rule[2] if rule else key
     if source == 'skill_mod':
         return arena_depth.MODS.get(key, {}).get('name', key)
+    if source == 'weather':
+        import arena_climate
+        return arena_climate.CLIMATES.get(key, {}).get('name', key)
     if source == 'terrain':
         return arena_depth.TERRAINS.get(key.replace('terrain_', ''), {}).get('name', key)
     if source == 'augment' and key not in arena_mod.ALL_AUGMENTS:
@@ -747,6 +751,15 @@ def _move_zh(name: str) -> str:
         _MOVES_ZH.update({'roar': '吼叫', 'rapid_spin': '高速旋转'})
         _MOVES_ZH.update({t['id']: t['name'] for t in arena_mod.technique_catalog()})
     return _MOVES_ZH.get(name, name)
+
+
+def _weather_back(anim, t):
+    battle = getattr(anim, 'research_battle', None) or getattr(anim, 'battle', None)
+    if battle is not None and getattr(battle, 'arena_climate', None):
+        import arena_climate
+        key = arena_climate.climate_at(battle, t + 1e-6)
+        return '天气覆盖结束，恢复为' + arena_climate.CLIMATES[key or 'calm']['name']
+    return '天气到期，恢复平静'
 
 
 def _fmt_event(anim, e: tuple) -> str:
@@ -872,7 +885,7 @@ def _fmt_event(anim, e: tuple) -> str:
         elif effect == 'absorb':
             text = f"护盾吸收 {amount} 伤害"
         elif effect == 'expire' and e[4] in ('element_wet', 'arena_weather', 'trait_chlorophyll', 'trait_swift_swim'):
-            text = ('湿润结束' if e[4] == 'element_wet' else '天气到期，恢复平静' if e[4] == 'arena_weather' else '天气加速结束')
+            text = ('湿润结束' if e[4] == 'element_wet' else _weather_back(anim, e[0]) if e[4] == 'arena_weather' else '天气加速结束')
         elif effect == 'tempo' and e[4] in ('trait_chlorophyll', 'trait_swift_swim'):
             text = f"天气行动速度 +{info.get('fraction', .25):.0%}；对应天气结束后撤销"
         elif effect == 'expire':
@@ -2964,6 +2977,30 @@ def state_json(sess, lite=False) -> dict:
     return st
 
 
+def _climate_view(sess):
+    import arena_climate
+    p = sess.player
+    swapped = arena_session.seat_state(p).get('climate_swap') == sess.round_no
+    rows = arena_climate.forecast_view(sess.seed, sess.round_no, swapped)
+    favoured = []
+    now = rows[0]
+    for o in p.all_pieces():
+        boost, weak = arena_climate.favoured(now['id'], o.piece.types)
+        if boost or weak:
+            favoured.append({'uid': o.uid, 'boost': boost, 'weak': weak})
+    shop = []
+    for i, slot in enumerate(p.shop.slots):
+        if slot is None:
+            continue
+        types = getattr(sess.templates.get(slot), 'types', ()) if isinstance(slot, int) else getattr(slot, 'types', ())
+        boost, weak = arena_climate.favoured(now['id'], types or ())
+        if boost or weak:
+            shop.append({'slot': i, 'boost': boost, 'weak': weak})
+    return {'forecast': rows, 'swap': {**arena_climate.swap_preview(sess.seed, sess.round_no),
+                                       'used': swapped},
+            'favoured': favoured, 'shop': shop}
+
+
 def _depth_view(sess):
     """arena_v2 rules the prep screen needs: terrain, draft, costs, bond breakpoints."""
     import arena_bonds
@@ -3005,6 +3042,7 @@ def _depth_view(sess):
                            'active': counts.get(element, 0) >= rule[0]})
     return {
         'ruleset': sess.ruleset,
+        'climate': _climate_view(sess),
         'terrain': {**arena_depth.terrain_view(terrain_key), 'stage_end': stage_end,
                     'next': arena_depth.terrain_view(next_key)},
         'draft': draft_view,
@@ -3488,6 +3526,16 @@ def act_dismantle(sess, key):
         raise DemoError(str(exc)) from exc
 
 
+def act_climate_swap(sess):
+    _guard_prep(sess)
+    if not sess.is_depth:
+        raise DemoError('当前规则没有天气预报')
+    try:
+        return arena_session.swap_climate(sess, sess.player)
+    except ValueError as exc:
+        raise DemoError(str(exc)) from exc
+
+
 def act_awaken(sess, key, uid='', component=''):
     _guard_prep(sess)
     if not sess.is_depth:
@@ -3876,6 +3924,8 @@ def _apply_action(params: dict):
                 msg = act_simulate(sess)
             elif cmd == "dismantle":
                 msg = act_dismantle(sess, params.get("item", ""))
+            elif cmd == "climate_swap":
+                msg = act_climate_swap(sess)
             elif cmd == "awaken":
                 msg = act_awaken(sess, params.get("item", ""), params.get("uid", ""),
                                  params.get("component", ""))
