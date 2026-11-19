@@ -527,7 +527,8 @@
       welcome = document.createElement("div");
       welcome.id = "empty-board-message";
       welcome.className = "empty-board-message";
-      document.querySelector(".board-scene").append(welcome);
+      // Anchored to the board itself so it stays centred wherever the board sits.
+      (document.getElementById("battlefield") || document.querySelector(".board-scene")).append(welcome);
     }
     welcome.hidden = !playable() || y.on_board > 0;
     welcome.textContent = state.bench.length

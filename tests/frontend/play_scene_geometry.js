@@ -55,6 +55,8 @@ async function rects(page, panel) {
       button: r(document.querySelector(`#stage-dock [data-open-panel="${panel}"]`)),
       drawer: r(document.getElementById('stage-drawer')),
       board: r(document.getElementById('battlefield')),
+      bench: r(document.querySelector('.bench-area')),
+      benchHit: hit(document.querySelector('#bench [data-loc="b0"]') || document.querySelector('.bench-area')),
       fight: r(document.getElementById('fight-button')),
       tileHit: hit(tile), fightHit: hit(document.getElementById('fight-button')),
       panel: document.getElementById('stage-shell').getAttribute('data-panel'),
@@ -87,7 +89,7 @@ const checks = {
       assert.ok(g.fightHit, `${tag} ${panel}: start battle stays reachable`);
     }
   },
-  // scene | side sheet | rail; the shop is a bottom tray ending at the 商店 rail button.
+  // scene | side sheet | rail; the shop is a tray above the bench, ending at the 商店 rail button.
   async landscape(page, tag) {
     for (const panel of ['bag', 'boost', 'bonds']) {
       const g = await openPanel(page, panel);
@@ -101,7 +103,8 @@ const checks = {
     }
     const g = await openPanel(page, 'shop');
     assert.equal(g.size, 'peek', `${tag}: the shop is a tray`);
-    assert.ok(g.vh - g.drawer.bottom <= GAP, `${tag}: the tray rises from the bottom edge`);
+    assert.ok(Math.abs(g.bench.top - g.drawer.bottom) <= GAP, `${tag}: the tray sits right above the bench row`);
+    assert.ok(g.benchHit, `${tag}: the bench stays visible and tappable under the tray`);
     assert.ok(g.drawer.width > g.vw * 0.6, `${tag}: the tray runs along the bottom`);
     const gap = g.button.left - g.drawer.right;
     assert.ok(gap >= 0 && gap <= GAP && spans(g.button, g.drawer), `${tag}: the tray ends at the 商店 rail button (${gap}px)`);

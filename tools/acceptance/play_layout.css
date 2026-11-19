@@ -107,9 +107,15 @@ body.portal-play.stage-ui .rail {
   align-items: stretch;
 }
 .stage-ui .game-layout.stage-shell[data-panel=""] > .center-column.stage {
+  /* With no panel open the scene hugs the dock and the board leans toward it
+     (user-approved 2026-11-19); the field still fills the space on the left. */
   max-width: 1180px;
   width: 100%;
-  justify-self: center;
+  justify-self: end;
+}
+.stage-ui.layout-desktop .game-layout.stage-shell[data-panel=""] .board-scene > .battlefield {
+  margin-left: auto;
+  margin-right: max(0px, 4%);
 }
 .stage-ui .stage-controls {
   display: contents;
@@ -1882,7 +1888,12 @@ body.portal-play.stage-ui .rail {
     box-shadow: none;
   }
   .stage-ui.layout-phone .dock-button { flex: 1 1 0; min-height: 0; max-height: 60px; }
-  .stage-ui.layout-phone .dock-button[data-open-panel="shop"] { order: 2; margin-top: auto; }
+  .stage-ui.layout-phone .dock-button[data-open-panel="shop"] {
+    order: 2;
+    margin-top: auto;
+    /* level with the shop tray, which sits above the bench row */
+    margin-bottom: max(0px, calc(var(--tray-bottom, 6px) - 12px));
+  }
   /* side sheet: from the board's right edge (measured) to the rail, above the fight button */
   .stage-ui.layout-phone .stage-drawer,
   .stage-ui.layout-phone dialog.scout-modal.docked {
@@ -1904,10 +1915,10 @@ body.portal-play.stage-ui .rail {
   .stage-ui.layout-phone .drawer-size { display: none; }
   .stage-ui.layout-phone .drawer-header { min-height: 40px; padding: 2px 4px 2px 12px; background: #f3f6ea; }
   .stage-ui.layout-phone .drawer-actions .icon-button { width: 40px; height: 40px; }
-  /* shop tray: the bottom edge of the scene, controls on the left, one row of cards */
+  /* shop tray: just above the bench row (measured --tray-bottom), controls on the left, one row of cards */
   .stage-ui.layout-phone .stage-drawer[data-size="peek"] {
     top: auto;
-    bottom: 6px;
+    bottom: var(--tray-bottom, 6px);
     left: calc(6px + env(safe-area-inset-left));
     height: var(--tray-h, 148px);
     border-radius: 16px 16px 12px 12px;

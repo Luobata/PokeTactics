@@ -128,6 +128,11 @@
       // Prefer not to cover the board; on very narrow phones keep a usable 260px sheet.
       const left = Math.max(6, Math.min(board.right + 6, rail.left - 6 - 260));
       $("stage-shell")?.style?.setProperty?.("--sheet-left", px(left));
+      // The shop tray sits just above the bench row so bought units stay in view.
+      const bench = rect(document.querySelector(".bench-area"));
+      if (bench && Number.isFinite(bench.top) && bench.top > 0) {
+        $("stage-shell")?.style?.setProperty?.("--tray-bottom", px(Math.max(6, innerHeight - bench.top + 4)));
+      }
       return;
     }
     const bench = rect(document.querySelector(".bench-area"));
