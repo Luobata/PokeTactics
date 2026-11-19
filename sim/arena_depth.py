@@ -427,11 +427,15 @@ DEPTH_ITEMS = {
 }
 
 import arena_mech_items as _mech  # noqa: E402
+import arena_item_synergy as _syn  # noqa: E402
 DEPTH_ITEMS.update(_mech.MECH_ITEMS)
+DEPTH_ITEMS.update(_syn.AWAKENED_ITEMS)
 
 
 def recipe_components(key):
+    """Recipe of ``key``; an awakened item keeps its base recipe (and base stats)."""
     import items
+    key = _syn.base_key(key)
     spec = {**items.FINISHED, **DEPTH_ITEMS}.get(key)
     if not spec or not spec.get('pairs'):
         return ()
@@ -473,7 +477,9 @@ def _items(unit):
 
 
 def has_item(unit, key):
-    return key in _items(unit)
+    """Exact key, or the awakened version of ``key`` (it counts as its base item)."""
+    held = _items(unit)
+    return key in held or key + '_plus' in held
 
 
 def apply_stat_curve(unit, star, tier):
@@ -576,6 +582,7 @@ def setup(battle):
     battle.terrain_cells = ({team: terrain_cells(terrain, team, battle.rows) for team in (0, 1)}
                             if terrain != 'plain' else {0: set(), 1: set()})
     instances = []
+    battle.item_resonance = {0: {}, 1: {}}
     for team in (0, 1):
         augments = set(battle.arena_teams[team])
         members = [u for u in battle.units if u.team == team]
@@ -614,6 +621,7 @@ def setup(battle):
         for spec in TEAM_SPECS:
             if spec.id in augments or spec.id == 'terrain_' + terrain:
                 instances.append(EffectInstance(spec, team, None))
+        instances.extend(_syn.team_instances(battle, team, members))
         for key in augments:
             if key in PASSIVE_AUGMENTS:
                 battle.fx.ledger.add(team, 'augment', key, passive=1)
@@ -664,6 +672,8 @@ def _unit_has(unit, spec, augments):
     if spec.source == 'skill_mod':
         return spec.id in unit.depth_mods
     if spec.source == 'item':
+        if _syn.is_duo(spec.id):
+            return _syn.unit_has_duo(unit, spec.id)
         return has_item(unit, spec.id)
     if spec.source == 'augment':
         return spec.id in augments
@@ -1295,6 +1305,7 @@ UNIT_SPECS += (
     _spec('retaliate', 'skill_mod', 'direct_hit', '反震', _h_mod_retaliate_hit),
 )
 UNIT_SPECS += _mech.UNIT_SPECS
+UNIT_SPECS += _syn.UNIT_SPECS
 TEAM_SPECS = (
     _spec('charge_horn', 'augment', 'battle_start', '冲锋号', _h_charge_horn, owner='team', limit=1),
     _spec('vanguard', 'augment', 'battle_start', '先锋壁垒', _h_vanguard, owner='team', limit=1),

@@ -110,6 +110,19 @@ PRE_TACTICAL_RESEARCH_FINGERPRINT = 'fd6a3572ba682a361a6edfb008f5fd4c0e1ae7a13ce
 PRE_DEPTH_EDITION_FINGERPRINT = 'af779aed8840e44251667f1b1a2329841612be1f2648f04c1b437cfb828e8a8b'
 # Verified build with the full research ledger, before deeper member bonds.
 PRE_BOND_DEPTH_FINGERPRINT = '771abf263e2c1603af3178e3ac321b43a963123d79b29159257f2ac97bf05638'
+# Depth-edition builds from tactical orders (26de0ec) through the save-path perf
+# work (b3ff56c) share this exact codec; only combat, items and the UI changed.
+# Their snapshots load as current: committed reports stay verbatim and the new
+# item synergies only act in later battles.
+SAME_LAYOUT_DEPTH_FINGERPRINTS = frozenset({
+    '30b2775cb67c3dd12cf0dca5d728de4ff114253559af7e1e0d0301ecbb2247f0',  # 26de0ec orders/quests
+    '9c5a96343a48b24e9c14ac983070c2acb6323bced95d9a684afe9b6b8a578ee3',  # 429fa96 bot orders
+    'c1aace3e1f5d0c35ae37810d8a74aa15aa527cd9a18295d63e30fb4c3c2bf09f',  # ca1fa36 third playtest
+    '69cea48feb0456f174289257e12eb7df1ee30cc93b3f31f4e2610aeabea26465',  # 036de08 choice moments
+    '18ca7f8970f4dd3161d6b969230aa19bbc280e74834a98cdff4db4ce2c3e51a5',  # 0652ee3 feedback layer
+    '3cc45a816f570f518877f556c3355c4cff391f158e8547d75b68bd23e845b8d4',  # 8caaebc mechanic items
+    '21e05a7b845ee045ba2990d1a1a06fa3e45e5731c04bc07be927a353a3b24bc6',  # b3ff56c save perf
+})
 PRE_SYNERGY_TECHNIQUES = frozenset({'cut', 'surf', 'rest', 'thunderbolt', 'ice_beam',
                                      'toxic', 'earthquake', 'roar', 'rapid_spin'})
 # Exact arena catalog from the frozen fixed-trait predecessor. Its fingerprint
@@ -341,6 +354,8 @@ class SessionCodec:
             # Identical arena_v1 layout and results; the depth edition did not exist yet.
             if tactics.is_depth(ruleset):
                 raise ValueError('旧版存档不能包含深度竞技规则')
+            fingerprint = loaded_fingerprint = current_fingerprint
+        if fingerprint in SAME_LAYOUT_DEPTH_FINGERPRINTS:
             fingerprint = loaded_fingerprint = current_fingerprint
         allow_depth_bonds = loaded_fingerprint == current_fingerprint
         if fingerprint == PRE_BOND_DEPTH_FINGERPRINT:
@@ -1579,7 +1594,7 @@ class SessionCodec:
     def _decode_depth_seat(counters):
         """Per-seat arena_v2 state. Keys added later default when absent."""
         import arena_depth
-        numeric = ('free_refreshes', 'relief', 'sims', 'targeted', 'fast_track')
+        numeric = ('free_refreshes', 'relief', 'sims', 'targeted', 'fast_track', 'awakened')
         known = set(numeric) | {'draft_uid', 'order', 'quests', 'quests_done'}
         if not isinstance(counters, dict) or not {'free_refreshes', 'relief', 'sims'} <= set(counters) \
                 or set(counters) - known:

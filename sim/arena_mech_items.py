@@ -51,6 +51,8 @@ DEPTH_CRAFT_ORDER = ('boomerang', 'impact_gauntlet', 'echo_bell', 'flame_orb', '
 
 
 def carrier_rank(owned, key):
+    if key.endswith('_plus'):
+        key = key[:-5]
     from arena_skills import skill_of
     from profiles import effective_range
     piece = owned.piece
@@ -88,6 +90,11 @@ def _d():
     return arena_depth
 
 
+def _syn():
+    import arena_item_synergy
+    return arena_item_synergy
+
+
 def _owner_basic(inst, unit, target, actual_hp):
     return unit is inst.unit and actual_hp > 0 and target.alive
 
@@ -102,6 +109,15 @@ def _h_boomerang(battle, inst, unit, target, t, actual_hp, **_):
         dealt = d._indirect_damage(battle, unit, victims[0], actual_hp * .5, t)
         if dealt:
             fire(battle, inst, victims[0], t, label='回旋镖', kind='damage', value=dealt, spend=False)
+        if _syn().is_awakened(unit, 'boomerang'):
+            first = victims[0]
+            again = sorted((v for v in battle.units if v.alive and v.team != unit.team
+                            and v is not target and v is not first and d._dist(v, first) <= 2),
+                           key=lambda v: (d._dist(v, first), v.local_idx))
+            if again:
+                dealt = d._indirect_damage(battle, unit, again[0], actual_hp * .35, t)
+                if dealt:
+                    fire(battle, inst, again[0], t, label='回旋镖·再弹', kind='damage', value=dealt, spend=False)
 
 
 def _counter(inst, every):
@@ -110,10 +126,15 @@ def _counter(inst, every):
 
 
 def _h_impact(battle, inst, unit, target, t, actual_hp, action_index=None, **_):
-    if not _owner_basic(inst, unit, target, actual_hp) or not _counter(inst, 3):
+    awakened = _owner_basic(inst, unit, target, actual_hp) and _syn().is_awakened(unit, 'impact_gauntlet')
+    if not _owner_basic(inst, unit, target, actual_hp) or not _counter(inst, 2 if awakened else 3):
         return
     destination = battle._knock_cell(target, unit.pos)
     if destination is None:
+        ready = inst.state.setdefault('stun_ready', {})
+        if awakened and ready.get(target.idx, 0.) <= t + 1e-9 and _syn().stun(battle, target, t, .8):
+            ready[target.idx] = t + 4.
+            fire(battle, inst, target, t, label='冲击·眩晕', kind='debuff', spend=False)
         return
     from arena_fields import move_unit
     fire(battle, inst, target, t, label='冲击', kind='move', spend=False)
@@ -126,6 +147,14 @@ def _h_echo(battle, inst, unit, target, t, cast_index, lost_hp, **_):
     dealt = _d()._indirect_damage(battle, unit, target, lost_hp * .45, t)
     if dealt:
         fire(battle, inst, target, t, label='回响', kind='damage', value=dealt, spend=False)
+    if _syn().is_awakened(unit, 'echo_bell'):
+        d = _d()
+        others = sorted((v for v in battle.units if v.alive and v.team != unit.team and v is not target
+                         and d._dist(v, target) <= 2), key=lambda v: (d._dist(v, target), v.local_idx))
+        if others:
+            dealt = d._indirect_damage(battle, unit, others[0], lost_hp * .45, t)
+            if dealt:
+                fire(battle, inst, others[0], t, label='回响·扩散', kind='damage', value=dealt, spend=False)
 
 
 def _status_on_basic(kind, label):
@@ -145,11 +174,19 @@ def _status_on_basic(kind, label):
 
 
 def _h_static(battle, inst, unit, target, t, actual_hp, **_):
-    if not _owner_basic(inst, unit, target, actual_hp) or not _counter(inst, 4):
+    awakened = _owner_basic(inst, unit, target, actual_hp) and _syn().is_awakened(unit, 'static_glove')
+    if not _owner_basic(inst, unit, target, actual_hp) or not _counter(inst, 3 if awakened else 4):
         return
     import status
     if status.apply_debuff(battle, target, 'para', t, source=unit):
         fire(battle, inst, target, t, label='静电', kind='debuff', spend=False)
+        if awakened:
+            d = _d()
+            others = sorted((v for v in battle.units if v.alive and v.team != unit.team and v is not target
+                             and d._dist(v, target) <= 2 and getattr(getattr(v, '_st', None), 'debuff', None) is None),
+                            key=lambda v: (d._dist(v, target), v.local_idx))
+            if others and status.apply_debuff(battle, others[0], 'para', t, source=unit):
+                fire(battle, inst, others[0], t, label='静电·电弧', kind='debuff', spend=False)
 
 
 def _h_taunt_bell(battle, inst, t, **_):
@@ -174,6 +211,9 @@ def _h_red_card(battle, inst, source, target, actual_hp, t, action_index=None, *
     if (target is not unit or source is None or source.team == unit.team or not source.alive
             or source.range != 1 or actual_hp <= 0 or not unit.alive):
         return
+    awakened = _syn().is_awakened(unit, 'red_card')
+    if inst.uses >= (4 if awakened else 2):
+        return
     from arena_fields import move_unit
     moved = 0
     for _step in range(2):
@@ -184,6 +224,10 @@ def _h_red_card(battle, inst, source, target, actual_hp, t, action_index=None, *
         moved += 1
     if moved:
         fire(battle, inst, source, t, label='红牌', kind='move', value=moved)
+        if awakened and source.alive:
+            drained = min(source.energy, 25)
+            source.energy -= drained
+            battle._emit_state(source, t)
     else:
         inst.spend(t)
 
@@ -257,7 +301,7 @@ UNIT_SPECS = (
     _spec('toxic_orb', 'basic_settled', '剧毒宝珠', _status_on_basic('poison', '剧毒')),
     _spec('static_glove', 'basic_settled', '静电手套', _h_static),
     _spec('taunt_bell', 'battle_start', '挑衅铃', _h_taunt_bell, limit=1),
-    _spec('red_card', 'direct_hit', '红牌', _h_red_card, limit=2),
+    _spec('red_card', 'direct_hit', '红牌', _h_red_card),  # 2 uses (4 awakened), enforced in the handler
     _spec('weakness_policy', 'direct_hit', '弱点保险', _h_weakness, limit=1),
     _spec('reaper_scale', 'death', '逆鳞', _h_reaper, cooldown=1.),
     _spec('rally_whistle', 'native_cast', '号令哨', _h_whistle),

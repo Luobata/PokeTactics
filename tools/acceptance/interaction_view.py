@@ -427,6 +427,8 @@ def _carrier_score(owned, key):
     import arena_mech_items as mech
     piece = owned.piece
     role = getattr(piece, 'role_key', 'attack')
+    if key.endswith('_plus') and key[:-5] in mech.MECH_ITEMS:
+        key = key[:-5]
     if key in mech.MECH_ITEMS:
         rank = mech.carrier_rank(owned, key)
         if rank is None:
@@ -491,6 +493,44 @@ def equip_block(sess):
             'unequip_cost': arena_session.UNEQUIP_COST if sess.is_depth else 0}
 
 
+# ---------------------------------------------------------------- item synergy
+def _board_item_keys(p):
+    return [k for o in p.board for k in (o.item, getattr(o, 'extra_item', None)) if k]
+
+
+def synergy_block(sess):
+    """Resonance progress (deployed items), awakening options and dual-wield combos."""
+    if not sess.is_depth:
+        return None
+    import arena_item_synergy as syn
+    import arena_session
+    p = sess.player
+    board_keys = _board_item_keys(p)
+    craftable = [items_mod.craft_result(a, b, sess.ruleset) for i, a in enumerate(items_mod.COMPONENT_ORDER)
+                 for b in items_mod.COMPONENT_ORDER[i:]
+                 if p.inventory.components.get(a, 0) >= 1 and p.inventory.components.get(b, 0) >= (2 if a == b else 1)]
+    candidates = set(p.inventory.finished) | {k for k in craftable if k in items_mod.catalog(sess.ruleset)}
+    candidates |= {k for o in p.bench for k in (o.item, getattr(o, 'extra_item', None)) if k}
+    name = lambda k: items_mod.FINISHED.get(k, {}).get('name', k)
+    resonance = syn.resonance_view(board_keys, candidates)
+    for row in resonance:
+        row['helpers'] = [{'key': k, 'name': name(k)} for k in row['helpers']]
+    duos = []
+    for duo, (pair, title, text) in syn.DUOS.items():
+        holders = [o for o in p.all_pieces() if duo in syn.duo_for((o.item, getattr(o, 'extra_item', None)))]
+        duos.append({'id': duo, 'name': title, 'text': text, 'items': [{'key': k, 'name': name(k)} for k in pair],
+                     'active': [o.piece.name for o in holders]})
+    awaken = arena_session.awaken_options(p, sess.round_no)
+    for row in awaken['options']:
+        row['name'] = name(row['key'])
+        row['clause'] = syn.AWAKEN[row['key']]
+        row['component_names'] = [items_mod.COMPONENT_NAMES[c] for c in row['components']]
+    return {'resonance': resonance, 'duos': duos, 'awaken': awaken,
+            'tags': {k: list(syn.item_tags(k)) for k in items_mod.catalog(sess.ruleset) if syn.item_tags(k)},
+            'tag_names': dict(syn.TAG_NAMES),
+            'dual_slots': sum(1 for o in p.all_pieces() if arena_session.item_slots(o, p) >= 2)}
+
+
 # ---------------------------------------------------------------- item advisor
 _BURN_PAYOFF = {'cinder_eruption'}
 _CONTROL_PAYOFF = {'storm_conductor', 'charged_beacon', 'gale_cross', 'frost_kiss', 'horn_pressure',
@@ -528,7 +568,9 @@ def advisor_context(sess, seat=None):
 
 def item_guide(sess, key, ctx):
     import arena_mech_items as mech
+    import arena_item_synergy as syn
     spec = items_mod.FINISHED.get(key, {})
+    key = syn.base_key(key)
     if key in mech.GUIDE:
         archetype, playstyle, links = mech.GUIDE[key]
     else:
@@ -570,10 +612,37 @@ def advice_block(sess):
         ranked.sort(key=lambda row: (-row[0], row[1].piece.name))
         return ranked[0] if ranked else None
 
+    import arena_item_synergy as syn
+    board_counts = syn.tag_counts(_board_item_keys(p)) if sess.is_depth else {}
+
+    def synergy_notes(key, carrier):
+        if not sess.is_depth:
+            return 0, []
+        bonus, notes = 0, []
+        benched = bool(carrier) and carrier[1] not in p.board
+        for tag in syn.item_tags(key):
+            n = board_counts.get(tag, 0) + 1
+            if n in syn.THRESHOLDS:
+                bonus += 1.5 if benched else 2
+                notes.append(('上场后' if benched else '') + f'凑齐{syn.RESONANCES[tag][0]}·{n}')
+            elif n + 1 in syn.THRESHOLDS:
+                bonus += .5
+                notes.append(f'{syn.TAG_NAMES[tag]} {n}/{n + 1}')
+        if carrier:
+            held = [k for k in (carrier[1].item, getattr(carrier[1], 'extra_item', None)) if k]
+            for duo in syn.duo_for(held + [key]):
+                if duo not in syn.duo_for(held):
+                    bonus += 2
+                    notes.append('双持：' + syn.DUOS[duo][1])
+        return bonus, notes
+
     def score_item(key):
         guide = item_guide(sess, key, ctx)
         carrier = best(key)
-        value = (carrier[0] if carrier else 0) + 1.5 * len(guide['active']) + (1 if guide['mechanic'] else 0)
+        bonus, notes = synergy_notes(key, carrier)
+        guide = {**guide, 'active': notes + guide['active']}
+        value = ((carrier[0] if carrier else 0) + 1.5 * len(guide['active']) - 1.5 * len(notes) + bonus
+                 + (1 if guide['mechanic'] else 0))
         return value, guide, carrier
 
     suggestions = []
@@ -609,14 +678,32 @@ def advice_block(sess):
             else:
                 lacking = next(items_mod.COMPONENT_NAMES[c] for c, n in need.items() if stock.get(c, 0) < n)
                 suggestions.append({**row, 'action': 'chase', 'lacking': lacking})
+    if sess.is_depth:
+        import arena_session
+        for row in arena_session.awaken_options(p, sess.round_no)['options']:
+            if row['ready']:
+                where = row['unit'] or '仓库'
+                suggestions.append({'action': 'awaken', 'item': row['key'],
+                                    'name': catalog.get(row['key'], {}).get('name', row['key']),
+                                    'uid': row['uid'], 'unit': where, 'value': 6.,
+                                    'component': row['have'][0],
+                                    'why': ['觉醒：' + syn.AWAKEN[row['key']]], 'archetype': item_guide(sess, row['key'], ctx)['archetype']})
     seen, unique = set(), []
-    for row in sorted(suggestions, key=lambda r: (-r['value'], {'equip': 0, 'craft': 1, 'chase': 2}[r['action']])):
+    for row in sorted(suggestions, key=lambda r: (-r['value'], {'awaken': 0, 'equip': 1, 'craft': 2, 'chase': 3}[r['action']])):
         if (row['action'], row['item']) in seen:
             continue
         seen.add((row['action'], row['item']))
         unique.append(row)
     guides = {key: item_guide(sess, key, ctx) for key in catalog
               if key not in ('evo_stone',) and not items_mod.retired(key, sess.ruleset)}
+    if sess.is_depth:
+        for key, guide in guides.items():
+            guide['tags'] = [syn.TAG_NAMES[t] for t in syn.item_tags(key)]
+            guide['duos'] = [{'partner': partner, 'partner_name': catalog.get(partner, {}).get('name', partner),
+                              'name': syn.DUOS[duo][1], 'text': syn.DUOS[duo][2]}
+                             for partner, duo in syn.duo_partners(key)]
+            if syn.base_key(key) in syn.AWAKEN and not key.endswith('_plus'):
+                guide['awaken'] = syn.AWAKEN[key]
     archetypes = {}
     for o in owned:
         for k in (o.item, getattr(o, 'extra_item', None)):
@@ -631,6 +718,7 @@ def advice_block(sess):
 def build(sess):
     return {
         'item_advice': advice_block(sess),
+        'item_synergy': synergy_block(sess),
         'version': 1,
         'augments': augment_block(sess),
         'techniques': technique_block(sess),

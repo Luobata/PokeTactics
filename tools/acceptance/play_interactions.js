@@ -271,7 +271,51 @@
     const off = (g.missing || []).slice(0, short ? 1 : limit).map((x) => `<li class="off"><span aria-hidden="true">○</span>还差：${esc(x)}</li>`).join("");
     return on || off ? `<ul class="ix-combos">${on}${off}</ul>` : "";
   }
-  const ACTION = {equip: ["装备", "装上"], craft: ["合成", "合成并装给"], chase: ["凑齐", "在合成图中查看"]};
+  const ACTION = {equip: ["装备", "装上"], craft: ["合成", "合成并装给"], chase: ["凑齐", "在合成图中查看"], awaken: ["觉醒", "立即觉醒"]};
+  const synergy = () => IX()?.item_synergy || null;
+  const tagChips = (key) => {
+    const syn = synergy();
+    const tags = syn?.tags?.[key] || [];
+    return tags.map((t) => `<span class="ix-tag tag-${esc(t)}">${esc(syn.tag_names?.[t] || t)}</span>`).join("");
+  };
+
+  // ------------------------------------------------------------ item synergy (docs/67)
+  function renderSynergy(s, ix) {
+    const box = $("ix-synergy");
+    if (!box) return;
+    const syn = ix?.item_synergy;
+    box.hidden = !syn;
+    if (!syn) { memo(box).innerHTML = ""; return; }
+    const resCard = (r) => {
+      const pips = [1, 2, 3, 4].map((i) => `<i class="${i <= r.count ? "on" : ""}${i === 2 || i === 4 ? " mark" : ""}"></i>`).join("");
+      const tiers = (r.tiers || []).map((t) => `<li class="${t.active ? "on" : "off"}"><b>${Number(t.n)}</b>${esc(t.text)}</li>`).join("");
+      const help = r.next && r.helpers?.length ? `<p class="ix-res-help">再上场 ${Number(r.next) - Number(r.count)} 件${r.tier ? "升级" : "激活"} · 手上可用：${r.helpers.slice(0, 4).map((h) => esc(h.name)).join("、")}</p>` : "";
+      return `<article class="ix-res tag-${esc(r.tag)}${r.tier ? " active" : ""}"><header><span class="ix-tag tag-${esc(r.tag)}">${esc(r.tag_name)}</span><b>${esc(r.name)}</b><span class="ix-pips" aria-label="已上场 ${Number(r.count)} 件">${pips}</span><small>${Number(r.count)}${r.next ? `/${Number(r.next)}` : " · 满"}</small></header><ul>${tiers}</ul>${help}</article>`;
+    };
+    // Tags with progress or a usable item first; the rest stay folded so the bag is not pushed down.
+    const live = (syn.resonance || []).filter((r) => r.count || r.helpers?.length);
+    const idle = (syn.resonance || []).filter((r) => !(r.count || r.helpers?.length));
+    const res = (live.length ? `<div class="ix-res-list">${live.map(resCard).join("")}</div>` : '<p class="section-note">场上还没有带标签的装备。装上 2 件同标签装备即可激活第一档。</p>')
+      + (idle.length ? `<details class="ix-syn-more"><summary>${live.length ? "其他共鸣" : "全部共鸣"} <small>${idle.map((r) => esc(r.tag_name)).join(" · ")}</small></summary><div class="ix-res-list">${idle.map(resCard).join("")}</div></details>` : "");
+    const aw = syn.awaken || {options: []};
+    const locked = (s.round || 0) < aw.round;
+    const awRows = (aw.options || []).map((o) => `<article class="ix-awaken-card${o.ready ? " ready" : ""}">
+        <header><b>${esc(o.name)}</b><span class="ix-chip">${o.unit ? esc(o.unit) : "仓库"}</span></header>
+        <p>${esc(o.clause)}</p>
+        <button type="button" class="${o.ready ? "primary-button" : "secondary-button"}" data-ix-awaken="${esc(o.key)}" data-uid="${esc(o.uid || "")}" data-component="${esc(o.have?.[0] || "")}" ${o.ready && canPrep() ? "" : "disabled"}>${o.have?.length ? `觉醒 · 消耗${esc((o.component_names || [])[o.components.indexOf(o.have[0])] || "")}` : `需要组件：${(o.component_names || []).map(esc).join(" / ")}`}</button>
+      </article>`).join("");
+    const duos = (syn.duos || []).map((d) => `<li class="${d.active?.length ? "on" : ""}"><b>${d.items.map((i) => esc(i.name)).join(" + ")}</b><span>→ ${esc(d.name)}</span><small>${esc(d.text)}${d.active?.length ? ` · 生效：${d.active.map(esc).join("、")}` : ""}</small></li>`).join("");
+    memo(box).innerHTML = `<div class="section-heading"><h2>装备共鸣</h2><span class="tiny-label">同标签 2 / 4 件</span></div>
+      ${res}
+      <details class="ix-syn-more"${aw.options?.some((o) => o.ready) ? " open" : ""}><summary>装备觉醒 <small>${locked ? `第 ${Number(aw.round)} 轮开放` : `本局剩余 ${Number(aw.left)}/${Number(aw.limit)}`}</small></summary>
+        <p class="section-note">机制装备 + 它配方里的一个组件 → 觉醒版：保留原效果和属性，再多一条机制。</p>
+        ${awRows ? `<div class="ix-awaken-list">${awRows}</div>` : '<p class="empty-copy">还没有可觉醒的机制装备（回旋镖、冲击护手、宝珠、手套、铃、红牌）。</p>'}
+      </details>
+      <details class="ix-syn-more"><summary>双持组合 <small>${Number(syn.dual_slots) ? `${Number(syn.dual_slots)} 只宝可梦有第二装备位` : "需要核心标记或双持强化"}</small></summary>
+        <p class="section-note">同一只宝可梦同时携带这两件装备时触发额外效果。</p>
+        <ul class="ix-duo-list">${duos}</ul>
+      </details>`;
+  }
 
   function renderAdvice(s, ix) {
     const box = $("ix-advice");
@@ -286,13 +330,14 @@
     const rows = adv.suggestions || [];
     const card = (row) => {
       const [label, cta] = ACTION[row.action] || ["建议", "查看"];
-      const target = row.action === "chase" ? `差 <b>${esc(row.lacking)}</b> · 合成后给 ${esc(row.unit)}`
+      const target = row.action === "awaken" ? `${esc(row.unit)} 的${esc(row.name)}`
+        : row.action === "chase" ? `差 <b>${esc(row.lacking)}</b> · 合成后给 ${esc(row.unit)}`
         : row.action === "craft" ? `${(row.recipe || []).map(esc).join(" + ")} → 给 ${esc(row.unit)}` : `给 ${esc(row.unit)}`;
       return `<article class="ix-advice-card act-${esc(row.action)}">
         <header><span class="ix-act">${label}</span><b>${esc(row.name)}</b>${archBadge(row.archetype)}</header>
         <p class="ix-advice-target">${target}</p>
         ${(row.why || []).length ? `<ul class="ix-combos">${row.why.slice(0, 3).map((x) => `<li class="on"><span aria-hidden="true">✓</span>${esc(x)}</li>`).join("")}</ul>` : ""}
-        <button type="button" class="${row.action === "chase" ? "secondary-button" : "primary-button"}" data-ix-advice="${esc(row.action)}" data-item="${esc(row.item)}" data-uid="${esc(row.uid || "")}" ${row.action !== "chase" && !canPrep() ? "disabled" : ""}>${cta}${row.action === "craft" ? ` ${esc(row.unit)}` : ""}</button>
+        <button type="button" class="${row.action === "chase" ? "secondary-button" : "primary-button"}" data-ix-advice="${esc(row.action)}" data-item="${esc(row.item)}" data-uid="${esc(row.uid || "")}" data-component="${esc(row.component || "")}" ${row.action !== "chase" && !canPrep() ? "disabled" : ""}>${cta}${row.action === "craft" ? ` ${esc(row.unit)}` : ""}</button>
       </article>`;
     };
     memo(box).innerHTML = `<div class="section-heading"><h2>配装建议</h2><span class="tiny-label">${rows.length ? `${rows.length} 条 · 按收益排序` : "ADVISOR"}</span></div>
@@ -331,9 +376,11 @@
       const guide = guideOf(key);
       const lines = [...(row.lines || []), ...(row.stats || []).map((x) => `组件 ${x}`)];
       return `<article class="ix-item-card" data-arch="${esc(ARCH[guide?.archetype] || "")}" ${canPrep() ? `draggable="true" data-ix-drag="item:${esc(key)}"` : ""}>
-        <header><b>◆ ${esc(row.name || item?.name || key)}</b>${n > 1 ? `<span class="ix-chip">×${n}</span>` : ""}${archBadge(guide?.archetype)}${kindBadge(guide)}${row.recipe ? `<small>${esc(row.recipe)}</small>` : ""}</header>
+        <header><b>◆ ${esc(row.name || item?.name || key)}</b>${n > 1 ? `<span class="ix-chip">×${n}</span>` : ""}${archBadge(guide?.archetype)}${kindBadge(guide)}${tagChips(key)}${row.recipe ? `<small>${esc(row.recipe)}</small>` : ""}</header>
         ${guide?.playstyle ? `<p class="ix-playstyle">${esc(guide.playstyle)}</p>` : ""}
         ${combos(guide)}
+        ${guide?.duos?.length ? `<p class="ix-item-duo">双持：${guide.duos.map((d) => `+ ${esc(d.partner_name)} → <b>${esc(d.name)}</b>`).join("；")}</p>` : ""}
+        ${guide?.awaken ? `<p class="ix-item-awaken">觉醒后：${esc(guide.awaken)}</p>` : ""}
         ${lines.length ? `<div class="ix-item-lines">${lines.map((x) => `<span>${esc(x)}</span>`).join("")}</div>` : ""}
         <p>${esc(row.effect || item?.effect || "")}</p>
         ${row.suits ? `<p class="ix-item-suits">适合：${esc(row.suits)}${row.carriers?.length ? ` · 推荐 ${row.carriers.map((c) => esc(c.name)).join(" › ")}` : ""}</p>` : '<p class="ix-item-suits ix-muted">队里暂时没有特别适合的携带者</p>'}
@@ -552,6 +599,7 @@
     renderStrip(s, ix);
     renderTmRack(s, ix);
     renderAdvice(s, ix);
+    renderSynergy(s, ix);
     renderItems(s, ix);
     renderRecipes(s, ix);
     decorateDetail(s, ix);
@@ -577,7 +625,7 @@
   };
   const CONTROLS = ["[data-ix-tm]", "[data-ix-equip]", "[data-ix-cell]", "[data-ix-socket]", "[data-ix-socket-pick]",
     "[data-ix-confirm-learn]", "[data-ix-confirm-equip]", "[data-ix-confirm-craft]", "[data-ix-mod]", "[data-ix-mod-later]",
-    "[data-ix-close]", "[data-ix-cancel-mode]", "[data-ix-advice]", "[data-ix-arch]", "[data-ix-chase-clear]", "[data-ix-augment-later]", "[data-ix-open-augment]", "[data-ix-augment-info]"];
+    "[data-ix-close]", "[data-ix-cancel-mode]", "[data-ix-advice]", "[data-ix-awaken]", "[data-ix-arch]", "[data-ix-chase-clear]", "[data-ix-augment-later]", "[data-ix-open-augment]", "[data-ix-augment-info]"];
 
   document.addEventListener("click", async (event) => {
     if (!ctx) return;
@@ -601,7 +649,8 @@
       if (mode?.kind === "equip" && mode.key === attr("data-ix-equip")) exitMode();
       else enterMode("equip", attr("data-ix-equip"));
     } else if (target.hasAttribute("data-ix-cancel-mode")) exitMode();
-    else if (target.hasAttribute("data-ix-advice")) await followAdvice(attr("data-ix-advice"), attr("data-item"), attr("data-uid"));
+    else if (target.hasAttribute("data-ix-advice")) await followAdvice(attr("data-ix-advice"), attr("data-item"), attr("data-uid"), attr("data-component"));
+    else if (target.hasAttribute("data-ix-awaken")) await awakenItem(attr("data-ix-awaken"), attr("data-uid"), attr("data-component"));
     else if (target.hasAttribute("data-ix-arch")) {
       archFilter = attr("data-ix-arch") || null;
       renderItems(S(), IX());
@@ -636,8 +685,14 @@
   }, true);
 
   /** One-tap advice: equip opens the usual confirm, craft crafts then offers the carrier, chase points at the board. */
-  async function followAdvice(action, item, uid) {
+  async function awakenItem(item, uid, component) {
+    if (!canPrep()) return;
+    await ctx.api("awaken", {item, uid: uid || "", component: component || ""});
+  }
+
+  async function followAdvice(action, item, uid, component) {
     if (action === "equip") return equipConfirm(item, uid);
+    if (action === "awaken") return awakenItem(item, uid, component);
     if (action === "craft") {
       if (!canPrep()) return;
       const result = await ctx.api("craft", {item});

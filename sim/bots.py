@@ -298,6 +298,8 @@ class Bot:
                 self.inventory.finished.remove(key)
                 target.item = key
                 self.item_equips += 1
+        if self.inventory.ruleset == 'arena_v2':
+            self._awaken_pass(round_no)
         if "lucky_egg" in self.inventory.finished:
             by_bst = sorted(self.all_pieces(),
                             key=lambda o: -dex.bst(o.piece.species_id))
@@ -307,6 +309,21 @@ class Bot:
                     o.item = "lucky_egg"
                     self.item_equips += 1
                     break
+
+    def _awaken_pass(self, round_no: int) -> None:
+        """arena_v2: awaken equipped mechanic items on the strongest board units first."""
+        import arena_item_synergy as syn
+        import arena_session
+        if round_no < syn.AWAKEN_ROUND:
+            return
+        dex = pokedex()
+        for o in sorted(self.board, key=lambda x: (-x.piece.star, -dex.bst(x.piece.species_id))):
+            for key in (o.item, getattr(o, 'extra_item', None)):
+                if key in syn.AWAKEN:
+                    try:
+                        arena_session.awaken(self, key, round_no, o)
+                    except ValueError:
+                        continue
 
     def _is_behind(self, others: list) -> bool:
         """落后方判定（与 items.drop_weights 同口径）：hp 不高于存活均值——

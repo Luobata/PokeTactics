@@ -64,7 +64,7 @@ class ReadOnlyTest(unittest.TestCase):
                 ix = state['interactions']
                 self.assertNotIn('error', ix)
                 self.assertEqual(set(ix), {'version', 'augments', 'techniques', 'skills', 'recipes', 'equip',
-                                           'item_advice'})
+                                           'item_advice', 'item_synergy'})
 
 
 class AugmentTest(unittest.TestCase):
@@ -215,7 +215,8 @@ class RecipeTest(unittest.TestCase):
         craftable_depth = sorted({c['item'] for c in cells2 if c['depth']})
         self.assertEqual(craftable_depth, sorted(k for k, spec in arena_depth.DEPTH_ITEMS.items() if spec['pairs']))
         import arena_mech_items
-        original = [spec for key, spec in arena_depth.DEPTH_ITEMS.items() if key not in arena_mech_items.MECH_ITEMS]
+        original = [spec for key, spec in arena_depth.DEPTH_ITEMS.items()
+                    if key not in arena_mech_items.MECH_ITEMS and spec['pairs']]
         self.assertEqual(sorted(tuple(sorted((c['a'], c['b']))) for c in cells1 if c['dead']),
                          sorted(tuple(sorted(spec['pairs'][0])) for spec in original))
 

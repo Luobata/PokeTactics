@@ -683,3 +683,50 @@
 .stage-ui.layout-phone .ix-arch-filter button { min-height: 44px; }
 .stage-ui .ix-target-bar button { flex: none; white-space: nowrap; }
 .stage-ui .ix-target-bar { max-width: min(640px, calc(100% - 16px)); }
+
+/* ---- item synergy: resonance, awakening, dual wield (docs/67) ---- */
+.stage-ui .ix-synergy { margin-bottom: 14px; }
+.stage-ui .ix-synergy[hidden] { display: none; }
+.stage-ui .ix-tag { display: inline-flex; align-items: center; padding: 0 7px; border-radius: 999px; font-size: 11px; font-weight: 700; line-height: 18px; color: #fff; background: #6b7a62; }
+.stage-ui .ix-tag.tag-status { background: #8f4fb0; }
+.stage-ui .ix-tag.tag-impact { background: #b0662c; }
+.stage-ui .ix-tag.tag-arcane { background: #3c6fb6; }
+.stage-ui .ix-tag.tag-guard { background: #4f7d5a; }
+.stage-ui .ix-tag.tag-strike { background: #b2423a; }
+.stage-ui .ix-res-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
+.stage-ui .ix-res { padding: 8px 10px; border-radius: 12px; background: #fbfaf3; border: 1px solid #e3dcc2; font-size: 12px; opacity: .82; transition: opacity .2s, border-color .2s; }
+.stage-ui .ix-res.active { opacity: 1; border-color: #8fbf7a; background: #f6fbef; box-shadow: 0 0 0 1px #cfe6c2 inset; }
+.stage-ui .ix-res header { display: flex; align-items: center; gap: 6px; }
+.stage-ui .ix-res header b { color: #263c33; font-size: 13px; }
+.stage-ui .ix-res header small { margin-left: auto; color: #66745c; font-weight: 700; }
+.stage-ui .ix-pips { display: inline-flex; gap: 3px; }
+.stage-ui .ix-pips i { width: 9px; height: 9px; border-radius: 3px; background: #e2ddcb; }
+.stage-ui .ix-pips i.mark { box-shadow: 0 0 0 1px #b9ad86; }
+.stage-ui .ix-pips i.on { background: #4c8a3c; }
+.stage-ui .ix-res ul { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 3px; }
+.stage-ui .ix-res li { display: flex; gap: 6px; align-items: baseline; color: #8a8f80; }
+.stage-ui .ix-res li b { min-width: 16px; text-align: center; border-radius: 5px; background: #ece7d6; color: #66745c; font-size: 11px; }
+.stage-ui .ix-res li.on { color: #2f5a1f; }
+.stage-ui .ix-res li.on b { background: #4c8a3c; color: #fff; }
+.stage-ui .ix-res-help { margin: 5px 0 0; color: #7a6a3a; }
+.stage-ui .ix-syn-more { margin-top: 8px; border-radius: 12px; background: #fbfaf3; border: 1px solid #e3dcc2; padding: 6px 10px; }
+.stage-ui .ix-syn-more summary { cursor: pointer; font-weight: 700; color: #263c33; min-height: 32px; display: flex; align-items: center; gap: 8px; }
+.stage-ui .ix-syn-more summary small { color: #66745c; font-weight: 600; }
+.stage-ui .ix-awaken-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; margin: 6px 0; }
+.stage-ui .ix-awaken-card { display: grid; gap: 5px; padding: 8px 10px; border-radius: 12px; border: 1px dashed #d4c79c; background: #fffdf5; font-size: 12px; }
+.stage-ui .ix-awaken-card.ready { border: 1px solid #d9a634; box-shadow: 0 0 0 2px #f7e2a8 inset; }
+.stage-ui .ix-awaken-card header { display: flex; align-items: center; gap: 6px; }
+.stage-ui .ix-awaken-card button { justify-self: start; min-height: 38px; padding: 4px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+.stage-ui .ix-awaken-card .primary-button { background: #9b7417; color: #fff; border: 0; }
+.stage-ui .ix-duo-list { list-style: none; margin: 6px 0; padding: 0; display: grid; gap: 6px; font-size: 12px; }
+.stage-ui .ix-duo-list li { display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; color: #66745c; }
+.stage-ui .ix-duo-list li b { color: #263c33; }
+.stage-ui .ix-duo-list li small { grid-column: 1 / -1; }
+.stage-ui .ix-duo-list li.on b, .stage-ui .ix-duo-list li.on span { color: #2f6a2a; }
+.stage-ui .ix-item-duo, .stage-ui .ix-item-awaken { margin: 0; font-size: 12px; color: #5d5130; }
+.stage-ui .ix-item-awaken { color: #8a6514; }
+.stage-ui .ix-advice-card.act-awaken { border-left-color: #d9a634; background: #fffaf0; }
+.stage-ui .act-awaken .ix-act { background: #b07f12; }
+@media (max-width: 720px) {
+  .stage-ui .ix-res-list, .stage-ui .ix-awaken-list { grid-template-columns: 1fr; }
+}

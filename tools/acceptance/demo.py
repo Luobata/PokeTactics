@@ -677,7 +677,8 @@ def _loadout_highlights(anim, teams):
 
 
 
-_LEDGER_SOURCES = {'augment': '海克斯', 'bond': '羁绊断点', 'item': '装备', 'skill_mod': '技能强化',
+_LEDGER_SOURCES = {'augment': '海克斯', 'bond': '羁绊断点', 'item': '装备', 'resonance': '装备共鸣',
+                   'skill_mod': '技能强化',
                    'terrain': '地形', 'edition': '规则', 'depth': '规则'}
 
 
@@ -696,10 +697,11 @@ def _ledger_name(source, key):
     if source == 'edition':
         return {'support_aura': '辅助庇护（邻格辅助减伤 6%）',
                 'cover': '前排掩护（远程受远程伤害 -12%）'}.get(key, key)
-    if source == 'item':
+    if source in ('item', 'resonance'):
         if key == 'component_damage':
             return '组件属性（木炭）'
-        return items_mod.FINISHED.get(key, {}).get('name', key)
+        import arena_item_synergy
+        return items_mod.FINISHED.get(key, {}).get('name') or arena_item_synergy.NAMES.get(key, key)
     return key
 
 
@@ -3486,6 +3488,17 @@ def act_dismantle(sess, key):
         raise DemoError(str(exc)) from exc
 
 
+def act_awaken(sess, key, uid='', component=''):
+    _guard_prep(sess)
+    if not sess.is_depth:
+        raise DemoError('当前规则没有装备觉醒')
+    owned = sess.locate_uid(uid)[0] if uid else None
+    try:
+        return arena_session.awaken(sess.player, key, sess.round_no, owned, component or None)
+    except ValueError as exc:
+        raise DemoError(str(exc)) from exc
+
+
 def act_sell_item(sess, key):
     _guard_prep(sess)
     if not sess.is_depth:
@@ -3863,6 +3876,9 @@ def _apply_action(params: dict):
                 msg = act_simulate(sess)
             elif cmd == "dismantle":
                 msg = act_dismantle(sess, params.get("item", ""))
+            elif cmd == "awaken":
+                msg = act_awaken(sess, params.get("item", ""), params.get("uid", ""),
+                                 params.get("component", ""))
             elif cmd == "sell_item":
                 msg = act_sell_item(sess, params.get("item", ""))
             elif cmd == "choose_mod":

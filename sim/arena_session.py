@@ -43,7 +43,7 @@ def seat_state(seat):
         state = {}
         seat.depth = state
     for key, value in (('free_refreshes', 0), ('relief', 0), ('sims', 0), ('targeted', 0),
-                       ('fast_track', 0), ('draft_uid', None), ('order', 'none'),
+                       ('fast_track', 0), ('awakened', 0), ('draft_uid', None), ('order', 'none'),
                        ('quests', {}), ('quests_done', [])):
         state.setdefault(key, value)
     return state
@@ -214,6 +214,61 @@ def dismantle(seat, key):
         seat.inventory.add_component(component)
     names = '、'.join(items.COMPONENT_NAMES[c] for c in components)
     return f'拆解{items.FINISHED[key]["name"]}，取回{names}' + (f'（-{cost} 金）' if cost else '')
+
+
+def awaken_options(seat, round_no):
+    """[{key, where, uid, components, ready}] for every awakenable item the seat holds."""
+    import arena_item_synergy as syn
+    left = syn.AWAKEN_LIMIT - seat_state(seat)['awakened']
+    rows = []
+    places = [('inventory', None, key) for key in dict.fromkeys(seat.inventory.finished)]
+    for owned in seat.all_pieces():
+        for slot, key in (('item', owned.item), ('extra_item', getattr(owned, 'extra_item', None))):
+            if key:
+                places.append((slot, owned, key))
+    for where, owned, key in places:
+        if key not in syn.AWAKEN:
+            continue
+        comps = syn.awaken_components(key)
+        have = [c for c in comps if seat.inventory.components.get(c, 0) > 0]
+        rows.append({'key': key, 'where': where, 'uid': owned.uid if owned else None,
+                     'unit': owned.piece.name if owned else None, 'components': list(comps),
+                     'have': have, 'ready': bool(have) and left > 0 and round_no >= syn.AWAKEN_ROUND})
+    return {'round': syn.AWAKEN_ROUND, 'left': max(0, left), 'limit': syn.AWAKEN_LIMIT, 'options': rows}
+
+
+def awaken(seat, key, round_no, owned=None, component=None):
+    """Upgrade a held mechanic item with one of its own recipe components."""
+    import arena_item_synergy as syn
+    if key not in syn.AWAKEN:
+        raise ValueError('这件装备没有觉醒形态')
+    if round_no < syn.AWAKEN_ROUND:
+        raise ValueError(f'第 {syn.AWAKEN_ROUND} 轮起才能觉醒装备')
+    state = seat_state(seat)
+    if state['awakened'] >= syn.AWAKEN_LIMIT:
+        raise ValueError(f'每局最多觉醒 {syn.AWAKEN_LIMIT} 件装备')
+    comps = syn.awaken_components(key)
+    choices = [component] if component else [c for c in comps if seat.inventory.components.get(c, 0) > 0]
+    pick = next((c for c in choices if c in comps and seat.inventory.components.get(c, 0) > 0), None)
+    if pick is None:
+        names = ' / '.join(items.COMPONENT_NAMES[c] for c in comps)
+        raise ValueError(f'觉醒需要一个组件：{names}')
+    plus = syn.awakened_key(key)
+    if owned is None:
+        if key not in seat.inventory.finished:
+            raise ValueError('仓库里没有这件装备')
+        index = seat.inventory.finished.index(key)
+        seat.inventory.finished[index] = plus
+    elif owned.item == key:
+        owned.item = plus
+    elif getattr(owned, 'extra_item', None) == key:
+        owned.extra_item = plus
+    else:
+        raise ValueError('这只宝可梦没有携带这件装备')
+    seat.inventory.components[pick] -= 1
+    state['awakened'] += 1
+    return (f'{items.FINISHED[key]["name"]} 觉醒！（消耗{items.COMPONENT_NAMES[pick]}，'
+            f'本局还可觉醒 {syn.AWAKEN_LIMIT - state["awakened"]} 件）')
 
 
 def draft_sell_value(seat, owned, value):

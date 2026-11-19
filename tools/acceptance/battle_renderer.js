@@ -527,7 +527,7 @@
   }
   const SOURCE_LOOK = {
     order: ["令", "#b8f08a"], quest: ["★", "#ffd86b"], augment: ["✦", "#ffcf7a"], bond: ["◆", "#ffe08a"],
-    item: ["◈", "#9fd8ff"], skill_mod: ["✧", "#f0b8ff"], terrain: ["▦", "#d8e8a8"], depth: ["➜", "#f0f4e8"],
+    item: ["◈", "#9fd8ff"], resonance: ["❖", "#8ff0d8"], skill_mod: ["✧", "#f0b8ff"], terrain: ["▦", "#d8e8a8"], depth: ["➜", "#f0f4e8"],
   };
 
   /** Cause-linked choreography: every action's owned outcomes and pops are

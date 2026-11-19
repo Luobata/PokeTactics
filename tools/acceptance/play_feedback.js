@@ -371,9 +371,15 @@
         mark(token.cmd === "dismantle" ? "craft" : "sell");
       }
     }
+    if (token.cmd === "awaken") {
+      ring(clickEl, "gold");
+      float(centre(token.clickRect), "觉醒！多一条机制", "gold");
+      bump(dock("bag"));
+      mark("good");
+    }
     const cBefore = countBy(prev.items?.components, "key", "n"), cNow = countBy(state.items?.components, "key", "n");
     for (const [key, n] of cNow) {
-      if (n > (cBefore.get(key) || 0) && token.cmd !== "craft") {
+      if (n > (cBefore.get(key) || 0) && token.cmd !== "craft" && token.cmd !== "awaken") {
         const name = (state.items?.components || []).find((row) => row.key === key)?.name || key;
         float(centre(rectOf(dock("bag"))), `+ ${name}`, "item", 120);
         bump(dock("bag"));

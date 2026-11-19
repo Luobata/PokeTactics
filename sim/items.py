@@ -224,7 +224,8 @@ def retired(key, ruleset) -> bool:
 def obtainable(ruleset):
     """Finished items a seat can receive as loot/draft under ``ruleset``."""
     return sorted(key for key in catalog(ruleset)
-                  if key not in ('lucky_egg', 'evo_stone') and not retired(key, ruleset))
+                  if key not in ('lucky_egg', 'evo_stone') and not retired(key, ruleset)
+                  and not FINISHED[key].get('awakened'))
 
 
 _PAIR_CACHE: Dict[str, Dict[Tuple[str, str], str]] = {}
