@@ -247,9 +247,9 @@ const cases = {
     assert.deepEqual(from.sort(), ['g0,1', 'g2,2']);
     assert.equal((p.element('board-overlay').innerHTML.match(/<line /g) || []).length, 2);
     assert.match(p.element('context-bar').textContent, /⚔2 · 5秒承伤 45% · 可能倒下/);
-    // The back-row support is not targeted: no lines. (A second tap on a unit is
-    // a quick placement, so deselect through the action bar.)
-    await p.click(p.element('context-bar').querySelector('[data-action="cancel-select"]'));
+    // The back-row support is not targeted: no lines.
+    await new Promise((resolve) => setTimeout(resolve, 400));  // slow second click deselects (fast = double-click)
+    await p.click(p.element('ally-board').querySelector('[data-loc="g0,2"]'));
     await p.click(p.element('ally-board').querySelector('[data-loc="g2,4"]'));
     assert.equal((p.element('board-overlay').innerHTML.match(/<line /g) || []).length, 0);
     // "Show all" draws every opening target without hover.

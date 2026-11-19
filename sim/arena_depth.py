@@ -426,6 +426,9 @@ DEPTH_ITEMS = {
                    'description': '携带者阵亡时爆炸，对四向相邻敌人造成其最大生命 25% 的伤害。'},
 }
 
+import arena_mech_items as _mech  # noqa: E402
+DEPTH_ITEMS.update(_mech.MECH_ITEMS)
+
 
 def recipe_components(key):
     import items
@@ -686,6 +689,8 @@ def damage_multiplier(battle, attacker, target, move, t, base=0):
     rules = getattr(attacker, 'depth_rules', ())
     if 'giant_slayer' in team_aug and target.max_hp > attacker.max_hp:
         factors.append((attacker.team, 'augment', 'giant_slayer', 1.22))
+    if has_item(attacker, 'static_glove') and getattr(getattr(target, '_st', None), 'debuff', None) == 'para':
+        factors.append((attacker.team, 'item', 'static_glove', 1.15))
     if 'solidarity' in rules:
         allies = sum(1 for u in battle.units if u.alive and u.team == attacker.team and u is not attacker)
         factors.append((attacker.team, 'bond', 'solidarity', 1. + .025 * allies))
@@ -767,6 +772,8 @@ def prevent_death(battle, unit, t):
                 enemy.target_idx = None
         _event(battle, unit, unit, 'phase_out', t, 'bond', '虚化', 'buff', 0, team=unit.team)
         battle._emit_state(unit, t)
+        return True
+    if _mech.revival_save(battle, unit, t):
         return True
     if 'undying' in battle.arena_teams[unit.team] and not battle.depth_undying_used[unit.team]:
         battle.depth_undying_used[unit.team] = True
@@ -1287,6 +1294,7 @@ UNIT_SPECS += (
     _spec('sustain', 'skill_mod', 'native_cast', '汲取', _h_mod_sustain_support),
     _spec('retaliate', 'skill_mod', 'direct_hit', '反震', _h_mod_retaliate_hit),
 )
+UNIT_SPECS += _mech.UNIT_SPECS
 TEAM_SPECS = (
     _spec('charge_horn', 'augment', 'battle_start', '冲锋号', _h_charge_horn, owner='team', limit=1),
     _spec('vanguard', 'augment', 'battle_start', '先锋壁垒', _h_vanguard, owner='team', limit=1),

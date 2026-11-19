@@ -63,7 +63,8 @@ class ReadOnlyTest(unittest.TestCase):
                 _sess, state = new_session(edition)
                 ix = state['interactions']
                 self.assertNotIn('error', ix)
-                self.assertEqual(set(ix), {'version', 'augments', 'techniques', 'skills', 'recipes', 'equip'})
+                self.assertEqual(set(ix), {'version', 'augments', 'techniques', 'skills', 'recipes', 'equip',
+                                           'item_advice'})
 
 
 class AugmentTest(unittest.TestCase):
@@ -211,9 +212,12 @@ class RecipeTest(unittest.TestCase):
         self.assertEqual(len(cells2), 36)
         self.assertEqual(len(cells1), 36)
         self.assertEqual(sum(c['dead'] for c in cells2), 0)
-        self.assertEqual(sorted(c['item'] for c in cells2 if c['depth']), sorted(arena_depth.DEPTH_ITEMS))
+        craftable_depth = sorted({c['item'] for c in cells2 if c['depth']})
+        self.assertEqual(craftable_depth, sorted(k for k, spec in arena_depth.DEPTH_ITEMS.items() if spec['pairs']))
+        import arena_mech_items
+        original = [spec for key, spec in arena_depth.DEPTH_ITEMS.items() if key not in arena_mech_items.MECH_ITEMS]
         self.assertEqual(sorted(tuple(sorted((c['a'], c['b']))) for c in cells1 if c['dead']),
-                         sorted(tuple(sorted(spec['pairs'][0])) for spec in arena_depth.DEPTH_ITEMS.values()))
+                         sorted(tuple(sorted(spec['pairs'][0])) for spec in original))
 
     def test_craftable_cells_agree_with_the_inventory(self):
         sess, _ = new_session('v2')
@@ -222,17 +226,17 @@ class RecipeTest(unittest.TestCase):
         cells = interaction_view.recipe_block(sess)['cells']
         by_pair = {(c['a'], c['b']): c for c in cells}
         self.assertTrue(by_pair[('band', 'band')]['craftable'])        # metronome: band ×2
-        self.assertTrue(by_pair[('band', 'magnet')]['craftable'])      # choice_band
+        self.assertTrue(by_pair[('band', 'magnet')]['craftable'])      # boomerang (v2 replaces 专爱头巾)
         self.assertFalse(by_pair[('magnet', 'shoes')]['craftable'])    # quick_claw needs shoes
         self.assertEqual(by_pair[('magnet', 'shoes')]['missing'], ['加速鞋'])
         for cell in cells:
             if cell['craftable']:
                 self.assertIsNotNone(inv.craftable(cell['item']))
-        state = act(sess, 'craft', item='choice_band')
+        state = act(sess, 'craft', item='boomerang')
         after = {(c['a'], c['b']): c for c in state['interactions']['recipes']['cells']}
         self.assertFalse(after[('band', 'magnet')]['craftable'])
         self.assertEqual(after[('band', 'magnet')]['missing'], ['磁铁线圈'])
-        self.assertIn('choice_band', state['interactions']['equip']['items'])
+        self.assertIn('boomerang', state['interactions']['equip']['items'])
 
 
 class EquipTest(unittest.TestCase):
