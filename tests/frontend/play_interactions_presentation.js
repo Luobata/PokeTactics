@@ -208,7 +208,8 @@ const cases = {
     assert.match(detail.querySelector('.ix-skill-card').textContent, /治疗/);
     const socket = detail.querySelector('[data-ix-socket="back"]');
     assert.match(socket.textContent, /更换技能机/);
-    await p.click(tile(p, 'g2,4'));
+    // A second tap on the same unit is a quick placement now; deselect explicitly.
+    await p.click(p.element('context-bar').querySelector('[data-action="cancel-select"]'));
     await p.click(tile(p, 'g0,2'));
     const front = p.element('unit-detail');
     assert.match(front.querySelector('.ix-skill-card').textContent, /护盾 · 威力 40 · 目标 友方/);

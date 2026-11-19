@@ -247,14 +247,78 @@ const cases = {
     assert.deepEqual(from.sort(), ['g0,1', 'g2,2']);
     assert.equal((p.element('board-overlay').innerHTML.match(/<line /g) || []).length, 2);
     assert.match(p.element('context-bar').textContent, /⚔2 · 5秒承伤 45% · 可能倒下/);
-    // The back-row support is not targeted: no lines.
-    await p.click(p.element('ally-board').querySelector('[data-loc="g0,2"]'));
+    // The back-row support is not targeted: no lines. (A second tap on a unit is
+    // a quick placement, so deselect through the action bar.)
+    await p.click(p.element('context-bar').querySelector('[data-action="cancel-select"]'));
     await p.click(p.element('ally-board').querySelector('[data-loc="g2,4"]'));
     assert.equal((p.element('board-overlay').innerHTML.match(/<line /g) || []).length, 0);
     // "Show all" draws every opening target without hover.
     await p.click(p.element('threat-summary').querySelector('[data-threat-all]'));
     assert.equal((p.element('board-overlay').innerHTML.match(/<line /g) || []).length, 2);
     assert.equal(p.events.fetches.length, 1);
+    p.unchanged();
+  },
+
+  // docs/66: pure selection never rebuilds keyed sections; it only toggles classes.
+  async keyedSelection() {
+    const p = await page(fixture());
+    const board = p.element('ally-board'), bench = p.element('bench'), shop = p.element('shop');
+    const nodes = () => [board.children[0], board.children[2], bench.children[0], shop.children[0], shop.children[1],
+      p.element('synergy-list').children[0], p.element('enemy-board').children[0]];
+    const before = nodes();
+    const benchTile = bench.querySelector('[data-loc="b0"]');
+    await p.click(benchTile);
+    assert.deepEqual(nodes(), before, 'selecting a unit keeps every tile / card node');
+    assert.ok(benchTile.classList.contains('selected'));
+    assert.equal(benchTile.getAttribute('aria-pressed'), 'true');
+    await p.click(shop.querySelector('[data-shop="1"]'));
+    assert.deepEqual(nodes(), before, 'shop preview keeps them too');
+    assert.equal(benchTile.classList.contains('selected'), false);
+    assert.equal(benchTile.hasAttribute('aria-pressed'), false);
+    assert.ok(shop.querySelector('[data-shop="1"]').classList.contains('selected'));
+    await p.click(p.element('context-bar').querySelector('[data-action="cancel-select"]'));
+    assert.deepEqual(nodes(), before);
+    assert.equal(shop.querySelector('[aria-pressed="true"]'), null);
+    // Equip target mode marks owned units by class only.
+    await p.click(p.element('stage-dock').querySelector('[data-open-panel="bag"]'));
+    await p.click(p.element('inventory').querySelector('[data-equip="band"]'));
+    assert.deepEqual(nodes(), before);
+    assert.ok(board.querySelector('[data-loc="g0,2"]').classList.contains('equip-target'));
+    assert.equal(board.querySelector('[data-loc="g0,0"]').classList.contains('equip-target'), false, 'empty cells are not targets');
+    assert.equal(p.events.fetches.length, 1);
+    p.unchanged();
+  },
+
+  // docs/66: a purchase shows its likely result at once and the server answer reconciles it.
+  async optimisticBuy() {
+    const p = await page(fixture(), {pendingMutation: true, mutationResponder: () => ({ok: true})});
+    const card = p.element('shop').querySelector('[data-shop="1"]');
+    await p.click(card);
+    await p.startClick(p.element('shop').querySelector('[data-shop="1"]'));
+    assert.equal(p.events.fetches.length, 2, 'the buy request is in flight');
+    const pending = p.element('bench').querySelector('[data-uid="optimistic-1"]');
+    assert.ok(pending, 'the bought unit is already on the bench');
+    assert.ok(pending.classList.contains('opt-arriving'));
+    assert.match(pending.getAttribute('aria-label'), /杰尼龟/);
+    assert.equal(p.element('shop').querySelector('[data-shop="1"]'), null, 'its shop slot shows as sold');
+    assert.equal(p.element('gold').textContent, '1', 'gold already paid');
+    p.unchanged();
+  },
+
+  async optimisticRollback() {
+    const p = await page(fixture(), {mutationResponder: () => ({ok: false, error: '金币不足'})});
+    const bench = p.element('bench');
+    await p.click(p.element('shop').querySelector('[data-shop="1"]'));
+    await p.click(p.element('shop').querySelector('[data-shop="1"]'));
+    assert.equal(bench.querySelector('[data-uid="optimistic-1"]'), null, 'rejected purchase rolls back');
+    assert.ok(p.element('shop').querySelector('[data-shop="1"]'), 'the card is back');
+    assert.equal(p.element('gold').textContent, '3');
+    assert.match(p.element('toast').textContent, /金币不足/);
+    // A move that the server rejects puts the unit back where it was.
+    await p.click(p.element('ally-board').querySelector('[data-loc="g0,2"]'));
+    await p.click(p.element('ally-board').querySelector('[data-loc="g1,2"]'));
+    assert.ok(p.element('ally-board').querySelector('[data-loc="g0,2"]').hasAttribute('data-owned'));
+    assert.equal(p.element('ally-board').querySelector('[data-loc="g1,2"]').hasAttribute('data-owned'), false);
     p.unchanged();
   },
 

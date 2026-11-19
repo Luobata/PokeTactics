@@ -16,6 +16,20 @@
     );
   const icon = (name) =>
     `<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;
+  // Keyed rendering (docs/66): a section's markup is rebuilt only when its HTML
+  // string changed (and nobody replaced its children behind our back). Pure UI
+  // state (selection, equip target, drag) is applied by class toggles instead.
+  const memo = (el) => ({set innerHTML(html) {
+    if (!el) return;
+    if (el.__src === html && el.__first === el.firstChild) return;
+    el.innerHTML = html;
+    el.__src = html;
+    el.__first = el.firstChild;
+  }});
+  const $h = (id) => memo($(id));
+  const setText = (el, text) => {
+    if (el && el.textContent !== String(text)) el.textContent = text;
+  };
   const API_TIMEOUT_MS = 12000;
   const RENDER_STATUS_TIMEOUT_MS = 5000;
   const RENDER_STATUS_MAX_ERRORS = 3;
@@ -231,6 +245,17 @@
     let upgrades = [];
     busy = true;
     markBusy(true);
+    // Show the likely result at once; the server answer replaces it (docs/66).
+    const confirmed = state;
+    const guess = optimisticState(cmd, params, state);
+    if (guess) {
+      state = guess;
+      selected = null;
+      shopSelected = null;
+      equipItem = null;
+      renderCore();
+      renderSelection();
+    }
     const query = new URLSearchParams({ cmd, sid, ...params });
     if (state?.arena && !LITE_EXCLUDED.has(cmd)) query.set("lite", "1");
     if (
@@ -251,6 +276,7 @@
           /保存.*确认|其他页面更新|先点继续存档/.test(result.error || "")
         )
           needsResume = true;
+        if (guess && state === guess) rollback(confirmed, feedback, cmd, params);
         toast(result.error || "操作未完成，请重试", true);
         if (!window.PlayFeedback) tone(false);
         if (needsResume)
@@ -271,10 +297,13 @@
         if (!rememberSlot())
           toast("浏览器无法记住进度，请下载存档保留这场冒险。", true);
       }
+      // An answer without a state cannot confirm the guess: show the last known truth.
+      if (guess && state === guess) rollback(confirmed, null, cmd, params);
       if (result.msg && !quiet) toast(result.msg);
       if (!quiet && !["state", "resume", "new"].includes(cmd) && !window.PlayFeedback) tone();
       return result;
     } catch (error) {
+      if (guess && state === guess) rollback(confirmed, feedback, cmd, params);
       // A lost mutation response is uncertain: reload disk before another purchase.
       if (!["state", "resume", "new"].includes(cmd)) needsResume = true;
       toast(
@@ -290,6 +319,80 @@
       for (const piece of upgrades) animateUpgrade(piece, before);
       if (feedback) window.PlayFeedback.after(feedback, outcome || {ok: false}, state);
     }
+  }
+
+  // ------------------------------------------------------------ optimistic state
+  // Mirrors the server for the frequent, predictable actions. Anything uncertain
+  // (merges, full bench, population cap, second item slots) waits for the server.
+  function optimisticState(cmd, params, s) {
+    if (!s || s.phase !== "prep" || !["buy", "move", "sell", "equip"].includes(cmd)) return null;
+    const next = {...s, you: {...s.you}, board: s.board.map((row) => [...row]), bench: [...s.bench],
+      shop: [...s.shop], items: {...s.items, finished: [...(s.items?.finished || [])]}};
+    const take = (loc) => {
+      if (loc?.[0] === "b") return next.bench[Number(loc.slice(1))] || null;
+      const m = /^g(\d),(\d)$/.exec(loc || "");
+      return m ? next.board[Number(m[1])]?.[Number(m[2])] || null : null;
+    };
+    if (cmd === "buy") {
+      const i = Number(params.i);
+      const card = s.shop[i];
+      const cap = s.you.bench_cap || 8;
+      if (!card || card.blocked || card.merge_note || card.star_progress?.merges_now || s.bench.length >= cap
+          || s.you.gold < card.price) return null;
+      next.shop[i] = null;
+      next.bench.push({...card, uid: `optimistic-${i}`, optimistic: true, item: null, item_name: null,
+                       technique: null, sell: card.price});
+      next.you.gold -= card.price;
+      return next;
+    }
+    if (cmd === "move") {
+      const src = take(params.from), dst = take(params.to);
+      if (!src || src === dst || src.optimistic) return null;
+      const toBench = params.to[0] === "b", fromBench = params.from[0] === "b";
+      if (fromBench && !toBench && !dst && s.you.on_board >= s.you.pop) return null;
+      const clear = (loc, piece) => {
+        if (loc[0] === "b") next.bench.splice(next.bench.indexOf(piece), 1);
+        else { const [r, c] = loc.slice(1).split(",").map(Number); next.board[r][c] = null; }
+      };
+      const put = (loc, piece) => {
+        if (loc[0] === "b") {
+          const at = Number(loc.slice(1));
+          if (at >= next.bench.length) next.bench.push(piece); else next.bench.splice(at, 0, piece);
+        } else { const [r, c] = loc.slice(1).split(",").map(Number); next.board[r][c] = piece; }
+      };
+      clear(params.from, src);
+      if (dst) clear(params.to, dst);
+      put(params.to, {...src, optimistic: true});
+      if (dst) put(params.from, dst);
+      next.you.on_board = next.board.flat().filter(Boolean).length;
+      return next;
+    }
+    if (cmd === "sell") {
+      const piece = take(params.loc);
+      if (!piece || piece.optimistic) return null;
+      if (params.loc[0] === "b") next.bench.splice(next.bench.indexOf(piece), 1);
+      else { const [r, c] = params.loc.slice(1).split(",").map(Number); next.board[r][c] = null; }
+      next.you.gold += Number(piece.sell) || 0;
+      next.you.on_board = next.board.flat().filter(Boolean).length;
+      return next;
+    }
+    // equip: first slot only
+    const piece = take(params.loc);
+    const index = next.items.finished.findIndex((row) => row.key === params.item);
+    if (!piece || piece.item || piece.optimistic || index < 0 || params.item === "evo_stone") return null;
+    const item = next.items.finished.splice(index, 1)[0];
+    const updated = {...piece, item: item.key, item_name: item.name, item_effect: item.effect};
+    if (params.loc[0] === "b") next.bench[Number(params.loc.slice(1))] = updated;
+    else { const [r, c] = params.loc.slice(1).split(",").map(Number); next.board[r][c] = updated; }
+    return next;
+  }
+  function rollback(confirmed, feedback, cmd, params) {
+    state = confirmed;
+    renderCore();
+    // Shake the restored control, not the detached optimistic one.
+    const back = cmd === "buy" ? $("shop")?.querySelector(`[data-shop="${Number(params.i)}"]`)
+      : document.querySelector(`[data-loc="${params.from || params.loc || ""}"]`);
+    if (feedback && back) feedback.click = back;
   }
 
   // Prep mutations return a slim state (docs/63 §5): keep static catalogs and the
@@ -365,74 +468,57 @@
 
   function cell(piece, loc, enemy = false, bench = false, enemyLoc = null) {
     const cls = bench ? "bench-slot" : "tile";
-    const chosen = Boolean(loc) && selected === loc;
+    // Selection, equip targets and busy are applied by syncSelection(), so the
+    // markup only changes when the piece itself changes.
+    const open = playable();
     const description = piece
       ? `${piece.name}，${starsOf(piece)}星${piece.shiny ? "闪光" : ""}，${roleNames[roleOf(piece)]}，${attackStyle(piece)}，${piece.types.join("、")}${piece.item_name ? "，装备" + piece.item_name : ""}`
       : "空位";
-    return `<button type="button" class="${cls}${piece ? "" : " empty"}${chosen ? " selected" : ""}${piece?.shiny ? " shiny" : ""}${equipItem && piece && !enemy && canPrep() ? " equip-target" : ""}" ${loc ? `data-loc="${loc}"` : ""} ${enemy && piece && enemyLoc ? `data-enemy-loc="${enemyLoc}" aria-haspopup="dialog"` : ""} ${piece && !enemy ? `data-owned="1"${piece.uid ? ` data-uid="${esc(piece.uid)}"` : ""}` : ""} ${enemy ? !piece ? "disabled" : "" : !canPrep() ? "disabled" : ""} ${piece && !enemy && canPrep() ? 'draggable="true"' : ""} aria-label="${esc((enemy ? "敌方" : bench ? "备战席" : "我方") + " " + description)}" ${chosen ? 'aria-pressed="true"' : ""}>${piece ? `<img src="${spriteOf(piece)}" alt="" draggable="false"><span class="unit-label">${esc(piece.name)}</span><span class="unit-stars">${"★".repeat(starsOf(piece))}</span>${piece.item ? `<span class="unit-item unit-item-badge" title="已装备：${esc(piece.item_name || piece.item)}">◆ ${esc(piece.item_name || piece.item)}</span>` : `<span class="unit-role role-${roleOf(piece)}" title="${roleNames[roleOf(piece)]}">${roleSymbols[roleOf(piece)]}</span>`}${piece.shiny ? '<span class="shiny-mark">✦</span>' : ""}` : ""}</button>`;
+    return `<button type="button" class="${cls}${piece ? "" : " empty"}${piece?.shiny ? " shiny" : ""}${piece?.optimistic ? " opt-arriving" : ""}" ${loc ? `data-loc="${loc}"` : ""} ${enemy && piece && enemyLoc ? `data-enemy-loc="${enemyLoc}" aria-haspopup="dialog"` : ""} ${piece && !enemy ? `data-owned="1"${piece.uid ? ` data-uid="${esc(piece.uid)}"` : ""}` : ""} ${enemy ? !piece ? "disabled" : "" : !open ? "disabled" : ""} ${piece && !enemy && open ? 'draggable="true"' : ""} aria-label="${esc((enemy ? "敌方" : bench ? "备战席" : "我方") + " " + description)}">${piece ? `<img src="${spriteOf(piece)}" alt="" draggable="false"><span class="unit-label">${esc(piece.name)}</span><span class="unit-stars">${"★".repeat(starsOf(piece))}</span>${piece.item ? `<span class="unit-item unit-item-badge" title="已装备：${esc(piece.item_name || piece.item)}">◆ ${esc(piece.item_name || piece.item)}</span>` : `<span class="unit-role role-${roleOf(piece)}" title="${roleNames[roleOf(piece)]}">${roleSymbols[roleOf(piece)]}</span>`}${piece.shiny ? '<span class="shiny-mark">✦</span>' : ""}` : ""}</button>`;
   }
-  function render() {
-    const locked = busy || deploying;
-    for (const id of ["new-confirm", "result-new", "resume-button", "backup-button", "new-backup"])
-      $(id).disabled = locked || ((id === "backup-button" || id === "new-backup") && !sid);
-    for (const button of document.querySelectorAll("[data-restart]"))
-      button.disabled = locked;
-    if (!state) {
-      $("fight-button").disabled =
-        $("refresh-button").disabled =
-        $("levelup-button").disabled =
-        $("lock-button").disabled =
-        $("deploy-button").disabled =
-          true;
-      if (busy) $("save-status").textContent = "正在连接冒险…";
-      return;
-    }
-    if (shopSelected != null && !state.shop[shopSelected]) shopSelected = null;
-    const y = state.you,
-      prep = canPrep();
+  // HUD, boards, bench and shop: everything an optimistic action changes (docs/66).
+  function renderCore() {
+    const y = state.you;
     const familyMode = state.arena?.pool_version?.startsWith('families_');
-    $('pool-summary').textContent = familyMode
+    setText($("pool-summary"), familyMode
       ? `${state.arena.catalog.length} 个家族 · 固定费用 · 累计 1 / 3 / 9 张培养`
-      : `${state.arena?.catalog?.length || 0} 种竞技精灵 · 同种同星三合一 · 三星闪光`;
-    $('help-growth-rules').textContent = familyMode
+      : `${state.arena?.catalog?.length || 0} 种竞技精灵 · 同种同星三合一 · 三星闪光`);
+    setText($("help-growth-rules"), familyMode
       ? '商店只卖初始形态，费用固定。累计 1 / 3 / 9 张培养，短链与无进化家族同样可满培养。伊布集齐三只后在个体详情选择路线；进化后仅同分支合并。同一家族对每项羁绊最多计一次。稀有单位全队限一，不参与培养。'
-      : '旧对局沿用物种卡池：同种同星三合一，形态保持一致，三星累计九张。上场的不同物种贡献羁绊，同种不同星不重复。传说单位全队限一。';
-    $("hp").textContent = y.hp;
+      : '旧对局沿用物种卡池：同种同星三合一，形态保持一致，三星累计九张。上场的不同物种贡献羁绊，同种不同星不重复。传说单位全队限一。');
+    setText($("hp"), y.hp);
     $("hp-fill").style.width = `${Math.max(0, Math.min(100, y.hp))}%`;
-    $("gold").textContent = y.gold;
-    $("level").textContent = `Lv.${y.level}`;
-    $("pop").textContent = `${y.on_board}/${y.pop}`;
-    $("xp-text").textContent =
-      y.xp_next == null ? "满级" : `${y.xp} / ${y.xp_next} XP`;
+    setText($("gold"), y.gold);
+    setText($("level"), `Lv.${y.level}`);
+    setText($("pop"), `${y.on_board}/${y.pop}`);
+    setText($("xp-text"), y.xp_next == null ? "满级" : `${y.xp} / ${y.xp_next} XP`);
     $("xp-fill").style.width =
       y.xp_next == null
         ? "100%"
         : `${Math.min(100, (100 * y.xp) / y.xp_next)}%`;
-    $("round-number").textContent = String(state.round).padStart(2, "0");
-    $("phase-label").textContent =
-      state.phase === "over"
+    setText($("round-number"), String(state.round).padStart(2, "0"));
+    setText($("phase-label"), state.phase === "over"
         ? "冒险结束"
         : !y.alive
           ? "观战阶段"
           : state.phase === "battle"
             ? "战斗结算"
-            : "准备阶段";
-    $("weather-label").textContent =
-      state.weather.zh === "无" ? "平静" : state.weather.zh;
+            : "准备阶段");
+    setText($("weather-label"), state.weather.zh === "无" ? "平静" : state.weather.zh);
     $("weather-label").parentElement.title = state.weather.note;
     const opp = state.opponent;
-    $("opponent-name").textContent = trainerName(opp?.name) || "等待下一轮";
-    $("enemy-team-name").textContent = trainerName(opp?.name) || "当轮对手";
-    $("opponent-kind").textContent = opp?.pve ? "野生遭遇" : "训练家对战";
+    setText($("opponent-name"), trainerName(opp?.name) || "等待下一轮");
+    setText($("enemy-team-name"), trainerName(opp?.name) || "当轮对手");
+    setText($("opponent-kind"), opp?.pve ? "野生遭遇" : "训练家对战");
     const enemies = opp?.rows || Array.from({length: 3}, () => []);
-    $("enemy-board").innerHTML = Array.from({ length: (state.arena?.deployment_rows || state.board.length) * 6 }, (_, i) =>
+    $h("enemy-board").innerHTML = Array.from({ length: (state.arena?.deployment_rows || state.board.length) * 6 }, (_, i) =>
       cell(enemies[Math.floor(i / 6)]?.[i % 6], null, true, false, `g${Math.floor(i / 6)},${i % 6}`),
     ).join("");
-    $("ally-board").innerHTML = state.board
+    $h("ally-board").innerHTML = state.board
       .flatMap((row, r) => row.map((p, c) => cell(p, `g${r},${c}`)))
       .join("");
     $("bench").style.setProperty("--bench-slots", state.you.bench_cap || 8);
-    $("bench").innerHTML = Array.from(
+    $h("bench").innerHTML = Array.from(
       { length: state.you.bench_cap || 8 },
       (_, i) => cell(state.bench[i], `b${i}`, false, true),
     ).join("");
@@ -447,21 +533,103 @@
     welcome.textContent = state.bench.length
       ? "点击备战席精灵，再点棋盘上场"
       : "从下方商店，招募你的第一位伙伴";
-    $("shop").innerHTML = state.shop
+    $h("shop").innerHTML = state.shop
       .map((p, i) =>
         p
-          ? `<button type="button" class="shop-card${shopSelected === i ? " selected" : ""}${y.gold < p.price ? " unaffordable" : ""}" data-shop="${i}" style="--card-tint:${/^#[0-9a-f]{6}$/i.test(p.colors?.[0]) ? p.colors[0] + "20" : "#e9efda"}"${shopSelected === i ? ' aria-pressed="true"' : ""} aria-label="查看${esc(p.name)}详情，${roleNames[roleOf(p)]}，${p.price}金币"><div class="shop-art"><span class="shop-tier">${p.tier} 费 · ★</span><span class="shop-role role-${roleOf(p)}">${roleNames[roleOf(p)]}</span>${p.pool_remaining != null ? `<span class="shop-stock${Number(p.pool_remaining) <= 3 ? " shop-stock-low" : ""}">剩 ${Number(p.pool_remaining)}</span>` : ""}<img src="${spriteOf(p)}" alt="" draggable="false"><span class="shop-buy-hint">+</span></div><div class="shop-info"><div class="shop-name">${esc(p.name)}<span class="shop-price">${p.price}${icon("coin")}</span></div><div class="shop-types">${p.types.map((t) => `<span class="type-tag">${esc(t)}</span>`).join("")}</div><div class="shop-move"><span>${esc(nativeOf(p).name)}</span><span>${attackStyle(p)} ${p.range}格</span></div><div class="shop-skill-tags">${skillTags(p)}${p.trait ? `<span class="trait-shop-tag">◎ ${esc(p.trait.name)}</span>` : ""}</div></div></button>`
+          ? `<button type="button" class="shop-card${y.gold < p.price ? " unaffordable" : ""}" data-shop="${i}" style="--card-tint:${/^#[0-9a-f]{6}$/i.test(p.colors?.[0]) ? p.colors[0] + "20" : "#e9efda"}" aria-label="查看${esc(p.name)}详情，${roleNames[roleOf(p)]}，${p.price}金币"><div class="shop-art"><span class="shop-tier">${p.tier} 费 · ★</span><span class="shop-role role-${roleOf(p)}">${roleNames[roleOf(p)]}</span>${p.pool_remaining != null ? `<span class="shop-stock${Number(p.pool_remaining) <= 3 ? " shop-stock-low" : ""}">剩 ${Number(p.pool_remaining)}</span>` : ""}<img src="${spriteOf(p)}" alt="" draggable="false"><span class="shop-buy-hint">+</span></div><div class="shop-info"><div class="shop-name">${esc(p.name)}<span class="shop-price">${p.price}${icon("coin")}</span></div><div class="shop-types">${p.types.map((t) => `<span class="type-tag">${esc(t)}</span>`).join("")}</div><div class="shop-move"><span>${esc(nativeOf(p).name)}</span><span>${attackStyle(p)} ${p.range}格</span></div><div class="shop-skill-tags">${skillTags(p)}${p.trait ? `<span class="trait-shop-tag">◎ ${esc(p.trait.name)}</span>` : ""}</div></div></button>`
           : `<div class="shop-card sold"><div class="sold-content">${icon("ball")}<p>伙伴已加入</p></div></div>`,
       )
       .join("");
-    $("shop-count").textContent = state.shop.length;
+    syncSelection();
+  }
+  function hintText() {
+    const y = state.you;
+    return needsResume
+      ? "进度需要核对。请点击页脚的「继续存档」，再继续操作。"
+      : equipItem
+        ? "已选择装备：点击棋盘或备战席中的精灵，为它装备。"
+        : shopSelected != null
+          ? "已选中商店伙伴。点棋盘上方操作条的「招募」加入备战席，再点一次卡片也可以直接招募。"
+          : selected
+            ? "伙伴已选中。点击目标格移动或交换，棋盘上方操作条可出售、卸下装备或查看详情。"
+          : state.phase === "over"
+            ? "每一场冒险，都会让下一次相遇更有把握。再来一场吧。"
+            : !y.alive
+              ? "你已结束这场冒险。可以继续观战，看看最终的冠军是谁。"
+              : state.phase === "battle"
+                ? "本轮战果已经保存。查看回放后，点击下一轮继续冒险。"
+                : !y.on_board
+                  ? state.bench.length
+                    ? "伙伴已来到备战席。点击它，再点击棋盘格，或者选择「一键上场」。"
+                    : "冒险从一次相遇开始。点击商店中的精灵看看详情，再把它招募到备战席。"
+                  : "准备阶段不限时。调整阵容、点亮羁绊，准备好了就开始战斗。";
+  }
+  // Pure UI state: toggle classes on the existing tiles / cards (no rebuild).
+  function syncSelection() {
+    const equipping = Boolean(equipItem) && playable();
+    for (const host of [$("ally-board"), $("bench")]) {
+      for (const tile of host?.querySelectorAll("[data-loc]") || []) {
+        const on = tile.getAttribute("data-loc") === selected;
+        tile.classList.toggle("selected", on);
+        if (on) tile.setAttribute("aria-pressed", "true");
+        else if (tile.hasAttribute("aria-pressed")) tile.removeAttribute("aria-pressed");
+        tile.classList.toggle("equip-target", equipping && tile.hasAttribute("data-owned"));
+        tile.classList.remove("drop-target");
+      }
+    }
+    for (const card of $("shop")?.querySelectorAll("[data-shop]") || []) {
+      const on = Number(card.getAttribute("data-shop")) === shopSelected;
+      card.classList.toggle("selected", on);
+      if (on) card.setAttribute("aria-pressed", "true");
+      else if (card.hasAttribute("aria-pressed")) card.removeAttribute("aria-pressed");
+    }
+  }
+  function layoutContext(reason = "full") {
+    return {state, api, canPrep, playable, pieceAt, selected: () => selected, reason,
+      shopSelected: () => shopSelected, equipItem: () => equipItem, busy: () => busy || deploying};
+  }
+  /** Selection / shop preview / equip target changed: no section rebuilds. */
+  function renderSelection() {
+    if (!state) return render();
+    if (shopSelected != null && !state.shop[shopSelected]) shopSelected = null;
+    syncSelection();
+    setText($("tutorial-hint"), hintText());
+    renderDetail();
+    renderInventory();
+    const ctx = layoutContext("selection");
+    window.PlayDepth?.render(ctx);
+    window.PlayLayout?.render(ctx);
+    window.PlayInteractions?.render(ctx);
+    window.PlayFeedback?.selection({selected, shopSelected, equipItem});
+  }
+  function render() {
+    const locked = busy || deploying;
+    for (const id of ["new-confirm", "result-new", "resume-button", "backup-button", "new-backup"])
+      $(id).disabled = locked || ((id === "backup-button" || id === "new-backup") && !sid);
+    for (const button of document.querySelectorAll("[data-restart]"))
+      button.disabled = locked;
+    if (!state) {
+      $("fight-button").disabled =
+        $("refresh-button").disabled =
+        $("levelup-button").disabled =
+        $("lock-button").disabled =
+        $("deploy-button").disabled =
+          true;
+      if (busy) setText($("save-status"), "正在连接冒险…");
+      return;
+    }
+    if (shopSelected != null && !state.shop[shopSelected]) shopSelected = null;
+    renderCore();
+    const y = state.you,
+      prep = canPrep();
+    setText($("shop-count"), state.shop.length);
     $("shop").style.setProperty("--shop-slots", state.shop.length);
     $("refresh-button").disabled = !prep || y.gold < y.refresh_cost;
     $("refresh-button").innerHTML =
       `${icon("refresh")} 刷新 <span>${y.refresh_cost} ${icon("coin")}</span>`;
     $("levelup-button").disabled =
       !prep || y.gold < y.xp_cost || y.xp_next == null;
-    $("levelup-button").innerHTML =
+    $h("levelup-button").innerHTML =
       `${icon("plus")} 购买经验 <span>${y.xp_cost} 金币</span>`;
     $("lock-button").disabled = !prep;
     $("lock-button").classList.toggle("locked", y.shop_locked);
@@ -485,28 +653,10 @@
           : !y.alive
             ? "继续观战"
             : "开始战斗";
-    $("fight-button").innerHTML =
+    $h("fight-button").innerHTML =
       `${icon("swords")}<span>${fightLabel}</span>${icon("arrow")}`;
     $("fight-button").classList.toggle("busy", locked);
-    $("tutorial-hint").textContent = needsResume
-      ? "进度需要核对。请点击页脚的「继续存档」，再继续操作。"
-      : equipItem
-        ? "已选择装备：点击棋盘或备战席中的精灵，为它装备。"
-        : shopSelected != null
-          ? "已选中商店伙伴。点棋盘上方操作条的「招募」加入备战席，再点一次卡片也可以直接招募。"
-          : selected
-            ? "伙伴已选中。点击目标格移动或交换，棋盘上方操作条可出售、卸下装备或查看详情。"
-          : state.phase === "over"
-            ? "每一场冒险，都会让下一次相遇更有把握。再来一场吧。"
-            : !y.alive
-              ? "你已结束这场冒险。可以继续观战，看看最终的冠军是谁。"
-              : state.phase === "battle"
-                ? "本轮战果已经保存。查看回放后，点击下一轮继续冒险。"
-                : !y.on_board
-                  ? state.bench.length
-                    ? "伙伴已来到备战席。点击它，再点击棋盘格，或者选择「一键上场」。"
-                    : "冒险从一次相遇开始。点击商店中的精灵看看详情，再把它招募到备战席。"
-                  : "准备阶段不限时。调整阵容、点亮羁绊，准备好了就开始战斗。";
+    setText($("tutorial-hint"), hintText());
     renderBonds();
     renderDetail();
     renderInventory();
@@ -522,29 +672,29 @@
       document.querySelectorAll('a[href^="/pokedex"]').forEach(link => {
         const url = new URL(link.getAttribute('href'), location.origin);
         url.searchParams.set('pool', state.arena.pool_version);
-        link.setAttribute('href', url.pathname + url.search + url.hash);
+        const href = url.pathname + url.search + url.hash;
+        if (link.getAttribute('href') !== href) link.setAttribute('href', href);
       });
     }
-    $("battle-log").innerHTML =
+    $h("battle-log").innerHTML =
       state.log
         .slice(-5)
         .reverse()
         .map((row) => `<p>${esc(trainerName(row))}</p>`)
         .join("") || '<p class="empty-copy">新的故事，等你写下。</p>';
-    $("save-status").textContent = needsResume
+    setText($("save-status"), needsResume
       ? "请点击「继续存档」重新核对进度。"
       : state.save?.warning ||
         (state.save?.sequence
           ? `进度已自动保存 · 第 ${state.round} 轮`
-          : "每次操作自动保存");
+          : "每次操作自动保存"));
     $("battle-next").disabled = locked || ($("battle-dialog").open && playback.n > 0 && !playback.verdictShown);
     // Depth edition decorates panels first; the board-centric layout (docs/61)
     // then mirrors the result into the HUD, dock badges and contextual bar.
-    const layoutContext = {state, api, canPrep, playable, pieceAt, selected: () => selected,
-      shopSelected: () => shopSelected, equipItem: () => equipItem, busy: () => busy || deploying};
-    window.PlayDepth?.render(layoutContext);
-    window.PlayLayout?.render(layoutContext);
-    window.PlayInteractions?.render(layoutContext);
+    const context = layoutContext();
+    window.PlayDepth?.render(context);
+    window.PlayLayout?.render(context);
+    window.PlayInteractions?.render(context);
     window.PlayFeedback?.selection({selected, shopSelected, equipItem});
     window.PlayMusic?.update({phase: state.phase, round: Number(state.round) || 1, hp: state.you?.hp,
                               alive: state.you?.alive, pve: Boolean(state.opponent?.pve)});
@@ -631,10 +781,10 @@
       }
     }
     const careerRows = [...career.values()].sort((a, b) => b.damage - a.damage || b.kills - a.kills || a.name.localeCompare(b.name, "zh-CN"));
-    $("battle-career").innerHTML = careerRows.length
+    $h("battle-career").innerHTML = careerRows.length
       ? `<div class="battle-career-heading"><span>生涯小计</span><small>同名伙伴跨轮累计 · 仅含已记录统计的轮次</small></div>${careerRows.map((entry) => `<p class="battle-career-row"><strong>${esc(entry.name)}</strong><span>累计输出 ${statNumber(entry.damage)} · 击杀 ${statNumber(entry.kills)}</span><small>上阵 ${entry.rounds} 轮</small></p>`).join("")}`
       : "";
-    $("battle-history").innerHTML = rows.slice().reverse().map((row) => {
+    $h("battle-history").innerHTML = rows.slice().reverse().map((row) => {
       const verdict = reportVerdict(row.winner);
       return `<button type="button" class="history-entry ${verdict.kind}" data-battle-report="${Number(row.round)}" aria-haspopup="dialog" aria-label="查看第${Number(row.round)}轮战报"><span class="history-round">${String(row.round).padStart(2, "0")}</span><span class="history-entry-main"><strong>第 ${Number(row.round)} 轮 <em>${verdict.label}</em></strong><small>${esc(trainerName(row.opp_name) || (row.pve ? "野生遭遇" : "当轮对手"))}${row.ghost ? " · 镜像对手" : ""}</small></span><span class="history-entry-end"><small>${battleDuration(row.duration)}</small><span>${recordedStats(row.statistics) ? "查看统计 →" : "统计未记录 →"}</span></span></button>`;
     }).join("") || `<p class="empty-copy history-empty">${emptyMessage}</p>`;
@@ -663,7 +813,7 @@
   function renderBonds() {
     const entries = Array.isArray(state.bonds?.entries) ? state.bonds.entries : null;
     if (!entries) {
-      $("synergy-list").innerHTML = (state.synergies || []).map((s) => `<details class="synergy-row${s.tier ? " on" : ""}"><summary><span class="type-dot">${esc((s.zh || s.name || "").slice(0, 1))}</span><strong>${esc(s.zh || s.name)}</strong><small>${Number(s.n)}${s.next ? " / " + Number(s.next) : ""}</small></summary><p>${esc(s.effect || `还需 ${Number(s.need)} 位伙伴。`)}</p></details>`).join("") || '<p class="empty-copy">上场精灵，点亮你的第一组羁绊。</p>';
+      $h("synergy-list").innerHTML = (state.synergies || []).map((s) => `<details class="synergy-row${s.tier ? " on" : ""}"><summary><span class="type-dot">${esc((s.zh || s.name || "").slice(0, 1))}</span><strong>${esc(s.zh || s.name)}</strong><small>${Number(s.n)}${s.next ? " / " + Number(s.next) : ""}</small></summary><p>${esc(s.effect || `还需 ${Number(s.need)} 位伙伴。`)}</p></details>`).join("") || '<p class="empty-copy">上场精灵，点亮你的第一组羁绊。</p>';
       $("bond-note").textContent = "按该存档原有规则显示属性计数；只计已上场伙伴。";
       return;
     }
@@ -676,7 +826,7 @@
       : state.bonds.note || "只计上场的不同物种，同种不同星级不重复，备战席不计入。";
     const ordered = [...entries].sort((a, b) => Number(b.category === "tactic") - Number(a.category === "tactic"));
     let previousCategory = null;
-    $("synergy-list").innerHTML = ordered.map(row => {
+    $h("synergy-list").innerHTML = ordered.map(row => {
       const heading = row.category !== previousCategory ? `<p class="bond-group-title">${row.category === "tactic" ? "战术羁绊 · 玩法配合" : "属性羁绊 · 成员加成"}</p>` : "";
       previousCategory = row.category;
       const candidates = [...(row.candidates || [])].sort((a, b) => priority(a) - priority(b) || a - b).slice(0, 4);
@@ -725,11 +875,11 @@
     }
     const p = pieceAt(selected);
     if (!p) {
-      $("unit-detail").innerHTML =
+      $h("unit-detail").innerHTML =
         `<div class="empty-detail">${icon("ball")}<p>点击一只精灵<br>了解它的战斗风格</p></div>`;
       return;
     }
-    $("unit-detail").innerHTML =
+    $h("unit-detail").innerHTML =
       `<div class="unit-detail-card"><img src="${spriteOf(p)}" alt="${esc(p.name)}"><h3>${esc(p.name)}</h3><p class="detail-star">${"★".repeat(starsOf(p))}${p.shiny ? " · 闪光" : ""}</p><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · ${esc(p.types.join(" / "))}</p><div style="clear:both"></div><p>${esc(p.role_description || "")}</p>${skillSlots(p)}${familyPanel(p, true)}${p.bonds?.length ? `<div class="unit-bonds"><span>所属羁绊</span>${pieceBonds(p)}</div>` : ""}<div class="detail-stat"><span>攻击方式</span><b>${attackStyle(p)} · ${p.range} 格</b></div>${p.item ? `<div class="detail-item"><p class="detail-item-heading"><span class="detail-item-badge" aria-hidden="true">◆</span><strong>装备：${esc(p.item_name)}</strong></p><p>${esc(p.item_effect)}</p></div>` : ""}${unitBuffs(p)}<div class="detail-actions"><button data-open-system="techniques">为它学习技能</button><button data-action="sell" class="sell-button" ${!canPrep() ? "disabled" : ""}>出售 +${p.sell} 金币</button>${p.item ? `<button data-action="unequip" ${!canPrep() ? "disabled" : ""}>卸下装备</button>` : ""}<button data-action="cancel-select">取消选择</button></div></div>`;
   }
   function renderShopDetail() {
@@ -745,7 +895,7 @@
       : y.gold < p.price
         ? `金币不足，还差 ${p.price - y.gold} 金币`
         : "";
-    $("unit-detail").innerHTML =
+    $h("unit-detail").innerHTML =
       `<div class="unit-detail-card shop-detail"><img src="${spriteOf(p)}" alt="${esc(p.name)}"><h3>${esc(p.name)}</h3><p class="detail-star">${"★".repeat(starsOf(p))} · ${p.tier} 费${p.shiny ? " · 闪光" : ""}</p><p class="role-${roleOf(p)}">${roleNames[roleOf(p)]} · ${attackStyle(p)} · ${esc(p.types.join(" / "))}</p><div style="clear:both"></div><p>${esc(p.role_description || "")}</p>${skillSlots(p, { learned: false })}${familyPanel(p)}${p.bonds?.length ? `<div class="unit-bonds"><span>所属羁绊</span>${pieceBonds(p)}</div>` : ""}<div class="detail-stat"><span>攻击方式</span><b>${attackStyle(p)} · ${p.range} 格</b></div>${p.pool_remaining != null ? `<div class="detail-stat"><span>共享池剩余</span><b>${Number(p.pool_remaining)} / ${Number(p.pool_total)} 张</b></div>` : ""}<div class="detail-actions"><button class="recruit-button" data-shop-buy="${shopSelected}" ${reason || !canPrep() ? "disabled" : ""} aria-label="招募${esc(p.name)}，${p.price}金币${reason ? "，" + reason : ""}">招募 · ${p.price} ${icon("coin")}</button><button data-action="cancel-select">取消选择</button>${reason ? `<p class="recruit-note">${reason}</p>` : ""}</div></div>`;
   }
   function renderInventory() {
@@ -781,7 +931,7 @@
               `<button class="craft-button" data-craft="${esc(item.key)}" ${!canPrep() ? "disabled" : ""}><span><b>${esc(item.name)}</b><span class="item-description">${esc(item.recipe)} · ${esc(item.effect)}</span></span><small>合成 +</small></button>`,
           )
           .join("");
-    $("inventory").innerHTML =
+    $h("inventory").innerHTML =
       html || '<p class="empty-copy">每轮结算获得随机装备、材料或技能机。</p>';
   }
   // Items live in their own 背包 panel (docs/61); the tablist keeps the other systems.
@@ -839,12 +989,12 @@
       ? `${pending.length} 待选`
       : picked.length;
     $("augments-count").classList.toggle("pending", pending.length > 0);
-    $("augments").innerHTML = augmentTrack(pending, picked);
+    $h("augments").innerHTML = augmentTrack(pending, picked);
     const techniques = Array.isArray(state.techniques)
       ? state.techniques
       : state.techniques?.inventory || [];
     $("techniques-count").textContent = `${techniques.reduce((n, t) => n + (Number(t.count) || 0), 0)} 台`;
-    $("techniques").innerHTML =
+    $h("techniques").innerHTML =
       '<p class="system-note">每只精灵有一个固定原生位和一个学习位，两者可同时生效。常规技能机次数等于培养档，每次用后需 3 次有效普攻再装填；天气机每战一次。替换只改变学习位，不覆盖原生技能。优先消耗一台技能机免费学习，没有机器可花 2 金币；替换不返还旧技能。</p>' +
       techniques
         .map((t) => {
@@ -877,7 +1027,7 @@
     const tracks = data.tracks || [];
     $('research-count').textContent = `${tracks.reduce((n, r)=>n+r.stacks,0)} / ${tracks.reduce((n, r)=>n+r.limit,0)}`;
     const last = data.last_round ? `最近在第 ${data.last_round} 轮获得：${tracks.filter(r=>(data.earned||[]).includes(r.id)).map(r=>r.name).join('、')}。` : '尚未积累研习；部署对应精灵并完成一次有效配合即可开始。';
-    $('research').innerHTML = `<p class="system-note">${esc(data.description)} 出售、进化与更换阵容保留本局积累，新对局清零。</p><p class="research-recent" role="status">${esc(last)}</p><div class="research-grid">${tracks.map(r=>`<article class="research-card"><div><h3>${esc(r.name)}</h3><b>${r.stacks} / ${r.limit}</b></div><p>${esc(r.condition)}</p><div class="research-meter" role="progressbar" aria-label="${esc(r.name)}" aria-valuenow="${r.stacks}" aria-valuemin="0" aria-valuemax="${r.limit}">${Array.from({length:r.limit},(_,i)=>`<i class="${i<r.stacks?'filled':''}"></i>`).join('')}</div><strong>${esc(r.reward)}</strong><p>每轮最多积累 1 层；满层后不再增加。</p><a href="/pokedex?q=${encodeURIComponent(r.id==='tempo'?'伊布':r.id==='sustain'?'水伊布':'伊布')}&stage=2" target="_blank" rel="noopener">查看相关战术 →</a></article>`).join('')}</div>`;
+    $h('research').innerHTML = `<p class="system-note">${esc(data.description)} 出售、进化与更换阵容保留本局积累，新对局清零。</p><p class="research-recent" role="status">${esc(last)}</p><div class="research-grid">${tracks.map(r=>`<article class="research-card"><div><h3>${esc(r.name)}</h3><b>${r.stacks} / ${r.limit}</b></div><p>${esc(r.condition)}</p><div class="research-meter" role="progressbar" aria-label="${esc(r.name)}" aria-valuenow="${r.stacks}" aria-valuemin="0" aria-valuemax="${r.limit}">${Array.from({length:r.limit},(_,i)=>`<i class="${i<r.stacks?'filled':''}"></i>`).join('')}</div><strong>${esc(r.reward)}</strong><p>每轮最多积累 1 层；满层后不再增加。</p><a href="/pokedex?q=${encodeURIComponent(r.id==='tempo'?'伊布':r.id==='sustain'?'水伊布':'伊布')}&stage=2" target="_blank" rel="noopener">查看相关战术 →</a></article>`).join('')}</div>`;
   }
   function renderGrowth() {
     const data = state.growth,
@@ -890,7 +1040,7 @@
     tab.hidden = false;
     if (data.error) {
       $("growth-count").textContent = "!";
-      $("growth").innerHTML = `<p class="empty-copy">${esc(data.error)}</p>`;
+      $h("growth").innerHTML = `<p class="empty-copy">${esc(data.error)}</p>`;
       return;
     }
     const challenges = Array.isArray(data.challenges) ? data.challenges : [],
@@ -913,7 +1063,7 @@
           `<div class="growth-unlock${t.unlocked ? " done" : ""}"><strong>◎ ${esc(t.name)}（${esc(t.species_name || "")}）</strong><p>${esc(t.description)}</p><small>${t.unlocked ? "已可在准备期选择" : "互斥特性 · 完成挑战解锁"}</small></div>`,
       ),
     ].join("");
-    $("growth").innerHTML =
+    $h("growth").innerHTML =
       '<p class="system-note">跨局挑战只解锁选项与收藏，不提供永久数值加成；解锁从下一局开始生效，机器人始终使用基础候选池。</p>' +
       `<p class="growth-stats">竞技 ${Number(stats.runs) || 0} 局 · 夺冠 ${Number(stats.wins) || 0} 次 · 累计击杀 ${Number(stats.kills) || 0} · 单局最高连胜 ${Number(stats.streak) || 0} · 点亮羁绊 ${Number(stats.bonds) || 0} 组 · 上场 ${Number(stats.species) || 0} 种</p>` +
       (data.new_this_run?.length
@@ -945,13 +1095,13 @@
         return `<article class="combination-row${ready ? " ready" : ""}"><div class="combination-heading"><strong>${esc(row.name)}</strong><span>${stage === "trait" ? "已选择 · 条件触发" : ready ? "配置已具备" : "尚缺配置"}</span></div><p>${esc(row.detail)}</p>${facts("已具备", row.present || row.units?.map(unit => "已上场：" + unit.name), "present")}${facts("缺组件 / 配置", row.missing, "missing")}${facts("需战斗时机 / 对手条件", row.battle_conditions, "conditions")}${facts("互斥 / 取舍", row.conflicts, "conflicts")}</article>`;
       }).join("")}</section>`;
     }
-    $("combinations").innerHTML = group("基础配合 · 本命与属性先配合", base, "base") + group("按战局补强 · 装备、天气与海克斯", upgrade, "upgrade") + group("个体特性 · 查看触发与取舍", traits, "trait") + `<p class="combination-note">${esc(data?.note || "配置齐全仍需战斗中的有效命中、治疗和站位条件。")}</p>`;
+    $h("combinations").innerHTML = group("基础配合 · 本命与属性先配合", base, "base") + group("按战局补强 · 装备、天气与海克斯", upgrade, "upgrade") + group("个体特性 · 查看触发与取舍", traits, "trait") + `<p class="combination-note">${esc(data?.note || "配置齐全仍需战斗中的有效命中、治疗和站位条件。")}</p>`;
   }
   function renderComponentChoices() {
     const container = $("component-choices");
     const rewards = Array.isArray(state.component_choices) ? state.component_choices : [];
     container.hidden = !rewards.length;
-    if (!rewards.length) { container.innerHTML = ""; return; }
+    if (!rewards.length) { memo(container).innerHTML = ""; return; }
     const pending = rewards.filter(reward => reward.status === "pending");
     const stock = new Map((state.items?.components || []).map(part => [part.key || part.id, Number(part.n) || 0]));
     function craftAfter(option, item) {
@@ -962,7 +1112,7 @@
         return pair.length === 2;
       });
     }
-    container.innerHTML = `<div class="component-choice-heading"><div><span class="eyebrow">COMPONENT SUPPLY</span><h3>定向组件补给</h3></div><span>${pending.length ? pending.length + " 次待领" : "已处理"}</span></div><p class="component-choice-note">第3、6轮实际结算后各一次八选一，独立于胜2份 / 败1份的随机战利品。${canPrep() ? "选择所缺材料，领取后加入仓库。" : "下一准备期可领取；当前暂不能选择。"}</p>${rewards.map(reward => {
+    memo(container).innerHTML = `<div class="component-choice-heading"><div><span class="eyebrow">COMPONENT SUPPLY</span><h3>定向组件补给</h3></div><span>${pending.length ? pending.length + " 次待领" : "已处理"}</span></div><p class="component-choice-note">第3、6轮实际结算后各一次八选一，独立于胜2份 / 败1份的随机战利品。${canPrep() ? "选择所缺材料，领取后加入仓库。" : "下一准备期可领取；当前暂不能选择。"}</p>${rewards.map(reward => {
       if (reward.status !== "pending") { const chosen = (reward.options || []).find(option => option.id === reward.choice); return `<p class="component-choice-receipt">第 ${Number(reward.round)} 轮 · ${reward.status === "claimed" ? "已领取 " + esc(chosen?.name || reward.choice) : reward.closed_reason === "eliminated" ? "已淘汰，补给关闭" : "对局已结束，补给关闭"}</p>`; }
       return `<div class="component-choice-round"><strong>第 ${Number(reward.round)} 轮 · 选择一件组件</strong><div class="component-choice-options">${(reward.options || []).map(option => {
         const recipes = option.recipe_details || [];
@@ -1208,7 +1358,7 @@
     const rows = state.round_rewards || [];
     const latest = rows[rows.length - 1];
     $("round-loot").hidden = !latest;
-    $("round-loot").innerHTML = latest ? `<div class="loot-heading"><strong>第 ${latest.round} 轮战利品</strong><span>${latest.result === "win" ? "胜利 · 2 份" : latest.result === "loss" ? "失利 · 1 份" : "平局 · 1 份"}已入仓</span></div>${rewardCards(latest)}` : "";
+    $h("round-loot").innerHTML = latest ? `<div class="loot-heading"><strong>第 ${latest.round} 轮战利品</strong><span>${latest.result === "win" ? "胜利 · 2 份" : latest.result === "loss" ? "失利 · 1 份" : "平局 · 1 份"}已入仓</span></div>${rewardCards(latest)}` : "";
   }
   function scoutPieces(pieces, label, owner) {
     const flat = (pieces || []).flat().filter(Boolean);
@@ -1342,8 +1492,8 @@
     $("scout-title").textContent = scoutSeat == null ? "全场阵容" : `${scoutName(p)} · 侦察`;
     $("scout-timing").textContent = `第 ${state.round} 轮 · ${state.phase === "prep" ? "当前公开配置。准备期可边侦察边调整我方阵容。" : state.phase === "over" ? "最终公开阵容。" : "当前公开配置；回放期间无法调整部署。"} 实际触发效果请查看最近实战。`;
     $("scout-workspace-note").textContent = $("battle-dialog").open ? "关闭侦察后返回战斗回放" : "宽屏并排布阵 · 窄屏可返回我方阵容";
-    $("scout-tabs").innerHTML = `<button type="button" data-scout-overview aria-pressed="${scoutSeat == null}">全场概览</button>` + seats.map(p => `<button type="button" data-scout="${Number(p.seat)}" aria-pressed="${p.seat === scoutSeat}">${p.human ? "我方" : esc(trainerName(p.name))}${p.current_opponent ? " · 本轮" : ""}</button>`).join("");
-    $("scout-content").innerHTML = scoutSeat == null && seats.length ? scoutOverview(seats) : p ? `<div class="scout-heading${p.human ? " own" : ""}"><h3>${esc(scoutName(p))} <span class="scout-badges">${scoutBadges(p)}</span></h3><p>${p.hp != null ? Number(p.hp) + " HP · " : ""}${p.level != null ? "Lv." + Number(p.level) + " · " : ""}${p.gold != null ? Number(p.gold) + " 金币 · " : ""}上场 ${(p.board || []).length} 只</p></div><div class="scout-position-heading"><h3>${p.battle_snapshot ? "本轮已锁定站位" : "当前实际站位"}</h3><span>点选精灵查看完整效果</span></div>${p.battle_snapshot ? `<p class="scout-section-note">第 ${Number(p.battle_snapshot.round)} 轮对手快照 · 上场装备、技能与特性按开战时记录；备战席为当前公开信息。</p>` : ""}${scoutBoard(p)}${scoutUnitDetail()}${scoutPieces(p.board, "上场精灵", p)}${scoutPieces(p.bench, "备战席", p)}${scoutSynergies(p, true)}${scoutAugments(p)}${scoutRecentReports(p)}` : '<p class="empty-copy">当前存档未提供侦察信息。新的竞技规则支持全部训练家侦察。</p>';
+    $h("scout-tabs").innerHTML = `<button type="button" data-scout-overview aria-pressed="${scoutSeat == null}">全场概览</button>` + seats.map(p => `<button type="button" data-scout="${Number(p.seat)}" aria-pressed="${p.seat === scoutSeat}">${p.human ? "我方" : esc(trainerName(p.name))}${p.current_opponent ? " · 本轮" : ""}</button>`).join("");
+    $h("scout-content").innerHTML = scoutSeat == null && seats.length ? scoutOverview(seats) : p ? `<div class="scout-heading${p.human ? " own" : ""}"><h3>${esc(scoutName(p))} <span class="scout-badges">${scoutBadges(p)}</span></h3><p>${p.hp != null ? Number(p.hp) + " HP · " : ""}${p.level != null ? "Lv." + Number(p.level) + " · " : ""}${p.gold != null ? Number(p.gold) + " 金币 · " : ""}上场 ${(p.board || []).length} 只</p></div><div class="scout-position-heading"><h3>${p.battle_snapshot ? "本轮已锁定站位" : "当前实际站位"}</h3><span>点选精灵查看完整效果</span></div>${p.battle_snapshot ? `<p class="scout-section-note">第 ${Number(p.battle_snapshot.round)} 轮对手快照 · 上场装备、技能与特性按开战时记录；备战席为当前公开信息。</p>` : ""}${scoutBoard(p)}${scoutUnitDetail()}${scoutPieces(p.board, "上场精灵", p)}${scoutPieces(p.bench, "备战席", p)}${scoutSynergies(p, true)}${scoutAugments(p)}${scoutRecentReports(p)}` : '<p class="empty-copy">当前存档未提供侦察信息。新的竞技规则支持全部训练家侦察。</p>';
     const report = scoutReport();
     if (report) { const teams = [scoutName(p), trainerName(report.opp_name) || "当场对手"]; renderCombatStats("scout", report.statistics, report.combatants, report.loadout_highlights); showCombinationSummary(report, "scout", teams); }
     document.querySelectorAll("[data-scout-unit]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.scoutUnit === scoutUnit?.loc)));
@@ -1352,7 +1502,7 @@
     const catalog = state.arena?.catalog || [];
     $("catalog-description").textContent =
       `${catalog.length} 种竞技精灵：${Object.keys(roleNames).map(role => roleNames[role] + " " + catalog.filter(p => roleOf(p) === role).length + " 种").join("、")}。${state.arena.pool_version?.startsWith("families_") ? "家族卡池：商店仅出售初始形态，累计1/3/9张培养；分支在进化时主动选择。打开顶部战术图鉴可比较强度。" : "八位训练家共享卡池，同种同星三合一；三星需要九张并使用闪光配色。"}`;
-    $("catalog-grid").innerHTML = catalog
+    $h("catalog-grid").innerHTML = catalog
       .filter((p) => roleFilter === "all" || roleOf(p) === roleFilter)
       .map(
         (p) =>
@@ -1370,7 +1520,7 @@
   }
   function renderStandings() {
     const portraits = [25, 4, 7, 39, 133, 52, 54, 1];
-    $("standings").innerHTML = state.standings
+    $h("standings").innerHTML = state.standings
       .map((p, i) => ({ ...p, seat: p.seat ?? i, portrait: portraits[i] }))
       .sort((a, b) => b.hp - a.hp || (a.rank ?? 0) - (b.rank ?? 0))
       .map(
@@ -1402,7 +1552,7 @@
     lastCellTap = {loc, at: now};
     selected = selected === loc ? null : p ? loc : null;
     shopSelected = null;
-    render();
+    renderSelection();
   }
   let lastCellTap = {loc: null, at: 0};
   function bestBoardCell(p) {
@@ -2396,7 +2546,7 @@
         shopSelected = i;
         selected = null;
         equipItem = null;
-        render();
+        renderSelection();
       }
     } else if (target.dataset.shopBuy != null && canPrep()) {
       await api("buy", { i: target.dataset.shopBuy });
@@ -2407,7 +2557,7 @@
         equipItem === target.dataset.equip ? null : target.dataset.equip;
       selected = null;
       shopSelected = null;
-      render();
+      renderSelection();
     } else if (target.dataset.craft && canPrep())
       await api("craft", { item: target.dataset.craft });
     else if (target.dataset.system) setSystemTab(target.dataset.system);
@@ -2456,7 +2606,7 @@
       selected = null;
       shopSelected = null;
       equipItem = null;
-      render();
+      renderSelection();
     } else if (
       ["sell", "unequip"].includes(target.dataset.action) &&
       selected &&
@@ -2507,10 +2657,10 @@
     const from = event.dataTransfer.getData("text/plain");
     if (from && from === selected && pieceAt(from) && from !== cell.dataset.loc)
       await api("move", { from, to: cell.dataset.loc });
-    render();
+    renderSelection();
   });
   document.addEventListener("dragend", () => {
-    if (!busy) render();
+    if (!busy) renderSelection();
   });
   $("refresh-button").onclick = () => {
     if (canPrep()) return api("refresh");
@@ -2679,11 +2829,11 @@
     }
     if (event.code === "KeyE") autoDeploy();
     if (event.code === "KeyR" && canPrep()) api("refresh");
-    if (event.code === "Escape") {
+    if (event.code === "Escape" && (selected || shopSelected != null || equipItem)) {
       selected = null;
       shopSelected = null;
       equipItem = null;
-      render();
+      renderSelection();
     }
   });
   render();

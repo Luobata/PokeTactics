@@ -104,6 +104,26 @@ async function page(fixture, options = {}) {
     hasAttribute(key) {return Object.hasOwn(this.attrs, key);}
     addEventListener(type, handler) {(this.listeners[type] ||= []).push(handler);}
     append(child) {child.parentElement = this; this.children.push(child);}
+    remove() {const parent = this.parentElement; if (parent) parent.children = parent.children.filter(child => child !== this); this.parentElement = null;}
+    get firstChild() {return this.children[0] || null;}
+    get nextElementSibling() {const list = this.parentElement?.children || []; return list[list.indexOf(this) + 1] || null;}
+    get options() {return this.querySelectorAll('option');}
+    insertAdjacentElement(where, element) {
+      element.parentElement?.children && (element.parentElement.children = element.parentElement.children.filter(child => child !== element));
+      if (where === 'beforeend') return this.append(element), element;
+      assert.equal(where, 'afterend'); const parent = this.parentElement; element.parentElement = parent;
+      parent.children.splice(parent.children.indexOf(this) + 1, 0, element); return element;
+    }
+    dispatchEvent(event) {
+      event.target ||= this;
+      for (let node = this; node; node = node.parentElement) {
+        if (node['on' + event.type]) node['on' + event.type](event);
+        for (const handler of node.listeners[event.type] || []) handler(event);
+        if (event.bubbles === false) break;
+      }
+      for (const handler of document.listeners[event.type] || []) handler(event);
+      return true;
+    }
     insertAdjacentHTML(position, html) {assert.equal(position, 'beforeend'); this.innerHTML += html;}
     contains(node) {return node === this || this.children.some(child => child.contains(node));}
     showModal() {this.open = true;}
@@ -228,8 +248,15 @@ async function page(fixture, options = {}) {
   async function startClick(button) {
     assert.ok(button, 'Missing button'); assert.equal(button.tagName, 'BUTTON'); assert.equal(button.disabled, false);
     const pending = [];
-    if (button.onclick) pending.push(button.onclick({target: button}));
-    for (const handler of document.listeners.click || []) pending.push(handler({target: button}));
+    // Honour stopPropagation like the real DOM (capture handlers registered first run first).
+    const event = {target: button, stopped: false, defaultPrevented: false,
+      preventDefault() {this.defaultPrevented = true;}, stopPropagation() {this.stopped = true;},
+      stopImmediatePropagation() {this.stopped = true;}};
+    if (button.onclick) pending.push(button.onclick(event));
+    for (const handler of document.listeners.click || []) {
+      if (event.stopped) break;
+      pending.push(handler(event));
+    }
     const done = Promise.all(pending); await settle(); return {done};
   }
   async function click(button) {const started = await startClick(button); await started.done; await settle();}
@@ -266,7 +293,7 @@ async function page(fixture, options = {}) {
       canvasWidth: element('battle-canvas').width, canvasHeight: element('battle-canvas').height,
       saveStatus: element('save-status').textContent});
   }
-  return {element, click, startClick, change, dispatch, tick, expireTimeouts, settle, timers, imageRecords,
+  return {element, window: context.window, click, startClick, change, dispatch, tick, expireTimeouts, settle, timers, imageRecords,
     pendingImages: () => imageRecords.filter(record => !record.settled),
     document, events, snapshot, fixture, serialized, focused: () => document.activeElement,
     unchanged: () => assert.equal(JSON.stringify(fixture), serialized, 'Report viewing changed the authoritative state')};

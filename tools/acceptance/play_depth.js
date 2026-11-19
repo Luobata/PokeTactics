@@ -10,6 +10,25 @@
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (ch) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[ch]));
 
+  // Keyed writes (docs/66): rebuild markup / badges only when they changed.
+  const setHTML = (el, html) => {
+    if (!el || (el.__src === html && el.__first === el.firstChild)) return;
+    el.innerHTML = html;
+    el.__src = html;
+    el.__first = el.firstChild;
+  };
+  /** One decoration per host, identified by its first class; replaced only when its markup changes. */
+  function decoration(host, cls, html) {
+    if (!host) return;
+    const old = host.querySelector(`.${cls}`);
+    if (old && old.__sig === html) return;
+    old?.remove();
+    if (!html) return;
+    host.insertAdjacentHTML("beforeend", html);
+    const added = host.querySelector(`.${cls}`);
+    if (added) added.__sig = html;
+  }
+
   function ensure(id, tag, anchor, where = "afterend", className = "") {
     let node = $(id);
     if (!node && anchor) {
@@ -54,12 +73,16 @@
     const simTitle = unchanged
       ? `阵容未变：在已有 ${Number(sim.battles)} 场之外再模拟 ${runSize} 场，缩小胜率区间。不影响正式结果。`
       : `对本轮对手模拟 ${runSize} 场（固定的独立种子，调整阵容前后可直接对比），不影响正式结果。`;
-    strip.innerHTML = `<div class="depth-terrain terrain-${esc(terrain.id)}" title="${esc(terrain.description)}"><b>地形 · ${esc(terrain.name)}</b><span>${esc(terrain.description)}</span>${next}</div><div class="depth-rules-hint"><span>选秀轮：${esc(draftRounds)}</span><span>升 2★/3★ 选择技能强化</span><span>可指定 1 名核心</span><button type="button" class="depth-sim-button" data-depth-simulate ${!ctx.canPrep() || depth.simulations_left <= 0 ? "disabled" : ""} title="${esc(simTitle)}">${simLabel} · 剩 ${Number(depth.simulations_left)} 次</button></div>${orderBar(depth)}${simCard}${depth.streak_pve ? '<p class="depth-note depth-warn">你正在连胜：野怪轮的每只野怪都会 +1 星。</p>' : ""}`;
+    setHTML(strip, `<div class="depth-terrain terrain-${esc(terrain.id)}" title="${esc(terrain.description)}"><b>地形 · ${esc(terrain.name)}</b><span>${esc(terrain.description)}</span>${next}</div><div class="depth-rules-hint"><span>选秀轮：${esc(draftRounds)}</span><span>升 2★/3★ 选择技能强化</span><span>可指定 1 名核心</span><button type="button" class="depth-sim-button" data-depth-simulate ${!ctx.canPrep() || depth.simulations_left <= 0 ? "disabled" : ""} title="${esc(simTitle)}">${simLabel} · 剩 ${Number(depth.simulations_left)} 次</button></div>${orderBar(depth)}${simCard}${depth.streak_pve ? '<p class="depth-note depth-warn">你正在连胜：野怪轮的每只野怪都会 +1 星。</p>' : ""}`);
+    paintTerrain(terrain);
+  }
+  function paintTerrain(terrain) {
     const cells = new Set((terrain.cells || []).map(([r, c]) => `g${r},${c}`));
-    document.querySelectorAll("#ally-board [data-loc]").forEach((tile) => {
-      tile.classList.toggle("terrain-cell", cells.has(tile.dataset.loc));
-      tile.classList.toggle(`terrain-${terrain.id}`, cells.has(tile.dataset.loc));
-    });
+    for (const tile of $("ally-board")?.querySelectorAll("[data-loc]") || []) {
+      const on = cells.has(tile.getAttribute("data-loc"));
+      tile.classList.toggle("terrain-cell", on);
+      tile.classList.toggle(`terrain-${terrain.id}`, on);
+    }
   }
 
   function orderBar(depth) {
@@ -111,24 +134,25 @@
     const threat = depth.threat;
     const early = threat?.early || {};
     const windowSec = Number(threat?.window) || 5;
-    document.querySelectorAll("#ally-board [data-loc]").forEach((tile) => {
-      tile.querySelector(".depth-threat")?.remove();
-      tile.querySelector(".depth-pressure")?.remove();
-      const p = ctx.pieceAt(tile.dataset.loc);
+    for (const tile of $("ally-board")?.querySelectorAll("[data-loc]") || []) {
+      const p = ctx.pieceAt(tile.getAttribute("data-loc"));
       const n = p && threat?.counts?.[p.uid];
-      if (n) tile.insertAdjacentHTML("beforeend", `<span class="depth-threat" title="开战时有 ${n} 名敌人首先攻击它">⚔${n}</span>`);
+      decoration(tile, "depth-threat", n ? `<span class="depth-threat" title="开战时有 ${n} 名敌人首先攻击它">⚔${n}</span>` : "");
       const row = p && early[p.uid];
+      let pressure = "";
       if (row && (Number(row.taken) > 0 || Number(row.falls) > 0)) {
         const share = Math.max(0, Math.min(1, Number(row.share) || 0));
         const falls = Number(row.falls) || 0;
-        tile.insertAdjacentHTML("beforeend", `<span class="depth-pressure${falls ? " falls" : share >= 0.5 ? " heavy" : ""}" style="--share:${Math.round(share * 100)}%" title="前 ${windowSec} 秒承伤约 ${Math.round(share * 100)}% 生命（${Number(row.taken)}）${falls ? `；3 次模拟中 ${falls} 次倒下` : ""}"><i></i>${falls ? "<b>!</b>" : ""}</span>`);
+        pressure = `<span class="depth-pressure${falls ? " falls" : share >= 0.5 ? " heavy" : ""}" style="--share:${Math.round(share * 100)}%" title="前 ${windowSec} 秒承伤约 ${Math.round(share * 100)}% 生命（${Number(row.taken)}）${falls ? `；3 次模拟中 ${falls} 次倒下` : ""}"><i></i>${falls ? "<b>!</b>" : ""}</span>`;
       }
-    });
+      decoration(tile, "depth-pressure", pressure);
+    }
     const byLoc = new Map((threat?.enemies || []).map((e) => [e.loc, e]));
     document.querySelectorAll("#enemy-board [data-enemy-loc]").forEach((tile) => {
       const row = byLoc.get(tile.dataset.enemyLoc);
       tile.classList.toggle("depth-threat-source", Boolean(row));
-      if (row) tile.title = `${row.name}${row.ranged ? "（远程）" : ""} 开战首先攻击：${row.target}`;
+      const title = row ? `${row.name}${row.ranged ? "（远程）" : ""} 开战首先攻击：${row.target}` : null;
+      if (title && tile.title !== title) tile.title = title;
     });
   }
 
@@ -139,15 +163,15 @@
     const draft = depth.draft;
     if (!draft || draft.status !== "pending") {
       panel.hidden = true;
-      panel.innerHTML = "";
+      setHTML(panel, "");
       return;
     }
     panel.hidden = false;
     const mine = draft.options.find((o) => o.taken_by_you);
-    panel.innerHTML = `<div class="depth-draft-head"><b>共享选秀 · 第 ${Number(draft.round)} 轮</b><span>血量低者先选。你是第 ${draft.your_position ?? "—"} 位；顺序：${draft.order.map(esc).join(" → ")}</span></div><div class="depth-draft-options">${draft.options.map((o) => {
+    setHTML(panel, `<div class="depth-draft-head"><b>共享选秀 · 第 ${Number(draft.round)} 轮</b><span>血量低者先选。你是第 ${draft.your_position ?? "—"} 位；顺序：${draft.order.map(esc).join(" → ")}</span></div><div class="depth-draft-options">${draft.options.map((o) => {
       const taken = o.taken_by && !o.taken_by_you;
       return `<button type="button" class="depth-draft-card${taken ? " taken" : ""}${o.taken_by_you ? " mine" : ""}" data-depth-draft="${o.index}" ${taken || mine || !ctx.canPrep() ? "disabled" : ""}><img src="${window.pokeSpriteUrl ? window.pokeSpriteUrl(o.species) : `/demo/sprite/${Number(o.species)}.png`}" alt=""><strong>${esc(o.name)}</strong><small>${Number(o.cost)} 费</small><span class="depth-draft-reward">+ ${esc(o.reward?.name || "")}</span>${taken ? `<em>${esc(o.taken_by)} 已选</em>` : ""}</button>`;
-    }).join("")}</div><p class="depth-note">未选择时，开战会自动拿走剩余第一个选项。</p>`;
+    }).join("")}</div><p class="depth-note">未选择时，开战会自动拿走剩余第一个选项。</p>`);
   }
 
   // ------------------------------------------------------------ shop
@@ -155,27 +179,21 @@
     document.querySelectorAll("#shop [data-shop]").forEach((card) => {
       const p = state.shop[Number(card.dataset.shop)];
       if (!p) return;
-      card.querySelector(".depth-copies")?.remove();
-      if (p.owned_copies) {
-        const badge = document.createElement("span");
-        badge.className = "depth-copies";
-        badge.textContent = `已有 ${p.owned_copies}/3`;
-        card.querySelector(".shop-art")?.append(badge);
-      }
-      if (p.blocked) {
-        card.classList.add("blocked");
-        card.title = p.blocked;
-      }
-      card.querySelector(".depth-merge")?.remove();
-      card.querySelector(".depth-star-progress")?.remove();
-      if (p.merge_note) card.querySelector(".shop-info")?.insertAdjacentHTML("beforeend", `<div class="depth-merge">${esc(p.merge_note)}</div>`);
+      decoration(card.querySelector(".shop-art"), "depth-copies",
+        p.owned_copies ? `<span class="depth-copies">已有 ${Number(p.owned_copies)}/3</span>` : "");
+      card.classList.toggle("blocked", Boolean(p.blocked));
+      if (p.blocked && card.title !== p.blocked) card.title = p.blocked;
+      const info = card.querySelector(".shop-info");
+      decoration(info, "depth-merge", p.merge_note ? `<div class="depth-merge">${esc(p.merge_note)}</div>` : "");
       const star = p.star_progress;
+      let progress = "";
       if (star && (Number(star.owned_copies) > 0 || star.merges_now)) {
         const text = star.merges_now ? `买下即升 ${Number(star.next_star) || 2}★`
           : star.next_star ? `已有 ${Number(star.owned_copies)} 张 · 还差 ${Number(star.copies_to_next_star)} 张到 ${Number(star.next_star)}★`
           : "已满培养";
-        card.querySelector(".shop-info")?.insertAdjacentHTML("beforeend", `<div class="depth-star-progress${star.merges_now ? " now" : ""}">${text}</div>`);
+        progress = `<div class="depth-star-progress${star.merges_now ? " now" : ""}">${text}</div>`;
       }
+      decoration(info, "depth-star-progress", progress);
     });
     const refresh = $("refresh-button");
     if (refresh && depth.refresh.free > 0)
@@ -184,7 +202,7 @@
     const host = ensure("depth-targeted", "div", anchor, where, "depth-targeted");
     if (!host) return;
     const current = host.querySelector("select")?.value || "";
-    host.innerHTML = `<span class="depth-targeted-label">按属性刷新</span><select aria-label="定向刷新属性" ${!ctx.canPrep() ? "disabled" : ""}>${depth.refresh.types.map((t) => `<option value="${esc(t.id)}" ${t.id === current ? "selected" : ""}>${esc(t.name)}系</option>`).join("")}</select><button type="button" data-depth-refresh-type ${!ctx.canPrep() || state.you.gold < depth.refresh.targeted_cost ? "disabled" : ""}>定向刷新 · ${Number(depth.refresh.targeted_cost)} 金</button>`;
+    setHTML(host, `<span class="depth-targeted-label">按属性刷新</span><select aria-label="定向刷新属性" ${!ctx.canPrep() ? "disabled" : ""}>${depth.refresh.types.map((t) => `<option value="${esc(t.id)}" data-chip="${esc(state.type_colors?.[t.id] || "")}" ${t.id === current ? "selected" : ""}>${esc(t.name)}系</option>`).join("")}</select><button type="button" data-depth-refresh-type ${!ctx.canPrep() || state.you.gold < depth.refresh.targeted_cost ? "disabled" : ""}>定向刷新 · ${Number(depth.refresh.targeted_cost)} 金</button>`);
   }
 
   // ------------------------------------------------------------ inventory
@@ -192,7 +210,10 @@
     const stats = depth.items.stats || {};
     document.querySelectorAll("#inventory [data-equip]").forEach((button) => {
       const key = button.dataset.equip;
-      if (button.nextElementSibling?.classList.contains("depth-item-actions")) button.nextElementSibling.remove();
+      const html = `<button type="button" data-depth-dismantle="${esc(key)}" ${!ctx.canPrep() ? "disabled" : ""}>拆解${depth.items.dismantle_cost ? ` · ${depth.items.dismantle_cost} 金` : "（免费）"}</button><button type="button" data-depth-sell-item="${esc(key)}" ${!ctx.canPrep() ? "disabled" : ""}>出售 +${Number(depth.items.sell_value)} 金</button>`;
+      const existing = button.nextElementSibling?.classList.contains("depth-item-actions") ? button.nextElementSibling : null;
+      if (existing && existing.__sig === html) return;
+      existing?.remove();
       if (stats[key] && !button.querySelector(".depth-item-stats")) {
         const line = document.createElement("span");
         line.className = "depth-item-stats";
@@ -201,7 +222,8 @@
       }
       const actions = document.createElement("div");
       actions.className = "depth-item-actions";
-      actions.innerHTML = `<button type="button" data-depth-dismantle="${esc(key)}" ${!ctx.canPrep() ? "disabled" : ""}>拆解${depth.items.dismantle_cost ? ` · ${depth.items.dismantle_cost} 金` : "（免费）"}</button><button type="button" data-depth-sell-item="${esc(key)}" ${!ctx.canPrep() ? "disabled" : ""}>出售 +${Number(depth.items.sell_value)} 金</button>`;
+      actions.innerHTML = html;
+      actions.__sig = html;
       button.after(actions);
     });
   }
@@ -211,30 +233,32 @@
     const card = document.querySelector("#unit-detail .unit-detail-card:not(.shop-detail)");
     const p = ctx.selected() ? ctx.pieceAt(ctx.selected()) : null;
     if (!card || !p) return;
-    card.querySelector(".depth-unit")?.remove();
     const mods = (p.skill_mods || []).map((m) => `<span class="depth-mod" title="${esc(m.description)}">${esc(m.name)}</span>`).join("");
     const options = (p.mod_options || []).map((m) => `<button type="button" class="depth-mod-option" data-depth-mod="${esc(m.id)}" ${!ctx.canPrep() ? "disabled" : ""}><strong>${esc(m.name)}</strong><span>${esc(m.description)}</span></button>`).join("");
     const onBoard = ctx.selected()?.startsWith("g");
     const extra = p.extra_item
       ? `<div class="detail-item depth-extra"><p class="detail-item-heading"><span class="detail-item-badge">◆</span><strong>第二装备位：${esc(p.extra_item_name)}</strong></p><button type="button" data-depth-unequip-extra ${!ctx.canPrep() ? "disabled" : ""}>卸下 · ${Number(depth.items.unequip_cost)} 金</button></div>`
       : p.item_slots >= 2 ? '<p class="depth-note">第二装备位空闲：在仓库选择装备后点它即可装上。</p>' : "";
+    const html = `<div class="depth-unit-head"><span>本命强化</span>${mods || '<em>升到 2★ 时可选第一项强化</em>'}</div>${options ? `<p class="depth-note">选择一项本命技能强化（永久）：</p><div class="depth-mod-options">${options}</div>` : ""}${extra}<div class="detail-actions"><button type="button" data-depth-core ${!ctx.canPrep() || (!onBoard && !p.is_core) ? "disabled" : ""}>${p.is_core ? "♛ 取消核心" : "♛ 设为核心"}</button></div><p class="depth-note">核心：第二装备位、自身属性羁绊计数 +1、生命攻击 +15%；但敌方俯冲单位会优先扑向核心。卸下装备在本规则下花费 ${Number(depth.items.unequip_cost)} 金。</p>`;
+    const existing = card.querySelector(".depth-unit");
+    if (existing && existing.__sig === html) return;
+    existing?.remove();
     const section = document.createElement("section");
     section.className = "depth-unit";
-    section.innerHTML = `<div class="depth-unit-head"><span>本命强化</span>${mods || '<em>升到 2★ 时可选第一项强化</em>'}</div>${options ? `<p class="depth-note">选择一项本命技能强化（永久）：</p><div class="depth-mod-options">${options}</div>` : ""}${extra}<div class="detail-actions"><button type="button" data-depth-core ${!ctx.canPrep() || (!onBoard && !p.is_core) ? "disabled" : ""}>${p.is_core ? "♛ 取消核心" : "♛ 设为核心"}</button></div><p class="depth-note">核心：第二装备位、自身属性羁绊计数 +1、生命攻击 +15%；但敌方俯冲单位会优先扑向核心。卸下装备在本规则下花费 ${Number(depth.items.unequip_cost)} 金。</p>`;
+    section.innerHTML = html;
+    section.__sig = html;
     card.querySelector(".detail-actions")?.before(section);
   }
 
   function decorateCells(state) {
     const all = [...state.board.flat(), ...state.bench];
-    document.querySelectorAll("#ally-board [data-loc], #bench [data-loc]").forEach((tile) => {
-      const p = ctx.pieceAt(tile.dataset.loc);
-      tile.querySelector(".depth-core-mark")?.remove();
-      tile.querySelector(".depth-mod-pips")?.remove();
-      if (!p) return;
-      if (p.is_core) tile.insertAdjacentHTML("beforeend", '<span class="depth-core-mark" title="核心">♛</span>');
-      if ((p.skill_mods || []).length || (p.mod_options || []).length)
-        tile.insertAdjacentHTML("beforeend", `<span class="depth-mod-pips${(p.mod_options || []).length ? " pending" : ""}" title="${(p.mod_options || []).length ? "可选择技能强化" : "已强化"}">${"◆".repeat((p.skill_mods || []).length)}${(p.mod_options || []).length ? "?" : ""}</span>`);
-    });
+    const tiles = [...($("ally-board")?.querySelectorAll("[data-loc]") || []), ...($("bench")?.querySelectorAll("[data-loc]") || [])];
+    for (const tile of tiles) {
+      const p = ctx.pieceAt(tile.getAttribute("data-loc"));
+      decoration(tile, "depth-core-mark", p?.is_core ? '<span class="depth-core-mark" title="核心">♛</span>' : "");
+      decoration(tile, "depth-mod-pips", p && ((p.skill_mods || []).length || (p.mod_options || []).length)
+        ? `<span class="depth-mod-pips${(p.mod_options || []).length ? " pending" : ""}" title="${(p.mod_options || []).length ? "可选择技能强化" : "已强化"}">${"◆".repeat((p.skill_mods || []).length)}${(p.mod_options || []).length ? "?" : ""}</span>` : "");
+    }
     return all;
   }
 
@@ -250,10 +274,9 @@
     }).join("");
     const questBox = `<p class="depth-note">羁绊任务：断点在本场产生收益并获胜计 1 次，满 ${Number(depth.quest_goal || 3)} 次奖励 2 金 + 1 组件（每个断点一次）。</p>${quests ? `<div class="depth-quests">${quests}</div>` : ""}`;
     const relevant = depth.bond_rules.filter((r) => r.current > 0);
-    box.innerHTML = relevant.length
+    setHTML(box, (relevant.length
       ? `<p class="bond-group-title">深度断点 · 改变打法</p>${relevant.map((r) => `<div class="depth-bond${r.active ? " on" : ""}"><strong>${esc(r.type_name)} ${Number(r.current)}/${Number(r.count)} · ${esc(r.name)}</strong><span>${esc(r.effect)}</span></div>`).join("")}`
-      : '<p class="depth-note">上场同属性伙伴达到门槛后，会解锁改变战斗行为的深度断点（如飞行 4 俯冲后排、岩石 4 掩护邻格）。</p>';
-    box.insertAdjacentHTML("beforeend", questBox);
+      : '<p class="depth-note">上场同属性伙伴达到门槛后，会解锁改变战斗行为的深度断点（如飞行 4 俯冲后排、岩石 4 掩护邻格）。</p>') + questBox);
   }
 
   // ------------------------------------------------------------ battle ledger
@@ -289,7 +312,7 @@
       try { await ctx.api("simulate"); } finally { justSimulated = false; }
     }
     else if (target.dataset.depthDraft != null) await ctx.api("draft", {index: target.dataset.depthDraft});
-    else if (target.hasAttribute("data-depth-refresh-type")) await ctx.api("refresh_type", {type: target.previousElementSibling.value});
+    else if (target.hasAttribute("data-depth-refresh-type")) await ctx.api("refresh_type", {type: target.parentElement.querySelector("select").value});
     else if (target.dataset.depthDismantle) await ctx.api("dismantle", {item: target.dataset.depthDismantle});
     else if (target.dataset.depthSellItem) await ctx.api("sell_item", {item: target.dataset.depthSellItem});
     else if (target.dataset.depthMod) await ctx.api("choose_mod", {loc: ctx.selected(), mod: target.dataset.depthMod});
@@ -304,6 +327,15 @@
     document.body.classList.toggle("depth-edition", Boolean(depth));
     if (!depth) {
       for (const id of ["depth-strip", "depth-draft", "depth-targeted", "depth-bond-rules"]) $(id)?.remove();
+      return;
+    }
+    if (context.reason === "selection") {
+      // The boards may have been re-rendered (optimistic action): repaint tile cues only.
+      paintTerrain(depth.terrain);
+      decorateCells(state);
+      renderThreat(depth);
+      renderInventory(state, depth);
+      renderDetail(state, depth);
       return;
     }
     rememberSimulation(state);

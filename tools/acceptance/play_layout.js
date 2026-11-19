@@ -13,6 +13,15 @@
 (function () {
   "use strict";
   const $ = (id) => document.getElementById(id);
+  // Keyed writes (docs/66): touch the DOM only when the markup/text changed.
+  const setHTML = (el, html) => {
+    if (!el || (el.__src === html && el.__first === el.firstChild)) return;
+    el.innerHTML = html;
+    el.__src = html;
+    el.__first = el.firstChild;
+  };
+  const setText = (el, text) => { if (el && el.textContent !== String(text)) el.textContent = text; };
+  const setClass = (el, name) => { if (el && el.className !== name) el.className = name; };
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (ch) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[ch]));
   const PANELS = {
@@ -136,7 +145,7 @@
     if (!badge) return;
     const show = value !== null && value !== undefined && value !== 0 && value !== "";
     badge.hidden = !show;
-    badge.textContent = show ? String(value) : "";
+    setText(badge, show ? String(value) : "");
     badge.classList.toggle("accent", Boolean(show && accent));
   }
 
@@ -145,9 +154,9 @@
     if (!node) return;
     node.hidden = !html;
     if (!html) return;
-    node.innerHTML = html;
-    node.title = title || "";
-    node.className = `hud-chip ${id.replace("hud-", "hud-")}${extraClass ? " " + extraClass : ""}`;
+    setHTML(node, html);
+    if (node.title !== (title || "")) node.title = title || "";
+    setClass(node, `hud-chip ${id}${extraClass ? " " + extraClass : ""}`);
   }
 
   function renderHud(s) {
@@ -155,8 +164,8 @@
     const streakNode = $("hud-streak");
     if (streakNode) {
       streakNode.hidden = Math.abs(streak) < 2;
-      streakNode.textContent = streak >= 2 ? `连胜 ${streak}` : streak <= -2 ? `连败 ${-streak}` : "";
-      streakNode.className = `hud-stat hud-streak ${streak > 0 ? "win" : "loss"}`;
+      setText(streakNode, streak >= 2 ? `连胜 ${streak}` : streak <= -2 ? `连败 ${-streak}` : "");
+      setClass(streakNode, `hud-stat hud-streak ${streak > 0 ? "win" : "loss"}`);
       streakNode.title = streak ? "连胜或连败达到 2 场起，每轮额外获得金币" : "";
     }
     const depth = s.depth;
@@ -240,7 +249,7 @@
     }
     bar.hidden = !html;
     bar.className = `context-bar${mode ? " context-" + mode : ""}`;
-    bar.innerHTML = html;
+    setHTML(bar, html);
   }
 
   // ------------------------------------------------------------ board cues
@@ -274,18 +283,15 @@
     if (!s || !ally || !enemy) return;
     const allyTiles = ally.querySelectorAll("[data-loc]");
     const enemyTiles = enemy.querySelectorAll("button");
-    for (const tile of [...allyTiles, ...enemyTiles])
-      for (const name of ["in-range", "threat-from", "threat-target"]) tile.classList.remove(name);
     const loc = ctx.selected?.();
     const piece = loc && loc.startsWith("g") ? ctx.pieceAt(loc) : null;
-    if (piece) {
-      const origin = battlePoint(loc, false);
-      const range = Math.max(1, Number(piece.range) || 1);
-      enemyTiles.forEach((tile, i) => {
-        const point = {row: Math.floor(i / 6), col: i % 6};
-        if (Math.abs(point.row - origin.row) + Math.abs(point.col - origin.col) <= range) tile.classList.add("in-range");
-      });
-    }
+    const home = piece ? battlePoint(loc, false) : null;
+    const range = piece ? Math.max(1, Number(piece.range) || 1) : 0;
+    enemyTiles.forEach((tile, i) => {
+      const point = {row: Math.floor(i / 6), col: i % 6};
+      tile.classList.toggle("in-range", Boolean(home)
+        && Math.abs(point.row - home.row) + Math.abs(point.col - home.col) <= range);
+    });
     const threat = s.depth?.threat?.enemies || [];
     const uidLoc = new Map();
     for (const tile of allyTiles) {
@@ -295,15 +301,19 @@
     const lines = threat.filter((row) => showAllThreat || row.loc === hoverEnemy || (piece && row.target_uid === piece.uid));
     const enemyByLoc = new Map();
     enemyTiles.forEach((tile, i) => enemyByLoc.set(`g${Math.floor(i / 6)},${i % 6}`, tile));
-    for (const row of lines) {
-      enemyByLoc.get(row.loc)?.classList.add("threat-from");
-      uidLoc.get(row.target_uid)?.classList.add("threat-target");
-    }
+    const from = new Set(lines.map((row) => enemyByLoc.get(row.loc)));
+    const to = new Set(lines.map((row) => uidLoc.get(row.target_uid)));
+    for (const tile of enemyTiles) tile.classList.toggle("threat-from", from.has(tile));
+    for (const tile of allyTiles) tile.classList.toggle("threat-target", to.has(tile));
     if (!overlay) return;
+    if (!lines.length) {
+      setHTML(overlay, "");
+      return;
+    }
     const field = $("battlefield");
     const origin = field?.getBoundingClientRect?.();
-    if (!origin || !origin.width || !lines.length) {
-      overlay.innerHTML = "";
+    if (!origin || !origin.width) {
+      setHTML(overlay, "");
       return;
     }
     overlay.setAttribute("viewBox", `0 0 ${Math.round(origin.width)} ${Math.round(origin.height)}`);
@@ -318,7 +328,7 @@
       const end = {x: b.x - dx / length * 16, y: b.y - dy / length * 16};
       return `<line class="threat-line" x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${end.x.toFixed(1)}" y2="${end.y.toFixed(1)}" marker-end="url(#threat-arrow)"><title>${esc(row.name)} 开战首先攻击 ${esc(row.target)}</title></line>`;
     }).join("");
-    overlay.innerHTML = `<defs><marker id="threat-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z"/></marker></defs>${segments}`;
+    setHTML(overlay, `<defs><marker id="threat-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z"/></marker></defs>${segments}`);
   }
 
   function renderThreatSummary(s) {
@@ -327,7 +337,7 @@
     const threat = s.depth?.threat;
     if (!threat || !(threat.enemies || []).length) {
       box.hidden = true;
-      box.innerHTML = "";
+      setHTML(box, "");
       return;
     }
     const groups = new Map();
@@ -342,11 +352,11 @@
     const pressure = Object.entries(early).filter(([, row]) => Number(row.taken) > 0 || Number(row.falls) > 0)
       .sort((a, b) => Number(b[1].falls) - Number(a[1].falls) || Number(b[1].share) - Number(a[1].share));
     box.hidden = false;
-    box.innerHTML = `<div class="section-heading"><h2>开战威胁预测</h2><span class="tiny-label">THREAT</span></div><p class="section-note">按当前站位推演每名敌人的首个目标${Number(threat.ranged_past_front) ? `；其中 ${Number(threat.ranged_past_front)} 名远程敌人越过前排瞄准后方` : ""}。调整站位后自动刷新。</p><ul class="threat-list">${[...groups.values()].sort((a, b) => b.from.length - a.from.length).map((g) => `<li><strong>${esc(g.target)}</strong><span>← ${g.from.map(esc).join("、")}</span><em>⚔${g.from.length}</em></li>`).join("")}</ul>${pressure.length ? `<h3 class="threat-subhead">前 ${windowSec} 秒承伤</h3><ul class="pressure-list">${pressure.map(([uid, row]) => {
+    setHTML(box, `<div class="section-heading"><h2>开战威胁预测</h2><span class="tiny-label">THREAT</span></div><p class="section-note">按当前站位推演每名敌人的首个目标${Number(threat.ranged_past_front) ? `；其中 ${Number(threat.ranged_past_front)} 名远程敌人越过前排瞄准后方` : ""}。调整站位后自动刷新。</p><ul class="threat-list">${[...groups.values()].sort((a, b) => b.from.length - a.from.length).map((g) => `<li><strong>${esc(g.target)}</strong><span>← ${g.from.map(esc).join("、")}</span><em>⚔${g.from.length}</em></li>`).join("")}</ul>${pressure.length ? `<h3 class="threat-subhead">前 ${windowSec} 秒承伤</h3><ul class="pressure-list">${pressure.map(([uid, row]) => {
       const share = Math.round(Math.max(0, Math.min(1, Number(row.share) || 0)) * 100);
       const falls = Number(row.falls) || 0;
       return `<li class="${falls ? "falls" : share >= 50 ? "heavy" : ""}"><strong>${esc(names.get(uid) || "伙伴")}</strong><span class="pressure-bar" aria-hidden="true"><i style="width:${share}%"></i></span><span>${share}% 生命${falls ? ` · <b>3 次中 ${falls} 次倒下</b>` : ""}</span></li>`;
-    }).join("")}</ul>` : ""}${threat.note ? `<p class="section-note threat-note">${esc(threat.note)}</p>` : ""}<button type="button" class="secondary-button threat-toggle" data-threat-all aria-pressed="${showAllThreat}">${showAllThreat ? "隐藏棋盘连线" : "在棋盘上显示全部连线"}</button>`;
+    }).join("")}</ul>` : ""}${threat.note ? `<p class="section-note threat-note">${esc(threat.note)}</p>` : ""}<button type="button" class="secondary-button threat-toggle" data-threat-all aria-pressed="${showAllThreat}">${showAllThreat ? "隐藏棋盘连线" : "在棋盘上显示全部连线"}</button>`);
   }
 
   function renderBoostMods(s) {
@@ -356,9 +366,9 @@
     s.board?.forEach((row, r) => row.forEach((p, c) => { if (p && (p.mod_options || []).length) rows.push([`g${r},${c}`, p]); }));
     (s.bench || []).forEach((p, i) => { if (p && (p.mod_options || []).length) rows.push([`b${i}`, p]); });
     box.hidden = !rows.length;
-    box.innerHTML = rows.length
+    setHTML(box, rows.length
       ? `<p class="boost-mods-title">待选技能强化 · ${rows.length}</p>${rows.map(([loc, p]) => `<button type="button" class="boost-mod-row" data-layout-select="${esc(loc)}"><strong>${esc(p.name)} ${"★".repeat(Math.max(1, Math.min(3, Number(p.star) || 1)))}</strong><span>${(p.mod_options || []).map((m) => esc(m.name)).join(" / ")}</span><em>选择 →</em></button>`).join("")}`
-      : "";
+      : "");
   }
 
   // ------------------------------------------------------------ draft sheet
@@ -384,6 +394,11 @@
       const pref = readPref();
       if (!phone && pref !== "closed") open(Object.hasOwn(PANELS, pref) ? pref : "shop", {transient: true});
       else applyPanel();
+    }
+    if (context.reason === "selection") {
+      renderContext(s);
+      drawBoardCues();
+      return;
     }
     renderHud(s);
     renderBadges(s);

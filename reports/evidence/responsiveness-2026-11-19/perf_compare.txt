@@ -1,0 +1,12 @@
+interaction            | HEADclk→dom  gap  evt   js  sty  lay | NEWclk→dom  gap  evt   js  sty  lay
+select shop card       |        -   33   64   18   18    7 |       -   17   48    7    9    3
+select board unit      |        -   33   80   16   24    6 |       -   17   56    8   16    3
+escape deselect        |        -   33   72   14   15    5 |       -   17    0    2    6    0
+open drawer bag        |        -   17   56    3   11   10 |       -   17   72    4   18   10
+back to shop           |        -   17   48    3    8    6 |       -   17   40    4   10    8
+hover enemy            |        -   17   56    3   12    1 |       -   17   56    4    9    0
+dblclick buy           |      166   33   80   18   40   21 |      18   17   72   12   36   19
+move bench->board      |      172   50   72   20   58   14 |      16   33   40   10   44    8
+sell                   |      158   33   72   21   44   22 |      10   17   56   10   28   14
+long tasks head [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
+long tasks new  [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]

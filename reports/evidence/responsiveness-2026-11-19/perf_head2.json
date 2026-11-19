@@ -1,0 +1,163 @@
+[
+ {
+  "name": "select shop card",
+  "visible": null,
+  "inpage": null,
+  "maxFrameGap": 33,
+  "longTasks": [],
+  "events": [
+   "pointerout:64:0",
+   "pointerleave:64:0",
+   "pointerover:64:0",
+   "pointerenter:64:0",
+   "pointerenter:64:0",
+   "pointerenter:64:0"
+  ],
+  "script": 17,
+  "layout": 7,
+  "style": 17
+ },
+ {
+  "name": "select board unit",
+  "visible": null,
+  "inpage": null,
+  "maxFrameGap": 33,
+  "longTasks": [],
+  "events": [
+   "pointerout:72:0",
+   "pointerleave:72:0",
+   "pointerleave:72:0",
+   "pointerleave:72:0",
+   "pointerleave:72:0",
+   "pointerleave:72:0"
+  ],
+  "script": 14,
+  "layout": 6,
+  "style": 22
+ },
+ {
+  "name": "escape deselect",
+  "visible": null,
+  "inpage": null,
+  "maxFrameGap": 33,
+  "longTasks": [],
+  "events": [
+   "keydown:72:14",
+   "keyup:56:0",
+   "pointerover:48:0",
+   "pointerenter:48:0",
+   "mouseover:48:0"
+  ],
+  "script": 16,
+  "layout": 6,
+  "style": 17
+ },
+ {
+  "name": "open drawer bag",
+  "visible": null,
+  "inpage": null,
+  "maxFrameGap": 17,
+  "longTasks": [],
+  "events": [
+   "pointerout:56:0",
+   "pointerleave:56:0",
+   "pointerleave:56:0",
+   "pointerleave:56:0",
+   "pointerleave:56:0",
+   "pointerleave:56:0"
+  ],
+  "script": 3,
+  "layout": 10,
+  "style": 11
+ },
+ {
+  "name": "back to shop",
+  "visible": null,
+  "inpage": null,
+  "maxFrameGap": 17,
+  "longTasks": [],
+  "events": [
+   "pointerout:48:0",
+   "pointerleave:48:0",
+   "pointerleave:48:0",
+   "pointerover:48:0",
+   "pointerenter:48:0",
+   "pointerenter:48:0"
+  ],
+  "script": 3,
+  "layout": 7,
+  "style": 9
+ },
+ {
+  "name": "hover enemy",
+  "visible": null,
+  "inpage": null,
+  "maxFrameGap": 17,
+  "longTasks": [],
+  "events": [
+   "pointerout:56:0",
+   "pointerleave:56:0",
+   "pointerleave:56:0",
+   "pointerleave:56:0",
+   "pointerleave:56:0",
+   "pointerover:56:0"
+  ],
+  "script": 3,
+  "layout": 1,
+  "style": 12
+ },
+ {
+  "name": "dblclick buy",
+  "visible": 227,
+  "inpage": 163,
+  "maxFrameGap": 33,
+  "longTasks": [],
+  "events": [
+   "pointerout:80:0",
+   "pointerleave:80:0",
+   "pointerover:80:0",
+   "pointerenter:80:0",
+   "pointerenter:80:0",
+   "pointerenter:80:0"
+  ],
+  "script": 17,
+  "layout": 21,
+  "style": 37
+ },
+ {
+  "name": "move bench->board",
+  "visible": 307,
+  "inpage": 171,
+  "maxFrameGap": 33,
+  "longTasks": [],
+  "events": [
+   "pointerout:64:0",
+   "pointerleave:64:0",
+   "pointerleave:64:0",
+   "pointerleave:64:0",
+   "pointerleave:64:0",
+   "pointerleave:64:0"
+  ],
+  "script": 20,
+  "layout": 14,
+  "style": 58
+ },
+ {
+  "name": "sell",
+  "visible": 290,
+  "inpage": 158,
+  "maxFrameGap": 33,
+  "longTasks": [],
+  "events": [
+   "pointerout:72:0",
+   "pointerleave:72:0",
+   "pointerover:72:0",
+   "pointerenter:72:0",
+   "mouseout:72:0",
+   "mouseover:72:0"
+  ],
+  "script": 22,
+  "layout": 22,
+  "style": 44
+ }
+]

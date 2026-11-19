@@ -40,18 +40,58 @@ class PlayLayoutPresentation(unittest.TestCase):
     def test_selection_highlights_attack_range_and_opening_target_lines(self):
         self.run_scenario('rangeThreat')
 
+    def test_selection_toggles_classes_without_rebuilding_keyed_sections(self):
+        self.run_scenario('keyedSelection')
+
+    def test_purchase_renders_optimistically_before_the_server_answers(self):
+        self.run_scenario('optimisticBuy')
+
+    def test_rejected_optimistic_actions_roll_back(self):
+        self.run_scenario('optimisticRollback')
+
     def test_legacy_saves_without_depth_render_without_chips_or_threat(self):
         self.run_scenario('legacy')
 
 
+@unittest.skipUnless(NODE, 'Node.js is needed to execute the play-page handlers')
+class PlaySelectPresentation(unittest.TestCase):
+    def run_scenario(self, scenario):
+        result = subprocess.run(
+            [NODE, str(ROOT / 'tests/frontend/play_select_presentation.js'),
+             str(ACCEPTANCE / 'play_select.js'), str(ACCEPTANCE / 'play.js'),
+             str(ACCEPTANCE / 'play.html'), scenario],
+            capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_dropdown_keyboard_typeahead_and_change_event_keep_the_native_select(self):
+        self.run_scenario('keyboard')
+
+    def test_dropdown_is_a_bottom_sheet_on_phones(self):
+        self.run_scenario('phoneSheet')
+
+    def test_dropdown_follows_options_rebuilt_by_code(self):
+        self.run_scenario('dynamicOptions')
+
+
 class PlayLayoutStatic(unittest.TestCase):
     def test_page_and_styles_load_nothing_from_the_network(self):
-        for name in ('play.html', 'play.css', 'play_layout.css', 'play_interactions.css', 'battle.css'):
+        for name in ('play.html', 'play.css', 'play_layout.css', 'play_interactions.css', 'play_motion.css', 'play_select.css', 'battle.css'):
             text = (ACCEPTANCE / name).read_text()
             with self.subTest(asset=name):
                 self.assertNotIn('fonts.googleapis', text)
                 self.assertNotRegex(text, r'(?:src|href)="https?://')
                 self.assertNotRegex(text, r'url\(["\']?https?://')
+
+    def test_long_running_loops_only_animate_compositor_properties(self):
+        css = (ACCEPTANCE / 'play_motion.css').read_text()
+        frames = css.split('@keyframes')[1:]
+        self.assertTrue(frames)
+        for block in frames:
+            body = block[block.index('{'):]
+            self.assertNotIn('box-shadow', body)
+            self.assertNotIn('background', body)
+        html = (ACCEPTANCE / 'play.html').read_text()
+        self.assertLess(html.index('play_feedback.css'), html.index('play_motion.css'), 'motion budget loads last')
 
     def test_mobile_viewport_respects_safe_areas_and_reduced_motion(self):
         html = (ACCEPTANCE / 'play.html').read_text()

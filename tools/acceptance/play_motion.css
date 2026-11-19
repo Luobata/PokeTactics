@@ -1,0 +1,88 @@
+/* Motion budget (docs/66). Loaded last.
+ *
+ * Long-running loops must not repaint: an infinite box-shadow / background
+ * animation forces Paint + raster every frame, which kept the main thread busy
+ * while idle and made every click wait behind it. Loops here only animate
+ * opacity or transform (compositor-only), usually on a pseudo-element that
+ * carries the static glow. One-shot effects (fly, ring, deal-in) are untouched. */
+
+/* selected unit: static ring on the tile, breathing glow on a composited layer */
+.stage-ui #ally-board .tile.selected,
+.stage-ui .board-grid .tile.selected,
+.stage-ui #bench .bench-slot.selected {
+  animation: none;
+}
+.stage-ui #ally-board .tile.selected::after,
+.stage-ui #bench .bench-slot.selected::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 4px rgba(242, 201, 76, .45), 0 0 14px rgba(242, 201, 76, .55);
+  pointer-events: none;
+  opacity: 1;
+  animation: motion-breathe 1.4s ease-in-out infinite;
+  will-change: opacity;
+}
+.stage-ui #bench .bench-slot.selected::after {
+  inset: 0;
+  box-shadow: inset 0 0 0 7px rgba(255, 212, 59, .4);
+}
+
+/* accent badges, chips, pending pips, equip targets: opacity pulse */
+.stage-ui .hud-chip.accent,
+.stage-ui .stage-hud .hud-chip.accent,
+.stage-ui .dock-badge.accent,
+.stage-ui .depth-mod-pips.pending,
+.stage-ui .equip-target {
+  animation: motion-pulse 1.6s ease-in-out infinite;
+}
+
+/* machine / item targets */
+.stage-ui.ix-targeting .board-grid .tile.ix-valid,
+.stage-ui.ix-targeting .bench-slot.ix-valid {
+  animation: none;
+  box-shadow: 0 0 0 6px #b892ff40, 0 0 16px #b892ffaa;
+}
+.stage-ui.ix-targeting .board-grid .tile.ix-valid::after,
+.stage-ui.ix-targeting .bench-slot.ix-valid::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 12px;
+  box-shadow: 0 0 0 4px #b892ff66, 0 0 18px #b892ffcc;
+  pointer-events: none;
+  animation: motion-breathe 1.4s ease-in-out infinite;
+  will-change: opacity;
+}
+
+/* threat arrows: static dashes (a marching dash repaints the whole overlay) */
+.stage-ui .threat-line { animation: none; }
+
+/* terrain loops that moved backgrounds: breathe the overlay instead */
+.stage-ui .board-grid .tile.terrain-swamp::before,
+.stage-ui .board-grid .tile.terrain-embers::before {
+  animation: motion-breathe 2.4s ease-in-out infinite;
+  will-change: opacity;
+}
+
+@keyframes motion-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .35; }
+}
+@keyframes motion-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .62; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage-ui #ally-board .tile.selected::after,
+  .stage-ui #bench .bench-slot.selected::after,
+  .stage-ui .hud-chip.accent,
+  .stage-ui .dock-badge.accent,
+  .stage-ui .depth-mod-pips.pending,
+  .stage-ui .equip-target,
+  .stage-ui.ix-targeting .board-grid .tile.ix-valid::after,
+  .stage-ui.ix-targeting .bench-slot.ix-valid::after,
+  .stage-ui .board-grid .tile.terrain-swamp::before,
+  .stage-ui .board-grid .tile.terrain-embers::before { animation: none !important; }
+}

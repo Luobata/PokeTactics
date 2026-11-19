@@ -10,6 +10,13 @@
 (function () {
   "use strict";
   const $ = (id) => document.getElementById(id);
+  // Keyed writes (docs/66): rebuild a block only when its markup changed.
+  const memo = (el) => ({set innerHTML(html) {
+    if (!el || (el.__src === html && el.__first === el.firstChild)) return;
+    el.innerHTML = html;
+    el.__src = html;
+    el.__first = el.firstChild;
+  }});
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (ch) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[ch]));
   const CATEGORY_GLYPH = {economy: "◎", rule: "§", battle: "⚔", condition: "⚡", growth: "↗"};
@@ -55,7 +62,7 @@
     const chip = $("hud-augment");
     if (chip) {
       chip.hidden = !raw;
-      chip.innerHTML = raw ? '<svg aria-hidden="true"><use href="#i-spark"/></svg>海克斯待选' : "";
+      memo(chip).innerHTML = raw ? '<svg aria-hidden="true"><use href="#i-spark"/></svg>海克斯待选' : "";
     }
     const open = Boolean(raw && ctx.playable() && augmentDeferred !== s.round);
     overlay.hidden = !open;
@@ -69,11 +76,11 @@
       ? "适配度按你现在的棋盘、备战席和仓库实时计算；本局持续生效。"
       : "你还没有伙伴：适配度按空阵容计算，经济与成长类更稳妥。";
     const left = view ? view.rerolls_left : raw.rerolled ? 0 : 1;
-    $("ix-augment-reroll").innerHTML = `<button type="button" class="ix-reroll" data-augment-reroll="${esc(raw.id)}" ${!canPrep() || !left ? "disabled" : ""}>换一批 ↻ <small>剩 ${left} 次</small></button>`;
+    memo($("ix-augment-reroll")).innerHTML = `<button type="button" class="ix-reroll" data-augment-reroll="${esc(raw.id)}" ${!canPrep() || !left ? "disabled" : ""}>换一批 ↻ <small>剩 ${left} 次</small></button>`;
     const sig = `${raw.id}:${raw.options.map((o) => o.id).join(",")}`;
     const reveal = sig !== augmentSig;
     augmentSig = sig;
-    $("ix-augment-cards").innerHTML = raw.options.map((option, i) => {
+    memo($("ix-augment-cards")).innerHTML = raw.options.map((option, i) => {
       const insight = view?.options?.find((row) => row.id === option.id) || {};
       const fit = insight.fit || "mid";
       const pct = Math.max(6, Math.min(100, Math.round((Number(insight.score) || 1) / 5 * 100)));
@@ -105,7 +112,7 @@
     const picked = s.augments?.selected || [];
     strip.hidden = !picked.length;
     const cats = new Map((ix?.augments?.selected || []).map((row) => [row.id, row]));
-    strip.innerHTML = picked.map((a) => {
+    memo(strip).innerHTML = picked.map((a) => {
       const cat = cats.get(a.id)?.category || "battle";
       return `<button type="button" class="ix-strip-badge cat-${esc(cat)}" data-ix-augment-info="${esc(a.id)}" title="${esc(a.name)}" aria-label="海克斯：${esc(a.name)}"><b aria-hidden="true">${CATEGORY_GLYPH[cat] || "✦"}</b><span>${esc(a.name)}</span></button>`;
     }).join("");
@@ -154,7 +161,7 @@
     const list = Array.isArray(s.techniques) ? s.techniques : s.techniques?.inventory || [];
     const data = ix?.techniques || {};
     if (!list.length || !ix) {
-      rack.innerHTML = "";
+      memo(rack).innerHTML = "";
       return;
     }
     const gold = Number(s.you?.gold) || 0;
@@ -172,7 +179,7 @@
     };
     const stocked = list.filter((t) => Number(t.count) > 0);
     const others = list.filter((t) => !(Number(t.count) > 0));
-    rack.innerHTML = `<p class="ix-rack-note">点一台技能机，棋盘上能学的伙伴会亮起；${isPhone() ? "再点伙伴确认。" : "也可以直接把它拖到伙伴身上。"}每只伙伴只有一个学习位，替换不返还。</p>
+    memo(rack).innerHTML = `<p class="ix-rack-note">点一台技能机，棋盘上能学的伙伴会亮起；${isPhone() ? "再点伙伴确认。" : "也可以直接把它拖到伙伴身上。"}每只伙伴只有一个学习位，替换不返还。</p>
       ${stocked.length ? `<h4>仓库技能机</h4><div class="ix-tm-grid">${stocked.map(card).join("")}</div>` : ""}
       <details class="ix-tm-more"${stocked.length ? "" : " open"}><summary>花 2 金学习（${others.length} 种）</summary><div class="ix-tm-grid">${others.map(card).join("")}</div></details>`;
   }
@@ -257,7 +264,7 @@
     const counts = new Map();
     for (const item of finished) counts.set(item.key, (counts.get(item.key) || 0) + 1);
     const depth = s.depth?.items;
-    box.innerHTML = counts.size ? [...counts].map(([key, n]) => {
+    memo(box).innerHTML = counts.size ? [...counts].map(([key, n]) => {
       const row = data[key] || {};
       const item = finished.find((x) => x.key === key);
       const lines = [...(row.lines || []), ...(row.stats || []).map((x) => `组件 ${x}`)];
@@ -303,7 +310,7 @@
     if (!box) return;
     const data = ix?.recipes;
     if (!data) {
-      box.innerHTML = "";
+      memo(box).innerHTML = "";
       return;
     }
     const comps = data.components || [];
@@ -317,7 +324,7 @@
       const sub = cell.dead ? "" : cell.craftable ? "可合成" : cell.blocked ? "已达上限" : `差${cell.missing.length}`;
       return `<button type="button" class="ix-mx-cell ${cls}${cell.depth ? " depth" : ""}" data-ix-cell="${esc(cell.a)}|${esc(cell.b)}" aria-label="${esc(ra.name)} + ${esc(cb.name)}：${cell.dead ? "无配方" : `${esc(cell.name)}，${sub}`}"${cell.dead ? " disabled" : ""}><b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</button>`;
     }).join("")}`).join("");
-    box.innerHTML = `<div class="section-heading"><h2>组件合成图</h2><span class="tiny-label">${ready ? `${ready} 件可合成` : "RECIPES"}</span></div>
+    memo(box).innerHTML = `<div class="section-heading"><h2>组件合成图</h2><span class="tiny-label">${ready ? `${ready} 件可合成` : "RECIPES"}</span></div>
       <p class="section-note">行列是 8 种组件（右下数字 = 库存）。亮起的格子现在就能合成；${isPhone() ? "点格子查看并合成。" : "点格子合成，或把一个组件拖到另一个组件上。"}${s.depth ? "金框为深度版新增配方。" : "灰色为无配方的组合。"}</p>
       <div class="ix-comp-row">${comps.map((c) => `<span class="ix-comp${c.n ? " have" : ""}" data-ix-comp="${esc(c.key)}" ${c.n && canPrep() ? `draggable="true" data-ix-drag="comp:${esc(c.key)}"` : ""} title="${esc(c.stats || c.name)}"><b>${esc(c.name)}</b><small>×${Number(c.n)}${c.stats ? ` · ${esc(c.stats)}` : ""}</small></span>`).join("")}</div>
       <div class="ix-matrix-scroll"><div class="ix-matrix"><span class="ix-mx-corner" aria-hidden="true">＋</span>${head}${rows}</div></div>`;
@@ -388,7 +395,7 @@
     if (!bar) return;
     bar.hidden = !mode;
     if (!mode) {
-      bar.innerHTML = "";
+      memo(bar).innerHTML = "";
       return;
     }
     const ix = IX();
@@ -401,7 +408,7 @@
       const row = ix?.equip?.items?.[mode.key];
       text = `<b>装备「${esc(row?.name || mode.key)}」</b><small>${row?.carriers?.length ? `推荐 ${row.carriers.map((c, i) => `${i + 1}.${esc(c.name)}`).join(" ")}` : "点亮起的伙伴"}</small>`;
     }
-    bar.innerHTML = `<span class="ix-bar-main">${text}${flash ? `<em>${esc(flash)}</em>` : ""}</span><button type="button" data-ix-cancel-mode>取消</button>`;
+    memo(bar).innerHTML = `<span class="ix-bar-main">${text}${flash ? `<em>${esc(flash)}</em>` : ""}</span><button type="button" data-ix-cancel-mode>取消</button>`;
   }
 
   function targetUnit(loc) {
@@ -430,7 +437,7 @@
     $("ix-sheet").hidden = false;
     $("ix-sheet").className = `ix-sheet kind-${meta.kind}`;
     $("ix-sheet-title").textContent = title;
-    $("ix-sheet-body").innerHTML = html;
+    memo($("ix-sheet-body")).innerHTML = html;
     document.body.classList.add("ix-sheet-open");
   }
   function closeSheet() {
@@ -455,6 +462,11 @@
     if (!ctx.playable()) {
       mode = null;
       if (sheet && sheet.kind !== "info") closeSheet();
+    }
+    if (context.reason === "selection") {
+      decorateDetail(s, ix);
+      decorateBoard();
+      return;
     }
     renderAugments(s, ix);
     renderStrip(s, ix);
