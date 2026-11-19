@@ -455,22 +455,6 @@
                 ><svg><use href="#i-arrow" /></svg>
               </button>
               <div class="ix-augment-strip" id="ix-augment-strip" aria-label="已选海克斯" hidden></div>
-              <nav class="stage-dock" id="stage-dock" aria-label="准备入口">
-                <button type="button" class="dock-button" data-open-panel="shop" aria-controls="stage-drawer" aria-expanded="false"
-                  ><svg aria-hidden="true"><use href="#i-ball" /></svg><span>商店</span><b class="dock-badge" data-badge="shop" hidden></b></button
-                ><button type="button" class="dock-button" data-open-panel="bag" aria-controls="stage-drawer" aria-expanded="false"
-                  ><svg aria-hidden="true"><use href="#i-bag" /></svg><span>背包</span><b class="dock-badge" data-badge="bag" hidden></b></button
-                ><button type="button" class="dock-button" data-open-panel="boost" aria-controls="stage-drawer" aria-expanded="false"
-                  ><svg aria-hidden="true"><use href="#i-spark" /></svg><span>强化</span><b class="dock-badge" data-badge="boost" hidden></b></button
-                ><button type="button" class="dock-button" data-open-panel="bonds" aria-controls="stage-drawer" aria-expanded="false"
-                  ><svg aria-hidden="true"><use href="#i-link" /></svg><span>羁绊</span><b class="dock-badge" data-badge="bonds" hidden></b></button
-                ><button type="button" class="dock-button" data-open-panel="scout" aria-controls="stage-drawer" aria-expanded="false"
-                  ><svg aria-hidden="true"><use href="#i-eye" /></svg><span>对手</span><b class="dock-badge" data-badge="scout" hidden></b></button
-                ><button type="button" class="dock-button dock-orders" data-open-panel="orders" aria-controls="stage-drawer" aria-expanded="false"
-                  ><svg aria-hidden="true"><use href="#i-flag" /></svg><span>指令</span><b class="dock-badge" data-badge="orders" hidden></b></button
-                ><button type="button" class="dock-button" data-open-panel="journal" aria-controls="stage-drawer" aria-expanded="false"
-                  ><svg aria-hidden="true"><use href="#i-scroll" /></svg><span>战报</span><b class="dock-badge" data-badge="journal" hidden></b></button>
-              </nav>
             </div>
             <div class="tutorial-hint">
               <span class="hint-spark" aria-hidden="true">✦</span>
@@ -480,6 +464,24 @@
               <span class="hint-step">拖动或先点精灵再点格子布阵 · 空格开战</span>
             </div>
           </section>
+
+          <!-- Dock sits on the drawer's outer edge: a panel always opens right next to the button that opened it (docs/68). -->
+          <nav class="stage-dock" id="stage-dock" aria-label="准备入口">
+            <button type="button" class="dock-button" data-open-panel="shop" aria-controls="stage-drawer" aria-expanded="false"
+              ><svg aria-hidden="true"><use href="#i-ball" /></svg><span>商店</span><b class="dock-badge" data-badge="shop" hidden></b></button
+            ><button type="button" class="dock-button" data-open-panel="bag" aria-controls="stage-drawer" aria-expanded="false"
+              ><svg aria-hidden="true"><use href="#i-bag" /></svg><span>背包</span><b class="dock-badge" data-badge="bag" hidden></b></button
+            ><button type="button" class="dock-button" data-open-panel="boost" aria-controls="stage-drawer" aria-expanded="false"
+              ><svg aria-hidden="true"><use href="#i-spark" /></svg><span>强化</span><b class="dock-badge" data-badge="boost" hidden></b></button
+            ><button type="button" class="dock-button" data-open-panel="bonds" aria-controls="stage-drawer" aria-expanded="false"
+              ><svg aria-hidden="true"><use href="#i-link" /></svg><span>羁绊</span><b class="dock-badge" data-badge="bonds" hidden></b></button
+            ><button type="button" class="dock-button" data-open-panel="scout" aria-controls="stage-drawer" aria-expanded="false"
+              ><svg aria-hidden="true"><use href="#i-eye" /></svg><span>对手</span><b class="dock-badge" data-badge="scout" hidden></b></button
+            ><button type="button" class="dock-button dock-orders" data-open-panel="orders" aria-controls="stage-drawer" aria-expanded="false"
+              ><svg aria-hidden="true"><use href="#i-flag" /></svg><span>指令</span><b class="dock-badge" data-badge="orders" hidden></b></button
+            ><button type="button" class="dock-button" data-open-panel="journal" aria-controls="stage-drawer" aria-expanded="false"
+              ><svg aria-hidden="true"><use href="#i-scroll" /></svg><span>战报</span><b class="dock-badge" data-badge="journal" hidden></b></button>
+          </nav>
 
           <aside class="stage-drawer" id="stage-drawer" aria-label="准备面板" data-size="half">
             <div class="drawer-grip" data-drawer-grip aria-hidden="true"><span></span></div>

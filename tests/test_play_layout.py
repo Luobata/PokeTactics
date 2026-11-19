@@ -1,7 +1,13 @@
 """Board-centric prep layout (docs/61): dock, drawer/sheet, badges and board cues."""
+import os
 import shutil
+import socket
 import subprocess
+import sys
+import tempfile
+import time
 import unittest
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,6 +36,9 @@ class PlayLayoutPresentation(unittest.TestCase):
 
     def test_phone_layout_uses_a_peeking_shop_sheet_with_resizable_panels(self):
         self.run_scenario('phoneSheet')
+
+    def test_landscape_phone_uses_side_sheets_and_a_bottom_shop_tray(self):
+        self.run_scenario('landscapeSheet')
 
     def test_contextual_bar_recruits_sells_and_opens_detail_on_the_board(self):
         self.run_scenario('contextBar')
@@ -71,6 +80,61 @@ class PlaySelectPresentation(unittest.TestCase):
 
     def test_dropdown_follows_options_rebuilt_by_code(self):
         self.run_scenario('dynamicOptions')
+
+
+def playwright_node_path():
+    """A NODE_PATH under which `require('playwright')` resolves, or None (test skips)."""
+    if not NODE:
+        return None
+    candidates = [os.environ.get('POKETACTICS_PLAYWRIGHT_NODE_PATH'), os.environ.get('NODE_PATH'),
+                  str(ROOT / 'node_modules'), '']
+    for candidate in candidates:
+        if candidate is None:
+            continue
+        env = {**os.environ, 'NODE_PATH': candidate}
+        probe = subprocess.run([NODE, '-e', "require.resolve('playwright')"], env=env, capture_output=True)
+        if probe.returncode == 0:
+            return candidate
+    return None
+
+
+PLAYWRIGHT_NODE_PATH = playwright_node_path()
+
+
+@unittest.skipUnless(PLAYWRIGHT_NODE_PATH is not None,
+                     'needs Node.js + playwright (set POKETACTICS_PLAYWRIGHT_NODE_PATH to its node_modules)')
+class PlaySceneGeometry(unittest.TestCase):
+    """docs/68: each panel opens next to its dock button and leaves the board usable,
+    measured in Chromium at 1440x900, 1280x720, 844x390 (landscape) and 390x844."""
+
+    def test_panels_open_next_to_their_dock_button_and_keep_the_board_usable(self):
+        with socket.socket() as sock:
+            sock.bind(('127.0.0.1', 0))
+            port = sock.getsockname()[1]
+        with tempfile.TemporaryDirectory() as saves:
+            server = subprocess.Popen(
+                [sys.executable, str(ACCEPTANCE / 'server.py'), '--port', str(port)],
+                env={**os.environ, 'POKETACTICS_SAVE_DIR': saves},
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            try:
+                base = f'http://127.0.0.1:{port}'
+                for _ in range(100):
+                    try:
+                        with urllib.request.urlopen(f'{base}/play', timeout=2) as response:
+                            if response.status == 200:
+                                break
+                    except OSError:
+                        time.sleep(0.2)
+                else:
+                    self.fail('acceptance server did not start')
+                result = subprocess.run(
+                    [NODE, str(ROOT / 'tests/frontend/play_scene_geometry.js'), base],
+                    env={**os.environ, 'NODE_PATH': PLAYWRIGHT_NODE_PATH},
+                    capture_output=True, text=True, timeout=180)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            finally:
+                server.terminate()
+                server.wait(timeout=10)
 
 
 class PlayLayoutStatic(unittest.TestCase):

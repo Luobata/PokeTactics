@@ -29,7 +29,8 @@
     bonds: "队伍羁绊", scout: "对手 · 侦察", orders: "地形 · 指令 · 模拟", journal: "战报 · 记录",
   };
   const SIZES = ["peek", "half", "full"];
-  const PHONE_QUERY = "(max-width: 760px), (max-height: 520px) and (orientation: landscape)";
+  const LANDSCAPE_QUERY = "(max-height: 520px) and (orientation: landscape)";
+  const PHONE_QUERY = `(max-width: 760px), ${LANDSCAPE_QUERY}`;
   const PREF_KEY = "poketactics.play.panel";
   const roleNames = {attack: "攻击型", defense: "防守型", support: "辅助型"};
 
@@ -43,6 +44,8 @@
   let showAllThreat = false;
 
   const isPhone = () => Boolean(window.matchMedia?.(PHONE_QUERY)?.matches);
+  // Landscape phones get the in-scene HUD: side sheets beside the rail, shop tray at the bottom.
+  const isLandscape = () => isPhone() && Boolean(window.matchMedia?.(LANDSCAPE_QUERY)?.matches);
   const state = () => ctx?.state || null;
   function readPref() {
     try { return localStorage.getItem(PREF_KEY) || ""; } catch (_) { return ""; }
@@ -69,7 +72,7 @@
     }
     const grow = drawer.querySelector("[data-drawer-size]");
     if (grow) grow.setAttribute("aria-label", size === "full" ? "收起面板高度" : "展开面板高度");
-    measurePeek();
+    measureSheet();
   }
 
   function open(panel, options = {}) {
@@ -100,6 +103,8 @@
   }
 
   function resize(direction) {
+    // Landscape side sheets / tray have one height: swiping down closes, up does nothing.
+    if (isLandscape()) return direction < 0 ? close() : undefined;
     const index = SIZES.indexOf(size);
     const next = index + direction;
     if (next < 0) return close();
@@ -107,35 +112,66 @@
     applyPanel();
   }
 
-  // The phone "peek" height leaves board and bench visible above the sheet,
-  // which sits on top of the fixed tab bar.
-  function measurePeek() {
+  // Phone sheet geometry (docs/68), measured so the sheet never hides what it edits:
+  //  - portrait "peek" (shop) stops under the bench, "half" (other panels) stops
+  //    under the board's own rows; both sit on top of the fixed tab bar;
+  //  - landscape side sheets start right of the board and end at the rail.
+  function measureSheet() {
     const drawer = $("stage-drawer");
-    const bench = document.querySelector(".bench-area");
-    if (!drawer || !bench || typeof innerHeight !== "number") return;
-    const bottom = bench.getBoundingClientRect?.().bottom;
-    if (!Number.isFinite(bottom) || bottom <= 0) return;
-    const dockTop = isPhone() ? $("stage-dock")?.getBoundingClientRect?.().top : innerHeight;
-    const floor = Number.isFinite(dockTop) && dockTop > bottom ? dockTop : innerHeight;
-    const peek = Math.max(180, Math.min(innerHeight * 0.62, floor - bottom - 2));
-    drawer.style.setProperty("--sheet-peek", `${Math.round(peek)}px`);
+    if (!drawer || typeof innerHeight !== "number") return;
+    const rect = (el) => el?.getBoundingClientRect?.();
+    const px = (value) => `${Math.round(value)}px`;
+    if (isLandscape()) {
+      const board = rect(document.querySelector(".stage-board"));
+      const rail = rect($("stage-dock"));
+      if (!board || !rail || !Number.isFinite(board.right) || !(rail.left > 0)) return;
+      // Prefer not to cover the board; on very narrow phones keep a usable 260px sheet.
+      const left = Math.max(6, Math.min(board.right + 6, rail.left - 6 - 260));
+      $("stage-shell")?.style?.setProperty?.("--sheet-left", px(left));
+      return;
+    }
+    const bench = rect(document.querySelector(".bench-area"));
+    const field = rect($("battlefield"));
+    if (!bench || !Number.isFinite(bench.bottom) || bench.bottom <= 0) return;
+    const dockTop = isPhone() ? rect($("stage-dock"))?.top : innerHeight;
+    const floor = Number.isFinite(dockTop) && dockTop > bench.bottom ? dockTop : innerHeight;
+    const peek = Math.max(180, Math.min(innerHeight * 0.62, floor - bench.bottom - 2));
+    drawer.style.setProperty("--sheet-peek", px(peek));
+    const fieldBottom = Number.isFinite(field?.bottom) && field.bottom > 0 ? field.bottom : bench.bottom;
+    const half = Math.max(240, Math.min(innerHeight * 0.62, floor - fieldBottom - 4));
+    drawer.style.setProperty("--sheet-half", px(half));
+    // Room to scroll the page above an open sheet (reach the bench while equipping).
+    const space = !current ? 0 : size === "peek" ? peek : size === "half" ? half : innerHeight * 0.8;
+    document.body.style?.setProperty?.("--sheet-space", px(space));
   }
 
-  // The terrain / order / sim / draft chips ride in the board's top strip; only
-  // landscape phones (short board, wide HUD) move them into the HUD row.
-  function placeChips(inBoard) {
-    const chips = $("hud-chips");
-    const host = inBoard ? document.querySelector(".board-topline") : document.querySelector(".stage-hud");
-    const before = inBoard ? host?.querySelector(".scout-resume") : host?.querySelector(".hud-tools");
-    if (!chips || !host || typeof host.insertBefore !== "function" || chips.parentElement === host) return;
-    host.insertBefore(chips, before || null);
+  // The board's top strip (opponent, weather / terrain / order / sim chips, scout)
+  // overlays the forest above the board. Landscape phones have no height to spare:
+  // the strip moves out of the board into the scene zone beside it, under the HUD.
+  function placeTopline(landscape) {
+    const strip = document.querySelector(".board-topline");
+    const host = landscape ? document.querySelector(".center-column.stage") : $("board-scene");
+    const before = landscape ? document.querySelector(".stage-board") : $("battlefield");
+    if (!strip || !host || typeof host.insertBefore !== "function" || strip.parentElement === host) return;
+    host.insertBefore(strip, before || null);
+  }
+
+  // The site rail (hidden on phones) carries the sound-effect toggle: phones get it in the HUD tools.
+  function placeSound(phone) {
+    const button = $("sound-button");
+    const host = phone ? document.querySelector(".hud-tools") : document.querySelector(".rail-bottom");
+    if (!button || !host || button.parentElement === host || typeof host.insertBefore !== "function") return;
+    host.insertBefore(button, phone ? $("music-button")?.nextSibling || null : host.firstChild);
   }
 
   function applyLayoutClass() {
     const phone = isPhone();
+    const landscape = isLandscape();
     document.body.classList.toggle("layout-phone", phone);
     document.body.classList.toggle("layout-desktop", !phone);
-    placeChips(!(phone && window.matchMedia?.("(orientation: landscape)")?.matches));
+    document.body.classList.toggle("layout-landscape", landscape);
+    placeTopline(landscape);
+    placeSound(phone);
     return phone;
   }
 
@@ -501,5 +537,5 @@
     });
   }
 
-  window.PlayLayout = {render, open, close, toggle, current: () => current, size: () => size, isPhone};
+  window.PlayLayout = {render, open, close, toggle, current: () => current, size: () => size, isPhone, isLandscape};
 })();
