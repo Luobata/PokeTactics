@@ -2902,7 +2902,12 @@ def state_json(sess, lite=False) -> dict:
             st['arena']['trait_catalog'] = arena_traits.catalog(
                             include_families=True, species_ids=sess.templates)
         try:
-            st['growth'] = _growth_view(sess)
+            # The profile only changes when a battle settles: reuse within a prep phase.
+            key = (sess.round_no, sess.phase, len(sess.battle_history))
+            cached = getattr(sess, '_growth_cache', None)
+            if not cached or cached[0] != key:
+                sess._growth_cache = cached = (key, _growth_view(sess))
+            st['growth'] = copy.deepcopy(cached[1])
         except Exception as exc:
             st['growth'] = {'error': f'档案读取失败：{exc}', 'challenges': [],
                             'augments': [], 'traits': [], 'new_this_run': []}
@@ -3950,13 +3955,23 @@ def _apply_action(params: dict):
 SAVE_ROOT = Path(os.environ.get("POKETACTICS_SAVE_DIR", str(ROOT / ".build" / "saves")))
 
 
+_SAVE_STORES = {}
+
+
 def _save_store(sid):
+    """One SaveStore per (root, slot): it remembers which bytes it already verified."""
     if not re.fullmatch(r"[a-f0-9]{12}", sid or ""):
         raise ValueError("无效的存档编号")
-    from esp32_runtime import SaveStore, FileBackend
-    from session_save import SessionCodec
-    return SaveStore(FileBackend(SAVE_ROOT), SessionCodec(), namespace="poketactics",
-                     slot=sid, max_bytes=512 * 1024)
+    key = (str(SAVE_ROOT), sid)
+    store = _SAVE_STORES.get(key)
+    if store is None:
+        from esp32_runtime import SaveStore, FileBackend
+        from session_save import SessionCodec
+        if len(_SAVE_STORES) >= 64:
+            _SAVE_STORES.pop(next(iter(_SAVE_STORES)))
+        store = _SAVE_STORES[key] = SaveStore(FileBackend(SAVE_ROOT), SessionCodec(), namespace="poketactics",
+                                              slot=sid, max_bytes=512 * 1024)
+    return store
 
 
 def _publish_loaded(loaded, sid):

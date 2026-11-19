@@ -227,6 +227,11 @@ def catalog():
     return result
 
 
+@functools.lru_cache(maxsize=None)
+def _family_members(key):
+    return [sid for sid in families.SPECIES_FAMILY if key in _memberships(sid)]
+
+
 def preparation(comp, available=None):
     """Only represented bonds; candidates are undeployed compatible species."""
     pieces = [getattr(e[0] if isinstance(e, tuple) else e, 'piece', e[0] if isinstance(e, tuple) else e)
@@ -240,7 +245,7 @@ def preparation(comp, available=None):
     entries = []
     for row in catalog():
         if is_family:
-            row = {**row, 'members': [sid for sid in legal if row['id'] in memberships(sid)]}
+            row = {**row, 'members': _family_members(row['id'])}
         key, n = row['id'], counts.get(row['id'], 0)
         if not n:
             continue

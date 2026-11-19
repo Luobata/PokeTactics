@@ -193,13 +193,24 @@ PVE_BONUS_DROPS = 2
 
 
 # ---- 配方查询 ----
+_CATALOG_KEYS = {}
+
+
 def catalog(ruleset=tactics.BASE_RULESET):
-    active = tactics.counters_enabled(ruleset)
-    return {key: spec for key, spec in FINISHED.items()
-            if (key != "healing_needle" or active or tactics.is_arena(ruleset))
-            and (not spec.get('arena_only') or tactics.is_arena(ruleset))
-            and (not spec.get('depth_only') or tactics.is_depth(ruleset))
-            and (key != "evo_stone" or not tactics.is_arena(ruleset))}
+    # The key filter depends only on the ruleset and the (append-only) FINISHED
+    # table; a fresh dict is still returned so callers may not alias each other.
+    cache_key = (ruleset, len(FINISHED))
+    keys = _CATALOG_KEYS.get(cache_key)
+    if keys is None:
+        active = tactics.counters_enabled(ruleset)
+        arena, depth = tactics.is_arena(ruleset), tactics.is_depth(ruleset)
+        keys = _CATALOG_KEYS[cache_key] = tuple(
+            key for key, spec in FINISHED.items()
+            if (key != "healing_needle" or active or arena)
+            and (not spec.get('arena_only') or arena)
+            and (not spec.get('depth_only') or depth)
+            and (key != "evo_stone" or not arena))
+    return {key: FINISHED[key] for key in keys}
 
 
 def retired(key, ruleset) -> bool:
@@ -216,8 +227,20 @@ def obtainable(ruleset):
                   if key not in ('lucky_egg', 'evo_stone') and not retired(key, ruleset))
 
 
+_PAIR_CACHE: Dict[str, Dict[Tuple[str, str], str]] = {}
+
+
 def _pair_lookup(ruleset=tactics.BASE_RULESET) -> Dict[Tuple[str, str], str]:
-    """排序后的组件对 → 成品 key（进化石不在表内 = 兜底）。"""
+    """排序后的组件对 → 成品 key（进化石不在表内 = 兜底）。静态数据，按规则缓存。"""
+    cached = _PAIR_CACHE.get(ruleset)
+    if cached is not None and len(FINISHED) == cached.get('__size__'):
+        return cached
+    table = _build_pair_lookup(ruleset)
+    _PAIR_CACHE[ruleset] = {**table, '__size__': len(FINISHED)}
+    return _PAIR_CACHE[ruleset]
+
+
+def _build_pair_lookup(ruleset) -> Dict[Tuple[str, str], str]:
     table: Dict[Tuple[str, str], str] = {}
     for key, spec in catalog(ruleset).items():
         if retired(key, ruleset):

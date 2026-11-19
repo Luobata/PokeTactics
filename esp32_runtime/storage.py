@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import collections
 import copy
 import json
 import math
@@ -284,6 +285,11 @@ class SaveStore(Generic[T]):
             raise ValueError("schema_version must be a positive integer")
         self.max_bytes = _capacity(max_bytes)
         self._lock = threading.RLock()
+        # Digests of record bytes this store has already decoded successfully.
+        # A save only needs to know which bank is current, so bytes verified
+        # earlier skip the (expensive) game-codec decode; anything unseen is
+        # still fully decoded, and load()/import always decode.
+        self._verified = collections.OrderedDict()
 
     def _key(self, index):
         return f"{self.slot}.{index}"
@@ -328,16 +334,23 @@ class SaveStore(Generic[T]):
             raise CorruptSaveError(f"invalid save record: {exc}") from exc
         return body
 
-    def _record(self, raw, index=-1):
+    def _record(self, raw, index=-1, need_state=True):
         body = self._parse(raw)
         if body["game_id"] != self.game_id:
             raise GameMismatchError(f"expected game {self.game_id}, got {body['game_id']}")
         if body["storage_version"] != STORAGE_VERSION or body["schema_version"] > self.codec.schema_version:
             raise UnsupportedVersionError("save uses an unsupported storage or game schema version")
+        digest = hashlib.sha256(raw).digest()
+        if not need_state and digest in self._verified:
+            return _Record(body, raw, None, index)
         state = self._decode_state(body["payload"], body["schema_version"])
+        self._verified[digest] = True
+        self._verified.move_to_end(digest)
+        while len(self._verified) > 4:
+            self._verified.popitem(last=False)
         return _Record(body, raw, state, index)
 
-    def _scan(self):
+    def _scan(self, need_state=True):
         records, errors, unsupported, present = [], [], [], False
         for index in (0, 1):
             try:
@@ -345,7 +358,7 @@ class SaveStore(Generic[T]):
                 if raw is None:
                     continue
                 present = True
-                records.append(self._record(raw, index))
+                records.append(self._record(raw, index, need_state))
             except UnsupportedVersionError as exc:
                 unsupported.append((self._parse(raw)["sequence"], exc))
             except (CorruptSaveError, InvalidStateError, TooLargeError) as exc:
@@ -412,7 +425,7 @@ class SaveStore(Generic[T]):
     def save(self, state):
         with self._lock:
             try:
-                current, _ = self._scan()
+                current, _ = self._scan(need_state=False)
             except NoSaveError:
                 current = None
             sequence = current.body["sequence"] + 1 if current else 1
@@ -423,7 +436,7 @@ class SaveStore(Generic[T]):
 
     def export_backup(self):
         with self._lock:
-            return self._scan()[0].raw
+            return self._scan(need_state=False)[0].raw
 
     def inspect_backup(self, data):
         """The exact startup integrity/schema/codec validation, without writes."""

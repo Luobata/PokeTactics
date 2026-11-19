@@ -106,6 +106,20 @@ class RuntimeStorageContracts(unittest.TestCase):
                 action()
         self.assertEqual(self.backend.data, before)
 
+    def test_repeat_saves_decode_only_the_new_record_but_unseen_bytes_are_verified(self):
+        calls = []
+        original = self.store.codec.decode
+        with patch.object(self.store.codec, "decode", side_effect=lambda *a: calls.append(1) or original(*a)):
+            for score in range(1, 6):
+                self.store.save(state(score))
+            self.assertEqual(len(calls), 5)  # one round-trip check per save
+            calls.clear()
+            # Bytes this store never verified are decoded again; invalid ones are rejected.
+            self.put(1, envelope({"score": -1, "unlocked": []}, sequence=9))
+            self.store.save(state(6))
+            self.assertEqual(self.store.load().state, state(6))
+            self.assertGreaterEqual(len(calls), 2)
+
     def test_slots_alternate_and_newest_sequence_wins(self):
         self.assertEqual(self.store.save(state(1)).slot_index, 0)
         self.assertEqual(self.store.save(state(2)).slot_index, 1)
