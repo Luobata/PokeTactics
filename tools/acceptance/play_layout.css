@@ -2,16 +2,21 @@
  * Loaded after play.css / battle.css. Every rule is scoped by body.stage-ui so it
  * outranks the legacy single-class rules (and their breakpoints) of play.css.
  *
- * Structure:  .stage-shell (grid)  =  .stage (HUD · dock · board · bench · fight)
- *                                   + .stage-drawer (desktop side drawer / phone sheet)
- * Phone mode is driven by body.layout-phone (set by play_layout.js with the same
- * media query used below), so JS and CSS never disagree. */
+ * Structure:  .stage-shell (grid)  =  .stage (HUD · board · bench · fight)
+ *                                   + .stage-drawer (desktop side drawer / phone sheet / tray)
+ *                                   + .stage-dock (entry dock on the drawer's outer edge)
+ * Adjacency rule (docs/68-scene-layout.md): a panel always opens right next to the
+ * dock button that opened it. Desktop = board | drawer | dock; landscape phone =
+ * scene | side sheet | rail (shop = bottom tray); portrait phone = sheet above the tab bar.
+ * Phone mode is driven by body.layout-phone (+ body.layout-landscape), set by
+ * play_layout.js with the same media queries used below, so JS and CSS never disagree. */
 
 .stage-ui {
   --nav-h: 52px;
   --chrome-y: 362px;
   --drawer-w: 400px;
   --dock-w: 66px;
+  --dock-gap: 6px;
   --dock-h: 0px;
   --gap: 10px;
   --hud-bg: #22372e;
@@ -73,14 +78,15 @@ body.portal-play.stage-ui .rail {
 /* ------------------------------------------------------------- shell grid */
 .stage-ui .game-layout.stage-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--drawer-w);
+  /* board | drawer | dock: the dock never moves, the drawer opens against it */
+  grid-template-columns: minmax(0, 1fr) var(--drawer-w) var(--dock-w);
   grid-template-rows: auto;
   grid-template-areas: none;
   gap: 14px;
   align-items: start;
 }
 .stage-ui .game-layout.stage-shell[data-panel=""] {
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) var(--dock-w);
 }
 .stage-ui .game-layout.stage-shell[data-panel=""] > .stage-drawer {
   display: none;
@@ -91,12 +97,12 @@ body.portal-play.stage-ui .rail {
   grid-row: 1;
   min-width: 0;
   container-type: inline-size;
-  grid-template-columns: var(--dock-w) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
-    "hud hud hud"
-    "dock board board"
-    "dock bench fight"
-    "hint hint hint";
+    "hud hud"
+    "board board"
+    "bench fight"
+    "hint hint";
   gap: 8px var(--gap);
   align-items: stretch;
 }
@@ -112,7 +118,12 @@ body.portal-play.stage-ui .rail {
 .stage-ui .stage-board { grid-area: board; }
 .stage-ui .bench-area { grid-area: bench; }
 .stage-ui .stage .fight-button { grid-area: fight; }
-.stage-ui .stage-dock { grid-area: dock; }
+.stage-ui .game-layout.stage-shell > .stage-dock {
+  /* always the last column, whatever the drawer / docked scout state */
+  grid-column: -2 / -1;
+  grid-row: 1;
+}
+.stage-ui.layout-desktop .game-layout.stage-shell > .stage-dock { margin-left: calc(var(--dock-gap) - 14px); }
 .stage-ui .stage .tutorial-hint { grid-area: hint; }
 
 /* ------------------------------------------------------------- HUD */
@@ -288,6 +299,17 @@ body.portal-play.stage-ui .rail {
 }
 .stage-ui .hud-tools .icon-button:hover { background: #ffffff1c; }
 .stage-ui .hud-tools svg { width: 16px; height: 16px; }
+/* desktop: the HUD stays one row when an open drawer narrows the stage (the
+   board's tiles are sized for a one-row HUD, so a wrap would push the bench off screen) */
+@container (max-width: 900px) {
+  .stage-ui.layout-desktop .stage-hud .new-game-button { width: 34px; padding: 0; justify-content: center; }
+  .stage-ui.layout-desktop .stage-hud .new-game-button span { display: none; }
+  .stage-ui.layout-desktop .stage-hud { gap: 6px 10px; }
+}
+@container (max-width: 800px) {
+  .stage-ui.layout-desktop .hud-level small { display: none; }
+  .stage-ui.layout-desktop .hud-hp .hud-meter { width: 36px; }
+}
 
 /* ------------------------------------------------------------- dock */
 .stage-ui .stage-dock {
@@ -328,6 +350,18 @@ body.portal-play.stage-ui .rail {
   background: var(--lime);
   color: #22372e;
   font-weight: 700;
+}
+/* the active entry points at the drawer it opened (desktop: drawer on its left) */
+.stage-ui.layout-desktop.drawer-open .dock-button.active::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: calc(-6px - var(--dock-gap));
+  border: 7px solid transparent;
+  border-right: 9px solid var(--lime);
+  border-left: 0;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 .stage-ui .dock-badge {
   position: absolute;
@@ -478,7 +512,7 @@ body.portal-play.stage-ui .rail {
 /* Tiles are square on desktop; phones trade a little height for width so the
    whole board, bench and an open shop sheet share one screen. */
 .stage-ui {
-  --tile-h: clamp(38px, min(calc((100cqw - var(--dock-w) - 130px) / 6.4), calc((100dvh - var(--chrome-y)) / 6)), var(--tile-max));
+  --tile-h: clamp(38px, min(calc((100cqw - 130px) / 6.4), calc((100dvh - var(--chrome-y)) / 6)), var(--tile-max));
   --tile-w: var(--tile-h);
   --tile: var(--tile-h);
 }
@@ -1268,7 +1302,7 @@ body.portal-play.stage-ui .rail {
 
 /* docked scout dialog takes the drawer slot so the board stays visible */
 .stage-ui .game-layout.scouting-open {
-  grid-template-columns: minmax(0, 1fr) var(--drawer-w);
+  grid-template-columns: minmax(0, 1fr) var(--drawer-w) var(--dock-w);
   grid-template-areas: none;
 }
 .stage-ui .game-layout.scouting-open > .center-column.stage { display: grid; }
@@ -1378,17 +1412,18 @@ body.portal-play.stage-ui .rail {
 @media (max-width: 1100px) {
   .stage-ui { --drawer-w: 340px; }
 }
-/* Tablet portrait: drawer floats over the right edge instead of taking a column. */
+/* Tablet portrait: drawer floats over the board's right edge, still flush with the dock. */
 @media (min-width: 761px) and (max-width: 960px) {
   .stage-ui .game-layout.stage-shell,
+  .stage-ui .game-layout.stage-shell[data-panel=""],
   .stage-ui .game-layout.scouting-open {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) var(--dock-w);
   }
   .stage-ui .stage-drawer,
   .stage-ui dialog.scout-modal.docked {
     position: fixed;
     top: calc(var(--nav-h) + 8px);
-    right: 8px;
+    right: calc(14px + var(--dock-w) + var(--dock-gap));
     bottom: 8px;
     width: min(400px, 52vw);
     height: auto;
@@ -1419,6 +1454,28 @@ body.portal-play.stage-ui .rail {
 .stage-ui.layout-phone main.stage-main {
   padding: 6px 6px calc(var(--dock-h) + env(safe-area-inset-bottom) + 12px);
 }
+/* an open sheet adds scroll room so the bench can still be scrolled above it */
+.stage-ui.layout-phone.drawer-open main.stage-main {
+  padding-bottom: calc(var(--dock-h) + env(safe-area-inset-bottom) + 12px + var(--sheet-space, 0px));
+}
+/* phones: the site rail is hidden, its sound-effect toggle rides in the HUD tools */
+.stage-ui.layout-phone .hud-tools #sound-button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  min-height: 0;
+  height: 34px;
+  padding: 0;
+  gap: 0;
+  border: 1px solid #ffffff26;
+  border-radius: 10px;
+  color: #e4ecd3;
+}
+.stage-ui.layout-phone .hud-tools #sound-button span { display: none; }
+.stage-ui.layout-phone .hud-tools #sound-button svg { width: 16px; height: 16px; }
+.stage-ui.layout-phone .hud-tools #sound-button[aria-pressed="true"] { background: #ffffff1c; }
+.stage-ui.layout-phone .hud-tools #sound-button::after { content: ""; position: absolute; inset: -5px -2px; }
 .stage-ui.layout-phone .game-layout.stage-shell,
 .stage-ui.layout-phone .game-layout.scouting-open {
   grid-template-columns: minmax(0, 1fr);
@@ -1549,7 +1606,7 @@ body.portal-play.stage-ui .rail {
   transition: height 0.2s ease;
 }
 .stage-ui.layout-phone .stage-drawer[data-size="peek"] { --sheet-h: var(--sheet-peek, 240px); }
-.stage-ui.layout-phone .stage-drawer[data-size="half"] { --sheet-h: 56dvh; }
+.stage-ui.layout-phone .stage-drawer[data-size="half"] { --sheet-h: var(--sheet-half, 56dvh); }
 .stage-ui.layout-phone .stage-drawer[data-size="full"] { --sheet-h: calc(100dvh - var(--dock-h) - env(safe-area-inset-bottom) - 40px); }
 .stage-ui.layout-phone .drawer-grip {
   display: grid;
@@ -1677,56 +1734,210 @@ body.portal-play.stage-ui .rail {
   }
 }
 
-/* phone landscape: board left, controls right, sheet from the right */
+/* phone landscape = the primary phone mode (docs/68): an in-scene HUD.
+ *   scene (board + bench | HUD · strip · hint · fight)  |  rail
+ * The board takes the full height left of the scene zone; side sheets open from the
+ * rail over the zone (never over the board), the shop is a bottom tray whose right
+ * end meets the 商店 button at the bottom of the rail. */
 @media (max-height: 520px) and (orientation: landscape) {
   body.portal-play.stage-ui .portal-nav { display: none; }
   .stage-ui.layout-phone {
     --nav-h: 0px;
     --dock-h: 0px;
-    --chrome-y: 168px;
-    --tile-h: clamp(30px, calc((100dvh - var(--chrome-y)) / 6), 56px);
-    --tile-w: calc(var(--tile-h) * 1.15);
+    --rail-w: 58px;
+    --slot: 40px;
+    --tile-gap: 3px;
+    /* height left for the 6 rows after scene padding, board frame, divider and the bench row */
+    --chrome-y: 132px;
+    --tile-h: clamp(30px, calc((100dvh - var(--chrome-y)) / 6), 60px);
+    --tile-w: calc(var(--tile-h) * 1.18);
   }
-  .stage-ui.layout-phone .rail { display: flex; top: 0; }
-  .stage-ui.layout-phone .app { margin-left: 64px; }
-  .stage-ui.layout-phone main.stage-main { padding: 6px 8px 8px; }
+  .stage-ui.layout-phone .rail { display: none; }
+  .stage-ui.layout-phone .app { margin-left: 0; }
+  .stage-ui.layout-phone main.stage-main,
+  .stage-ui.layout-phone.drawer-open main.stage-main {
+    padding: 6px 6px 6px calc(6px + env(safe-area-inset-left));
+  }
+  .stage-ui.layout-phone .game-layout.stage-shell,
+  .stage-ui.layout-phone .game-layout.stage-shell[data-panel=""],
+  .stage-ui.layout-phone .game-layout.scouting-open {
+    grid-template-columns: minmax(0, 1fr) var(--rail-w);
+    gap: 6px;
+    padding-right: env(safe-area-inset-right);
+  }
+  /* the scene: one grass field holding board, bench and the HUD zone */
   .stage-ui.layout-phone .game-layout.stage-shell > .center-column.stage {
+    height: calc(100dvh - 12px);
     grid-template-columns: auto minmax(0, 1fr);
-    grid-template-rows: auto auto auto 1fr;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
     grid-template-areas:
-      "hud hud"
-      "board bench"
-      "board fight"
-      "board dock";
-  }
-  .stage-ui.layout-phone .stage-hud { flex-wrap: nowrap; }
-  .stage-ui.layout-phone .hud-level { order: 0; }
-  .stage-ui.layout-phone .hud-tools { order: 0; }
-  .stage-ui.layout-phone .board-scene { padding-top: 44px; }
-  .stage-ui.layout-phone .stage .fight-button { flex-direction: row; min-height: 48px; }
-  .stage-ui.layout-phone .stage .tutorial-hint { display: none; }
-  .stage-ui.layout-phone .bench-grid { grid-auto-flow: row; grid-template-columns: repeat(auto-fill, var(--slot)); overflow: visible; }
-  .stage-ui.layout-phone .stage-dock {
-    position: static;
-    height: auto;
-    border-radius: 14px;
+      "board hud"
+      "board strip"
+      "board hint"
+      "bench fight";
+    gap: 6px;
     padding: 4px;
+    border-radius: 16px;
+    background:
+      radial-gradient(circle at 80% 20%, #a6c486 0 2px, transparent 3px) 0 0 / 38px 34px,
+      linear-gradient(180deg, #86ab6c, #739a5c);
+    box-shadow: 0 0 0 1px #2c46333d;
+    overflow: hidden;
+  }
+  .stage-ui.layout-phone .stage-board { grid-area: board; }
+  .stage-ui.layout-phone .arena.stage-board { border-radius: 12px; box-shadow: none; }
+  .stage-ui.layout-phone .board-scene { height: 100%; justify-content: center; padding: 4px 6px; }
+  .stage-ui.layout-phone .battlefield { padding: 4px; }
+  .stage-ui.layout-phone .board-divider { height: 10px; margin: 1px 4px; }
+  /* HUD: top of the zone, two compact rows */
+  .stage-ui.layout-phone .stage-hud {
+    flex-wrap: wrap;
+    overflow: visible;
+    gap: 2px 10px;
+    padding: 4px 6px 4px 8px;
+    background: #22372ee6;
+  }
+  .stage-ui.layout-phone .hud-level { order: 5; flex: 1 1 150px; }
+  .stage-ui.layout-phone .hud-tools { order: 6; flex-wrap: wrap; }
+  .stage-ui.layout-phone .hud-tools .new-game-button span { display: none; }
+  .stage-ui.layout-phone .hud-tools .new-game-button { width: 34px; height: 34px; min-height: 0; padding: 0; justify-content: center; }
+  /* board strip (moved out of the board by play_layout.js): opponent, chips, scout */
+  .stage-ui.layout-phone .stage > .board-topline {
+    grid-area: strip;
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+  }
+  .stage-ui.layout-phone .stage > .board-topline .hud-chips { flex-wrap: wrap; overflow: visible; }
+  .stage-ui.layout-phone .stage > .board-topline .opponent-tag { max-width: 100%; }
+  .stage-ui.layout-phone .stage > .board-topline .opponent-tag #opponent-kind,
+  .stage-ui.layout-phone .stage > .board-topline .opponent-separator { display: inline; }
+  .stage-ui.layout-phone .stage .tutorial-hint {
+    grid-area: hint;
+    display: flex;
     align-self: end;
+    gap: 6px;
+    padding: 6px 8px;
+    border-radius: 10px;
+    background: #f6f8eccc;
+    font-size: 11px;
+    line-height: 1.45;
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
   }
-  .stage-ui.layout-phone .stage-drawer {
+  /* bench row under the board, fight button under the zone (thumb corner) */
+  .stage-ui.layout-phone .bench-area {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border-radius: 12px;
+  }
+  .stage-ui.layout-phone .bench-heading {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    flex: none;
+    gap: 2px;
+  }
+  .stage-ui.layout-phone .bench-heading h3 { font-size: 11px; white-space: nowrap; }
+  .stage-ui.layout-phone .bench-heading h3 span { margin-left: 2px; }
+  .stage-ui.layout-phone .bench-heading button { min-height: 22px; padding: 0 6px; font-size: 11px; }
+  .stage-ui.layout-phone .bench-heading #deploy-button svg { display: none; }
+  .stage-ui.layout-phone .bench-grid { flex: 1; grid-auto-flow: column; grid-template-columns: none; overflow-x: auto; gap: 4px; }
+  /* small landscape phones: the board alone sizes its column; the bench row scrolls */
+  @media (max-width: 760px) {
+    .stage-ui.layout-phone .bench-area { contain: inline-size; }
+    .stage-ui.layout-phone .stage .tutorial-hint { display: none; }
+    .stage-ui.layout-phone .stage > .board-topline .hud-chip,
+    .stage-ui.layout-phone .stage > .board-topline .scout-entry { min-height: 30px; padding: 2px 8px; }
+    .stage-ui.layout-phone .stage > .board-topline .opponent-tag #opponent-kind,
+    .stage-ui.layout-phone .stage > .board-topline .opponent-separator { display: none; }
+  }
+  .stage-ui.layout-phone .stage .fight-button {
+    grid-area: fight;
+    flex-direction: row;
+    align-self: stretch;
+    min-height: 48px;
+    font-size: 15px;
+  }
+  .stage-ui.layout-phone .stage .fight-button > svg:last-child { display: inline; }
+  /* rail = the dock on the right edge; 商店 sits at the bottom, next to its tray */
+  .stage-ui.layout-phone .stage-dock {
+    position: sticky;
     top: 6px;
-    bottom: 6px;
+    bottom: auto;
     left: auto;
-    right: 6px;
-    width: min(420px, 55vw);
-    height: auto;
-    border-radius: 18px;
-    border: 1px solid #d5dec6;
+    right: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    height: calc(100dvh - 12px);
+    padding: 4px;
+    border-radius: 14px;
+    box-shadow: none;
   }
+  .stage-ui.layout-phone .dock-button { flex: 1 1 0; min-height: 0; max-height: 60px; }
+  .stage-ui.layout-phone .dock-button[data-open-panel="shop"] { order: 2; margin-top: auto; }
+  /* side sheet: from the board's right edge (measured) to the rail, above the fight button */
+  .stage-ui.layout-phone .stage-drawer,
+  .stage-ui.layout-phone dialog.scout-modal.docked {
+    position: fixed;
+    top: 6px;
+    bottom: 64px;
+    left: var(--sheet-left, 46vw);
+    right: calc(var(--rail-w) + 12px + env(safe-area-inset-right));
+    width: auto;
+    height: auto;
+    max-height: none;
+    border-radius: 16px;
+    border: 1px solid #d5dec6;
+    box-shadow: 6px 0 24px #1b2c2455;
+    transition: none;
+  }
+  .stage-ui.layout-phone dialog.scout-modal.docked { margin: 0; padding: 12px; }
   .stage-ui.layout-phone .drawer-grip,
   .stage-ui.layout-phone .drawer-size { display: none; }
-  .stage-ui.layout-phone .stage-drawer .shop-grid { flex-wrap: wrap; }
-  .stage-ui.layout-phone dialog.scout-modal.docked { top: 6px; bottom: 6px; left: auto; right: 6px; width: min(460px, 60vw); border-radius: 18px; }
+  .stage-ui.layout-phone .drawer-header { min-height: 40px; padding: 2px 4px 2px 12px; background: #f3f6ea; }
+  .stage-ui.layout-phone .drawer-actions .icon-button { width: 40px; height: 40px; }
+  /* shop tray: the bottom edge of the scene, controls on the left, one row of cards */
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] {
+    top: auto;
+    bottom: 6px;
+    left: calc(6px + env(safe-area-inset-left));
+    height: var(--tray-h, 148px);
+    border-radius: 16px 16px 12px 12px;
+    box-shadow: 0 -8px 24px #1b2c2455;
+  }
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] .drawer-header { top: 6px; right: 6px; }
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] .drawer-body { padding: 8px 10px; overflow: hidden; }
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] #panel-shop {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    height: 100%;
+  }
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] .shop-controls {
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] .shop-controls > * { min-height: 36px; justify-content: center; }
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] .shop-grid {
+    flex-wrap: nowrap;
+    align-items: stretch;
+    padding-right: 44px;
+  }
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] .shop-card,
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] .shop-card:not(.sold) { flex: 0 0 112px; }
+  .stage-ui.layout-phone .context-bar { top: 4px; }
 }
 
 /* ------------------------------------------------------------- battle dialog on phones */

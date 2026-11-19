@@ -208,6 +208,9 @@
 .stage-ui .ix-strip-badge span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .stage-ui .ix-strip-badge:hover { background: #ffffff24; }
 .stage-ui.layout-phone .bench-heading .ix-augment-strip { order: 1; margin-left: auto; margin-right: 6px; }
+.stage-ui.layout-phone .stage-hud .ix-augment-strip { order: 4; }
+.stage-ui.layout-phone .stage-hud .ix-strip-badge { width: 30px; height: 30px; border-radius: 9px; }
+.stage-ui.layout-phone .stage-hud .ix-strip-badge b { width: 22px; height: 22px; font-size: 12px; }
 .stage-ui.layout-phone .bench-heading #deploy-button { order: 2; }
 .stage-ui.layout-phone .bench-heading .ix-strip-badge { width: 34px; height: 34px; border-radius: 10px; background: #22372e; position: relative; }
 .stage-ui.layout-phone .bench-heading .ix-strip-badge::after { content: ""; position: absolute; inset: -5px -2px; }

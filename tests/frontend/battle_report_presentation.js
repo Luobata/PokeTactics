@@ -186,7 +186,7 @@ async function page(fixture, options = {}) {
   };
   parse(markup, root); document.body = root.querySelector('body');
   const serialized = JSON.stringify(fixture); freeze(fixture);
-  const context = vm.createContext({document, window: {matchMedia: () => ({matches: !!options.mobile}), ...(options.window || {})}, innerHeight: 900, URLSearchParams, Date: {now: options.clock || Date.now},
+  const context = vm.createContext({document, window: {matchMedia: (query) => ({matches: String(query).trim() === '(max-height: 520px) and (orientation: landscape)' ? !!options.landscape : !!(options.mobile || options.landscape)}), ...(options.window || {})}, innerHeight: 900, URLSearchParams, Date: {now: options.clock || Date.now},
     ...(options.globals || {}),
     localStorage: {getItem: key => storage.get(key) || null, setItem: (key, value) => storage.set(key, value)},
     AbortController,

@@ -144,6 +144,8 @@ const cases = {
     assert.equal(openPanel(p), 'shop');
     assert.equal(p.element('stage-drawer').getAttribute('data-size'), 'peek', 'the shop sheet only peeks');
     assert.ok(/\d+px/.test(p.element('stage-drawer').style['--sheet-peek'] || ''), 'peek height is measured');
+    assert.ok(/\d+px/.test(p.element('stage-drawer').style['--sheet-half'] || ''), 'half height (stops under the board rows) is measured');
+    assert.equal(body.classList.contains('layout-landscape'), false, 'portrait is not the landscape scene');
     // Buying keeps the sheet open: preview + recruit happen while the shop stays visible.
     await p.click(p.element('shop').querySelector('[data-shop="1"]'));
     assert.equal(openPanel(p), 'shop');
@@ -155,6 +157,27 @@ const cases = {
     assert.equal(p.element('stage-drawer').getAttribute('data-size'), 'half');
     await p.click(p.element('stage-drawer').querySelector('[data-close-panel]'));
     assert.equal(openPanel(p), '');
+    p.unchanged();
+  },
+
+  // docs/68: landscape phones = in-scene HUD; side sheets beside the rail, shop as a bottom tray.
+  async landscapeSheet() {
+    const p = await page(fixture(), {landscape: true});
+    const body = p.document.body;
+    assert.ok(body.classList.contains('layout-phone'));
+    assert.ok(body.classList.contains('layout-landscape'));
+    assert.equal(openPanel(p), '', 'the scene starts with every panel closed');
+    await p.click(dock(p, 'shop'));
+    assert.equal(p.element('stage-drawer').getAttribute('data-size'), 'peek', 'the shop opens as the bottom tray');
+    await p.click(dock(p, 'bag'));
+    assert.equal(openPanel(p), 'bag');
+    assert.equal(p.element('stage-drawer').getAttribute('data-size'), 'half', 'other panels are side sheets');
+    // Side sheets have one height: the size control never grows them to a full-screen sheet.
+    await p.click(p.element('stage-drawer').querySelector('[data-drawer-size]'));
+    assert.equal(p.element('stage-drawer').getAttribute('data-size'), 'half');
+    await p.click(dock(p, 'bag'));
+    assert.equal(openPanel(p), '', 'the rail button toggles its sheet');
+    assert.equal(p.events.fetches.length, 1);
     p.unchanged();
   },
 

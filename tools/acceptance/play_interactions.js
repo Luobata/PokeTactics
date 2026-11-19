@@ -107,7 +107,9 @@
   function renderStrip(s, ix) {
     const strip = $("ix-augment-strip");
     if (!strip) return;
-    const host = isPhone() ? document.querySelector(".bench-heading") : $("stage-dock");
+    // Desktop: under the dock; landscape phone: in the scene HUD; portrait: beside the bench title.
+    const host = window.PlayLayout?.isLandscape?.() ? document.querySelector(".stage-hud")
+      : isPhone() ? document.querySelector(".bench-heading") : $("stage-dock");
     if (host && strip.parentElement !== host && typeof host.append === "function") host.append(strip);
     const picked = s.augments?.selected || [];
     strip.hidden = !picked.length;
