@@ -1391,9 +1391,8 @@
       await api("move", { from: selected, to: loc });
       return;
     }
-    // Double-click / double-tap a unit: bench → best free board cell, board → bench.
     const now = Date.now();
-    if (p && lastCellTap.loc === loc && now - lastCellTap.at < 450) {
+    if (p && lastCellTap.loc === loc && now - lastCellTap.at < DOUBLE_TAP_MS) {
       lastCellTap = {loc: null, at: 0};
       selected = null;
       await quickPlace(loc, p);
@@ -1404,6 +1403,11 @@
     shopSelected = null;
     render();
   }
+  // Double-click / double-tap a unit: bench → best free board cell, board → bench.
+  // Clicking re-renders the tile, so the native dblclick never fires; a second
+  // click on the same unit within DOUBLE_TAP_MS counts instead. Slower second
+  // clicks keep their deselect meaning.
+  const DOUBLE_TAP_MS = 350;
   let lastCellTap = {loc: null, at: 0};
   function bestBoardCell(p) {
     const rows = roleOf(p) === "defense" ? [0, 1, 2] : p.ranged || roleOf(p) === "support" ? [2, 1, 0] : [1, 0, 2];

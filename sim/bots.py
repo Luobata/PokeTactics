@@ -244,6 +244,11 @@ class Bot:
             ready = tuple(key for key in CRAFT_ORDER
                           if any(o.item is None and carrier_rank(o, key) is not None
                                  for o in self.all_pieces()))
+            if self.inventory.ruleset == 'arena_v2':
+                from arena_mech_items import DEPTH_CRAFT_ORDER, carrier_rank as mech_rank
+                ready = tuple(key for key in DEPTH_CRAFT_ORDER
+                              if any(o.item is None and mech_rank(o, key) is not None
+                                     for o in self.all_pieces())) + ready
             priority = ready + priority
         # Only public, previously encountered opponent pieces inform this choice.
         # No future shop, seed or hidden inventory is inspected.
@@ -359,6 +364,13 @@ class Bot:
         free = [o for o in self.all_pieces() if o.item is None]
         if not free:
             return None
+        if self.inventory.ruleset == 'arena_v2':
+            from arena_mech_items import MECH_ITEMS, carrier_rank as mech_rank
+            if key in MECH_ITEMS:
+                eligible = [(mech_rank(o, key), o) for o in free]
+                eligible = [(rank, o) for rank, o in eligible if rank is not None]
+                return max(eligible, key=lambda row: (
+                    row[0], dex.bst(row[1].piece.species_id)), default=(0, None))[1]
         if self.inventory.ruleset in ('arena_v1', 'arena_v2'):
             from arena_equipment import CRAFT_ORDER, carrier_rank
             if key in CRAFT_ORDER:

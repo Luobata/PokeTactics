@@ -208,6 +208,7 @@ const cases = {
     assert.match(detail.querySelector('.ix-skill-card').textContent, /治疗/);
     const socket = detail.querySelector('[data-ix-socket="back"]');
     assert.match(socket.textContent, /更换技能机/);
+    await new Promise((resolve) => setTimeout(resolve, 400));  // a slow second click deselects; a fast one is a double-click
     await p.click(tile(p, 'g2,4'));
     await p.click(tile(p, 'g0,2'));
     const front = p.element('unit-detail');

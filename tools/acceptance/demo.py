@@ -1907,6 +1907,9 @@ class Session:
                         self._say(f"野怪轮胜（+{gold} 金）")
                     if self.is_depth and arena_session.pve_bonus(self, e) and e is p:
                         self._say('寻宝者：野怪轮胜利额外获得 1 个组件')
+                    treasure = arena_session.pve_treasure(self, e) if self.is_depth else None
+                    if treasure and e is p:
+                        self._say(f'野怪掉落宝物：{items_mod.FINISHED[treasure]["name"]}')
                 else:
                     dmg = self._loss_damage(r, res["survivors"][1])
                     if e is p:

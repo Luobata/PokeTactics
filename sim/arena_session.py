@@ -246,7 +246,7 @@ def roll_rewards(rng, result, seat):
     """One reward per battle; techniques only if someone on the seat can learn it."""
     pools = {
         'component': list(items.COMPONENT_ORDER),
-        'item': sorted(set(items.catalog(RULESET)) - {'lucky_egg', 'evo_stone'}),
+        'item': items.obtainable(RULESET),
     }
     pieces = seat.all_pieces()
     learnable = [key for key in techniques.ids_for(RULESET)
@@ -381,12 +381,15 @@ def draft_options(session, round_no):
     candidates = sorted(fid for fid, (cost, _) in FAMILIES.items()
                         if cost in tiers and session.pool.remaining.get(fid, 0) > 0
                         and (fid not in RARE or round_no >= 14))
-    finished = sorted(set(items.catalog(RULESET)) - {'lucky_egg', 'evo_stone'})
+    finished = items.obtainable(RULESET)
+    from arena_mech_items import TREASURES
     options = []
     picks = rng.sample(candidates, min(8, len(candidates)))
     for index, fid in enumerate(picks):
         if round_no < 9:
             reward = {'kind': 'component', 'key': rng.choice(items.COMPONENT_ORDER)}
+        elif index % 2 == 0:
+            reward = {'kind': 'item', 'key': rng.choice(TREASURES)}   # half the late draft offers a treasure
         else:
             reward = {'kind': 'item', 'key': rng.choice(finished)}
         piece = make_piece(fid)
@@ -564,6 +567,16 @@ def _bot_items(seat):
         if spare:
             owned.extra_item = spare[0]
             seat.inventory.finished.remove(spare[0])
+
+
+def pve_treasure(session, seat):
+    """Winning a wild round from round 10 on grants one treasure (deterministic)."""
+    if session.round_no < 10:
+        return None
+    from arena_mech_items import TREASURES
+    key = TREASURES[(session.seed + session.round_no * 3 + seat.seat) % len(TREASURES)]
+    seat.inventory.finished.append(key)
+    return key
 
 
 def pve_bonus(session, seat):

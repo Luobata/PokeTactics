@@ -221,7 +221,8 @@ def _depth_catalog():
             'bond_rules': [{'element': element, **arena_depth.bond_rule_view(element)}
                            for element in arena_depth.BOND_RULES],
             'items': [{'id': key, 'name': spec['name'], 'description': spec['description'],
-                       'recipe': [items.COMPONENT_NAMES[c] for c in spec['pairs'][0]]}
+                       'recipe': [items.COMPONENT_NAMES[c] for c in spec['pairs'][0]] if spec['pairs'] else [],
+                       'treasure': bool(spec.get('treasure'))}
                       for key, spec in arena_depth.DEPTH_ITEMS.items()],
             'component_stats': {key: dict(value) for key, value in arena_depth.COMPONENT_STATS.items()}}
 

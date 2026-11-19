@@ -40,6 +40,7 @@ def play(seed):
                 snapshots[bot.seat] = {
                     'rules': rules, 'order': arena_session.order_of(s, bot),
                     'stars': [o.piece.star for o in bot.board],
+                    'items': sorted({k for o in bot.board for k in (o.item, getattr(o, 'extra_item', None)) if k}),
                     'costs': [o.piece.tier for o in bot.board], 'level': bot.level,
                     'round': s.round_no}
 
@@ -72,6 +73,8 @@ def summarize(games):
             for key in row.get('rules', []):
                 by['breakpoint'][key].append(row['rank'])
             by['order'][row.get('order', 'none')].append(row['rank'])
+            for key in row.get('items', []):
+                by['item'][key].append(row['rank'])
             for key in row.get('quests_done', []):
                 by['quest_done'][key].append(row['rank'])
     report = {}

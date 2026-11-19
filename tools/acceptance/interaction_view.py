@@ -424,8 +424,14 @@ def _component_stat(sess, component):
 
 def _carrier_score(owned, key):
     from arena_equipment import carrier_rank
+    import arena_mech_items as mech
     piece = owned.piece
     role = getattr(piece, 'role_key', 'attack')
+    if key in mech.MECH_ITEMS:
+        rank = mech.carrier_rank(owned, key)
+        if rank is None:
+            return None, None
+        return rank, f'{ROLE_ZH.get(role, role)} · {mech.GUIDE[key][1]}'
     rank = carrier_rank(owned, key)
     if rank is not None:
         return rank, f'{ROLE_ZH.get(role, role)} · {ARENA_ITEM_REASON.get(key, "适配")}'
@@ -485,8 +491,146 @@ def equip_block(sess):
             'unequip_cost': arena_session.UNEQUIP_COST if sess.is_depth else 0}
 
 
+# ---------------------------------------------------------------- item advisor
+_BURN_PAYOFF = {'cinder_eruption'}
+_CONTROL_PAYOFF = {'storm_conductor', 'charged_beacon', 'gale_cross', 'frost_kiss', 'horn_pressure',
+                   'undertow_lock'}
+
+
+def advisor_context(sess, seat=None):
+    """What the player's own pieces, augments and items enable (public, own data only)."""
+    import arena_bonds
+    p = seat or sess.player
+    owned = p.all_pieces()
+    pieces = [o.piece for o in p.board] or [o.piece for o in owned]
+    skills = [_skill(o.piece.species_id) for o in owned]
+    counts = arena_bonds.count([o.piece for o in p.board]) if p.board else {}
+    held = set(p.inventory.finished)
+    for o in owned:
+        held.update(k for k in (o.item, getattr(o, 'extra_item', None)) if k)
+    traits = {getattr(o, 'arena_trait', None) for o in owned}
+    return {
+        'skill_categories': {s.get('category') for s in skills if s},
+        'skill_ids': {s.get('effect', s.get('id')) for s in skills if s},
+        'techniques': {o.technique for o in owned if o.technique},
+        'augments': set(__import__('arena_session').augment_keys(p)),
+        'bonds': {k: v for k, v in counts.items() if k.isupper()},
+        'tactics': {k: v for k, v in counts.items() if k.startswith('bond_')},
+        'items': held,
+        'mods': {m for o in owned for m in (getattr(o, 'skill_mods', None) or [])},
+        'roles': [getattr(piece, 'role_key', 'attack') for piece in pieces],
+        'core': next((o for o in owned if getattr(o, 'is_core', False)), None),
+        'burn_payoff': bool(_BURN_PAYOFF & {s.get('effect', s.get('id')) for s in skills if s})
+                       or 'trait_ignite_pursuit' in traits,
+        'control_payoff': bool(_CONTROL_PAYOFF & {s.get('effect', s.get('id')) for s in skills if s}),
+    }
+
+
+def item_guide(sess, key, ctx):
+    import arena_mech_items as mech
+    spec = items_mod.FINISHED.get(key, {})
+    if key in mech.GUIDE:
+        archetype, playstyle, links = mech.GUIDE[key]
+    else:
+        archetype, playstyle = mech.GUIDE_BASE.get(key, ('输出' if spec.get('atk') else '坦克', ''))
+        links = []
+    active, missing = [], []
+    for _id, text, test in links:
+        try:
+            (active if test(ctx) else missing).append(text)
+        except Exception:  # pragma: no cover - defensive on partial seats
+            missing.append(text)
+    return {'archetype': archetype, 'playstyle': playstyle, 'active': active, 'missing': missing,
+            'mechanic': key in mech.MECH_ITEMS or bool(spec.get('description')),
+            'treasure': bool(spec.get('treasure'))}
+
+
+def advice_block(sess):
+    """Concrete next steps: equip what you hold, craft what you can, chase one component."""
+    if not sess.is_arena:
+        return None
+    import arena_session
+    p = sess.player
+    ctx = advisor_context(sess)
+    owned = p.all_pieces()
+    catalog = items_mod.catalog(sess.ruleset)
+
+    def best(key):
+        ranked = []
+        for o in owned:
+            score, reason = _carrier_score(o, key)
+            if score is None:
+                continue
+            slots = arena_session.item_slots(o, p) if sess.is_depth else 1
+            used = (1 if o.item else 0) + (1 if getattr(o, 'extra_item', None) else 0)
+            if used >= slots:
+                continue
+            ranked.append((score + (0.5 if o in p.board else 0) + (0.5 if getattr(o, 'is_core', False) else 0),
+                           o, reason))
+        ranked.sort(key=lambda row: (-row[0], row[1].piece.name))
+        return ranked[0] if ranked else None
+
+    def score_item(key):
+        guide = item_guide(sess, key, ctx)
+        carrier = best(key)
+        value = (carrier[0] if carrier else 0) + 1.5 * len(guide['active']) + (1 if guide['mechanic'] else 0)
+        return value, guide, carrier
+
+    suggestions = []
+    for key in dict.fromkeys(p.inventory.finished):
+        if key in ('lucky_egg', 'evo_stone'):
+            continue
+        value, guide, carrier = score_item(key)
+        if carrier:
+            suggestions.append({'action': 'equip', 'item': key, 'name': catalog.get(key, {}).get('name', key),
+                                'uid': carrier[1].uid, 'unit': carrier[1].piece.name, 'value': round(value, 1),
+                                'why': [carrier[2].split(' · ', 1)[-1]] + guide['active'][:2],
+                                'archetype': guide['archetype']})
+    stock = dict(p.inventory.components)
+    order = items_mod.COMPONENT_ORDER
+    for i, a in enumerate(order):
+        for b in order[i:]:
+            key = items_mod.craft_result(a, b, sess.ruleset)
+            if key == 'evo_stone' or key not in catalog or key == 'lucky_egg':
+                continue
+            need = {a: 2} if a == b else {a: 1, b: 1}
+            short = sum(max(0, n - stock.get(c, 0)) for c, n in need.items())
+            if short > 1:
+                continue
+            value, guide, carrier = score_item(key)
+            if not carrier:
+                continue
+            row = {'item': key, 'name': catalog[key]['name'], 'uid': carrier[1].uid, 'unit': carrier[1].piece.name,
+                   'recipe': [items_mod.COMPONENT_NAMES[a], items_mod.COMPONENT_NAMES[b]],
+                   'value': round(value - (1 if short else 0), 1),
+                   'why': [carrier[2].split(' · ', 1)[-1]] + guide['active'][:2], 'archetype': guide['archetype']}
+            if short == 0:
+                suggestions.append({**row, 'action': 'craft'})
+            else:
+                lacking = next(items_mod.COMPONENT_NAMES[c] for c, n in need.items() if stock.get(c, 0) < n)
+                suggestions.append({**row, 'action': 'chase', 'lacking': lacking})
+    seen, unique = set(), []
+    for row in sorted(suggestions, key=lambda r: (-r['value'], {'equip': 0, 'craft': 1, 'chase': 2}[r['action']])):
+        if (row['action'], row['item']) in seen:
+            continue
+        seen.add((row['action'], row['item']))
+        unique.append(row)
+    guides = {key: item_guide(sess, key, ctx) for key in catalog
+              if key not in ('evo_stone',) and not items_mod.retired(key, sess.ruleset)}
+    archetypes = {}
+    for o in owned:
+        for k in (o.item, getattr(o, 'extra_item', None)):
+            if k:
+                arche = guides.get(k, {}).get('archetype')
+                if arche:
+                    archetypes[arche] = archetypes.get(arche, 0) + 1
+    return {'suggestions': unique[:6], 'guides': guides, 'team_archetypes': archetypes,
+            'archetype_order': list(__import__('arena_mech_items').ARCHETYPES)}
+
+
 def build(sess):
     return {
+        'item_advice': advice_block(sess),
         'version': 1,
         'augments': augment_block(sess),
         'techniques': technique_block(sess),

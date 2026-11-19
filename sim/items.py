@@ -202,10 +202,26 @@ def catalog(ruleset=tactics.BASE_RULESET):
             and (key != "evo_stone" or not tactics.is_arena(ruleset))}
 
 
+def retired(key, ruleset) -> bool:
+    """arena_v2 retires the numeric items: still valid in saves, never crafted or dropped."""
+    if not tactics.is_depth(ruleset):
+        return False
+    from arena_mech_items import RETIRED_IN_V2
+    return key in RETIRED_IN_V2
+
+
+def obtainable(ruleset):
+    """Finished items a seat can receive as loot/draft under ``ruleset``."""
+    return sorted(key for key in catalog(ruleset)
+                  if key not in ('lucky_egg', 'evo_stone') and not retired(key, ruleset))
+
+
 def _pair_lookup(ruleset=tactics.BASE_RULESET) -> Dict[Tuple[str, str], str]:
     """排序后的组件对 → 成品 key（进化石不在表内 = 兜底）。"""
     table: Dict[Tuple[str, str], str] = {}
     for key, spec in catalog(ruleset).items():
+        if retired(key, ruleset):
+            continue
         for a, b in spec["pairs"] or ():
             table[tuple(sorted((a, b)))] = key
     return table
@@ -251,7 +267,9 @@ class Inventory:
             return None
         if key == "evo_stone":
             return self._stone_pair()
-        for pair in sorted(FINISHED[key]["pairs"]):
+        if retired(key, self.ruleset):
+            return None
+        for pair in sorted(FINISHED[key]["pairs"] or ()):
             a, b = pair
             need_b = 2 if a == b else 1
             if self.components[a] >= 1 and self.components[b] >= need_b:
