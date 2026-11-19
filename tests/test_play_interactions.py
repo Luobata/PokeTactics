@@ -299,6 +299,12 @@ class FrontendMomentsTest(unittest.TestCase):
     def test_equip_ranks_carriers_previews_slots_and_equips(self):
         self.run_scenario('equipPreview')
 
+    def test_item_advice_strip_filters_combos_equip_and_chase(self):
+        self.run_scenario('itemAdvice')
+
+    def test_craft_advice_crafts_then_offers_the_carrier(self):
+        self.run_scenario('itemAdviceCraft')
+
     def test_star_up_mod_choice_opens_and_can_be_deferred(self):
         self.run_scenario('skillMod')
 

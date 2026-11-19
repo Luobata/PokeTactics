@@ -79,7 +79,80 @@ function recorder() {
 const tile = (p, loc) => p.element(loc[0] === 'b' ? 'bench' : 'ally-board').querySelector(`[data-loc="${loc}"]`);
 const sheetOpen = (p) => p.element('ix-sheet').hidden === false;
 
+function adviceFixture() {
+  const s = fixture({augments: false});
+  s.items.finished = [{key: 'metronome', name: '节拍器', effect: '普攻叠攻速'}, {key: 'taunt_bell', name: '挑衅铃', effect: '开战嘲讽'}];
+  s.interactions.equip.items.taunt_bell = {name: '挑衅铃', lines: [], stats: [], effect: '开战嘲讽', recipe: '硬石头 + 硬石头',
+    carriers: [{uid: 'front', name: '小拳石', score: 3, reason: '防守型 · 前排嘲讽', free: true}], suits: '前排嘲讽'};
+  s.interactions.item_advice = {
+    suggestions: [
+      {action: 'equip', item: 'metronome', name: '节拍器', uid: 'bench1', unit: '皮卡丘', value: 5, why: ['攻击型普攻叠攻速', '电 4 电弧'], archetype: '输出'},
+      {action: 'craft', item: 'metronome', name: '节拍器', uid: 'front', unit: '小拳石', value: 4, why: ['叠攻速'], archetype: '输出', recipe: ['力量头带', '力量头带']},
+      {action: 'chase', item: 'choice_band', name: '专爱头巾', uid: 'bench1', unit: '皮卡丘', value: 3, why: ['输出'], archetype: '输出', recipe: ['力量头带', '磁铁线圈'], lacking: '磁铁线圈'}],
+    guides: {
+      metronome: {archetype: '输出', playstyle: '同目标叠攻速', active: ['电 4 电弧'], missing: ['连击'], mechanic: true, treasure: false},
+      taunt_bell: {archetype: '坦克', playstyle: '开战嘲讽并减伤', active: [], missing: ['钢 2 反甲'], mechanic: true, treasure: false},
+      choice_band: {archetype: '输出', playstyle: '攻击 +35%', active: [], missing: [], mechanic: false, treasure: false}},
+    team_archetypes: {输出: 2}, archetype_order: ['输出', '坦克', '控制', '联动', '辅助', '经济']};
+  return s;
+}
+
 const cases = {
+  async itemAdvice() {
+    const rec = recorder();
+    const p = await page(adviceFixture(), rec.options);
+    const box = p.element('ix-advice');
+    assert.equal(box.hidden, false);
+    const cards = box.querySelectorAll('article');
+    assert.equal(cards.length, 3);
+    assert.match(cards[0].textContent, /给 皮卡丘/);
+    assert.match(cards[0].textContent, /电 4 电弧/);
+    assert.match(cards[1].textContent, /力量头带 \+ 力量头带 → 给 小拳石/);
+    assert.match(cards[2].textContent, /差 磁铁线圈/);
+    assert.match(box.querySelector('.ix-team-arch').textContent, /缺少坦克、控制道具/);
+    // Item cards: archetype, mechanic badge, playstyle, active / missing combos, filter chips.
+    const items = p.element('ix-items');
+    assert.equal(items.querySelectorAll('article').length, 2);
+    assert.match(items.textContent, /同目标叠攻速/);
+    assert.match(items.querySelector('.ix-combos').textContent, /✓电 4 电弧.*还差：连击/s);
+    assert.ok(items.querySelector('.ix-kind.mech'));
+    const filter = p.element('ix-item-filter');
+    assert.equal(filter.hidden, false);
+    await p.click(filter.querySelector('[data-ix-arch="坦克"]'));
+    assert.equal(p.element('ix-items').querySelectorAll('article').length, 1);
+    assert.match(p.element('ix-items').textContent, /挑衅铃/);
+    await p.click(p.element('ix-item-filter').querySelector('[data-ix-arch=""]'));
+    assert.equal(p.element('ix-items').querySelectorAll('article').length, 2);
+    // Equip advice → the usual confirm sheet → equip on the suggested unit.
+    await p.click(box.querySelector('[data-ix-advice="equip"]'));
+    assert.equal(p.element('ix-sheet').hidden, false);
+    assert.match(p.element('ix-sheet-body').textContent, /皮卡丘/);
+    await p.click(p.element('ix-sheet-body').querySelector('[data-ix-confirm-equip]'));
+    const equip = rec.calls.find((c) => c.cmd === 'equip');
+    assert.deepEqual([equip.item, equip.loc], ['metronome', 'b0']);
+    // Chase highlights the recipe and the missing component.
+    await p.click(p.element('ix-advice').querySelector('[data-ix-advice="chase"]'));
+    const recipes = p.element('ix-recipes');
+    assert.match(recipes.querySelector('.ix-chase-note').textContent, /专爱头巾.*磁铁线圈/s);
+    assert.ok(recipes.querySelector('[data-ix-cell="band|magnet"]').classList.contains('ix-chase'));
+    assert.ok(recipes.querySelector('[data-ix-comp="magnet"]').classList.contains('ix-chase'));
+    // Equip targeting shows the item's active combos.
+    await p.click(p.element('ix-items').querySelector('[data-ix-equip="metronome"]'));
+    assert.match(p.element('ix-target-bar').textContent, /✓ 电 4 电弧/);
+  },
+
+  async itemAdviceCraft() {
+    const rec = recorder();
+    const p = await page(adviceFixture(), rec.options);
+    await p.click(p.element('ix-advice').querySelector('[data-ix-advice="craft"]'));
+    assert.deepEqual(rec.calls.map((c) => [c.cmd, c.item]), [['craft', 'metronome']]);
+    assert.equal(p.element('ix-sheet').hidden, false, 'after crafting the equip sheet for the suggested unit opens');
+    assert.match(p.element('ix-sheet-body').textContent, /刚合成/);
+    await p.click(p.element('ix-sheet-body').querySelector('[data-ix-confirm-equip]'));
+    const equip = rec.calls.find((c) => c.cmd === 'equip');
+    assert.deepEqual([equip.item, equip.loc], ['metronome', 'g0,2'], 'equips onto the suggested unit');
+  },
+
   async augmentMoment() {
     const rec = recorder();
     const p = await page(fixture(), rec.options);

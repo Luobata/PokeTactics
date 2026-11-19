@@ -552,3 +552,134 @@
 
 /* Inside the drawer the drawer body is the single scroll layer (no nested 340px boxes). */
 .stage-ui .stage-drawer .system-panel { max-height: none; overflow: visible; padding: 10px 2px 12px; }
+
+/* ------------------------------------------------------------ item advisor (docs/66) */
+.stage-ui {
+  --arch-dps: #c4553d;
+  --arch-tank: #3f7fc1;
+  --arch-ctrl: #7b5bc9;
+  --arch-combo: #d0832a;
+  --arch-sup: #4f9a4a;
+  --arch-eco: #b58b36;
+}
+.stage-ui .arch-dps { --arch: var(--arch-dps); }
+.stage-ui .arch-tank { --arch: var(--arch-tank); }
+.stage-ui .arch-ctrl { --arch: var(--arch-ctrl); }
+.stage-ui .arch-combo { --arch: var(--arch-combo); }
+.stage-ui .arch-sup { --arch: var(--arch-sup); }
+.stage-ui .arch-eco { --arch: var(--arch-eco); }
+.stage-ui .ix-arch {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 8px 1px 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--arch, #6c7d58) 14%, #fff);
+  border: 1px solid color-mix(in srgb, var(--arch, #6c7d58) 45%, #fff);
+  color: color-mix(in srgb, var(--arch, #6c7d58) 85%, #000);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.stage-ui .ix-arch b {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--arch, #6c7d58);
+  color: #fff;
+  font-size: 10px;
+}
+.stage-ui .ix-arch.zero { opacity: .45; }
+.stage-ui .ix-kind { padding: 1px 7px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.stage-ui .ix-kind.mech { background: #e9e2fb; color: #4b2f7a; }
+.stage-ui .ix-kind.treasure { background: #fff0c4; color: #7a5a12; box-shadow: inset 0 0 0 1px #e9c96b; }
+.stage-ui .ix-kind.stat { background: #eef1e6; color: #66745c; }
+.stage-ui .ix-playstyle { font-weight: 600; color: #3d4c3f; }
+.stage-ui .ix-combos { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: 12px; }
+.stage-ui .ix-combos li { display: flex; gap: 6px; align-items: baseline; }
+.stage-ui .ix-combos li.on { color: #2f6a2a; }
+.stage-ui .ix-combos li.on span { font-weight: 800; }
+.stage-ui .ix-combos li.off { color: #8a8f80; }
+
+.stage-ui .ix-advice { margin-bottom: 14px; }
+.stage-ui .ix-advice[hidden] { display: none; }
+.stage-ui .ix-team-arch { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-bottom: 8px; font-size: 12px; }
+.stage-ui .ix-team-label { color: #66745c; font-weight: 600; margin-right: 2px; }
+.stage-ui .ix-team-hint { font-style: normal; font-weight: 700; color: #a8452f; }
+.stage-ui .ix-advice-list { display: grid; gap: 8px; }
+.stage-ui .ix-advice-card {
+  display: grid;
+  gap: 5px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fffdf5;
+  border: 1px solid #e3dcc2;
+  border-left: 4px solid #6fae4f;
+  font-size: 12px;
+}
+.stage-ui .ix-advice-card.act-craft { border-left-color: #c79a1a; }
+.stage-ui .ix-advice-card.act-chase { border-left-color: #a9b3a0; background: #fbfbf6; }
+.stage-ui .ix-advice-card header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.stage-ui .ix-advice-card header b { font-size: 14px; color: #263c33; }
+.stage-ui .ix-act { padding: 1px 8px; border-radius: 6px; background: #2f5a1f; color: #fff; font-weight: 700; font-size: 11px; }
+.stage-ui .act-craft .ix-act { background: #9b7417; }
+.stage-ui .act-chase .ix-act { background: #7c8573; }
+.stage-ui .ix-advice-target { color: #4b5a44; }
+.stage-ui .ix-advice-card button { justify-self: start; min-height: 40px; padding: 4px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+.stage-ui .ix-advice-card .primary-button { background: #33573b; color: #fff; border: 0; }
+
+.stage-ui .ix-arch-filter { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+.stage-ui .ix-arch-filter[hidden] { display: none; }
+.stage-ui .ix-arch-filter button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 3px 12px 3px 6px;
+  border-radius: 999px;
+  border: 1px solid #d3dcc3;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+.stage-ui .ix-arch-filter button b { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--arch, #6c7d58); color: #fff; font-size: 11px; }
+.stage-ui .ix-arch-filter button[aria-pressed="true"] { background: #22372e; border-color: #22372e; color: #fff; }
+.stage-ui .ix-item-card[data-arch]:not([data-arch=""]) { border-left: 4px solid var(--arch-line, #c9d6b0); }
+.stage-ui .ix-item-card[data-arch="dps"] { --arch-line: var(--arch-dps); }
+.stage-ui .ix-item-card[data-arch="tank"] { --arch-line: var(--arch-tank); }
+.stage-ui .ix-item-card[data-arch="ctrl"] { --arch-line: var(--arch-ctrl); }
+.stage-ui .ix-item-card[data-arch="combo"] { --arch-line: var(--arch-combo); }
+.stage-ui .ix-item-card[data-arch="sup"] { --arch-line: var(--arch-sup); }
+.stage-ui .ix-item-card[data-arch="eco"] { --arch-line: var(--arch-eco); }
+
+/* recipe board: archetype stripe, mechanic mark, chase target */
+.stage-ui .ix-mx-cell { position: relative; }
+.stage-ui .ix-mx-cell[class*="arch-"]:not(.dead) { box-shadow: inset 0 3px 0 var(--arch); }
+.stage-ui .ix-mx-cell.craftable[class*="arch-"] { box-shadow: inset 0 3px 0 var(--arch), 0 0 10px #8fd46a88; }
+.stage-ui .ix-mech { position: absolute; top: 1px; right: 3px; font-style: normal; font-size: 9px; color: #5b3f8f; }
+.stage-ui .ix-mx-cell.ix-chase { outline: 3px solid #e0703a; outline-offset: 1px; z-index: 1; }
+.stage-ui .ix-comp.ix-chase { outline: 3px dashed #e0703a; opacity: 1; }
+.stage-ui .ix-chase-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #fff1e6;
+  border: 1px solid #f1c6a3;
+  font-size: 12px;
+}
+.stage-ui .ix-chase-note button { margin-left: auto; min-height: 36px; padding: 2px 12px; border-radius: 8px; background: #fff; border: 1px solid #f1c6a3; }
+.stage-ui .ix-bar-combos { color: #c8f0b8 !important; }
+.stage-ui .context-actions .context-advice { background: #f3ecff; border-color: #cdb8f5; color: #4b2f7a; }
+
+/* phone: suggestions scroll sideways so the bag stays short */
+.stage-ui.layout-phone .ix-advice-list { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; }
+.stage-ui.layout-phone .ix-advice-card { flex: 0 0 82%; scroll-snap-align: start; }
+.stage-ui.layout-phone .ix-advice-card button,
+.stage-ui.layout-phone .ix-arch-filter button { min-height: 44px; }
+.stage-ui .ix-target-bar button { flex: none; white-space: nowrap; }
+.stage-ui .ix-target-bar { max-width: min(640px, calc(100% - 16px)); }

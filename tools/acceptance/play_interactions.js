@@ -255,6 +255,65 @@
       <div class="ix-sheet-actions"><button type="button" class="secondary-button" data-ix-mod-later data-uid="${esc(row.p.uid)}">稍后再选</button></div>`);
   }
 
+  // ------------------------------------------------------------ item advice (docs/65 data, docs/66 UI)
+  const ARCH = {"输出": "dps", "坦克": "tank", "控制": "ctrl", "联动": "combo", "辅助": "sup", "经济": "eco"};
+  const ARCH_GLYPH = {"输出": "⚔", "坦克": "⛨", "控制": "❄", "联动": "⚙", "辅助": "✚", "经济": "◎"};
+  let archFilter = null;     // item card filter (archetype name) or null = all
+  let chase = null;          // item key highlighted on the recipe board
+  const advice = () => IX()?.item_advice || null;
+  const guideOf = (key) => advice()?.guides?.[key] || null;
+  const archBadge = (a) => a ? `<span class="ix-arch arch-${ARCH[a] || "x"}"><b aria-hidden="true">${ARCH_GLYPH[a] || "◆"}</b>${esc(a)}</span>` : "";
+  const kindBadge = (g) => !g ? "" : g.treasure ? '<span class="ix-kind treasure">宝物</span>'
+    : g.mechanic ? '<span class="ix-kind mech">机制</span>' : '<span class="ix-kind stat">数值</span>';
+  function combos(g, {limit = 3, short = false} = {}) {
+    if (!g) return "";
+    const on = (g.active || []).slice(0, limit).map((x) => `<li class="on"><span aria-hidden="true">✓</span>${esc(x)}</li>`).join("");
+    const off = (g.missing || []).slice(0, short ? 1 : limit).map((x) => `<li class="off"><span aria-hidden="true">○</span>还差：${esc(x)}</li>`).join("");
+    return on || off ? `<ul class="ix-combos">${on}${off}</ul>` : "";
+  }
+  const ACTION = {equip: ["装备", "装上"], craft: ["合成", "合成并装给"], chase: ["凑齐", "在合成图中查看"]};
+
+  function renderAdvice(s, ix) {
+    const box = $("ix-advice");
+    if (!box) return;
+    const adv = ix?.item_advice;
+    box.hidden = !adv;
+    if (!adv) { memo(box).innerHTML = ""; return; }
+    const order = adv.archetype_order || Object.keys(ARCH);
+    const team = adv.team_archetypes || {};
+    const total = Object.values(team).reduce((n, v) => n + Number(v || 0), 0);
+    const lacking = total >= 2 ? ["坦克", "输出", "控制"].filter((a) => order.includes(a) && !team[a]) : [];
+    const rows = adv.suggestions || [];
+    const card = (row) => {
+      const [label, cta] = ACTION[row.action] || ["建议", "查看"];
+      const target = row.action === "chase" ? `差 <b>${esc(row.lacking)}</b> · 合成后给 ${esc(row.unit)}`
+        : row.action === "craft" ? `${(row.recipe || []).map(esc).join(" + ")} → 给 ${esc(row.unit)}` : `给 ${esc(row.unit)}`;
+      return `<article class="ix-advice-card act-${esc(row.action)}">
+        <header><span class="ix-act">${label}</span><b>${esc(row.name)}</b>${archBadge(row.archetype)}</header>
+        <p class="ix-advice-target">${target}</p>
+        ${(row.why || []).length ? `<ul class="ix-combos">${row.why.slice(0, 3).map((x) => `<li class="on"><span aria-hidden="true">✓</span>${esc(x)}</li>`).join("")}</ul>` : ""}
+        <button type="button" class="${row.action === "chase" ? "secondary-button" : "primary-button"}" data-ix-advice="${esc(row.action)}" data-item="${esc(row.item)}" data-uid="${esc(row.uid || "")}" ${row.action !== "chase" && !canPrep() ? "disabled" : ""}>${cta}${row.action === "craft" ? ` ${esc(row.unit)}` : ""}</button>
+      </article>`;
+    };
+    memo(box).innerHTML = `<div class="section-heading"><h2>配装建议</h2><span class="tiny-label">${rows.length ? `${rows.length} 条 · 按收益排序` : "ADVISOR"}</span></div>
+      <div class="ix-team-arch" aria-label="已装备道具类型"><span class="ix-team-label">队伍道具</span>${order.map((a) => `<span class="ix-arch arch-${ARCH[a] || "x"}${team[a] ? "" : " zero"}"><b aria-hidden="true">${ARCH_GLYPH[a] || "◆"}</b>${esc(a)} ${Number(team[a]) || 0}</span>`).join("")}${lacking.length ? `<em class="ix-team-hint">缺少${lacking.join("、")}道具</em>` : ""}</div>
+      ${rows.length ? `<div class="ix-advice-list">${rows.map(card).join("")}</div>` : '<p class="empty-copy">暂时没有能马上执行的配装：继续收集组件，或看下方合成图。</p>'}`;
+  }
+
+  function renderArchFilter(s, ix, keys) {
+    const box = $("ix-item-filter");
+    if (!box) return;
+    const order = ix?.item_advice?.archetype_order || [];
+    const counts = new Map();
+    for (const key of keys) {
+      const a = guideOf(key)?.archetype;
+      if (a) counts.set(a, (counts.get(a) || 0) + 1);
+    }
+    if (archFilter && !counts.has(archFilter)) archFilter = null;
+    box.hidden = counts.size < 2;
+    memo(box).innerHTML = counts.size < 2 ? "" : `<button type="button" data-ix-arch="" aria-pressed="${!archFilter}">全部 ${keys.length}</button>${order.filter((a) => counts.has(a)).map((a) => `<button type="button" class="arch-${ARCH[a] || "x"}" data-ix-arch="${esc(a)}" aria-pressed="${archFilter === a}"><b aria-hidden="true">${ARCH_GLYPH[a] || "◆"}</b>${esc(a)} ${counts.get(a)}</button>`).join("")}`;
+  }
+
   // ------------------------------------------------------------ items
   function renderItems(s, ix) {
     const box = $("ix-items");
@@ -264,12 +323,17 @@
     const counts = new Map();
     for (const item of finished) counts.set(item.key, (counts.get(item.key) || 0) + 1);
     const depth = s.depth?.items;
-    memo(box).innerHTML = counts.size ? [...counts].map(([key, n]) => {
+    renderArchFilter(s, ix, [...counts.keys()]);
+    const shown = [...counts].filter(([key]) => !archFilter || guideOf(key)?.archetype === archFilter);
+    memo(box).innerHTML = counts.size ? shown.map(([key, n]) => {
       const row = data[key] || {};
       const item = finished.find((x) => x.key === key);
+      const guide = guideOf(key);
       const lines = [...(row.lines || []), ...(row.stats || []).map((x) => `组件 ${x}`)];
-      return `<article class="ix-item-card${mode?.kind === "equip" && mode.key === key ? " active" : ""}" ${canPrep() ? `draggable="true" data-ix-drag="item:${esc(key)}"` : ""}>
-        <header><b>◆ ${esc(row.name || item?.name || key)}</b>${n > 1 ? `<span class="ix-chip">×${n}</span>` : ""}${row.recipe ? `<small>${esc(row.recipe)}</small>` : ""}</header>
+      return `<article class="ix-item-card" data-arch="${esc(ARCH[guide?.archetype] || "")}" ${canPrep() ? `draggable="true" data-ix-drag="item:${esc(key)}"` : ""}>
+        <header><b>◆ ${esc(row.name || item?.name || key)}</b>${n > 1 ? `<span class="ix-chip">×${n}</span>` : ""}${archBadge(guide?.archetype)}${kindBadge(guide)}${row.recipe ? `<small>${esc(row.recipe)}</small>` : ""}</header>
+        ${guide?.playstyle ? `<p class="ix-playstyle">${esc(guide.playstyle)}</p>` : ""}
+        ${combos(guide)}
         ${lines.length ? `<div class="ix-item-lines">${lines.map((x) => `<span>${esc(x)}</span>`).join("")}</div>` : ""}
         <p>${esc(row.effect || item?.effect || "")}</p>
         ${row.suits ? `<p class="ix-item-suits">适合：${esc(row.suits)}${row.carriers?.length ? ` · 推荐 ${row.carriers.map((c) => esc(c.name)).join(" › ")}` : ""}</p>` : '<p class="ix-item-suits ix-muted">队里暂时没有特别适合的携带者</p>'}
@@ -315,19 +379,30 @@
     }
     const comps = data.components || [];
     const ready = (data.cells || []).filter((c) => c.craftable).length;
+    const chasing = chase ? (ix?.item_advice?.suggestions || []).find((r) => r.item === chase) || null : null;
+    if (chase && !chasing) chase = null;
     const head = comps.map((c) => `<span class="ix-mx-head${c.n ? " have" : ""}" title="${esc(c.name)}${c.stats ? `：${esc(c.stats)}` : ""}">${esc(shortName(c.name))}<b>${Number(c.n)}</b></span>`).join("");
     const rows = comps.map((ra) => `<span class="ix-mx-head row${ra.n ? " have" : ""}">${esc(shortName(ra.name))}<b>${Number(ra.n)}</b></span>${comps.map((cb) => {
       const cell = cellFor(ra.key, cb.key);
       if (!cell) return '<span class="ix-mx-cell dead"></span>';
       const cls = cell.dead ? "dead" : cell.craftable ? "craftable" : cell.blocked ? "blocked" : cell.missing.length === 1 ? "near" : "missing";
       const label = cell.dead ? "—" : esc(shortName(cell.name));
+      const g = cell.item ? guideOf(cell.item) : null;
+      const arch = g?.archetype ? ` arch-${ARCH[g.archetype] || "x"}` : "";
+      const mark = g?.treasure ? "★" : g?.mechanic ? "⚙" : "";
       const sub = cell.dead ? "" : cell.craftable ? "可合成" : cell.blocked ? "已达上限" : `差${cell.missing.length}`;
-      return `<button type="button" class="ix-mx-cell ${cls}${cell.depth ? " depth" : ""}" data-ix-cell="${esc(cell.a)}|${esc(cell.b)}" aria-label="${esc(ra.name)} + ${esc(cb.name)}：${cell.dead ? "无配方" : `${esc(cell.name)}，${sub}`}"${cell.dead ? " disabled" : ""}><b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</button>`;
+      return `<button type="button" class="ix-mx-cell ${cls}${cell.depth ? " depth" : ""}${arch}${chase && cell.item === chase ? " ix-chase" : ""}" data-ix-cell="${esc(cell.a)}|${esc(cell.b)}" aria-label="${esc(ra.name)} + ${esc(cb.name)}：${cell.dead ? "无配方" : `${esc(cell.name)}，${sub}`}"${cell.dead ? " disabled" : ""}>${mark ? `<i class="ix-mech" aria-hidden="true">${mark}</i>` : ""}<b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</button>`;
     }).join("")}`).join("");
     memo(box).innerHTML = `<div class="section-heading"><h2>组件合成图</h2><span class="tiny-label">${ready ? `${ready} 件可合成` : "RECIPES"}</span></div>
       <p class="section-note">行列是 8 种组件（右下数字 = 库存）。亮起的格子现在就能合成；${isPhone() ? "点格子查看并合成。" : "点格子合成，或把一个组件拖到另一个组件上。"}${s.depth ? "金框为深度版新增配方。" : "灰色为无配方的组合。"}</p>
-      <div class="ix-comp-row">${comps.map((c) => `<span class="ix-comp${c.n ? " have" : ""}" data-ix-comp="${esc(c.key)}" ${c.n && canPrep() ? `draggable="true" data-ix-drag="comp:${esc(c.key)}"` : ""} title="${esc(c.stats || c.name)}"><b>${esc(c.name)}</b><small>×${Number(c.n)}${c.stats ? ` · ${esc(c.stats)}` : ""}</small></span>`).join("")}</div>
+      ${chasing ? `<p class="ix-chase-note">正在凑：<b>${esc(chasing.name)}</b> · 还差 <b>${esc(chasing.lacking || "—")}</b> · 合成后给 ${esc(chasing.unit)}<button type="button" data-ix-chase-clear>取消</button></p>` : ""}
+      <div class="ix-comp-row">${comps.map((c) => `<span class="ix-comp${c.n ? " have" : ""}${chase && chaseLacking() === c.key ? " ix-chase" : ""}" data-ix-comp="${esc(c.key)}" ${c.n && canPrep() ? `draggable="true" data-ix-drag="comp:${esc(c.key)}"` : ""} title="${esc(c.stats || c.name)}"><b>${esc(c.name)}</b><small>×${Number(c.n)}${c.stats ? ` · ${esc(c.stats)}` : ""}</small></span>`).join("")}</div>
       <div class="ix-matrix-scroll"><div class="ix-matrix"><span class="ix-mx-corner" aria-hidden="true">＋</span>${head}${rows}</div></div>`;
+  }
+
+  function chaseLacking() {
+    const row = (IX()?.item_advice?.suggestions || []).find((r) => r.item === chase && r.action === "chase");
+    return row ? (IX()?.recipes?.components || []).find((c) => c.name === row.lacking)?.key || null : null;
   }
 
   function cellSheet(a, b) {
@@ -338,6 +413,7 @@
     openSheet({kind: "craft", item: cell.item}, `合成 ${cell.name}`, `
       <p class="ix-recipe-line">${esc(names.get(cell.a))} <span>+</span> ${esc(names.get(cell.b))} <span>→</span> <strong>${esc(cell.name)}</strong>${cell.depth ? ' <span class="ix-chip gold">深度版</span>' : ""}</p>
       ${cell.stats?.length ? `<div class="ix-item-lines">${cell.stats.map((x) => `<span>组件 ${esc(x)}</span>`).join("")}</div>` : ""}
+      ${guideOf(cell.item) ? `<p class="ix-sheet-tag">${archBadge(guideOf(cell.item).archetype)}${kindBadge(guideOf(cell.item))}</p>${guideOf(cell.item).playstyle ? `<p class="ix-playstyle">${esc(guideOf(cell.item).playstyle)}</p>` : ""}${combos(guideOf(cell.item), {limit: 4})}` : ""}
       <p>${esc(cell.effect)}</p>
       ${cell.craftable ? "" : `<p class="ix-warn">${cell.blocked ? "幸运蛋已达全场上限" : `还差：${cell.missing.map(esc).join("、")}`}</p>`}
       <div class="ix-sheet-actions"><button type="button" class="secondary-button" data-ix-close>关闭</button><button type="button" class="primary-button" data-ix-confirm-craft="${esc(cell.item)}" ${!cell.craftable || !canPrep() || !s ? "disabled" : ""}>合成</button></div>`);
@@ -375,6 +451,8 @@
   function decorateBoard() {
     const tiles = [...($("ally-board")?.querySelectorAll("[data-loc]") || []), ...($("bench")?.querySelectorAll("[data-loc]") || [])];
     document.body.classList.toggle("ix-targeting", Boolean(mode));
+    for (const card of $("ix-items")?.querySelectorAll("[data-ix-equip]") || [])
+      card.closest?.(".ix-item-card")?.classList.toggle("active", mode?.kind === "equip" && mode.key === card.getAttribute("data-ix-equip"));
     for (const tile of tiles) {
       tile.classList.remove("ix-valid", "ix-dim", "ix-best");
       tile.querySelector(".ix-rank")?.remove?.();
@@ -406,7 +484,9 @@
       text = `<b>学习「${esc(t?.name || mode.key)}」</b><small>点亮起的伙伴${best ? ` · 推荐 ${esc(best.name)}` : ""}</small>`;
     } else {
       const row = ix?.equip?.items?.[mode.key];
-      text = `<b>装备「${esc(row?.name || mode.key)}」</b><small>${row?.carriers?.length ? `推荐 ${row.carriers.map((c, i) => `${i + 1}.${esc(c.name)}`).join(" ")}` : "点亮起的伙伴"}</small>`;
+      const top = row?.carriers?.[0];
+      const active = guideOf(mode.key)?.active || [];
+      text = `<b>装备「${esc(row?.name || mode.key)}」</b><small>${top ? `推荐 1.${esc(top.name)}：${esc(top.reason.split(" · ").slice(1).join(" · ") || top.reason)}${row.carriers.length > 1 ? ` · ${row.carriers.slice(1).map((c, i) => `${i + 2}.${esc(c.name)}`).join(" ")}` : ""}` : "点亮起的伙伴"}</small>${active.length ? `<small class="ix-bar-combos">✓ ${active.slice(0, 2).map(esc).join(" · ")}</small>` : ""}`;
     }
     memo(bar).innerHTML = `<span class="ix-bar-main">${text}${flash ? `<em>${esc(flash)}</em>` : ""}</span><button type="button" data-ix-cancel-mode>取消</button>`;
   }
@@ -471,6 +551,7 @@
     renderAugments(s, ix);
     renderStrip(s, ix);
     renderTmRack(s, ix);
+    renderAdvice(s, ix);
     renderItems(s, ix);
     renderRecipes(s, ix);
     decorateDetail(s, ix);
@@ -496,7 +577,7 @@
   };
   const CONTROLS = ["[data-ix-tm]", "[data-ix-equip]", "[data-ix-cell]", "[data-ix-socket]", "[data-ix-socket-pick]",
     "[data-ix-confirm-learn]", "[data-ix-confirm-equip]", "[data-ix-confirm-craft]", "[data-ix-mod]", "[data-ix-mod-later]",
-    "[data-ix-close]", "[data-ix-cancel-mode]", "[data-ix-augment-later]", "[data-ix-open-augment]", "[data-ix-augment-info]"];
+    "[data-ix-close]", "[data-ix-cancel-mode]", "[data-ix-advice]", "[data-ix-arch]", "[data-ix-chase-clear]", "[data-ix-augment-later]", "[data-ix-open-augment]", "[data-ix-augment-info]"];
 
   document.addEventListener("click", async (event) => {
     if (!ctx) return;
@@ -520,6 +601,14 @@
       if (mode?.kind === "equip" && mode.key === attr("data-ix-equip")) exitMode();
       else enterMode("equip", attr("data-ix-equip"));
     } else if (target.hasAttribute("data-ix-cancel-mode")) exitMode();
+    else if (target.hasAttribute("data-ix-advice")) await followAdvice(attr("data-ix-advice"), attr("data-item"), attr("data-uid"));
+    else if (target.hasAttribute("data-ix-arch")) {
+      archFilter = attr("data-ix-arch") || null;
+      renderItems(S(), IX());
+    } else if (target.hasAttribute("data-ix-chase-clear")) {
+      chase = null;
+      renderRecipes(S(), IX());
+    }
     else if (target.hasAttribute("data-ix-cell")) {
       const [a, b] = attr("data-ix-cell").split("|");
       cellSheet(a, b);
@@ -545,6 +634,25 @@
     } else if (target.hasAttribute("data-ix-open-augment")) openAugments();
     else if (target.hasAttribute("data-ix-augment-info")) augmentInfo(attr("data-ix-augment-info"));
   }, true);
+
+  /** One-tap advice: equip opens the usual confirm, craft crafts then offers the carrier, chase points at the board. */
+  async function followAdvice(action, item, uid) {
+    if (action === "equip") return equipConfirm(item, uid);
+    if (action === "craft") {
+      if (!canPrep()) return;
+      const result = await ctx.api("craft", {item});
+      if (result?.ok && byUid(uid) && IX()?.equip?.items?.[item]) {
+        equipConfirm(item, uid);
+        const head = $("ix-sheet-body")?.querySelector(".ix-unit-line");
+        head?.insertAdjacentHTML?.("beforeend", '<span class="ix-chip gold">刚合成</span>');
+      }
+      return;
+    }
+    chase = item;
+    window.PlayLayout?.open?.("bag", window.PlayLayout?.isPhone?.() ? {size: "full"} : {});
+    renderRecipes(S(), IX());
+    $("ix-recipes")?.querySelector(".ix-chase")?.scrollIntoView?.({block: "center", behavior: "smooth"});
+  }
 
   // Desktop drag: machines / items onto units, one component onto another.
   document.addEventListener("dragstart", (event) => {
