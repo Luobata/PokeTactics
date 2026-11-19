@@ -111,11 +111,12 @@
     const r = pill?.getBoundingClientRect();
     const w = Math.min(380, window.innerWidth - 16);
     box.style.width = `${w}px`;
-    if (r) {
-      box.style.left = `${Math.max(8, Math.min(r.left, window.innerWidth - w - 8))}px`;
-      box.style.top = `${Math.min(r.bottom + 8, window.innerHeight - 120)}px`;
-    }
-    box.style.maxHeight = `${Math.max(200, window.innerHeight - (r ? r.bottom + 16 : 16))}px`;
+    // Short viewports (phone landscape): use the full height beside the chip instead of a sliver below it.
+    const below = r ? window.innerHeight - r.bottom - 16 : 0;
+    const tall = !r || below < 300;
+    box.style.left = `${Math.max(8, Math.min(r ? r.left : 8, window.innerWidth - w - 8))}px`;
+    box.style.top = `${tall ? 8 : r.bottom + 8}px`;
+    box.style.maxHeight = `${tall ? window.innerHeight - 16 : below}px`;
   }
 
   function setOpen(value) {
