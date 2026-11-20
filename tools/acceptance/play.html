@@ -14,10 +14,17 @@
     <link rel="stylesheet" href="/play/assets/play_layout.css" />
     <link rel="stylesheet" href="/play/assets/play_interactions.css" />
     <script src="/play/assets/play_layout.js" defer></script>
+    <!-- docs/70: glossary + previews, context menu and guide load before the other click handlers. -->
+    <script src="/play/assets/play_preview.js" defer></script>
+    <script src="/play/assets/play_context.js" defer></script>
+    <script src="/play/assets/play_guide.js" defer></script>
     <script src="/play/assets/play_select.js" defer></script>
     <script src="/play/assets/play_interactions.js" defer></script>
     <link rel="stylesheet" href="/play/assets/play_feedback.css" />
     <link rel="stylesheet" href="/play/assets/play_select.css" />
+    <link rel="stylesheet" href="/play/assets/play_preview.css" />
+    <link rel="stylesheet" href="/play/assets/play_context.css" />
+    <link rel="stylesheet" href="/play/assets/play_guide.css" />
     <link rel="stylesheet" href="/play/assets/play_motion.css" />
     <link rel="stylesheet" href="/play/assets/play_weather.css" />
     <link rel="stylesheet" href="/play/assets/play_tree.css" />
@@ -208,6 +215,13 @@
                   aria-label="背景音乐开关"
                   title="背景音乐"
                 ><span aria-hidden="true">♪</span></button
+                ><button
+                  id="guide-button"
+                  class="icon-button guide-button"
+                  type="button"
+                  title="新手引导"
+                  aria-label="重看新手引导"
+                ><span aria-hidden="true">?</span></button
                 ><button
                   id="mobile-help-button"
                   class="icon-button mobile-help-button"
@@ -464,7 +478,7 @@
               <p id="tutorial-hint">
                 冒险从一次相遇开始。点击商店中的精灵，把它招募到备战席。
               </p>
-              <span class="hint-step">拖动或先点精灵再点格子布阵 · 空格开战</span>
+              <span class="hint-step">拖动或先点精灵再点格子布阵 · 右键/长按更多操作 · 空格开战</span>
             </div>
           </section>
 
@@ -527,7 +541,7 @@
                 </div>
                 <div class="shop-subtools" id="shop-subtools"></div>
                 <div id="shop" class="shop-grid"></div>
-                <p class="section-note shop-tip">点卡片预览，再点一次或点棋盘上方操作条的「招募」。面板保持打开，可以连续购买。</p>
+                <p class="section-note shop-tip">点卡片预览，双击卡片或点操作条的「招募」买下，再点一次取消选择；右键卡片有更多操作。面板保持打开，可以连续购买。</p>
               </section>
 
               <section class="drawer-panel unit-section" data-panel="detail" id="panel-detail" aria-label="精灵情报" hidden>
@@ -809,6 +823,7 @@
       </div>
       <div class="guide-note">
         操作会自动保存。下次打开页面，可以继续这场冒险。
+        <button type="button" class="text-button" data-guide-start>重看新手引导</button>
         <a href="/guide">打开完整玩法指南 →</a>
       </div>
     </dialog>

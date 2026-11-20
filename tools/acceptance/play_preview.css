@@ -1,0 +1,103 @@
+/* Preview card, glossary terms and the selection info strip (docs/70). */
+.pv-card {
+  position: fixed;
+  z-index: 88;
+  width: 290px;
+  max-width: calc(100vw - 16px);
+  padding: 10px 11px 8px;
+  border-radius: 12px;
+  border: 1px solid #c9d6b0;
+  background: #fffef9f7;
+  color: var(--ink, #263c33);
+  box-shadow: 0 12px 30px #13211b44;
+  font-size: 12px;
+  line-height: 1.45;
+  pointer-events: none;
+}
+.pv-card.pinned { pointer-events: auto; }
+.pv-card[hidden] { display: none; }
+.pv-card.pv-term { width: 240px; }
+.pv-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.pv-head img { width: 40px; height: 40px; object-fit: contain; image-rendering: pixelated; flex: none; }
+.pv-head > span:not(.pv-glyph):not(.pv-price) { display: flex; flex-direction: column; min-width: 0; }
+.pv-head b { font-size: 14px; }
+.pv-head b em { font-style: normal; color: #c79a1a; margin-left: 3px; font-size: 12px; }
+.pv-head small { color: #6c7d5d; font-size: 11px; }
+.pv-glyph {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: #eef3e3;
+  font-size: 17px;
+  flex: none;
+}
+.pv-price { margin-left: auto; font-weight: 700; color: #9a7425; white-space: nowrap; }
+.pv-types { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 5px; }
+.pv-type, .pv-stat, .pv-merge, .pv-pool {
+  padding: 0 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 18px;
+  background: color-mix(in srgb, var(--type, #9aa58a) 22%, #fff);
+  border: 1px solid color-mix(in srgb, var(--type, #9aa58a) 45%, #fff);
+}
+.pv-stat { background: #f1f4e8; border-color: #dfe6d0; }
+.pv-merge { background: #fff2d6; border-color: #e8c983; color: #7c5a12; }
+.pv-pool { background: #f1f4e8; border-color: #dfe6d0; color: #6c7d5d; }
+.pv-line { margin: 3px 0; }
+.pv-line i {
+  display: inline-block;
+  margin-right: 5px;
+  padding: 0 5px;
+  border-radius: 5px;
+  background: #e7efd8;
+  color: #4b6440;
+  font-style: normal;
+  font-size: 10px;
+  line-height: 16px;
+  vertical-align: 1px;
+}
+.pv-line b { margin-right: 4px; }
+.pv-tiers { margin: 4px 0; padding: 0; list-style: none; }
+.pv-tiers li { display: flex; gap: 6px; margin: 2px 0; color: #8b9483; }
+.pv-tiers li b { min-width: 16px; text-align: center; border-radius: 5px; background: #eef1e8; }
+.pv-tiers li.on { color: var(--ink, #263c33); }
+.pv-tiers li.on b { background: #c8e790; }
+.pv-terms {
+  margin: 6px 0 2px;
+  padding: 6px 7px;
+  border-radius: 8px;
+  background: #f4f6ee;
+  font-size: 11px;
+}
+.pv-terms div { display: flex; gap: 6px; margin: 1px 0; }
+.pv-terms dt { flex: none; font-weight: 700; color: #4b6440; }
+.pv-terms dd { margin: 0; color: #56634e; }
+.pv-hint { margin: 5px 0 0; font-size: 10.5px; color: #8b9483; }
+.pv-term b { display: block; margin-bottom: 2px; font-size: 13px; color: #4b6440; }
+.pv-term { margin: 0; }
+
+/* Glossary terms inline: dotted underline, keyboard reachable. */
+.gl-term {
+  text-decoration: underline dotted #7f9a6a;
+  text-underline-offset: 3px;
+  cursor: help;
+  border-radius: 3px;
+}
+.gl-term:hover, .gl-term:focus-visible { background: #e7f0d6; outline: none; }
+
+/* Selection info strip: the hint line shows what the selected thing does. */
+.stage-ui .stage .tutorial-hint #tutorial-hint {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+#tutorial-hint .hint-name { color: var(--ink, #263c33); margin-right: 2px; }
+#tutorial-hint .hint-skill { color: #4f6243; }
+#tutorial-hint .hint-trait, #tutorial-hint .hint-item { color: #7a6a3a; white-space: nowrap; }
+
+/* Selected enemy (the one shown in the scout panel). */
+.stage-ui #enemy-board .tile.selected { outline: 3px solid #e0703a; outline-offset: -3px; }

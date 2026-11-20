@@ -1,0 +1,132 @@
+/* Context menu / phone action sheet (docs/70). One reusable #ctx-menu. */
+.ctx-menu {
+  position: fixed;
+  z-index: 90;
+  min-width: 212px;
+  max-width: 300px;
+  max-height: min(70vh, 520px);
+  overflow: auto;
+  padding: 5px;
+  border-radius: 12px;
+  border: 1px solid #c9d6b0;
+  background: #fffef9;
+  color: var(--ink, #263c33);
+  box-shadow: 0 14px 34px #13211b55, 0 2px 6px #13211b22;
+  font-size: 13px;
+  animation: ctx-in 90ms ease-out;
+}
+.ctx-menu[hidden], .ctx-backdrop[hidden] { display: none; }
+@keyframes ctx-in { from { opacity: 0; transform: translateY(-3px) scale(0.98); } }
+.ctx-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 8px 6px;
+  border-bottom: 1px solid #e6ebdd;
+  margin-bottom: 3px;
+}
+.ctx-head b { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ctx-head small { color: #7b8a70; font-size: 11px; white-space: nowrap; }
+.ctx-back {
+  align-self: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 8px;
+  background: #eef3e3;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.ctx-items { display: flex; flex-direction: column; gap: 1px; }
+.ctx-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  column-gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ctx-item:hover, .ctx-item:focus-visible { background: #edf3e2; outline: none; }
+.ctx-item:focus-visible { box-shadow: inset 0 0 0 2px #6d9a5c; }
+.ctx-label { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ctx-hint { color: #7b8a70; font-size: 11px; white-space: nowrap; }
+.ctx-more { color: #7b8a70; font-size: 15px; }
+.ctx-note, .ctx-reason {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  line-height: 1.3;
+  color: #7b8a70;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ctx-reason { color: #a1462f; }
+.ctx-primary .ctx-label { color: #2f5a35; }
+.ctx-danger .ctx-label { color: #a1462f; }
+.ctx-item.is-disabled { cursor: not-allowed; }
+.ctx-item.is-disabled .ctx-label, .ctx-item.is-disabled .ctx-hint { color: #a8b1a0; }
+.ctx-item.ctx-shake { animation: ctx-shake 240ms; }
+@keyframes ctx-shake { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+.ctx-empty { margin: 6px 8px; color: #7b8a70; font-size: 12px; }
+.ctx-cancel {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 6px;
+  border: 1px solid #d3dcc3;
+  border-radius: 12px;
+  background: #f4f7ec;
+  font: inherit;
+  font-weight: 600;
+}
+/* The tile / card the menu belongs to. */
+.ctx-target { outline: 2px dashed #e0703a; outline-offset: 2px; }
+
+/* Phones: bottom action sheet with the preview card on top. */
+.ctx-backdrop { position: fixed; inset: 0; z-index: 89; background: #0f1a1466; }
+.ctx-menu.as-sheet {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: auto;
+  max-width: none;
+  max-height: 78vh;
+  padding: 8px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+  border-radius: 18px 18px 0 0;
+  animation: ctx-sheet-in 160ms ease-out;
+}
+@keyframes ctx-sheet-in { from { transform: translateY(24px); opacity: 0; } }
+.ctx-menu.as-sheet .ctx-item { min-height: 44px; }
+.ctx-menu.as-sheet .ctx-preview {
+  max-height: 34vh;
+  overflow: auto;
+  padding: 2px 4px 8px;
+  border-bottom: 1px solid #e6ebdd;
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  /* Landscape phones: a side sheet instead, so the board stays visible. */
+  .ctx-menu.as-sheet {
+    left: auto;
+    top: 0;
+    width: min(360px, 52vw);
+    max-height: none;
+    border-radius: 18px 0 0 18px;
+  }
+}
+/* Long press must not select text or open the iOS callout. */
+.stage-ui .tile, .stage-ui .bench-slot, .stage-ui .shop-card, .stage-ui .ix-item-card, .stage-ui .ix-tm-card {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ctx-menu, .ctx-menu.as-sheet, .ctx-item.ctx-shake { animation: none; }
+}

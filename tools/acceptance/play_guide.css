@@ -1,0 +1,42 @@
+/* First-run guide coach marks (docs/70). The ring is click-through. */
+.guide-ring {
+  position: fixed;
+  z-index: 86;
+  border-radius: 14px;
+  border: 2px solid #f2b23a;
+  box-shadow: 0 0 0 4px #f2b23a55, 0 0 0 200vmax #0f1a1452;
+  pointer-events: none;
+  transition: left 180ms ease, top 180ms ease, width 180ms ease, height 180ms ease;
+}
+.guide-bubble {
+  position: fixed;
+  z-index: 87;
+  width: min(320px, calc(100vw - 16px));
+  padding: 12px 14px 10px;
+  border-radius: 14px;
+  background: #fffef9;
+  color: var(--ink, #263c33);
+  border: 1px solid #e3cd93;
+  box-shadow: 0 16px 36px #13211b55;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.guide-ring[hidden], .guide-bubble[hidden] { display: none; }
+.guide-count { font-size: 11px; letter-spacing: 0.5px; color: #9a7425; }
+.guide-bubble h3 { margin: 2px 0 4px; font-size: 15px; }
+.guide-bubble p { margin: 0 0 10px; color: #4f5f48; }
+.guide-actions { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+.guide-actions button {
+  min-height: 34px;
+  padding: 4px 12px;
+  border-radius: 10px;
+  border: 1px solid #d3dcc3;
+  background: #f4f7ec;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.guide-actions .guide-skip { margin-right: auto; border-color: transparent; background: none; color: #7b8a70; font-weight: 500; }
+.guide-actions .guide-next { background: #33573b; border-color: #33573b; color: #fff; }
+.stage-ui .guide-button { font-weight: 800; font-size: 15px; line-height: 1; }
+@media (prefers-reduced-motion: reduce) { .guide-ring { transition: none; } }
