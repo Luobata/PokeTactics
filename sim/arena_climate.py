@@ -139,6 +139,11 @@ def current(battle, t):
     return active(battle, t)
 
 
+def _goggles(unit):
+    from arena_depth import has_item
+    return has_item(unit, 'safety_goggles')
+
+
 def _types(unit):
     return getattr(unit.piece, 'types', ()) or ()
 
@@ -152,6 +157,8 @@ def damage_factors(battle, attacker, target, t):
     out = []
     if set(_types(attacker)) & set(spec['boost']):
         out.append((attacker.team, 'weather', kind, BOOST[kind]))
+        if _goggles(attacker):
+            out.append((attacker.team, 'item', 'safety_goggles', 1.10))
     elif set(_types(attacker)) & set(spec['weak']):
         out.append((attacker.team, 'weather', kind, WEAK))
     if kind == 'sand' and set(_types(target)) & set(spec['boost']):
@@ -246,7 +253,7 @@ def _tick(battle, t, **_):
         immune = set(CLIMATES[kind]['boost'])
         fraction = .01 if kind == 'sand' else .008
         for unit in alive:
-            if set(_types(unit)) & immune:
+            if set(_types(unit)) & immune or _goggles(unit):
                 continue
             dealt = battle._land_hit(unit, unit, max(1, int(unit.max_hp * fraction)), t, direct=False)
             if dealt:
@@ -258,7 +265,7 @@ def _tick(battle, t, **_):
 def _lightning(battle, t):
     team = battle._climate_bolt % 2
     battle._climate_bolt += 1
-    victims = [u for u in battle.units if u.alive and u.team == team]
+    victims = [u for u in battle.units if u.alive and u.team == team and not _goggles(u)]
     if not victims:
         return
     victim = max(victims, key=lambda u: (u.energy, -u.local_idx))

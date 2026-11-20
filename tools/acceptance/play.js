@@ -600,6 +600,7 @@
     const ctx = layoutContext("selection");
     window.PlayDepth?.render(ctx);
     window.PlayWeather?.render(ctx);
+    window.PlayTree?.render(ctx);
     window.PlayLayout?.render(ctx);
     window.PlayInteractions?.render(ctx);
     window.PlayFeedback?.selection({selected, shopSelected, equipItem});
@@ -696,6 +697,7 @@
     const context = layoutContext();
     window.PlayDepth?.render(context);
     window.PlayWeather?.render(context);
+    window.PlayTree?.render(context);
     window.PlayLayout?.render(context);
     window.PlayInteractions?.render(context);
     window.PlayFeedback?.selection({selected, shopSelected, equipItem});

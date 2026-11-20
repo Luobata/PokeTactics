@@ -111,6 +111,12 @@ def grant_shield(battle, caster, patient, amount, t, cast_index, *,
     if not battle._arena_on or not patient.alive:
         return False
     amount = max(0, int(amount))
+    if getattr(battle, 'depth', False) and caster is not None:
+        from arena_depth import has_item
+        if has_item(caster, 'light_clay'):
+            bonus = int(amount * .4)
+            amount += bonus
+            battle.fx.ledger.add(caster.team, 'item', 'light_clay', shield=bonus)
     expire(battle, patient, t)
     if not can_shield(patient, amount, t):
         return False

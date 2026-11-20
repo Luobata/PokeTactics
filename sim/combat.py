@@ -609,6 +609,12 @@ class Battle:
             piece, item_key = entry if isinstance(entry, tuple) else (entry, None)
             if item_key is not None and item_key not in items_mod.catalog(self.ruleset):
                 raise ValueError('equipment unavailable in this ruleset')
+            # arena_v2 awakened items fight as their base item plus an awakening mark,
+            # so every base effect keyed on item_key keeps working.
+            awakened = set()
+            if self.depth and item_key is not None and items_mod.FINISHED[item_key].get('awakened'):
+                item_key = items_mod.FINISHED[item_key]['base']
+                awakened.add(item_key)
             if self.depth:
                 from arena_depth import mentor_piece
                 piece = mentor_piece(piece)
@@ -626,7 +632,11 @@ class Battle:
                 if extra is not None:
                     if extra not in items_mod.catalog(self.ruleset):
                         raise ValueError('equipment unavailable in this ruleset')
+                    if items_mod.FINISHED[extra].get('awakened'):
+                        extra = items_mod.FINISHED[extra]['base']
+                        awakened.add(extra)
                     arena_depth.apply_secondary_item(unit, extra)
+                unit.awakened_items = frozenset(awakened)
             unit.next_act = next_act
             unit.initiative = initiative
             unit.local_idx = local_idx

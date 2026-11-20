@@ -275,6 +275,7 @@
   }
   const ACTION = {equip: ["装备", "装上"], craft: ["合成", "合成并装给"], chase: ["凑齐", "在合成图中查看"], awaken: ["觉醒", "立即觉醒"]};
   const synergy = () => IX()?.item_synergy || null;
+  const ico = (key, size = 24) => (window.ItemIcons && key ? window.ItemIcons.html(key, {size}) : "");
   const tagChips = (key) => {
     const syn = synergy();
     const tags = syn?.tags?.[key] || [];
@@ -302,11 +303,11 @@
     const aw = syn.awaken || {options: []};
     const locked = (s.round || 0) < aw.round;
     const awRows = (aw.options || []).map((o) => `<article class="ix-awaken-card${o.ready ? " ready" : ""}">
-        <header><b>${esc(o.name)}</b><span class="ix-chip">${o.unit ? esc(o.unit) : "仓库"}</span></header>
+        <header>${ico(o.key, 26)}<span aria-hidden="true">→</span>${ico(o.key + "_plus", 30)}<b>${esc(o.name)}</b><span class="ix-chip">${o.unit ? esc(o.unit) : "仓库"}</span></header>
         <p>${esc(o.clause)}</p>
         <button type="button" class="${o.ready ? "primary-button" : "secondary-button"}" data-ix-awaken="${esc(o.key)}" data-uid="${esc(o.uid || "")}" data-component="${esc(o.have?.[0] || "")}" ${o.ready && canPrep() ? "" : "disabled"}>${o.have?.length ? `觉醒 · 消耗${esc((o.component_names || [])[o.components.indexOf(o.have[0])] || "")}` : `需要组件：${(o.component_names || []).map(esc).join(" / ")}`}</button>
       </article>`).join("");
-    const duos = (syn.duos || []).map((d) => `<li class="${d.active?.length ? "on" : ""}"><b>${d.items.map((i) => esc(i.name)).join(" + ")}</b><span>→ ${esc(d.name)}</span><small>${esc(d.text)}${d.active?.length ? ` · 生效：${d.active.map(esc).join("、")}` : ""}</small></li>`).join("");
+    const duos = (syn.duos || []).map((d) => `<li class="${d.active?.length ? "on" : ""}"><b>${d.items.map((i) => ico(i.key, 22) + esc(i.name)).join(" + ")}</b><span>→ ${esc(d.name)}</span><small>${esc(d.text)}${d.active?.length ? ` · 生效：${d.active.map(esc).join("、")}` : ""}</small></li>`).join("");
     memo(box).innerHTML = `<div class="section-heading"><h2>装备共鸣</h2><span class="tiny-label">同标签 2 / 4 件</span></div>
       ${res}
       <details class="ix-syn-more"${aw.options?.some((o) => o.ready) ? " open" : ""}><summary>装备觉醒 <small>${locked ? `第 ${Number(aw.round)} 轮开放` : `本局剩余 ${Number(aw.left)}/${Number(aw.limit)}`}</small></summary>
@@ -336,7 +337,7 @@
         : row.action === "chase" ? `差 <b>${esc(row.lacking)}</b> · 合成后给 ${esc(row.unit)}`
         : row.action === "craft" ? `${(row.recipe || []).map(esc).join(" + ")} → 给 ${esc(row.unit)}` : `给 ${esc(row.unit)}`;
       return `<article class="ix-advice-card act-${esc(row.action)}">
-        <header><span class="ix-act">${label}</span><b>${esc(row.name)}</b>${archBadge(row.archetype)}</header>
+        <header><span class="ix-act">${label}</span>${ico(row.action === "awaken" ? row.item + "_plus" : row.item, 28)}<b>${esc(row.name)}</b>${archBadge(row.archetype)}</header>
         <p class="ix-advice-target">${target}</p>
         ${(row.why || []).length ? `<ul class="ix-combos">${row.why.slice(0, 3).map((x) => `<li class="on"><span aria-hidden="true">✓</span>${esc(x)}</li>`).join("")}</ul>` : ""}
         <button type="button" class="${row.action === "chase" ? "secondary-button" : "primary-button"}" data-ix-advice="${esc(row.action)}" data-item="${esc(row.item)}" data-uid="${esc(row.uid || "")}" data-component="${esc(row.component || "")}" ${row.action !== "chase" && !canPrep() ? "disabled" : ""}>${cta}${row.action === "craft" ? ` ${esc(row.unit)}` : ""}</button>
@@ -378,11 +379,12 @@
       const guide = guideOf(key);
       const lines = [...(row.lines || []), ...(row.stats || []).map((x) => `组件 ${x}`)];
       return `<article class="ix-item-card" data-arch="${esc(ARCH[guide?.archetype] || "")}" ${canPrep() ? `draggable="true" data-ix-drag="item:${esc(key)}"` : ""}>
-        <header><b>◆ ${esc(row.name || item?.name || key)}</b>${n > 1 ? `<span class="ix-chip">×${n}</span>` : ""}${archBadge(guide?.archetype)}${kindBadge(guide)}${tagChips(key)}${row.recipe ? `<small>${esc(row.recipe)}</small>` : ""}</header>
+        <header>${ico(key, 32)}<b>${esc(row.name || item?.name || key)}</b>${n > 1 ? `<span class="ix-chip">×${n}</span>` : ""}${archBadge(guide?.archetype)}${kindBadge(guide)}${tagChips(key)}${row.recipe ? `<small>${esc(row.recipe)}</small>` : ""}</header>
         ${guide?.playstyle ? `<p class="ix-playstyle">${esc(guide.playstyle)}</p>` : ""}
         ${combos(guide)}
         ${guide?.duos?.length ? `<p class="ix-item-duo">双持：${guide.duos.map((d) => `+ ${esc(d.partner_name)} → <b>${esc(d.name)}</b>`).join("；")}</p>` : ""}
         ${guide?.awaken ? `<p class="ix-item-awaken">觉醒后：${esc(guide.awaken)}</p>` : ""}
+        ${IX()?.item_tree ? `<button type="button" class="tr-link" data-tree-open="item:${esc(key.replace(/_plus$/, ""))}">在合成树中查看 ⟶</button>` : ""}
         ${lines.length ? `<div class="ix-item-lines">${lines.map((x) => `<span>${esc(x)}</span>`).join("")}</div>` : ""}
         <p>${esc(row.effect || item?.effect || "")}</p>
         ${row.suits ? `<p class="ix-item-suits">适合：${esc(row.suits)}${row.carriers?.length ? ` · 推荐 ${row.carriers.map((c) => esc(c.name)).join(" › ")}` : ""}</p>` : '<p class="ix-item-suits ix-muted">队里暂时没有特别适合的携带者</p>'}
@@ -430,8 +432,8 @@
     const ready = (data.cells || []).filter((c) => c.craftable).length;
     const chasing = chase ? (ix?.item_advice?.suggestions || []).find((r) => r.item === chase) || null : null;
     if (chase && !chasing) chase = null;
-    const head = comps.map((c) => `<span class="ix-mx-head${c.n ? " have" : ""}" title="${esc(c.name)}${c.stats ? `：${esc(c.stats)}` : ""}">${esc(shortName(c.name))}<b>${Number(c.n)}</b></span>`).join("");
-    const rows = comps.map((ra) => `<span class="ix-mx-head row${ra.n ? " have" : ""}">${esc(shortName(ra.name))}<b>${Number(ra.n)}</b></span>${comps.map((cb) => {
+    const head = comps.map((c) => `<span class="ix-mx-head${c.n ? " have" : ""}" title="${esc(c.name)}${c.stats ? `：${esc(c.stats)}` : ""}">${ico(c.key, 22)}${esc(shortName(c.name))}<b>${Number(c.n)}</b></span>`).join("");
+    const rows = comps.map((ra) => `<span class="ix-mx-head row${ra.n ? " have" : ""}">${ico(ra.key, 22)}${esc(shortName(ra.name))}<b>${Number(ra.n)}</b></span>${comps.map((cb) => {
       const cell = cellFor(ra.key, cb.key);
       if (!cell) return '<span class="ix-mx-cell dead"></span>';
       const cls = cell.dead ? "dead" : cell.craftable ? "craftable" : cell.blocked ? "blocked" : cell.missing.length === 1 ? "near" : "missing";
@@ -440,12 +442,12 @@
       const arch = g?.archetype ? ` arch-${ARCH[g.archetype] || "x"}` : "";
       const mark = g?.treasure ? "★" : g?.mechanic ? "⚙" : "";
       const sub = cell.dead ? "" : cell.craftable ? "可合成" : cell.blocked ? "已达上限" : `差${cell.missing.length}`;
-      return `<button type="button" class="ix-mx-cell ${cls}${cell.depth ? " depth" : ""}${arch}${chase && cell.item === chase ? " ix-chase" : ""}" data-ix-cell="${esc(cell.a)}|${esc(cell.b)}" aria-label="${esc(ra.name)} + ${esc(cb.name)}：${cell.dead ? "无配方" : `${esc(cell.name)}，${sub}`}"${cell.dead ? " disabled" : ""}>${mark ? `<i class="ix-mech" aria-hidden="true">${mark}</i>` : ""}<b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</button>`;
+      return `<button type="button" class="ix-mx-cell ${cls}${cell.depth ? " depth" : ""}${arch}${chase && cell.item === chase ? " ix-chase" : ""}" data-ix-cell="${esc(cell.a)}|${esc(cell.b)}" aria-label="${esc(ra.name)} + ${esc(cb.name)}：${cell.dead ? "无配方" : `${esc(cell.name)}，${sub}`}"${cell.dead ? " disabled" : ""}>${mark ? `<i class="ix-mech" aria-hidden="true">${mark}</i>` : ""}${cell.dead ? "" : ico(cell.item, 26)}<b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</button>`;
     }).join("")}`).join("");
-    memo(box).innerHTML = `<div class="section-heading"><h2>组件合成图</h2><span class="tiny-label">${ready ? `${ready} 件可合成` : "RECIPES"}</span></div>
+    memo(box).innerHTML = `<div class="section-heading"><h2>组件合成图${ix?.item_tree ? '<button type="button" class="ix-tree-button" data-tree-open>合成树 ⟶</button>' : ""}</h2><span class="tiny-label">${ready ? `${ready} 件可合成` : "RECIPES"}</span></div>
       <p class="section-note">行列是 8 种组件（右下数字 = 库存）。亮起的格子现在就能合成；${isPhone() ? "点格子查看并合成。" : "点格子合成，或把一个组件拖到另一个组件上。"}${s.depth ? "金框为深度版新增配方。" : "灰色为无配方的组合。"}</p>
       ${chasing ? `<p class="ix-chase-note">正在凑：<b>${esc(chasing.name)}</b> · 还差 <b>${esc(chasing.lacking || "—")}</b> · 合成后给 ${esc(chasing.unit)}<button type="button" data-ix-chase-clear>取消</button></p>` : ""}
-      <div class="ix-comp-row">${comps.map((c) => `<span class="ix-comp${c.n ? " have" : ""}${chase && chaseLacking() === c.key ? " ix-chase" : ""}" data-ix-comp="${esc(c.key)}" ${c.n && canPrep() ? `draggable="true" data-ix-drag="comp:${esc(c.key)}"` : ""} title="${esc(c.stats || c.name)}"><b>${esc(c.name)}</b><small>×${Number(c.n)}${c.stats ? ` · ${esc(c.stats)}` : ""}</small></span>`).join("")}</div>
+      <div class="ix-comp-row">${comps.map((c) => `<span class="ix-comp${c.n ? " have" : ""}${chase && chaseLacking() === c.key ? " ix-chase" : ""}" data-ix-comp="${esc(c.key)}" ${c.n && canPrep() ? `draggable="true" data-ix-drag="comp:${esc(c.key)}"` : ""} title="${esc(c.stats || c.name)}">${ico(c.key, 26)}<b>${esc(c.name)}</b><small>×${Number(c.n)}${c.stats ? ` · ${esc(c.stats)}` : ""}</small></span>`).join("")}</div>
       <div class="ix-matrix-scroll"><div class="ix-matrix"><span class="ix-mx-corner" aria-hidden="true">＋</span>${head}${rows}</div></div>`;
   }
 
@@ -460,12 +462,12 @@
     if (!cell || cell.dead) return;
     const names = new Map((IX()?.recipes?.components || []).map((c) => [c.key, c.name]));
     openSheet({kind: "craft", item: cell.item}, `合成 ${cell.name}`, `
-      <p class="ix-recipe-line">${esc(names.get(cell.a))} <span>+</span> ${esc(names.get(cell.b))} <span>→</span> <strong>${esc(cell.name)}</strong>${cell.depth ? ' <span class="ix-chip gold">深度版</span>' : ""}</p>
+      <p class="ix-recipe-line">${ico(cell.a, 30)}${esc(names.get(cell.a))} <span>+</span> ${ico(cell.b, 30)}${esc(names.get(cell.b))} <span>→</span> ${ico(cell.item, 36)}<strong>${esc(cell.name)}</strong>${cell.depth ? ' <span class="ix-chip gold">深度版</span>' : ""}</p>
       ${cell.stats?.length ? `<div class="ix-item-lines">${cell.stats.map((x) => `<span>组件 ${esc(x)}</span>`).join("")}</div>` : ""}
       ${guideOf(cell.item) ? `<p class="ix-sheet-tag">${archBadge(guideOf(cell.item).archetype)}${kindBadge(guideOf(cell.item))}</p>${guideOf(cell.item).playstyle ? `<p class="ix-playstyle">${esc(guideOf(cell.item).playstyle)}</p>` : ""}${combos(guideOf(cell.item), {limit: 4})}` : ""}
       <p>${esc(cell.effect)}</p>
       ${cell.craftable ? "" : `<p class="ix-warn">${cell.blocked ? "幸运蛋已达全场上限" : `还差：${cell.missing.map(esc).join("、")}`}</p>`}
-      <div class="ix-sheet-actions"><button type="button" class="secondary-button" data-ix-close>关闭</button><button type="button" class="primary-button" data-ix-confirm-craft="${esc(cell.item)}" ${!cell.craftable || !canPrep() || !s ? "disabled" : ""}>合成</button></div>`);
+      <div class="ix-sheet-actions"><button type="button" class="secondary-button" data-ix-close>关闭</button>${IX()?.item_tree && cell.item ? `<button type="button" class="secondary-button" data-ix-close data-tree-open="item:${esc(cell.item)}">在合成树中查看</button>` : ""}<button type="button" class="primary-button" data-ix-confirm-craft="${esc(cell.item)}" ${!cell.craftable || !canPrep() || !s ? "disabled" : ""}>合成</button></div>`);
   }
 
   // ------------------------------------------------------------ targeting mode

@@ -181,5 +181,55 @@ class SessionTest(unittest.TestCase):
         self.assertTrue(ix['item_advice']['guides']['flame_orb']['duos'])
 
 
+
+class ExpansionTest(unittest.TestCase):
+    def test_new_items_recipes_treasures_and_awakenings(self):
+        import arena_mech_items as mech
+        self.assertEqual(items.craft_result('hardstone', 'magnet', ruleset='arena_v2'), 'mirror_coat')
+        self.assertEqual(items.craft_result('spark', 'spark', ruleset='arena_v2'), 'lightning_rod')
+        for key in ('safety_goggles', 'light_clay', 'expert_belt', 'kings_rock'):
+            self.assertIn(key, mech.TREASURES)
+            self.assertIn(key, items.obtainable('arena_v2'))
+        self.assertEqual(len(syn.AWAKEN), 16)
+        for key in syn.AWAKEN:
+            plus = items.FINISHED[syn.awakened_key(key)]
+            self.assertEqual(plus['name'], items.FINISHED[key]['name'] + '·觉醒')
+            self.assertTrue(syn.awaken_components(key), key)
+
+    def test_awakened_legacy_item_keeps_its_base_effect(self):
+        # leftovers heals through item_key == 'leftovers'; the awakened copy must still do so.
+        fired = 0
+        for seed in range(4):
+            battle = fight([(piece(74, 3), 'leftovers_plus'), piece(4)], ENEMY(), seed=seed, pa=[(2, 3), (3, 3)])
+            unit = battle.units[0]
+            self.assertEqual(unit.item_key, 'leftovers')
+            self.assertIn('leftovers', unit.awakened_items)
+            fired += len(effects(battle, 'leftovers_plus'))
+        self.assertGreater(fired, 0)
+
+    def test_new_item_effects_fire(self):
+        seen = {}
+        for key, holder in (('mirror_coat', 74), ('lightning_rod', 4), ('light_clay', 1), ('kings_rock', 66)):
+            n = 0
+            for seed in range(4):
+                n += len(effects(fight([(piece(holder, 3), key), piece(74), piece(1)], ENEMY(), seed=seed,
+                                       pa=[(2, 3), (3, 3), (1, 3)]), key))
+            seen[key] = n
+        self.assertTrue(all(seen.values()), seen)
+
+    def test_tree_block(self):
+        import demo
+        s = demo._new_session(91, {'mode': 'arena'})
+        tree = demo.state_json(s, lite=True)['interactions']['item_tree']
+        static = tree['static']
+        self.assertEqual(len(static['components']), 8)
+        keys = [row['key'] for row in static['items']]
+        self.assertEqual(len(keys), len(set(keys)))
+        self.assertIn('mirror_coat', keys)
+        self.assertEqual(len([r for r in static['items'] if r['awaken']]), 16)
+        self.assertEqual(len(static['treasures']), 8)
+        self.assertTrue(set(tree['craftable']) <= set(keys))
+
+
 if __name__ == '__main__':
     unittest.main()

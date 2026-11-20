@@ -178,6 +178,8 @@ FINISHED: Dict[str, dict] = {
 # arena_v2 depth items: the four component pairs that had no recipe in v1.
 from arena_depth import DEPTH_ITEMS as _DEPTH_ITEMS  # noqa: E402
 FINISHED.update(_DEPTH_ITEMS)
+from arena_item_synergy import finish_awakened as _finish_awakened  # noqa: E402
+_finish_awakened(FINISHED)
 
 # 进化石的通信进化名单（S2 §1.5：勇基拉→胡地、豪力→怪力、鬼斯通→耿鬼）
 STONE_TARGETS: Dict[int, int] = {64: 65, 67: 68, 93: 94}

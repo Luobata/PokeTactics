@@ -487,7 +487,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
+  min-height: 58px;
   padding: 2px;
   border-radius: 8px;
   background: #f1f2ea;
@@ -733,3 +733,13 @@
 @media (max-width: 720px) {
   .stage-ui .ix-res-list, .stage-ui .ix-awaken-list { grid-template-columns: 1fr; }
 }
+
+/* item icons inside the recipe matrix, cards and advisor (play_icons.js) */
+.stage-ui .ix-mx-cell .item-icon { margin: 0 auto -1px; }
+.stage-ui .ix-mx-cell.dead .item-icon, .stage-ui .ix-mx-cell.missing .item-icon { opacity: .45; filter: grayscale(.6); }
+.stage-ui .ix-mx-head .item-icon { margin-right: 2px; vertical-align: middle; }
+.stage-ui .ix-comp .item-icon { float: left; margin: 0 6px 0 0; }
+.stage-ui .ix-item-card header .item-icon, .stage-ui .ix-advice-card header .item-icon,
+.stage-ui .ix-awaken-card header .item-icon { margin-right: 2px; }
+.stage-ui .ix-recipe-line .item-icon { vertical-align: middle; margin: 0 3px; }
+.stage-ui .ix-duo-list .item-icon { vertical-align: middle; margin-right: 2px; }

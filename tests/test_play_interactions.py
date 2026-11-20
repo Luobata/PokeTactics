@@ -64,7 +64,7 @@ class ReadOnlyTest(unittest.TestCase):
                 ix = state['interactions']
                 self.assertNotIn('error', ix)
                 self.assertEqual(set(ix), {'version', 'augments', 'techniques', 'skills', 'recipes', 'equip',
-                                           'item_advice', 'item_synergy'})
+                                           'item_advice', 'item_synergy', 'item_tree'})
 
 
 class AugmentTest(unittest.TestCase):

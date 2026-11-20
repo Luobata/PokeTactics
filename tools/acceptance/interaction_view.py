@@ -412,6 +412,75 @@ def recipe_block(sess):
             'cells': cells}
 
 
+_TREE_STATIC = {}
+
+
+def _tree_static(sess):
+    """Rule data of the crafting tree for one ruleset (cached; never mutated)."""
+    cached = _TREE_STATIC.get(sess.ruleset)
+    if cached is not None:
+        return cached
+    import arena_mech_items as mech
+    catalog = items_mod.catalog(sess.ruleset)
+    order = items_mod.COMPONENT_ORDER
+    syn = None
+    if sess.is_depth:
+        import arena_item_synergy as syn
+    guide = lambda key: (mech.GUIDE.get(key) or mech.GUIDE_BASE.get(key) or ('', ''))[0]  # noqa: E731
+    tags = lambda key: [syn.TAG_NAMES[t] for t in syn.item_tags(key)] if syn else []  # noqa: E731
+    rows, seen = [], set()
+    for i, a in enumerate(order):
+        for b in order[i:]:
+            key = items_mod.craft_result(a, b, sess.ruleset)
+            if key == 'evo_stone' or key not in catalog or key in seen:
+                continue
+            seen.add(key)
+            spec = catalog[key]
+            awaken = None
+            if syn and key in syn.AWAKEN:
+                plus = syn.awakened_key(key)
+                awaken = {'key': plus, 'name': items_mod.FINISHED[plus]['name'], 'clause': syn.AWAKEN[key],
+                          'components': list(syn.awaken_components(key))}
+            rows.append({'key': key, 'name': spec['name'], 'recipe': [a, b], 'archetype': guide(key),
+                         'tags': tags(key), 'effect': spec.get('description') or '、'.join(spec_lines(key)),
+                         'stats': _component_lines(sess, key), 'mechanic': key in mech.MECH_ITEMS,
+                         'awaken': awaken,
+                         'duos': [{'partner': p, 'name': syn.DUOS[d][1]} for p, d in syn.duo_partners(key)] if syn else []})
+    treasures = [{'key': key, 'name': catalog[key]['name'], 'archetype': guide(key), 'tags': tags(key),
+                  'effect': catalog[key]['description']}
+                 for key in mech.TREASURES if key in catalog]
+    cached = _TREE_STATIC[sess.ruleset] = {
+        'components': [{'key': c, 'name': items_mod.COMPONENT_NAMES[c], 'stats': _component_stat(sess, c)}
+                       for c in order],
+        'items': rows, 'treasures': treasures,
+        'awaken_round': syn.AWAKEN_ROUND if syn else None, 'awaken_limit': syn.AWAKEN_LIMIT if syn else 0,
+        'treasure_source': '第 9 轮起的选秀、第 10 轮后击败野怪' if sess.is_depth else ''}
+    return cached
+
+
+def tree_block(sess):
+    """Crafting tree: static rules plus what this player holds right now."""
+    if not sess.is_arena:
+        return None
+    p = sess.player
+    held = {}
+    for key in p.inventory.finished:
+        held[key] = held.get(key, 0) + 1
+    for o in p.all_pieces():
+        for key in (o.item, getattr(o, 'extra_item', None)):
+            if key:
+                held[key] = held.get(key, 0) + 1
+    static = _tree_static(sess)
+    awaken = {}
+    if sess.is_depth:
+        import arena_session
+        awaken = {row['key']: row['ready'] for row in arena_session.awaken_options(p, sess.round_no)['options']}
+    return {'static': static, 'components': dict(p.inventory.components), 'held': held,
+            'craftable': [row['key'] for row in static['items'] if p.inventory.craftable(row['key'])],
+            'awaken_ready': sorted(k for k, ready in awaken.items() if ready),
+            'round': sess.round_no}
+
+
 def _component_stat(sess, component):
     if not sess.is_depth:
         return ''
@@ -719,6 +788,7 @@ def build(sess):
     return {
         'item_advice': advice_block(sess),
         'item_synergy': synergy_block(sess),
+        'item_tree': tree_block(sess),
         'version': 1,
         'augments': augment_block(sess),
         'techniques': technique_block(sess),

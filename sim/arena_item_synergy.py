@@ -15,7 +15,7 @@ Three layers make items build around each other instead of adding numbers:
 All effects are deterministic (no RNG draws) and report through the effect bus
 ledger, sources ``resonance`` and ``item``.
 """
-from arena_effects import EffectSpec, fire
+from arena_effects import EPS, EffectSpec, fire
 
 AWAKEN_ROUND = 12
 AWAKEN_LIMIT = 2
@@ -40,6 +40,8 @@ ITEM_TAGS = {
     'heart_bell': ('guard',), 'clarity_charm': ('guard',), 'dew_charm': ('guard',),
     'metronome': ('strike',), 'drain_fang': ('strike',), 'life_orb': ('strike',),
     'damp_rock': ('arcane',), 'heat_rock': ('arcane',),
+    'mirror_coat': ('guard', 'arcane'), 'lightning_rod': ('arcane', 'strike'), 'safety_goggles': ('guard',),
+    'light_clay': ('guard',), 'expert_belt': ('strike',), 'kings_rock': ('status', 'strike'),
 }
 THRESHOLDS = (2, 4)
 RESONANCES = {
@@ -108,7 +110,17 @@ AWAKEN = {
     'static_glove': '每第 3 次有效普攻就麻痹；麻痹成功时电弧跳到 2 格内另一名敌人并使其麻痹。',
     'taunt_bell': '再挑衅：首次降到 50% 生命时，再次嘲讽 2 格内敌人 2.5 秒并获得 20% 最大生命护盾。',
     'red_card': '每场可推开 4 次；被推开的攻击者损失 25 能量。',
+    'mirror_coat': '反射比例提升到 50%，每次反射获得 8% 最大生命护盾。',
+    'lightning_rod': '每 4 秒放电一次，并使目标麻痹（同一目标 6 秒一次）。',
+    'mind_crystal': '每次返还能量时，2 格内能量最低的另一名队友也获得 10 能量。',
+    'quick_claw': '开战后 4 秒内攻速 +30%。',
+    'metronome': '连续普攻同一目标第 3 次起，每次追加 25% 伤害。',
+    'contagion_orb': '携带者施加灼伤 / 中毒 / 麻痹时，目标 4 秒内受到伤害 +10%。',
+    'blast_core': '爆炸范围扩大到 2 格（外圈 15%），并点燃被炸到的无异常敌人。',
+    'leftovers': '首次降到 40% 生命以下时，立即回复 15% 最大生命。',
 }
+# Base items whose name/description are filled in by items.py once every table is loaded.
+NON_MECH_AWAKEN = ('mind_crystal', 'quick_claw', 'metronome', 'contagion_orb', 'blast_core', 'leftovers')
 
 
 def awakened_key(key):
@@ -119,23 +131,33 @@ def _awakened_specs():
     from arena_mech_items import MECH_ITEMS
     out = {}
     for key, clause in AWAKEN.items():
-        base = MECH_ITEMS[key]
+        base = MECH_ITEMS.get(key, {'name': key, 'description': ''})
         out[awakened_key(key)] = {
-            'name': base['name'] + '·觉醒', 'pairs': (), 'awakened': True, 'base': key,
+            'name': base['name'] + '·觉醒', 'pairs': (), 'awakened': True, 'base': key, 'clause': clause,
             'arena_only': True, 'depth_only': True,
             'description': base['description'] + ' 【觉醒】' + clause}
     return out
+
+
+def finish_awakened(finished):
+    """Called by items.py after all tables merge: copy base names/descriptions."""
+    for key, spec in finished.items():
+        if spec.get('awakened') and spec['base'] in finished:
+            base = finished[spec['base']]
+            spec['name'] = base['name'] + '·觉醒'
+            spec['description'] = base.get('description', '') + ' 【觉醒】' + spec['clause']
 
 
 AWAKENED_ITEMS = _awakened_specs()
 
 
 def awaken_components(key):
-    """Components that can awaken ``key`` (any component of any of its recipes)."""
-    from arena_mech_items import MECH_ITEMS
+    """Components that can awaken ``key`` (any component of its v2 recipe)."""
     if key not in AWAKEN:
         return ()
-    return tuple(dict.fromkeys(c for pair in MECH_ITEMS[key]['pairs'] for c in pair))
+    import items
+    pairs = items.FINISHED[key].get('pairs') or ()
+    return tuple(dict.fromkeys(c for pair in pairs for c in pair))
 
 
 # ------------------------------------------------------------------ dual wield
@@ -172,7 +194,7 @@ def _d():
 
 
 def is_awakened(unit, key):
-    return awakened_key(key) in _d()._items(unit)
+    return key in getattr(unit, 'awakened_items', ()) or awakened_key(key) in _d()._items(unit)
 
 
 def unit_has_duo(unit, duo):
@@ -260,6 +282,71 @@ def _h_taunt_plus(battle, inst, source, target, actual_hp, t, **_):
     _d()._shield(battle, unit, unit, unit.max_hp * .2, t, 'taunt_bell_plus')
     battle._emit_state(unit, t)
     fire(battle, inst, unit, t, label='再挑衅', kind='buff', value=taunted, camera='focus')
+
+
+def _h_mind_plus(battle, inst, unit, t, **_):
+    if unit is not inst.unit or not unit.alive:
+        return
+    d = _d()
+    mates = [m for m in battle.units if m.alive and m.team == unit.team and m is not unit and d._dist(m, unit) <= 2]
+    if not mates:
+        return
+    mate = min(mates, key=lambda m: (m.energy, m.local_idx))
+    gained = d._energy(battle, mate, 10)
+    if gained:
+        battle._emit_state(mate, t)
+        fire(battle, inst, mate, t, label='心灵共振', kind='energy', value=gained)
+
+
+def _h_claw_plus(battle, inst, t, **_):
+    unit = inst.unit
+    if unit.alive:
+        _haste(unit, t, 4., .30)
+        battle._emit_state(unit, t)
+        fire(battle, inst, unit, t, label='先制·疾', kind='buff')
+
+
+def _h_metronome_plus(battle, inst, unit, target, t, actual_hp, **_):
+    if unit is not inst.unit or actual_hp <= 0:
+        return
+    streak = inst.state.get('streak', 0) + 1 if inst.state.get('target') == target.idx else 1
+    inst.state.update(target=target.idx, streak=streak)
+    if streak >= 3 and target.alive:
+        dealt = _d()._indirect_damage(battle, unit, target, actual_hp * .25, t)
+        if dealt:
+            fire(battle, inst, target, t, label='连奏', kind='damage', value=dealt, spend=False)
+
+
+def _h_contagion_plus(battle, inst, source, target, kind, t, **_):
+    if source is not inst.unit or target.team == source.team or kind not in ('burn', 'poison', 'para'):
+        return
+    current = target.vulnerable_fraction if target.vulnerable_until > t + EPS else 0.
+    target.vulnerable_until = max(target.vulnerable_until, t + 4.)
+    target.vulnerable_fraction = max(current or 0., .10)
+    fire(battle, inst, target, t, label='易伤', kind='debuff', spend=False)
+
+
+def _h_blast_plus(battle, inst, unit, killer, t, **_):
+    if unit is not inst.unit or inst.uses:
+        return
+    import status
+    d = _d()
+    total = 0
+    for victim in sorted((v for v in battle.units if v.alive and v.team != unit.team and d._dist(v, unit) <= 2),
+                         key=lambda v: v.local_idx):
+        if d._dist(victim, unit) == 2:
+            total += d._indirect_damage(battle, unit, victim, unit.max_hp * .15, t)
+        if victim.alive and _debuff_of(victim) is None:
+            status.apply_debuff(battle, victim, 'burn', t, source=unit)
+    fire(battle, inst, unit, t, label='爆裂·扩散', kind='damage', value=total)
+
+
+def _h_leftovers_plus(battle, inst, source, target, actual_hp, t, **_):
+    unit = inst.unit
+    if target is not unit or not unit.alive or actual_hp <= 0 or unit.hp > unit.max_hp * .4:
+        return
+    healed = battle._heal(unit, int(unit.max_hp * .15), t, source=unit)
+    fire(battle, inst, unit, t, label='剩饭·饱食', kind='heal', value=healed, camera='focus')
 
 
 # -------------------------------------------------------------- duo clauses
@@ -474,6 +561,13 @@ UNIT_SPECS = (
     _spec('toxic_orb_plus', 'item', 'basic_settled', '剧毒宝珠·觉醒', _h_toxic_plus, AWAKEN['toxic_orb'],
           cooldown=2.),
     _spec('taunt_bell_plus', 'item', 'direct_hit', '挑衅铃·觉醒', _h_taunt_plus, AWAKEN['taunt_bell'], limit=1),
+    _spec('mind_crystal_plus', 'item', 'native_cast', '心灵水晶·觉醒', _h_mind_plus, AWAKEN['mind_crystal'],
+          cooldown=2., limit=4),
+    _spec('quick_claw_plus', 'item', 'battle_start', '先制之爪·觉醒', _h_claw_plus, AWAKEN['quick_claw'], limit=1),
+    _spec('metronome_plus', 'item', 'basic_settled', '节拍器·觉醒', _h_metronome_plus, AWAKEN['metronome']),
+    _spec('contagion_orb_plus', 'item', 'debuff', '扩散宝珠·觉醒', _h_contagion_plus, AWAKEN['contagion_orb']),
+    _spec('blast_core_plus', 'item', 'death', '爆裂核心·觉醒', _h_blast_plus, AWAKEN['blast_core'], limit=1),
+    _spec('leftovers_plus', 'item', 'direct_hit', '剩饭·觉醒', _h_leftovers_plus, AWAKEN['leftovers'], limit=1),
     _spec('duo_corrosion', 'item', 'basic_settled', '腐蚀爆燃', _h_duo_corrosion, DUOS['duo_corrosion'][2],
           cooldown=1.),
     _spec('duo_conductor', 'item', 'basic_settled', '导电回旋', _h_duo_conductor, DUOS['duo_conductor'][2],

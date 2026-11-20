@@ -123,6 +123,7 @@ SAME_LAYOUT_DEPTH_FINGERPRINTS = frozenset({
     '3cc45a816f570f518877f556c3355c4cff391f158e8547d75b68bd23e845b8d4',  # 8caaebc mechanic items
     '21e05a7b845ee045ba2990d1a1a06fa3e45e5731c04bc07be927a353a3b24bc6',  # b3ff56c save perf
     '69b917b1fc838da3fe2a51a3ac5d0ac2e70bc38a2acedcfb827b6d17cf2b49b3',  # b2dd5a4 item synergy (awakened counter)
+    '3068888c45bee15b00b8becd51f5d303102fbf17f4111f4a7ff297758321a515',  # 6996e7b..d658f73 stage weather (climate_swap counter)
 })
 PRE_SYNERGY_TECHNIQUES = frozenset({'cut', 'surf', 'rest', 'thunderbolt', 'ice_beam',
                                      'toxic', 'earthquake', 'roar', 'rapid_spin'})

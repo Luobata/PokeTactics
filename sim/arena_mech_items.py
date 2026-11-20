@@ -25,9 +25,9 @@ MECH_ITEMS = {
                   'description': '有效普攻使没有异常的目标灼伤（同一目标 4 秒一次）。为侵蚀、扩散宝珠、燎原等提供灼伤来源。'},
     'toxic_orb': {'name': '剧毒宝珠', 'pairs': (('mysticwater', 'magnet'),),
                   'description': '有效普攻使没有异常的目标中毒（同一目标 4 秒一次）。为毒蚀、毒性催化、侵蚀等提供中毒来源。'},
-    'static_glove': {'name': '静电手套', 'pairs': (('spark', 'magnet'), ('spark', 'spark')),
+    'static_glove': {'name': '静电手套', 'pairs': (('spark', 'magnet'),),
                      'description': '每第 4 次有效普攻使目标麻痹；携带者对麻痹目标伤害 +15%。为“对已控制目标追击”类本命提供条件。'},
-    'taunt_bell': {'name': '挑衅铃', 'pairs': (('hardstone', 'hardstone'), ('magnet', 'hardstone')),
+    'taunt_bell': {'name': '挑衅铃', 'pairs': (('hardstone', 'hardstone'),),
                    'description': '开战时嘲讽 2 格内所有敌人 2.5 秒，期间携带者受到伤害 -25%。把火力拉到带反伤、护盾的前排。'},
     'red_card': {'name': '红牌', 'pairs': (('hardstone', 'shoes'),),
                  'description': '每场前 2 次被近战直接命中时，把攻击者推开最多 2 格（会触发岩钉与击退联动）。'},
@@ -39,6 +39,19 @@ MECH_ITEMS = {
                      'description': '宝物。每场一次：相邻队友受到致命伤时改为保留 25% 生命，携带者失去 15% 最大生命。'},
     'rally_whistle': {'name': '号令哨', 'pairs': (), 'treasure': True,
                       'description': '宝物。携带者施放本命后，2 格内所有队友 3 秒攻速 +20%。'},
+    # 2026-11-20 expansion: two pairs that duplicated a recipe now craft their own items.
+    'mirror_coat': {'name': '镜面护符', 'pairs': (('hardstone', 'magnet'),),
+                    'description': '被敌方本命或技能机直接命中时，把本次实际伤害的 30% 反射给施法者（1.5 秒一次）。克制高爆发施法者。'},
+    'lightning_rod': {'name': '聚雷针', 'pairs': (('spark', 'spark'),),
+                      'description': '每 6 秒向能量最高的敌人放电：造成携带者攻击 30% 的伤害（无视防御），并夺取其 15 能量。拖慢对面本命。'},
+    'safety_goggles': {'name': '防尘护目镜', 'pairs': (), 'treasure': True,
+                       'description': '宝物。免疫风沙、严寒与落雷；本轮天气强化携带者的属性时，伤害再 +10%。'},
+    'light_clay': {'name': '光之黏土', 'pairs': (), 'treasure': True,
+                   'description': '宝物。携带者施加的所有护盾 +40%；开战时为自己施加 10% 最大生命护盾。'},
+    'expert_belt': {'name': '达人带', 'pairs': (), 'treasure': True,
+                    'description': '宝物。本命 / 技能机属性克制目标时伤害 +25%；普攻按携带者第一属性判定，克制时 +12%。'},
+    'kings_rock': {'name': '王者之证', 'pairs': (), 'treasure': True,
+                   'description': '宝物。每第 3 次有效普攻使目标畏缩；携带者击倒敌人时，2 格内的敌人全部畏缩。'},
 }
 for _spec in MECH_ITEMS.values():
     _spec.update(arena_only=True, depth_only=True)
@@ -47,7 +60,8 @@ TREASURES = tuple(key for key, spec in MECH_ITEMS.items() if spec.get('treasure'
 # Visible carrier policy (owned piece → score or None) shared by bots and the advisor.
 DEPTH_CRAFT_ORDER = ('boomerang', 'impact_gauntlet', 'echo_bell', 'flame_orb', 'toxic_orb',
                      'static_glove', 'taunt_bell', 'red_card', 'weakness_policy', 'reaper_scale',
-                     'revival_seed', 'rally_whistle')
+                     'revival_seed', 'rally_whistle', 'mirror_coat', 'lightning_rod', 'safety_goggles',
+                     'light_clay', 'expert_belt', 'kings_rock')
 
 
 def carrier_rank(owned, key):
@@ -81,6 +95,18 @@ def carrier_rank(owned, key):
         return 3 if role == 'support' else 2 if role == 'defense' else 1
     if key == 'rally_whistle':
         return 3 if role == 'support' else 2
+    if key == 'mirror_coat':
+        return 3 if role == 'defense' else 1
+    if key == 'lightning_rod':
+        return 3 if role == 'attack' and ranged else 2
+    if key == 'safety_goggles':
+        return 3 if role == 'attack' else 2
+    if key == 'light_clay':
+        return 3 if role == 'support' else 2 if role == 'defense' else None
+    if key == 'expert_belt':
+        return 3 if role == 'attack' else 1
+    if key == 'kings_rock':
+        return 3 if role == 'attack' and not ranged else 2
     return None
 
 
@@ -268,6 +294,71 @@ def _h_whistle(battle, inst, unit, t, cast_index, **_):
         fire(battle, inst, unit, t, label='号令', kind='buff', value=hasted, spend=False)
 
 
+def _h_mirror(battle, inst, source, target, actual_hp, t, move=None, basic=False, **_):
+    unit = inst.unit
+    if (target is not unit or source is None or source.team == unit.team or not source.alive
+            or basic or move is None or actual_hp <= 0 or not unit.alive):
+        return
+    awakened = _syn().is_awakened(unit, 'mirror_coat')
+    dealt = _d()._indirect_damage(battle, unit, source, actual_hp * (.5 if awakened else .3), t)
+    if awakened:
+        _d()._shield(battle, unit, unit, unit.max_hp * .08, t, 'mirror_coat')
+    fire(battle, inst, source, t, label='镜面反射', kind='damage', value=dealt)
+
+
+def _h_rod(battle, inst, t, **_):
+    unit = inst.unit
+    if not unit.alive:
+        return
+    awakened = _syn().is_awakened(unit, 'lightning_rod')
+    period = 4. if awakened else 6.
+    due = inst.state.setdefault('next', period)
+    if t + 1e-9 < due:
+        return
+    inst.state['next'] = due + period
+    enemies = [v for v in battle.units if v.alive and v.team != unit.team]
+    if not enemies:
+        return
+    victim = max(enemies, key=lambda v: (v.energy, -v.local_idx))
+    dealt = _d()._indirect_damage(battle, unit, victim, max(unit.attack, unit.sp_attack) * .3, t)
+    drained = min(max(0, victim.energy), 15) if victim.alive else 0
+    victim.energy -= drained
+    _d()._energy(battle, unit, drained)
+    battle._emit_state(victim, t)
+    battle._emit_state(unit, t)
+    ready = inst.state.setdefault('para', {})
+    if awakened and victim.alive and ready.get(victim.idx, 0.) <= t + 1e-9:
+        import status
+        if status.apply_debuff(battle, victim, 'para', t, source=unit):
+            ready[victim.idx] = t + 6.
+    fire(battle, inst, victim, t, label='聚雷针', kind='damage', value=dealt, spend=False, bolt=True)
+
+
+def _h_light_clay(battle, inst, t, **_):
+    unit = inst.unit
+    if unit.alive and _d()._shield(battle, unit, unit, unit.max_hp * .10, t, 'light_clay'):
+        fire(battle, inst, unit, t, label='光之黏土', kind='shield', value=int(unit.shield))
+
+
+def _h_kings_basic(battle, inst, unit, target, t, actual_hp, **_):
+    if not _owner_basic(inst, unit, target, actual_hp) or not _counter(inst, 3):
+        return
+    import status
+    if status.apply_flinch(battle, target, t):
+        fire(battle, inst, target, t, label='畏缩', kind='debuff', spend=False)
+
+
+def _h_kings_kill(battle, inst, unit, killer, t, **_):
+    owner = inst.unit
+    if killer is not owner or not owner.alive or unit.team == owner.team:
+        return
+    import status
+    hit = sum(1 for v in battle.units if v.alive and v.team != owner.team and _d()._dist(v, unit) <= 2
+              and status.apply_flinch(battle, v, t))
+    if hit:
+        fire(battle, inst, owner, t, label='王者威压', kind='debuff', value=hit, spend=False)
+
+
 def revival_save(battle, unit, t):
     """Called from arena_depth.prevent_death: an adjacent revival-seed holder saves ``unit``."""
     d = _d()
@@ -305,6 +396,11 @@ UNIT_SPECS = (
     _spec('weakness_policy', 'direct_hit', '弱点保险', _h_weakness, limit=1),
     _spec('reaper_scale', 'death', '逆鳞', _h_reaper, cooldown=1.),
     _spec('rally_whistle', 'native_cast', '号令哨', _h_whistle),
+    _spec('mirror_coat', 'direct_hit', '镜面护符', _h_mirror, cooldown=1.5),
+    _spec('lightning_rod', 'tick', '聚雷针', _h_rod),
+    _spec('light_clay', 'battle_start', '光之黏土', _h_light_clay, limit=1),
+    _spec('kings_rock', 'basic_settled', '王者之证', _h_kings_basic),
+    _spec('kings_rock', 'death', '王者之证', _h_kings_kill),
 )
 
 
@@ -357,6 +453,16 @@ GUIDE = {
                      [('core', '与核心相邻时最有价值', lambda c: c['core'] is not None)]),
     'rally_whistle': ('辅助', '本命后全队加速，辅助施法越快越好',
                       [('support', '辅助型多：施法频繁', lambda c: c['roles'].count('support') >= 2)]),
+    'mirror_coat': ('坦克', '前排反弹本命伤害，克制高爆发施法',
+                    [('taunt', '挑衅铃 / 嘲讽把施法火力引到携带者身上', lambda c: 'taunt_bell' in c['items'] or _tech(c, 'taunt'))]),
+    'lightning_rod': ('控制', '定期放电夺能，压制对面本命节奏',
+                      [('storm', '雷暴 / 电系队：配合麻痹控制', lambda c: _bond(c, 'ELECTRIC', 2))]),
+    'safety_goggles': ('输出', '天气对应属性的主 C：免疫天气伤害并额外增伤', []),
+    'light_clay': ('辅助', '放大护盾：给会加盾的辅助或坦克',
+                   [('shield', '队里有加盾本命或守护共鸣', lambda c: 'shield' in c['skill_categories'] or 'heart_bell' in c['items'])]),
+    'expert_belt': ('输出', '属性克制时爆发：配合针对性站位与刷新', []),
+    'kings_rock': ('控制', '高频普攻打断：畏缩打断对面施法',
+                   [('combo', '连击羁绊 / 节拍器提升普攻频率', lambda c: c['tactics'].get('bond_combo', 0) >= 2 or 'metronome' in c['items'])]),
 }
 # Existing v1/v2 items, so every obtainable item has an archetype in the advisor.
 GUIDE_BASE = {

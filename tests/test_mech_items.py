@@ -40,7 +40,8 @@ class RecipeTest(unittest.TestCase):
     def test_numeric_pairs_craft_mechanic_items_only_in_v2(self):
         pairs = {('band', 'magnet'): 'boomerang', ('shoes', 'shoes'): 'impact_gauntlet',
                  ('magnet', 'bell'): 'echo_bell', ('charcoal', 'magnet'): 'flame_orb',
-                 ('mysticwater', 'magnet'): 'toxic_orb', ('spark', 'spark'): 'static_glove',
+                 ('mysticwater', 'magnet'): 'toxic_orb', ('spark', 'magnet'): 'static_glove',
+                 ('spark', 'spark'): 'lightning_rod', ('hardstone', 'magnet'): 'mirror_coat',
                  ('hardstone', 'hardstone'): 'taunt_bell', ('hardstone', 'shoes'): 'red_card'}
         for pair, key in pairs.items():
             self.assertEqual(items.craft_result(*pair, ruleset='arena_v2'), key)

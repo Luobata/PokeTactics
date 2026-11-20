@@ -551,6 +551,7 @@ def unit_init(unit):
     unit.haste_until = 0.
     unit.haste_fraction = 0.
     unit.threshold_used = set()
+    unit.awakened_items = getattr(unit, 'awakened_items', frozenset())
 
 
 def _bond_counts(battle, team):
@@ -676,6 +677,8 @@ def _unit_has(unit, spec, augments):
     if spec.source == 'item':
         if _syn.is_duo(spec.id):
             return _syn.unit_has_duo(unit, spec.id)
+        if spec.id.endswith('_plus'):
+            return _syn.is_awakened(unit, spec.id[:-5])
         return has_item(unit, spec.id)
     if spec.source == 'augment':
         return spec.id in augments
@@ -701,6 +704,10 @@ def damage_multiplier(battle, attacker, target, move, t, base=0):
     rules = getattr(attacker, 'depth_rules', ())
     if 'giant_slayer' in team_aug and target.max_hp > attacker.max_hp:
         factors.append((attacker.team, 'augment', 'giant_slayer', 1.22))
+    if has_item(attacker, 'expert_belt'):
+        kind = move.get('type') if move else (attacker.piece.types[0] if attacker.piece.types else None)
+        if kind and battle.dex.multiplier(kind, target.piece.types) > 1:
+            factors.append((attacker.team, 'item', 'expert_belt', 1.25 if move else 1.12))
     if has_item(attacker, 'static_glove') and getattr(getattr(target, '_st', None), 'debuff', None) == 'para':
         factors.append((attacker.team, 'item', 'static_glove', 1.15))
     if 'solidarity' in rules:
