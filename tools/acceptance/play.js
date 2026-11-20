@@ -550,9 +550,9 @@
       : equipItem
         ? "已选择装备：点击棋盘或备战席中的精灵，为它装备。"
         : shopSelected != null
-          ? "已选中商店伙伴。点棋盘上方操作条的「招募」加入备战席，再点一次卡片也可以直接招募。"
+          ? "已选中商店伙伴。点操作条的「招募」加入备战席，双击卡片直接招募，再点一次取消选择。"
           : selected
-            ? "伙伴已选中。点击目标格移动或交换，棋盘上方操作条可出售、卸下装备或查看详情。"
+            ? "伙伴已选中。点击目标格移动或交换，双击直接上场 / 下场，再点一次取消选择。"
           : state.phase === "over"
             ? "每一场冒险，都会让下一次相遇更有把握。再来一场吧。"
             : !y.alive
@@ -564,6 +564,27 @@
                     ? "伙伴已来到备战席。点击它，再点击棋盘格，或者选择「一键上场」。"
                     : "冒险从一次相遇开始。点击商店中的精灵看看详情，再把它招募到备战席。"
                   : "准备阶段不限时。调整阵容、点亮羁绊，准备好了就开始战斗。";
+  }
+  // The hint line doubles as the selection info strip (docs/70): what the selected
+  // unit's native skill and trait do, with glossary terms, plus its shortcuts.
+  function selectionInfo() {
+    const p = shopSelected != null ? state.shop?.[shopSelected] : selected ? pieceAt(selected) : null;
+    if (!p) return "";
+    const mark = (text) => window.PlayGlossary?.mark ? window.PlayGlossary.mark(text) : esc(text);
+    const skill = nativeOf(p);
+    const parts = [`<b class="hint-name">${esc(p.name)}</b>`];
+    if (skill?.name) parts.push(`<span class="hint-skill">本命「${esc(skill.name)}」：${mark(skill.description || "")}</span>`);
+    if (p.trait?.name) parts.push(`<span class="hint-trait">特性「${esc(p.trait.name)}」</span>`);
+    if (p.item_name) parts.push(`<span class="hint-item">◆ ${esc(p.item_name)}</span>`);
+    return parts.join(" ");
+  }
+  function renderHint() {
+    const info = needsResume || equipItem ? "" : selectionInfo();
+    const prefix = shopSelected != null && info ? "已选中商店伙伴 · " : "";
+    $h("tutorial-hint").innerHTML = info ? `${prefix}${info}` : esc(hintText());
+    setText(document.querySelector(".hint-step"), shopSelected != null ? "双击卡片招募 · 再点取消 · 右键更多 · Esc 取消"
+      : selected ? `双击${selected[0] === "b" ? "上场" : "下场"} · 再点取消 · 右键/长按更多 · Esc 取消`
+        : "拖动或先点精灵再点格子布阵 · 右键/长按更多操作 · 空格开战");
   }
   // Pure UI state: toggle classes on the existing tiles / cards (no rebuild).
   function syncSelection() {
@@ -578,6 +599,10 @@
         tile.classList.remove("drop-target");
       }
     }
+    // The enemy unit open in the scout panel is the "selected" enemy: a second click closes it.
+    const scouted = $("scout-dialog")?.open && scoutUnit?.source === "opponent" ? scoutUnit.loc : null;
+    for (const tile of $("enemy-board")?.querySelectorAll("[data-enemy-loc]") || [])
+      tile.classList.toggle("selected", tile.getAttribute("data-enemy-loc") === scouted);
     for (const card of $("shop")?.querySelectorAll("[data-shop]") || []) {
       const on = Number(card.getAttribute("data-shop")) === shopSelected;
       card.classList.toggle("selected", on);
@@ -587,14 +612,40 @@
   }
   function layoutContext(reason = "full") {
     return {state, api, canPrep, playable, pieceAt, selected: () => selected, reason,
-      shopSelected: () => shopSelected, equipItem: () => equipItem, busy: () => busy || deploying};
+      shopSelected: () => shopSelected, equipItem: () => equipItem, busy: () => busy || deploying, actions};
   }
+  // Selection and quick actions for the context menu / previews / guide (docs/70).
+  const actions = {
+    selectUnit(loc) {
+      if (!pieceAt(loc)) return;
+      selected = loc; shopSelected = null; equipItem = null; renderSelection();
+    },
+    selectShop(i) {
+      if (!state?.shop?.[i]) return;
+      shopSelected = Number(i); selected = null; equipItem = null; renderSelection();
+    },
+    selectEquip(key) {
+      equipItem = key; selected = null; shopSelected = null; renderSelection();
+    },
+    clear() {
+      if (selected == null && shopSelected == null && !equipItem) return;
+      selected = null; shopSelected = null; equipItem = null; renderSelection();
+    },
+    quickPlace: (loc) => canPrep() && pieceAt(loc) ? quickPlace(loc, pieceAt(loc)) : null,
+    bestBoardCell: (p) => bestBoardCell(p),
+    buyAndPlace: (i) => buyAndPlace(i),
+    autoDeploy: () => autoDeploy(),
+    openEnemy: (loc, focus) => openEnemyPiece(loc, focus),
+    openScout: (seat) => openScout(seat),
+    openDetail: () => revealPanel("detail", ".unit-section"),
+    toast: (message, error = false) => toast(message, error),
+  };
   /** Selection / shop preview / equip target changed: no section rebuilds. */
   function renderSelection() {
     if (!state) return render();
     if (shopSelected != null && !state.shop[shopSelected]) shopSelected = null;
     syncSelection();
-    setText($("tutorial-hint"), hintText());
+    renderHint();
     renderDetail();
     renderInventory();
     const ctx = layoutContext("selection");
@@ -602,7 +653,13 @@
     window.PlayWeather?.render(ctx);
     window.PlayLayout?.render(ctx);
     window.PlayInteractions?.render(ctx);
+    renderHelpers(ctx);
     window.PlayFeedback?.selection({selected, shopSelected, equipItem});
+  }
+  function renderHelpers(ctx) {
+    window.PlayContext?.render(ctx);
+    window.PlayPreview?.render(ctx);
+    window.PlayGuide?.render(ctx);
   }
   function render() {
     const locked = busy || deploying;
@@ -658,7 +715,7 @@
     $h("fight-button").innerHTML =
       `${icon("swords")}<span>${fightLabel}</span>${icon("arrow")}`;
     $("fight-button").classList.toggle("busy", locked);
-    setText($("tutorial-hint"), hintText());
+    renderHint();
     renderBonds();
     renderDetail();
     renderInventory();
@@ -698,6 +755,7 @@
     window.PlayWeather?.render(context);
     window.PlayLayout?.render(context);
     window.PlayInteractions?.render(context);
+    renderHelpers(context);
     window.PlayFeedback?.selection({selected, shopSelected, equipItem});
     window.PlayMusic?.update({phase: state.phase, round: Number(state.round) || 1, hp: state.you?.hp,
                               alive: state.you?.alive, pve: Boolean(state.opponent?.pve)});
@@ -1443,6 +1501,7 @@
     const narrow = $("scout-dialog").classList.contains("docked") && window.matchMedia("(max-width: 1199px)").matches;
     if ($("scout-dialog").open) $("scout-dialog").close();
     clearScoutLayout();
+    if (state) syncSelection();
     if (narrow) document.querySelector(".center-column").scrollIntoView({block: "start", behavior: "instant"});
   }
   function resetScout() {
@@ -1488,6 +1547,7 @@
     if (!state?.opponent) return;
     const owner = (state.scouting || []).find(p => p.current_opponent);
     openScout(owner?.seat ?? -1, {unit: {source: "opponent", loc}, returnFocus});
+    syncSelection();
   }
   function renderScout() {
     const seats = state.scouting || [];
@@ -1556,12 +1616,26 @@
     shopSelected = null;
     renderSelection();
   }
-  // Double-click / double-tap a unit: bench → best free board cell, board → bench.
-  // Clicking re-renders the tile, so the native dblclick never fires; a second
-  // click on the same unit within DOUBLE_TAP_MS counts instead. Slower second
-  // clicks keep their deselect meaning.
-  const DOUBLE_TAP_MS = 350;
+  // Selection rule (docs/70), the same for units and shop cards:
+  //  - click selects; clicking the same thing again after DOUBLE_TAP_MS deselects;
+  //  - two clicks on the same thing within DOUBLE_TAP_MS are a double-click and act
+  //    (unit: bench → best free board cell, board → bench; shop card: recruit),
+  //    whether or not it was selected before;
+  //  - Esc, the × in the action bar or 取消选择 clear any selection.
+  // We time the clicks ourselves: re-rendered tiles break the native dblclick and
+  // the OS double-click interval (up to 500 ms) would swallow deliberate re-clicks.
+  const DOUBLE_TAP_MS = 300;
   let lastCellTap = {loc: null, at: 0};
+  let lastShopTap = {i: null, at: 0};
+  async function buyAndPlace(i) {
+    if (!canPrep()) return null;
+    const before = new Set(ownedSnapshot(state).map((p) => p.uid));
+    const result = await api("buy", { i });
+    if (!result?.ok) return result;
+    const index = state.bench.findIndex((p) => p && !before.has(p.uid));
+    if (index >= 0 && state.you.on_board < state.you.pop) await quickPlace(`b${index}`, state.bench[index]);
+    return result;
+  }
   function bestBoardCell(p) {
     const rows = roleOf(p) === "defense" ? [0, 1, 2] : p.ranged || roleOf(p) === "support" ? [2, 1, 0] : [1, 0, 2];
     for (const r of rows) for (const c of [2, 3, 1, 4, 0, 5]) if (!state.board[r]?.[c]) return `g${r},${c}`;
@@ -2545,10 +2619,16 @@
       await api("family_evolve", {loc: selected, branch: target.dataset.familyEvolve});
     } else if (target.dataset.shop != null) {
       const i = Number(target.dataset.shop);
-      if (shopSelected === i || event.detail >= 2) {
-        // 再次点击已选中的卡片等同于点「招募」，沿用旧的一步买入习惯。
-        if (canPrep() && state.you.gold >= (state.shop[i]?.price ?? Infinity))
-          await api("buy", { i });
+      const now = Date.now();
+      const quick = lastShopTap.i === i && now - lastShopTap.at < DOUBLE_TAP_MS;
+      lastShopTap = quick ? {i: null, at: 0} : {i, at: now};
+      if (quick && canPrep() && state.you.gold >= (state.shop[i]?.price ?? Infinity)) {
+        // Double-click / double-tap recruits at once (docs/70).
+        await api("buy", { i });
+      } else if (shopSelected === i && !quick) {
+        // A slower second click on the selected card drops the selection.
+        shopSelected = null;
+        renderSelection();
       } else {
         shopSelected = i;
         selected = null;
@@ -2557,7 +2637,11 @@
       }
     } else if (target.dataset.shopBuy != null && canPrep()) {
       await api("buy", { i: target.dataset.shopBuy });
-    } else if (target.dataset.enemyLoc) openEnemyPiece(target.dataset.enemyLoc, target);
+    } else if (target.dataset.enemyLoc) {
+      // Second click on the enemy shown in the scout panel closes it again.
+      if ($("scout-dialog").open && scoutUnit?.source === "opponent" && scoutUnit.loc === target.dataset.enemyLoc) closeScout();
+      else openEnemyPiece(target.dataset.enemyLoc, target);
+    }
     else if (target.dataset.loc) await chooseCell(target.dataset.loc);
     else if (target.dataset.equip && canPrep()) {
       equipItem =
@@ -2593,12 +2677,18 @@
     } else if (target.hasAttribute("data-scout-overview")) {
       openScout(null, {returnFocus: target});
     } else if (target.dataset.scout != null) {
-      openScout(Number(target.dataset.scout), {returnFocus: target});
+      // A standings row toggles its own scout view; tabs inside the panel only switch.
+      if (target.classList.contains("trainer-row") && $("scout-dialog").open && scoutSeat === Number(target.dataset.scout)) closeScout();
+      else openScout(Number(target.dataset.scout), {returnFocus: target});
     } else if (target.dataset.scoutUnit) {
       const seat = Number(target.dataset.scoutOwner);
-      openScout(seat, {unit: {source: "scouting", loc: target.dataset.scoutUnit}});
+      if (scoutUnit?.source === "scouting" && scoutUnit.loc === target.dataset.scoutUnit && scoutSeat === seat) {
+        scoutUnit = null;
+        renderScout();
+      } else openScout(seat, {unit: {source: "scouting", loc: target.dataset.scoutUnit}});
     } else if (target.dataset.scoutReport != null) {
-      scoutReportIndex = Number(target.dataset.scoutReport);
+      const index = Number(target.dataset.scoutReport);
+      scoutReportIndex = scoutReportIndex === index ? null : index;
       Object.assign(statViews.scout, {team: 0, metric: "damage_dealt"});
       renderScout();
       $("scout-statistics")?.scrollIntoView({block: "nearest", behavior: "instant"});
@@ -2607,7 +2697,7 @@
     } else if (target.dataset.statScope) {
       selectStatView(target);
     } else if (target.dataset.roleFilter) {
-      roleFilter = target.dataset.roleFilter;
+      roleFilter = roleFilter === target.dataset.roleFilter ? "all" : target.dataset.roleFilter;
       renderCatalog();
     } else if (target.dataset.action === "cancel-select") {
       selected = null;
@@ -2821,6 +2911,15 @@
   });
   document.addEventListener("keydown", (event) => {
     if (event.code === "Escape" && $("scout-dialog").open && $("scout-dialog").classList.contains("docked")) { event.preventDefault(); closeScout(); return; }
+    // Esc drops the selection even while the clicked tile / card keeps focus.
+    if (event.code === "Escape" && (selected || shopSelected != null || equipItem) && !document.querySelector("dialog[open]")
+        && !["INPUT", "SELECT", "TEXTAREA"].includes(event.target?.tagName)) {
+      selected = null;
+      shopSelected = null;
+      equipItem = null;
+      renderSelection();
+      return;
+    }
     if (
       event.repeat ||
       event.altKey ||

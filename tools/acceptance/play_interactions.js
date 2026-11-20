@@ -139,7 +139,7 @@
     const fmt = (row) => [row.damage ? `伤害 ${row.damage}` : "", row.estimated ? `增伤≈${row.estimated}` : "",
       row.heal ? `治疗 ${row.heal}` : "", row.shield ? `护盾 ${row.shield}` : "", row.energy ? `能量 ${row.energy}` : "",
       row.prevented ? `减伤≈${row.prevented}` : ""].filter(Boolean).join(" · ") || (row.passive ? "常驻加成（已计入面板）" : "未触发");
-    openSheet({kind: "info"}, `${CATEGORY_GLYPH[cat?.category] || "✦"} ${a.name}`, `
+    openSheet({kind: "info", id}, `${CATEGORY_GLYPH[cat?.category] || "✦"} ${a.name}`, `
       <p class="ix-sheet-tag">${esc(cat?.category_name || "海克斯")}</p>
       <p>${esc(a.description || a.brief || "")}</p>
       ${a.current ? `<p class="ix-current">${esc(a.current)}</p>` : ""}
@@ -654,7 +654,8 @@
     else if (target.hasAttribute("data-ix-advice")) await followAdvice(attr("data-ix-advice"), attr("data-item"), attr("data-uid"), attr("data-component"));
     else if (target.hasAttribute("data-ix-awaken")) await awakenItem(attr("data-ix-awaken"), attr("data-uid"), attr("data-component"));
     else if (target.hasAttribute("data-ix-arch")) {
-      archFilter = attr("data-ix-arch") || null;
+      const next = attr("data-ix-arch") || null;
+      archFilter = next === archFilter ? null : next;  // re-click clears the filter (docs/70)
       renderItems(S(), IX());
     } else if (target.hasAttribute("data-ix-chase-clear")) {
       chase = null;
@@ -662,7 +663,9 @@
     }
     else if (target.hasAttribute("data-ix-cell")) {
       const [a, b] = attr("data-ix-cell").split("|");
-      cellSheet(a, b);
+      const cell = cellFor(a, b);
+      if (sheet?.kind === "craft" && cell && sheet.item === cell.item) closeSheet();  // re-click closes (docs/70)
+      else cellSheet(a, b);
     } else if (target.hasAttribute("data-ix-socket")) socketPicker(attr("data-ix-socket"));
     else if (target.hasAttribute("data-ix-socket-pick")) tmConfirm(attr("data-ix-socket-pick"), attr("data-uid"));
     else if (target.hasAttribute("data-ix-confirm-learn") && sheet?.kind === "learn" && canPrep()) {
@@ -683,7 +686,11 @@
       augmentDeferred = S()?.round ?? null;
       renderAugments(S(), IX());
     } else if (target.hasAttribute("data-ix-open-augment")) openAugments();
-    else if (target.hasAttribute("data-ix-augment-info")) augmentInfo(attr("data-ix-augment-info"));
+    else if (target.hasAttribute("data-ix-augment-info")) {
+      const id = attr("data-ix-augment-info");
+      if (sheet?.kind === "info" && sheet.id === id) closeSheet();  // re-click closes (docs/70)
+      else augmentInfo(id);
+    }
   }, true);
 
   /** One-tap advice: equip opens the usual confirm, craft crafts then offers the carrier, chase points at the board. */
@@ -767,5 +774,16 @@
     }
   }, true);
 
-  window.PlayInteractions = {render, openAugments, mode: () => mode, sheet: () => sheet};
+  window.PlayInteractions = {render, openAugments, mode: () => mode, sheet: () => sheet,
+    // Context-menu hooks (docs/70): the same targeting mode and confirm sheets as the cards.
+    target: (kind, key) => { if (canPrep()) enterMode(kind, key); },
+    learn: (key, uid) => tmConfirm(key, uid),
+    equip: (key, uid) => equipConfirm(key, uid),
+    openMods(uid) {
+      const row = byUid(uid);
+      const mods = IX()?.skills?.[uid]?.mods || [];
+      if (!row || !mods.length) return false;
+      modChoice(row, mods);
+      return true;
+    }};
 })();
