@@ -20,27 +20,32 @@
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (ch) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[ch]));
   const HOVER_MS = 300;
+  // Board tiles are hovered constantly while arranging: wait longer, never cover the board,
+  // and stay quiet while a unit is selected (the info strip already describes it).
+  const BOARD_HOVER_MS = 650;
+  const onBoard = (el) => Boolean(el?.closest?.("#battlefield"));
   const TERM_MS = 150;
   const LONG_PRESS_MS = 450;
 
   // ------------------------------------------------------------ glossary
-  // Plain-language definitions; numbers follow docs/06, 38, 42, 59, 67.
+  // Plain-language definitions; numbers checked against sim/status.py, economy.py,
+  // arena_depth.py and arena_item_synergy.py on 2026-11-21.
   const TERMS = {
     "本命技能": "每只精灵自带的专属技能，不能被替换。能量攒满后自动释放；升到 2★/3★ 时可以再选一项永久强化。",
     "学习位": "每只精灵额外的一个技能栏，用技能机学会一招。替换会覆盖旧招且不返还，本命技能始终保留。",
     "技能机": "让精灵学会一招额外技能的道具（仓库里没有时也可以花 2 金学习）。只能学给属性相容的精灵。",
-    "能量": "普攻和受到攻击都会积攒能量，攒满后自动释放本命技能。",
+    "能量": "普攻和受到攻击都会积攒能量，攒满 80 后自动释放本命技能。",
     "特性": "被动能力：满足触发条件时自动生效，通常有冷却时间和每场次数上限。",
-    "灼伤": "持续损失生命，并降低物理攻击。火系招式常会附带。",
-    "中毒": "持续损失生命，时间越久每秒掉得越多。毒、钢属性不会中毒。",
-    "麻痹": "攻击速度降低约 30%，并且每隔几秒僵住一下。",
-    "冰冻": "短时间内完全无法行动（约 1 秒多）。",
-    "睡眠": "无法行动，受到攻击就会醒来。",
-    "畏缩": "被打断，行动停顿一瞬间。",
+    "灼伤": "6 秒内持续掉血（共约 4.8% 最大生命），物理攻击 -10%。火系招式常会附带，火系免疫。",
+    "中毒": "8 秒内持续掉血，每秒 0.5% 起逐秒加深（共约 9.6% 最大生命）。毒、钢属性免疫。",
+    "麻痹": "持续 8 秒：攻击速度 -30%，每 3 秒僵住 0.4 秒。电系免疫。",
+    "冰冻": "1.2 秒内完全无法行动。冰系免疫。",
+    "睡眠": "最多 2 秒无法行动，受到攻击就会醒来。",
+    "畏缩": "被打断，行动停顿 0.3 秒。",
     "定身": "不能移动位置，但仍然可以攻击；不占用主要异常状态。",
     "易伤": "受到的伤害提高。",
     "湿润": "水系招式留下的标记，可以和其他异常共存，供后续联动利用。",
-    "护盾": "一层临时生命，受到伤害时先扣护盾；持续时间结束后消失，不叠加。",
+    "护盾": "一层临时生命，受到伤害时先扣护盾，通常持续 3 秒。同时只有一层，只有更强的护盾才能替换。",
     "击退": "把目标推开一格，打乱对方站位。",
     "嘲讽": "迫使附近的敌人优先攻击自己一段时间。",
     "净化": "解除友军身上的主要异常状态（灼伤、中毒、麻痹等）。",
@@ -50,19 +55,19 @@
     "溅射": "命中主目标时，附近的敌人也受到一部分伤害。",
     "羁绊": "场上不同的精灵凑齐同一属性或战术的数量门槛后激活的加成。备战席上的不计入，同种精灵只算一次。",
     "共鸣": "场上精灵携带同一标签的装备 2 件 / 4 件时，激活装备共鸣的额外效果。",
-    "觉醒": "机制装备 + 它配方里的一个组件 → 觉醒版：保留原效果，再多一条机制。每局次数有限。",
+    "觉醒": "第 12 轮起，装备 + 它配方里的一个组件 → 觉醒版：保留原效果，再多一条机制。每局最多 2 件，可在合成树里查看。",
     "双持": "同一只精灵同时携带两件特定装备时触发的组合效果，需要第二装备位。",
-    "核心": "每队可以指定 1 名上场精灵为核心：获得第二装备位、生命和攻击 +15%，但敌方突进单位会优先扑向它。",
+    "核心": "每队可以指定 1 名上场精灵为核心：获得第二装备位、生命和攻击 +15%、它的属性羁绊多计一次，但敌方突进单位会优先扑向它。",
     "海克斯": "每隔几轮三选一的全局强化，本局一直生效。",
     "技能强化": "精灵升到 2★/3★ 时，从两项本命技能强化中选一项，永久生效。",
     "升星": "集齐 3 只同名同星的精灵会自动合成为更高一星，属性大幅提升。",
     "三合一": "3 只同名同星的精灵自动合成为更高一星。",
     "共享池": "八位训练家共用同一个卡池：别人买走的精灵，你就更难刷到。",
     "人口": "可以同时上场的精灵数量，随训练家等级提高。",
-    "利息": "每轮结算时，留存金币每 10 金额外 +1（有上限），存钱也能变强。",
-    "连胜": "连续获胜 2 场起，每轮额外获得金币。",
-    "连败": "连续失利 2 场起，每轮额外获得金币作为补偿。",
-    "天气": "本轮战场天气，会提高或降低某些属性招式的伤害，双方共享。",
+    "利息": "每轮结算时，留存金币每 10 金额外 +1，最多 +5（存到 50 金吃满）。",
+    "连胜": "连胜 2 场起每轮额外 +1 金，4 场 +2，6 场 +3。",
+    "连败": "连败 2 场起每轮额外 +1 金，4 场 +2，6 场 +3，作为补偿。",
+    "天气": "本轮战场天气，双方共享：强化对应属性的宝可梦，并带来落雷、风沙、光合等效果。点顶部天气标签看三轮预报。",
     "地形": "当前阶段的战场地形，带来额外规则，几轮后会切换。",
     "射程": "能攻击到的距离（格数）。近战为 1 格。",
     "近战": "需要贴近敌人才能攻击，射程 1 格。",
@@ -319,7 +324,12 @@
   }
   function place(el, anchor) {
     if (typeof el.getBoundingClientRect !== "function" || !anchor?.getBoundingClientRect) return;
-    const a = anchor.getBoundingClientRect();
+    let a = anchor.getBoundingClientRect();
+    if (onBoard(anchor)) {
+      // Anchor to the whole board at the tile's height, so the card sits beside the board.
+      const b = document.getElementById("battlefield").getBoundingClientRect();
+      a = {left: b.left, right: b.right, top: a.top, bottom: a.bottom, width: b.width, height: a.height};
+    }
     const w = el.offsetWidth || 280, h = el.offsetHeight || 160;
     const vw = window.innerWidth || 1280, vh = window.innerHeight || 800, gap = 8;
     const fits = (x, y) => x >= 4 && y >= 4 && x + w <= vw - 4 && y + h <= vh - 4;
@@ -327,7 +337,9 @@
       [a.right + gap, a.top], [a.left - w - gap, a.top],
       [a.left + a.width / 2 - w / 2, a.top - h - gap], [a.left + a.width / 2 - w / 2, a.bottom + gap],
     ];
-    let [x, y] = options.find(([ox, oy]) => fits(ox, Math.min(oy, vh - h - 4))) || options[0];
+    const sideways = onBoard(anchor) ? options.slice(0, 2) : options;
+    let [x, y] = sideways.find(([ox, oy]) => fits(ox, Math.min(oy, vh - h - 4)))
+      || options.find(([ox, oy]) => fits(ox, Math.min(oy, vh - h - 4))) || options[0];
     x = Math.max(4, Math.min(x, vw - w - 4));
     y = Math.max(4, Math.min(y, vh - h - 4));
     el.style.left = `${Math.round(x)}px`;
@@ -371,8 +383,10 @@
   document.addEventListener("pointerover", (event) => {
     if (event.pointerType && event.pointerType !== "mouse") return;
     if (blocked()) return;
-    const target = targetOf(event.target);
-    schedule(target, target?.kind === "term" ? TERM_MS : HOVER_MS);
+    let target = targetOf(event.target);
+    const board = target && onBoard(target.el);
+    if (board && (ctx?.selected?.() != null || ctx?.equipItem?.() != null)) target = null;
+    schedule(target, target?.kind === "term" ? TERM_MS : board ? BOARD_HOVER_MS : HOVER_MS);
   });
   document.addEventListener("pointerout", (event) => {
     if (event.pointerType && event.pointerType !== "mouse") return;

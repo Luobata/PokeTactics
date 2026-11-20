@@ -97,6 +97,40 @@
     return "请先点「继续存档」核对进度";
   }
   const call = (cmd, params) => () => ctx.api(cmd, params);
+  // Menu equips skip the confirm sheet; the next few seconds offer a free undo instead
+  // (the server refunds an unequip that directly follows the equip, docs/70).
+  let undoTimer = 0;
+  function equipNow(item, loc) {
+    return async () => {
+      const before = pieceAt(loc);
+      const slot = before?.item ? "1" : "0";
+      const name = itemName(item);   // resolve before the item leaves the bag
+      const result = await ctx.api("equip", {item, loc});
+      if (!result?.ok) return;
+      let bar = document.getElementById("cx-undo");
+      if (!bar) {
+        bar = document.createElement("div");
+        bar.id = "cx-undo";
+        bar.className = "cx-undo";
+        bar.setAttribute("role", "status");
+        document.body.append(bar);
+      }
+      bar.innerHTML = `<span>已装备 ◆${String(name).replace(/[<>&"]/g, "")}</span><button type="button">撤销</button>`;
+      bar.hidden = false;
+      bar.querySelector("button").onclick = async () => {
+        bar.hidden = true;
+        clearTimeout(undoTimer);
+        await ctx.api("unequip", {loc, slot});
+      };
+      clearTimeout(undoTimer);
+      undoTimer = setTimeout(() => { bar.hidden = true; }, 5000);
+    };
+  }
+  // Any other action ends the free-undo window on the server; hide the chip too.
+  document.addEventListener("pointerdown", (event) => {
+    const bar = document.getElementById("cx-undo");
+    if (bar && !bar.hidden && !bar.contains(event.target)) bar.hidden = true;
+  }, true);
   const benchFull = () => (S().bench || []).filter(Boolean).length >= (Number(S().you?.bench_cap) || 8);
   const popFull = () => Number(S().you?.on_board) >= Number(S().you?.pop);
   const popReason = () => `上场人口已满（${Number(S().you.on_board)}/${Number(S().you.pop)}）`;
@@ -132,7 +166,7 @@
     return {title: `为 ${p.name} 装备`, entries: keys.map((key) => {
       const r = rank(key);
       return {label: `◆ ${itemName(key)}`, hint: r === -1 ? "最佳" : r < 99 ? `适配 #${r + 1}` : "", note: short(itemEffect(key), 26),
-        tone: r === -1 ? "primary" : "", disabled: why, run: call("equip", {item: key, loc})};
+        tone: r === -1 ? "primary" : "", disabled: why, run: equipNow(key, loc)};
     })};
   }
   function learnMenu(p, loc, list, why) {
@@ -255,7 +289,7 @@
     const entries = [];
     const best = carriers[0];
     if (IX()?.equip) entries.push(best
-      ? {label: `装给 ${best.name}`, hint: "推荐", tone: "primary", note: short(best.reason, 26), disabled: why, run: () => ctx.api("equip", {item: key, loc: locOf(best.uid)})}
+      ? {label: `装给 ${best.name}`, hint: "推荐", tone: "primary", note: short(best.reason, 26), disabled: why, run: () => equipNow(key, locOf(best.uid))()}
       : {label: "装给推荐携带者", disabled: why || "没有空装备位的合适伙伴"});
     entries.push({label: "选择携带者…", hint: "点亮可装的伙伴", disabled: why,
       run: () => window.PlayInteractions?.target ? window.PlayInteractions.target("equip", key) : ctx.actions?.selectEquip(key)});

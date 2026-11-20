@@ -231,5 +231,35 @@ class ExpansionTest(unittest.TestCase):
         self.assertTrue(set(tree['craftable']) <= set(keys))
 
 
+
+class UndoEquipTest(unittest.TestCase):
+    def test_unequip_right_after_equip_is_free_otherwise_costs(self):
+        import demo
+        r = demo.api_action({'cmd': 'new', 'mode': 'arena', 'seed': '515'})
+        sid = r['sid']
+        s = demo.SESSIONS[sid]
+        for row in list(s.arena_augments_pending):
+            arena.claim_augment(s, row['id'], row['options'][0]['id'])
+        p = s.player
+        p.inventory.finished.append('flame_orb')
+
+        def act(**q):
+            seq = demo.state_json(s)['save']['sequence']
+            out = demo.api_action({**q, 'sid': sid, 'expected_sequence': str(seq)})
+            self.assertTrue(out.get('ok'), out)
+
+        act(cmd='buy', i='0')
+        act(cmd='move', **{'from': 'b0', 'to': 'g0,0'})
+        gold = p.gold
+        act(cmd='equip', item='flame_orb', loc='g0,0')
+        act(cmd='unequip', loc='g0,0')
+        self.assertEqual(p.gold, gold)
+        self.assertIn('flame_orb', p.inventory.finished)
+        act(cmd='equip', item='flame_orb', loc='g0,0')
+        act(cmd='lock')
+        act(cmd='unequip', loc='g0,0')
+        self.assertEqual(p.gold, gold - 1)
+
+
 if __name__ == '__main__':
     unittest.main()

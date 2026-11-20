@@ -309,7 +309,7 @@ const cases = {
     let now = 1_000_000;
     const p = await page(fixture(), {...recorder().options, clock: () => now});
     const G = p.window.PlayGlossary;
-    assert.match(G.define('麻痹'), /攻击速度降低/);
+    assert.match(G.define('麻痹'), /攻击速度 -30%/);
     assert.equal(G.define('原生技能'), G.define('本命技能'), 'aliases share one definition');
     const marked = G.mark('命中时麻痹目标，再次麻痹 <b>');
     assert.equal((marked.match(/class="gl-term"/g) || []).length, 1, 'first occurrence only');

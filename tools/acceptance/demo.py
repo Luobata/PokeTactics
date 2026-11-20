@@ -3686,6 +3686,7 @@ def act_equip(sess, key: str, loc: str):
             and getattr(owned, 'extra_item', None) is None and key != 'evo_stone':
         p.inventory.finished.remove(key)
         owned.extra_item = key
+        sess._last_equip = (owned.uid, key, '1')
         return f"{owned.piece.name} 第二装备位装备了 {items_mod.FINISHED[key]['name']}"
     if owned.item is not None:
         slots = arena_session.item_slots(owned, p) if sess.is_depth else 1
@@ -3709,6 +3710,7 @@ def act_equip(sess, key: str, loc: str):
         return f"通信进化！{old} → {owned.piece.name}（进化石不消耗）"
     p.inventory.finished.remove(key)
     owned.item = key
+    sess._last_equip = (owned.uid, key, '0')
     return f"{owned.piece.name} 装备了 {items_mod.FINISHED[key]['name']}"
 
 
@@ -3716,6 +3718,16 @@ def act_unequip(sess, loc: str, slot='0'):
     _guard_prep(sess)
     p = sess.player
     owned, _where, _key = sess.locate(loc)
+    undo = getattr(sess, '_undo_equip', None)
+    held = getattr(owned, 'extra_item', None) if slot == '1' else owned.item
+    if undo is not None and undo == (owned.uid, held, slot):
+        # Undoing the equip made by the previous action is free.
+        if slot == '1':
+            owned.extra_item = None
+        else:
+            owned.item = None
+        p.inventory.finished.append(held)
+        return f"已撤销装备 {items_mod.FINISHED[held]['name']}（不扣金币）"
     if sess.is_depth and slot == '1':
         if not getattr(owned, 'extra_item', None):
             raise DemoError("第二装备位是空的")
@@ -3879,6 +3891,9 @@ def _apply_action(params: dict):
                 return {"ok": False, "dead": True,
                         "error": "会话不存在（服务可能已重启），请开新对局"}
             msg = None
+            # An equip may be undone for free by the very next action (context-menu undo).
+            if cmd not in ("state", "save"):
+                sess._undo_equip, sess._last_equip = getattr(sess, '_last_equip', None), None
             if cmd == "state":
                 pass
             elif cmd == "save":
