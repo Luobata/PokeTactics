@@ -137,6 +137,66 @@ class PlaySceneGeometry(unittest.TestCase):
                 server.wait(timeout=10)
 
 
+
+@unittest.skipUnless(PLAYWRIGHT_NODE_PATH is not None,
+                     'needs Node.js + playwright (set POKETACTICS_PLAYWRIGHT_NODE_PATH to its node_modules)')
+class PlayBranchFlow(unittest.TestCase):
+    """Three un-evolved branch-family copies (无畏小子) never merge silently: the route choice pops up."""
+
+    def test_third_copy_prompts_route_choice_and_picking_merges(self):
+        for path in (ROOT / 'sim', ACCEPTANCE, ROOT / 'tools' / 'mockups'):
+            if str(path) not in sys.path:
+                sys.path.insert(0, str(path))
+        import arena
+        import demo
+        import shop as shop_mod
+        with tempfile.TemporaryDirectory() as saves:
+            old_root = demo.SAVE_ROOT
+            demo.SAVE_ROOT = Path(saves)
+            try:
+                s = demo._new_session(515, {'mode': 'arena'})
+                for row in list(s.arena_augments_pending):
+                    arena.claim_augment(s, row['id'], row['options'][0]['id'])
+                p = s.player
+                for _ in range(2):
+                    template = s.templates[236]
+                    s.pool.take(236)
+                    p.bench.append(shop_mod.OwnedPiece(template, template.tier))
+                s.ensure_unit_ids()
+                s.pool.remaining[p.shop.slots[0]] += 1
+                s.pool.take(236)
+                p.shop.slots[0] = 236
+                p.gold = 10
+                demo._save_store(s.sid).save(s)
+            finally:
+                demo.SAVE_ROOT = old_root
+            with socket.socket() as sock:
+                sock.bind(('127.0.0.1', 0))
+                port = sock.getsockname()[1]
+            server = subprocess.Popen(
+                [sys.executable, str(ACCEPTANCE / 'server.py'), '--port', str(port)],
+                env={**os.environ, 'POKETACTICS_SAVE_DIR': saves},
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            try:
+                base = f'http://127.0.0.1:{port}'
+                for _ in range(100):
+                    try:
+                        with urllib.request.urlopen(f'{base}/play', timeout=2) as response:
+                            if response.status == 200:
+                                break
+                    except OSError:
+                        time.sleep(0.2)
+                else:
+                    self.fail('acceptance server did not start')
+                result = subprocess.run(
+                    [NODE, str(ROOT / 'tests/frontend/play_branch_flow.js'), base, s.sid],
+                    env={**os.environ, 'NODE_PATH': PLAYWRIGHT_NODE_PATH},
+                    capture_output=True, text=True, timeout=120)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            finally:
+                server.terminate()
+                server.wait(timeout=10)
+
 class PlayLayoutStatic(unittest.TestCase):
     def test_page_and_styles_load_nothing_from_the_network(self):
         for name in ('play.html', 'play.css', 'play_layout.css', 'play_interactions.css', 'play_motion.css', 'play_select.css', 'battle.css'):

@@ -652,6 +652,7 @@
     window.PlayDepth?.render(ctx);
     window.PlayWeather?.render(ctx);
     window.PlayTree?.render(ctx);
+    window.PlayBranch?.render(ctx);
     window.PlayLayout?.render(ctx);
     window.PlayInteractions?.render(ctx);
     renderHelpers(ctx);
@@ -755,6 +756,7 @@
     window.PlayDepth?.render(context);
     window.PlayWeather?.render(context);
     window.PlayTree?.render(context);
+    window.PlayBranch?.render(context);
     window.PlayLayout?.render(context);
     window.PlayInteractions?.render(context);
     renderHelpers(context);
@@ -929,7 +931,7 @@
     const waiting = [...(state.board || []).flat(), ...(state.bench || [])].filter(x => x?.family?.id === f.id && x.family.step === 1).length;
     const choices = owned && f.step === 1 && f.routes.length > 1;
     const routes = f.step > 1 ? f.routes.filter(r => r.branch === f.branch) : f.routes;
-    return `<section class="skill-slot family-growth-panel"><div class="skill-slot-heading"><span>${f.rare ? '稀有 · 全队限一' : `培养 ${f.step}/3 · 累计 ${f.copies} 张`}</span><a href="/pokedex?q=${encodeURIComponent(f.entrance)}&stage=${f.step}&pool=${encodeURIComponent(state.arena.pool_version)}" target="_blank" rel="noopener">图鉴对比 ↗</a></div><p>商店一直出售 ${esc(f.entrance)} · 每张 ${f.cost} 金。${f.rare ? '单张即战力，不参与培养。' : '三只同档合成，满培养共需九张。'}</p>${routes.map(r=>`<p>${r.names.map(esc).join(' → ')}${r.names.length < 3 && !f.rare ? ' → 满培养' : ''}${f.routes.length > 1 ? `<br><strong>${esc(roleNames[r.role])} · ${esc(r.skill)}</strong><br>${esc(r.description)}${r.trait?.playstyle ? `<br><strong>${esc(r.trait.playstyle)} · ${esc(r.trait.name)}</strong><br>${esc(r.trait.description)}` : ""}` : ''}</p>`).join('')}${f.step > 1 && f.routes.length > 1 ? '<p>进化路线已锁定，之后仅同分支可合并。</p>' : ''}${choices ? `<p>集齐三只后选择进化方向，之后仅同分支可合并。当前持有 ${waiting} 只初始形态。</p><div class="detail-actions">${f.routes.map(r=>`<button data-family-evolve="${r.branch}" ${!canPrep() || waiting < 3 ? 'disabled' : ''}>进化为 ${esc(r.names[r.names.length-1])}</button>`).join('')}</div>` : ''}</section>`;
+    return `<section class="skill-slot family-growth-panel"><div class="skill-slot-heading"><span>${f.rare ? '稀有 · 全队限一' : `培养 ${f.step}/3 · 累计 ${f.copies} 张`}</span><a href="/pokedex?q=${encodeURIComponent(f.entrance)}&stage=${f.step}&pool=${encodeURIComponent(state.arena.pool_version)}" target="_blank" rel="noopener">图鉴对比 ↗</a></div><p>商店一直出售 ${esc(f.entrance)} · 每张 ${f.cost} 金。${f.rare ? '单张即战力，不参与培养。' : '三只同档合成，满培养共需九张。'}</p>${routes.map(r=>`<p>${r.names.map(esc).join(' → ')}${r.names.length < 3 && !f.rare ? ' → 满培养' : ''}${f.routes.length > 1 ? `<br><strong>${esc(roleNames[r.role])} · ${esc(r.skill)}</strong><br>${esc(r.description)}${r.trait?.playstyle ? `<br><strong>${esc(r.trait.playstyle)} · ${esc(r.trait.name)}</strong><br>${esc(r.trait.description)}` : ""}` : ''}</p>`).join('')}${f.step > 1 && f.routes.length > 1 ? '<p>进化路线已锁定，之后仅同分支可合并。</p>' : ''}${choices ? `<p>${waiting >= 3 ? '<strong>已集齐三只：选一条路线立即合成。</strong>' : `集齐三只后选择进化方向（还差 ${3 - waiting} 只），不会自动合成。`}之后仅同分支可合并。当前持有 ${waiting} 只初始形态。</p><div class="detail-actions">${f.routes.map(r=>`<button data-family-evolve="${r.branch}" ${!canPrep() || waiting < 3 ? 'disabled' : ''}>进化为 ${esc(r.names[r.names.length-1])}</button>`).join('')}</div>` : ''}</section>`;
   }
   function renderDetail() {
     if (shopSelected != null) {

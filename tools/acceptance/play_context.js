@@ -194,6 +194,9 @@
       entries.push({label: "上场", hint: cell ? `→ ${ROWS[Number(cell[1])] || "棋盘"} · 双击` : "双击", tone: "primary",
         disabled: why || (popFull() ? popReason() : !cell ? "棋盘没有空位" : ""), run: () => ctx.actions?.quickPlace(loc)});
     }
+    const branch = window.PlayBranch?.readyFor?.(p.uid);
+    if (branch) entries.push({label: "选择进化路线", hint: `${branch.count} 只 · ${branch.routes.length} 选 1`, tone: "primary",
+      disabled: why, run: () => window.PlayBranch.open(branch.fid)});
     if ((p.mod_options || []).length)
       entries.push({label: "选择技能强化", hint: `${p.mod_options.length} 选 1`, tone: "primary", disabled: why,
         run: () => window.PlayInteractions?.openMods?.(p.uid) || (ctx.actions?.selectUnit(loc), ctx.actions?.openDetail())});
