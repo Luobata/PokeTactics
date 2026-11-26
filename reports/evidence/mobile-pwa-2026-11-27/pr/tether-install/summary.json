@@ -1,0 +1,268 @@
+{
+  "ok": true,
+  "serial": "<dora-adb-serial>",
+  "via": "tether",
+  "steps": [
+    {
+      "step": "device",
+      "t": 1.6,
+      "model": "Pixel 9a",
+      "manufacturer": "Google",
+      "android": "15",
+      "sdk": "35",
+      "chrome": "157.0.8103.78",
+      "screen": "1080x2424"
+    },
+    {
+      "step": "connected",
+      "t": 1.8,
+      "base": "http://localhost:8844",
+      "browser": "Chrome/157.0.8103.78"
+    },
+    {
+      "step": "opened",
+      "t": 5.2,
+      "round": "01",
+      "gold": "7",
+      "secure": true,
+      "mode": "browser",
+      "manifest": true,
+      "sw": "registered",
+      "shot": "01-opened.png"
+    },
+    {
+      "step": "augment picked",
+      "t": 6.3,
+      "at": {
+        "x": 205.71429443359375,
+        "y": 412.3988037109375,
+        "w": 357.4285888671875,
+        "h": 48
+      },
+      "shot": "02-augment.png"
+    },
+    {
+      "step": "shop card selected",
+      "t": 7.3,
+      "card": "0",
+      "shot": "03-shop-selected.png"
+    },
+    {
+      "step": "bought",
+      "t": 8.1,
+      "gold": [
+        7,
+        6
+      ],
+      "shot": "04-bought.png"
+    },
+    {
+      "step": "placed",
+      "t": 9.7,
+      "bench": "b0",
+      "cell": "g0,0",
+      "pop": [
+        "0/4",
+        "1/4"
+      ],
+      "shot": "05-placed.png"
+    },
+    {
+      "step": "battle playing",
+      "t": 14.2,
+      "wakeLock": true,
+      "wakeLockError": null,
+      "canvas": [
+        2520,
+        1680
+      ],
+      "clock": "00:02.7",
+      "shot": "06-battle.png"
+    },
+    {
+      "step": "verdict",
+      "t": 23.3,
+      "verdict": "回合失利",
+      "haptics": {
+        "cues": 2,
+        "vibrations": [
+          "ult",
+          "ult_enemy"
+        ]
+      },
+      "shot": "07-verdict.png"
+    },
+    {
+      "step": "round 2",
+      "t": 24.7,
+      "wakeLockAfterBattle": false,
+      "shot": "08-round2.png"
+    },
+    {
+      "step": "pwa",
+      "t": 24.8,
+      "secure": true,
+      "sw": "active",
+      "swVersion": "868bfe2d8f17",
+      "scope": "http://localhost:8844/play",
+      "controlled": true,
+      "caches": [
+        "pt-shell-868bfe2d8f17",
+        "pt-media-4dde0d8261ca"
+      ],
+      "manifest": {
+        "display": "fullscreen",
+        "orientation": "any",
+        "icons": 3
+      },
+      "installable": true,
+      "vibrate": true,
+      "vibrated": true,
+      "audio": "running",
+      "audioUnlocked": true,
+      "wakeLockApi": true
+    },
+    {
+      "step": "install dialog",
+      "t": 27.8,
+      "button": [
+        895,
+        1475
+      ],
+      "shot": "09-install-dialog.png"
+    },
+    {
+      "step": "launcher add-to-home sheet",
+      "t": 31.7,
+      "button": [
+        898,
+        2214
+      ],
+      "shot": "10-add-to-home.png"
+    },
+    {
+      "step": "installed",
+      "t": 32.8,
+      "appinstalled": true
+    },
+    {
+      "step": "home screen",
+      "t": 38.4,
+      "new_icons": [
+        [
+          1,
+          910,
+          383
+        ]
+      ],
+      "shot": "11-home-screen.png"
+    },
+    {
+      "step": "installed app",
+      "t": 44.6,
+      "mode": "fullscreen",
+      "url": "http://localhost:8844/play?source=pwa",
+      "inner": [
+        411,
+        923
+      ],
+      "screen": [
+        412,
+        924
+      ],
+      "dpr": 2.625,
+      "insets": null,
+      "sw": "active",
+      "controlled": true,
+      "activity": "topResumedActivity=ActivityRecord{3e08ed7 u0 com.android.chrome/org.chromium.chrome.browser.webapps.WebappActivity t1843}",
+      "shot": "12-installed-fullscreen.png"
+    }
+  ],
+  "device": {
+    "model": "Pixel 9a",
+    "manufacturer": "Google",
+    "android": "15",
+    "sdk": "35",
+    "chrome": "157.0.8103.78",
+    "screen": "1080x2424"
+  },
+  "browser": "Chrome/157.0.8103.78",
+  "base": "http://localhost:8844",
+  "shop_sheet_covered_bench": true,
+  "battle": {
+    "wakeLock": true,
+    "wakeLockError": null,
+    "canvas": [
+      2520,
+      1680
+    ],
+    "clock": "00:02.7"
+  },
+  "verdict": "回合失利",
+  "haptics": {
+    "cues": 2,
+    "vibrations": [
+      "ult",
+      "ult_enemy"
+    ]
+  },
+  "wake_lock_released_after_battle": true,
+  "pwa": {
+    "secure": true,
+    "sw": "active",
+    "swVersion": "868bfe2d8f17",
+    "scope": "http://localhost:8844/play",
+    "controlled": true,
+    "caches": [
+      "pt-shell-868bfe2d8f17",
+      "pt-media-4dde0d8261ca"
+    ],
+    "manifest": {
+      "display": "fullscreen",
+      "orientation": "any",
+      "icons": 3
+    },
+    "installable": true,
+    "vibrate": true,
+    "vibrated": true,
+    "audio": "running",
+    "audioUnlocked": true,
+    "wakeLockApi": true
+  },
+  "webapk_packages": [],
+  "installed_app": {
+    "mode": "fullscreen",
+    "url": "http://localhost:8844/play?source=pwa",
+    "inner": [
+      411,
+      923
+    ],
+    "screen": [
+      412,
+      924
+    ],
+    "dpr": 2.625,
+    "insets": null,
+    "sw": "active",
+    "controlled": true,
+    "activity": "topResumedActivity=ActivityRecord{3e08ed7 u0 com.android.chrome/org.chromium.chrome.browser.webapps.WebappActivity t1843}"
+  },
+  "errors": [],
+  "recording": "screenrecord.mp4",
+  "tether_connections": 177,
+  "seconds": 50.8,
+  "screenshots": [
+    "01-opened.png",
+    "02-augment.png",
+    "03-shop-selected.png",
+    "04-bought.png",
+    "05-placed.png",
+    "06-battle.png",
+    "07-verdict.png",
+    "08-round2.png",
+    "09-install-dialog.png",
+    "10-add-to-home.png",
+    "11-home-screen.png",
+    "12-installed-fullscreen.png"
+  ]
+}

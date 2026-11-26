@@ -141,7 +141,14 @@ class Adb:
         sums along the indentation path.
         """
         dump = self.shell("dumpsys activity top", timeout=40, check=False)
-        section = next((part for part in re.split(r"\n\s*ACTIVITY ", dump)[1:] if activity in part.split(None, 1)[0]), "")
+        # Every matching activity (Chrome may also run an installed app's WebappActivity).
+        sections = [part for part in re.split(r"\n\s*ACTIVITY ", dump)[1:] if activity in part.split(None, 1)[0]]
+        out = []
+        for section in sections:
+            out += self._parse_views(section)
+        return out
+
+    def _parse_views(self, section: str) -> list[dict]:
         stack: list[tuple[int, int, int, bool]] = []  # indent, abs left, abs top, visible
         out = []
         for line in section.splitlines():
@@ -663,6 +670,9 @@ class Run:
                   scope: reg?.scope || null, controlled: !!navigator.serviceWorker?.controller, caches: keys,
                   manifest: manifest && {display: manifest.display, orientation: manifest.orientation, icons: manifest.icons.length},
                   installable: window.PlayMobile?.status.installable, vibrate: typeof navigator.vibrate === 'function',
+                  // a real buzz through the app's own path (the page has had taps, so it is allowed)
+                  vibrated: window.PlayMobile ? window.PlayMobile.buzz('super', {force: true}) : null,
+                  audio: window.PlayMusic?.state?.() || null, audioUnlocked: window.PlayMobile?.status.audioUnlocked ?? null,
                   wakeLockApi: !!navigator.wakeLock};
         })()""")
         self.summary["pwa"] = info
@@ -774,8 +784,8 @@ class Run:
                         " screen: [screen.width, screen.height], dpr: devicePixelRatio,"
                         " insets: getComputedStyle(document.documentElement).getPropertyValue('--sat') || null,"
                         " sw: window.PlayMobile.status.sw, controlled: !!navigator.serviceWorker.controller})")
-        activity = self.adb.shell("dumpsys activity activities | grep -m1 -E 'topResumedActivity|mResumedActivity'",
-                                  check=False).strip()
+        activity = self.adb.shell("dumpsys activity activities | grep -E 'topResumedActivity|mResumedActivity'",
+                                  check=False).strip().splitlines()[0].strip()
         mode["activity"] = activity
         self.summary["installed_app"] = mode
         self.log("installed app", **mode, shot=self.shot("installed-fullscreen"))
@@ -791,6 +801,8 @@ class Run:
             self.play_round(page)
             pwa = self.check_pwa(page)
             if self.args.via == "tether":
+                if pwa["vibrate"] and not pwa["vibrated"]:
+                    raise E2EFailure("navigator.vibrate is available but the app's buzz was refused")
                 if pwa["sw"] != "active" or not pwa["controlled"]:
                     raise E2EFailure(f"Service Worker not active on a secure origin: {pwa}")
                 if not self.summary["battle"].get("wakeLock"):

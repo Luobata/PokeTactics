@@ -1,0 +1,152 @@
+{
+  "ok": true,
+  "serial": "<dora-adb-serial>",
+  "via": "direct",
+  "steps": [
+    {
+      "step": "device",
+      "t": 1.6,
+      "model": "Pixel 9a",
+      "manufacturer": "Google",
+      "android": "15",
+      "sdk": "35",
+      "chrome": "157.0.8103.78",
+      "screen": "1080x2424"
+    },
+    {
+      "step": "connected",
+      "t": 1.9,
+      "base": "http://<dev-vpn-ip>:8820",
+      "browser": "Chrome/157.0.8103.78"
+    },
+    {
+      "step": "opened",
+      "t": 4.2,
+      "round": "01",
+      "gold": "7",
+      "secure": false,
+      "manifest": false,
+      "shot": "01-opened.png"
+    },
+    {
+      "step": "augment picked",
+      "t": 5.3,
+      "at": {
+        "x": 205.71429443359375,
+        "y": 412.3988037109375,
+        "w": 357.4285888671875,
+        "h": 48
+      },
+      "shot": "02-augment.png"
+    },
+    {
+      "step": "shop card selected",
+      "t": 6.3,
+      "card": "0",
+      "shot": "03-shop-selected.png"
+    },
+    {
+      "step": "bought",
+      "t": 7.0,
+      "gold": [
+        7,
+        6
+      ],
+      "shot": "04-bought.png"
+    },
+    {
+      "step": "placed",
+      "t": 8.6,
+      "bench": "b0",
+      "cell": "g0,0",
+      "pop": [
+        "0/4",
+        "1/4"
+      ],
+      "shot": "05-placed.png"
+    },
+    {
+      "step": "battle playing",
+      "t": 12.8,
+      "canvas": [
+        2520,
+        1680
+      ],
+      "clock": "00:02.5",
+      "shot": "06-battle.png"
+    },
+    {
+      "step": "verdict",
+      "t": 14.2,
+      "verdict": "回合失利",
+      "haptics": null,
+      "shot": "07-verdict.png"
+    },
+    {
+      "step": "round 2",
+      "t": 15.4,
+      "wakeLockAfterBattle": null,
+      "shot": "08-round2.png"
+    },
+    {
+      "step": "pwa",
+      "t": 15.4,
+      "secure": false,
+      "scope": null,
+      "controlled": false,
+      "caches": [],
+      "manifest": null,
+      "vibrate": true,
+      "vibrated": null,
+      "audio": null,
+      "audioUnlocked": null,
+      "wakeLockApi": false
+    }
+  ],
+  "device": {
+    "model": "Pixel 9a",
+    "manufacturer": "Google",
+    "android": "15",
+    "sdk": "35",
+    "chrome": "157.0.8103.78",
+    "screen": "1080x2424"
+  },
+  "browser": "Chrome/157.0.8103.78",
+  "base": "http://<dev-vpn-ip>:8820",
+  "shop_sheet_covered_bench": true,
+  "battle": {
+    "canvas": [
+      2520,
+      1680
+    ],
+    "clock": "00:02.5"
+  },
+  "verdict": "回合失利",
+  "haptics": null,
+  "wake_lock_released_after_battle": false,
+  "pwa": {
+    "secure": false,
+    "scope": null,
+    "controlled": false,
+    "caches": [],
+    "manifest": null,
+    "vibrate": true,
+    "vibrated": null,
+    "audio": null,
+    "audioUnlocked": null,
+    "wakeLockApi": false
+  },
+  "errors": [],
+  "recording": "screenrecord.mp4",
+  "seconds": 19.2,
+  "screenshots": [
+    "01-opened.png",
+    "02-augment.png",
+    "03-shop-selected.png",
+    "04-bought.png",
+    "05-placed.png",
+    "06-battle.png",
+    "07-verdict.png",
+    "08-round2.png"
+  ]
+}
