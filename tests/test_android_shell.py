@@ -35,6 +35,8 @@ class ApkDownload(unittest.TestCase):
                 page = body.decode()
                 self.assertEqual(status, 200)
                 self.assertIn('href="/app/PokeTactics.apk"', page)
+                self.assertIn('name="viewport" content="width=device-width', page, 'phone-width page')
+                self.assertIn('/hub/assets/portal.css', page, 'site navigation styles')
                 for needle in ('1.0.7', 'abc1234', 'https://10.0.0.5:8821/play', '允许来自此来源的应用', '仍然安装'):
                     self.assertIn(needle, page)
                 status, headers, body = server.get('/app/PokeTactics.apk')

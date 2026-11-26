@@ -554,13 +554,16 @@ def app_download_page(app_dir) -> str:
 <p>App 内置预览 CA，不需要在系统里装证书。返回键 / 侧滑返回先关闭弹层，没有可关的才问「退出游戏？」。
 两指同时按住屏幕 2 秒打开设置，可改服务器地址（例如连分支服务）、横屏、边缘防误触。</p>
 <table class="app-meta">{table}</table>"""
-    return f"""<main class="app-page"><style>
-.app-page{{max-width:40rem;margin:0 auto;padding:1rem;line-height:1.6}}
+    return f"""<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>安卓 App · PokeTactics</title></head><body class="app-download-page"><main class="app-page"><style>
+.app-page{{max-width:40rem;margin:0 auto;padding:1rem 1.2rem 2rem;line-height:1.7;font:16px/1.7 system-ui,sans-serif}}
+.app-page h1{{font-size:1.5rem}} .app-steps li{{margin:.4rem 0}}
 .app-download{{display:inline-block;padding:.8rem 1.4rem;border-radius:.6rem;background:#2f6fde;color:#fff;font-size:1.2rem;text-decoration:none}}
 .app-meta{{font-size:.8rem;border-collapse:collapse}} .app-meta th{{text-align:left;padding-right:1rem;white-space:nowrap}}
 .app-meta code{{word-break:break-all}}
 </style><h1>PokeTactics 安卓 App</h1>{body}
-<p>iPhone 暂无 App：用 Safari 打开 <a href="/play">/play</a> 后「添加到主屏幕」（见 docs/72）。</p></main>"""
+<p>iPhone 暂无 App：用 Safari 打开 <a href="/play">/play</a> 后「添加到主屏幕」（见 docs/72）。</p></main></body></html>"""
 _SW_CONFIG = re.compile(r"/\*__PT_CONFIG__\*/.*?/\*__PT_CONFIG_END__\*/", re.S)
 _SW_VERSION = {}
 
