@@ -545,10 +545,11 @@ def app_download_page(app_dir) -> str:
         table = "".join(f"<tr><th>{esc(k)}</th><td><code>{esc(v)}</code></td></tr>" for k, v in rows)
         body = f"""<p><a class="app-download" href="/app/{APP_APK}" download>⇩ 下载 PokeTactics.apk</a></p>
 <ol class="app-steps">
-  <li>手机连公司内网 / VPN，用浏览器打开本页，点上面的「下载」。浏览器提示「此类文件可能有害」时选「仍然下载」。</li>
-  <li>下载完成后点通知栏或浏览器下载列表里的 <code>PokeTactics.apk</code>。</li>
+  <li>手机连公司内网 / VPN，用浏览器打开本页，点上面的「下载」。Chrome 会依次提示「无法安全地下载文件」→ 点「保留」，
+      「文件可能有害」→ 点「仍然下载」（内网 http 地址的正常提示）。</li>
+  <li>下载完成后点页面顶部「1 个文件已下载完毕」的「打开」，或通知栏 / Chrome「⋮ → 下载内容」里的 <code>PokeTactics.apk</code>。</li>
   <li>第一次安装会提示「出于安全考虑，不允许安装未知来源的应用」：点「设置」，打开「允许来自此来源的应用」，返回。</li>
-  <li>点「安装」。Play 保护机制提示未知开发者时，点「更多详情」→「仍然安装」。</li>
+  <li>点「安装」→「已安装应用」→「打开」。若 Play 保护机制提示未知开发者，点「更多详情」→「仍然安装」。</li>
   <li>打开桌面上的「PokeTactics」。以后有新版本，重新下载安装即可覆盖（签名固定，存档在服务器上不丢）。</li>
 </ol>
 <p>App 内置预览 CA，不需要在系统里装证书。返回键 / 侧滑返回先关闭弹层，没有可关的才问「退出游戏？」。

@@ -1,0 +1,30 @@
+11-27 02:21:02.954 I/PokeTacticsShell(12631): load https://10.37.30.198:8821/play
+11-27 02:21:02.983 I/PokeTacticsShell(12631): insets statusBars=true navigationBars=true cutoutTop=152
+11-27 02:21:02.994 I/PokeTacticsShell(12631): insets statusBars=false navigationBars=false cutoutTop=152
+11-27 02:21:03.039 I/PokeTacticsShell(12631): insets statusBars=false navigationBars=false cutoutTop=152
+11-27 02:21:17.969 W/PokeTacticsShell(12631): error page: 连接超时（15 秒）：确认手机连着公司内网 / VPN
+11-27 02:21:22.630 I/PokeTacticsShell(12631): load https://10.4.63.169:8821/play
+11-27 02:21:22.644 I/PokeTacticsShell(12631): insets statusBars=false navigationBars=true cutoutTop=152
+11-27 02:21:22.737 I/PokeTacticsShell(12631): insets statusBars=false navigationBars=false cutoutTop=152
+11-27 02:21:26.807 I/PokeTacticsShell(12631): page ready https://10.4.63.169:8821/play
+11-27 02:21:28.241 I/PokeTacticsShell(12631): vibrate [28]
+11-27 02:21:28.823 I/PokeTacticsShell(12631): insets statusBars=false navigationBars=false cutoutTop=0
+11-27 02:21:28.843 I/PokeTacticsShell(12631): insets statusBars=false navigationBars=false cutoutTop=0
+11-27 02:21:31.772 I/PokeTacticsShell(12631): insets statusBars=false navigationBars=false cutoutTop=152
+11-27 02:21:31.788 I/PokeTacticsShell(12631): insets statusBars=false navigationBars=false cutoutTop=152
+11-27 02:21:51.266 I/PokeTacticsShell(12631): back -> exit dialog (page result false)
+11-27 02:21:51.280 I/PokeTacticsShell(12631): exit dialog shown
+11-27 02:21:53.384 I/PokeTacticsShell(12631): exit dialog dismissed
+11-27 02:21:54.325 I/PokeTacticsShell(12631): vibrate [40,30,70]
+11-27 02:22:01.631 I/PokeTacticsShell(12631): back -> page closed an overlay
+11-27 02:22:03.568 I/PokeTacticsShell(12631): back -> exit dialog (page result false)
+11-27 02:22:03.590 I/PokeTacticsShell(12631): exit dialog shown
+11-27 02:22:06.189 I/PokeTacticsShell(12631): exit dialog dismissed
+11-27 02:22:20.399 I/PokeTacticsShell(12631): back -> page closed an overlay
+11-27 02:22:24.852 I/PokeTacticsShell(12631): back -> exit dialog (page result false)
+11-27 02:22:24.874 I/PokeTacticsShell(12631): exit dialog shown
+11-27 02:22:27.741 I/PokeTacticsShell(12631): exit dialog dismissed
+11-27 02:22:30.880 I/PokeTacticsShell(12631): back -> exit dialog (page result false)
+11-27 02:22:30.894 I/PokeTacticsShell(12631): exit dialog shown
+11-27 02:22:32.892 I/PokeTacticsShell(12631): exit confirmed
+11-27 02:22:32.908 I/PokeTacticsShell(12631): exit dialog dismissed
