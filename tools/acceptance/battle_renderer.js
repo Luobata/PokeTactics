@@ -2808,13 +2808,32 @@
     }
     render(t) {
       this.resize();
+      const before = this.lastT;
       this.lastT = clamp(t, 0, this.duration);
+      this._emitCues(before, this.lastT);
       const ctx = this.canvas.getContext("2d");
       const list = frame(this.plan, this.lastT, { hover: this.hover, selected: this.selected });
       this.lastList = list;
       ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
       paint(ctx, this.plan, list, this.images, { dpr: this.dpr });
       return list;
+    }
+    /** Playback cues for the page (docs/72 haptics): a window "battle:cue" event when
+     * forward playback crosses a signature move's impact (kind "ult") or a
+     * super-effective hit (kind "super"). Seeks and big jumps stay silent. */
+    _emitCues(from, to) {
+      if (from == null || !(to > from) || to - from > 1 || typeof window === "undefined"
+        || typeof window.dispatchEvent !== "function" || typeof CustomEvent !== "function") return;
+      const a = toSim(this.plan, from), b = toSim(this.plan, to);
+      const fire = (detail) => window.dispatchEvent(new CustomEvent("battle:cue", { detail }));
+      for (const act of this.plan.actions) {
+        if (act.ult && act.impact > a && act.impact <= b) {
+          fire({ kind: "ult", team: this.plan.units[act.actor]?.team, name: act.skill?.name || "" });
+        }
+      }
+      for (const n of this.plan.numbers) {
+        if (n.kind === "super" && n.t > a && n.t <= b) fire({ kind: "super", team: this.plan.units[n.unit]?.team });
+      }
     }
     hitTest(x, y, t) {
       const s = toSim(this.plan, t);

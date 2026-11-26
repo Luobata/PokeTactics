@@ -1,0 +1,74 @@
+/* Phone / installed-app polish for /play (docs/72). Loaded after the layout styles. */
+
+/* Native-app feel on touch screens: no double-tap zoom delay, no grey tap flash,
+   no pull-to-refresh or rubber-band scrolling that could reload a running game. */
+html { -webkit-tap-highlight-color: transparent; }
+body.stage-ui { touch-action: manipulation; }
+html.app-installed, html.app-installed body { overscroll-behavior: none; }
+.stage-ui .stage, .stage-ui .stage-dock, .stage-ui .stage-hud { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+/* Installed app (fullscreen / standalone): there is no browser bar any more, so the
+   page itself keeps clear of the status bar, notch and rounded corners. */
+html.app-installed .portal-nav { padding-top: max(10px, env(safe-area-inset-top)); }
+html.app-installed body.stage-ui.layout-phone .portal-nav {
+  min-height: calc(48px + env(safe-area-inset-top));
+  padding-left: max(12px, env(safe-area-inset-left));
+  padding-right: max(12px, env(safe-area-inset-right));
+}
+html.app-installed.orient-landscape body.stage-ui .app {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* HUD buttons added by play_mobile.js */
+.stage-ui .hud-tools .vibrate-button svg,
+.stage-ui .hud-tools .install-button svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.stage-ui .hud-tools .vibrate-button.muted svg { opacity: .45; }
+.stage-ui .hud-tools .vibrate-button.muted::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  top: 50%;
+  border-top: 2px solid currentColor;
+  transform: rotate(-35deg);
+  opacity: .8;
+}
+.stage-ui .hud-tools .vibrate-button { position: relative; }
+.stage-ui .hud-tools .install-button { border-color: #c8e79088; color: #c8e790; }
+.stage-ui .hud-tools .icon-button[hidden] { display: none; }
+
+/* "新版本已就绪" notice after the Service Worker swaps versions */
+.app-update {
+  position: fixed;
+  z-index: 120;
+  left: 50%;
+  top: calc(env(safe-area-inset-top) + 10px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 14px;
+  border: 1px solid #c8e79066;
+  border-radius: 999px;
+  background: #18271fee;
+  color: #ecf3e3;
+  font: 600 13px/1.4 system-ui, "PingFang SC", sans-serif;
+  box-shadow: 0 6px 18px #0007;
+}
+.app-update button {
+  min-width: 44px;
+  min-height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: #c8e790;
+  color: #18271f;
+  font: inherit;
+}
+.app-update button[data-app-dismiss] { background: transparent; color: inherit; min-width: 36px; }

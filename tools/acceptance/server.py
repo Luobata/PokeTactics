@@ -478,6 +478,86 @@ def _pmd_manifest(species: str) -> dict:
             "species": rows, "fallback": fallback, "actions": actions}
 
 
+PLAY_ASSETS = {
+    "/play/assets/play.css": ("play.css", "text/css; charset=utf-8"),
+    "/play/assets/play.js": ("play.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_depth.js": ("play_depth.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_weather.js": ("play_weather.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_tree.js": ("play_tree.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_icons.js": ("play_icons.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_branch.js": ("play_branch.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_branch.css": ("play_branch.css", "text/css; charset=utf-8"),
+    "/play/assets/play_tree.css": ("play_tree.css", "text/css; charset=utf-8"),
+    "/play/assets/play_weather.css": ("play_weather.css", "text/css; charset=utf-8"),
+    "/play/assets/play_layout.js": ("play_layout.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_layout.css": ("play_layout.css", "text/css; charset=utf-8"),
+    "/play/assets/play_interactions.js": ("play_interactions.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_interactions.css": ("play_interactions.css", "text/css; charset=utf-8"),
+    "/play/assets/play_motion.css": ("play_motion.css", "text/css; charset=utf-8"),
+    "/play/assets/play_select.js": ("play_select.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_select.css": ("play_select.css", "text/css; charset=utf-8"),
+    "/play/assets/play_feedback.js": ("play_feedback.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_feedback.css": ("play_feedback.css", "text/css; charset=utf-8"),
+    "/play/assets/play_music.js": ("play_music.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_preview.js": ("play_preview.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_preview.css": ("play_preview.css", "text/css; charset=utf-8"),
+    "/play/assets/play_context.js": ("play_context.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_context.css": ("play_context.css", "text/css; charset=utf-8"),
+    "/play/assets/play_guide.js": ("play_guide.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_guide.css": ("play_guide.css", "text/css; charset=utf-8"),
+    "/play/assets/battle.css": ("battle.css", "text/css; charset=utf-8"),
+    "/play/assets/battle_renderer.js": ("battle_renderer.js", "text/javascript; charset=utf-8"),
+    "/play/assets/animation_workbench.js": ("animation_workbench.js", "text/javascript; charset=utf-8"),
+    "/play/assets/animation_workbench.css": ("animation_workbench.css", "text/css; charset=utf-8"),
+    "/play/assets/play_mobile.js": ("play_mobile.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_mobile.css": ("play_mobile.css", "text/css; charset=utf-8"),
+}
+
+# ---------------------------------------------------------------- installable app (docs/72)
+PWA_DIR = Path(__file__).resolve().parent / "pwa"
+PWA_ICONS = {"icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"}
+_SW_CONFIG = re.compile(r"/\*__PT_CONFIG__\*/.*?/\*__PT_CONFIG_END__\*/", re.S)
+_SW_VERSION = {}
+
+
+def _shell_files():
+    here = Path(__file__).resolve().parent
+    files = [here / "play.html", here / "play_sw.js", here / "portal.py", PWA_DIR / "play.webmanifest"]
+    files += [here / name for name, _ in sorted(set(PLAY_ASSETS.values()))]
+    files += [PWA_DIR / name for name in sorted(PWA_ICONS)]
+    return files
+
+
+def service_worker_config():
+    """Version hashes + precache list for /play/sw.js.
+
+    `version` changes whenever any shell file changes (a new commit on the preview
+    service), which makes browsers install the new worker and drop the old cache.
+    `media` follows the pinned PMD sprite index only.
+    """
+    files = _shell_files()
+    key = tuple((str(f), f.stat().st_mtime_ns if f.exists() else 0) for f in files)
+    cached = _SW_VERSION.get("key")
+    if cached != key:
+        digest = hashlib.sha1()
+        for f in files:
+            digest.update(f.name.encode())
+            digest.update(f.read_bytes() if f.exists() else b"-")
+        index = PMD_ROOT / "index.json"
+        media = hashlib.sha1(index.read_bytes()).hexdigest()[:12] if index.exists() else "none"
+        precache = sorted(PLAY_ASSETS) + [f"/play/icons/{name}" for name in sorted(PWA_ICONS)]
+        precache.append("/play/manifest.webmanifest")
+        _SW_VERSION.update(key=key, config={"version": digest.hexdigest()[:12], "media": media,
+                                            "precache": precache})
+    return _SW_VERSION["config"]
+
+
+def service_worker_source():
+    text = (Path(__file__).resolve().parent / "play_sw.js").read_text()
+    config = json.dumps(service_worker_config(), ensure_ascii=False)
+    return _SW_CONFIG.sub(lambda _: config, text, count=1)
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, directory=str(ROOT), **kwargs)
@@ -609,39 +689,32 @@ class Handler(SimpleHTTPRequestHandler):
             self._play_asset(*asset)
         elif parsed.path in ("/play", "/play/"):
             self._play_asset("play.html", "text/html; charset=utf-8")
+        elif parsed.path == "/play/manifest.webmanifest":
+            self._static_bytes((PWA_DIR / "play.webmanifest").read_bytes(),
+                               "application/manifest+json; charset=utf-8", "no-cache")
+        elif parsed.path == "/play/sw.js":
+            # Never let the HTTP cache pin an old worker; the scope header lets a
+            # worker under /play/ control the /play page itself.
+            self._static_bytes(service_worker_source().encode(), "text/javascript; charset=utf-8",
+                               "no-cache", {"Service-Worker-Allowed": "/play"})
+        elif parsed.path.startswith("/play/icons/") or parsed.path in (
+                "/apple-touch-icon.png", "/apple-touch-icon-precomposed.png", "/favicon.ico"):
+            name = parsed.path.rsplit("/", 1)[1]
+            name = {"apple-touch-icon-precomposed.png": "apple-touch-icon.png",
+                    "favicon.ico": "icon-192.png"}.get(name, name)
+            if name not in PWA_ICONS:
+                return self.send_error(404)
+            self._static_bytes((PWA_DIR / name).read_bytes(), "image/png", "public, max-age=86400")
+        elif parsed.path in ("/ca.crt", "/preview-ca.crt"):
+            # Public certificate of the preview CA (docs/72), so a phone can download
+            # and trust it. Only served when the operator configured one.
+            ca = getattr(self.server, "ca_cert", None)
+            if not ca or not Path(ca).is_file():
+                return self.send_error(404, "No preview CA configured")
+            self._static_bytes(Path(ca).read_bytes(), "application/x-x509-ca-cert", "no-cache",
+                               {"Content-Disposition": 'attachment; filename="PokeTactics-preview-CA.crt"'})
         elif parsed.path.startswith("/play/assets/"):
-            assets = {
-                "/play/assets/play.css": ("play.css", "text/css; charset=utf-8"),
-                "/play/assets/play.js": ("play.js", "text/javascript; charset=utf-8"),
-                "/play/assets/play_depth.js": ("play_depth.js", "text/javascript; charset=utf-8"),
-                "/play/assets/play_weather.js": ("play_weather.js", "text/javascript; charset=utf-8"),
-                "/play/assets/play_tree.js": ("play_tree.js", "text/javascript; charset=utf-8"),
-                "/play/assets/play_icons.js": ("play_icons.js", "text/javascript; charset=utf-8"),
-                "/play/assets/play_branch.js": ("play_branch.js", "text/javascript; charset=utf-8"),
-                "/play/assets/play_branch.css": ("play_branch.css", "text/css; charset=utf-8"),
-                "/play/assets/play_tree.css": ("play_tree.css", "text/css; charset=utf-8"),
-                "/play/assets/play_weather.css": ("play_weather.css", "text/css; charset=utf-8"),
-                "/play/assets/play_layout.js": ("play_layout.js", "text/javascript; charset=utf-8"),
-                "/play/assets/play_layout.css": ("play_layout.css", "text/css; charset=utf-8"),
-                "/play/assets/play_interactions.js": ("play_interactions.js", "text/javascript; charset=utf-8"),
-                "/play/assets/play_interactions.css": ("play_interactions.css", "text/css; charset=utf-8"),
-                "/play/assets/play_motion.css": ("play_motion.css", "text/css; charset=utf-8"),
-                "/play/assets/play_select.js": ("play_select.js", "text/javascript; charset=utf-8"),
-                "/play/assets/play_select.css": ("play_select.css", "text/css; charset=utf-8"),
-                "/play/assets/play_feedback.js": ("play_feedback.js", "text/javascript; charset=utf-8"),
-                "/play/assets/play_feedback.css": ("play_feedback.css", "text/css; charset=utf-8"),
-                "/play/assets/play_music.js": ("play_music.js", "text/javascript; charset=utf-8"),
-                "/play/assets/play_preview.js": ("play_preview.js", "text/javascript; charset=utf-8"),
-                "/play/assets/play_preview.css": ("play_preview.css", "text/css; charset=utf-8"),
-                "/play/assets/play_context.js": ("play_context.js", "text/javascript; charset=utf-8"),
-                "/play/assets/play_context.css": ("play_context.css", "text/css; charset=utf-8"),
-                "/play/assets/play_guide.js": ("play_guide.js", "text/javascript; charset=utf-8"),
-                "/play/assets/play_guide.css": ("play_guide.css", "text/css; charset=utf-8"),
-                "/play/assets/battle.css": ("battle.css", "text/css; charset=utf-8"),
-                "/play/assets/battle_renderer.js": ("battle_renderer.js", "text/javascript; charset=utf-8"),
-                "/play/assets/animation_workbench.js": ("animation_workbench.js", "text/javascript; charset=utf-8"),
-                "/play/assets/animation_workbench.css": ("animation_workbench.css", "text/css; charset=utf-8"),
-            }
+            assets = PLAY_ASSETS
             asset = assets.get(parsed.path)
             if asset is None:
                 return self.send_error(404)
@@ -1085,6 +1158,20 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
+        if path in ("/play", "/play/"):
+            # Lets an older Service Worker notice it is behind (play_sw.js, docs/72).
+            self.send_header("X-PT-Shell-Version", service_worker_config()["version"])
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _static_bytes(self, body: bytes, content_type: str, cache: str, extra: dict | None = None) -> None:
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", cache)
+        self.send_header("X-Content-Type-Options", "nosniff")
+        for key, value in (extra or {}).items():
+            self.send_header(key, value)
         self.end_headers()
         self.wfile.write(body)
 
@@ -1105,27 +1192,79 @@ class Handler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
 
+class Server(ThreadingHTTPServer):
+    # 回放预取 + 精灵图 + API 会在瞬间开出十余条并发连接，默认 5 的
+    # listen backlog 溢出会被系统直接 RST（浏览器表现为图片载入失败）。
+    request_queue_size = 128
+    daemon_threads = True
+    ca_cert = None
+
+
+class TLSServer(Server):
+    """HTTPS listener for phones (docs/72): Service Workers / installable apps need a
+    secure context, and plain http on a LAN address is not one.
+
+    The TLS handshake runs in the request thread, so a slow or broken client never
+    blocks accept() for everybody else.
+    """
+
+    def __init__(self, address, handler, context):
+        self.context = context
+        super().__init__(address, handler)
+
+    def get_request(self):
+        sock, addr = self.socket.accept()
+        return self.context.wrap_socket(sock, server_side=True, do_handshake_on_connect=False), addr
+
+    def finish_request(self, request, client_address):
+        import ssl
+        request.settimeout(15)
+        try:
+            request.do_handshake()
+        except (ssl.SSLError, OSError):
+            return  # e.g. a phone that does not trust the CA yet
+        request.settimeout(None)
+        super().finish_request(request, client_address)
+
+    def handle_error(self, request, client_address):
+        if isinstance(sys.exc_info()[1], (ConnectionError, TimeoutError)):
+            return
+        super().handle_error(request, client_address)
+
+
 def main() -> None:
+    import threading
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", type=int, default=8799)
     ap.add_argument("--host", default="127.0.0.1",
                     help="监听地址；0.0.0.0 让局域网内其他机器访问（工作台保存仍只允许本机）")
+    ap.add_argument("--tls-port", type=int, default=0,
+                    help="另开一个 HTTPS 端口（手机安装网页 App 需要安全上下文，见 docs/72）")
+    ap.add_argument("--tls-cert", help="HTTPS 证书链（PEM，叶子证书在前）")
+    ap.add_argument("--tls-key", help="HTTPS 私钥（PEM）")
+    ap.add_argument("--ca-cert", help="可选：在 /ca.crt 提供给手机下载的预览 CA 公钥证书")
     args = ap.parse_args()
-    url = f"http://{'127.0.0.1' if args.host in ('0.0.0.0', '::') else args.host}:{args.port}/"
-    print(f"PokeTactics 统一入口：{url}（Ctrl-C 退出）")
+    if args.tls_port and not (args.tls_cert and args.tls_key):
+        ap.error("--tls-port 需要同时提供 --tls-cert 与 --tls-key")
+    shown = '127.0.0.1' if args.host in ('0.0.0.0', '::') else args.host
+    print(f"PokeTactics 统一入口：http://{shown}:{args.port}/（Ctrl-C 退出）", flush=True)
     # 开战只等权威解算，帧后台流式落盘；播放端按播放进度逐帧拉取。
     demo_mod.DEFER_RENDER = True
-    class Server(ThreadingHTTPServer):
-        # 回放预取 + 精灵图 + API 会在瞬间开出十余条并发连接，默认 5 的
-        # listen backlog 溢出会被系统直接 RST（浏览器表现为图片载入失败）。
-        request_queue_size = 128
+    Server.ca_cert = args.ca_cert
     srv = Server((args.host, args.port), Handler)
+    if args.tls_port:
+        import ssl
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        context.minimum_version = ssl.TLSVersion.TLSv1_2
+        context.load_cert_chain(args.tls_cert, args.tls_key)
+        tls = TLSServer((args.host, args.tls_port), Handler, context)
+        threading.Thread(target=tls.serve_forever, name="https", daemon=True).start()
+        print(f"HTTPS：https://{shown}:{args.tls_port}/play", flush=True)
     demo_mod.start_render_housekeeping()
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
         print("\nbye")
-
 
 if __name__ == "__main__":
     main()

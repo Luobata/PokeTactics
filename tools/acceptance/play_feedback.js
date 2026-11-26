@@ -210,6 +210,8 @@
   }
 
   function vibrate(pattern) {
+    // docs/72: the HUD vibration switch (play_mobile.js) also silences feedback buzzes.
+    if (window.PlayMobile && !window.PlayMobile.vibrationEnabled()) return;
     if (coarse() && navigator.vibrate) {
       try { navigator.vibrate(pattern); } catch (_) { /* unsupported */ }
     }
@@ -460,5 +462,13 @@
     vibrate(8);
   }
 
-  window.PlayFeedback = {before, after, selection, float, ring, bump, fly, banner, shakeLoc};
+  function unlockAudio() {
+    if (!window.PlaySound?.enabled?.()) return false;
+    try {
+      audio ||= new (window.AudioContext || window.webkitAudioContext)();
+      audio.resume().catch(() => {});
+      return true;
+    } catch (_) { return false; }
+  }
+  window.PlayFeedback = {before, after, selection, float, ring, bump, fly, banner, shakeLoc, unlockAudio};
 })();
