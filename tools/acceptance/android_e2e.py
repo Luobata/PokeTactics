@@ -614,6 +614,8 @@ class Run:
         self.log("shop card selected", card=index, shot=self.shot("shop-selected"))
         page.tap("[data-shop-buy]")
         page.wait(f"document.querySelectorAll('#bench [data-uid]').length > {bench_before}", 15, "recruited onto the bench")
+        # The bench can render a beat before the HUD's gold counter.
+        page.wait(f"Number(document.getElementById('gold').textContent) < {gold_before}", 10, "gold spent")
         gold_after = int(page.eval("document.getElementById('gold').textContent"))
         if gold_after >= gold_before:
             raise E2EFailure(f"gold did not drop after buying ({gold_before} -> {gold_after})")

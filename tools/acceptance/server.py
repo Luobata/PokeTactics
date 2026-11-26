@@ -516,6 +516,51 @@ PLAY_ASSETS = {
 # ---------------------------------------------------------------- installable app (docs/72)
 PWA_DIR = Path(__file__).resolve().parent / "pwa"
 PWA_ICONS = {"icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"}
+
+# Android shell App (apps/android, docs/73). tools/android/build.sh copies the signed
+# APK and its metadata into the preview's app directory (outside any checkout).
+APP_APK = "PokeTactics.apk"
+APP_META = "PokeTactics.json"
+
+
+def app_download_page(app_dir) -> str:
+    """Phone-friendly download page for the shell APK (or a note that none is built)."""
+    import html as _html
+    meta, apk = {}, None
+    if app_dir:
+        apk = Path(app_dir) / APP_APK
+        try:
+            meta = json.loads((Path(app_dir) / APP_META).read_text())
+        except (OSError, ValueError):
+            meta = {}
+    esc = lambda value: _html.escape(str(value))
+    if not apk or not apk.is_file():
+        body = "<p class=\"app-missing\">还没有构建 APK：在开发机执行 <code>tools/android/build.sh</code>。</p>"
+    else:
+        size = apk.stat().st_size / 1e6
+        rows = [("版本", f"{meta.get('versionName', '?')}（{meta.get('versionCode', '?')}）"),
+                ("大小", f"{size:.1f} MB"), ("构建", meta.get("builtAt", "?")),
+                ("代码", meta.get("commit", "?")), ("默认地址", meta.get("defaultUrl", "?")),
+                ("签名证书 SHA-256", meta.get("certSha256", "?")), ("APK SHA-256", meta.get("sha256", "?"))]
+        table = "".join(f"<tr><th>{esc(k)}</th><td><code>{esc(v)}</code></td></tr>" for k, v in rows)
+        body = f"""<p><a class="app-download" href="/app/{APP_APK}" download>⇩ 下载 PokeTactics.apk</a></p>
+<ol class="app-steps">
+  <li>手机连公司内网 / VPN，用浏览器打开本页，点上面的「下载」。浏览器提示「此类文件可能有害」时选「仍然下载」。</li>
+  <li>下载完成后点通知栏或浏览器下载列表里的 <code>PokeTactics.apk</code>。</li>
+  <li>第一次安装会提示「出于安全考虑，不允许安装未知来源的应用」：点「设置」，打开「允许来自此来源的应用」，返回。</li>
+  <li>点「安装」。Play 保护机制提示未知开发者时，点「更多详情」→「仍然安装」。</li>
+  <li>打开桌面上的「PokeTactics」。以后有新版本，重新下载安装即可覆盖（签名固定，存档在服务器上不丢）。</li>
+</ol>
+<p>App 内置预览 CA，不需要在系统里装证书。返回键 / 侧滑返回先关闭弹层，没有可关的才问「退出游戏？」。
+两指同时按住屏幕 2 秒打开设置，可改服务器地址（例如连分支服务）、横屏、边缘防误触。</p>
+<table class="app-meta">{table}</table>"""
+    return f"""<main class="app-page"><style>
+.app-page{{max-width:40rem;margin:0 auto;padding:1rem;line-height:1.6}}
+.app-download{{display:inline-block;padding:.8rem 1.4rem;border-radius:.6rem;background:#2f6fde;color:#fff;font-size:1.2rem;text-decoration:none}}
+.app-meta{{font-size:.8rem;border-collapse:collapse}} .app-meta th{{text-align:left;padding-right:1rem;white-space:nowrap}}
+.app-meta code{{word-break:break-all}}
+</style><h1>PokeTactics 安卓 App</h1>{body}
+<p>iPhone 暂无 App：用 Safari 打开 <a href="/play">/play</a> 后「添加到主屏幕」（见 docs/72）。</p></main>"""
 _SW_CONFIG = re.compile(r"/\*__PT_CONFIG__\*/.*?/\*__PT_CONFIG_END__\*/", re.S)
 _SW_VERSION = {}
 
@@ -705,6 +750,15 @@ class Handler(SimpleHTTPRequestHandler):
             if name not in PWA_ICONS:
                 return self.send_error(404)
             self._static_bytes((PWA_DIR / name).read_bytes(), "image/png", "public, max-age=86400")
+        elif parsed.path in ("/app", "/app/"):
+            self._html(app_download_page(getattr(self.server, "app_dir", None)))
+        elif parsed.path == f"/app/{APP_APK}":
+            app_dir = getattr(self.server, "app_dir", None)
+            apk = Path(app_dir) / APP_APK if app_dir else None
+            if not apk or not apk.is_file():
+                return self.send_error(404, "No APK built yet (tools/android/build.sh)")
+            self._static_bytes(apk.read_bytes(), "application/vnd.android.package-archive", "no-cache",
+                               {"Content-Disposition": f'attachment; filename="{APP_APK}"'})
         elif parsed.path in ("/ca.crt", "/preview-ca.crt"):
             # Public certificate of the preview CA (docs/72), so a phone can download
             # and trust it. Only served when the operator configured one.
@@ -1198,6 +1252,7 @@ class Server(ThreadingHTTPServer):
     request_queue_size = 128
     daemon_threads = True
     ca_cert = None
+    app_dir = None
 
 
 class TLSServer(Server):
@@ -1243,6 +1298,7 @@ def main() -> None:
     ap.add_argument("--tls-cert", help="HTTPS 证书链（PEM，叶子证书在前）")
     ap.add_argument("--tls-key", help="HTTPS 私钥（PEM）")
     ap.add_argument("--ca-cert", help="可选：在 /ca.crt 提供给手机下载的预览 CA 公钥证书")
+    ap.add_argument("--app-dir", help="可选：安卓壳 App 目录（PokeTactics.apk + .json），在 /app 提供下载（docs/73）")
     args = ap.parse_args()
     if args.tls_port and not (args.tls_cert and args.tls_key):
         ap.error("--tls-port 需要同时提供 --tls-cert 与 --tls-key")
@@ -1251,6 +1307,7 @@ def main() -> None:
     # 开战只等权威解算，帧后台流式落盘；播放端按播放进度逐帧拉取。
     demo_mod.DEFER_RENDER = True
     Server.ca_cert = args.ca_cert
+    Server.app_dir = args.app_dir
     srv = Server((args.host, args.port), Handler)
     if args.tls_port:
         import ssl

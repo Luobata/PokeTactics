@@ -9,7 +9,10 @@
  * - navigator.vibrate on battle cues (signature moves, super-effective hits) and on
  *   feedback errors, switchable with #vibrate-button (localStorage poketactics.vibrate);
  * - unlocks WebAudio on the first tap (iOS needs the context resumed inside a gesture);
- * - marks <html> with display-mode / orientation classes for the CSS.
+ * - marks <html> with display-mode / orientation classes for the CSS;
+ * - inside the Android shell App (apps/android, docs/73): window.PokeTacticsShell.onBack()
+ *   closes the top overlay for the system back key / back swipe, vibration goes through
+ *   the native bridge and audio starts without waiting for a tap.
  * It never calls the game API.
  */
 (function () {
@@ -22,7 +25,11 @@
   let installEvent = null, sentinel = null, wantWake = false, lastBuzz = 0;
 
   const store = () => { try { return window.localStorage; } catch (_) { return null; } };
-  const canVibrate = () => typeof navigator.vibrate === "function";
+  // Android shell App (docs/73): a WebMessageListener object injected only for the
+  // configured game origin. Absent in browsers.
+  const shell = () => window.PokeTacticsNative || null;
+  const inShell = () => typeof shell()?.postMessage === "function";
+  const canVibrate = () => inShell() || typeof navigator.vibrate === "function";
   function vibrationEnabled() {
     const value = store()?.getItem(VIBRATE_KEY);
     return value !== "off";
@@ -42,7 +49,10 @@
     if (!force && now - lastBuzz < 160) return false;  // a burst of hits is one buzz
     lastBuzz = now;
     try {
-      const ok = navigator.vibrate(PATTERNS[kind] || PATTERNS.super);
+      const pattern = PATTERNS[kind] || PATTERNS.super;
+      let ok = true;
+      if (inShell()) shell().postMessage(JSON.stringify({type: "vibrate", pattern}));
+      else ok = navigator.vibrate(pattern);
       status.vibrations.push(kind);
       if (status.vibrations.length > 50) status.vibrations.shift();
       return ok !== false;
@@ -119,11 +129,61 @@
   window.addEventListener("click", onGesture);
   window.addEventListener("touchend", onGesture, {passive: true});
 
+  // ------------------------------------------------------------ Android shell: back key
+  // The shell App never navigates back in history. On the system back key / back swipe
+  // it calls onBack(): true = an overlay was closed, false = nothing to close, so the
+  // shell asks "退出游戏？". Overlays reuse their own Escape handlers (drawers, sheets,
+  // menus, glossary cards, pickers, the first-run guide, the selection); plain modal
+  // dialogs get their cancel path. Game-phase dialogs are never closed by back: closing
+  // the battle dialog advances the round, which an accidental swipe must not do.
+  const PHASE_DIALOGS = new Set(["battle-dialog", "result-dialog"]);
+  const shellStatus = {backs: 0, closed: 0, last: null};
+  const WATCHED = ["class", "open", "hidden", "style", "aria-expanded", "aria-hidden"];
+  function escapeChanges() {
+    const target = document.activeElement && document.activeElement !== document.body
+      ? document.activeElement : document.body || document;
+    const observer = typeof MutationObserver === "function" ? new MutationObserver(() => {}) : null;
+    observer?.observe(document.documentElement, {subtree: true, childList: true, attributes: true, attributeFilter: WATCHED});
+    let prevented = false;
+    try {
+      const event = new KeyboardEvent("keydown", {key: "Escape", code: "Escape", keyCode: 27, bubbles: true, cancelable: true});
+      target.dispatchEvent(event);
+      prevented = event.defaultPrevented;
+    } catch (_) { /* old engines: fall through to the dialogs */ }
+    const records = observer ? observer.takeRecords() : [];
+    observer?.disconnect();
+    if (records.length || prevented) {
+      // What changed, for the shell's diagnostics (e.g. "#shop-drawer.class").
+      const name = (node) => node && (node.id ? `#${node.id}` : node.nodeName?.toLowerCase?.() || "?");
+      shellStatus.last = {via: "escape", prevented, changed: [...new Set(records.map((r) =>
+        `${name(r.target)}${r.attributeName ? "." + r.attributeName : ""}`))].slice(0, 4)};
+      return true;
+    }
+    return false;
+  }
+  function closeTopDialog() {
+    const top = [...document.querySelectorAll("dialog[open]")].filter((dialog) => !PHASE_DIALOGS.has(dialog.id)).pop();
+    if (!top) return false;
+    const cancel = new Event("cancel", {cancelable: true});
+    top.dispatchEvent(cancel);
+    if (!cancel.defaultPrevented && top.open) top.close();
+    shellStatus.last = {via: "dialog", changed: [`#${top.id}`]};
+    return true;
+  }
+  function onBack() {
+    shellStatus.backs += 1;
+    shellStatus.last = null;
+    const closed = escapeChanges() || closeTopDialog();
+    if (closed) shellStatus.closed += 1;
+    return closed;
+  }
+  window.PokeTacticsShell = {version: 1, onBack, status: shellStatus};
+
   // ------------------------------------------------------------ install + service worker
   function syncInstallButton() {
     const button = document.getElementById("install-button");
     if (!button) return;
-    button.hidden = !installEvent || standalone();
+    button.hidden = !installEvent || standalone() || inShell();
   }
   window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
@@ -208,6 +268,7 @@
   });
 
   function boot() {
+    root.classList.toggle("in-shell", inShell());
     syncClasses();
     syncVibrateButton();
     syncInstallButton();
@@ -216,7 +277,17 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
+  // The shell allows media without a gesture (mediaPlaybackRequiresUserGesture=false):
+  // start the music once play_music.js / play_feedback.js (later deferred scripts) exist.
+  function shellAudio() {
+    if (inShell() && unlockAudio()) {
+      window.removeEventListener("click", onGesture);
+      window.removeEventListener("touchend", onGesture);
+    }
+  }
+  if (document.readyState === "complete") shellAudio();
+  else document.addEventListener("DOMContentLoaded", shellAudio);
 
   window.PlayMobile = {status, displayMode, standalone, vibrationEnabled, setVibration, buzz, promptInstall,
-                       unlockAudio, wakeLockHeld: () => Boolean(sentinel)};
+                       unlockAudio, wakeLockHeld: () => Boolean(sentinel), inShell, onBack};
 })();

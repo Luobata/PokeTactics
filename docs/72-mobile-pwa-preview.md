@@ -3,7 +3,7 @@
 > 目标：以后都在手机上体验 /play，并尽量接近原生 App——从主屏幕图标全屏打开、开战不熄屏、大招有震感、横竖屏都能玩。
 > 范围：预览部署（`tools/preview/`）、PWA 外壳（`tools/acceptance/pwa/`、`play_sw.js`、`play_mobile.{js,css}`、`server.py` 路由与 HTTPS）、
 > 战斗渲染器的震动提示事件（`battle_renderer.js` 只加事件，不改画面）、真机脚本 `tools/acceptance/android_e2e.py`。
-> 不改玩法规则与数值。PMD 精灵仅限非商业使用：预览只在公司内网 / VPN 内提供，**不要**把端口映射到公网。
+> 不改玩法规则与数值。网页版返回键容易误触的问题由安卓壳 App 解决，见 [docs/73](73-android-shell-app.md)。PMD 精灵仅限非商业使用：预览只在公司内网 / VPN 内提供，**不要**把端口映射到公网。
 
 下文 `<开发机IP>` 指运行预览的机器的内网地址（`hostname -I` 第一项）；安装脚本结束时会打印实际地址。
 

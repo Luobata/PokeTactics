@@ -30,7 +30,7 @@ class El {
 }
 let elements = {};
 
-function mobileEnv({secure = true, vibrate = true, wakeLock = true, mode = 'browser'} = {}) {
+function mobileEnv({secure = true, vibrate = true, wakeLock = true, mode = 'browser', shell = false, globals = {}} = {}) {
   observers.length = 0;
   elements = Object.fromEntries(['vibrate-button', 'install-button', 'battle-dialog'].map((id) => [id, new El(id)]));
   elements['vibrate-button'].hidden = true;
@@ -74,13 +74,19 @@ function mobileEnv({secure = true, vibrate = true, wakeLock = true, mode = 'brow
       windowListeners[type] = (windowListeners[type] || []).filter((f) => f !== fn); },
     scrollTo() {},
   };
+  log.native = [];
+  log.unlocks = 0;
+  // Android shell App (docs/73): WebMessageListener object + autoplay-capable WebView.
+  if (shell) window.PokeTacticsNative = {postMessage: (message) => log.native.push(JSON.parse(message))};
+  window.PlayMusic = {unlock: () => { log.unlocks += 1; return true; }};
   class MutationObserver {
     constructor(fn) { this.fn = fn; }
     observe(target, opts) { observers.push({notify: (el, attr) => {
       if (el === target && opts.attributeFilter.includes(attr)) this.fn([{attributeName: attr}]); }}); }
   }
   const context = {window, document, navigator, MutationObserver, performance: {now: () => now}, location: {reload() {}},
-    setTimeout, console, CustomEvent: class { constructor(type, init) { this.type = type; this.detail = init?.detail; } }};
+    setTimeout, console, CustomEvent: class { constructor(type, init) { this.type = type; this.detail = init?.detail; } },
+    ...globals};
   window.window = window;
   vm.createContext(context);
   vm.runInContext(read('play_mobile.js'), context);
@@ -179,6 +185,92 @@ const scenarios = {
     const silent = mobileEnv({vibrate: false});
     assert.equal(silent.elements['vibrate-button'].hidden, true, 'no switch without navigator.vibrate (iOS)');
     silent.fireWindow('battle:cue', {detail: {kind: 'ult', team: 0}});
+  },
+
+  async shellBack() {
+    // A tiny page: one drawer closed by an Escape handler, modal dialogs, and the
+    // battle dialog (a game phase the back key must never close).
+    const mutations = [];
+    class ShellObserver {
+      observe(target, opts) {
+        if (target?.id === 'battle-dialog') return;  // watchBattle()'s own observer
+        assert.ok(opts.subtree && opts.attributes && opts.childList, 'watches the whole page');
+        this.on = true;
+      }
+      takeRecords() { return this.on ? mutations.splice(0) : []; }
+      disconnect() { this.on = false; }
+    }
+    class Event { constructor(type, init = {}) { this.type = type; this.cancelable = !!init.cancelable; this.defaultPrevented = false; }
+      preventDefault() { if (this.cancelable) this.defaultPrevented = true; } }
+    class KeyboardEvent extends Event { constructor(type, init) { super(type, init); this.key = init.key; this.code = init.code; } }
+    const env = mobileEnv({shell: true, globals: {MutationObserver: ShellObserver, Event, KeyboardEvent}});
+    const doc = env.document;
+    let drawerOpen = false, keys = 0;
+    doc.body.dispatchEvent = (event) => {
+      keys += 1;
+      assert.equal(event.key, 'Escape');
+      for (const fn of env.documentListeners.keydown || []) fn(event);
+      return !event.defaultPrevented;
+    };
+    // The page's own Escape handler (like play_layout.js closing the phone drawer).
+    doc.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && drawerOpen) { drawerOpen = false; mutations.push({attributeName: 'class'}); }
+    });
+    const dialogs = [];
+    const dialog = (id, onCancel) => {
+      const d = {id, open: false, cancels: 0, dispatchEvent(event) { this.cancels += 1; onCancel?.(event, this); },
+        close() { this.open = false; }};
+      dialogs.push(d);
+      return d;
+    };
+    doc.querySelectorAll = (sel) => { assert.equal(sel, 'dialog[open]'); return dialogs.filter((d) => d.open); };
+    const help = dialog('help-dialog');
+    const scout = dialog('scout-dialog', (event, d) => { event.preventDefault(); d.open = false; });
+    const battle = dialog('battle-dialog', () => assert.fail('back must not cancel the battle dialog'));
+    const shellApi = env.window.PokeTacticsShell;
+    assert.equal(typeof shellApi.onBack, 'function', 'hook installed for the shell');
+    assert.equal(env.document.documentElement.classList.contains('in-shell'), true);
+
+    assert.equal(shellApi.onBack(), false, 'nothing open: the shell asks to exit');
+    drawerOpen = true;
+    assert.equal(shellApi.onBack(), true, 'an open drawer closes first');
+    assert.equal(drawerOpen, false);
+    assert.equal(shellApi.onBack(), false, 'then nothing is left');
+    help.open = true;
+    assert.equal(shellApi.onBack(), true, 'a modal dialog closes');
+    assert.equal(help.open, false);
+    assert.equal(help.cancels, 1, 'through its cancel event');
+    scout.open = true;
+    assert.equal(shellApi.onBack(), true);
+    assert.equal(scout.open, false, 'a dialog with its own cancel handler closes through it');
+    battle.open = true;
+    assert.equal(shellApi.onBack(), false, 'the battle dialog is a game phase: ask to exit instead');
+    assert.equal(battle.open, true);
+    help.open = true;
+    assert.equal(shellApi.onBack(), true, 'an overlay above the battle still closes');
+    assert.equal(help.open, false);
+    assert.equal(battle.open, true);
+    drawerOpen = true;
+    assert.equal(shellApi.onBack(), true, 'Escape-closed overlays come before dialogs');
+    assert.equal(shellApi.status.backs, 8);
+    assert.equal(shellApi.status.closed, 5);
+    assert.equal(keys, 8, 'every back tries the page\'s Escape handlers once');
+
+    // Vibration goes to the native bridge, never navigator.vibrate.
+    env.fireWindow('battle:cue', {detail: {kind: 'ult', team: 0}});
+    assert.deepEqual(env.log.native, [{type: 'vibrate', pattern: [40, 30, 70]}]);
+    assert.deepEqual(env.log.vibrate, []);
+    assert.equal(env.elements['vibrate-button'].hidden, false, 'switch shown in the shell');
+    // Audio starts at boot, no tap needed.
+    assert.equal(env.log.unlocks, 1);
+    assert.equal(env.elements['install-button'].hidden, true);
+
+    const browser = mobileEnv();
+    assert.equal(browser.log.unlocks, 0, 'browsers still wait for the first tap');
+    assert.equal(browser.document.documentElement.classList.contains('in-shell'), false);
+    browser.fireWindow('battle:cue', {detail: {kind: 'ult', team: 0}});
+    assert.deepEqual(browser.log.vibrate, [[40, 30, 70]], 'browsers keep navigator.vibrate');
+    assert.deepEqual(browser.log.native, []);
   },
 
   async wakeLock() {

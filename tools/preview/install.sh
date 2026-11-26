@@ -6,7 +6,7 @@
 #
 # Creates (idempotently):
 #   <repo>/../PokeTactics-preview          detached worktree that follows main
-#   ~/.local/share/poketactics-preview/    venv (Pillow), bin/ copies, saves/, certs/
+#   ~/.local/share/poketactics-preview/    venv (Pillow), bin/ copies, saves/, certs/, app/ (APK, docs/73)
 #   ~/.config/poketactics-preview/env      settings read by run.sh / update.sh
 #   ~/.config/systemd/user/poketactics-preview{,-update}.{service,timer}
 # Needs `loginctl enable-linger $USER` once so the units start at boot without a login.
@@ -27,6 +27,7 @@ PREVIEW_WORKTREE=${PREVIEW_WORKTREE:-$(dirname "$repo")/PokeTactics-preview}
 PREVIEW_SAVE_DIR=${PREVIEW_SAVE_DIR:-$data/saves}
 PREVIEW_CERT_DIR=${PREVIEW_CERT_DIR:-$data/certs}
 PREVIEW_PYTHON=${PREVIEW_PYTHON:-$data/venv/bin/python}
+PREVIEW_APP_DIR=${PREVIEW_APP_DIR:-$data/app}
 
 port_owner() { ss -Hltnp "sport = :$1" 2>/dev/null | head -1; }
 running=$(systemctl --user is-active poketactics-preview.service 2>/dev/null || true)
@@ -38,7 +39,7 @@ for port in "$PREVIEW_PORT" ${PREVIEW_TLS_PORT:+"$PREVIEW_TLS_PORT"}; do
   fi
 done
 
-mkdir -p "$data/bin" "$PREVIEW_SAVE_DIR" "$conf_dir" "$units"
+mkdir -p "$data/bin" "$PREVIEW_SAVE_DIR" "$PREVIEW_APP_DIR" "$conf_dir" "$units"
 if [ ! -e "$PREVIEW_WORKTREE/.git" ]; then
   git -C "$repo" fetch --quiet origin "$PREVIEW_BRANCH" || true
   git -C "$repo" worktree add --detach "$PREVIEW_WORKTREE" "origin/$PREVIEW_BRANCH"
@@ -67,6 +68,7 @@ PREVIEW_WORKTREE=$PREVIEW_WORKTREE
 PREVIEW_SAVE_DIR=$PREVIEW_SAVE_DIR
 PREVIEW_CERT_DIR=$PREVIEW_CERT_DIR
 PREVIEW_PYTHON=$PREVIEW_PYTHON
+PREVIEW_APP_DIR=$PREVIEW_APP_DIR
 EOF
 
 cat > "$units/poketactics-preview.service" <<EOF
@@ -120,3 +122,4 @@ echo "preview http://$(hostname -I | awk '{print $1}'):$PREVIEW_PORT/play  (work
 if [ -n "$PREVIEW_TLS_PORT" ]; then
   echo "https  https://$(hostname -I | awk '{print $1}'):$PREVIEW_TLS_PORT/play  (needs the CA from /ca.crt on the phone)"
 fi
+echo "app    http://$(hostname -I | awk '{print $1}'):$PREVIEW_PORT/app  (Android shell APK from tools/android/build.sh)"

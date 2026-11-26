@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="pt_background">#FF10141C</color>
+    <color name="pt_text">#FFE8ECF4</color>
+    <color name="pt_accent">#FF2F6FDE</color>
+    <color name="ic_launcher_background">#FF244236</color>
+
+    <style name="Theme.PokeTactics" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@color/pt_background</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:colorAccent">@color/pt_accent</item>
+    </style>
+
+    <style name="Theme.PokeTactics.Settings" parent="@android:style/Theme.DeviceDefault.Settings">
+        <item name="android:colorAccent">@color/pt_accent</item>
+    </style>
+
+    <style name="Theme.PokeTactics.Dialog" parent="@android:style/Theme.DeviceDefault.Dialog.Alert" />
+</resources>

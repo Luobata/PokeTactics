@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PokeTactics</string>
+    <string name="settings_title">壳 App 设置</string>
+    <string name="exit_title">退出游戏？</string>
+    <string name="exit_message">对局进度保存在服务器上，下次打开可以继续。</string>
+    <string name="exit_confirm">退出</string>
+    <string name="exit_cancel">继续游戏</string>
+    <string name="exit_to_game">回到对局</string>
+    <string name="loading">正在连接游戏服务器…</string>
+    <string name="error_title">连不上游戏服务器</string>
+    <string name="error_retry">重试</string>
+    <string name="error_settings">设置地址</string>
+    <string name="settings_url">服务器地址（/play 页面）</string>
+    <string name="settings_url_hint">https://10.37.30.198:8821/play</string>
+    <string name="settings_landscape">允许横屏（默认锁定竖屏）</string>
+    <string name="settings_gesture">边缘防误触：屏幕左右边缘中部不触发侧滑返回</string>
+    <string name="settings_gesture_note">系统限制每侧最多屏蔽 200dp 高；其余位置侧滑返回仍会先关闭弹层或询问「退出游戏？」。</string>
+    <string name="settings_save">保存并重新加载</string>
+    <string name="settings_reset">恢复默认地址</string>
+    <string name="settings_clear">清除网页缓存</string>
+    <string name="settings_entry_note">打开本页：两指同时按住屏幕 2 秒，或在「连不上服务器」页点「设置地址」。</string>
+    <string name="settings_bad_url">地址需以 http:// 或 https:// 开头</string>
+    <string name="settings_cache_cleared">已清除网页缓存</string>
+</resources>
