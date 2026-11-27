@@ -30,6 +30,12 @@ reports/evidence/android-shell-<time>/.
 
   python3 tools/android/shell_e2e.py --serial <adb-serial> --url https://10.4.63.169:8821/play \
       --download-page http://10.4.63.169:8820/app
+  # Cloud phone with a lossy VPN path: carry the App's traffic over adb instead (docs/74 §8)
+  python3 tools/android/shell_e2e.py --serial <adb-serial> --tether-port 8820
+
+Phone UX phase (docs/74): one-row HUD and menu button, shop sheet clear of the bench with the
+recruit button on the card, a real finger drag (input motionevent) from bench to board, a long
+press that neither selects text nor swallows the next tap, and the menu sheet's toggles + back.
 """
 from __future__ import annotations
 
@@ -225,6 +231,8 @@ class ShellRun(base.Run):
         line = self.wait_log(r"page ready|error page", 40)
         if "error page" in line:
             self.log("error page", line=line.split(": ", 1)[-1], shot=self.shot("error-page"))
+            if self.args.tether_port:
+                self.start_tether()
             self.tap_view("error_settings", PKG + "/")
             time.sleep(1.5)
             self.check("settings page opened from the error page", "SettingsActivity" in self.focus(), focus=self.focus())
@@ -243,8 +251,23 @@ class ShellRun(base.Run):
                 self.log("page load stalled; relaunching the App once", shot=self.shot("stalled"))
                 self.adb.shell(f"am force-stop {PKG}")
                 self.adb.shell(f"am start -W -n {ACTIVITY}", timeout=60)
+                if self.args.tether_port:
+                    # The forwarding lives on the WebView: bind it again for the new process,
+                    # then retry from the error page if the first load ran before it.
+                    time.sleep(1.0)
+                    self.start_tether()
+                    if "error page" in self.wait_log(r"page ready|error page", 40):
+                        self.tap_view("error_retry", PKG + "/")
                 self.wait_log(r"page ready", 60)
         self.summary["loaded_via_settings"] = "error page" in line
+
+    def start_tether(self) -> None:
+        """DevTools port forwarding on the App's own WebView: phone localhost → adb → this machine."""
+        pid = self.adb.shell(f"pidof {PKG}", check=False).strip().split()[0]
+        self.tether_cdp = WebViewCdp(self.adb, f"webview_devtools_remote_{pid}")
+        self.tether = base.Tether(self.adb, self.tether_cdp, self.args.phone_port, ("127.0.0.1", self.args.tether_port))
+        self.summary["tether"] = {"phone": f"localhost:{self.args.phone_port}", "server": f"127.0.0.1:{self.args.tether_port}"}
+        self.log("tether bound", **self.summary["tether"])
 
     def attach(self) -> Page:
         pid = self.adb.shell(f"pidof {PKG}", check=False).strip().split()[0]
@@ -651,8 +674,13 @@ class ShellRun(base.Run):
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--serial", help="adb serial (default: the only connected device)")
-    ap.add_argument("--url", required=True, help="/play address the phone can reach, typed into the App's settings"
+    ap.add_argument("--url", help="/play address the phone can reach, typed into the App's settings"
                     " when the built-in default is unreachable (e.g. https://<VPN-IP>:8821/play)")
+    ap.add_argument("--tether-port", type=int, default=0,
+                    help="instead of --url: carry the App's traffic over adb (DevTools port forwarding on the"
+                         " App's WebView) to this machine's server on this port; the App loads"
+                         " http://localhost:<--phone-port>/play. For cloud phones whose VPN path drops packets.")
+    ap.add_argument("--phone-port", type=int, default=8851, help="phone-side localhost port for --tether-port")
     ap.add_argument("--apk-url", default="http://127.0.0.1:8820/app/PokeTactics.apk",
                     help="where to download the APK (default: this machine's preview service)")
     ap.add_argument("--download-page", help="also open this /app page in the phone's Chrome and screenshot it"
@@ -661,7 +689,12 @@ def main() -> int:
     ap.add_argument("--no-record", dest="record", action="store_false", help="skip the screen recording")
     ap.add_argument("--keep-gestures", action="store_true", help="leave gesture navigation on afterwards")
     ap.add_argument("--out", help="evidence directory (default reports/evidence/android-shell-<time>)")
-    return ShellRun(ap.parse_args()).execute()
+    args = ap.parse_args()
+    if args.tether_port:
+        args.url = f"http://localhost:{args.phone_port}/play"
+    elif not args.url:
+        ap.error("--url or --tether-port is required")
+    return ShellRun(args).execute()
 
 
 if __name__ == "__main__":

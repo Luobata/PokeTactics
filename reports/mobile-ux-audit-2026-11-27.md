@@ -124,7 +124,7 @@
 
 ### M10 返回键 / Esc 的实现不可靠（结构问题）
 * 现象：壳 App 的返回钩子 `PokeTacticsShell.onBack()` 派发一个假的 Esc 键盘事件，再用 MutationObserver 看 DOM 有没有变化来判断「关掉了东西」；
-  Esc 的处理分散在 9 个文件里（有的在捕获阶段 `stopPropagation`，有的在冒泡阶段），关闭顺序取决于脚本加载顺序。
+  Esc 的处理分散在 10 个脚本里（有的在捕获阶段 `stopPropagation`，有的在冒泡阶段），关闭顺序取决于脚本加载顺序。
   新加一个弹层就要记得在自己的文件里接 Esc，而且只要 DOM 有任何变化（比如一个计时器刷新）都会被当成「已关闭」。
 * 改法：重构为统一弹层栈 `PlayOverlay`（见 docs/74）：每个弹层登记 `isOpen / close / 层级`，返回键与 Esc 都关「最上层的一个」，返回值确定。
 
