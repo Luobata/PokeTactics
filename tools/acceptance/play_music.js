@@ -250,6 +250,21 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", syncButton);
   else syncButton();
 
-  window.PlayMusic = {update, jingle, setEnabled, setVolume, enabled: () => enabled, current: () => current?.name || null,
-                      desired, tracks: Object.keys(TRACKS)};
+  // Called by play_mobile.js inside the first tap (docs/72): iOS only lets a context
+  // start from a gesture, and a one-sample silent buffer wakes its output route.
+  function unlock() {
+    if (!enabled || !ensure()) return false;
+    try {
+      const source = ctx.createBufferSource();
+      source.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+      source.connect(ctx.destination);
+      source.start();
+    } catch (_) { /* best effort */ }
+    ctx.resume().catch(() => {});
+    if (!timer) start();
+    return true;
+  }
+
+  window.PlayMusic = {update, jingle, setEnabled, setVolume, unlock, enabled: () => enabled, current: () => current?.name || null,
+                      desired, tracks: Object.keys(TRACKS), state: () => ctx?.state || "none"};
 })();

@@ -9,6 +9,15 @@
       content="PokeTactics 宝可梦自走棋试玩。招募精灵、构筑羁绊、自由布阵，与七位训练家一决胜负。"
     />
     <title>PokeTactics — 精灵战术实验室</title>
+    <!-- docs/72: installable app (manifest + Service Worker), home-screen icons. -->
+    <link rel="manifest" href="/play/manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/play/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/play/icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="PokeTactics" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="format-detection" content="telephone=no" />
     <link rel="stylesheet" href="/play/assets/play.css" />
     <link rel="stylesheet" href="/play/assets/battle.css" />
     <link rel="stylesheet" href="/play/assets/play_layout.css" />
@@ -29,6 +38,8 @@
     <link rel="stylesheet" href="/play/assets/play_weather.css" />
     <link rel="stylesheet" href="/play/assets/play_tree.css" />
     <link rel="stylesheet" href="/play/assets/play_branch.css" />
+    <link rel="stylesheet" href="/play/assets/play_mobile.css" />
+    <script src="/play/assets/play_mobile.js" defer></script>
     <script src="/play/assets/play_feedback.js" defer></script>
     <script src="/play/assets/play_music.js" defer></script>
     <script src="/play/assets/play_depth.js" defer></script>
@@ -217,6 +228,23 @@
                   aria-label="背景音乐开关"
                   title="背景音乐"
                 ><span aria-hidden="true">♪</span></button
+                ><button
+                  id="vibrate-button"
+                  class="icon-button vibrate-button"
+                  type="button"
+                  aria-pressed="true"
+                  aria-label="震动反馈开关"
+                  title="震动反馈"
+                  hidden
+                ><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="18" rx="2" /><path d="M4 8v8M20 8v8M1.5 10v4M22.5 10v4" /></svg></button
+                ><button
+                  id="install-button"
+                  class="icon-button install-button"
+                  type="button"
+                  aria-label="安装到主屏幕"
+                  title="安装到主屏幕（全屏打开）"
+                  hidden
+                ><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v11M7 9l5 5 5-5M5 19h14" /></svg></button
                 ><button
                   id="guide-button"
                   class="icon-button guide-button"

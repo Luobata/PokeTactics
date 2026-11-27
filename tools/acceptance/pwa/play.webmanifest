@@ -1,0 +1,20 @@
+{
+  "id": "/play",
+  "name": "PokeTactics 宝可梦自走棋",
+  "short_name": "PokeTactics",
+  "description": "宝可梦自走棋试玩：招募精灵、构筑羁绊、自由布阵，与七位训练家一决胜负。",
+  "lang": "zh-CN",
+  "start_url": "/play?source=pwa",
+  "scope": "/play",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "any",
+  "background_color": "#13211a",
+  "theme_color": "#202c29",
+  "categories": ["games"],
+  "icons": [
+    {"src": "/play/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "/play/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "/play/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

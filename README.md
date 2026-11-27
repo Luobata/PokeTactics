@@ -23,6 +23,9 @@
 > 手机竖屏一屏完成「买 → 放 → 开战」（[docs/61](docs/61-play-ui-redesign.md)）。
 > 海克斯选择、技能机/升星强化、组件合成与装备是带适配度与推荐理由的「游戏时刻」（[docs/62](docs/62-prep-interaction-moments.md)）。
 >
+> **手机体验**：开发机常驻预览服务（systemd --user，跟随 main 自动更新）；/play 可「添加到主屏幕」全屏打开，
+> 开战防熄屏、大招与克制命中震动、首次点击解锁音频、安全区与横竖屏适配；真机 E2E 用 adb 驱动手机 Chrome（[docs/72](docs/72-mobile-pwa-preview.md)）。
+>
 > **2026-11 深度版**：新开竞技局默认使用 `arena_v2`——阶段地形、升星技能强化、
 > 规则型海克斯、羁绊深度断点、核心单位、共享选秀、组件属性与拆解经济、定向刷新、
 > 收益账本，以及统一的效果总线（旧 `arena_v1` 逐事件冻结、旧存档继续可读）。
@@ -88,6 +91,24 @@ python3 tools/extract_from_pokewalk.py
 # 跑战斗原型：随机阵容 × 300 场，输出平衡性报告
 python3 sim/prototype.py --games 300
 ```
+
+### 手机预览与真机 E2E
+
+```sh
+# 常驻预览（systemd --user，开机自启、崩溃重启、每 2 分钟跟随 main 自动更新）
+tools/preview/install.sh                      # http :8820 / https :8821
+loginctl enable-linger "$USER"                # 只需一次
+# 手机连内网 / VPN 打开 http://<开发机IP>:8820/play；
+# 全屏安装：信任 http://<开发机IP>:8820/ca.crt 后打开 https://<开发机IP>:8821/play →「安装到主屏幕」
+
+# 真机 E2E（adb：USB / 无线调试 / Dora 云真机均可；只用标准库）
+adb devices
+python3 tools/acceptance/android_e2e.py --port 8820 --install          # 一整回合 + 安装 + 全屏打开
+python3 tools/acceptance/android_e2e.py --via direct --url http://<开发机IP>:8820/play   # 手机经网络直连
+# 证据：reports/evidence/android-e2e-<时间>/（逐步截图、screenrecord.mp4、summary.json）
+```
+
+申请云真机、证书信任步骤与各项限制见 [docs/72](docs/72-mobile-pwa-preview.md)。
 
 玩法仿真与存档运行时使用 Python 标准库。画面渲染还需要 Pillow 和兄弟项目
 `../ESP32-PokemonGo/assets/` 的现有像素资源；不会自动下载或改写兄弟项目。
