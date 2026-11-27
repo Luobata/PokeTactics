@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stable view ids: the adb E2E finds these in `dumpsys activity top` (docs/73). -->
+<resources>
+    <item name="shell_root" type="id" />
+    <item name="shell_webview" type="id" />
+    <item name="shell_loading" type="id" />
+    <item name="shell_error" type="id" />
+    <item name="shell_error_detail" type="id" />
+    <item name="error_retry" type="id" />
+    <item name="error_settings" type="id" />
+    <item name="settings_url" type="id" />
+    <item name="settings_landscape" type="id" />
+    <item name="settings_gesture" type="id" />
+    <item name="settings_save" type="id" />
+    <item name="settings_reset" type="id" />
+    <item name="settings_clear" type="id" />
+</resources>

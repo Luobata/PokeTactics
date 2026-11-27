@@ -226,6 +226,9 @@ class PhoneLayer(unittest.TestCase):
     def test_vibration_follows_battle_cues_and_the_hud_switch(self):
         self.run_scenario('vibration')
 
+    def test_android_shell_back_hook_native_vibration_and_autoplay(self):
+        self.run_scenario('shellBack')
+
     def test_wake_lock_is_held_only_while_the_battle_is_open(self):
         self.run_scenario('wakeLock')
 

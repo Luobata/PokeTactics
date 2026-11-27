@@ -25,6 +25,8 @@
 >
 > **手机体验**：开发机常驻预览服务（systemd --user，跟随 main 自动更新）；/play 可「添加到主屏幕」全屏打开，
 > 开战防熄屏、大招与克制命中震动、首次点击解锁音频、安全区与横竖屏适配；真机 E2E 用 adb 驱动手机 Chrome（[docs/72](docs/72-mobile-pwa-preview.md)）。
+> **安卓 App**：WebView 壳（`apps/android/`）接管返回键与侧滑返回——先关弹层，没有可关的才问「退出游戏？」；
+> 沉浸全屏、竖屏、防熄屏、原生震动、免点击音频，内置预览 CA；从 `http://<开发机IP>:8820/app` 下载安装（[docs/73](docs/73-android-shell-app.md)）。
 >
 > **2026-11 深度版**：新开竞技局默认使用 `arena_v2`——阶段地形、升星技能强化、
 > 规则型海克斯、羁绊深度断点、核心单位、共享选秀、组件属性与拆解经济、定向刷新、
@@ -109,6 +111,17 @@ python3 tools/acceptance/android_e2e.py --via direct --url http://<开发机IP>:
 ```
 
 申请云真机、证书信任步骤与各项限制见 [docs/72](docs/72-mobile-pwa-preview.md)。
+
+### 安卓壳 App（防误触返回）
+
+```sh
+tools/android/setup_sdk.sh      # 一次：JDK 17 + Android SDK 装到用户目录（不需要 sudo）
+tools/android/build.sh          # 构建 APK（固定自签 key 在 ~/.config/poketactics-android/，不进仓库）并发布到预览
+# 手机浏览器打开 http://<开发机IP>:8820/app →「下载」→ 允许安装未知来源 → 安装 → 桌面「PokeTactics」
+python3 tools/android/shell_e2e.py --serial <adb-serial> --url https://<手机可达的IP>:8821/play   # 真机 E2E
+```
+
+返回键行为、证书选择、隐藏设置页（两指按住 2 秒）、安装步骤与限制见 [docs/73](docs/73-android-shell-app.md)；iOS 以后用 WKWebView 壳。
 
 玩法仿真与存档运行时使用 Python 标准库。画面渲染还需要 Pillow 和兄弟项目
 `../ESP32-PokemonGo/assets/` 的现有像素资源；不会自动下载或改写兄弟项目。

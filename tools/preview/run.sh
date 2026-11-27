@@ -11,6 +11,10 @@ if [ -n "${PREVIEW_TLS_PORT:-}" ] && [ -s "$PREVIEW_CERT_DIR/server-chain.crt" ]
   args+=(--tls-port "$PREVIEW_TLS_PORT" --tls-cert "$PREVIEW_CERT_DIR/server-chain.crt"
          --tls-key "$PREVIEW_CERT_DIR/server.key" --ca-cert "$PREVIEW_CERT_DIR/ca.crt")
 fi
+# Android shell APK download (/app, docs/73), on server.py versions that know --app-dir.
+if [ -n "${PREVIEW_APP_DIR:-}" ] && grep -q -- '--app-dir' tools/acceptance/server.py; then
+  args+=(--app-dir "$PREVIEW_APP_DIR")
+fi
 export POKETACTICS_SAVE_DIR="$PREVIEW_SAVE_DIR" PYTHONUNBUFFERED=1
 echo "preview: $(git rev-parse --short HEAD) $(git log -1 --format=%s | cut -c1-80)"
 exec "$PREVIEW_PYTHON" "${args[@]}"
