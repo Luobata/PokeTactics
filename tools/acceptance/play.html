@@ -18,11 +18,14 @@
     <meta name="apple-mobile-web-app-title" content="PokeTactics" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="format-detection" content="telephone=no" />
+    <link rel="stylesheet" href="/play/assets/play_tokens.css" />
     <link rel="stylesheet" href="/play/assets/play.css" />
     <link rel="stylesheet" href="/play/assets/battle.css" />
     <link rel="stylesheet" href="/play/assets/play_layout.css" />
+    <link rel="stylesheet" href="/play/assets/play_layout_phone.css" />
     <link rel="stylesheet" href="/play/assets/play_interactions.css" />
     <script src="/play/assets/play_layout.js" defer></script>
+    <script src="/play/assets/play_overlay.js" defer></script>
     <!-- docs/70: glossary + previews, context menu and guide load before the other click handlers. -->
     <script src="/play/assets/play_preview.js" defer></script>
     <script src="/play/assets/play_context.js" defer></script>
@@ -39,7 +42,9 @@
     <link rel="stylesheet" href="/play/assets/play_tree.css" />
     <link rel="stylesheet" href="/play/assets/play_branch.css" />
     <link rel="stylesheet" href="/play/assets/play_mobile.css" />
+    <link rel="stylesheet" href="/play/assets/play_phone.css" />
     <script src="/play/assets/play_mobile.js" defer></script>
+    <script src="/play/assets/play_phone.js" defer></script>
     <script src="/play/assets/play_feedback.js" defer></script>
     <script src="/play/assets/play_music.js" defer></script>
     <script src="/play/assets/play_depth.js" defer></script>
@@ -270,6 +275,11 @@
                   <svg aria-hidden="true"><use href="#i-plus" /></svg><span>新开一局</span>
                 </button>
               </div>
+              <!-- phones (docs/74): the tools above live in the menu sheet; this is its only HUD entry -->
+              <span class="hud-xp-compact" id="hud-xp-compact" aria-hidden="true"></span>
+              <button id="menu-button" class="hud-menu-button" type="button" aria-haspopup="dialog"
+                aria-controls="phone-menu" aria-expanded="false" aria-label="菜单与设置"
+              ><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg><span>菜单</span></button>
             </header>
 
             <div class="arena stage-board">
@@ -809,6 +819,37 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+    <!-- Phone menu & settings (docs/74). Rows proxy the HUD tool buttons, which phones hide. -->
+    <div id="phone-menu" class="phone-menu" hidden>
+      <div class="phone-menu-backdrop" data-menu-close></div>
+      <section class="phone-menu-sheet" role="dialog" aria-modal="true" aria-labelledby="phone-menu-title">
+        <header class="phone-menu-head">
+          <h2 id="phone-menu-title">菜单 · 设置</h2>
+          <button type="button" class="icon-button" data-menu-close aria-label="关闭菜单"><svg><use href="#i-close" /></svg></button>
+        </header>
+        <div class="phone-menu-body">
+          <section class="phone-menu-group" aria-label="声音与震动">
+            <h3>声音与震动</h3>
+            <button type="button" class="menu-row menu-toggle" data-menu-proxy="music-button"><span>背景音乐</span><i class="menu-switch" aria-hidden="true"></i></button>
+            <button type="button" class="menu-row menu-toggle" data-menu-proxy="sound-button"><span>游戏音效</span><i class="menu-switch" aria-hidden="true"></i></button>
+            <button type="button" class="menu-row menu-toggle" data-menu-proxy="vibrate-button"><span>震动反馈</span><i class="menu-switch" aria-hidden="true"></i></button>
+          </section>
+          <section class="phone-menu-group" aria-label="帮助">
+            <h3>帮助</h3>
+            <button type="button" class="menu-row" data-menu-proxy="guide-button"><span>新手引导</span><small>再看一遍操作提示</small></button>
+            <button type="button" class="menu-row" data-menu-proxy="mobile-help-button"><span>玩法指南</span><small>规则速览</small></button>
+          </section>
+          <section class="phone-menu-group" aria-label="对局">
+            <h3>对局</h3>
+            <button type="button" class="menu-row" data-menu-proxy="backup-button"><span>下载当前存档</span><small>备份到手机</small></button>
+            <button type="button" class="menu-row" data-menu-proxy="install-button"><span>安装到主屏幕</span><small>全屏打开</small></button>
+            <button type="button" class="menu-row danger" data-menu-proxy="new-button"><span>新开一局</span><small>会先确认</small></button>
+          </section>
+          <nav class="phone-menu-group" id="phone-menu-links" aria-label="站点" hidden><h3>站点</h3></nav>
+        </div>
+      </section>
+    </div>
+
     <dialog id="help-dialog" class="modal help-modal">
       <button id="help-close" class="modal-close" aria-label="关闭玩法指南">
         ×</button
@@ -905,7 +946,7 @@
           <div class="battle-screen" aria-busy="true">
             <canvas id="battle-canvas" width="960" height="640" aria-label="战斗动画回放：蓝色圆标为我方，红色三角标为敌方"></canvas>
             <div id="battle-loading" class="battle-loading" role="status"><span class="arena-loading-dot" aria-hidden="true"></span><span id="battle-loading-copy">正在准备战场…</span><progress id="battle-render-progress" max="1" value="0" hidden></progress><button id="battle-retry" type="button" hidden>重试画面</button></div>
-            <div id="battle-verdict" class="battle-verdict" aria-live="polite" hidden><div class="verdict-symbol" aria-hidden="true"></div><div><strong></strong><p></p></div></div>
+            <div id="battle-verdict" class="battle-verdict" aria-live="polite" hidden><div class="verdict-symbol" aria-hidden="true"></div><div><strong></strong><p></p><small class="verdict-hp" id="battle-verdict-hp" hidden></small></div></div>
           </div>
           <div class="arena-caption"><span id="battle-current-event">双方伙伴，即将登场。</span><span id="battle-status" role="status">战斗画面载入中…</span></div>
           <div class="battle-transport">

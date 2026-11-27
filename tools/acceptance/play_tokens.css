@@ -1,0 +1,65 @@
+/* Design tokens for the play page (docs/74 §2).
+ *
+ * One place for the stacking order, touch sizes, type scale and phone chrome
+ * sizes that used to be magic numbers spread across a dozen stylesheets.
+ * Files that also load on their own (unit tests read single stylesheets) use
+ * var(--token, <same value>) so they keep working without this file.
+ *
+ * Stacking order (low → high). Values are the ones the page already used, now named:
+ *   board cues 1–9 · context bar 8 (inside the board scene) · phone sheet 40 · docked scout panel 42
+ *   tab bar 45 · confirm sheet 65 · augment moment 70 · undo chip 75 · crafting tree 80 · branch sheet 82
+ *   phone menu 84 · guide 86/87 · glossary card 88 · long-press menu 89/90 · toast 100
+ *   custom select 119/120 · update bar 120 · touch-drag ghost 130 · feedback layer (top)
+ */
+:root {
+  --z-context-bar: 8;
+  --z-sheet: 40;
+  --z-scout-docked: 42;
+  --z-dock: 45;
+  --z-toast: 100;
+  --z-ix-sheet: 65;
+  --z-augment: 70;
+  --z-undo: 75;
+  --z-tree: 80;
+  --z-branch: 82;
+  --z-menu: 84;
+  --z-guide: 86;
+  --z-guide-card: 87;
+  --z-glossary: 88;
+  --z-ctx-backdrop: 89;
+  --z-ctx: 90;
+  --z-select-backdrop: 119;
+  --z-select: 120;
+  --z-app-update: 120;
+  --z-drag: 130;
+
+  /* touch targets: 44px minimum (WCAG 2.5.5 / Apple HIG), 48px for primary rows */
+  --touch-min: 44px;
+  --touch-row: 48px;
+
+  /* type scale; phones never go below --fs-xs for anything a player must read */
+  --fs-2xs: 10px;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 20px;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+
+  /* phone chrome */
+  --phone-hud-h: 46px;
+  --phone-shop-peek: 200px;
+  --app-letterbox: #14231b; /* status-bar / cutout band colour in the shell App and PWA */
+
+  /* motion */
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+  --dur-fast: 120ms;
+  --dur-mid: 200ms;
+}

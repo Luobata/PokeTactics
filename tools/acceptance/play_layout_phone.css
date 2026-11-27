@@ -1,0 +1,567 @@
+/* Phone layout of the board-centric prep screen (docs/61, docs/68, docs/74).
+ *
+ * Moved verbatim out of play_layout.css (docs/74 §3): every rule is scoped to
+ * body.layout-phone (set by play_layout.js with the same media query as JS) or to
+ * the phone media queries for the battle dialog. play.html links this file right
+ * after play_layout.css. New phone-only UX (compact HUD, menu sheet, touch drag,
+ * toasts) lives in play_phone.css.
+ */
+/* ------------------------------------------------------------- phone */
+.stage-ui.layout-phone {
+  --nav-h: 48px;
+  --dock-h: 60px;
+  --dock-w: 0px;
+  --gap: 6px;
+  --row-label-w: 18px;
+  --tile-gap: 3px;
+  --slot: 50px;
+  /* Above the 6 rows: nav 48 + HUD 64 + top strip 44 + frame 50 + bench 94 + gaps,
+     plus ~220px kept free so the shop sheet never covers the bench. */
+  --chrome-y: 600px;
+  --tile-w: clamp(36px, calc((100vw - 84px) / 6), 62px);
+  --tile-h: clamp(34px, calc((100dvh - var(--chrome-y)) / 6), var(--tile-w));
+  --tile: var(--tile-h);
+}
+.stage-ui.layout-phone .app { margin-left: 0; }
+.stage-ui.layout-phone .rail { display: none; }
+.stage-ui.layout-phone main.stage-main {
+  padding: 6px 6px calc(var(--dock-h) + env(safe-area-inset-bottom) + 12px);
+}
+/* an open sheet adds scroll room so the bench can still be scrolled above it */
+.stage-ui.layout-phone.drawer-open main.stage-main {
+  padding-bottom: calc(var(--dock-h) + env(safe-area-inset-bottom) + 12px + var(--sheet-space, 0px));
+}
+/* phones: the site rail is hidden, its sound-effect toggle rides in the HUD tools */
+.stage-ui.layout-phone .hud-tools #sound-button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  min-height: 0;
+  height: 34px;
+  padding: 0;
+  gap: 0;
+  border: 1px solid #ffffff26;
+  border-radius: 10px;
+  color: #e4ecd3;
+}
+.stage-ui.layout-phone .hud-tools #sound-button span { display: none; }
+.stage-ui.layout-phone .hud-tools #sound-button svg { width: 16px; height: 16px; }
+.stage-ui.layout-phone .hud-tools #sound-button[aria-pressed="true"] { background: #ffffff1c; }
+.stage-ui.layout-phone .hud-tools #sound-button::after { content: ""; position: absolute; inset: -5px -2px; }
+.stage-ui.layout-phone .game-layout.stage-shell,
+.stage-ui.layout-phone .game-layout.scouting-open {
+  grid-template-columns: minmax(0, 1fr);
+}
+.stage-ui.layout-phone .game-layout.stage-shell > .center-column.stage {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "hud hud"
+    "board board"
+    "bench fight"
+    "hint hint";
+  gap: 6px;
+}
+/* HUD: row 1 = round · HP · gold · population · streak; row 2 = level/XP · tools */
+.stage-ui.layout-phone .stage-hud {
+  gap: 2px 12px;
+  min-height: 0;
+  padding: 4px 6px 4px 8px;
+  border-radius: 12px;
+}
+.stage-ui.layout-phone .hud-round.round-card { padding: 1px 8px; }
+.stage-ui.layout-phone .hud-round .phase { font-size: 11px; }
+.stage-ui.layout-phone .hud-stat strong { font-size: 15px; }
+.stage-ui.layout-phone .hud-hp .hud-meter { display: none; }
+.stage-ui.layout-phone .hud-level { order: 5; flex: 1 1 190px; min-width: 0; }
+.stage-ui.layout-phone .stage-hud { overflow: hidden; }
+.stage-ui.layout-phone .hud-level .hud-meter { width: 34px; flex: none; }
+.stage-ui.layout-phone .hud-level small { font-size: 10px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.stage-ui.layout-phone .hud-tools { order: 6; }
+.stage-ui.layout-phone .hud-tools .icon-button { position: relative; width: 34px; height: 34px; }
+.stage-ui.layout-phone .hud-chip::after,
+.stage-ui.layout-phone .hud-tools .icon-button::after {
+  /* invisible 44px touch target around compact controls */
+  content: "";
+  position: absolute;
+  inset: -5px -2px;
+}
+.stage-ui.layout-phone .hud-chip { min-height: 34px; padding: 2px 9px; font-size: 11px; }
+.stage-ui.layout-phone .hud-chip b { font-size: 9px; letter-spacing: 0; }
+.stage-ui.layout-phone .arena.stage-board { border-radius: 14px; }
+.stage-ui.layout-phone .board-scene { padding: 46px 4px 6px; }
+.stage-ui.layout-phone .board-topline { top: 5px; left: 5px; right: 5px; gap: 5px; }
+.stage-ui.layout-phone .board-topline .opponent-tag { flex: none; font-size: 11px; padding: 3px 9px; min-height: 34px; max-width: 34%; }
+.stage-ui.layout-phone .board-topline .opponent-tag #opponent-kind,
+.stage-ui.layout-phone .board-topline .opponent-separator { display: none; }
+.stage-ui.layout-phone .board-topline .scout-entry,
+.stage-ui.layout-phone .board-topline .scout-resume { flex: none; min-height: 34px; font-size: 11px; padding: 3px 9px; }
+.stage-ui.layout-phone .board-topline .scout-entry span { display: none; }
+.stage-ui.layout-phone .field-caption,
+.stage-ui.layout-phone .map-coordinate { display: none; }
+.stage-ui.layout-phone .battlefield { padding: 5px; border-radius: 14px; }
+.stage-ui.layout-phone .board-half { padding: 3px 4px 3px 1px; gap: 2px; }
+.stage-ui.layout-phone .row-labels span { font-size: 9px; letter-spacing: 1px; }
+.stage-ui.layout-phone .board-divider { height: 12px; margin: 2px 4px; }
+.stage-ui.layout-phone .board-divider b { font-size: 9px; padding: 0 6px; }
+.stage-ui.layout-phone .board-grid .tile .unit-label { font-size: 8px; line-height: 12px; }
+.stage-ui.layout-phone .board-grid .tile .unit-label { display: none; }
+.stage-ui.layout-phone .context-bar {
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  transform: none;
+  width: auto;
+  max-width: none;
+  gap: 6px;
+  padding: 3px 4px;
+}
+.stage-ui.layout-phone .context-bar > img { width: 32px; height: 32px; }
+.stage-ui.layout-phone .context-main { flex: 1; }
+.stage-ui.layout-phone .context-main b { font-size: 12px; }
+.stage-ui.layout-phone .context-main small { font-size: 10px; }
+.stage-ui.layout-phone .context-actions {
+  overflow-x: auto;
+  scrollbar-width: none;
+  max-width: 62%;
+}
+.stage-ui.layout-phone .context-actions button { min-height: 40px; padding: 4px 9px; font-size: 12px; }
+.stage-ui.layout-phone .bench-area { padding: 6px 6px 8px; border-radius: 14px; gap: 4px; }
+.stage-ui.layout-phone .bench-heading button { min-height: 32px; }
+.stage-ui.layout-phone .bench-grid { scroll-snap-type: x proximity; }
+.stage-ui.layout-phone .bench-slot { scroll-snap-align: start; }
+.stage-ui.layout-phone .stage .fight-button {
+  flex-direction: column;
+  gap: 2px;
+  min-width: 78px;
+  min-height: 0;
+  padding: 6px 8px;
+  font-size: 14px;
+  border-radius: 14px;
+}
+.stage-ui.layout-phone .stage .fight-button > svg:last-child { display: none; }
+.stage-ui.layout-phone .stage .tutorial-hint { font-size: 11px; }
+.stage-ui.layout-phone .stage .tutorial-hint .hint-step { display: none; }
+
+/* dock = fixed tab bar */
+.stage-ui.layout-phone .stage-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: auto;
+  z-index: var(--z-dock, 45);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  grid-auto-flow: column;
+  gap: 2px;
+  height: calc(var(--dock-h) + env(safe-area-inset-bottom));
+  padding: 4px 6px calc(4px + env(safe-area-inset-bottom));
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -6px 18px #1b2c2440;
+}
+.stage-ui.layout-phone .dock-button { min-height: 50px; padding: 4px 0; font-size: 10px; letter-spacing: 0; }
+.stage-ui.layout-phone .dock-button svg { width: 20px; height: 20px; }
+.stage-ui.layout-phone .dock-badge { top: 1px; right: 2px; }
+
+/* drawer = bottom sheet above the tab bar */
+.stage-ui.layout-phone .stage-drawer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: auto;
+  bottom: calc(var(--dock-h) + env(safe-area-inset-bottom));
+  z-index: var(--z-sheet, 40);
+  height: var(--sheet-h, 56dvh);
+  border-radius: 18px 18px 0 0;
+  border-bottom: 0;
+  box-shadow: 0 -10px 30px #1b2c2455;
+  transition: height 0.2s ease;
+}
+.stage-ui.layout-phone .stage-drawer[data-size="peek"] { --sheet-h: var(--sheet-peek, 240px); }
+.stage-ui.layout-phone .stage-drawer[data-size="half"] { --sheet-h: var(--sheet-half, 56dvh); }
+.stage-ui.layout-phone .stage-drawer[data-size="full"] { --sheet-h: calc(100dvh - var(--dock-h) - env(safe-area-inset-bottom) - 40px); }
+.stage-ui.layout-phone .drawer-grip {
+  display: grid;
+  place-items: center;
+  height: 18px;
+  cursor: grab;
+  touch-action: none;
+}
+.stage-ui.layout-phone .drawer-grip span {
+  width: 40px;
+  height: 5px;
+  border-radius: 3px;
+  background: #c3cdb3;
+}
+.stage-ui.layout-phone .drawer-header { min-height: 44px; padding: 0 6px 4px 14px; background: none; touch-action: none; }
+.stage-ui.layout-phone .drawer-size { display: grid; }
+.stage-ui.layout-phone .stage-drawer[data-size="full"] .drawer-size svg { transform: rotate(180deg); }
+.stage-ui.layout-phone .drawer-actions .icon-button { width: 44px; height: 44px; }
+.stage-ui.layout-phone .drawer-body { padding: 8px 10px 14px; }
+
+/* phone shop: one swipeable row so the board and bench stay visible */
+.stage-ui.layout-phone .stage-drawer .shop-heading { display: none; }
+.stage-ui.layout-phone .stage-drawer .shop-controls { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+.stage-ui.layout-phone .stage-drawer .shop-controls > * { flex: none; min-height: 44px; }
+.stage-ui.layout-phone .stage-drawer .shop-controls .icon-button { width: 44px; }
+.stage-ui.layout-phone .stage-drawer .shop-grid {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 8px;
+  padding-bottom: 4px;
+}
+.stage-ui.layout-phone .stage-drawer .shop-card,
+.stage-ui.layout-phone .stage-drawer .shop-card:not(.sold) {
+  display: block;
+  flex: 0 0 116px;
+  scroll-snap-align: start;
+}
+.stage-ui.layout-phone .stage-drawer .shop-card .shop-art { min-height: 0; height: 66px; }
+.stage-ui.layout-phone .stage-drawer .shop-card .shop-art img { width: 56px; height: 56px; }
+.stage-ui.layout-phone .stage-drawer .shop-card .shop-art::before { width: 46px; height: 46px; }
+.stage-ui.layout-phone .stage-drawer .shop-card .shop-info { padding: 5px 7px 6px; }
+.stage-ui.layout-phone .stage-drawer .shop-card .shop-name { font-size: 12px; }
+.stage-ui.layout-phone .stage-drawer .shop-card .shop-move,
+.stage-ui.layout-phone .stage-drawer .shop-card .shop-skill-tags,
+.stage-ui.layout-phone .stage-drawer .shop-card .depth-merge { display: none; }
+.stage-ui.layout-phone .stage-drawer .shop-card .shop-types { margin-top: 3px; }
+.stage-ui.layout-phone .stage-drawer .shop-card.sold { flex-basis: 70px; min-height: 0; }
+.stage-ui.layout-phone .stage-drawer .shop-card.sold p { display: none; }
+.stage-ui.layout-phone .stage-drawer .shop-tip { display: none; }
+.stage-ui.layout-phone .stage-drawer[data-size="peek"] .shop-subtools { display: none; }
+.stage-ui.layout-phone .stage-drawer[data-size="peek"] .drawer-header {
+  position: absolute;
+  top: 18px;
+  right: 6px;
+  z-index: 2;
+  min-height: 0;
+  padding: 0;
+}
+.stage-ui.layout-phone .stage-drawer[data-size="peek"] .drawer-header h2,
+.stage-ui.layout-phone .stage-drawer[data-size="peek"] .drawer-size { display: none; }
+.stage-ui.layout-phone .stage-drawer[data-size="peek"] .drawer-body { padding-top: 0; }
+.stage-ui.layout-phone .stage-drawer[data-size="peek"] .shop-controls { padding-right: 52px; margin-bottom: 6px; }
+.stage-ui.layout-phone .stage-drawer[data-size="peek"] .shop-card .shop-art { height: 58px; }
+.stage-ui.layout-phone .stage-drawer[data-size="peek"] .shop-card .shop-art img { width: 50px; height: 50px; }
+.stage-ui.layout-phone .stage-drawer .upgrade-button span { display: none; }
+.stage-ui.layout-phone .stage-drawer .shop-card .shop-tier { display: none; }
+.stage-ui.layout-phone .stage-drawer .shop-card .depth-copies { left: 4px; top: 4px; bottom: auto; font-size: 10px; }
+.stage-ui.layout-phone .stage-drawer .shop-card .shop-stock { left: auto; right: 4px; bottom: 4px; }
+.stage-ui.layout-phone .stage-drawer .shop-card .shop-buy-hint { display: none; }
+
+/* phone: docked scout becomes a full sheet */
+.stage-ui.layout-phone dialog.scout-modal.docked {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 40px;
+  bottom: calc(var(--dock-h) + env(safe-area-inset-bottom));
+  width: auto;
+  max-height: none;
+  z-index: var(--z-scout-docked, 42);
+  border-radius: 18px 18px 0 0;
+  padding: 14px 12px;
+}
+
+/* draft as a bottom sheet */
+.stage-ui.layout-phone .draft-overlay { place-items: end stretch; padding: 0; }
+.stage-ui.layout-phone .draft-sheet {
+  width: 100%;
+  max-height: 82dvh;
+  border-radius: 20px 20px 0 0;
+  padding: 14px 12px calc(14px + env(safe-area-inset-bottom));
+}
+.stage-ui.layout-phone .draft-host .depth-draft-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.stage-ui.layout-phone .draft-host .depth-draft-card { min-height: 128px; }
+
+.stage-ui.layout-phone .page-footer { flex-wrap: wrap; gap: 6px; font-size: 11px; }
+
+/* phone portal nav: one compact row */
+@media (max-width: 760px) {
+  body.portal-play.stage-ui .portal-nav {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 2px 8px;
+  }
+  body.portal-play.stage-ui .portal-nav .portal-brand {
+    min-height: 44px;
+    font-size: 15px;
+  }
+  body.portal-play.stage-ui .portal-nav .portal-ball { width: 18px; height: 18px; margin-right: 6px; }
+  body.portal-play.stage-ui .portal-links {
+    margin: 0;
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    justify-content: flex-start;
+  }
+  body.portal-play.stage-ui .portal-links a {
+    min-height: 44px;
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}
+
+/* phone landscape = the primary phone mode (docs/68): an in-scene HUD.
+ *   scene (board + bench | HUD · strip · hint · fight)  |  rail
+ * The board takes the full height left of the scene zone; side sheets open from the
+ * rail over the zone (never over the board), the shop is a bottom tray whose right
+ * end meets the 商店 button at the bottom of the rail. */
+@media (max-height: 520px) and (orientation: landscape) {
+  body.portal-play.stage-ui .portal-nav { display: none; }
+  .stage-ui.layout-phone {
+    --nav-h: 0px;
+    --dock-h: 0px;
+    --rail-w: 58px;
+    --slot: 40px;
+    --tile-gap: 3px;
+    /* height left for the 6 rows after scene padding, board frame, divider and the bench row */
+    --chrome-y: 132px;
+    --tile-h: clamp(30px, calc((100dvh - var(--chrome-y)) / 6), 60px);
+    --tile-w: calc(var(--tile-h) * 1.18);
+  }
+  .stage-ui.layout-phone .rail { display: none; }
+  .stage-ui.layout-phone .app { margin-left: 0; }
+  .stage-ui.layout-phone main.stage-main,
+  .stage-ui.layout-phone.drawer-open main.stage-main {
+    padding: 6px 6px 6px calc(6px + env(safe-area-inset-left));
+  }
+  .stage-ui.layout-phone .game-layout.stage-shell,
+  .stage-ui.layout-phone .game-layout.stage-shell[data-panel=""],
+  .stage-ui.layout-phone .game-layout.scouting-open {
+    grid-template-columns: minmax(0, 1fr) var(--rail-w);
+    gap: 6px;
+    padding-right: env(safe-area-inset-right);
+  }
+  /* the scene: one grass field holding board, bench and the HUD zone */
+  .stage-ui.layout-phone .game-layout.stage-shell > .center-column.stage {
+    height: calc(100dvh - 12px);
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "board hud"
+      "board strip"
+      "board hint"
+      "bench fight";
+    gap: 6px;
+    padding: 4px;
+    border-radius: 16px;
+    background:
+      radial-gradient(circle at 80% 20%, #a6c486 0 2px, transparent 3px) 0 0 / 38px 34px,
+      linear-gradient(180deg, #86ab6c, #739a5c);
+    box-shadow: 0 0 0 1px #2c46333d;
+    overflow: hidden;
+  }
+  .stage-ui.layout-phone .stage-board { grid-area: board; }
+  .stage-ui.layout-phone .arena.stage-board { border-radius: 12px; box-shadow: none; }
+  .stage-ui.layout-phone .board-scene { height: 100%; justify-content: center; padding: 4px 6px; }
+  .stage-ui.layout-phone .battlefield { padding: 4px; }
+  .stage-ui.layout-phone .board-divider { height: 10px; margin: 1px 4px; }
+  /* HUD: top of the zone, two compact rows */
+  .stage-ui.layout-phone .stage-hud {
+    flex-wrap: wrap;
+    overflow: visible;
+    gap: 2px 10px;
+    padding: 4px 6px 4px 8px;
+    background: #22372ee6;
+  }
+  .stage-ui.layout-phone .hud-level { order: 5; flex: 1 1 150px; }
+  .stage-ui.layout-phone .hud-tools { order: 6; flex-wrap: wrap; }
+  .stage-ui.layout-phone .hud-tools .new-game-button span { display: none; }
+  .stage-ui.layout-phone .hud-tools .new-game-button { width: 34px; height: 34px; min-height: 0; padding: 0; justify-content: center; }
+  /* board strip (moved out of the board by play_layout.js): opponent, chips, scout */
+  .stage-ui.layout-phone .stage > .board-topline {
+    grid-area: strip;
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+  }
+  .stage-ui.layout-phone .stage > .board-topline .hud-chips { flex-wrap: wrap; overflow: visible; }
+  .stage-ui.layout-phone .stage > .board-topline .opponent-tag { max-width: 100%; }
+  .stage-ui.layout-phone .stage > .board-topline .opponent-tag #opponent-kind,
+  .stage-ui.layout-phone .stage > .board-topline .opponent-separator { display: inline; }
+  .stage-ui.layout-phone .stage .tutorial-hint {
+    grid-area: hint;
+    display: flex;
+    align-self: end;
+    gap: 6px;
+    padding: 6px 8px;
+    border-radius: 10px;
+    background: #f6f8eccc;
+    font-size: 11px;
+    line-height: 1.45;
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+  /* bench row under the board, fight button under the zone (thumb corner) */
+  .stage-ui.layout-phone .bench-area {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border-radius: 12px;
+  }
+  .stage-ui.layout-phone .bench-heading {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    flex: none;
+    gap: 2px;
+  }
+  .stage-ui.layout-phone .bench-heading h3 { font-size: 11px; white-space: nowrap; }
+  .stage-ui.layout-phone .bench-heading h3 span { margin-left: 2px; }
+  .stage-ui.layout-phone .bench-heading button { min-height: 22px; padding: 0 6px; font-size: 11px; }
+  .stage-ui.layout-phone .bench-heading #deploy-button svg { display: none; }
+  .stage-ui.layout-phone .bench-grid { flex: 1; grid-auto-flow: column; grid-template-columns: none; overflow-x: auto; gap: 4px; }
+  /* small landscape phones: the board alone sizes its column; the bench row scrolls */
+  @media (max-width: 760px) {
+    .stage-ui.layout-phone .bench-area { contain: inline-size; }
+    .stage-ui.layout-phone .stage .tutorial-hint { display: none; }
+    .stage-ui.layout-phone .stage > .board-topline .hud-chip,
+    .stage-ui.layout-phone .stage > .board-topline .scout-entry { min-height: 30px; padding: 2px 8px; }
+    .stage-ui.layout-phone .stage > .board-topline .opponent-tag #opponent-kind,
+    .stage-ui.layout-phone .stage > .board-topline .opponent-separator { display: none; }
+  }
+  .stage-ui.layout-phone .stage .fight-button {
+    grid-area: fight;
+    flex-direction: row;
+    align-self: stretch;
+    min-height: 48px;
+    font-size: 15px;
+  }
+  .stage-ui.layout-phone .stage .fight-button > svg:last-child { display: inline; }
+  /* rail = the dock on the right edge; 商店 sits at the bottom, next to its tray */
+  .stage-ui.layout-phone .stage-dock {
+    position: sticky;
+    top: 6px;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    height: calc(100dvh - 12px);
+    padding: 4px;
+    border-radius: 14px;
+    box-shadow: none;
+  }
+  .stage-ui.layout-phone .dock-button { flex: 1 1 0; min-height: 0; max-height: 60px; }
+  .stage-ui.layout-phone .dock-button[data-open-panel="shop"] {
+    order: 2;
+    margin-top: auto;
+    /* level with the shop tray, which sits above the bench row */
+    margin-bottom: max(0px, calc(var(--tray-bottom, 6px) - 12px));
+  }
+  /* side sheet: from the board's right edge (measured) to the rail, above the fight button */
+  .stage-ui.layout-phone .stage-drawer,
+  .stage-ui.layout-phone dialog.scout-modal.docked {
+    position: fixed;
+    top: 6px;
+    bottom: 64px;
+    left: var(--sheet-left, 46vw);
+    right: calc(var(--rail-w) + 12px + env(safe-area-inset-right));
+    width: auto;
+    height: auto;
+    max-height: none;
+    border-radius: 16px;
+    border: 1px solid #d5dec6;
+    box-shadow: 6px 0 24px #1b2c2455;
+    transition: none;
+  }
+  .stage-ui.layout-phone dialog.scout-modal.docked { margin: 0; padding: 12px; }
+  .stage-ui.layout-phone .drawer-grip,
+  .stage-ui.layout-phone .drawer-size { display: none; }
+  .stage-ui.layout-phone .drawer-header { min-height: 40px; padding: 2px 4px 2px 12px; background: #f3f6ea; }
+  .stage-ui.layout-phone .drawer-actions .icon-button { width: 40px; height: 40px; }
+  /* shop tray: just above the bench row (measured --tray-bottom), controls on the left, one row of cards */
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] {
+    top: auto;
+    bottom: var(--tray-bottom, 6px);
+    left: calc(6px + env(safe-area-inset-left));
+    height: var(--tray-h, 148px);
+    border-radius: 16px 16px 12px 12px;
+    box-shadow: 0 -8px 24px #1b2c2455;
+  }
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] .drawer-header { top: 6px; right: 6px; }
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] .drawer-body { padding: 8px 10px; overflow: hidden; }
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] #panel-shop {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    height: 100%;
+  }
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] .shop-controls {
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] .shop-controls > * { min-height: 36px; justify-content: center; }
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] .shop-grid {
+    flex-wrap: nowrap;
+    align-items: stretch;
+    padding-right: 44px;
+  }
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] .shop-card,
+  .stage-ui.layout-phone .stage-drawer[data-size="peek"] .shop-card:not(.sold) { flex: 0 0 112px; }
+  .stage-ui.layout-phone .context-bar { top: 4px; }
+}
+
+/* ------------------------------------------------------------- battle dialog on phones */
+@media (max-width: 520px) {
+  .stage-ui .battle-modal.modal {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    padding: calc(8px + env(safe-area-inset-top)) 6px calc(8px + env(safe-area-inset-bottom));
+  }
+  .stage-ui .battle-modal .modal-close { top: calc(6px + env(safe-area-inset-top)); right: 6px; width: 44px; height: 44px; }
+  .stage-ui .battle-modal-heading { margin: 0 50px 8px 4px; padding-bottom: 6px; }
+  .stage-ui .battle-modal-heading .eyebrow { display: none; }
+  .stage-ui .battle-modal-heading h2 { font-size: 17px; margin-top: 0; }
+  .stage-ui .battle-scoreboard { padding-bottom: 6px; }
+  .stage-ui .battle-screen { border-radius: 6px; }
+  .stage-ui .battle-transport { padding: 6px 8px; }
+  .stage-ui .playback-controls .secondary-button,
+  .stage-ui .playback-controls .text-button { min-height: 40px; }
+  .stage-ui .battle-footer-actions {
+    position: sticky;
+    bottom: calc(-8px - env(safe-area-inset-bottom));
+    z-index: 3;
+    margin: 8px -6px 0;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+    background: var(--paper);
+    border-top: 1px solid var(--line);
+  }
+  .stage-ui .battle-footer-actions .primary-button,
+  .stage-ui .battle-footer-actions .text-button { min-height: 44px; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  .stage-ui .battle-modal.modal {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100dvh;
+    height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+    padding: 6px 10px;
+  }
+  .stage-ui .battle-modal-heading,
+  .stage-ui .battle-scoreboard { display: none; }
+  .stage-ui .battle-screen canvas { max-height: calc(100dvh - 120px); width: auto; max-width: 100%; margin: 0 auto; display: block; }
+}

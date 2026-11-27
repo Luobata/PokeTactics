@@ -47,7 +47,7 @@ html.app-installed.orient-landscape body.stage-ui .app {
 /* "新版本已就绪" notice after the Service Worker swaps versions */
 .app-update {
   position: fixed;
-  z-index: 120;
+  z-index: var(--z-app-update, 120);
   left: 50%;
   top: calc(env(safe-area-inset-top) + 10px);
   transform: translateX(-50%);

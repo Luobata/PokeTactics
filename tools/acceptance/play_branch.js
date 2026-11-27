@@ -129,6 +129,6 @@
     }
     if (openFid != null) sheet();
   }
-  window.PlayBranch = {render, open, close, groups,
+  window.PlayBranch = {render, open, close, groups, isOpen: () => openFid != null,
     readyFor: (uid) => groups().find((g) => g.units.some((u) => u.p.uid === uid)) || null};
 })();

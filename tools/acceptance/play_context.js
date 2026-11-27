@@ -406,6 +406,7 @@
     const back = view.returnFocus;
     view.target?.el?.classList?.remove?.("ctx-target");
     view = null;
+    eatClick = false; // a pending "eat the release click" must not outlive the menu
     if (menu) menu.hidden = true;
     if (backdrop) backdrop.hidden = true;
     document.body.classList.remove("ctx-open");
@@ -524,6 +525,10 @@
     if (eatClick) suppressClickUntil = Date.now() + 400;
     eatClick = false;
   }, true);
+  // The browser took the touch over (text selection, scroll, its own long-press):
+  // no release click is coming, so there is nothing to eat. Leaving the flag set
+  // swallowed the player's next tap anywhere (mobile audit H4, docs/74).
+  document.addEventListener("pointercancel", () => { eatClick = false; }, true);
   const cancelPress = (event) => {
     if (!press) return;
     if (event?.type === "pointermove" && Math.hypot(event.clientX - press.x, event.clientY - press.y) < 10) return;

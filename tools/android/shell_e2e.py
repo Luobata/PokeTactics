@@ -117,8 +117,10 @@ class ShellRun(base.Run):
         raise E2EFailure(f"no App log line matching {pattern!r} (saw {seen[-5:]})")
 
     def focus(self) -> str:
+        # Several displays each print a line; a cloud phone's virtual display reports null first.
         out = self.adb.shell("dumpsys window | grep -E 'mCurrentFocus='", check=False)
-        return out.strip().splitlines()[0] if out.strip() else ""
+        lines = [ln.strip() for ln in out.splitlines() if ln.strip()]
+        return next((ln for ln in lines if not ln.endswith("=null")), lines[0] if lines else "")
 
     def in_game(self) -> bool:
         return f"{PKG}/" in self.focus() or f"{PKG}/{PKG}" in self.focus()
@@ -354,6 +356,120 @@ class ShellRun(base.Run):
             time.sleep(1.5)
         page.wait("!document.querySelector('dialog[open]')", 15, "no dialog open")
 
+    # ------------------------------------------------------------ phone UX (docs/74)
+    def screen_point(self, page: Page, selector: str) -> tuple[int, int]:
+        """Centre of an element in physical screen pixels (WebView fills the window under the cutout band)."""
+        box = page.eval(f"(() => {{ const el = {VISIBLE}({json.dumps(selector)}); if (!el) return null;"
+                        " const r = el.getBoundingClientRect();"
+                        " return {x: r.left + r.width / 2, y: r.top + r.height / 2, dpr: devicePixelRatio, ih: innerHeight}; })()")
+        if not box:
+            raise E2EFailure(f"no visible {selector}")
+        screen_h = int(self.summary["device"]["screen"].split("x")[1])
+        offset = round(screen_h - box["ih"] * box["dpr"])
+        return round(box["x"] * box["dpr"]), round(box["y"] * box["dpr"]) + offset
+
+    def finger_drag(self, start: tuple[int, int], end: tuple[int, int]) -> None:
+        """A real finger drag (input motionevent): straight up first, then over to the target."""
+        (x0, y0), (x1, y1) = start, end
+        steps = [(x0, y0 - 25), (x0 + 2, y0 - 55), (x0 + 6, y0 - 90)]
+        steps += [(round(x0 + (x1 - x0) * k / 6), round(y0 - 90 + (y1 - y0 + 90) * k / 6)) for k in range(1, 7)]
+        cmds = [f"input motionevent DOWN {x0} {y0}"] + [f"input motionevent MOVE {x} {y}" for x, y in steps]
+        self.adb.shell("; ".join(cmds))
+        time.sleep(0.25)
+        self.shot("drag-in-flight")
+        self.adb.shell(f"input motionevent MOVE {x1} {y1}; input motionevent UP {x1} {y1}")
+
+    def phone_ux_tests(self, page: Page) -> None:
+        layout = page.eval("""(() => {
+          const hud = document.querySelector('.stage-hud').getBoundingClientRect();
+          const menu = document.getElementById('menu-button').getBoundingClientRect();
+          return {nav: getComputedStyle(document.querySelector('.portal-nav') || document.body).display,
+                  tools: getComputedStyle(document.querySelector('.hud-tools')).display,
+                  hudHeight: Math.round(hud.height), menu: [Math.round(menu.width), Math.round(menu.height)],
+                  tileH: window.PlayPhone?.status.tileH};
+        })()""")
+        self.check("phone HUD: site nav and tool row hidden, one-row HUD with a menu button",
+                   layout["nav"] == "none" and layout["tools"] == "none" and layout["hudHeight"] <= 58
+                   and layout["menu"][0] >= 40 and layout["menu"][1] >= 36, **layout)
+        # Shop: the sheet stops under the bench; the selected card carries its own recruit button.
+        self.open_shop(page)
+        gold = int(page.eval("document.getElementById('gold').textContent"))
+        index = page.eval(f"(() => {{ const cards = [...document.querySelectorAll('#shop [data-shop]')];"
+                          f" const ok = cards.find((c) => !c.disabled && Number((c.getAttribute('aria-label') || '').match(/(\\d+)金币/)?.[1] ?? 99) <= {gold});"
+                          " return ok ? ok.dataset.shop : null; })()")
+        if index is None:
+            raise E2EFailure("no affordable shop card for the quick-buy check")
+        bench_before = page.eval("document.querySelectorAll('#bench [data-uid]').length")
+        page.tap(f'#shop [data-shop="{index}"]')
+        page.wait(f"!!{VISIBLE}('.shop-quick-buy')", 8, "recruit button on the selected shop card")
+        geo = page.eval("""(() => { const b = document.querySelector('.shop-quick-buy').getBoundingClientRect();
+          const sheet = document.getElementById('stage-drawer').getBoundingClientRect();
+          const bench = document.querySelector('.bench-area').getBoundingClientRect();
+          return {button: [Math.round(b.width), Math.round(b.height)], inSheet: b.top >= sheet.top,
+                  benchBottom: Math.round(bench.bottom), sheetTop: Math.round(sheet.top)}; })()""")
+        self.check("shop sheet leaves the bench uncovered; recruit button sits in the sheet",
+                   geo["inSheet"] and geo["benchBottom"] <= geo["sheetTop"] + 1 and geo["button"][1] >= 40,
+                   **geo, shot=self.shot("ux-shop-quick-buy"))
+        page.tap(".shop-quick-buy")
+        page.wait(f"document.querySelectorAll('#bench [data-uid]').length > {bench_before}", 15, "quick-buy recruited")
+        self.log("quick buy", gold=[gold, page.eval("document.getElementById('gold').textContent")])
+        # Touch drag with a real finger: bench → an empty board cell (or another bench slot when the board is full).
+        unit = page.eval("[...document.querySelectorAll('#bench [data-uid]')].pop().dataset.loc")
+        full = page.eval("(() => { const [a, b] = document.getElementById('pop').textContent.split('/').map(Number); return a >= b; })()")
+        target = page.eval("(() => { const cells = [...document.querySelectorAll(" + json.dumps(
+            "#bench [data-loc]:not([data-uid])" if full else "#ally-board [data-loc]:not([data-uid])")
+            + ")]; return cells[Math.floor(cells.length / 2)]?.dataset.loc || null; })()")
+        page.tap("[data-close-panel]")
+        page.wait("!document.body.classList.contains('drawer-open')", 8, "shop closed for the drag")
+        time.sleep(0.4)
+        self.finger_drag(self.screen_point(page, f'#bench [data-loc="{unit}"]'), self.screen_point(page, f'[data-loc="{target}"]'))
+        page.wait(f"!!document.querySelector('[data-loc=\"{target}\"]').dataset.uid", 10, "unit dropped by touch drag")
+        self.check("touch drag moves a unit with a real finger", page.eval("PlayPhone.status.moves") >= 1,
+                   source=unit, target=target, status=page.eval("PlayPhone.status"), shot=self.shot("ux-dragged"))
+        # Long press → menu, no text selection; back closes it; the very next tap works (audit H4).
+        x, y = self.screen_point(page, f'[data-loc="{target}"]')
+        self.adb.shell(f"input swipe {x} {y} {x} {y} 1100")
+        page.wait("window.PlayContext?.isOpen()", 6, "long-press menu")
+        selected = page.eval("getSelection().toString()")
+        shot = self.shot("ux-long-press")
+        self.new_log()
+        self.back_key()
+        self.wait_log(r"back -> ", 8)
+        time.sleep(0.5)
+        closed = page.eval("PokeTacticsShell.status.last")
+        bx, by = self.screen_point(page, '.dock-button[data-open-panel="bonds"]')
+        self.adb.shell(f"input tap {bx} {by}")
+        time.sleep(1.0)
+        opened = page.eval("PlayLayout.current()")
+        self.check("long press: menu without text selection; back closes it; next tap is not swallowed",
+                   selected == "" and closed.get("changed") == ["context-menu"] and opened == "bonds",
+                   selection=selected, closed=closed, opened=opened, shot=shot)
+        self.back_key()
+        self.wait_log(r"back -> ", 8)
+        # Menu sheet: labelled rows, toggles mirror the HUD buttons, back closes it.
+        mx, my = self.screen_point(page, "#menu-button")
+        self.adb.shell(f"input tap {mx} {my}")
+        page.wait("PlayPhone.menuOpen()", 6, "menu sheet")
+        before = page.eval("document.getElementById('vibrate-button')?.getAttribute('aria-pressed')")
+        shot = self.shot("ux-menu")
+        if page.eval(f"!!{VISIBLE}('[data-menu-proxy=\"vibrate-button\"]')"):
+            page.tap('[data-menu-proxy="vibrate-button"]')
+            time.sleep(0.4)
+            flipped = page.eval("document.getElementById('vibrate-button').getAttribute('aria-pressed')")
+            page.tap('[data-menu-proxy="vibrate-button"]')
+            time.sleep(0.4)
+        else:
+            flipped = None
+        self.new_log()
+        self.back_key()
+        line = self.wait_log(r"back -> ", 8)
+        time.sleep(0.4)
+        self.check("menu sheet: toggles drive the real buttons; back closes it",
+                   not page.eval("PlayPhone.menuOpen()") and "closed an overlay" in line
+                   and (flipped is None or flipped != before)
+                   and page.eval("document.getElementById('vibrate-button')?.getAttribute('aria-pressed')") == before,
+                   vibrate=[before, flipped], closed=page.eval("PokeTacticsShell.status.last"), shot=shot)
+
     def back_tests(self, page: Page) -> None:
         start = self.page_state()
         self.new_log()
@@ -482,6 +598,7 @@ class ShellRun(base.Run):
             self.guide_back(page)
             self.play_round(page)
             self.settle(page)
+            self.phone_ux_tests(page)
             self.back_tests(page)
             self.new_log()
             vibes = [l.split(": ", 1)[-1] for l in self.all_lines if "vibrate [" in l]

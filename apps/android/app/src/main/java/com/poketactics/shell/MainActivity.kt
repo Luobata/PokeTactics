@@ -116,7 +116,8 @@ class MainActivity : ComponentActivity() {
     private fun buildViews() {
         root = FrameLayout(this).apply {
             id = R.id.shell_root
-            setBackgroundColor(getColor(R.color.pt_background))
+            // Shows only in the cutout band (padding below): match the game's HUD, not black.
+            setBackgroundColor(getColor(R.color.pt_letterbox))
         }
         webView = newWebView()
         loading = TextView(this).apply {
