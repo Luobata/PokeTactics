@@ -235,7 +235,15 @@ class ShellRun(base.Run):
             self.log("settings", url=self.args.url, shot=self.shot("settings"))
             self.tap_view("settings_save", PKG + "/")
             self.wait_log(r"load " + re.escape(self.args.url), 15)
-            self.wait_log(r"page ready", 60)
+            try:
+                self.wait_log(r"page ready", 45)
+            except E2EFailure:
+                # Cloud phones: the VPN relay now and then stalls one TCP stream (often the
+                # largest script); a WebView reload reuses the stuck socket, a relaunch does not.
+                self.log("page load stalled; relaunching the App once", shot=self.shot("stalled"))
+                self.adb.shell(f"am force-stop {PKG}")
+                self.adb.shell(f"am start -W -n {ACTIVITY}", timeout=60)
+                self.wait_log(r"page ready", 60)
         self.summary["loaded_via_settings"] = "error page" in line
 
     def attach(self) -> Page:

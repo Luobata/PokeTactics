@@ -346,3 +346,25 @@ body.portal-play.stage-ui.layout-phone .portal-nav { display: none; }
 }
 .stage-ui .battle-verdict .verdict-hp[hidden] { display: none; }
 .stage-ui .battle-verdict .verdict-hp.lost { color: #ffd2c9; }
+
+/* ------------------------------------------------------------- M11: waiting for the server */
+/* Touch has no progress cursor: after 0.7 s of a pending request say so under the HUD.
+ * play.js already aborts a request after 12 s and offers 「继续存档」. */
+.stage-ui.layout-phone .stage-hud::after {
+  content: "同步中…";
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 4px);
+  z-index: 4;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #22372ee6;
+  color: #eef4df;
+  font: 600 var(--fs-xs, 11px)/16px var(--body, inherit);
+  transform: translateX(-50%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.stage-ui.layout-phone.is-busy .stage-hud::after { animation: pm-busy 0s linear .7s forwards; }
+@keyframes pm-busy { to { opacity: 1; visibility: visible; } }
