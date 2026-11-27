@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="pt_background">#FF10141C</color>
-    <!-- Camera-cutout band above the WebView: the game HUD's dark green (play_tokens.css --app-letterbox, docs/74). -->
+    <!-- Camera-cutout band above the WebView: the game HUD's dark green (play_tokens.css app-letterbox token, docs/74). -->
     <color name="pt_letterbox">#FF14231B</color>
     <color name="pt_text">#FFE8ECF4</color>
     <color name="pt_accent">#FF2F6FDE</color>
