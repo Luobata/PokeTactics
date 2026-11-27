@@ -1,7 +1,7 @@
 /* Context menu / phone action sheet (docs/70). One reusable #ctx-menu. */
 .ctx-menu {
   position: fixed;
-  z-index: 90;
+  z-index: var(--z-ctx, 90);
   min-width: 212px;
   max-width: 300px;
   max-height: min(70vh, 520px);
@@ -91,7 +91,7 @@
 .ctx-target { outline: 2px dashed #e0703a; outline-offset: 2px; }
 
 /* Phones: bottom action sheet with the preview card on top. */
-.ctx-backdrop { position: fixed; inset: 0; z-index: 89; background: #0f1a1466; }
+.ctx-backdrop { position: fixed; inset: 0; z-index: var(--z-ctx-backdrop, 89); background: #0f1a1466; }
 .ctx-menu.as-sheet {
   left: 0;
   right: 0;
@@ -132,7 +132,7 @@
 }
 
 /* free undo after a menu equip */
-.cx-undo { position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 75;
+.cx-undo { position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: var(--z-undo, 75);
   display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 16px; border-radius: 14px; background: #22372ef2; color: #f3f4da;
   font-size: 13px; font-weight: 700; box-shadow: 0 10px 28px rgba(0, 0, 0, .3); animation: cx-undo-in .16s ease-out; }
 .cx-undo[hidden] { display: none; }

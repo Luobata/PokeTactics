@@ -1690,7 +1690,7 @@ main {
   font-size: 12px;
   max-width: min(550px, 85vw);
   text-align: center;
-  z-index: 100;
+  z-index: var(--z-toast, 100);
   box-shadow: 0 6px 30px #1c362b30;
   opacity: 0;
   pointer-events: none;

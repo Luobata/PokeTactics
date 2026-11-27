@@ -16,6 +16,7 @@
  * its phone action sheet. */
 (function () {
   "use strict";
+  const touchScreen = () => Boolean(window.matchMedia?.("(pointer: coarse)")?.matches);
   const $ = (id) => document.getElementById(id);
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (ch) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[ch]));
@@ -202,9 +203,11 @@
     const texts = [skill?.description, p.trait?.description, ...items.map(([, e]) => e), role];
     const price = shop != null ? `<span class="pv-price">${Number(p.price)} 金</span>` : "";
     const merge = shop != null ? (p.merge_note || (p.star_progress?.merges_now ? `买下即升 ${Number(p.star_progress.next_star) || 2}★` : "")) : "";
+    // Touch screens have no right click (mobile audit L1): name the gesture they have.
+    const more = touchScreen() ? "长按更多" : "右键/长按更多";
     const hint = owner === "enemy" ? "点击侦察完整情报"
-      : shop != null ? "点击选中 · 双击招募 · 右键更多"
-        : `点击选中 · 双击${loc?.[0] === "b" ? "上场" : "下场"} · 右键/长按更多`;
+      : shop != null ? `点击选中 · 双击招募 · ${more}`
+        : `点击选中 · 双击${loc?.[0] === "b" ? "上场" : "下场"} · ${more}`;
     return `<header class="pv-head"><img src="${esc(sprite(p))}" alt=""><span><b>${esc(p.name)} <em>${stars(p)}</em></b><small>${owner === "enemy" ? "敌方 · " : shop != null ? `${Number(p.tier || p.price)} 费 · ` : loc?.[0] === "b" ? "备战席 · " : ""}${role} · ${p.ranged ? "远程" : "近战"} ${Number(p.range) || 1} 格</small></span>${price}</header>
       <div class="pv-types">${typeTags(p.types)}${merge ? `<span class="pv-merge">⇪ ${esc(merge)}</span>` : ""}${p.pool_remaining != null ? `<span class="pv-pool">池剩 ${Number(p.pool_remaining)}</span>` : ""}</div>
       ${skill?.name ? `<p class="pv-line"><i>本命</i><b>${esc(skill.name)}</b>${esc(short(skill.description, 110))}</p>` : ""}
@@ -231,7 +234,7 @@
       ${guide?.awaken ? `<p class="pv-line"><i>觉醒</i>${esc(short(guide.awaken, 90))}</p>` : ""}
       ${carriers ? `<p class="pv-line"><i>推荐</i>${carriers}</p>` : ""}
       ${termsFooter([effect, guide?.awaken || "", ...lines, guide?.playstyle || ""])}
-      <p class="pv-hint">右键 / 长按：装给推荐携带者、拆解、出售</p>`;
+      <p class="pv-hint">${touchScreen() ? "长按" : "右键 / 长按"}：装给推荐携带者、拆解、出售</p>`;
   }
   function tmCard(key) {
     const s = S();

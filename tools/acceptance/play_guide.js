@@ -16,7 +16,7 @@
   const owned = (s) => [...(s?.board || []).flat(), ...(s?.bench || [])].filter(Boolean).length;
   const STEPS = [
     {title: "招募伙伴", targets: ["#shop .shop-card[data-shop]", '#stage-dock [data-open-panel="shop"]'],
-      text: "点商店卡片查看它的技能和特性，双击卡片直接招募。金币每轮发放，存着还有利息。",
+      text: "点商店卡片查看它的技能和特性，再点「招募」（或双击卡片）把它招进备战席。金币每轮发放，存着还有利息。",
       done: (s, start) => owned(s) > start.owned},
     {title: "上场布阵", targets: ["#bench [data-owned]", "#bench"],
       text: "点备战席的精灵，再点棋盘格上场；双击精灵直接上到合适的位置，也可以拖动。再点一次取消选择。",

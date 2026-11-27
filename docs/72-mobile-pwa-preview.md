@@ -175,7 +175,7 @@ BYTEDCLI_CLOUD_SITE=cn rax dora release <serial> --json
   （震动开关与节流、Wake Lock 获取 / 重获 / 释放、SW 注册与安装按钮、SW 路由只缓存静态资源、版本替换与离线外壳、渲染器提示只在正向播放时派发）。
 * 真机：Pixel 9a / Android 15 / Chrome 157（Dora 云真机）跑通一整回合、安装与全屏打开；证据见 PR 与 `reports/evidence/mobile-pwa-2026-11-27/`。
 * 已知限制：
-  * Chrome 标签页模式下（地址栏占高度，视口高度约 ≤ 780px），商店「peek」弹层会盖住备战席，需要先收起商店再点备战席（main 上同样如此，与本次改动无关）；
+  * Chrome 标签页模式下（地址栏占高度，视口高度约 ≤ 780px），商店「peek」弹层会盖住备战席，需要先收起商店再点备战席（main 上同样如此，与本次改动无关）；→ 已在 [docs/74](74-mobile-ux-polish.md) 解决（隐藏站点导航、一行 HUD、格子高度按剩余空间计算）；
     安装后的全屏 App 视口更高（Pixel 9a 为 923px），不受影响。
   * 内网 IP 的 HTTP 地址不能安装 / 不能用 SW 与防熄屏，需 HTTPS + 信任 CA 或方案 B。
   * 证书信任步骤在真机上需要人工操作；云真机不能自动化系统设置（uiautomator 被禁用），这一步未在云真机上实测，已用 openssl / Python TLS 客户端验证证书链与名称约束。

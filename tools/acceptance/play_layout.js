@@ -542,5 +542,6 @@
     });
   }
 
-  window.PlayLayout = {render, open, close, toggle, current: () => current, size: () => size, isPhone, isLandscape};
+  window.PlayLayout = {render, open, close, toggle, current: () => current, size: () => size, isPhone, isLandscape,
+    measure: measureSheet};
 })();

@@ -105,7 +105,7 @@ SHELL_URL=http://10.37.30.198:8899/play tools/android/build.sh   # 换默认地�
   * APK `http://<开发机IP>:8820/app/PokeTactics.apk`（`application/vnd.android.package-archive`）。
   * 用 http 8820 是为了手机浏览器不需要先信任 CA 就能下载；装好后 App 自己用 https 8821。
 
-### 常驻预览现在跟随本分支
+### 常驻预览现在跟随本分支（2026-11-27 合并后已改回 main，见 docs/74 §7）
 
 `/app` 路由与 `--app-dir` 在本分支里，`main` 上的服务端还没有。为了让手机现在就能下载、App 默认地址就有返回钩子，
 常驻预览的配置改成了 `PREVIEW_BRANCH=feat/android-shell`（`~/.config/poketactics-preview/env`，已重新执行 `install.sh`），
@@ -179,4 +179,4 @@ logcat 是环形缓冲，脚本按行内容而不是行号去重。
   手机上 APK 的 SHA-256 与服务器一致），没有写进脚本。
 * 默认地址是本机局域网 IP；换机器或 IP 后需要重新 `build.sh`（或在设置页改地址）。VPN 用户需在设置页改成 VPN 地址。
 * debug 构建（可远程调试 WebView）：只用于内网预览，不要上架或外发；PMD 精灵仅限非商业使用（见 README「来源与边界」）。
-* 预览服务目前跟随 `feat/android-shell`（§5），合并后记得改回 `main`。
+* ~~预览服务目前跟随 `feat/android-shell`（§5），合并后记得改回 `main`。~~ 2026-11-27 已改回 `main`（[docs/74](74-mobile-ux-polish.md) §7）。

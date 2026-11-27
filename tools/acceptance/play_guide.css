@@ -1,7 +1,7 @@
 /* First-run guide coach marks (docs/70). The ring is click-through. */
 .guide-ring {
   position: fixed;
-  z-index: 86;
+  z-index: var(--z-guide, 86);
   border-radius: 14px;
   border: 2px solid #f2b23a;
   box-shadow: 0 0 0 4px #f2b23a55, 0 0 0 200vmax #0f1a1452;
@@ -10,7 +10,7 @@
 }
 .guide-bubble {
   position: fixed;
-  z-index: 87;
+  z-index: var(--z-guide-card, 87);
   width: min(320px, calc(100vw - 16px));
   padding: 12px 14px 10px;
   border-radius: 14px;

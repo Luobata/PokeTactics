@@ -181,12 +181,15 @@
   };
 
   function toast(message, error = false) {
+    // Phones (docs/74) shorten or drop pure confirmations; 0 = do not show.
+    const hold = window.PlayPhone?.toastHold?.(String(message), error) ?? 3600;
+    if (!(hold > 0)) return;
     $("toast").textContent = message;
     $("toast").className = `toast show${error ? " error" : ""}`;
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
       $("toast").className = "toast";
-    }, 3600);
+    }, hold);
   }
   function tone(success = true) {
     if (!sound) return;
@@ -582,9 +585,15 @@
     const info = needsResume || equipItem ? "" : selectionInfo();
     const prefix = shopSelected != null && info ? "已选中商店伙伴 · " : "";
     $h("tutorial-hint").innerHTML = info ? `${prefix}${info}` : esc(hintText());
-    setText(document.querySelector(".hint-step"), shopSelected != null ? "双击卡片招募 · 再点取消 · 右键更多 · Esc 取消"
-      : selected ? `双击${selected[0] === "b" ? "上场" : "下场"} · 再点取消 · 右键/长按更多 · Esc 取消`
-        : "拖动或先点精灵再点格子布阵 · 右键/长按更多操作 · 空格开战");
+    // Touch screens: no right click, no keyboard (mobile audit L1).
+    const touch = Boolean(window.matchMedia?.("(pointer: coarse)")?.matches);
+    setText(document.querySelector(".hint-step"), touch
+      ? (shopSelected != null ? "点「招募」或双击卡片 · 再点取消 · 长按更多"
+        : selected ? `双击${selected[0] === "b" ? "上场" : "下场"} · 再点取消 · 长按更多`
+          : "拖动或先点精灵再点格子布阵 · 长按更多操作")
+      : shopSelected != null ? "双击卡片招募 · 再点取消 · 右键更多 · Esc 取消"
+        : selected ? `双击${selected[0] === "b" ? "上场" : "下场"} · 再点取消 · 右键/长按更多 · Esc 取消`
+          : "拖动或先点精灵再点格子布阵 · 右键/长按更多操作 · 空格开战");
   }
   // Pure UI state: toggle classes on the existing tiles / cards (no rebuild).
   function syncSelection() {
@@ -632,6 +641,12 @@
       selected = null; shopSelected = null; equipItem = null; renderSelection();
     },
     quickPlace: (loc) => canPrep() && pieceAt(loc) ? quickPlace(loc, pieceAt(loc)) : null,
+    // Touch drag (play_phone.js, docs/74): the same move as a mouse drop.
+    move(from, to) {
+      if (!canPrep() || !from || !to || from === to || !pieceAt(from)) return null;
+      selected = null; shopSelected = null; equipItem = null;
+      return api("move", { from, to });
+    },
     bestBoardCell: (p) => bestBoardCell(p),
     buyAndPlace: (i) => buyAndPlace(i),
     autoDeploy: () => autoDeploy(),
@@ -659,6 +674,8 @@
     window.PlayFeedback?.selection({selected, shopSelected, equipItem});
   }
   function renderHelpers(ctx) {
+    window.PlayOverlay?.render(ctx);
+    window.PlayPhone?.render(ctx);
     window.PlayContext?.render(ctx);
     window.PlayPreview?.render(ctx);
     window.PlayGuide?.render(ctx);

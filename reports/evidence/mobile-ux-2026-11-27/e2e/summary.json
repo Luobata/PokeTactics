@@ -1,0 +1,783 @@
+{
+  "ok": true,
+  "via": "shell",
+  "steps": [
+    {
+      "step": "device",
+      "t": 0.3,
+      "model": "Pixel 9a",
+      "manufacturer": "Google",
+      "android": "15",
+      "sdk": "35",
+      "chrome": "158.0.8127.42",
+      "screen": "1080x2424"
+    },
+    {
+      "step": "ok  apk downloadable from the preview",
+      "t": 1.6,
+      "url": "http://127.0.0.1:8830/app/PokeTactics.apk",
+      "bytes": 2714467,
+      "contentType": "application/vnd.android.package-archive"
+    },
+    {
+      "step": "installed",
+      "t": 2.3,
+      "version": "1.0.139"
+    },
+    {
+      "step": "ok  gesture navigation on for the swipe tests",
+      "t": 5.6,
+      "before": "0",
+      "now": "2"
+    },
+    {
+      "step": "error page",
+      "t": 21.7,
+      "line": "error page: 连接超时（15 秒）：确认手机连着公司内网 / VPN",
+      "shot": "01-error-page.png"
+    },
+    {
+      "step": "tether bound",
+      "t": 21.8,
+      "phone": "localhost:8851",
+      "server": "127.0.0.1:8830"
+    },
+    {
+      "step": "ok  settings page opened from the error page",
+      "t": 28.6,
+      "focus": "mCurrentFocus=Window{823a8f u0 com.poketactics.shell/com.poketactics.shell.SettingsActivity}"
+    },
+    {
+      "step": "settings",
+      "t": 29.8,
+      "url": "http://localhost:8851/play",
+      "shot": "02-settings.png"
+    },
+    {
+      "step": "ok  audio running without a tap",
+      "t": 37.5,
+      "music": "running",
+      "enabled": true,
+      "unlocked": true,
+      "inShell": true,
+      "shellClass": true,
+      "ua": true
+    },
+    {
+      "step": "game opened",
+      "t": 38.1,
+      "shot": "03-game-opened.png"
+    },
+    {
+      "step": "ok  status bar and navigation bar hidden",
+      "t": 38.5,
+      "window": {
+        "statusBars": "false",
+        "navigationBars": "false"
+      },
+      "app": "insets statusBars=false navigationBars=false cutoutTop=152"
+    },
+    {
+      "step": "ok  screen kept on",
+      "t": 38.7,
+      "flags": "KEEP_SCREEN_ON LAYOUT_IN_SCREEN FULLSCREEN LAYOUT_INSET_DECOR SPLIT_TOUCH HARDWARE_ACCELERATED DRAWS_SYSTEM_BAR_BACKGROUNDS"
+    },
+    {
+      "step": "ok  edge guard bands set",
+      "t": 38.7,
+      "bands": [
+        [
+          0,
+          949,
+          78,
+          1474
+        ],
+        [
+          1002,
+          949,
+          1080,
+          1474
+        ]
+      ]
+    },
+    {
+      "step": "ok  vibration reaches the native Vibrator",
+      "t": 39.0,
+      "log": "vibrate [28]"
+    },
+    {
+      "step": "ok  portrait locked under forced rotation",
+      "t": 44.7,
+      "viewport": [
+        270,
+        607
+      ],
+      "display": "landscape-primary",
+      "shot": "04-forced-landscape.png"
+    },
+    {
+      "step": "opened",
+      "t": 46.3,
+      "round": "01",
+      "gold": "7",
+      "secure": true,
+      "mode": "browser",
+      "manifest": true,
+      "sw": "active",
+      "shot": "05-opened.png"
+    },
+    {
+      "step": "augment picked",
+      "t": 47.6,
+      "at": {
+        "x": 205.71429443359375,
+        "y": 429,
+        "w": 357.4285888671875,
+        "h": 48
+      },
+      "shot": "06-augment.png"
+    },
+    {
+      "step": "shop card selected",
+      "t": 48.8,
+      "card": "0",
+      "shot": "07-shop-selected.png"
+    },
+    {
+      "step": "bought",
+      "t": 49.8,
+      "gold": [
+        7,
+        6
+      ],
+      "shot": "08-bought.png"
+    },
+    {
+      "step": "placed",
+      "t": 51.4,
+      "bench": "b0",
+      "cell": "g0,0",
+      "pop": [
+        "0/4",
+        "1/4"
+      ],
+      "shot": "09-placed.png"
+    },
+    {
+      "step": "battle playing",
+      "t": 55.9,
+      "wakeLock": true,
+      "wakeLockError": null,
+      "canvas": [
+        2520,
+        1680
+      ],
+      "clock": "00:02.8",
+      "shot": "10-battle.png"
+    },
+    {
+      "step": "ok  back during the battle: 「退出游戏？」 shown, App still in front",
+      "t": 57.8,
+      "focus": "mCurrentFocus=Window{1cd0882 u0 com.poketactics.shell/com.poketactics.shell.MainActivity}"
+    },
+    {
+      "step": "battle exit dialog",
+      "t": 58.1,
+      "shot": "11-battle-back-dialog.png"
+    },
+    {
+      "step": "ok  back during the battle keeps the battle",
+      "t": 59.1,
+      "state": {
+        "url": "http://localhost:8851/play",
+        "history": 1,
+        "shop": true,
+        "battle": true,
+        "backs": 1,
+        "closed": 0
+      }
+    },
+    {
+      "step": "verdict",
+      "t": 59.6,
+      "verdict": "回合失利",
+      "haptics": {
+        "cues": 1,
+        "vibrations": [
+          "super",
+          "ult"
+        ]
+      },
+      "shot": "12-verdict.png"
+    },
+    {
+      "step": "round 2",
+      "t": 61.1,
+      "wakeLockAfterBattle": false,
+      "shot": "13-round2.png"
+    },
+    {
+      "step": "ok  phone HUD: site nav and tool row hidden, one-row HUD with a menu button",
+      "t": 62.7,
+      "nav": "none",
+      "tools": "none",
+      "hudHeight": 46,
+      "menu": [
+        68,
+        38
+      ],
+      "tileH": 54
+    },
+    {
+      "step": "ok  shop sheet leaves the bench uncovered; recruit button sits in the sheet",
+      "t": 64.2,
+      "button": [
+        104,
+        40
+      ],
+      "inSheet": true,
+      "benchBottom": 594,
+      "sheetTop": 596,
+      "shot": "14-ux-shop-quick-buy.png"
+    },
+    {
+      "step": "quick buy",
+      "t": 64.5,
+      "gold": [
+        12,
+        "11"
+      ]
+    },
+    {
+      "step": "ok  touch drag moves a unit with a real finger",
+      "t": 67.6,
+      "source": "b0",
+      "target": "g1,3",
+      "status": {
+        "drags": 1,
+        "moves": 1,
+        "quickBuys": 1,
+        "lastToastHold": 1800,
+        "tileH": 54
+      },
+      "shot": "16-ux-dragged.png"
+    },
+    {
+      "step": "ok  long press: menu without text selection; back closes it; next tap is not swallowed",
+      "t": 73.0,
+      "selection": "",
+      "closed": {
+        "via": "overlay",
+        "changed": [
+          "context-menu"
+        ],
+        "top": null
+      },
+      "opened": "bonds",
+      "shot": "17-ux-long-press.png"
+    },
+    {
+      "step": "ok  menu sheet: toggles drive the real buttons; back closes it",
+      "t": 81.0,
+      "vibrate": [
+        "true",
+        "false"
+      ],
+      "closed": {
+        "via": "overlay",
+        "changed": [
+          "menu"
+        ],
+        "top": null
+      },
+      "shot": "18-ux-menu.png"
+    },
+    {
+      "step": "shop drawer open",
+      "t": 84.2,
+      "shot": "19-back-shop-open.png"
+    },
+    {
+      "step": "ok  back key closes the shop drawer",
+      "t": 86.0,
+      "log": "back -> page closed an overlay",
+      "state": {
+        "url": "http://localhost:8851/play",
+        "history": 1,
+        "shop": false,
+        "battle": false,
+        "backs": 5,
+        "closed": 4
+      },
+      "closed": {
+        "via": "overlay",
+        "changed": [
+          "sheet"
+        ],
+        "top": null
+      }
+    },
+    {
+      "step": "after back",
+      "t": 86.8,
+      "shot": "20-back-shop-closed.png"
+    },
+    {
+      "step": "ok  back key with nothing open: 「退出游戏？」 shown, App still in front",
+      "t": 90.0,
+      "focus": "mCurrentFocus=Window{c789ef3 u0 com.poketactics.shell/com.poketactics.shell.MainActivity}"
+    },
+    {
+      "step": "exit dialog",
+      "t": 90.4,
+      "shot": "21-back-exit-dialog.png"
+    },
+    {
+      "step": "ok  「继续游戏」 dismisses the dialog and stays in the game",
+      "t": 94.3,
+      "state": {
+        "url": "http://localhost:8851/play",
+        "history": 1,
+        "shop": false,
+        "battle": false,
+        "backs": 6,
+        "closed": 4
+      },
+      "focus": "mCurrentFocus=Window{4bc5f46 u0 com.poketactics.shell/com.poketactics.shell.MainActivity}"
+    },
+    {
+      "step": "ok  one edge swipe only reveals the bars (no back)",
+      "t": 100.3,
+      "y": 474,
+      "state": {
+        "url": "http://localhost:8851/play",
+        "history": 1,
+        "shop": true,
+        "battle": false,
+        "backs": 6,
+        "closed": 4
+      },
+      "shot": "22-swipe-once-bars.png"
+    },
+    {
+      "step": "ok  revealed bars hide again by themselves",
+      "t": 100.4,
+      "seconds": 0.1
+    },
+    {
+      "step": "ok  edge swipes inside the guard band neither reveal bars nor go back",
+      "t": 106.0,
+      "y": 1211,
+      "state": {
+        "url": "http://localhost:8851/play",
+        "history": 1,
+        "shop": true,
+        "battle": false,
+        "backs": 6,
+        "closed": 4
+      }
+    },
+    {
+      "step": "ok  edge back swipe closes the shop drawer first",
+      "t": 113.5,
+      "y": 474,
+      "log": "back -> page closed an overlay",
+      "state": {
+        "url": "http://localhost:8851/play",
+        "history": 1,
+        "shop": false,
+        "battle": false,
+        "backs": 7,
+        "closed": 5
+      },
+      "closed": {
+        "via": "overlay",
+        "changed": [
+          "sheet"
+        ],
+        "top": null
+      }
+    },
+    {
+      "step": "after swipe",
+      "t": 114.2,
+      "shot": "23-swipe-shop-closed.png"
+    },
+    {
+      "step": "ok  edge back swipe with nothing open asks to exit",
+      "t": 121.1,
+      "log": "back -> exit dialog (page result false)"
+    },
+    {
+      "step": "ok  edge back swipe with nothing open: 「退出游戏？」 shown, App still in front",
+      "t": 125.4,
+      "focus": "mCurrentFocus=Window{8450e73 u0 com.poketactics.shell/com.poketactics.shell.MainActivity}"
+    },
+    {
+      "step": "swipe exit dialog",
+      "t": 125.9,
+      "shot": "24-swipe-exit-dialog.png"
+    },
+    {
+      "step": "ok  back on the dialog dismisses it; same page, no history navigation",
+      "t": 129.8,
+      "state": {
+        "url": "http://localhost:8851/play",
+        "history": 1,
+        "shop": false,
+        "battle": false,
+        "backs": 8,
+        "closed": 5
+      }
+    },
+    {
+      "step": "ok  final back: 「退出游戏？」 shown, App still in front",
+      "t": 137.7,
+      "focus": "mCurrentFocus=Window{5e24bd8 u0 com.poketactics.shell/com.poketactics.shell.MainActivity}"
+    },
+    {
+      "step": "ok  「退出」 closes the App",
+      "t": 142.6,
+      "focus": "mCurrentFocus=Window{f9946c u0 com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity}"
+    }
+  ],
+  "app": "com.poketactics.shell",
+  "checks": {
+    "apk downloadable from the preview": {
+      "ok": true,
+      "url": "http://127.0.0.1:8830/app/PokeTactics.apk",
+      "bytes": 2714467,
+      "contentType": "application/vnd.android.package-archive"
+    },
+    "gesture navigation on for the swipe tests": {
+      "ok": true,
+      "before": "0",
+      "now": "2"
+    },
+    "settings page opened from the error page": {
+      "ok": true,
+      "focus": "mCurrentFocus=Window{823a8f u0 com.poketactics.shell/com.poketactics.shell.SettingsActivity}"
+    },
+    "audio running without a tap": {
+      "ok": true,
+      "music": "running",
+      "enabled": true,
+      "unlocked": true,
+      "inShell": true,
+      "shellClass": true,
+      "ua": true
+    },
+    "status bar and navigation bar hidden": {
+      "ok": true,
+      "window": {
+        "statusBars": "false",
+        "navigationBars": "false"
+      },
+      "app": "insets statusBars=false navigationBars=false cutoutTop=152"
+    },
+    "screen kept on": {
+      "ok": true,
+      "flags": "KEEP_SCREEN_ON LAYOUT_IN_SCREEN FULLSCREEN LAYOUT_INSET_DECOR SPLIT_TOUCH HARDWARE_ACCELERATED DRAWS_SYSTEM_BAR_BACKGROUNDS"
+    },
+    "edge guard bands set": {
+      "ok": true,
+      "bands": [
+        [
+          0,
+          949,
+          78,
+          1474
+        ],
+        [
+          1002,
+          949,
+          1080,
+          1474
+        ]
+      ]
+    },
+    "vibration reaches the native Vibrator": {
+      "ok": true,
+      "log": "vibrate [28]"
+    },
+    "portrait locked under forced rotation": {
+      "ok": true,
+      "viewport": [
+        270,
+        607
+      ],
+      "display": "landscape-primary",
+      "shot": "04-forced-landscape.png"
+    },
+    "back during the battle: 「退出游戏？」 shown, App still in front": {
+      "ok": true,
+      "focus": "mCurrentFocus=Window{1cd0882 u0 com.poketactics.shell/com.poketactics.shell.MainActivity}"
+    },
+    "back during the battle keeps the battle": {
+      "ok": true,
+      "state": {
+        "url": "http://localhost:8851/play",
+        "history": 1,
+        "shop": true,
+        "battle": true,
+        "backs": 1,
+        "closed": 0
+      }
+    },
+    "phone HUD: site nav and tool row hidden, one-row HUD with a menu button": {
+      "ok": true,
+      "nav": "none",
+      "tools": "none",
+      "hudHeight": 46,
+      "menu": [
+        68,
+        38
+      ],
+      "tileH": 54
+    },
+    "shop sheet leaves the bench uncovered; recruit button sits in the sheet": {
+      "ok": true,
+      "button": [
+        104,
+        40
+      ],
+      "inSheet": true,
+      "benchBottom": 594,
+      "sheetTop": 596,
+      "shot": "14-ux-shop-quick-buy.png"
+    },
+    "touch drag moves a unit with a real finger": {
+      "ok": true,
+      "source": "b0",
+      "target": "g1,3",
+      "status": {
+        "drags": 1,
+        "moves": 1,
+        "quickBuys": 1,
+        "lastToastHold": 1800,
+        "tileH": 54
+      },
+      "shot": "16-ux-dragged.png"
+    },
+    "long press: menu without text selection; back closes it; next tap is not swallowed": {
+      "ok": true,
+      "selection": "",
+      "closed": {
+        "via": "overlay",
+        "changed": [
+          "context-menu"
+        ],
+        "top": null
+      },
+      "opened": "bonds",
+      "shot": "17-ux-long-press.png"
+    },
+    "menu sheet: toggles drive the real buttons; back closes it": {
+      "ok": true,
+      "vibrate": [
+        "true",
+        "false"
+      ],
+      "closed": {
+        "via": "overlay",
+        "changed": [
+          "menu"
+        ],
+        "top": null
+      },
+      "shot": "18-ux-menu.png"
+    },
+    "back key closes the shop drawer": {
+      "ok": true,
+      "log": "back -> page closed an overlay",
+      "state": {
+        "url": "http://localhost:8851/play",
+        "history": 1,
+        "shop": false,
+        "battle": false,
+        "backs": 5,
+        "closed": 4
+      },
+      "closed": {
+        "via": "overlay",
+        "changed": [
+          "sheet"
+        ],
+        "top": null
+      }
+    },
+    "back key with nothing open: 「退出游戏？」 shown, App still in front": {
+      "ok": true,
+      "focus": "mCurrentFocus=Window{c789ef3 u0 com.poketactics.shell/com.poketactics.shell.MainActivity}"
+    },
+    "「继续游戏」 dismisses the dialog and stays in the game": {
+      "ok": true,
+      "state": {
+        "url": "http://localhost:8851/play",
+        "history": 1,
+        "shop": false,
+        "battle": false,
+        "backs": 6,
+        "closed": 4
+      },
+      "focus": "mCurrentFocus=Window{4bc5f46 u0 com.poketactics.shell/com.poketactics.shell.MainActivity}"
+    },
+    "one edge swipe only reveals the bars (no back)": {
+      "ok": true,
+      "y": 474,
+      "state": {
+        "url": "http://localhost:8851/play",
+        "history": 1,
+        "shop": true,
+        "battle": false,
+        "backs": 6,
+        "closed": 4
+      },
+      "shot": "22-swipe-once-bars.png"
+    },
+    "revealed bars hide again by themselves": {
+      "ok": true,
+      "seconds": 0.1
+    },
+    "edge swipes inside the guard band neither reveal bars nor go back": {
+      "ok": true,
+      "y": 1211,
+      "state": {
+        "url": "http://localhost:8851/play",
+        "history": 1,
+        "shop": true,
+        "battle": false,
+        "backs": 6,
+        "closed": 4
+      }
+    },
+    "edge back swipe closes the shop drawer first": {
+      "ok": true,
+      "y": 474,
+      "log": "back -> page closed an overlay",
+      "state": {
+        "url": "http://localhost:8851/play",
+        "history": 1,
+        "shop": false,
+        "battle": false,
+        "backs": 7,
+        "closed": 5
+      },
+      "closed": {
+        "via": "overlay",
+        "changed": [
+          "sheet"
+        ],
+        "top": null
+      }
+    },
+    "edge back swipe with nothing open asks to exit": {
+      "ok": true,
+      "log": "back -> exit dialog (page result false)"
+    },
+    "edge back swipe with nothing open: 「退出游戏？」 shown, App still in front": {
+      "ok": true,
+      "focus": "mCurrentFocus=Window{8450e73 u0 com.poketactics.shell/com.poketactics.shell.MainActivity}"
+    },
+    "back on the dialog dismisses it; same page, no history navigation": {
+      "ok": true,
+      "state": {
+        "url": "http://localhost:8851/play",
+        "history": 1,
+        "shop": false,
+        "battle": false,
+        "backs": 8,
+        "closed": 5
+      }
+    },
+    "final back: 「退出游戏？」 shown, App still in front": {
+      "ok": true,
+      "focus": "mCurrentFocus=Window{5e24bd8 u0 com.poketactics.shell/com.poketactics.shell.MainActivity}"
+    },
+    "「退出」 closes the App": {
+      "ok": true,
+      "focus": "mCurrentFocus=Window{f9946c u0 com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity}"
+    }
+  },
+  "device": {
+    "model": "Pixel 9a",
+    "manufacturer": "Google",
+    "android": "15",
+    "sdk": "35",
+    "chrome": "158.0.8127.42",
+    "screen": "1080x2424"
+  },
+  "app_version": "1.0.139",
+  "navigation_mode_before": "0",
+  "tether": {
+    "phone": "localhost:8851",
+    "server": "127.0.0.1:8830"
+  },
+  "loaded_via_settings": true,
+  "base": "http://localhost:8851",
+  "gesture_exclusion": "SkRegion((0,949,78,1474)(1002,949,1080,1474))",
+  "shop_sheet_covered_bench": false,
+  "battle": {
+    "wakeLock": true,
+    "wakeLockError": null,
+    "canvas": [
+      2520,
+      1680
+    ],
+    "clock": "00:02.8"
+  },
+  "battle_back_closed_first": [],
+  "verdict": "回合失利",
+  "haptics": {
+    "cues": 1,
+    "vibrations": [
+      "super",
+      "ult"
+    ]
+  },
+  "wake_lock_released_after_battle": true,
+  "native_vibrations": [
+    "vibrate [28]",
+    "vibrate [40,30,70]",
+    "vibrate [28]",
+    "vibrate [28]"
+  ],
+  "back_log": [
+    "back -> exit dialog (page result false)",
+    "back -> page closed an overlay",
+    "back -> page closed an overlay",
+    "back -> page closed an overlay",
+    "back -> page closed an overlay",
+    "back -> exit dialog (page result false)",
+    "back -> page closed an overlay",
+    "back -> exit dialog (page result false)"
+  ],
+  "errors": [],
+  "recording": "（本地，未入库）",
+  "seconds": 157.8,
+  "screenshots": [
+    "03-game-opened.jpg",
+    "04-forced-landscape.jpg",
+    "05-opened.jpg",
+    "06-augment.jpg",
+    "07-shop-selected.jpg",
+    "08-bought.jpg",
+    "09-placed.jpg",
+    "10-battle.jpg",
+    "11-battle-back-dialog.jpg",
+    "12-verdict.jpg",
+    "13-round2.jpg",
+    "14-ux-shop-quick-buy.jpg",
+    "15-drag-in-flight.jpg",
+    "16-ux-dragged.jpg",
+    "17-ux-long-press.jpg",
+    "18-ux-menu.jpg",
+    "19-back-shop-open.jpg",
+    "20-back-shop-closed.jpg",
+    "21-back-exit-dialog.jpg",
+    "22-swipe-once-bars.jpg",
+    "23-swipe-shop-closed.jpg",
+    "24-swipe-exit-dialog.jpg",
+    "25-exited.jpg"
+  ]
+}

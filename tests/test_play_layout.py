@@ -199,7 +199,8 @@ class PlayBranchFlow(unittest.TestCase):
 
 class PlayLayoutStatic(unittest.TestCase):
     def test_page_and_styles_load_nothing_from_the_network(self):
-        for name in ('play.html', 'play.css', 'play_layout.css', 'play_interactions.css', 'play_motion.css', 'play_select.css', 'battle.css'):
+        for name in ('play.html', 'play.css', 'play_layout.css', 'play_layout_phone.css', 'play_phone.css', 'play_tokens.css',
+                     'play_interactions.css', 'play_motion.css', 'play_select.css', 'battle.css'):
             text = (ACCEPTANCE / name).read_text()
             with self.subTest(asset=name):
                 self.assertNotIn('fonts.googleapis', text)
@@ -219,7 +220,8 @@ class PlayLayoutStatic(unittest.TestCase):
 
     def test_mobile_viewport_respects_safe_areas_and_reduced_motion(self):
         html = (ACCEPTANCE / 'play.html').read_text()
-        css = (ACCEPTANCE / 'play_layout.css').read_text()
+        # Phone rules moved to play_layout_phone.css (docs/74); the layout is both files.
+        css = (ACCEPTANCE / 'play_layout.css').read_text() + (ACCEPTANCE / 'play_layout_phone.css').read_text()
         self.assertIn('viewport-fit=cover', html)
         self.assertIn('env(safe-area-inset-bottom)', css)
         self.assertIn('prefers-reduced-motion', css)

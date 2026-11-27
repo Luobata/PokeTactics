@@ -63,7 +63,7 @@ select.ps-native {
 /* ---------------------------------------------------------- popover */
 .ps-list {
   position: fixed;
-  z-index: 120;
+  z-index: var(--z-select, 120);
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 5px;
@@ -96,7 +96,7 @@ select.ps-native {
 @keyframes ps-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 
 /* phone: bottom sheet with big rows */
-.ps-backdrop { position: fixed; inset: 0; z-index: 119; background: #13211a66; animation: ps-fade .15s ease-out both; }
+.ps-backdrop { position: fixed; inset: 0; z-index: var(--z-select-backdrop, 119); background: #13211a66; animation: ps-fade .15s ease-out both; }
 .ps-list.ps-sheet {
   left: 0 !important;
   right: 0;

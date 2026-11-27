@@ -132,10 +132,11 @@
   // ------------------------------------------------------------ Android shell: back key
   // The shell App never navigates back in history. On the system back key / back swipe
   // it calls onBack(): true = an overlay was closed, false = nothing to close, so the
-  // shell asks "退出游戏？". Overlays reuse their own Escape handlers (drawers, sheets,
-  // menus, glossary cards, pickers, the first-run guide, the selection); plain modal
-  // dialogs get their cancel path. Game-phase dialogs are never closed by back: closing
-  // the battle dialog advances the round, which an accidental swipe must not do.
+  // shell asks "退出游戏？". The overlay stack (play_overlay.js, docs/74) closes the
+  // topmost open layer and names it. Game-phase dialogs are never closed by back:
+  // closing the battle dialog advances the round, which an accidental swipe must not do.
+  // Without play_overlay.js (older pages) the legacy path below fakes an Esc keypress
+  // and watches the DOM for a change.
   const PHASE_DIALOGS = new Set(["battle-dialog", "result-dialog"]);
   const shellStatus = {backs: 0, closed: 0, last: null};
   const WATCHED = ["class", "open", "hidden", "style", "aria-expanded", "aria-hidden"];
@@ -173,6 +174,12 @@
   function onBack() {
     shellStatus.backs += 1;
     shellStatus.last = null;
+    if (window.PlayOverlay) {
+      const id = window.PlayOverlay.closeTop("back");
+      shellStatus.last = {via: "overlay", changed: id ? [id] : [], top: window.PlayOverlay.status.last?.top || null};
+      if (id) shellStatus.closed += 1;
+      return Boolean(id);
+    }
     const closed = escapeChanges() || closeTopDialog();
     if (closed) shellStatus.closed += 1;
     return closed;

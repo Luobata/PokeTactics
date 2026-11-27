@@ -764,19 +764,25 @@
     if (clearMode && mode?.drag) exitMode();
   }
   document.addEventListener("dragend", () => { if (drag) endDrag(); }, true);
-  document.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape") return;
+  // Esc / back (docs/74): the confirm sheet first, then targeting mode. A star-mod
+  // choice dismissed this way waits until next round, like 「稍后再选」.
+  function dismiss() {
     if (sheet) {
       if (sheet.kind === "mod") modDeferred.add(`${S().round}:${sheet.uid}:${sheet.star}`);
       closeSheet();
-      stop(event);
-    } else if (mode) {
-      exitMode();
-      stop(event);
+      return true;
     }
+    if (mode) {
+      exitMode();
+      return true;
+    }
+    return false;
+  }
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && dismiss()) stop(event);
   }, true);
 
-  window.PlayInteractions = {render, openAugments, mode: () => mode, sheet: () => sheet,
+  window.PlayInteractions = {render, openAugments, dismiss, mode: () => mode, sheet: () => sheet,
     // Context-menu hooks (docs/70): the same targeting mode and confirm sheets as the cards.
     target: (kind, key) => { if (canPrep()) enterMode(kind, key); },
     learn: (key, uid) => tmConfirm(key, uid),

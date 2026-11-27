@@ -491,6 +491,7 @@ PLAY_ASSETS = {
     "/play/assets/play_weather.css": ("play_weather.css", "text/css; charset=utf-8"),
     "/play/assets/play_layout.js": ("play_layout.js", "text/javascript; charset=utf-8"),
     "/play/assets/play_layout.css": ("play_layout.css", "text/css; charset=utf-8"),
+    "/play/assets/play_layout_phone.css": ("play_layout_phone.css", "text/css; charset=utf-8"),
     "/play/assets/play_interactions.js": ("play_interactions.js", "text/javascript; charset=utf-8"),
     "/play/assets/play_interactions.css": ("play_interactions.css", "text/css; charset=utf-8"),
     "/play/assets/play_motion.css": ("play_motion.css", "text/css; charset=utf-8"),
@@ -511,6 +512,10 @@ PLAY_ASSETS = {
     "/play/assets/animation_workbench.css": ("animation_workbench.css", "text/css; charset=utf-8"),
     "/play/assets/play_mobile.js": ("play_mobile.js", "text/javascript; charset=utf-8"),
     "/play/assets/play_mobile.css": ("play_mobile.css", "text/css; charset=utf-8"),
+    "/play/assets/play_tokens.css": ("play_tokens.css", "text/css; charset=utf-8"),
+    "/play/assets/play_overlay.js": ("play_overlay.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_phone.js": ("play_phone.js", "text/javascript; charset=utf-8"),
+    "/play/assets/play_phone.css": ("play_phone.css", "text/css; charset=utf-8"),
 }
 
 # ---------------------------------------------------------------- installable app (docs/72)

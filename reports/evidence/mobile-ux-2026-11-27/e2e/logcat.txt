@@ -1,0 +1,35 @@
+11-28 00:07:28.565 I/PokeTacticsShell(24312): load https://<开发机IP>:8831/play
+11-28 00:07:28.595 I/PokeTacticsShell(24312): insets statusBars=true navigationBars=true cutoutTop=152
+11-28 00:07:28.602 I/PokeTacticsShell(24312): insets statusBars=false navigationBars=false cutoutTop=152
+11-28 00:07:28.674 I/PokeTacticsShell(24312): insets statusBars=false navigationBars=false cutoutTop=152
+11-28 00:07:43.579 W/PokeTacticsShell(24312): error page: 连接超时（15 秒）：确认手机连着公司内网 / VPN
+11-28 00:07:57.405 I/PokeTacticsShell(24312): load http://localhost:8851/play
+11-28 00:07:57.415 I/PokeTacticsShell(24312): insets statusBars=false navigationBars=true cutoutTop=152
+11-28 00:07:57.542 I/PokeTacticsShell(24312): insets statusBars=false navigationBars=false cutoutTop=152
+11-28 00:07:59.078 I/PokeTacticsShell(24312): page ready http://localhost:8851/play
+11-28 00:08:01.135 I/PokeTacticsShell(24312): vibrate [28]
+11-28 00:08:01.766 I/PokeTacticsShell(24312): insets statusBars=false navigationBars=false cutoutTop=0
+11-28 00:08:01.784 I/PokeTacticsShell(24312): insets statusBars=false navigationBars=false cutoutTop=0
+11-28 00:08:04.686 I/PokeTacticsShell(24312): insets statusBars=false navigationBars=false cutoutTop=152
+11-28 00:08:04.705 I/PokeTacticsShell(24312): insets statusBars=false navigationBars=false cutoutTop=152
+11-28 00:08:18.398 I/PokeTacticsShell(24312): back -> exit dialog (page result false)
+11-28 00:08:18.412 I/PokeTacticsShell(24312): exit dialog shown
+11-28 00:08:19.299 I/PokeTacticsShell(24312): vibrate [40,30,70]
+11-28 00:08:20.646 I/PokeTacticsShell(24312): exit dialog dismissed
+11-28 00:08:27.824 I/PokeTacticsShell(24312): vibrate [28]
+11-28 00:08:32.763 I/PokeTacticsShell(24312): back -> page closed an overlay
+11-28 00:08:35.544 I/PokeTacticsShell(24312): back -> page closed an overlay
+11-28 00:08:39.102 I/PokeTacticsShell(24312): vibrate [28]
+11-28 00:08:40.784 I/PokeTacticsShell(24312): back -> page closed an overlay
+11-28 00:08:46.770 I/PokeTacticsShell(24312): back -> page closed an overlay
+11-28 00:08:49.294 I/PokeTacticsShell(24312): back -> exit dialog (page result false)
+11-28 00:08:49.318 I/PokeTacticsShell(24312): exit dialog shown
+11-28 00:08:53.650 I/PokeTacticsShell(24312): exit dialog dismissed
+11-28 00:09:12.268 I/PokeTacticsShell(24312): back -> page closed an overlay
+11-28 00:09:20.075 I/PokeTacticsShell(24312): back -> exit dialog (page result false)
+11-28 00:09:20.099 I/PokeTacticsShell(24312): exit dialog shown
+11-28 00:09:28.410 I/PokeTacticsShell(24312): exit dialog dismissed
+11-28 00:09:35.831 I/PokeTacticsShell(24312): back -> exit dialog (page result false)
+11-28 00:09:35.848 I/PokeTacticsShell(24312): exit dialog shown
+11-28 00:09:40.516 I/PokeTacticsShell(24312): exit confirmed
+11-28 00:09:40.537 I/PokeTacticsShell(24312): exit dialog dismissed
